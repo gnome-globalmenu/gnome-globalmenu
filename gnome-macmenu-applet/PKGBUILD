@@ -1,0 +1,31 @@
+# Maintainer: AqD <aquila.deus@gmail.com>
+
+pkgname=gnome-macmenu-applet
+pkgver=1.0.14
+pkgrel=3
+pkgdesc="Mac-style menubar applet for gnome panel"
+arch=(i686 x86_64)
+url="http://aquila.deus.googlepages.com/"
+depends=('gnome-panel' 'libwnck>=2.16.1' 'gtk2-aqd>=2.10.6-4')
+makedepends=(pkgconfig)
+options=(!libtool)
+license=(LGPL)
+source=(macmenu-applet.c \
+        macmenu-tslist.h \
+        GNOME_MacMenuApplet.server \
+	gnome-macmenu-applet-eduardo.patch)
+md5sums=('f3c02035222ffaf9cd8ba89b51b578f4'
+         '442128110d99a35da54df6fd58b8c405'
+         'e0712ff4974b3baf9909746de359a7de'
+	 'f9c7223410fbc47b4774a8957bbf292c')
+
+build() {
+#  cd ${startdir}/src
+#  patch -p0 < gnome-macmenu-applet-eduardo.patch
+  gcc -g -std=gnu99 -Wall -fno-strict-aliasing -DFOR_GNOME `pkg-config --cflags --libs libwnck-1.0 libpanelapplet-2.0 gconf-2.0` $CFLAGS $LDFLAGS -o $pkgname macmenu-applet.c || return 1
+#  mkdir -p ${startdir}/pkg/usr/lib/gnome-panel
+#  mkdir -p ${startdir}/pkg/usr/lib/bonobo/servers
+#  cp -f $pkgname ${startdir}/pkg/usr/lib/gnome-panel/
+#  cp -f GNOME_MacMenuApplet.server ${startdir}/pkg/usr/lib/bonobo/servers/
+}
+build

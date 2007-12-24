@@ -1,0 +1,11 @@
+--- macmenu-applet.c       2007-01-14 03:00:56.000000000 -0500
++++ macmenu-applet.c   2007-10-23 09:32:30.000000000 -0400
+@@ -298,7 +298,7 @@
+   return aname;
+ }
+ 
+-static void desktop_active_window_changed(WnckScreen* screen, MacMenu* mmb)
++static void desktop_active_window_changed(WnckScreen* screen, WnckWindow *previous_window, MacMenu* mmb)
+ {
+   WnckWindow* awin = wnck_screen_get_active_window(screen);
+   GtkWidget* sck = NULL;
