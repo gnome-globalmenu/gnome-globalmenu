@@ -1,0 +1,4 @@
+To install,
+# make
+
+and edit the bonobo .server file, then put it to somewhere bonobo-activition-server can find. (on Fedora, it is /usr/lib/bonobo/servers)

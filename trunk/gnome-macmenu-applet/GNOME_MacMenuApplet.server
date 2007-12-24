@@ -1,0 +1,22 @@
+<oaf_info>
+  <oaf_server iid="OAFIID:GNOME_MacMenuApplet_Factory" type="exe"
+    location="/usr/libexec/gnome-macmenu-applet">
+    <oaf_attribute name="repo_ids" type="stringv">
+      <item value="IDL:Bonobo/GenericFactory:1.0"/>
+      <item value="IDL:Bonobo/Unknown:1.0"/>
+    </oaf_attribute>
+    <oaf_attribute name="name" type="string" value="MacMenu applet Factory"/>
+    <oaf_attribute name="description" type="string" value="Mac Menu applet factory"/>
+  </oaf_server>
+  <oaf_server iid="OAFIID:GNOME_MacMenuApplet" type="factory"
+    location="OAFIID:GNOME_MacMenuApplet_Factory">
+    <oaf_attribute name="repo_ids" type="stringv">
+      <item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
+      <item value="IDL:Bonobo/Control:1.0"/>
+      <item value="IDL:Bonobo/Unknown:1.0"/>
+    </oaf_attribute>
+    <oaf_attribute name="name" type="string" value="Mac Menu"/>
+    <oaf_attribute name="description" type="string" value="Mac Menubar applet for gtk2-aqd"/>
+    <oaf_attribute name="panel:icon" type="string" value="gnome-fs-home"/>
+  </oaf_server>
+</oaf_info>
