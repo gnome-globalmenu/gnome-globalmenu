@@ -246,7 +246,9 @@ gnome2_globalmenu_test_SOURCES = \
 	callbacks.h \
 	main.c 
 
-gnome2_globalmenu_test_LDFLAGS = 
+gnome2_globalmenu_test_LDFLAGS = \
+	-export-dynamic 
+
 gnome2_globalmenu_test_LDADD = $(GNOME2_GLOBALMENU_TEST_LIBS)
 EXTRA_DIST = $(glade_DATA)
 all: all-am

@@ -29,3 +29,7 @@
 #include <gtk/gtk.h>
 
 #include "callbacks.h"
+
+void on_save1_activate(GtkMenuItem * menu, gpointer unused){
+	g_print("save 1 activated\n");
+}
