@@ -65,6 +65,9 @@
 /* #define GLADE_FILE PACKAGE_DATA_DIR"/gnome2-globalmenu-test/glade/gnome2-globalmenu-test.glade" */
 #define GLADE_FILE "gnome2-globalmenu-test.glade"
 	
+static void destroy_cb(GtkWindow * window, gpointer useless){
+	gtk_main_quit();
+}
 GtkWidget*
 create_window (void)
 {
@@ -76,7 +79,7 @@ create_window (void)
 	/* This is important */
 	glade_xml_signal_autoconnect (gxml);
 	window = glade_xml_get_widget (gxml, "window");
-	
+	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(destroy_cb), NULL);
 	return window;
 }
 
