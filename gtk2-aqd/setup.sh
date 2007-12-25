@@ -14,15 +14,10 @@ cp $RPMDEVROOT/SPECS/gtk2.spec .
 patch < gtk2.spec.patch
 mv gtk2.spec gtk2-aqd.spec
 
-cp gtkmenubar.patch $RPMDEVROOT/SOURCES
+cp gtkmenubar.patch $RPMDEVROOT/SOURCES/
 
-if [ ! -f $RPMDEVROOT/BUILD/gtk+-$VER/gtk/Makefile ]; then
-rpmbuild -bc --short-circuit gtk2-aqd.spec
-fi
-(
-cd $RPMDEVROOT/BUILD/gtk+-$VER/gtk
-make
-)
+rpmbuild -bc gtk2-aqd.spec
+
 rm -rf libs
 mkdir libs
 ln -s $RPMDEVROOT/BUILD/gtk+-$VER/gtk/.libs/* libs/
