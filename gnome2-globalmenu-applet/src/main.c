@@ -83,13 +83,15 @@ void repaint_applet(Application * App){
 	h = GTK_WIDGET(App->Layout)->allocation.height;
 	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
 
+	gtk_layout_move(App->Layout, App->Notebook, client->x, client->y);
+
 	old_icon = gtk_image_get_pixbuf(App->ClientIcon);
 	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
 		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
 		gtk_image_clear(App->ClientIcon);
 	}else{
 		GdkPixbuf * resized_icon = NULL;
-		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
+		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h-3, GDK_INTERP_BILINEAR);
 		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
 		g_object_unref(G_OBJECT(resized_icon));
 	}
@@ -102,12 +104,13 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	XWindowID active_wid = 0; 
 	ClientEntry * client = NULL;
 
-	if(App->Mode == APP_STANDALONE && /*Then MainWindow is a GtkWindow*/
-		gtk_window_has_toplevel_focus(GTK_WINDOW(App->MainWindow))) {
+	if(App->Mode == APP_STANDALONE && gtk_window_has_toplevel_focus(
+		GTK_WIDGET(App->MainWindow))) {
 				/*Don't change if I am activted*/
 		return;
-	} /*else APP_APPLET*/
+	}
 	active_window = wnck_screen_get_active_window(screen);
+
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_wid = wnck_window_get_xid(active_window);
@@ -142,6 +145,8 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	GtkBox * basebox = NULL;
+	GtkEventBox * eventbox = NULL;
+	GtkButton * button = NULL;
 	App->Clients = g_hash_table_new_full(g_direct_hash, 
 									g_direct_equal, 
 									NULL, 
@@ -169,20 +174,33 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	App->ClientIcon = GTK_IMAGE(gtk_image_new());
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->ClientIcon), FALSE, FALSE, 0);
 
-	App->TitleLabel = GTK_LABEL(gtk_label_new("abced"));
+	App->TitleLabel = GTK_LABEL(gtk_label_new("Dumb"));
 	gtk_label_set_max_width_chars(App->TitleLabel, 20);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
 
+	eventbox = GTK_EVENT_BOX(gtk_event_box_new());
+	gtk_widget_set_size_request(GTK_WIDGET(eventbox), 8,-1);
+	gtk_box_pack_start(basebox, GTK_WIDGET(eventbox), FALSE, FALSE, 0);
+	
 	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
 
 	App->Notebook = GTK_NOTEBOOK(gtk_notebook_new());
 	gtk_layout_put(App->Layout, GTK_WIDGET(App->Notebook), 0, 0); /*inital position*/
+
+	button = GTK_BUTTON(gtk_button_new());
+	gtk_button_set_relief(button, GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click(GTK_BUTTON(button), FALSE);
+	gtk_box_pack_start(basebox, GTK_WIDGET(button),
+				FALSE, FALSE, 0);
+
 	
 	clients_set_active(clients_add_dummy("dummy", App), App);
 
 	if(App->Mode == APP_APPLET){ /*setup a packed visual if in a panel*/
+		gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
 		gtk_container_set_border_width(GTK_CONTAINER(App->Layout), 0);
+		/*layout don't care about border width, anyway, set it*/
 		gtk_container_set_border_width(GTK_CONTAINER(App->Notebook), 0);
 		gtk_notebook_set_show_tabs(App->Notebook, FALSE);
 		gtk_notebook_set_show_border(App->Notebook, FALSE);
