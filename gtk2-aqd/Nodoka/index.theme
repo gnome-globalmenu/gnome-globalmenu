@@ -1,0 +1,8 @@
+[X-GNOME-Metatheme]
+Name=Nodoka
+Type=X-GNOME-Metatheme
+Comment=Clean, blue theme using soft gradients
+Encoding=UTF-8
+GtkTheme=Nodoka
+MetacityTheme=Nodoka
+IconTheme=Fedora
