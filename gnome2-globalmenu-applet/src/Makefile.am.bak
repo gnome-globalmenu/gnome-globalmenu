@@ -15,14 +15,7 @@ AM_CFLAGS =\
 	 -Wall\
 	 -g
 
-bin_PROGRAMS = gnome2-globalmenu-applet \
-	test_client 
-
-test_client_SOURCES = \
-	test_client.c 
-
-test_client_LDADD = \
-	$(TEST_CLIENT_LIBS) 
+bin_PROGRAMS = gnome2-globalmenu-applet 
 
 gnome2_globalmenu_applet_SOURCES = \
 	clients.c                 \
@@ -37,6 +30,7 @@ gnome2_globalmenu_applet_LDFLAGS =
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
 
 EXTRA_DIST = $(glade_DATA)
+
 
 
 

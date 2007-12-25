@@ -3,8 +3,6 @@
 ## Created by Anjuta
 
 gladedir = $(datadir)/gnome2-globalmenu-applet/glade
-glade_DATA = gnome2-globalmenu-applet.glade
-
 INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
@@ -30,6 +28,7 @@ gnome2_globalmenu_applet_LDFLAGS =
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
 
 EXTRA_DIST = $(glade_DATA)
+
 
 
 

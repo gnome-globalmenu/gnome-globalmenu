@@ -92,6 +92,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	XWindowID active_wid = 0; 
 	ClientEntry * client = NULL;
 
+	if(gtk_window_has_toplevel_focus(App->MainWindow)) /*Don't change if I am activted*/return;
 	active_window = wnck_screen_get_active_window(screen);
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
@@ -178,28 +179,6 @@ static void application_free(Application * App){
 	g_free(App);
 }
 
-#ifndef STANDALONE
-static gboolean globalmenu_applet_factory (PanelApplet *applet,
-                                        const gchar *iid,
-                                        gpointer data){
-  if (g_str_equal(iid, "OAFIID:GNOME_GlobalMenuApplet")){
-	panel_applet_set_flags(applet, 
-		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR);
-    application_new(GTK_CONTAINER(applet));
-    return TRUE;
-  } else return FALSE;
-}
-#define GNOMELOCALEDIR PACKAGE_LOCALE_DIR
-
-PANEL_APPLET_BONOBO_FACTORY ("OAFIID:GNOME_GlobalMenuApplet_Factory",
-                 PANEL_TYPE_APPLET,
-                 "globalmenu",
-                 "0",
-                 globalmenu_applet_factory,
-                 NULL)
-
-
-#else
 
 static gboolean clicked(GtkWindow * mainwindow, gpointer button, Application * App){
 	static gboolean trigger=FALSE;
@@ -218,22 +197,54 @@ static gboolean start_applet(GtkWindow * mainwindow, gpointer unused){
 	return TRUE;
 }
 
-int
-main (int argc, char *argv[])
+#define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet_Factory"
+#define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet"
+#define APP_NAME "globalmenu-applet"
+#define APP_VERSION "0"
+
+static gboolean globalmenu_applet_factory (PanelApplet *applet,
+                                        const gchar *iid,
+                                        gpointer data){
+  if (g_str_equal(iid, APPLET_IID)){
+	panel_applet_set_flags(applet, 
+		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR);
+    application_new(GTK_CONTAINER(applet));
+    return TRUE;
+  } else return FALSE;
+}
+
+int main (int argc, char *argv [])
 {
-	GtkWindow * mainwindow;
+	GnomeProgram *program;
+	GOptionContext *context;
+	int           retval;
 #ifdef ENABLE_NLS
 	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 #endif
-
-	gtk_set_locale ();
-	gtk_init (&argc, &argv);
-	mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	g_signal_connect(G_OBJECT(mainwindow), "show", start_applet, NULL);
-	gtk_widget_show_all(GTK_WIDGET(mainwindow));
-	gtk_main ();
-	return 0;
+	
+	if(argc == 1){
+	/*standalone mode*/
+		GtkWindow * mainwindow;
+		gtk_set_locale ();
+		gtk_init (&argc, &argv);
+		mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		g_signal_connect(G_OBJECT(mainwindow), "show", start_applet, NULL);
+		gtk_widget_show_all(GTK_WIDGET(mainwindow));
+		gtk_main ();
+		return 0;
+	} else{
+	/*bonobo server mode*/
+		context = g_option_context_new("");
+		program = gnome_program_init (APP_NAME, APP_VERSION,
+						  LIBGNOMEUI_MODULE,
+						  argc, argv,
+						  GNOME_PARAM_GOPTION_CONTEXT, context,	
+						  GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
+						  GNOME_PARAM_NONE);
+		retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
+		g_object_unref (program);
+		return retval;
+	}
 }
-#endif
