@@ -1,0 +1,57 @@
+--- gtk2.spec	2007-12-24 21:02:13.000000000 -0500
++++ gtk2-aqd.spec	2007-12-24 20:37:59.000000000 -0500
+@@ -14,7 +14,7 @@
+ %define bin_version 2.10.0
+ 
+ Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
+-Name: gtk2
++Name: gtk2-aqd
+ Version: %{base_version}
+ Release: 3%{?dist}
+ License: LGPLv2+
+@@ -23,6 +23,8 @@
+ Source1: update-gdk-pixbuf-loaders
+ Source2: update-gtk-immodules 
+ 
++Provides: gtk2 = %{base_version}-%{release}
++Obsoletes: gtk2 = %{base_version}-%{release}
+ # Biarch changes
+ Patch0: gtk+-2.4.1-lib64.patch
+ # Fedora patch
+@@ -37,6 +39,9 @@
+ # fixed in upstream svn
+ Patch4: tab-label.patch
+ 
++# gtk-aqd patch
++Patch999: gtkmenubar.patch 
++
+ BuildRequires: atk-devel >= %{atk_version}
+ BuildRequires: pango-devel >= %{pango_version}
+ BuildRequires: glib2-devel >= %{glib2_version}
+@@ -89,7 +94,7 @@
+ %package devel
+ Summary: Development tools for GTK+ applications
+ Group: Development/Libraries
+-Requires: gtk2 = %{version}-%{release}
++Requires: gtk2-aqd = %{version}-%{release}
+ Requires: pango-devel >= %{pango_version}
+ Requires: atk-devel >= %{atk_version}
+ Requires: glib2-devel >= %{glib2_version}
+@@ -103,7 +108,8 @@
+ Requires: automake
+ # for /usr/share/gtk-doc/html
+ Requires: gtk-doc
+-
++Provides: gtk2-devel = %{version}-%{release}
++Obsoletes: gtk2-devel = %{version}-%{release}
+ %description devel
+ The gtk+-devel package contains the header files and developer
+ docs for the GTK+ widget toolkit.  
+@@ -117,6 +123,7 @@
+ %patch3 -p1 -b .system-log-crash
+ %patch4 -p1 -b .tab-label
+ 
++%patch999 -p0 -b .globalmenubar
+ for i in config.guess config.sub ; do
+   test -f %{_datadir}/libtool/$i && cp %{_datadir}/libtool/$i .
+ done
