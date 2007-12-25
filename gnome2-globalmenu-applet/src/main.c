@@ -69,6 +69,7 @@
 void repaint_applet(Application * App){
 	int page_num;
 	guint h;
+	GdkPixbuf * old_icon = NULL;
 	ClientEntry * client = App->ActiveClient;
 	if(client->Type == MENUBAR_LOCAL){
 			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
@@ -78,13 +79,22 @@ void repaint_applet(Application * App){
 	g_assert(page_num != -1);
 	gtk_notebook_set_current_page(App->Notebook, page_num);
 	gtk_label_set_text(App->TitleLabel, client->Title);
-	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
-		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
-	}else{
-		gtk_image_set_from_pixbuf(App->ClientIcon, client->Icon);
-	}
+
 	h = GTK_WIDGET(App->Layout)->allocation.height;
 	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
+
+	old_icon = gtk_image_get_pixbuf(App->ClientIcon);
+	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
+		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
+		gtk_image_clear(App->ClientIcon);
+	}else{
+		GdkPixbuf * resized_icon = NULL;
+		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
+		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
+		g_object_unref(G_OBJECT(resized_icon));
+	}
+	/*since gtk_image doesn't unref the old pixbuf in set_from_pixbuf*/
+	if(old_icon) g_object_unref(G_OBJECT(old_icon)); 
 }
 
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
@@ -92,8 +102,11 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	XWindowID active_wid = 0; 
 	ClientEntry * client = NULL;
 
-	if(GTK_IS_WINDOW(App->MainWindow) &&
-		gtk_window_has_toplevel_focus(GTK_WINDOW(App->MainWindow))) /*Don't change if I am activted*/return;
+	if(App->Mode == APP_STANDALONE && /*Then MainWindow is a GtkWindow*/
+		gtk_window_has_toplevel_focus(GTK_WINDOW(App->MainWindow))) {
+				/*Don't change if I am activted*/
+		return;
+	} /*else APP_APPLET*/
 	active_window = wnck_screen_get_active_window(screen);
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
@@ -125,7 +138,7 @@ static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App
 	return TRUE;
 }
 
-static Application * application_new(GtkContainer * mainwindow){
+static Application * application_new(GtkContainer * mainwindow, enum AppMode Mode){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	GtkBox * basebox = NULL;
@@ -133,6 +146,7 @@ static Application * application_new(GtkContainer * mainwindow){
 									g_direct_equal, 
 									NULL, 
 									(GDestroyNotify)clients_entry_free);
+	App->Mode = Mode;
 	App->MainWindow = mainwindow;
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
 		G_CALLBACK(main_window_destroy_cb), App);
@@ -167,6 +181,13 @@ static Application * application_new(GtkContainer * mainwindow){
 	
 	clients_set_active(clients_add_dummy("dummy", App), App);
 
+	if(App->Mode == APP_APPLET){ /*setup a packed visual if in a panel*/
+		gtk_container_set_border_width(GTK_CONTAINER(App->Layout), 0);
+		gtk_container_set_border_width(GTK_CONTAINER(App->Notebook), 0);
+		gtk_notebook_set_show_tabs(App->Notebook, FALSE);
+		gtk_notebook_set_show_border(App->Notebook, FALSE);
+	}
+
 	gtk_widget_show_all(GTK_WIDGET(mainwindow));
 	/*if we have registered the signals of App->Screen, all clients can be discovered in this function. if we haven't, here we can not find any windows.*/
 	clients_discover_all(App);
@@ -189,9 +210,9 @@ static gboolean clicked(GtkWindow * mainwindow, gpointer button, Application * A
 	}
 	return TRUE;
 }
-static gboolean start_applet(GtkWindow * mainwindow, gpointer unused){
+static gboolean start_standalone(GtkWindow * mainwindow, gpointer unused){
 	Application * App;
-	App = application_new(GTK_CONTAINER(mainwindow));
+	App = application_new(GTK_CONTAINER(mainwindow), APP_STANDALONE);
 //	gdk_window_set_events(GTK_WIDGET(mainwindow)->window,
 //		GDK_BUTTON_PRESS_MASK);
 //	g_signal_connect(G_OBJECT(mainwindow), "button-press-event", clicked, App);
@@ -206,10 +227,11 @@ static gboolean start_applet(GtkWindow * mainwindow, gpointer unused){
 static gboolean globalmenu_applet_factory (PanelApplet *applet,
                                         const gchar *iid,
                                         gpointer data){
+	Application * App;
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR);
-    application_new(GTK_CONTAINER(applet));
+    App = application_new(GTK_CONTAINER(applet), APP_APPLET);
     return TRUE;
   } else return FALSE;
 }
@@ -231,7 +253,7 @@ int main (int argc, char *argv [])
 		gtk_set_locale ();
 		gtk_init (&argc, &argv);
 		mainwindow = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-		g_signal_connect(G_OBJECT(mainwindow), "show", G_CALLBACK(start_applet), NULL);
+		g_signal_connect(G_OBJECT(mainwindow), "show", G_CALLBACK(start_standalone), NULL);
 		gtk_widget_show_all(GTK_WIDGET(mainwindow));
 		gtk_main ();
 		return 0;

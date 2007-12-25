@@ -35,6 +35,10 @@ typedef struct {
 
 struct _Application {
 	GtkContainer * MainWindow;
+	enum AppMode {
+		APP_STANDALONE,
+		APP_APPLET
+	} Mode;
 	struct {
 		GtkImage * ClientIcon;
 		GtkLabel * TitleLabel;

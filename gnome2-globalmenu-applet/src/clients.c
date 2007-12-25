@@ -67,6 +67,7 @@ ClientEntry * clients_add_remote_by_stealing(WnckWindow * remoteMenuBarWindow,
 	title = wnck_application_get_name(remoteApp);
 	rt = clients_entry_new(title, App);
 	rt->Icon = wnck_application_get_icon(remoteApp);
+	g_object_ref(G_OBJECT(rt->Icon));
 	rt->Type = MENUBAR_REMOTE;
 	rt->IsDead = FALSE;
 	rt->Socket = GTK_SOCKET(gtk_socket_new());
@@ -152,6 +153,7 @@ void clients_entry_free(ClientEntry * entry){
 		}else{
 			g_print("Already dead, don't destroy Socket.\n");
 		}
+		g_object_unref(G_OBJECT(entry->Icon));
 	} else{ /*MENUBAR_LOCAL*/
 		g_print("Freeing the Dummy Menubar. Do you really want it?\n");
 		gtk_widget_destroy(entry->Widget);
