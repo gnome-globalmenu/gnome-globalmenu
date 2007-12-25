@@ -4,15 +4,22 @@ typedef Window XWindowID;
 typedef struct _Application Application;
 typedef struct {
 	gchar * Title;
-	gboolean IsDummy;
+	enum {
+		MENUBAR_LOCAL,
+		MENUBAR_REMOTE
+	} Type;
 	gboolean IsDead; /*Set if Socket is destroyed*/
 	union {
-		GtkWidget * Widget;
+		struct {
+			gboolean IsDummy;
+			GtkWidget * Widget;
+		};/* local menubars*/
 		struct {
 			GtkSocket * Socket;
 			XWindowID MasterWID;
 			GdkPixbuf * Icon;
-		};
+			gboolean IsStolen;
+		}; /*for remote menubars*/
 	}/* Menubar*/;
 	struct {
 	gint x;
@@ -27,7 +34,7 @@ typedef struct {
 } ClientEntry;
 
 struct _Application {
-	GtkWindow * MainWindow;
+	GtkContainer * MainWindow;
 	struct {
 		GtkImage * ClientIcon;
 		GtkLabel * TitleLabel;

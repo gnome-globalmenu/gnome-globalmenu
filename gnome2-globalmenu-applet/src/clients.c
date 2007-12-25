@@ -23,16 +23,23 @@ static ClientEntry * clients_entry_new(gchar * title, Application * App){
 	rt->App = App;
 	return rt;
 }
-ClientEntry * clients_add_dummy(gchar * title,
+ClientEntry * clients_add_local(char * title, GtkWidget * menubar,
 	Application * App){
 	ClientEntry * rt = clients_entry_new(title, App);
-	rt->IsDummy = TRUE;
-	rt->Widget = GTK_WIDGET(gtk_label_new(title));
+	rt->Type = MENUBAR_LOCAL;
+	rt->Widget = menubar;
 	gtk_notebook_append_page(App->Notebook, rt->Widget, NULL);
 	g_hash_table_insert(App->Clients, NULL, rt);
 	return rt;
 }
 
+ClientEntry * clients_add_dummy(char * title,
+	Application * App){
+	GtkWidget * label = gtk_label_new(title);
+	ClientEntry * rt = clients_add_local(title, label, App);
+	rt->IsDummy = TRUE;
+	return rt;
+}
 void clients_discover_all(Application * App){
 	g_print("then add all existed menubars\n");
 	{
@@ -40,14 +47,14 @@ void clients_discover_all(Application * App){
 		GList* node = windows;
 		while (node != NULL) {
 			WnckWindow* wnckwin = (WnckWindow*) node->data;
-			if (wnck_window_is_menubar(wnckwin))
-			  clients_add_remote(wnckwin, App);
+			if (wnck_window_is_stealable_menubar(wnckwin))
+			  clients_add_remote_by_stealing(wnckwin, App);
 			node = node->next;
 		}
 	}
 }
 
-ClientEntry * clients_add_remote(WnckWindow * remoteMenuBarWindow,
+ClientEntry * clients_add_remote_by_stealing(WnckWindow * remoteMenuBarWindow,
 	Application * App){
 	gint x, y; /*drop these values after obtained*/
 	WnckApplication * remoteApp;
@@ -60,7 +67,7 @@ ClientEntry * clients_add_remote(WnckWindow * remoteMenuBarWindow,
 	title = wnck_application_get_name(remoteApp);
 	rt = clients_entry_new(title, App);
 	rt->Icon = wnck_application_get_icon(remoteApp);
-	rt->IsDummy = FALSE;
+	rt->Type = MENUBAR_REMOTE;
 	rt->IsDead = FALSE;
 	rt->Socket = GTK_SOCKET(gtk_socket_new());
 	rt->MasterWID = menubar_window_get_master(remoteMenuBarWindow); /*
@@ -84,7 +91,7 @@ ClientEntry * clients_add_remote(WnckWindow * remoteMenuBarWindow,
 
 static gboolean clients_find_by_socket_cb(XWindowID menubar_xwid,
 				ClientEntry * entry, GtkSocket * socket){
-	if(entry->IsDummy) return FALSE;
+	if(entry->Type != MENUBAR_REMOTE) return FALSE;
 	if(entry->Socket == socket){
 		return TRUE;
 	}
@@ -93,7 +100,7 @@ static gboolean clients_find_by_socket_cb(XWindowID menubar_xwid,
 #define clients_remove_by_socket_cb clients_find_by_socket_cb
 static gboolean clients_find_by_master_cb(XWindowID menubar_xwid,
 				ClientEntry * entry, XWindowID master_xwid){
-	if(entry->IsDummy) return FALSE;
+	if(entry->Type != MENUBAR_REMOTE) return FALSE;
 	if(entry->MasterWID == master_xwid){
 		return TRUE;
 	}
@@ -101,7 +108,7 @@ static gboolean clients_find_by_master_cb(XWindowID menubar_xwid,
 }
 static gboolean clients_find_dummy_cb(gpointer dontcare, 
 				ClientEntry *entry, gpointer dontcare2){
-	if(entry->IsDummy) return TRUE;
+	if(entry->Type == MENUBAR_LOCAL && entry->IsDummy == TRUE) return TRUE;
 	return FALSE;
 }
 
@@ -122,7 +129,9 @@ ClientEntry * clients_find_by_master(XWindowID master, Application * App){
 		(GHRFunc)clients_find_by_master_cb, (gpointer)master);
 }
 ClientEntry * clients_find_dummy(Application * App){
-	return g_hash_table_find(App->Clients, (GHRFunc)clients_find_dummy_cb, NULL);
+	ClientEntry * rt = g_hash_table_find(App->Clients, (GHRFunc)clients_find_dummy_cb, NULL);
+	g_assert(rt);
+	return rt;
 }
 void clients_set_active(ClientEntry * client, Application * App){
 	g_assert(!client->IsDead);
@@ -133,7 +142,7 @@ void clients_entry_free(ClientEntry * entry){
  * 1, application_free: all non dead sockets are freed, and no destroy signal is emited since we disconnect it first;
  * 2, socket_destroy_cb: then the socket is already dead and there is no need to destroy it.
  * */
-	if(!entry->IsDummy){
+	if(entry->Type == MENUBAR_REMOTE){
 		g_print("Freeing the a remote Menubar.\n");
 		if(!entry->IsDead){
 			g_print("Destroying Socket.\n");
@@ -143,7 +152,7 @@ void clients_entry_free(ClientEntry * entry){
 		}else{
 			g_print("Already dead, don't destroy Socket.\n");
 		}
-	} else{
+	} else{ /*MENUBAR_LOCAL*/
 		g_print("Freeing the Dummy Menubar. Do you really want it?\n");
 		gtk_widget_destroy(entry->Widget);
 	}

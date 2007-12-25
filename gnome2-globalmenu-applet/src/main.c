@@ -70,7 +70,7 @@ void repaint_applet(Application * App){
 	int page_num;
 	guint h;
 	ClientEntry * client = App->ActiveClient;
-	if(client->IsDummy){
+	if(client->Type == MENUBAR_LOCAL){
 			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
 	}else{
 			page_num = gtk_notebook_page_num(App->Notebook, GTK_WIDGET(client->Socket));
@@ -78,7 +78,7 @@ void repaint_applet(Application * App){
 	g_assert(page_num != -1);
 	gtk_notebook_set_current_page(App->Notebook, page_num);
 	gtk_label_set_text(App->TitleLabel, client->Title);
-	if(client->IsDummy){ /*Should load a pixmap for dummy*/
+	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
 		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
 	}else{
 		gtk_image_set_from_pixbuf(App->ClientIcon, client->Icon);
@@ -92,7 +92,8 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	XWindowID active_wid = 0; 
 	ClientEntry * client = NULL;
 
-	if(gtk_window_has_toplevel_focus(App->MainWindow)) /*Don't change if I am activted*/return;
+	if(GTK_IS_WINDOW(App->MainWindow) &&
+		gtk_window_has_toplevel_focus(GTK_WINDOW(App->MainWindow))) /*Don't change if I am activted*/return;
 	active_window = wnck_screen_get_active_window(screen);
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
@@ -112,8 +113,8 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	repaint_applet(App);
 }
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
-	if(wnck_window_is_menubar(window)){
-		clients_add_remote(window, App);
+	if(wnck_window_is_stealable_menubar(window)){
+		clients_add_remote_by_stealing(window, App);
 	}
 }
 static void application_free(Application * App);
@@ -190,7 +191,7 @@ static gboolean clicked(GtkWindow * mainwindow, gpointer button, Application * A
 }
 static gboolean start_applet(GtkWindow * mainwindow, gpointer unused){
 	Application * App;
-	App = application_new(mainwindow);
+	App = application_new(GTK_CONTAINER(mainwindow));
 //	gdk_window_set_events(GTK_WIDGET(mainwindow)->window,
 //		GDK_BUTTON_PRESS_MASK);
 //	g_signal_connect(G_OBJECT(mainwindow), "button-press-event", clicked, App);
@@ -229,8 +230,8 @@ int main (int argc, char *argv [])
 		GtkWindow * mainwindow;
 		gtk_set_locale ();
 		gtk_init (&argc, &argv);
-		mainwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		g_signal_connect(G_OBJECT(mainwindow), "show", start_applet, NULL);
+		mainwindow = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+		g_signal_connect(G_OBJECT(mainwindow), "show", G_CALLBACK(start_applet), NULL);
 		gtk_widget_show_all(GTK_WIDGET(mainwindow));
 		gtk_main ();
 		return 0;
