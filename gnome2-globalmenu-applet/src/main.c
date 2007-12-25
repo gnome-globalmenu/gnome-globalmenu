@@ -91,7 +91,7 @@ void repaint_applet(Application * App){
 		gtk_image_clear(App->ClientIcon);
 	}else{
 		GdkPixbuf * resized_icon = NULL;
-		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h-3, GDK_INTERP_BILINEAR);
+		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
 		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
 		g_object_unref(G_OBJECT(resized_icon));
 	}
