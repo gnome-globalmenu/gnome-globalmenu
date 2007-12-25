@@ -1,11 +1,11 @@
---- gtkmenubar.orig	2007-12-24 21:33:34.000000000 -0500
-+ gtk/gtkmenubar.c	2007-12-24 21:33:34.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-25 04:42:21.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-25 04:43:07.000000000 -0500
 @@ -38,7 +38,20 @@
  #include "gtkwindow.h"
  #include "gtkprivate.h"
  #include "gtkalias.h"
 -
-+// For mac menubar
++// For global menubar
 +#ifdef GDK_WINDOWING_X11
 +#include "gdk/x11/gdkx.h"
 +#include "gdk/x11/gdkwindow-x11.h"
