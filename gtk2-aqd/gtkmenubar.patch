@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-25 04:42:21.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-25 04:43:07.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-25 04:43:27.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-25 04:45:21.000000000 -0500
 @@ -38,7 +38,20 @@
  #include "gtkwindow.h"
  #include "gtkprivate.h"
@@ -39,39 +39,39 @@
  
 +
 +		/*
-+		 * Mac Menubar options
++		 * Global Menubar options
 +		 */
 +
 +#ifdef GDK_WINDOWING_X11
-+static gboolean option_no_mac()
++static gboolean option_no_global()
 +{
-+		static gboolean no_mac_set = FALSE;
-+		static gboolean no_mac = FALSE;
++		static gboolean no_global_set = FALSE;
++		static gboolean no_global = FALSE;
 +		char* env = NULL;
-+		if (no_mac_set) return no_mac;
-+		env = getenv("GTK_MENUBAR_NO_MAC");
++		if (no_global_set) return no_global;
++		env = getenv("GTK_MENUBAR_NO_GLOBAL");
 +		if (env == NULL)
-+				env = "acroread gnome-macmenu-applet gnome-panel xfce4-macmenu-plugin xfce4-panel";
++				env = "acroread gnome-globalmenu-applet gnome-panel xfce4-globalmenu-plugin xfce4-panel";
 +		if (strcmp(env, "1") == 0)
-+				no_mac = TRUE;
++				no_global = TRUE;
 +		else
 +		{
-+				// check for GTK_MENUBAR_NO_MAC
-+				gchar** no_mac_prgs = g_strsplit(env, " ", 0);
-+				gchar** p = no_mac_prgs;
++				// check for GTK_MENUBAR_NO_GLOBAL
++				gchar** no_global_prgs = g_strsplit(env, " ", 0);
++				gchar** p = no_global_prgs;
 +				gchar* prg = g_get_prgname();
 +				while (*p != NULL)
 +				{
 +						if (strcmp(*p, prg) == 0)
 +						{
-+								no_mac = TRUE;
++								no_global = TRUE;
 +								break;
 +						}
 +						p ++;
 +				}
-+				g_strfreev(no_mac_prgs);
++				g_strfreev(no_global_prgs);
 +		}
-+		if (! no_mac)
++		if (! no_global)
 +		{
 +				// check for mozplugger
 +				char scmd[255];
@@ -86,7 +86,7 @@
 +						if ((p = index(buffer, '\n')) != NULL)
 +								*p = 0;
 +						if (strcmp(buffer, "mozplugger-help") == 0)
-+								no_mac = TRUE;
++								no_global = TRUE;
 +				}
 +				else
 +				{
@@ -94,12 +94,12 @@
 +				}
 +				pclose(f);
 +		}
-+		no_mac_set = TRUE;
-+		return no_mac;
++		no_global_set = TRUE;
++		return no_global;
 +}
 +
 +/*
-+ * Mac Menubar event handlers/callbacks
++ * Global Menubar event handlers/callbacks
 + */
 +
 +static gboolean orig_toplevel_on_destroy (GtkWidget *widget, gpointer my_data)
@@ -131,7 +131,7 @@
 +		GtkMenuBar* menubar = GTK_MENU_BAR (widget);
 +		GtkMenuBarPrivate* priv = GTK_MENU_BAR_GET_PRIVATE (menubar);
 +
-+		if (!priv->mbar_toplevel_win && !option_no_mac())
++		if (!priv->mbar_toplevel_win && !option_no_global())
 +		{
 +				Atom typehints[2];
 +				GdkGeometry geometry;
