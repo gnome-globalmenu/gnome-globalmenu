@@ -69,8 +69,8 @@
 void repaint_applet(Application * App){
 	int page_num;
 	guint h;
-	GdkPixbuf * old_icon = NULL;
 	ClientEntry * client = App->ActiveClient;
+
 	if(client->Type == MENUBAR_LOCAL){
 			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
 	}else{
@@ -78,14 +78,13 @@ void repaint_applet(Application * App){
 	}
 	g_assert(page_num != -1);
 	gtk_notebook_set_current_page(App->Notebook, page_num);
-	gtk_label_set_text(App->TitleLabel, client->Title);
-
+	//gtk_label_set_text(App->TitleLabel, client->Title);
+	gtk_widget_set_tooltip_text(GTK_WIDGET(App->ClientIcon), client->Title);
 	h = GTK_WIDGET(App->Layout)->allocation.height;
 	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
 
 	gtk_layout_move(App->Layout, App->Notebook, client->x, client->y);
 
-	old_icon = gtk_image_get_pixbuf(App->ClientIcon);
 	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
 		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
 		gtk_image_clear(App->ClientIcon);
@@ -95,8 +94,6 @@ void repaint_applet(Application * App){
 		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
 		g_object_unref(G_OBJECT(resized_icon));
 	}
-	/*since gtk_image doesn't unref the old pixbuf in set_from_pixbuf*/
-	if(old_icon) g_object_unref(G_OBJECT(old_icon)); 
 }
 
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
@@ -140,13 +137,21 @@ static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App
 	gtk_main_quit();
 	return TRUE;
 }
-
+void client_icon_button_press_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
+	g_print("Button Pressed on client icon.\n");
+	if(App->Mode == APP_APPLET){ /*Emit the applet popup menu*/
+		if(button->button == 1){
+			g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", NULL);
+		}
+	}
+}
 static Application * application_new(GtkContainer * mainwindow, enum AppMode Mode){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	GtkBox * basebox = NULL;
 	GtkEventBox * eventbox = NULL;
-	GtkButton * button = NULL;
+	GtkButton * button = NULL; /*So the dashed box will cover the button instead of the Applet, and the menu will response when clicked at the very top.*/
+
 	App->Clients = g_hash_table_new_full(g_direct_hash, 
 									g_direct_equal, 
 									NULL, 
@@ -172,16 +177,15 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	gtk_container_add(GTK_CONTAINER(App->MainWindow), GTK_WIDGET(basebox));
 
 	App->ClientIcon = GTK_IMAGE(gtk_image_new());
-	gtk_box_pack_start(basebox, GTK_WIDGET(App->ClientIcon), FALSE, FALSE, 0);
-
-	App->TitleLabel = GTK_LABEL(gtk_label_new("Dumb"));
-	gtk_label_set_max_width_chars(App->TitleLabel, 20);
-	gtk_box_pack_start(basebox, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
-
 	eventbox = GTK_EVENT_BOX(gtk_event_box_new());
-	gtk_widget_set_size_request(GTK_WIDGET(eventbox), 8,-1);
+	gtk_container_add(GTK_CONTAINER(eventbox), GTK_WIDGET(App->ClientIcon));
 	gtk_box_pack_start(basebox, GTK_WIDGET(eventbox), FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(eventbox), "button-press-event",
+			G_CALLBACK(client_icon_button_press_cb), App);
 	
+	App->TitleLabel = GTK_LABEL(gtk_label_new(""));
+	gtk_label_set_max_width_chars(App->TitleLabel, 10);
+	gtk_box_pack_start(basebox, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
 	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
 
@@ -195,7 +199,7 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 				FALSE, FALSE, 0);
 
 	
-	clients_set_active(clients_add_dummy("dummy", App), App);
+	clients_set_active(clients_add_dummy("    ", App), App);
 
 	if(App->Mode == APP_APPLET){ /*setup a packed visual if in a panel*/
 		gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
@@ -207,6 +211,8 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	}
 
 	gtk_widget_show_all(GTK_WIDGET(mainwindow));
+	/*I think it is not nessary since we have an app icon already. Maybe can let user choose whether use TitleLabel or Icon*/
+	gtk_widget_hide(GTK_WIDGET(App->TitleLabel)); 
 	/*if we have registered the signals of App->Screen, all clients can be discovered in this function. if we haven't, here we can not find any windows.*/
 	clients_discover_all(App);
 	
