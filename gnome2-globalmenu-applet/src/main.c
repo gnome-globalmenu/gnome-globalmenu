@@ -67,35 +67,6 @@
 #include "misc.h"
 #include "ui.h"
 
-void repaint_applet(Application * App){
-	int page_num;
-	guint h;
-	ClientEntry * client = App->ActiveClient;
-
-	if(client->Type == MENUBAR_LOCAL){
-			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
-	}else{
-			page_num = gtk_notebook_page_num(App->Notebook, GTK_WIDGET(client->Socket));
-	}
-	g_assert(page_num != -1);
-	gtk_notebook_set_current_page(App->Notebook, page_num);
-	//gtk_label_set_text(App->TitleLabel, client->Title);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(App->ClientIcon), client->Title);
-	h = GTK_WIDGET(App->Layout)->allocation.height;
-	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
-
-	gtk_layout_move(App->Layout, App->Notebook, client->x, client->y);
-
-	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
-		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
-		gtk_image_clear(App->ClientIcon);
-	}else{
-		GdkPixbuf * resized_icon = NULL;
-		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
-		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
-		g_object_unref(G_OBJECT(resized_icon));
-	}
-}
 
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
 	WnckWindow * active_window = NULL;
@@ -124,7 +95,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	}else{
 		clients_set_active(clients_find_dummy(App), App);
 	}
-	repaint_applet(App);
+	ui_repaint_all(App);
 }
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
 	if(wnck_window_is_stealable_menubar(window)){
