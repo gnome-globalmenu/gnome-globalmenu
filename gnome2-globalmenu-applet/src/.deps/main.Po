@@ -461,7 +461,7 @@ main.o: main.c /usr/include/sys/types.h /usr/include/features.h \
   /usr/include/libbonobo-2.0/bonobo/bonobo-i18n.h \
   /usr/include/glib-2.0/glib/gi18n.h /usr/include/libintl.h \
   /usr/include/locale.h /usr/include/bits/locale.h \
-  /usr/include/panel-2.0/GNOME_Panel.h typedefs.h clients.h misc.h
+  /usr/include/panel-2.0/GNOME_Panel.h typedefs.h clients.h misc.h ui.h
 
 /usr/include/sys/types.h:
 
@@ -1522,3 +1522,5 @@ typedefs.h:
 clients.h:
 
 misc.h:
+
+ui.h:

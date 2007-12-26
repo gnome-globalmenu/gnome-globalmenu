@@ -65,6 +65,7 @@
 #include "typedefs.h"
 #include "clients.h"
 #include "misc.h"
+#include "ui.h"
 
 void repaint_applet(Application * App){
 	int page_num;
@@ -137,7 +138,7 @@ static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App
 	gtk_main_quit();
 	return TRUE;
 }
-void client_icon_button_press_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
+static void label_area_button_press_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
 	g_print("Button Pressed on client icon.\n");
 	if(App->Mode == APP_APPLET){ /*Emit the applet popup menu*/
 		if(button->button == 1){
@@ -149,7 +150,10 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	GtkBox * basebox = NULL;
-	GtkEventBox * eventbox = NULL;
+	GtkEventBox * label_area = NULL;
+	GtkEventBox * backward = NULL;
+	GtkEventBox * forward = NULL;
+
 	GtkButton * button = NULL; /*So the dashed box will cover the button instead of the Applet, and the menu will response when clicked at the very top.*/
 
 	App->Clients = g_hash_table_new_full(g_direct_hash, 
@@ -161,6 +165,7 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
 		G_CALLBACK(main_window_destroy_cb), App);
 
+/**The Screen***/
 	gdkscreen = gtk_widget_get_screen(GTK_WIDGET(App->MainWindow));
 	g_print("GDK SCREEN number is %d\n", gdk_screen_get_number(gdkscreen));
 	App->Screen = wnck_screen_get(gdk_screen_get_number(gdkscreen));
@@ -172,33 +177,41 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	App->Handlers.window_opened = 
 		g_signal_connect(G_OBJECT(App->Screen), "window-opened", 
 			G_CALLBACK(window_opened_cb), App);
-
+/****** Applet's Base Horizontal Box*******/
 	basebox = GTK_BOX(gtk_hbox_new(FALSE, 0));
 	gtk_container_add(GTK_CONTAINER(App->MainWindow), GTK_WIDGET(basebox));
 
+/********Label Area********/
 	App->ClientIcon = GTK_IMAGE(gtk_image_new());
-	eventbox = GTK_EVENT_BOX(gtk_event_box_new());
-	gtk_container_add(GTK_CONTAINER(eventbox), GTK_WIDGET(App->ClientIcon));
-	gtk_box_pack_start(basebox, GTK_WIDGET(eventbox), FALSE, FALSE, 0);
-	g_signal_connect(G_OBJECT(eventbox), "button-press-event",
-			G_CALLBACK(client_icon_button_press_cb), App);
-	
 	App->TitleLabel = GTK_LABEL(gtk_label_new(""));
 	gtk_label_set_max_width_chars(App->TitleLabel, 10);
-	gtk_box_pack_start(basebox, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
-	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
-	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
 
+	label_area = ui_create_label_area(App);
+	gtk_box_pack_start(basebox, GTK_WIDGET(label_area), FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(label_area), "button-press-event",
+			G_CALLBACK(label_area_button_press_cb), App);
+
+/****** Move Backward ***********/
+	backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
+	gtk_box_pack_start(basebox, GTK_WIDGET(backward), FALSE, FALSE, 0);
+
+/**********Layout and Notebook: Menubars Shows here**********/
+	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
 	App->Notebook = GTK_NOTEBOOK(gtk_notebook_new());
 	gtk_layout_put(App->Layout, GTK_WIDGET(App->Notebook), 0, 0); /*inital position*/
+	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
 
+/****** Move Forward ***********/
+	forward = ui_create_event_box_with_icon(GTK_STOCK_GO_FORWARD);
+	gtk_box_pack_start(basebox, GTK_WIDGET(forward), FALSE, FALSE, 0);
+
+/********Button: focus hack*********/
 	button = GTK_BUTTON(gtk_button_new());
 	gtk_button_set_relief(button, GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click(GTK_BUTTON(button), FALSE);
 	gtk_box_pack_start(basebox, GTK_WIDGET(button),
 				FALSE, FALSE, 0);
-
-	
+/**********All done**********/
 	clients_set_active(clients_add_dummy("    ", App), App);
 
 	if(App->Mode == APP_APPLET){ /*setup a packed visual if in a panel*/

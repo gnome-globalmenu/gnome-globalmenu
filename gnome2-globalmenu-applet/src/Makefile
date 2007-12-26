@@ -46,7 +46,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_gnome2_globalmenu_applet_OBJECTS = clients.$(OBJEXT) main.$(OBJEXT) \
-	misc.$(OBJEXT)
+	misc.$(OBJEXT) ui.$(OBJEXT)
 gnome2_globalmenu_applet_OBJECTS =  \
 	$(am_gnome2_globalmenu_applet_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -241,7 +241,9 @@ gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
 	misc.c                 \
 	misc.h                 \
-	typedefs.h 
+	typedefs.h                 \
+	ui.c                 \
+	ui.h 
 
 gnome2_globalmenu_applet_LDFLAGS = 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
@@ -320,6 +322,7 @@ distclean-compile:
 include ./$(DEPDIR)/clients.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/misc.Po
+include ./$(DEPDIR)/ui.Po
 
 .c.o:
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
