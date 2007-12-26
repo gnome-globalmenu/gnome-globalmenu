@@ -33,6 +33,12 @@ typedef struct {
 	struct _Application * App;
 } ClientEntry;
 
+typedef struct {
+		GCallback label_area_action_cb;
+		GCallback forward_action_cb; 
+		GCallback backward_action_cb;
+} UICallbacks;
+
 struct _Application {
 	GtkContainer * MainWindow;
 	enum AppMode {
