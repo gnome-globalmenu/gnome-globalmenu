@@ -97,11 +97,13 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	}
 	ui_repaint_all(App);
 }
+
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
 	if(wnck_window_is_stealable_menubar(window)){
 		clients_add_remote_by_stealing(window, App);
 	}
 }
+
 static void application_free(Application * App);
 static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App){
 	g_print("Server quited\n");
@@ -127,6 +129,7 @@ static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Appli
 	App->ActiveClient->x +=10;
 	ui_repaint_all(App);
 }
+
 static Application * application_new(GtkContainer * mainwindow, enum AppMode Mode){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
@@ -153,6 +156,7 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	App->Handlers.window_opened = 
 		g_signal_connect(G_OBJECT(App->Screen), "window-opened", 
 			G_CALLBACK(window_opened_cb), App);
+
 /******Create the UI *****/
 	callback_table.label_area_action_cb = label_area_action_cb;
 	callback_table.forward_action_cb = forward_action_cb;
