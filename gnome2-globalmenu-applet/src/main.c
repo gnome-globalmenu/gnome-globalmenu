@@ -117,13 +117,21 @@ static void label_area_button_press_cb(GtkWidget * widget, GdkEventButton* butto
 		}
 	}
 }
+static void backward_button_press_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+	g_print("Button Pressed on backward icon.\n");
+	App->ActiveClient->x -=10;
+	ui_repaint_all(App);
+}
+static void forward_button_press_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+	g_print("Button Pressed on forward icon.\n");
+	App->ActiveClient->x +=10;
+	ui_repaint_all(App);
+}
 static Application * application_new(GtkContainer * mainwindow, enum AppMode Mode){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	GtkBox * basebox = NULL;
 	GtkEventBox * label_area = NULL;
-	GtkEventBox * backward = NULL;
-	GtkEventBox * forward = NULL;
 
 	GtkButton * button = NULL; /*So the dashed box will cover the button instead of the Applet, and the menu will response when clicked at the very top.*/
 
@@ -163,8 +171,10 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 			G_CALLBACK(label_area_button_press_cb), App);
 
 /****** Move Backward ***********/
-	backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
-	gtk_box_pack_start(basebox, GTK_WIDGET(backward), FALSE, FALSE, 0);
+	App->Backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
+	gtk_box_pack_start(basebox, GTK_WIDGET(App->Backward), FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(App->Backward), "button-press-event",
+			G_CALLBACK(backward_button_press_cb), App);
 
 /**********Layout and Notebook: Menubars Shows here**********/
 	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
@@ -173,8 +183,10 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
 
 /****** Move Forward ***********/
-	forward = ui_create_event_box_with_icon(GTK_STOCK_GO_FORWARD);
-	gtk_box_pack_start(basebox, GTK_WIDGET(forward), FALSE, FALSE, 0);
+	App->Forward = ui_create_event_box_with_icon(GTK_STOCK_GO_FORWARD);
+	gtk_box_pack_start(basebox, GTK_WIDGET(App->Forward), FALSE, FALSE, 0);
+	g_signal_connect(G_OBJECT(App->Forward), "button-press-event",
+			G_CALLBACK(forward_button_press_cb), App);
 
 /********Button: focus hack*********/
 	button = GTK_BUTTON(gtk_button_new());

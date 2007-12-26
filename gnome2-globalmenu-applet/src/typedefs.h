@@ -44,6 +44,8 @@ struct _Application {
 		GtkLabel * TitleLabel;
 		GtkLayout * Layout;
 		GtkNotebook * Notebook; /*menu collection, contains all the sockets*/
+		GtkEventBox * Backward;
+		GtkEventBox * Forward;
 	}; /*Widgets*/
 	GHashTable * Clients; /*hashed by Client's window id*/
 	WnckScreen * Screen;

@@ -31,7 +31,10 @@ GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id){
 }
 void ui_repaint_all(Application * App){
 	int page_num;
-	guint h;
+	gint h;
+	gint w;
+	gboolean show_backward;
+	gboolean show_forward;
 	ClientEntry * client = App->ActiveClient;
 
 	if(client->Type == MENUBAR_LOCAL){
@@ -41,16 +44,39 @@ void ui_repaint_all(Application * App){
 	}
 	g_assert(page_num != -1);
 	gtk_notebook_set_current_page(App->Notebook, page_num);
-	//gtk_label_set_text(App->TitleLabel, client->Title);
+	gtk_label_set_text(App->TitleLabel, client->Title);
 	gtk_widget_set_tooltip_text(GTK_WIDGET(App->ClientIcon), client->Title);
 	h = GTK_WIDGET(App->Layout)->allocation.height;
+	w = GTK_WIDGET(App->Layout)->allocation.width;
+
+	g_print("Determining which scroll button to show:\n"
+		"client->x: %d, w: %d, client->w: %d\n",
+		client->x, w, client->w);
+	show_backward = FALSE;
+	show_forward = FALSE;
+	
+	show_backward = (client->x > w - client->w);
+	show_forward = (client->x < 0);
+	g_print("Backward: %d, Forward: %d",
+		show_backward, show_forward);
+
+	if(show_forward) 
+		gtk_widget_show(GTK_WIDGET(App->Forward));
+	else
+		gtk_widget_hide(GTK_WIDGET(App->Forward));
+	if(show_backward) 
+		gtk_widget_show(GTK_WIDGET(App->Backward));
+	else
+		gtk_widget_hide(GTK_WIDGET(App->Backward));
+
 	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
 
 	gtk_layout_move(App->Layout, App->Notebook, client->x, client->y);
 
 	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
-		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
-		gtk_image_clear(App->ClientIcon);
+/*		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
+		gtk_image_clear(App->ClientIcon);*/
+		gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
 	}else{
 		GdkPixbuf * resized_icon = NULL;
 		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
