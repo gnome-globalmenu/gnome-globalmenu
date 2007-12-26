@@ -1,5 +1,5 @@
 Name: 		gnome2-globalmenu-applet
-Version: 	0.2
+Version: 	0.2.1
 Release:	1%{?dist}
 Summary:	Global menubar applet for Gnome2
 
@@ -7,7 +7,7 @@ Group:		User Interface/Desktops
 License:	GPLv2+
 URL:		http://code.google.com/p/gnome2-globalmenu/
 
-Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome2-globalmenu-applet-0.2.tar.gz
+Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome2-globalmenu-applet-0.2.1.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires:	gtk2-aqd
