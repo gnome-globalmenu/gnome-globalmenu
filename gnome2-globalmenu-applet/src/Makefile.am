@@ -13,7 +13,7 @@ AM_CFLAGS =\
 	 -Wall\
 	 -g
 
-bin_PROGRAMS = gnome2-globalmenu-applet 
+libexec_PROGRAMS = gnome2-globalmenu-applet 
 
 gnome2_globalmenu_applet_SOURCES = \
 	clients.c                 \

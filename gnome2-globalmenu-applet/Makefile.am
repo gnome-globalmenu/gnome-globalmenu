@@ -3,17 +3,25 @@
 
 SUBDIRS = src po
 
-gnome2_globalmenu_appletdocdir = ${prefix}/doc/gnome2-globalmenu-applet
+gnome2_globalmenu_appletdocdir = ${datadir}/doc/gnome2-globalmenu-applet
 gnome2_globalmenu_appletdoc_DATA = \
 	README\
 	COPYING\
 	AUTHORS\
 	ChangeLog\
 	INSTALL\
-	NEWS
+	NEWS\
+	GNOME_GlobalMenuApplet.server.sample
 
-EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA)
+intltool_in_files = intltool-extract.in\
+	intltool-merge.in\
+	intltool-update.in	
 
+intltool_files = intltool-extract intltool-merge intltool-update
+
+EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files)
+DISTCLEANFILES = $(intltool_files)
+#
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:
 	for specfile in *.spec; do \

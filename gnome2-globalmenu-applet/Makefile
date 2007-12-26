@@ -164,9 +164,9 @@ OBJEXT = o
 PACKAGE = gnome2-globalmenu-applet
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = gnome2-globalmenu-applet
-PACKAGE_STRING = gnome2-globalmenu-applet 0.1
+PACKAGE_STRING = gnome2-globalmenu-applet 0.2
 PACKAGE_TARNAME = gnome2-globalmenu-applet
-PACKAGE_VERSION = 0.1
+PACKAGE_VERSION = 0.2
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 POFILES = 
@@ -181,7 +181,7 @@ STRIP = strip
 TEST_CLIENT_CFLAGS = -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libglade-2.0 -I/usr/include/libxml2  
 TEST_CLIENT_LIBS = -lglade-2.0 -lgtk-x11-2.0 -lxml2 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -ldl -lglib-2.0  
 USE_NLS = yes
-VERSION = 0.1
+VERSION = 0.2
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
 abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
@@ -235,16 +235,23 @@ target_alias =
 top_builddir = .
 top_srcdir = .
 SUBDIRS = src po
-gnome2_globalmenu_appletdocdir = ${prefix}/doc/gnome2-globalmenu-applet
+gnome2_globalmenu_appletdocdir = ${datadir}/doc/gnome2-globalmenu-applet
 gnome2_globalmenu_appletdoc_DATA = \
 	README\
 	COPYING\
 	AUTHORS\
 	ChangeLog\
 	INSTALL\
-	NEWS
+	NEWS\
+	GNOME_GlobalMenuApplet.server.sample
 
-EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA)
+intltool_in_files = intltool-extract.in\
+	intltool-merge.in\
+	intltool-update.in	
+
+intltool_files = intltool-extract intltool-merge intltool-update
+EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files)
+DISTCLEANFILES = $(intltool_files)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -630,6 +637,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -713,7 +721,7 @@ uninstall-am: uninstall-gnome2_globalmenu_appletdocDATA
 	ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-gnome2_globalmenu_appletdocDATA
 
-
+#
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:
 	for specfile in *.spec; do \

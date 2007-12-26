@@ -1,6 +1,6 @@
 <oaf_info>
   <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet_Factory" type="exe"
-    location="/home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/src/gnome2-globalmenu-applet">
+    location="APP_LOCATION/gnome2-globalmenu-applet">
     <oaf_attribute name="repo_ids" type="stringv">
       <item value="IDL:Bonobo/GenericFactory:1.0"/>
       <item value="IDL:Bonobo/Unknown:1.0"/>

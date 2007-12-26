@@ -235,16 +235,23 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = src po
-gnome2_globalmenu_appletdocdir = ${prefix}/doc/gnome2-globalmenu-applet
+gnome2_globalmenu_appletdocdir = ${datadir}/doc/gnome2-globalmenu-applet
 gnome2_globalmenu_appletdoc_DATA = \
 	README\
 	COPYING\
 	AUTHORS\
 	ChangeLog\
 	INSTALL\
-	NEWS
+	NEWS\
+	GNOME_GlobalMenuApplet.server.sample
 
-EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA)
+intltool_in_files = intltool-extract.in\
+	intltool-merge.in\
+	intltool-update.in	
+
+intltool_files = intltool-extract intltool-merge intltool-update
+EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files)
+DISTCLEANFILES = $(intltool_files)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -630,6 +637,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -713,7 +721,7 @@ uninstall-am: uninstall-gnome2_globalmenu_appletdocDATA
 	ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-gnome2_globalmenu_appletdocDATA
 
-
+#
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:
 	for specfile in *.spec; do \
