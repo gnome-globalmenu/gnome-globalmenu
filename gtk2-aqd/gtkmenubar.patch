@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-25 08:58:16.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-25 08:58:26.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-26 21:33:25.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-26 21:34:05.000000000 -0500
 @@ -38,7 +38,20 @@
  #include "gtkwindow.h"
  #include "gtkprivate.h"
@@ -33,7 +33,7 @@
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -87,6 +104,170 @@
+@@ -87,6 +104,160 @@
  
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  
@@ -115,16 +115,6 @@
 +		return FALSE;
 +}
 +
-+void menuitem_foreach_cb(GtkWidget * widget, GtkLabel ** label){
-+	if(GTK_IS_LABEL(widget)){
-+		 *label = widget;
-+		g_print("menubar: label discovered\n");
-+		g_print("keyval: %d\twidget: %p\n", 
-+			gtk_label_get_mnemonic_keyval(*label),
-+			gtk_label_get_mnemonic_widget(*label));
-+	}
-+}
-+
 +static void orig_toplevel_on_event_after (GtkWidget*  widget,
 +				GdkEvent*   event,
 +				gpointer    my_data)
@@ -139,7 +129,7 @@
 +static gboolean
 +window_key_press_handler (GtkWidget   *widget,
 +                          GdkEventKey *event,
-+                          GtkWidget   *mbar_win);
++                          GtkMenuBar   *menubar);
 +static void gtk_menu_bar_map (GtkWidget *widget)
 +{
 +		GtkMenuBar* menubar = GTK_MENU_BAR (widget);
@@ -179,11 +169,11 @@
 +				// Menubar
 +				gtk_widget_reparent (GTK_WIDGET (menubar),
 +								GTK_WIDGET (priv->mbar_toplevel_win));
-+
++				g_print("menubar reparented\n");
 +			    g_signal_connect (G_OBJECT(priv->orig_toplevel_win),
 +						"key_press_event",
 +						G_CALLBACK (window_key_press_handler),
-+						priv->mbar_toplevel_win);
++						menubar);
 +				
 +				// Show everything!
 +				gtk_widget_show_all (GTK_WIDGET (priv->mbar_toplevel_win));
@@ -204,7 +194,7 @@
  static void
  gtk_menu_bar_class_init (GtkMenuBarClass *class)
  {
-@@ -108,6 +289,9 @@
+@@ -108,6 +279,9 @@
    widget_class->expose_event = gtk_menu_bar_expose;
    widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
    
@@ -214,7 +204,7 @@
    menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
-@@ -220,6 +404,11 @@
+@@ -220,6 +394,11 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -226,7 +216,7 @@
  }
  
  GtkWidget*
-@@ -584,18 +773,40 @@
+@@ -584,18 +763,43 @@
    g_object_set_data (G_OBJECT (window), I_("gtk-menu-bar-list"), menubars);
  }
  
@@ -234,7 +224,7 @@
 +static gboolean
 +window_key_press_handler (GtkWidget   *orig_win,
 +                          GdkEventKey *event,
-+                          GtkWidget   *mbar_win)
++                          GtkMenuBar   *menubar)
 +#else
  static gboolean
  window_key_press_handler (GtkWidget   *widget,
@@ -245,20 +235,24 @@
  {
    gchar *accel = NULL;
    gboolean retval = FALSE;
-   
+-  
 +#ifdef GDK_WINDOWING_X11
 +  GtkWidget * widget;
-+  if(mbar_win)
-+		widget = mbar_win;
++  GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++  if(menubar)
++		widget = priv->mbar_toplevel_win;
 +  else
 +		widget = orig_win;
 +#endif
 +  g_print("menubar: key pressed %s, state %d\n", 
 +		gdk_keyval_name(event->keyval), event->state);
 +#ifdef GDK_WINDOWING_X11
-+  if(mbar_win && event->state == gtk_window_get_mnemonic_modifier(orig_win)){
++  if(menubar && event->state == gtk_window_get_mnemonic_modifier(orig_win)){
++		gboolean rt;
 +		g_print("mnemonic modifier, transmit to mbar_win\n");
-+		gtk_window_activate_key(mbar_win, event);
++		rt = gtk_window_activate_key(priv->mbar_toplevel_win, event);
++		g_print("state: %d\n", rt);
++		return rt;	
 +	}
 +#endif
    g_object_get (gtk_widget_get_settings (widget),
@@ -269,7 +263,7 @@
    if (accel && *accel)
      {
        guint keyval = 0;
-@@ -605,6 +816,7 @@
+@@ -605,6 +809,7 @@
  
        if (keyval == 0)
          g_warning ("Failed to parse menu bar accelerator '%s'\n", accel);
@@ -277,7 +271,7 @@
  
        /* FIXME this is wrong, needs to be in the global accel resolution
         * thing, to properly consider i18n etc., but that probably requires
-@@ -681,7 +893,6 @@
+@@ -681,7 +886,6 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
