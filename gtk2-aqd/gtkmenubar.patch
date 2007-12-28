@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-28 00:45:14.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-28 02:18:45.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-28 15:31:03.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-28 15:31:50.000000000 -0500
 @@ -25,7 +25,7 @@
   */
  
@@ -28,7 +28,7 @@
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -82,6 +87,12 @@
+@@ -82,8 +87,15 @@
  static gint gtk_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
@@ -40,8 +40,11 @@
 +static void gtk_menu_bar_real_insert (GtkMenuShell * menu_shell, GtkWidget * child, gint position);
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
++static void allocate_size (GtkWidget     *widget, GtkAllocation *allocation);
  
-@@ -107,10 +118,15 @@
+ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
+ 
+@@ -107,10 +119,15 @@
    widget_class->size_allocate = gtk_menu_bar_size_allocate;
    widget_class->expose_event = gtk_menu_bar_expose;
    widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
@@ -58,7 +61,7 @@
  
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
-@@ -220,11 +236,19 @@
+@@ -220,11 +237,19 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -78,7 +81,7 @@
    return g_object_new (GTK_TYPE_MENU_BAR, NULL);
  }
  
-@@ -273,7 +297,7 @@
+@@ -273,7 +298,7 @@
  }
  
  static void
@@ -87,7 +90,7 @@
  			   GtkRequisition *requisition)
  {
    GtkMenuBar *menu_bar;
-@@ -285,6 +309,7 @@
+@@ -285,6 +310,7 @@
    GtkRequisition child_requisition;
    gint ipadding;
  
@@ -95,10 +98,11 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
    g_return_if_fail (requisition != NULL);
  
-@@ -353,6 +378,26 @@
+@@ -353,7 +379,69 @@
  }
  
  static void
+-gtk_menu_bar_size_allocate (GtkWidget     *widget,
 +gtk_menu_bar_size_request (GtkWidget *widget,
 +			   GtkRequisition * requisition){
 +  GtkMenuBar *menu_bar;
@@ -117,29 +121,33 @@
 +  } else
 +    calculate_size_request(widget, requisition);
 +}
-+
 +static void
- gtk_menu_bar_size_allocate (GtkWidget     *widget,
- 			    GtkAllocation *allocation)
- {
-@@ -367,7 +412,7 @@
-   GtkTextDirection direction;
-   gint ltr_x, ltr_y;
-   gint ipadding;
--
++gtk_menu_bar_size_allocate(GtkWidget * widget,
++				GtkAllocation * allocation)
++{
++  GtkMenuBar *menu_bar;
++  GtkMenuShell *menu_shell;
++  GtkMenuBarPrivate *priv;
++  GtkWidget *child;
++  GList *children;
++  GtkAllocation child_allocation;
++  GtkRequisition child_requisition;
++  guint offset;
++  GtkTextDirection direction;
++  gint ltr_x, ltr_y;
++  gint ipadding;
++
 +LOG_FUNC_NAME;
-   g_return_if_fail (GTK_IS_MENU_BAR (widget));
-   g_return_if_fail (allocation != NULL);
- 
-@@ -378,11 +423,29 @@
-   direction = gtk_widget_get_direction (widget);
- 
-   widget->allocation = *allocation;
--  if (GTK_WIDGET_REALIZED (widget))
--    gdk_window_move_resize (widget->window,
--			    allocation->x, allocation->y,
--			    allocation->width, allocation->height);
- 
++  g_return_if_fail (GTK_IS_MENU_BAR (widget));
++  g_return_if_fail (allocation != NULL);
++
++  menu_bar = GTK_MENU_BAR (widget);
++  menu_shell = GTK_MENU_SHELL (widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
++
++  widget->allocation = *allocation;
++  g_print("Allocation for widget is w=%d, h=%d\n", allocation->width, allocation->height);
++
 +  if(priv->globalized){ /*Ah, greedy!*/
 +    /*What I realy need if not limited by allocation?*/
 +    calculate_size_request(widget, &priv->children_requisition);
@@ -150,6 +158,39 @@
 +
 +  if (GTK_WIDGET_REALIZED (widget)) 
 +    {
++		gdk_window_move_resize (widget->window,
++					allocation->x, allocation->y,
++					allocation->width, allocation->height);
++    }
++	allocate_size(widget, allocation);
++}
++static void
++allocate_size (GtkWidget     *widget,
+ 			    GtkAllocation *allocation)
+ {
+   GtkMenuBar *menu_bar;
+@@ -368,6 +456,7 @@
+   gint ltr_x, ltr_y;
+   gint ipadding;
+ 
++LOG_FUNC_NAME;
+   g_return_if_fail (GTK_IS_MENU_BAR (widget));
+   g_return_if_fail (allocation != NULL);
+ 
+@@ -375,13 +464,21 @@
+   menu_shell = GTK_MENU_SHELL (widget);
+   priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
+ 
+-  direction = gtk_widget_get_direction (widget);
++  g_print("Allocation is w=%d, h=%d\n", allocation->width, allocation->height);
+ 
+-  widget->allocation = *allocation;
+-  if (GTK_WIDGET_REALIZED (widget))
+-    gdk_window_move_resize (widget->window,
+-			    allocation->x, allocation->y,
+-			    allocation->width, allocation->height);
++  if (GTK_WIDGET_REALIZED (widget)) 
++    {
 +		if(priv->globalized){
 +			gdk_window_move_resize (priv->float_window,
 +						0, 0,
@@ -158,14 +199,13 @@
 +		gdk_window_move_resize (priv->container_window,
 +					0, 0,
 +					allocation->width, allocation->height);
-+		gdk_window_move_resize (widget->window,
-+					allocation->x, allocation->y,
-+					allocation->width, allocation->height);
 +    }
++
++  direction = gtk_widget_get_direction (widget);
+ 
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
-   if (menu_shell->children)
-@@ -532,6 +595,7 @@
+@@ -532,6 +629,7 @@
  {
    g_return_val_if_fail (GTK_IS_MENU_BAR (widget), FALSE);
    g_return_val_if_fail (event != NULL, FALSE);
@@ -173,7 +213,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -581,6 +645,7 @@
+@@ -581,6 +679,7 @@
  set_menu_bars (GtkWindow *window,
  	       GList     *menubars)
  {
@@ -181,7 +221,7 @@
    g_object_set_data (G_OBJECT (window), I_("gtk-menu-bar-list"), menubars);
  }
  
-@@ -591,6 +656,7 @@
+@@ -591,6 +690,7 @@
  {
    gchar *accel = NULL;
    gboolean retval = FALSE;
@@ -189,7 +229,7 @@
    
    g_object_get (gtk_widget_get_settings (widget),
                  "gtk-menu-bar-accel", &accel,
-@@ -645,6 +711,7 @@
+@@ -645,6 +745,7 @@
                 GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -197,7 +237,7 @@
  
    if (!menubars)
      {
-@@ -662,6 +729,7 @@
+@@ -662,6 +763,7 @@
                      GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -205,7 +245,7 @@
  
    menubars = g_list_remove (menubars, menubar);
  
-@@ -681,6 +749,7 @@
+@@ -681,6 +783,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -213,7 +253,7 @@
  
    menubar = GTK_MENU_BAR (widget);
  
-@@ -693,6 +762,186 @@
+@@ -693,6 +796,223 @@
      add_to_window (GTK_WINDOW (toplevel), menubar);
  }
  
@@ -286,6 +326,42 @@
 +  gtk_widget_set_parent_window(child, priv->container_window);
 +}
 +
++static GdkFilterReturn 
++gtk_menu_bar_float_window_filter_cb(XEvent * xevent, 
++			GdkEvent * event, GtkMenuBar * menubar){
++  GdkFilterReturn rt = GDK_FILTER_CONTINUE;
++  GdkDisplay * display;
++
++  display = gdk_drawable_get_display(event->any.window);
++  switch(xevent->type){
++    case ClientMessage:
++      if(xevent->xclient.message_type == gdk_x11_get_xatom_by_name_for_display (display, "_GTKMENUBAR_EMBED")){
++			g_print("Menu bar Embedding message received!\n");
++			rt = GDK_FILTER_REMOVE;
++			if(xevent->xclient.data.l[1] == 0)//magic number, for resize
++			{
++			   GtkAllocation allocation;
++			   allocation.x = 0;
++               allocation.y = 0;
++               allocation.width = xevent->xclient.data.l[2];
++               allocation.height = xevent->xclient.data.l[3];
++  g_print("Allocation from menu server is w=%d, h=%d\n", allocation.width, allocation.height);
++			   allocate_size(menubar, &allocation);	
++			}
++      }
++      if(xevent->xclient.message_type == gdk_x11_get_xatom_by_name_for_display (display, "WM_DELETE_WINDOW")){
++			g_print("Delete Xevent received, ignore it");
++			rt = GDK_FILTER_REMOVE;
++      }
++	  break;
++    case ReparentNotify:
++      g_print("Reparent Notify received\n");
++      rt = GDK_FILTER_REMOVE;
++      break;
++  }
++  return rt;
++}
++
 +static void
 +gtk_menu_bar_realize(GtkWidget * widget)
 +{
@@ -336,10 +412,11 @@
 +
 +  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_TYPE_HINT | GDK_WA_TITLE | GDK_WA_WMCLASS;
 +  priv->float_window = gdk_window_new (gtk_widget_get_root_window (widget), &attributes, attributes_mask);
-+
++  g_print("Float window created ,XID=%p\n", GDK_WINDOW_XID(priv->float_window));
 +  gdk_window_set_transient_for (priv->float_window, master_window);
 +  gdk_window_stick(priv->float_window);
-+
++  gdk_window_set_user_data (priv->float_window, widget);
++  gdk_window_add_filter(priv->float_window, gtk_menu_bar_float_window_filter_cb, widget);
 +
 +/*********Then the container window *********/
 +  attributes.x = 0;
@@ -400,7 +477,7 @@
  /**
   * _gtk_menu_bar_cycle_focus:
   * @menubar: a #GtkMenuBar
-@@ -706,6 +955,7 @@
+@@ -706,6 +1026,7 @@
  {
    GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (menubar));
    GtkMenuItem *to_activate = NULL;
@@ -408,7 +485,7 @@
  
    if (GTK_WIDGET_TOPLEVEL (toplevel))
      {
-@@ -742,6 +992,7 @@
+@@ -742,6 +1063,7 @@
  get_shadow_type (GtkMenuBar *menubar)
  {
    GtkShadowType shadow_type = GTK_SHADOW_OUT;
@@ -416,7 +493,7 @@
    
    gtk_widget_style_get (GTK_WIDGET (menubar),
  			"shadow-type", &shadow_type,
-@@ -769,6 +1020,7 @@
+@@ -769,6 +1091,7 @@
    GtkMenuBar *menubar = GTK_MENU_BAR (menu_shell);
    GtkTextDirection text_dir;
    GtkPackDirection pack_dir;

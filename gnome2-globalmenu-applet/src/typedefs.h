@@ -1,6 +1,10 @@
 typedef gulong HandlerID;
 typedef Window XWindowID;
 
+typedef enum {
+	GTK_MB_MESSAGE_RESIZE,
+} GtkMenuBarMessage;
+
 typedef struct _Application Application;
 typedef struct {
 	gchar * Title;

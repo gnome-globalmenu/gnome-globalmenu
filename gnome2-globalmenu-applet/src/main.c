@@ -209,10 +209,10 @@ static gboolean start_standalone(GtkWindow * mainwindow, gpointer unused){
 	return TRUE;
 }
 
-#define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet_Factory"
-#define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet"
+#define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet2_Factory"
+#define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet2"
 #define APP_NAME "globalmenu-applet"
-#define APP_VERSION "0"
+#define APP_VERSION "2"
 
 static gboolean globalmenu_applet_factory (PanelApplet *applet,
                                         const gchar *iid,
@@ -223,7 +223,9 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR);
     App = application_new(GTK_CONTAINER(applet), APP_APPLET);
     return TRUE;
-  } else return FALSE;
+  } else {
+	return FALSE;
+	}
 }
 
 int main (int argc, char *argv [])

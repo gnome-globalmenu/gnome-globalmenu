@@ -56,12 +56,23 @@ void clients_discover_all(Application * App){
 
 static void container_destroy_cb(GtkContainer * container, Application * App){
 	ClientEntry * target = clients_find_by_container(container, App);
-//	target->IsDead = TRUE;	 just do nothing.
+//	target->IsDead = TRUE;	 just do nothing. or core dump.
+//
 }
 
 static void container_size_allocate_cb(GtkContainer * container, GtkAllocation * allocation, Application * App){
-	g_print("container resized!\n");
-//	target->IsDead = TRUE;	 just do nothing.
+	ClientEntry * target = clients_find_by_container(container, App);
+	g_print("Container resized!\n");
+	if(target){	
+/*		gdk_window_move_resize (target->Window,
+                      0, 0,
+                      allocation->width, allocation->height);*/
+//		gdk_foreign_window_send_resize_event(target->Window, allocation->width, allocation->height);
+	    gdk_foreign_window_send_client_message(target->Window, 
+				GTK_MB_MESSAGE_RESIZE, allocation->width, allocation->height, 0);
+	} else{
+		g_print("Client dead before sending resize event\n");
+	}	
 }
 ClientEntry * clients_add_remote_by_stealing(WnckWindow * remoteMenuBarWindow,
 	Application * App){
@@ -173,7 +184,7 @@ void clients_entry_free(ClientEntry * entry){
 			g_signal_handlers_disconnect_by_func(GTK_WIDGET(entry->Container),
 						container_destroy_cb, entry->App);
 			gdk_window_reparent(entry->Window, 
-				gtk_widget_get_root_window(entry->Container), 0, 0);
+				gtk_widget_get_root_window(GTK_WIDGET(entry->Container)), 0, 0);
 			gtk_widget_destroy(GTK_WIDGET(entry->Container));
 		}else{
 			g_print("Already dead, don't destroy Container.\n");
