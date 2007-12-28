@@ -99,9 +99,14 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 }
 
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
+	g_print("Window opened\n");
 	if(wnck_window_is_stealable_menubar(window)){
 		clients_add_remote_by_stealing(window, App);
 	}
+}
+static void window_closed_cb(WnckScreen* screen, WnckWindow *window, Application * App){
+	g_print("Window Closed\n");
+	clients_remove_by_master(wnck_window_get_xid(window), App);
 }
 
 static void application_free(Application * App);
@@ -150,12 +155,12 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	App->Screen = wnck_screen_get(gdk_screen_get_number(gdkscreen));
 	g_print("App->Screen is %p\n",App->Screen);
 
-	App->Handlers.active_window_changed = 
-		g_signal_connect(G_OBJECT(App->Screen), "active-window-changed", 
-			G_CALLBACK(active_window_changed_cb), App);
-	App->Handlers.window_opened = 
-		g_signal_connect(G_OBJECT(App->Screen), "window-opened", 
-			G_CALLBACK(window_opened_cb), App);
+	g_signal_connect(G_OBJECT(App->Screen), "active-window-changed", 
+		G_CALLBACK(active_window_changed_cb), App);
+	g_signal_connect(G_OBJECT(App->Screen), "window-opened", 
+		G_CALLBACK(window_opened_cb), App);
+	g_signal_connect(G_OBJECT(App->Screen), "window-closed", 
+		G_CALLBACK(window_closed_cb), App);
 
 /******Create the UI *****/
 	callback_table.label_area_action_cb = label_area_action_cb;
@@ -177,8 +182,9 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	return App;
 }
 static void application_free(Application * App){
-	g_signal_handler_disconnect(App->Screen, App->Handlers.active_window_changed);
-	g_signal_handler_disconnect(App->Screen, App->Handlers.window_opened);
+	g_signal_handlers_disconnect_by_func(App->Screen, active_window_changed_cb, App);
+	g_signal_handlers_disconnect_by_func(App->Screen, window_opened_cb, App);
+	g_signal_handlers_disconnect_by_func(App->Screen, window_closed_cb, App);
 	g_hash_table_destroy(App->Clients);
 	g_free(App);
 }
@@ -192,12 +198,14 @@ static gboolean clicked(GtkWindow * mainwindow, gpointer button, Application * A
 	}
 	return TRUE;
 }
+
 static gboolean start_standalone(GtkWindow * mainwindow, gpointer unused){
 	Application * App;
 	App = application_new(GTK_CONTAINER(mainwindow), APP_STANDALONE);
 //	gdk_window_set_events(GTK_WIDGET(mainwindow)->window,
 //		GDK_BUTTON_PRESS_MASK);
 //	g_signal_connect(G_OBJECT(mainwindow), "button-press-event", clicked, App);
+	
 	return TRUE;
 }
 

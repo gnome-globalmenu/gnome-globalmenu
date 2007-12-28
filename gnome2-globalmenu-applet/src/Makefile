@@ -71,13 +71,13 @@ DIST_SOURCES = $(gnome2_globalmenu_applet_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run aclocal-1.10
+ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run aclocal-1.10
 ALL_LINGUAS = 
-AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run tar
+AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run automake-1.10
+AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run automake-1.10
 AWK = gawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -144,8 +144,8 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
-MAINT = 
-MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run makeinfo
+MAINT = #
+MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -173,10 +173,10 @@ TEST_CLIENT_LIBS = -lglade-2.0 -lgtk-x11-2.0 -lxml2 -lgdk-x11-2.0 -latk-1.0 -lgd
 USE_NLS = yes
 VERSION = 0.2.1
 XGETTEXT = /usr/bin/xgettext
-abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/src
-abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/src
-abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
-abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
+abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/src
+abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/src
+abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
+abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = gfortran
@@ -205,7 +205,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/install-sh
+install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -252,7 +252,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -277,9 +277,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: # $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 install-libexecPROGRAMS: $(libexec_PROGRAMS)
 	@$(NORMAL_INSTALL)

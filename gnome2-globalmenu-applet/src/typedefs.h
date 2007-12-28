@@ -15,7 +15,8 @@ typedef struct {
 			GtkWidget * Widget;
 		};/* local menubars*/
 		struct {
-			GtkSocket * Socket;
+			GtkContainer * Container;
+			GdkWindow * Window;
 			XWindowID MasterWID;
 			GdkPixbuf * Icon;
 			gboolean IsStolen;
@@ -56,8 +57,4 @@ struct _Application {
 	GHashTable * Clients; /*hashed by Client's window id*/
 	WnckScreen * Screen;
 	ClientEntry * ActiveClient;
-	struct {
-		HandlerID active_window_changed;
-		HandlerID window_opened;
-	} Handlers;
 };

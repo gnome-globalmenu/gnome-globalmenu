@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-27 23:37:06.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-27 23:44:48.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-28 00:45:14.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-28 02:18:45.000000000 -0500
 @@ -25,7 +25,7 @@
   */
  
@@ -95,7 +95,7 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
    g_return_if_fail (requisition != NULL);
  
-@@ -353,6 +378,25 @@
+@@ -353,6 +378,26 @@
  }
  
  static void
@@ -103,6 +103,7 @@
 +			   GtkRequisition * requisition){
 +  GtkMenuBar *menu_bar;
 +  GtkMenuBarPrivate *priv;
++LOG_FUNC_NAME;
 +
 +  g_return_if_fail (GTK_IS_MENU_BAR (widget));
 +  g_return_if_fail (requisition != NULL);
@@ -121,7 +122,7 @@
  gtk_menu_bar_size_allocate (GtkWidget     *widget,
  			    GtkAllocation *allocation)
  {
-@@ -367,7 +411,7 @@
+@@ -367,7 +412,7 @@
    GtkTextDirection direction;
    gint ltr_x, ltr_y;
    gint ipadding;
@@ -130,7 +131,7 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
    g_return_if_fail (allocation != NULL);
  
-@@ -378,11 +422,29 @@
+@@ -378,11 +423,29 @@
    direction = gtk_widget_get_direction (widget);
  
    widget->allocation = *allocation;
@@ -164,7 +165,7 @@
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -532,6 +594,7 @@
+@@ -532,6 +595,7 @@
  {
    g_return_val_if_fail (GTK_IS_MENU_BAR (widget), FALSE);
    g_return_val_if_fail (event != NULL, FALSE);
@@ -172,7 +173,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -581,6 +644,7 @@
+@@ -581,6 +645,7 @@
  set_menu_bars (GtkWindow *window,
  	       GList     *menubars)
  {
@@ -180,7 +181,7 @@
    g_object_set_data (G_OBJECT (window), I_("gtk-menu-bar-list"), menubars);
  }
  
-@@ -591,6 +655,7 @@
+@@ -591,6 +656,7 @@
  {
    gchar *accel = NULL;
    gboolean retval = FALSE;
@@ -188,7 +189,7 @@
    
    g_object_get (gtk_widget_get_settings (widget),
                  "gtk-menu-bar-accel", &accel,
-@@ -645,6 +710,7 @@
+@@ -645,6 +711,7 @@
                 GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -196,7 +197,7 @@
  
    if (!menubars)
      {
-@@ -662,6 +728,7 @@
+@@ -662,6 +729,7 @@
                      GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -204,7 +205,7 @@
  
    menubars = g_list_remove (menubars, menubar);
  
-@@ -681,6 +748,7 @@
+@@ -681,6 +749,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -212,7 +213,7 @@
  
    menubar = GTK_MENU_BAR (widget);
  
-@@ -693,6 +761,186 @@
+@@ -693,6 +762,186 @@
      add_to_window (GTK_WINDOW (toplevel), menubar);
  }
  
@@ -309,7 +310,7 @@
 +/*Then we create the float window*/
 +  master_window = gdk_window_get_toplevel(gtk_widget_get_parent_window(widget));
 +  g_print("Master Window Xid is %p\n", GDK_WINDOW_XID(master_window));
-+  attributes.title = "GTK MENUBAR";
++  attributes.title = "GTK MENUBAR2";
 +  attributes.x = widget->allocation.x;
 +  attributes.y = widget->allocation.y;
 +  attributes.width = priv->children_requisition.width;
@@ -343,7 +344,7 @@
 +/*********Then the container window *********/
 +  attributes.x = 0;
 +  attributes.y = 0;
-+  attributes.width = widget->allocation.width;
++  attributes.width = widget->allocation.width; /*They are Zeros, potentially will introduce bug*/
 +  attributes.height = widget->allocation.height;
 +  attributes.window_type = GDK_WINDOW_CHILD;
 +  attributes.event_mask = (gtk_widget_get_events (widget) |
@@ -399,7 +400,7 @@
  /**
   * _gtk_menu_bar_cycle_focus:
   * @menubar: a #GtkMenuBar
-@@ -706,6 +954,7 @@
+@@ -706,6 +955,7 @@
  {
    GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (menubar));
    GtkMenuItem *to_activate = NULL;
@@ -407,7 +408,7 @@
  
    if (GTK_WIDGET_TOPLEVEL (toplevel))
      {
-@@ -742,6 +991,7 @@
+@@ -742,6 +992,7 @@
  get_shadow_type (GtkMenuBar *menubar)
  {
    GtkShadowType shadow_type = GTK_SHADOW_OUT;
@@ -415,7 +416,7 @@
    
    gtk_widget_style_get (GTK_WIDGET (menubar),
  			"shadow-type", &shadow_type,
-@@ -769,6 +1019,7 @@
+@@ -769,6 +1020,7 @@
    GtkMenuBar *menubar = GTK_MENU_BAR (menu_shell);
    GtkTextDirection text_dir;
    GtkPackDirection pack_dir;

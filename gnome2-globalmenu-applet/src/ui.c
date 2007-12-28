@@ -100,7 +100,7 @@ void ui_repaint_all(Application * App){
 	if(client->Type == MENUBAR_LOCAL){
 			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
 	}else{
-			page_num = gtk_notebook_page_num(App->Notebook, GTK_WIDGET(client->Socket));
+			page_num = gtk_notebook_page_num(App->Notebook, GTK_WIDGET(client->Container));
 	}
 	g_assert(page_num != -1);
 	gtk_notebook_set_current_page(App->Notebook, page_num);
@@ -117,8 +117,6 @@ void ui_repaint_all(Application * App){
 	
 	show_backward = (client->x > w - client->w);
 	show_forward = (client->x < 0);
-	g_print("Backward: %d, Forward: %d",
-		show_backward, show_forward);
 
 	if(show_forward) 
 		gtk_widget_show(GTK_WIDGET(App->Forward));

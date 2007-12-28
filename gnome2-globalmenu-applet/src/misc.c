@@ -10,7 +10,7 @@
 #include "misc.h"
 
 gboolean wnck_window_is_stealable_menubar(WnckWindow * window){
-	if(g_str_equal(wnck_window_get_name(window), "GTK MENUBAR")){
+	if(g_str_equal(wnck_window_get_name(window), "GTK MENUBAR2")){
 		g_print("Menu bar discovered, assume stealable\n");
 		return TRUE;
 	}
