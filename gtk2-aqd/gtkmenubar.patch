@@ -1,35 +1,53 @@
---- gtk/gtkmenubar.orig	2007-12-27 18:00:02.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-27 18:05:18.000000000 -0500
-@@ -55,6 +55,8 @@
+--- gtk/gtkmenubar.orig	2007-12-27 22:18:57.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-27 22:22:19.000000000 -0500
+@@ -39,6 +39,7 @@
+ #include "gtkprivate.h"
+ #include "gtkalias.h"
+ 
++#include "x11/gdkx.h" /*remove it in the future!*/
+ 
+ #define BORDER_SPACING  0
+ #define DEFAULT_IPADDING 1
+@@ -55,6 +56,8 @@
  {
    GtkPackDirection pack_direction;
    GtkPackDirection child_pack_direction;
-+  GdkWindow * bin_window;
++  GdkWindow * container_window;
 +  GdkWindow * float_window;
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -82,6 +84,8 @@
+@@ -82,6 +85,12 @@
  static gint gtk_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
 +static void gtk_menu_bar_realize            (GtkWidget         *widget);
 +static void gtk_menu_bar_unrealize            (GtkWidget         *widget);
++static void gtk_menu_bar_map				(GtkWidget * widget);
++static void gtk_menu_bar_unmap				(GtkWidget * widget);
++
++static void gtk_menu_bar_real_insert (GtkMenuShell * menu_shell, GtkWidget * child, gint position);
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
-@@ -107,7 +111,9 @@
+@@ -107,10 +116,15 @@
    widget_class->size_allocate = gtk_menu_bar_size_allocate;
    widget_class->expose_event = gtk_menu_bar_expose;
    widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
 -  
 +  widget_class->realize = gtk_menu_bar_realize;  
 +  widget_class->unrealize = gtk_menu_bar_unrealize;  
++  widget_class->map = gtk_menu_bar_map;
++  widget_class->unmap = gtk_menu_bar_unmap;
 +
    menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
-@@ -220,11 +226,13 @@
++  menu_shell_class->insert = gtk_menu_bar_real_insert;
+ 
+   binding_set = gtk_binding_set_by_class (class);
+   gtk_binding_entry_add_signal (binding_set,
+@@ -220,11 +234,13 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -43,7 +61,7 @@
    return g_object_new (GTK_TYPE_MENU_BAR, NULL);
  }
  
-@@ -532,6 +540,7 @@
+@@ -532,6 +548,7 @@
  {
    g_return_val_if_fail (GTK_IS_MENU_BAR (widget), FALSE);
    g_return_val_if_fail (event != NULL, FALSE);
@@ -51,7 +69,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -581,6 +590,7 @@
+@@ -581,6 +598,7 @@
  set_menu_bars (GtkWindow *window,
  	       GList     *menubars)
  {
@@ -59,7 +77,7 @@
    g_object_set_data (G_OBJECT (window), I_("gtk-menu-bar-list"), menubars);
  }
  
-@@ -591,6 +601,7 @@
+@@ -591,6 +609,7 @@
  {
    gchar *accel = NULL;
    gboolean retval = FALSE;
@@ -67,7 +85,7 @@
    
    g_object_get (gtk_widget_get_settings (widget),
                  "gtk-menu-bar-accel", &accel,
-@@ -645,6 +656,7 @@
+@@ -645,6 +664,7 @@
                 GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -75,7 +93,7 @@
  
    if (!menubars)
      {
-@@ -662,6 +674,7 @@
+@@ -662,6 +682,7 @@
                      GtkMenuBar *menubar)
  {
    GList *menubars = get_menu_bars (window);
@@ -83,7 +101,7 @@
  
    menubars = g_list_remove (menubars, menubar);
  
-@@ -681,6 +694,7 @@
+@@ -681,6 +702,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -91,9 +109,51 @@
  
    menubar = GTK_MENU_BAR (widget);
  
-@@ -693,6 +707,65 @@
+@@ -692,7 +714,153 @@
+   if (GTK_WIDGET_TOPLEVEL (toplevel))
      add_to_window (GTK_WINDOW (toplevel), menubar);
  }
++static void
++gtk_menu_bar_map(GtkWidget * widget){
++  GtkMenuBar * menubar = NULL;
++  GtkMenuBarPrivate * priv = NULL;
++g_print("%s\n", __func__);
++
++  menubar = GTK_MENU_BAR(widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++  GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->map(widget);
++  gdk_window_show(priv->container_window);
++  gdk_window_show(priv->float_window);
++}
++static void
++gtk_menu_bar_unmap(GtkWidget * widget){
++  GtkMenuBar * menubar = NULL;
++  GtkMenuBarPrivate * priv = NULL;
++g_print("%s\n", __func__);
++
++  menubar = GTK_MENU_BAR(widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++  
++  gdk_window_hide(priv->container_window);
++  gdk_window_hide(priv->float_window);
++  GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->unmap(widget);
++}
++
++/*****************************
++ * overide gtk_menu_shell_insert, because we want to set proper parent gdkwindow
++ * *****************/
++static void
++gtk_menu_bar_real_insert(GtkMenuShell * menu_shell, GtkWidget * child, gint position){
++  GtkMenuBar * menubar = NULL;
++  GtkMenuBarPrivate * priv = NULL;
++g_print("%s\n", __func__);
++
++  menubar = GTK_MENU_BAR(menu_shell);
++  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++
++  GTK_MENU_SHELL_CLASS(gtk_menu_bar_parent_class)->insert(menu_shell, child, position);
++  gtk_widget_set_parent_window(child, priv->container_window);
++}
  
 +static void
 +gtk_menu_bar_realize(GtkWidget * widget)
@@ -101,6 +161,7 @@
 +  GtkMenuBar * menubar = NULL;
 +  GtkMenuBarPrivate * priv = NULL;
 +  GdkWindowAttr attributes;
++  GdkWindow * master_window = NULL;
 +  gint attributes_mask = 0;
 +
 +  menubar = GTK_MENU_BAR(widget);
@@ -109,14 +170,27 @@
 +
 +  g_return_if_fail (GTK_IS_MENU_SHELL (widget));
 +
-+  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
++//  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED); set by parent class realize
++  GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->realize(widget);
++  //gdk_window_set_user_data (widget->window, widget); I think it is also set
++// parent realize will also create widget->window
 +
-+  attributes.x = 0;
-+  attributes.y = 0;
-+  attributes.width = widget->allocation.width;
-+  attributes.height = widget->allocation.height;
++
++/*Then we create the float window*/
++  master_window = gdk_window_get_toplevel(gtk_widget_get_parent_window(widget));
++  g_print("Master Window Xid is %p\n", GDK_WINDOW_XID(master_window));
++  attributes.title = "GTK MENUBAR";
++  attributes.x = widget->allocation.x;
++  attributes.y = widget->allocation.y;
++  attributes.width = widget->requisition.width;
++  attributes.height = widget->requisition.height;
 +  attributes.window_type = GDK_WINDOW_TOPLEVEL;
 +  attributes.wclass = GDK_INPUT_OUTPUT;
++/*
++  attributes.wmclass_name = g_strdup(g_get_prgname());
++  attributes.wmclass_class = g_strdup(gdk_get_program_class());
++  This doesn't help solving the icon problem. So disable them. 
++*/
 +  attributes.visual = gtk_widget_get_visual (widget);
 +  attributes.colormap = gtk_widget_get_colormap (widget);
 +  attributes.event_mask = gtk_widget_get_events (widget);
@@ -127,18 +201,41 @@
 +			    GDK_ENTER_NOTIFY_MASK |
 +			    GDK_LEAVE_NOTIFY_MASK);
 +
-+  attributes.type_hint = GDK_WINDOW_TYPE_HINT_TOOLBAR;
++  attributes.type_hint = GDK_WINDOW_TYPE_HINT_DOCK;
 +
-+  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_TYPE_HINT;
-+  widget->window = gdk_window_new (gtk_widget_get_root_window (widget), &attributes, attributes_mask);
-+  gdk_window_set_user_data (widget->window, widget);
-+  gdk_window_set_title (widget->window, "GTK MENUBAR");
-+  gdk_window_set_transient_for (widget->window, 
-+		gtk_widget_get_toplevel(gtk_widget_get_parent(widget))->window);
-+  gdk_window_stick(widget->window);
++  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_TYPE_HINT | GDK_WA_TITLE | GDK_WA_WMCLASS;
++  priv->float_window = gdk_window_new (gtk_widget_get_root_window (widget), &attributes, attributes_mask);
 +
-+  widget->style = gtk_style_attach (widget->style, widget->window);
-+  gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
++  gdk_window_set_transient_for (priv->float_window, master_window);
++  gdk_window_stick(priv->float_window);
++
++
++/*********Then the container window *********/
++  attributes.x = 0;
++  attributes.y = 0;
++  attributes.width = widget->allocation.width;
++  attributes.height = widget->allocation.height;
++  attributes.window_type = GDK_WINDOW_CHILD;
++  attributes.event_mask = (gtk_widget_get_events (widget) |
++               GDK_EXPOSURE_MASK |
++               GDK_BUTTON1_MOTION_MASK |
++               GDK_POINTER_MOTION_HINT_MASK |
++               GDK_BUTTON_PRESS_MASK |
++                GDK_BUTTON_RELEASE_MASK);
++  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
++  priv->container_window = gdk_window_new (widget->window, &attributes, attributes_mask);
++  gdk_window_set_user_data (priv->container_window, widget);
++
++  gdk_window_reparent(priv->container_window, priv->float_window, 0, 0); /*THE MOST IMPORTANT CHANGE WILL BE HERE*/
++/*Set some painting hints*/
++  gtk_style_set_background (widget->style, widget->window, GTK_WIDGET_STATE (menubar));
++  gtk_style_set_background (widget->style, priv->container_window, GTK_WIDGET_STATE (menubar));
++  gtk_style_set_background (widget->style, priv->float_window, GTK_WIDGET_STATE (menubar));
++  gdk_window_set_back_pixmap (widget->window, NULL, TRUE);
++
++/*Then move all the exsited menuitems's gdk parent window to the container */
++  gtk_container_forall(GTK_CONTAINER(widget), 
++			gtk_widget_set_parent_window, (gpointer)(priv->container_window));
 +
 +}
 +static void
@@ -146,18 +243,27 @@
 +{
 +  GtkMenuBar * menubar = NULL;
 +  GtkMenuBarPrivate * priv = NULL;
-+  menubar = GTK_MENU_BAR(widget);
-+  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++
 +	g_print("%s\n", __func__);
 +
-+  menubar = GTK_MENU_BAR (widget);
++  menubar = GTK_MENU_BAR(widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++
++  gdk_window_set_user_data (priv->container_window, NULL);
++  gdk_window_destroy (priv->container_window);
++  priv->container_window = NULL;
++
++  gdk_window_set_user_data (priv->float_window, NULL);
++  gdk_window_destroy (priv->float_window);
++  priv->float_window = NULL;
++
 +  GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->unrealize(widget); 
 +
 +}
  /**
   * _gtk_menu_bar_cycle_focus:
   * @menubar: a #GtkMenuBar
-@@ -706,6 +779,7 @@
+@@ -706,6 +874,7 @@
  {
    GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (menubar));
    GtkMenuItem *to_activate = NULL;
@@ -165,7 +271,7 @@
  
    if (GTK_WIDGET_TOPLEVEL (toplevel))
      {
-@@ -742,6 +816,7 @@
+@@ -742,6 +911,7 @@
  get_shadow_type (GtkMenuBar *menubar)
  {
    GtkShadowType shadow_type = GTK_SHADOW_OUT;
@@ -173,7 +279,7 @@
    
    gtk_widget_style_get (GTK_WIDGET (menubar),
  			"shadow-type", &shadow_type,
-@@ -769,6 +844,7 @@
+@@ -769,6 +939,7 @@
    GtkMenuBar *menubar = GTK_MENU_BAR (menu_shell);
    GtkTextDirection text_dir;
    GtkPackDirection pack_dir;
