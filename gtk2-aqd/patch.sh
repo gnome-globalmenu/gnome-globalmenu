@@ -7,6 +7,7 @@ cp gtkmenubar.patch $RPMDEVROOT/SOURCES/
 (
 cd $RPMDEVROOT/BUILD/gtk+-$VER/gtk
 cp gtkmenubar.c.globalmenubar gtkmenubar.c
+rm gtkmenuembed-x11.h
 patch -p1 -b -z .globalmenubar < ../../../SOURCES/gtkmenubar.patch
 make
 )
