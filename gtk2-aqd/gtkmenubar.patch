@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-30 21:33:42.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-30 21:34:11.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-30 21:34:19.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-30 22:03:52.000000000 -0500
 @@ -39,10 +39,14 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -88,7 +88,7 @@
    menubars = g_list_remove (menubars, menubar);
  
    if (!menubars)
-@@ -938,5 +972,230 @@
+@@ -938,5 +972,231 @@
      }
  }
  
@@ -195,6 +195,7 @@
 +	  notify.ClientNew.float_xid = GDK_WINDOW_XWINDOW(priv->float_window);
 +	  notify.ClientNew.master_xid = GDK_WINDOW_XWINDOW(priv->master_window);
 +	  global_menu_socket_send(priv->socket, &notify);
++	  widget->style->ythickness = 0;
 +  } else {
 +	  gdk_window_reparent(priv->container_window, widget->window, 0, 0); 
 +  }
