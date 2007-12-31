@@ -5,14 +5,14 @@ typedef enum {
 	GM_NOTIFY_DESTROY,
 	GM_NOTIFY_SERVER_NEW,
 	GM_NOTIFY_SERVER_DESTROY,
-	GM_NOTIFY_SIZE_ALLOCATION,
+	GM_NOTIFY_SIZE_ALLOCATE,
 	GM_NOTIFY_MAX,
 } GlobalMenuNotifyType;
 #define ATOM_STRING "_GTKMENUBAR_EMBED"
-#define SERVER_NAME "GTK MENU BAR SERVER"
-#define CLIENT_NAME "GTK MENU BAR CLIENT"
+#define MENU_SERVER_NAME "GTK MENU BAR SERVER"
+#define MENU_CLIENT_NAME "GTK MENU BAR CLIENT"
 
-typedef struct {
+typedef struct _GlobalMenuNotify {
 	GlobalMenuNotifyType type;
 	union{
 	struct {
@@ -40,22 +40,26 @@ typedef struct {
 			Window server_xid;
 			glong width;
 			glong height;
-		} SizeAllocation;
+		} SizeAllocate;
 	};
 } GlobalMenuNotify;
+
+typedef struct _GlobalMenuSocket GlobalMenuSocket;
 
 typedef void (*GlobalMenuCallback)(GlobalMenuSocket* socket, 
 	GlobalMenuNotify * notify, gpointer data);
 
-typedef struct {
+struct _GlobalMenuSocket {
 	gchar * name;
 	GdkWindow * window;
 	GdkDisplay * display;
 	GlobalMenuCallback callbacks[GM_NOTIFY_MAX];
 	gpointer userdata;
 	Window dest_xid; // Where to connect to
-} GlobalMenuSocket;
+};
 
+
+#ifdef INCLUDE_SOURCE
 static const gchar * global_menu_notify_get_name(GlobalMenuNotifyType type){
 #define CASE(x) case x: return # x;
 	switch(type){
@@ -64,7 +68,7 @@ static const gchar * global_menu_notify_get_name(GlobalMenuNotifyType type){
 	CASE(GM_NOTIFY_DESTROY)
 	CASE(GM_NOTIFY_SERVER_NEW)
 	CASE(GM_NOTIFY_SERVER_DESTROY)
-	CASE(GM_NOTIFY_SIZE_ALLOCATION)
+	CASE(GM_NOTIFY_SIZE_ALLOCATE)
 	default:
 		return "Unknown notification";
 	}
@@ -81,6 +85,7 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 
 	notify->type = GM_NOTIFY_NOT_GM;
 	if(xevent->type == ClientMessage){
+		g_message("XClient notify translating");
 
 		display = gdk_x11_lookup_xdisplay(xevent->xclient.display);
 		if(display == NULL){
@@ -93,7 +98,7 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 			notify->param1 = xevent->xclient.data.l[2];
 			notify->param2 = xevent->xclient.data.l[3];
 			notify->param3 = xevent->xclient.data.l[4];
-			g_message("Global Menu Notification: %s, %d, %d, %d\n",
+			g_message("Global Menu Notification: %s, %ld, %ld, %ld\n",
 				global_menu_notify_get_name(notify->type),
 					notify->param1, notify->param2, notify->param3);
 			return TRUE;
@@ -102,14 +107,14 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 	return FALSE;
 }
 
-global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocket * socket){
+static GdkFilterReturn global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocket * socket){
 	GlobalMenuNotify notify;
 	GlobalMenuNotifyType type;
-	if(global_menu_translate_xevent(xevent, &notify)){
-		for(type = GM_NOTIFY_MIN + 1; type < GM_NOTIFY_MAX; type++){
-			if(socket->callbacks[type]){
-				(*(socket->callbacks[type]))(socket, &notify, socket->userdata);
-			}
+	if(global_menu_xevent_to_notify(xevent, &notify)){
+		g_message("global menu notify received");
+		type = notify.type;
+		if(socket->callbacks[type] ){
+			(*(socket->callbacks[type]))(socket, &notify, socket->userdata);
 		}
 		return GDK_FILTER_REMOVE;
 	}
@@ -117,14 +122,14 @@ global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocke
 	
 }
 
-GlobalMenuSocket * global_menu_socket_new(gchar * name, gpointer userdata){
+static GlobalMenuSocket * global_menu_socket_new(gchar * name, gpointer userdata){
 	GdkWindowAttr attr;
 	GdkWindowAttributesType mask;
 
 	GlobalMenuSocket * socket = g_new0(GlobalMenuSocket, 1);
 	attr.title = name;
 	attr.wclass = GDK_INPUT_ONLY;
-	attr.window_type = GDK_WINDOW_TOP_LEVEL;
+	attr.window_type = GDK_WINDOW_TOPLEVEL;
 
 	mask = GDK_WA_TITLE;
 	socket->window = gdk_window_new(NULL, &attr, mask);
@@ -132,16 +137,16 @@ GlobalMenuSocket * global_menu_socket_new(gchar * name, gpointer userdata){
 	socket->userdata = userdata,
 	socket->display = gdk_drawable_get_display(socket->window);
 
-	gdk_window_add_filter(socket->window, global_menu_socket_dispatcher, socket);
+	gdk_window_add_filter(socket->window, (GdkFilterFunc)global_menu_socket_dispatcher, socket);
 
 	return socket;
 }
-void global_menu_socket_free(GlobalMenuSocket * socket){
+static void global_menu_socket_free(GlobalMenuSocket * socket){
 	gdk_window_destroy(socket->window);
 	g_free(socket->name);
 	g_free(socket);
 }
-void global_menu_socket_set_callback(GlobalMenuSocket * socket, 
+static void global_menu_socket_set_callback(GlobalMenuSocket * socket, 
 		GlobalMenuNotifyType type, GlobalMenuCallback cb){
 	g_return_if_fail( type > GM_NOTIFY_MIN && type < GM_NOTIFY_MAX);
 	g_return_if_fail( socket );
@@ -149,59 +154,72 @@ void global_menu_socket_set_callback(GlobalMenuSocket * socket,
 	
 	socket->callbacks[type] = cb;
 }
-void global_menu_socket_connect(GlobalMenuSocket * socket, gchar * dest_name){
+static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gchar * dest_name){
 	GdkScreen * screen;
-	GdkDisplay * display;
-	GList * windows;
-	GList * node;
-	GdkWindow * dest = NULL;
+	GdkWindow * root = NULL;
+	Window root_xid;
+	Window root_return;
+	Window parent_return;
+	Window * children_return;
+	unsigned int nchildren_return;
+	unsigned int i;
+	gboolean connected = FALSE;
 
-	g_return_if_fail( socket );
-	g_return_if_fail( dest_name );
+	g_return_val_if_fail( socket ,FALSE);
+	g_return_val_if_fail( dest_name ,FALSE);
 	
 	screen = gdk_drawable_get_screen(socket->window);
+	root = gdk_screen_get_root_window(screen);
+	g_return_val_if_fail( screen , FALSE);	
+	g_return_val_if_fail( root , FALSE);	
 
-	g_return_if_fail( screen );	
+	gdk_error_trap_push();
+	XQueryTree(GDK_DISPLAY_XDISPLAY(socket->display),
+		GDK_WINDOW_XWINDOW(root),
+		&root_return,
+		&parent_return,
+		&children_return,
+		&nchildren_return);
+	gdk_error_trap_pop();
 
-	node = windows = gdk_screen_get_top_levels(screen);
-		
-	while(node){
+	g_return_val_if_fail( children_return , FALSE );
+
+	for(i = 0; i < nchildren_return; i++){
 		Atom type_return;
-		Atom type_req = gdk_x11_get_xatom_by_name_for_display (socket->display, "UTF8_STRING"),
+		Atom type_req = gdk_x11_get_xatom_by_name_for_display (socket->display, "UTF8_STRING");
 		gint format_return;
 		gulong nitems_return;
 		gulong bytes_after_return;
 		gchar * data;
 
-		GdkWindow * window = node->data;
-		g_assert(window);	
-		if(XGetWindowProperty (GDK_DISPLAY_XDISPLAY (socket->display), GDK_WINDOW_XID (window),
+		if(XGetWindowProperty (GDK_DISPLAY_XDISPLAY (socket->display), children_return[i],
 						  gdk_x11_get_xatom_by_name_for_display (socket->display, "_NET_WM_NAME"),
                           0, G_MAXLONG, False, type_req, &type_return,
                           &format_return, &nitems_return, &bytes_after_return,
                           &data) == Success)
 		if(type_return == type_req){
-			g_print("Window name is %s\n", 	data);
 			if(g_str_equal(dest_name, data)){
-				g_print("dest found");
-				dest = window;
+				g_message("Destination found, remember it");
+				socket->dest_xid = children_return[i];
+				connected = TRUE;
 				break;
 			}
 		}
-		node = node->next;
 	}
-	if(windows) g_list_free(windows);	
-	g_return_if_fail(dest);
-	socket->dest_xid = GDK_WINDOW_XID(dest);
+	XFree(children_return);
+	return connected;
 }
 
-void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
+static Window global_menu_socket_get_xid(GlobalMenuSocket * socket){
+	return GDK_WINDOW_XWINDOW(socket->window);
+}
+static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, GlobalMenuNotify * message){
 	XClientMessageEvent xclient;
 
 	memset (&xclient, 0, sizeof (xclient));
-	xclient.window = socket->dest_xid;
+	xclient.window = xid;
 	xclient.type = ClientMessage;
-	xclient.message_type = gdk_x11_get_xatom_by_name_for_display (display, ATOM_STRING);
+	xclient.message_type = gdk_x11_get_xatom_by_name_for_display (socket->display, ATOM_STRING);
 	xclient.format = 32;
 	xclient.data.l[0] = gtk_get_current_event_time();
 	xclient.data.l[1] = message->type;
@@ -210,8 +228,12 @@ void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * messa
 	xclient.data.l[4] = message->param3;
 	gdk_error_trap_push ();
 	XSendEvent (GDK_DISPLAY_XDISPLAY(socket->display),
-		  socket->dest_xid,
+		  xid,
 		  False, NoEventMask, (XEvent *)&xclient);
 	gdk_display_sync (socket->display);
 	gdk_error_trap_pop ();
 }
+static void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
+	global_menu_socket_send_to(socket, socket->dest_xid, message);
+}
+#endif
