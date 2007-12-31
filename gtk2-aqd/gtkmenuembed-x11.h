@@ -180,7 +180,10 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 		&parent_return,
 		&children_return,
 		&nchildren_return);
-	gdk_error_trap_pop();
+	if(gdk_error_trap_pop()){
+		g_warning("XQueryTree Failed");
+		return FALSE;
+	}
 
 	g_return_val_if_fail( children_return , FALSE );
 
@@ -191,19 +194,24 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 		gulong nitems_return;
 		gulong bytes_after_return;
 		gchar * data;
-
-		if(XGetWindowProperty (GDK_DISPLAY_XDISPLAY (socket->display), children_return[i],
+		gint rt;
+		gdk_error_trap_push();
+		rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (socket->display), children_return[i],
 						  gdk_x11_get_xatom_by_name_for_display (socket->display, "_NET_WM_NAME"),
                           0, G_MAXLONG, False, type_req, &type_return,
                           &format_return, &nitems_return, &bytes_after_return,
-                          &data) == Success)
-		if(type_return == type_req){
-			if(g_str_equal(dest_name, data)){
-				g_message("Destination found, remember it");
-				socket->dest_xid = children_return[i];
-				connected = TRUE;
-				break;
+                          &data);
+		if(!gdk_error_trap_pop()){
+			if(rt == Success && type_return == type_req){
+				if(g_str_equal(dest_name, data)){
+					g_message("Destination found, remember it");
+					socket->dest_xid = children_return[i];
+					connected = TRUE;
+					break;
+				}
 			}
+		}else{
+			g_warning("XGetWindowProperty Failed");
 		}
 	}
 	XFree(children_return);
