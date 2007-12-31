@@ -9,6 +9,7 @@
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
 #include "typedefs.h"
+#include "application.h"
 #include "ui.h"
 
 GtkEventBox * ui_create_label_area(Application * App){
@@ -57,12 +58,12 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	g_signal_connect(G_OBJECT(App->Backward), "button-press-event",
 			G_CALLBACK(callbacks->backward_action_cb), App);
 
-/**********Layout and Notebook: Menubars Shows here**********/
-	App->Layout = GTK_LAYOUT(gtk_layout_new(NULL, NULL));
-	App->Notebook = GTK_NOTEBOOK(gtk_notebook_new());
-	gtk_layout_put(App->Layout, GTK_WIDGET(App->Notebook), 0, 0); /*inital position*/
-	gtk_box_pack_start(basebox, GTK_WIDGET(App->Layout), TRUE, TRUE, 0);
-
+/**********Holder: Menubars Shows here**********/
+	App->Holder = GTK_FIXED(gtk_fixed_new());
+	gtk_fixed_set_has_window(App->Holder, TRUE);
+	gtk_box_pack_start(basebox, GTK_WIDGET(App->Holder), TRUE, TRUE, 0);
+	g_signal_connect(G_OBJECT(App->Holder), "size-allocate", 
+			G_CALLBACK(callbacks->holder_resize_cb), App);
 /****** Move Forward ***********/
 	App->Forward = ui_create_event_box_with_icon(GTK_STOCK_GO_FORWARD);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Forward), FALSE, FALSE, 0);
@@ -79,11 +80,6 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 /*******Applet tweaks*************/
 	if(App->Mode == APP_APPLET){ /*setup a compact visual if in a panel*/
 		gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
-		gtk_container_set_border_width(GTK_CONTAINER(App->Layout), 0);
-		/*layout don't care about border width, anyway, set it*/
-		gtk_container_set_border_width(GTK_CONTAINER(App->Notebook), 0);
-		gtk_notebook_set_show_tabs(App->Notebook, FALSE);
-		gtk_notebook_set_show_border(App->Notebook, FALSE);
 	}
 
 
@@ -95,28 +91,11 @@ void ui_repaint_all(Application * App){
 	gint w;
 	gboolean show_backward;
 	gboolean show_forward;
-	ClientEntry * client = App->ActiveClient;
 
-	if(client->Type == MENUBAR_LOCAL){
-			page_num = gtk_notebook_page_num(App->Notebook, client->Widget);
-	}else{
-			page_num = gtk_notebook_page_num(App->Notebook, GTK_WIDGET(client->Container));
-	}
-	g_assert(page_num != -1);
-	gtk_notebook_set_current_page(App->Notebook, page_num);
-	gtk_label_set_text(App->TitleLabel, client->Title);
-	gtk_widget_set_tooltip_text(GTK_WIDGET(App->ClientIcon), client->Title);
-	h = GTK_WIDGET(App->Layout)->allocation.height;
-	w = GTK_WIDGET(App->Layout)->allocation.width;
 
-	g_print("Determining which scroll button to show:\n"
-		"client->x: %d, w: %d, client->w: %d\n",
-		client->x, w, client->w);
-	show_backward = FALSE;
-	show_forward = FALSE;
+	show_backward = TRUE;
+	show_forward = TRUE;
 	
-	show_backward = (client->x > w - client->w);
-	show_forward = (client->x < 0);
 
 	if(show_forward) 
 		gtk_widget_show(GTK_WIDGET(App->Forward));
@@ -127,19 +106,6 @@ void ui_repaint_all(Application * App){
 	else
 		gtk_widget_hide(GTK_WIDGET(App->Backward));
 
-	gtk_widget_set_size_request(GTK_WIDGET(App->Notebook), client->w, h);
-
-	gtk_layout_move(App->Layout, App->Notebook, client->x, client->y);
-
-	if(client->Type == MENUBAR_LOCAL){ /*Should load a pixmap for dummy*/
-/*		gtk_image_set_from_pixbuf(App->ClientIcon, NULL);
-		gtk_image_clear(App->ClientIcon);*/
-		gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
-	}else{
-		GdkPixbuf * resized_icon = NULL;
-		resized_icon = gdk_pixbuf_scale_simple(client->Icon, h, h, GDK_INTERP_BILINEAR);
-		gtk_image_set_from_pixbuf(App->ClientIcon, resized_icon);
-		g_object_unref(G_OBJECT(resized_icon));
-	}
+	gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
 
 }

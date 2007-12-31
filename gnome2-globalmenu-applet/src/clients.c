@@ -185,6 +185,7 @@ void clients_entry_free(ClientEntry * entry){
 						container_destroy_cb, entry->App);
 			gdk_window_reparent(entry->Window, 
 				gtk_widget_get_root_window(GTK_WIDGET(entry->Container)), 0, 0);
+			gdk_display_sync(gdk_display_get_default());
 			gtk_widget_destroy(GTK_WIDGET(entry->Container));
 		}else{
 			g_print("Already dead, don't destroy Container.\n");
