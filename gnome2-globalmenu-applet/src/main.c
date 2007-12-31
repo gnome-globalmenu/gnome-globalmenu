@@ -168,8 +168,8 @@ static void client_destroy_cb(MenuServer * server, MenuClient * client, Applicat
 			break;
 		}
 	}	
-	g_assert( node );
-	g_assert( info );
+	g_return_if_fail( node );
+	g_return_if_fail( info );
 /* We don't need to return window, the Client Application will be destroying the menu bar when we receive the notification
 	if(node->data == App->ActiveClient->menu_client){
 		return_float_window(App->ActiveClient->float_window, App);

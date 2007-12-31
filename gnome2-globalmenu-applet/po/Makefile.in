@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = gnome2-globalmenu-applet
 PACKAGE = gnome2-globalmenu-applet
-VERSION = 0.2.1
+VERSION = 0.3
 
 SHELL = /bin/sh
 

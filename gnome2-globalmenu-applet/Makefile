@@ -154,7 +154,7 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
-MAINT = #
+MAINT = 
 MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
@@ -164,9 +164,9 @@ OBJEXT = o
 PACKAGE = gnome2-globalmenu-applet
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = gnome2-globalmenu-applet
-PACKAGE_STRING = gnome2-globalmenu-applet 0.2.1
+PACKAGE_STRING = gnome2-globalmenu-applet 0.3
 PACKAGE_TARNAME = gnome2-globalmenu-applet
-PACKAGE_VERSION = 0.2.1
+PACKAGE_VERSION = 0.3
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 POFILES = 
@@ -181,7 +181,7 @@ STRIP = strip
 TEST_CLIENT_CFLAGS = -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libglade-2.0 -I/usr/include/libxml2  
 TEST_CLIENT_LIBS = -lglade-2.0 -lgtk-x11-2.0 -lxml2 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -ldl -lglib-2.0  
 USE_NLS = yes
-VERSION = 0.2.1
+VERSION = 0.3
 XGETTEXT = /usr/bin/xgettext
 abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
 abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
@@ -258,7 +258,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -285,9 +285,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 
-$(top_srcdir)/configure: # $(am__configure_deps)
+$(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
-$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
+$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -299,7 +299,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in: # $(am__configure_deps) 
+$(srcdir)/config.h.in:  $(am__configure_deps) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	rm -f stamp-h1
 	touch $@
