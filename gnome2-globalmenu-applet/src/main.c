@@ -67,24 +67,25 @@
 #include "application.h"
 #include "menuclients.h"
 #include "menuserver.h"
-#include "misc.h"
 #include "ui.h"
 
 typedef struct _ClientInfo{
 	MenuClient * menu_client;
 	GdkWindow * float_window;
 } ClientInfo;
-static void return_float_window(GdkWindow * float_window, Application * App){
-	g_message("Return window");
-	gdk_window_hide(float_window);
-	gdk_window_reparent(float_window, gtk_widget_get_root_window(App->Holder), 0, 0);
-	gdk_window_hide(float_window);
+static void return_client_float_window(ClientInfo * client, Application * App){
+	g_message("Return client float window");
+	gdk_window_hide(client->float_window);
+	gdk_window_reparent(client->float_window, 
+		gtk_widget_get_root_window(GTK_WIDGET(App->Holder)), 0, 0);
+	gdk_window_hide(client->float_window);
 }
-static void steal_float_window(GdkWindow * float_window, Application * App){
-	g_message("Steal window");
-	gdk_window_hide(float_window);
-	gdk_window_reparent(float_window, GTK_WIDGET(App->Holder)->window, 0, 0);
-	gdk_window_show(float_window);
+static void steal_client_float_window(ClientInfo * client, Application * App){
+	g_message("Steal client float window");
+	gdk_window_hide(client->float_window);
+	gdk_window_reparent(client->float_window, 
+		GTK_WIDGET(App->Holder)->window, 0, 0);
+	gdk_window_show(client->float_window);
 }
 static void set_client_size_allocation(ClientInfo * info, GtkAllocation * allocation, Application * App){
 	GlobalMenuNotify notify;
@@ -102,8 +103,13 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	ClientInfo * info;
 	GList * node = NULL;
 
-	if(App->Mode == APP_STANDALONE && gtk_window_has_toplevel_focus(
-		GTK_WIDGET(App->MainWindow))) {
+	if(App->Mode == APP_STANDALONE && 
+		gtk_window_has_toplevel_focus(
+			GTK_WINDOW(gtk_widget_get_toplevel(
+				GTK_WIDGET(App->MainWindow))
+			)
+		)
+	) {
 				/*Don't change if I am activted*/
 		return;
 	}
@@ -112,7 +118,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_xid = wnck_window_get_xid(active_window);
-		g_message("Active XWin ID is %p", active_xid);
+		g_message("Active XWin ID is %p", (gpointer) active_xid);
 		for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
 			if(((ClientInfo*)node->data)->menu_client->master_xid == active_xid){
 				client_known = TRUE;
@@ -123,7 +129,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 		g_message("Active Window is not a window, that's Stupid!");
 	}
 	if(App->ActiveClient){
-		return_float_window(App->ActiveClient->float_window, App);
+		return_client_float_window(App->ActiveClient, App);
 		App->ActiveClient = NULL;
 	}
 	if(client_known){
@@ -131,8 +137,8 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 		g_message("Client menubar found");
 		if(App->ActiveClient != info){
 			if(App->ActiveClient)
-				return_float_window(App->ActiveClient->float_window, App);
-			steal_float_window(info->float_window, App);
+				return_client_float_window(App->ActiveClient, App);
+			steal_client_float_window(info, App);
 			App->ActiveClient = info;
 			set_client_size_allocation(App->ActiveClient, 
 				&GTK_WIDGET(App->Holder)->allocation, 
@@ -222,8 +228,12 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	App->Clients = NULL;
 	App->ActiveClient = NULL;
 	menu_server_set_user_data(App->Server, App);
-	menu_server_set_callback(App->Server, MS_CB_CLIENT_NEW, client_new_cb);
-	menu_server_set_callback(App->Server, MS_CB_CLIENT_DESTROY, client_destroy_cb);
+	menu_server_set_callback(App->Server, 
+		MS_CB_CLIENT_NEW, 
+		(MenuServerCallback) client_new_cb);
+	menu_server_set_callback(App->Server, 
+		MS_CB_CLIENT_DESTROY, 
+		(MenuServerCallback) client_destroy_cb);
 	App->Mode = Mode;
 	App->MainWindow = mainwindow;
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
@@ -243,10 +253,10 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 		G_CALLBACK(window_closed_cb), App);
 
 /******Create the UI *****/
-	callback_table.label_area_action_cb = label_area_action_cb;
-	callback_table.forward_action_cb = forward_action_cb;
-	callback_table.backward_action_cb = backward_action_cb;
-	callback_table.holder_resize_cb = holder_resize_cb;
+	callback_table.label_area_action_cb = G_CALLBACK(label_area_action_cb);
+	callback_table.forward_action_cb = G_CALLBACK(forward_action_cb);
+	callback_table.backward_action_cb = G_CALLBACK(backward_action_cb);
+	callback_table.holder_resize_cb = G_CALLBACK(holder_resize_cb);
 
 	ui_create_all(App, &callback_table);
 
@@ -265,7 +275,7 @@ static void application_free(Application * App){
 	g_signal_handlers_disconnect_by_func(App->Screen, window_opened_cb, App);
 	g_signal_handlers_disconnect_by_func(App->Screen, window_closed_cb, App);
 	if(App->ActiveClient){
-		return_float_window(App->ActiveClient->float_window, App);
+		return_client_float_window(App->ActiveClient, App);
 		App->ActiveClient = NULL;
 	}
 	menu_server_shutdown(App->Server);

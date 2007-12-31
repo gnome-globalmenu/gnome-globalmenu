@@ -86,15 +86,12 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 }
 
 void ui_repaint_all(Application * App){
-	int page_num;
-	gint h;
-	gint w;
 	gboolean show_backward;
 	gboolean show_forward;
 
 
-	show_backward = TRUE;
-	show_forward = TRUE;
+	show_backward = FALSE;
+	show_forward = FALSE;
 	
 
 	if(show_forward) 

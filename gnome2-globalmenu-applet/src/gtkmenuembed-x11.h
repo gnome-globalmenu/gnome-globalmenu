@@ -157,7 +157,7 @@ static void global_menu_socket_set_callback(GlobalMenuSocket * socket,
 static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gchar * dest_name){
 	GdkScreen * screen;
 	GdkWindow * root = NULL;
-	Window root_xid;
+
 	Window root_return;
 	Window parent_return;
 	Window * children_return;
@@ -193,7 +193,7 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 		gint format_return;
 		gulong nitems_return;
 		gulong bytes_after_return;
-		gchar * data;
+		guchar * data;
 		gint rt;
 		gdk_error_trap_push();
 		rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (socket->display), children_return[i],

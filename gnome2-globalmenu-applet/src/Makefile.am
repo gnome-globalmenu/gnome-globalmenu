@@ -17,8 +17,6 @@ libexec_PROGRAMS = gnome2-globalmenu-applet
 
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
-	misc.c                 \
-	misc.h                 \
 	typedefs.h                 \
 	ui.c                 \
 	ui.h                 \
@@ -34,6 +32,8 @@ gnome2_globalmenu_applet_LDFLAGS =
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
 
 EXTRA_DIST = $(glade_DATA)
+
+
 
 
 

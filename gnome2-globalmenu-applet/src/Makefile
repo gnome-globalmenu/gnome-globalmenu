@@ -45,8 +45,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(libexecdir)"
 libexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(libexec_PROGRAMS)
-am_gnome2_globalmenu_applet_OBJECTS = main.$(OBJEXT) misc.$(OBJEXT) \
-	ui.$(OBJEXT) menuclients.$(OBJEXT) menuserver.$(OBJEXT)
+am_gnome2_globalmenu_applet_OBJECTS = main.$(OBJEXT) ui.$(OBJEXT) \
+	menuclients.$(OBJEXT) menuserver.$(OBJEXT)
 gnome2_globalmenu_applet_OBJECTS =  \
 	$(am_gnome2_globalmenu_applet_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -237,8 +237,6 @@ AM_CFLAGS = \
 
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
-	misc.c                 \
-	misc.h                 \
 	typedefs.h                 \
 	ui.c                 \
 	ui.h                 \
@@ -326,7 +324,6 @@ distclean-compile:
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/menuclients.Po
 include ./$(DEPDIR)/menuserver.Po
-include ./$(DEPDIR)/misc.Po
 include ./$(DEPDIR)/ui.Po
 
 .c.o:

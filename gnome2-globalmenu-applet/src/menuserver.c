@@ -47,7 +47,9 @@ static void menu_server_client_new_cb(GlobalMenuSocket * socket,
 	client.master_xid = notify->ClientNew.master_xid;
 
 	g_message("ClientNew: client: %p, float: %p, master: %p",
-			client.client_xid, client.float_xid, client.master_xid);
+			(gpointer) client.client_xid, 
+			(gpointer) client.float_xid, 
+			(gpointer) client.master_xid);
 	newclient = menu_clients_add(server->clients, &client);
 	if(server->client_new_cb)
 		(*(server->client_new_cb))(server, newclient, server->userdata);
@@ -63,7 +65,10 @@ static void menu_server_client_destroy_cb(GlobalMenuSocket * socket,
 	client.master_xid = notify->ClientDestroy.master_xid;
 
 	g_message("ClientDestroy: client: %p, float: %p, master: %p",
-			client.client_xid, client.float_xid, client.master_xid);
+			(gpointer) client.client_xid, 
+			(gpointer) client.float_xid, 
+			(gpointer) client.master_xid);
+
 	oldclient = menu_clients_find(server->clients, &client);
 	if(server->client_destroy_cb)
 		(*(server->client_destroy_cb))(server, oldclient, server->userdata);
@@ -75,8 +80,12 @@ MenuServer * menu_server_new(){
 	server = g_new0(MenuServer, 1);
 	server->clients = menu_clients_new(server);
 	server->socket = global_menu_socket_new(MENU_SERVER_NAME, server);
-	global_menu_socket_set_callback(server->socket, GM_NOTIFY_NEW, menu_server_client_new_cb);
-	global_menu_socket_set_callback(server->socket, GM_NOTIFY_DESTROY, menu_server_client_destroy_cb);
+	global_menu_socket_set_callback(server->socket, 
+		GM_NOTIFY_NEW, 
+		(GlobalMenuCallback) menu_server_client_new_cb);
+	global_menu_socket_set_callback(server->socket, 
+		GM_NOTIFY_DESTROY, 
+		(GlobalMenuCallback) menu_server_client_destroy_cb);
 
 	server->userdata = NULL;
 	server->client_new_cb = NULL;
@@ -111,14 +120,17 @@ void menu_server_send_to(MenuServer * server, MenuClient * client, GlobalMenuNot
 	global_menu_socket_send_to(server->socket, client->client_xid, message);
 }
 static void menu_server_broadcast_cb(MenuClient * client, struct menu_server_broadcast_cb_struct * data){
-	g_message("menu server broadcasting to %p", client->client_xid);
+	g_message("menu server broadcasting to %p", 
+		(gpointer) client->client_xid);
 	menu_server_send_to(data->server, client, data->message);
 }
 void menu_server_broadcast(MenuServer * server, GlobalMenuNotify * message){
 	struct menu_server_broadcast_cb_struct data;
 	data.message = message;
 	data.server = server;
-	menu_clients_foreach(server->clients, menu_server_broadcast_cb, &data);
+	menu_clients_foreach(server->clients, 
+		(GFunc)menu_server_broadcast_cb, 
+		&data);
 }
 void menu_server_start(MenuServer * server){
 	GlobalMenuNotify message;
