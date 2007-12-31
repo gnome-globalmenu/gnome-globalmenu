@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-31 00:57:03.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-31 00:56:51.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-31 02:24:49.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-31 02:26:24.000000000 -0500
 @@ -39,10 +39,14 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -31,7 +31,7 @@
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -83,6 +95,13 @@
+@@ -83,6 +95,14 @@
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
  
@@ -40,12 +40,13 @@
 +static void gtk_menu_bar_unrealize            (GtkWidget         *widget);
 +static void gtk_menu_bar_map				(GtkWidget * widget);
 +static void gtk_menu_bar_unmap				(GtkWidget * widget);
++static gboolean gtk_menu_bar_motion				(GtkWidget * widget, GdkEventMotion * event);
 +static void gtk_menu_bar_real_insert (GtkMenuShell * menu_shell, GtkWidget * child, gint position);
 +static void gtk_menu_bar_notify_size_allocate_cb (GlobalMenuSocket * socket, GlobalMenuNotify * notify, GtkMenuBar * menubar);
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
-@@ -112,6 +131,14 @@
+@@ -112,6 +132,16 @@
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
  
@@ -55,30 +56,47 @@
 +  widget_class->unrealize = gtk_menu_bar_unrealize;  
 +  widget_class->map = gtk_menu_bar_map;
 +  widget_class->unmap = gtk_menu_bar_unmap;
++  widget_class->motion_notify_event = gtk_menu_bar_motion;
++
 +  menu_shell_class->insert = gtk_menu_bar_real_insert;
 +
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
  				GDK_Left, 0,
-@@ -220,6 +247,17 @@
+@@ -220,6 +250,15 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
 +	GtkMenuBarPrivate * priv;
 +	priv = GTK_MENU_BAR_GET_PRIVATE(object);
-+	
++LOG_FUNC_NAME;	
 +	priv->socket = global_menu_socket_new(MENU_CLIENT_NAME, object);
 +	global_menu_socket_set_callback(priv->socket, GM_NOTIFY_SIZE_ALLOCATE, gtk_menu_bar_notify_size_allocate_cb);
 +    priv->globalized = global_menu_socket_connect_by_name(priv->socket, MENU_SERVER_NAME);
-+	if(priv->globalized)
-+	  GTK_WIDGET(object)->style->ythickness = 0;
 +	priv->container_window = NULL;
 +	priv->float_window = NULL;
 +	priv->master_window = NULL;
  }
  
  GtkWidget*
-@@ -284,7 +322,7 @@
+@@ -271,7 +310,15 @@
+       break;
+     }
+ }
+-
++static void
++gtk_menu_bar_ensure_style (GtkWidget * widget){
++	GtkMenuBar * menubar = GTK_MENU_BAR(widget);
++	GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++	gtk_widget_ensure_style(GTK_WIDGET(menubar));
++	if(priv->globalized){
++		GTK_WIDGET(menubar)->style->ythickness = 0;
++	}
++}
+ static void
+ gtk_menu_bar_size_request (GtkWidget      *widget,
+ 			   GtkRequisition *requisition)
+@@ -284,13 +331,13 @@
    gint nchildren;
    GtkRequisition child_requisition;
    gint ipadding;
@@ -87,7 +105,14 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
    g_return_if_fail (requisition != NULL);
  
-@@ -350,6 +388,13 @@
+   requisition->width = 0;
+   requisition->height = 0;
+-  
++  gtk_menu_bar_ensure_style(widget); 
+   if (GTK_WIDGET_VISIBLE (widget))
+     {
+       menu_bar = GTK_MENU_BAR (widget);
+@@ -350,6 +397,13 @@
  	  requisition->height += widget->style->ythickness * 2;
  	}
      }
@@ -101,7 +126,7 @@
  }
  
  static void
-@@ -367,9 +412,9 @@
+@@ -367,9 +421,9 @@
    GtkTextDirection direction;
    gint ltr_x, ltr_y;
    gint ipadding;
@@ -113,7 +138,7 @@
  
    menu_bar = GTK_MENU_BAR (widget);
    menu_shell = GTK_MENU_SHELL (widget);
-@@ -377,12 +422,20 @@
+@@ -377,12 +431,22 @@
  
    direction = gtk_widget_get_direction (widget);
  
@@ -122,7 +147,8 @@
 -    gdk_window_move_resize (widget->window,
 -			    allocation->x, allocation->y,
 -			    allocation->width, allocation->height);
--
++  gtk_menu_bar_ensure_style(widget); 
+ 
 +  if(!allocation){ /*if allocation == NULL, it is from _cb, allocate chilrens*/
 +	allocation = &priv->container_allocation;
 +	g_message("container_allocation = %d, %d", priv->container_allocation.width,
@@ -140,7 +166,7 @@
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -507,7 +560,14 @@
+@@ -507,7 +571,14 @@
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
@@ -155,7 +181,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -646,6 +706,8 @@
+@@ -646,6 +717,8 @@
  {
    GList *menubars = get_menu_bars (window);
  
@@ -164,7 +190,7 @@
    if (!menubars)
      {
        g_signal_connect (window,
-@@ -663,6 +725,8 @@
+@@ -663,6 +736,8 @@
  {
    GList *menubars = get_menu_bars (window);
  
@@ -173,7 +199,7 @@
    menubars = g_list_remove (menubars, menubar);
  
    if (!menubars)
-@@ -681,7 +745,7 @@
+@@ -681,7 +756,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -182,7 +208,7 @@
    menubar = GTK_MENU_BAR (widget);
  
    toplevel = gtk_widget_get_toplevel (widget);
-@@ -938,5 +1002,239 @@
+@@ -938,5 +1013,273 @@
      }
  }
  
@@ -245,6 +271,8 @@
 +  attributes.event_mask |= (GDK_EXPOSURE_MASK |
 +			    GDK_BUTTON_PRESS_MASK |
 +			    GDK_BUTTON_RELEASE_MASK |
++			    GDK_POINTER_MOTION_MASK |
++                GDK_POINTER_MOTION_HINT_MASK |
 +			    GDK_KEY_PRESS_MASK |
 +			    GDK_ENTER_NOTIFY_MASK |
 +			    GDK_LEAVE_NOTIFY_MASK);
@@ -401,6 +429,30 @@
 +  GTK_MENU_SHELL_CLASS(gtk_menu_bar_parent_class)->insert(menu_shell, child, position);
 +  gtk_widget_set_parent_window(child, priv->container_window);
 +}
++static gboolean 
++gtk_menu_bar_motion (GtkWidget * widget, 
++		GdkEventMotion * event){
++  GtkMenuBar * menubar = NULL;
++  GtkMenuBarPrivate * priv = NULL;
++
++  menubar = GTK_MENU_BAR(widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++
++	if(GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->motion_notify_event)
++		return GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->motion_notify_event(widget, event);
++	if(event->is_hint){
++		LOG_FUNC_NAME;
++		if(event->x < 10){ 
++			priv->container_allocation.x -=10;
++		}
++		gdk_window_move_resize(priv->container_window, 
++			priv->container_allocation.x,
++			priv->container_allocation.y,
++			priv->container_allocation.width,
++			priv->container_allocation.height);
++	}
++	return TRUE;
++}
 +static void
 +gtk_menu_bar_notify_size_allocate_cb(GlobalMenuSocket * socket, 
 +		GlobalMenuNotify * notify,
@@ -408,16 +460,24 @@
 +	GtkMenuBarPrivate * priv;
 +	GtkAllocation allocation;
 +	priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
-+	allocation.x = 0;
-+	allocation.y = 0;
++
 +	allocation.width = notify->SizeAllocate.width;
 +	allocation.height = notify->SizeAllocate.height;
 +	g_message("Size Allocate Notify Received: %d, %d",allocation.width, allocation.height);
-+	priv->container_allocation = allocation;
 +	gdk_window_resize(priv->float_window, 
 +		allocation.width, allocation.height);
 +	gdk_window_resize(priv->container_window, 
 +		allocation.width, allocation.height);
++
++    if(allocation.width > allocation.height){
++		priv->pack_direction = GTK_PACK_DIRECTION_LTR;
++		priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
++	} else {
++		priv->pack_direction = GTK_PACK_DIRECTION_TTB;
++		priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
++	}
++	priv->container_allocation.width = allocation.width;
++	priv->container_allocation.height = allocation.height;
 +	gtk_menu_bar_size_allocate(menubar, NULL);
 +}
  #define __GTK_MENU_BAR_C__
