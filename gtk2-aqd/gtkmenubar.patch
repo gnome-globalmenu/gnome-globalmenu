@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-31 12:59:19.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-31 12:59:46.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-31 14:50:56.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-31 14:52:31.000000000 -0500
 @@ -39,10 +39,14 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -16,7 +16,7 @@
  /* Properties */
  enum {
    PROP_0,
-@@ -55,6 +59,14 @@
+@@ -55,6 +59,16 @@
  {
    GtkPackDirection pack_direction;
    GtkPackDirection child_pack_direction;
@@ -28,10 +28,12 @@
 +  GdkWindow * float_window;
 +  GdkWindow * container_window;
 +  GdkWindow * master_window;
++  gint ythickness_backup;
++  gint xthickness_backup;
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -83,6 +95,14 @@
+@@ -83,6 +97,14 @@
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
  
@@ -46,7 +48,7 @@
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
-@@ -112,6 +132,16 @@
+@@ -112,6 +134,16 @@
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
  
@@ -63,7 +65,7 @@
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
  				GDK_Left, 0,
-@@ -220,6 +250,18 @@
+@@ -220,6 +252,20 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -79,10 +81,12 @@
 +	priv->container_window = NULL;
 +	priv->float_window = NULL;
 +	priv->master_window = NULL;
++	priv->ythickness_backup = -1;
++	priv->xthickness_backup = -1;
  }
  
  GtkWidget*
-@@ -271,7 +313,30 @@
+@@ -271,7 +317,32 @@
        break;
      }
  }
@@ -91,30 +95,32 @@
 +gtk_menu_bar_ensure_style (GtkWidget * widget){
 +	GtkMenuBar * menubar = GTK_MENU_BAR(widget);
 +	GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
-+static gint ythickness_backup = -1;
-+static gint xthickness_backup = -1;
 +	GtkStyle * style;
++
 +	gtk_widget_ensure_style(GTK_WIDGET(menubar));
-+	if(ythickness_backup == -1 || xthickness_backup == -1){
-+		ythickness_backup = style->ythickness;
-+		xthickness_backup = style->xthickness;
-+	}
 +	style = GTK_WIDGET(menubar)->style;
++	g_message("style->ythickness = %d, xthickness = %d",
++		style->xthickness, style->ythickness);
++	if(priv->ythickness_backup == -1 || priv->xthickness_backup == -1){
++		priv->xthickness_backup = style->xthickness;
++		priv->ythickness_backup = style->ythickness;
++	}
 +	if(priv->globalized){
-+		if(priv->pack_direction == GTK_PACK_DIRECTION_LTR){
++		if(priv->pack_direction == GTK_PACK_DIRECTION_LTR
++		|| priv->pack_direction == GTK_PACK_DIRECTION_RTL){
 +			style->ythickness = 0;
-+			style->xthickness = xthickness_backup;
++			style->xthickness = priv->xthickness_backup;
 +		}
 +        else {
 +			style->xthickness = 0;
-+			style->ythickness = ythickness_backup;
++			style->ythickness = priv->ythickness_backup;
 +		}
 +	}
 +}
  static void
  gtk_menu_bar_size_request (GtkWidget      *widget,
  			   GtkRequisition *requisition)
-@@ -284,13 +349,13 @@
+@@ -284,13 +355,13 @@
    gint nchildren;
    GtkRequisition child_requisition;
    gint ipadding;
@@ -130,7 +136,7 @@
    if (GTK_WIDGET_VISIBLE (widget))
      {
        menu_bar = GTK_MENU_BAR (widget);
-@@ -350,6 +415,13 @@
+@@ -350,6 +421,13 @@
  	  requisition->height += widget->style->ythickness * 2;
  	}
      }
@@ -144,7 +150,7 @@
  }
  
  static void
-@@ -367,9 +439,9 @@
+@@ -367,9 +445,9 @@
    GtkTextDirection direction;
    gint ltr_x, ltr_y;
    gint ipadding;
@@ -156,7 +162,7 @@
  
    menu_bar = GTK_MENU_BAR (widget);
    menu_shell = GTK_MENU_SHELL (widget);
-@@ -377,12 +449,22 @@
+@@ -377,12 +455,22 @@
  
    direction = gtk_widget_get_direction (widget);
  
@@ -184,7 +190,7 @@
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -507,7 +589,14 @@
+@@ -507,7 +595,14 @@
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
@@ -199,7 +205,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -646,6 +735,8 @@
+@@ -646,6 +741,8 @@
  {
    GList *menubars = get_menu_bars (window);
  
@@ -208,7 +214,7 @@
    if (!menubars)
      {
        g_signal_connect (window,
-@@ -663,6 +754,8 @@
+@@ -663,6 +760,8 @@
  {
    GList *menubars = get_menu_bars (window);
  
@@ -217,7 +223,7 @@
    menubars = g_list_remove (menubars, menubar);
  
    if (!menubars)
-@@ -681,7 +774,7 @@
+@@ -681,7 +780,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -226,7 +232,7 @@
    menubar = GTK_MENU_BAR (widget);
  
    toplevel = gtk_widget_get_toplevel (widget);
-@@ -938,5 +1031,268 @@
+@@ -938,5 +1037,268 @@
      }
  }
  
