@@ -1,3 +1,5 @@
+patchsource:
+	./patchsource.sh
 setup: setup.sh gtk2.spec.patch
 	./setup.sh
 patch: gtkmenubar.patch	

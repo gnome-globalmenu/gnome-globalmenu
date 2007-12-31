@@ -23,4 +23,5 @@ mkdir libs
 ln -s $RPMDEVROOT/BUILD/gtk+-$VER/gtk/.libs/* libs/
 cp $RPMDEVROOT/BUILD/gtk+-$VER/gtk/gtkmenubar.c.globalmenubar gtkmenubar.orig
 cp $RPMDEVROOT/BUILD/gtk+-$VER/gtk/gtkmenubar.c gtkmenubar.c
+cp $RPMDEVROOT/BUILD/gtk+-$VER/gtk/gtkmenuembed-x11.h gtkmenuembed-x11.h
 

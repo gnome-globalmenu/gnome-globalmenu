@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2007-12-31 02:24:49.000000000 -0500
-+++ gtk/gtkmenubar.c	2007-12-31 02:26:24.000000000 -0500
+--- gtk/gtkmenubar.orig	2007-12-31 11:44:26.000000000 -0500
++++ gtk/gtkmenubar.c	2007-12-31 11:44:26.000000000 -0500
 @@ -39,10 +39,14 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -208,7 +208,7 @@
    menubar = GTK_MENU_BAR (widget);
  
    toplevel = gtk_widget_get_toplevel (widget);
-@@ -938,5 +1013,273 @@
+@@ -938,5 +1013,265 @@
      }
  }
  
@@ -442,14 +442,6 @@
 +		return GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->motion_notify_event(widget, event);
 +	if(event->is_hint){
 +		LOG_FUNC_NAME;
-+		if(event->x < 10){ 
-+			priv->container_allocation.x -=10;
-+		}
-+		gdk_window_move_resize(priv->container_window, 
-+			priv->container_allocation.x,
-+			priv->container_allocation.y,
-+			priv->container_allocation.width,
-+			priv->container_allocation.height);
 +	}
 +	return TRUE;
 +}
@@ -482,8 +474,8 @@
 +}
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
---- /dev/null	2007-12-30 12:14:21.429092025 -0500
-+++ gtk/gtkmenuembed-x11.h	2007-12-31 00:58:23.000000000 -0500
+--- /dev/null	2007-12-31 11:23:47.435092936 -0500
++++ gtk/gtkmenuembed-x11.h	2007-12-31 11:44:26.000000000 -0500
 @@ -0,0 +1,247 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
@@ -616,14 +608,14 @@
 +	GlobalMenuSocket * socket = g_new0(GlobalMenuSocket, 1);
 +	attr.title = name;
 +	attr.wclass = GDK_INPUT_ONLY;
-+	attr.window_type = GDK_WINDOW_TOPLEVEL;
++	attr.window_type = GDK_WINDOW_TEMP;
 +
 +	mask = GDK_WA_TITLE;
 +	socket->window = gdk_window_new(NULL, &attr, mask);
 +	socket->name = g_strdup(name);
 +	socket->userdata = userdata,
 +	socket->display = gdk_drawable_get_display(socket->window);
-+
++	
 +	gdk_window_add_filter(socket->window, (GdkFilterFunc)global_menu_socket_dispatcher, socket);
 +
 +	return socket;
