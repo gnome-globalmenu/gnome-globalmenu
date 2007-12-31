@@ -26,13 +26,15 @@ gnome2_globalmenu_applet_SOURCES = \
 	menuclients.h                 \
 	menuserver.c                 \
 	menuserver.h                 \
-	gtkmenuembed-x11.h 
+	gtkmenuembed-x11.h                 \
+	application.h 
 
 gnome2_globalmenu_applet_LDFLAGS = 
 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
 
 EXTRA_DIST = $(glade_DATA)
+
 
 
 

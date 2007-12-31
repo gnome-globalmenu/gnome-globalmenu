@@ -129,14 +129,14 @@ static GlobalMenuSocket * global_menu_socket_new(gchar * name, gpointer userdata
 	GlobalMenuSocket * socket = g_new0(GlobalMenuSocket, 1);
 	attr.title = name;
 	attr.wclass = GDK_INPUT_ONLY;
-	attr.window_type = GDK_WINDOW_TOPLEVEL;
+	attr.window_type = GDK_WINDOW_TEMP;
 
 	mask = GDK_WA_TITLE;
 	socket->window = gdk_window_new(NULL, &attr, mask);
 	socket->name = g_strdup(name);
 	socket->userdata = userdata,
 	socket->display = gdk_drawable_get_display(socket->window);
-
+	
 	gdk_window_add_filter(socket->window, (GdkFilterFunc)global_menu_socket_dispatcher, socket);
 
 	return socket;
