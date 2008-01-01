@@ -68,7 +68,8 @@
 #include "menuclients.h"
 #include "menuserver.h"
 #include "ui.h"
-
+//#undef g_message
+//#define g_message g_print
 typedef struct _ClientInfo{
 	MenuClient * menu_client;
 	GdkWindow * float_window;
@@ -196,6 +197,10 @@ static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App
 	gtk_main_quit();
 	return TRUE;
 }
+static gboolean main_window_delete_cb(GtkWindow * MainWindow, GdkEvent * event, Application * App){
+	g_message("Main window delete-event.");
+	return FALSE;
+}
 static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, Application * App){
 	g_message("Holder resizesd.");
 	if(App->ActiveClient){
@@ -236,8 +241,11 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 		(MenuServerCallback) client_destroy_cb);
 	App->Mode = Mode;
 	App->MainWindow = mainwindow;
+
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
 		G_CALLBACK(main_window_destroy_cb), App);
+	g_signal_connect(G_OBJECT(App->MainWindow), "delete-event",
+		G_CALLBACK(main_window_delete_cb), App);
 
 /**The Screen***/
 	gdkscreen = gtk_widget_get_screen(GTK_WIDGET(App->MainWindow));
@@ -274,11 +282,15 @@ static void application_free(Application * App){
 	g_signal_handlers_disconnect_by_func(App->Screen, active_window_changed_cb, App);
 	g_signal_handlers_disconnect_by_func(App->Screen, window_opened_cb, App);
 	g_signal_handlers_disconnect_by_func(App->Screen, window_closed_cb, App);
-	if(App->ActiveClient){
-		return_client_float_window(App->ActiveClient, App);
+	if(App->ActiveClient){ /*Perhaps not useful, since when we reach here,
+							 the a delete-event has been sent to
+                             activeclient->float_window*/
+		/*So don't return active client, just forget it and let the application itself handle it*/
+		//return_client_float_window(App->ActiveClient, App);
 		App->ActiveClient = NULL;
 	}
 	menu_server_shutdown(App->Server);
+    usleep(1000000); /*sleep for clients to get their menubar back*/
 	menu_server_free(App->Server);
 	g_free(App);
 }
