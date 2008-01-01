@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-01 16:45:09.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-01 16:47:27.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-01 16:47:45.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-01 16:49:57.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -161,7 +161,7 @@
  
    menu_bar = GTK_MENU_BAR (widget);
    menu_shell = GTK_MENU_SHELL (widget);
-@@ -377,12 +455,35 @@
+@@ -377,12 +455,36 @@
  
    direction = gtk_widget_get_direction (widget);
  
@@ -190,6 +190,7 @@
 +					allocation->x, allocation->y,
 +					allocation->width, allocation->height);
 +#ifdef GNOME_GLOBAL_MENU
++	  if (!priv->globalized)
 +		gdk_window_move_resize (priv->container_window,
 +					0, 0,
 +					allocation->width, allocation->height);
@@ -203,7 +204,7 @@
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -507,7 +608,17 @@
+@@ -507,7 +609,17 @@
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
@@ -221,7 +222,7 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -639,15 +750,18 @@
+@@ -639,15 +751,18 @@
  
    return retval;
  }
@@ -241,7 +242,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -663,6 +777,8 @@
+@@ -663,6 +778,8 @@
  {
    GList *menubars = get_menu_bars (window);
  
@@ -250,7 +251,7 @@
    menubars = g_list_remove (menubars, menubar);
  
    if (!menubars)
-@@ -681,7 +797,7 @@
+@@ -681,7 +798,7 @@
  {
    GtkWidget *toplevel;  
    GtkMenuBar *menubar;
@@ -259,7 +260,7 @@
    menubar = GTK_MENU_BAR (widget);
  
    toplevel = gtk_widget_get_toplevel (widget);
-@@ -938,5 +1054,396 @@
+@@ -938,5 +1055,396 @@
      }
  }
  
