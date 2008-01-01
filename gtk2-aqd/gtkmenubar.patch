@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-01 16:47:45.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-01 16:49:57.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-01 16:50:06.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-01 16:58:40.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -65,7 +65,7 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
-@@ -112,6 +152,17 @@
+@@ -112,6 +152,16 @@
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
  
@@ -79,19 +79,17 @@
 +  widget_class->motion_notify_event = gtk_menu_bar_motion;
 +  menu_shell_class->insert = gtk_menu_bar_real_insert;
 +#endif
-+
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
  				GDK_Left, 0,
-@@ -220,6 +271,20 @@
+@@ -220,6 +270,19 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
++#ifdef GNOME_GLOBALMENU
 +	GtkMenuBarPrivate * priv;
 +	priv = GTK_MENU_BAR_GET_PRIVATE(object);
-+LOG_FUNC_NAME;	
 +
-+#ifdef GNOME_GLOBALMENU
 +    priv->connected = FALSE;
 +	priv->socket = NULL;
 +    priv->globalized = FALSE;
@@ -104,15 +102,7 @@
  }
  
  GtkWidget*
-@@ -271,7 +336,6 @@
-       break;
-     }
- }
--
- static void
- gtk_menu_bar_size_request (GtkWidget      *widget,
- 			   GtkRequisition *requisition)
-@@ -284,13 +348,15 @@
+@@ -284,13 +347,16 @@
    gint nchildren;
    GtkRequisition child_requisition;
    gint ipadding;
@@ -123,7 +113,7 @@
  
    requisition->width = 0;
    requisition->height = 0;
--  
+   
 +#ifdef GNOME_GLOBAL_MENU
 +  gtk_menu_bar_ensure_style(widget); 
 +#endif
@@ -142,35 +132,28 @@
 +		requisition->width = 0;
 +		requisition->height = 0;
 +	}
-+#endif
 +	g_message("%s: %d, %d", __func__, requisition->width, requisition->height);
++#endif
  }
  
  static void
-@@ -367,9 +443,11 @@
-   GtkTextDirection direction;
+@@ -368,8 +444,11 @@
    gint ltr_x, ltr_y;
    gint ipadding;
--
+ 
 +#ifdef GNOME_GLOBAL_MENU
++LOG_FUNC_NAME;
 +  gboolean need_allocate_child = FALSE;
 +#endif
-+LOG_FUNC_NAME;
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
 -  g_return_if_fail (allocation != NULL);
  
    menu_bar = GTK_MENU_BAR (widget);
    menu_shell = GTK_MENU_SHELL (widget);
-@@ -377,12 +455,36 @@
+@@ -377,12 +456,38 @@
  
    direction = gtk_widget_get_direction (widget);
  
--  widget->allocation = *allocation;
--  if (GTK_WIDGET_REALIZED (widget))
--    gdk_window_move_resize (widget->window,
--			    allocation->x, allocation->y,
--			    allocation->width, allocation->height);
--
 +#ifdef GNOME_GLOBAL_MENU
 +  gtk_menu_bar_ensure_style(widget); 
 +#endif
@@ -184,18 +167,20 @@
 +    need_allocate_child = TRUE;
 +  }else{ /*if it is globalized, don't allocate childrens*/
 +#endif
-+      widget->allocation = *allocation;
-+	  if (GTK_WIDGET_REALIZED (widget)){
-+		gdk_window_move_resize (widget->window,
-+					allocation->x, allocation->y,
-+					allocation->width, allocation->height);
+   widget->allocation = *allocation;
+   if (GTK_WIDGET_REALIZED (widget))
+     gdk_window_move_resize (widget->window,
+ 			    allocation->x, allocation->y,
+ 			    allocation->width, allocation->height);
+ 
 +#ifdef GNOME_GLOBAL_MENU
++  if (GTK_WIDGET_REALIZED (widget))
 +	  if (!priv->globalized)
 +		gdk_window_move_resize (priv->container_window,
 +					0, 0,
 +					allocation->width, allocation->height);
 +#endif
-+	  }
++
 +#ifdef GNOME_GLOBAL_MENU
 +      if (!priv->globalized) need_allocate_child = TRUE;
 +  }
@@ -204,35 +189,25 @@
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -507,7 +609,17 @@
+@@ -507,7 +612,17 @@
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
++#ifdef GNOME_GLOBAL_MENU
 +  GtkMenuBar * menubar;
 +  GtkMenuBarPrivate * priv;
 +
-   g_return_if_fail (GTK_IS_MENU_BAR (widget));
-+  
 +  menubar = GTK_MENU_BAR(widget);
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
-+
++#endif
+   g_return_if_fail (GTK_IS_MENU_BAR (widget));
 +#ifdef GNOME_GLOBAL_MENU
 +  if(priv->globalized) return;
 +#endif
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -639,15 +751,18 @@
- 
-   return retval;
- }
--
- static void
- add_to_window (GtkWindow  *window,
-                GtkMenuBar *menubar)
- {
-   GList *menubars = get_menu_bars (window);
-+LOG_FUNC_NAME;
+@@ -648,6 +763,9 @@
  
    if (!menubars)
      {
@@ -242,25 +217,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -663,6 +778,8 @@
- {
-   GList *menubars = get_menu_bars (window);
- 
-+LOG_FUNC_NAME;
-+
-   menubars = g_list_remove (menubars, menubar);
- 
-   if (!menubars)
-@@ -681,7 +798,7 @@
- {
-   GtkWidget *toplevel;  
-   GtkMenuBar *menubar;
--
-+LOG_FUNC_NAME;
-   menubar = GTK_MENU_BAR (widget);
- 
-   toplevel = gtk_widget_get_toplevel (widget);
-@@ -938,5 +1055,396 @@
+@@ -938,5 +1056,396 @@
      }
  }
  
