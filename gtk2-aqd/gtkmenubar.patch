@@ -1,11 +1,11 @@
---- gtk/gtkmenubar.orig	2008-01-01 16:43:49.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-01 16:44:59.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-01 16:45:09.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-01 16:47:27.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
  
 +#ifdef GDK_WINDOWING_X11
-+//#define GNOME_GLOBAL_MENU
++#define GNOME_GLOBAL_MENU
 +#endif
 +
 +#ifdef GNOME_GLOBAL_MENU
