@@ -93,9 +93,6 @@ MenuServer * menu_server_new(){
 
 	return server;
 }
-void menu_server_discover_clients(MenuServer * server){
-	/*FIXME: finish this*/
-}
 void menu_server_set_user_data(MenuServer * server, gpointer userdata){
 	server->userdata = userdata;
 }
@@ -134,10 +131,9 @@ void menu_server_broadcast(MenuServer * server, GlobalMenuNotify * message){
 }
 void menu_server_start(MenuServer * server){
 	GlobalMenuNotify message;
-	menu_server_discover_clients(server);
 	message.type = GM_NOTIFY_SERVER_NEW;
-	message.ServerDestroy.server_xid = global_menu_socket_get_xid(server->socket);
-	menu_server_broadcast(server, &message);
+	message.ServerNew.server_xid = global_menu_socket_get_xid(server->socket);
+	global_menu_socket_broadcast_by_name(server->socket, MENU_CLIENT_NAME, &message);
 }
 void menu_server_shutdown(MenuServer * server){
 	GlobalMenuNotify message;

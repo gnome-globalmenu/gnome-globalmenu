@@ -154,7 +154,8 @@ static void global_menu_socket_set_callback(GlobalMenuSocket * socket,
 	
 	socket->callbacks[type] = cb;
 }
-static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gchar * dest_name){
+static GList * _global_menu_find_windows(GlobalMenuSocket * socket, char * dest_name){
+	GList * window_list = NULL;
 	GdkScreen * screen;
 	GdkWindow * root = NULL;
 
@@ -164,7 +165,7 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 	unsigned int nchildren_return;
 	unsigned int i;
 	gboolean connected = FALSE;
-
+g_message("%s", __func__);
 	g_return_val_if_fail( socket ,FALSE);
 	g_return_val_if_fail( dest_name ,FALSE);
 	
@@ -204,10 +205,10 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
 				if(g_str_equal(dest_name, data)){
-					g_message("Destination found, remember it");
-					socket->dest_xid = children_return[i];
-					connected = TRUE;
-					break;
+					g_message("Window found, Add to list");
+	//				socket->dest_xid = children_return[i];
+	//				connected = TRUE;
+					window_list = g_list_append(window_list, (gpointer) children_return[i]);
 				}
 			}
 		}else{
@@ -215,7 +216,7 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 		}
 	}
 	XFree(children_return);
-	return connected;
+	return window_list;
 }
 
 static Window global_menu_socket_get_xid(GlobalMenuSocket * socket){
@@ -243,5 +244,30 @@ static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, Gl
 }
 static void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
 	global_menu_socket_send_to(socket, socket->dest_xid, message);
+}
+static gboolean global_menu_socket_broadcast_by_name(GlobalMenuSocket * socket, char * dest_name, GlobalMenuNotify * notify){
+	GList * window_list = NULL;
+	GList * node = NULL;
+	window_list = _global_menu_find_windows(socket, dest_name);
+	for(node = g_list_first(window_list); node ; node = g_list_next(node)){
+		g_message("%s: sending to %p", __func__, (gpointer) node->data);
+		global_menu_socket_send_to(socket, node->data, notify);
+	}
+	g_list_free(window_list);
+}
+static gboolean global_menu_socket_connect_by_xid(GlobalMenuSocket * socket, Window xid){
+	socket->dest_xid = xid; /*perhaps need to check whether the window is valid*/
+	return TRUE;
+}
+static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gchar * dest_name){
+	GList * window_list = NULL;
+	gboolean rt = FALSE;
+	window_list = _global_menu_find_windows(socket, dest_name);
+	if(window_list){
+		rt = global_menu_socket_connect_by_xid(socket, window_list->data); 
+/*simply connect to the first server*/
+		g_list_free(window_list);
+	}
+	return rt;
 }
 #endif
