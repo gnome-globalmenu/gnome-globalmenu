@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-01 17:08:14.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-01 17:09:55.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-01 20:07:37.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-01 21:12:31.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -208,7 +208,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1056,395 @@
+@@ -938,5 +1056,405 @@
      }
  }
  
@@ -234,25 +234,36 @@
 +static void 
 +gtk_menu_bar_globalize(GtkMenuBar * menubar){
 +  GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++  GtkWidget * toplevel = NULL;
 +LOG_FUNC_NAME;
 +  if(priv->globalized == FALSE){
-+      GlobalMenuNotify notify;
-+	  priv->globalized = TRUE;
-+	  if(GTK_WIDGET_REALIZED(menubar)){
-+		  gdk_window_reparent(priv->container_window, priv->float_window, 0, 0); 
-+		  notify.type = GM_NOTIFY_NEW;
-+		  notify.ClientNew.client_xid = GDK_WINDOW_XWINDOW(priv->socket->window);
-+		  notify.ClientNew.float_xid = GDK_WINDOW_XWINDOW(priv->float_window);
-+		  notify.ClientNew.master_xid = GDK_WINDOW_XWINDOW(priv->master_window);
-+		  global_menu_socket_send(priv->socket, &notify);
++	  toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
++	  if(GTK_WIDGET_TOPLEVEL(toplevel) 
++		&& !GTK_WIDGET_NO_WINDOW(toplevel)
++		&& gdk_window_get_type_hint(toplevel->window) 
++		== GDK_WINDOW_TYPE_HINT_NORMAL){
++	      priv->master_window = toplevel->window;
++		  GlobalMenuNotify notify;
++		  priv->globalized = TRUE;
++		  g_message("Master window found:%x", priv->master_window);
++		  if(GTK_WIDGET_REALIZED(menubar)){
++			  gdk_window_reparent(priv->container_window, priv->float_window, 0, 0); 
++			  notify.type = GM_NOTIFY_NEW;
++			  notify.ClientNew.client_xid = GDK_WINDOW_XWINDOW(priv->socket->window);
++			  notify.ClientNew.float_xid = GDK_WINDOW_XWINDOW(priv->float_window);
++			  notify.ClientNew.master_xid = GDK_WINDOW_XWINDOW(priv->master_window);
++			  global_menu_socket_send(priv->socket, &notify);
 +
-+		  gtk_menu_bar_size_allocate(GTK_WIDGET(menubar), NULL); /*allocate according to container_allocation*/
-+		  if(GTK_WIDGET_MAPPED(menubar)){
-+			gdk_window_show(priv->float_window); /*perhaps we need to hide it*/
-+		    gtk_widget_queue_resize(GTK_WIDGET(menubar));
-+		  }else{
-+		    gtk_widget_queue_resize_no_redraw(GTK_WIDGET(menubar));
-+           }
++			  gtk_menu_bar_size_allocate(GTK_WIDGET(menubar), NULL); /*allocate according to container_allocation*/
++			  if(GTK_WIDGET_MAPPED(menubar)){
++				gdk_window_show(priv->float_window); /*perhaps we need to hide it*/
++				gtk_widget_queue_resize(GTK_WIDGET(menubar));
++			  }else{
++				gtk_widget_queue_resize_no_redraw(GTK_WIDGET(menubar));
++			   }
++		  }
++	  } else {
++		priv->master_window = NULL;
 +	  }
 +  }
 +}
@@ -302,7 +313,6 @@
 +
 +
 +/*Then we create the float window*/
-+  priv->master_window = gdk_window_get_toplevel(gtk_widget_get_parent_window(widget));
 +
 +  priv->container_allocation.x = 0;
 +  priv->container_allocation.y = 0;
@@ -605,7 +615,7 @@
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
 --- /dev/null	2008-01-01 12:10:11.160011886 -0500
-+++ gtk/gtkmenuembed-x11.h	2008-01-01 14:24:50.000000000 -0500
++++ gtk/gtkmenuembed-x11.h	2008-01-01 20:07:37.000000000 -0500
 @@ -0,0 +1,273 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
