@@ -305,6 +305,7 @@ static gboolean start_standalone(GtkWindow * mainwindow, gpointer unused){
 
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet2_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet2"
+
 #define APP_NAME "globalmenu-applet"
 #define APP_VERSION "2"
 
