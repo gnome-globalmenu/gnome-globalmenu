@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-03 02:07:10.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-03 02:07:45.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-03 02:08:01.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-03 02:17:32.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -211,13 +211,11 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
  
    if (GTK_WIDGET_DRAWABLE (widget))
-@@ -514,7 +640,17 @@
-       gint border;
+@@ -515,6 +641,16 @@
  
        border = GTK_CONTAINER (widget)->border_width;
--      
+       
 +#ifdef GNOME_GLOBAL_MENU
-+	border = 5;
 +      gtk_paint_box (widget->style,
 +		     priv->container_window,
 +                     GTK_WIDGET_STATE (widget),
