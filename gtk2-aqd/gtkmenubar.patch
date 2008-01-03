@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-01 22:23:06.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-01 22:23:15.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-03 02:07:10.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-03 02:07:45.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -22,7 +22,7 @@
  /* Properties */
  enum {
    PROP_0,
-@@ -55,6 +66,18 @@
+@@ -55,6 +66,19 @@
  {
    GtkPackDirection pack_direction;
    GtkPackDirection child_pack_direction;
@@ -35,13 +35,14 @@
 +  GdkWindow * float_window;
 +  GdkWindow * container_window;
 +  GdkWindow * master_window;
++  gboolean visible;
 +  gint ythickness_backup;
 +  gint xthickness_backup;
 +#endif
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -82,6 +105,23 @@
+@@ -82,6 +106,23 @@
  static gint gtk_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
@@ -65,7 +66,7 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
-@@ -112,6 +152,16 @@
+@@ -112,6 +153,16 @@
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
  
@@ -82,7 +83,7 @@
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
  				GDK_Left, 0,
-@@ -220,6 +270,19 @@
+@@ -220,6 +271,20 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -98,89 +99,105 @@
 +	priv->master_window = NULL;
 +	priv->ythickness_backup = -1;
 +	priv->xthickness_backup = -1;
++	priv->visible = FALSE;
 +#endif
  }
  
  GtkWidget*
-@@ -291,6 +354,9 @@
-   requisition->width = 0;
-   requisition->height = 0;
-   
-+#ifdef GNOME_GLOBAL_MENU
-+  gtk_menu_bar_ensure_style(widget); 
-+#endif
-   if (GTK_WIDGET_VISIBLE (widget))
-     {
-       menu_bar = GTK_MENU_BAR (widget);
-@@ -350,6 +416,15 @@
- 	  requisition->height += widget->style->ythickness * 2;
+@@ -273,7 +338,7 @@
+ }
+ 
+ static void
+-gtk_menu_bar_size_request (GtkWidget      *widget,
++_gtk_menu_bar_size_request (GtkWidget      *widget,
+ 			   GtkRequisition *requisition)
+ {
+   GtkMenuBar *menu_bar;
+@@ -351,9 +416,28 @@
  	}
      }
+ }
++static void
++gtk_menu_bar_size_request (GtkWidget      *widget,
++			   GtkRequisition *requisition)
++{
 +#ifdef GNOME_GLOBAL_MENU
++  GtkMenuBar *menu_bar;
++  GtkMenuBarPrivate *priv;
++
++  menu_bar = GTK_MENU_BAR (widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
 +/****store the requisition as container window's requistion****/
-+	priv->container_requisition = *requisition;
 +	if(priv->globalized){
 +/******tell the parent my requisition is 0 **********/
 +		requisition->width = 0;
 +		requisition->height = 0;
-+	}
++	} else
 +#endif
- }
++	_gtk_menu_bar_size_request(widget, requisition);
++}
  
  static void
-@@ -368,8 +443,14 @@
-   gint ltr_x, ltr_y;
-   gint ipadding;
- 
-+#ifdef GNOME_GLOBAL_MENU
-+LOG_FUNC_NAME;
-+  gboolean need_allocate_child = FALSE;
-+#endif
-   g_return_if_fail (GTK_IS_MENU_BAR (widget));
-+#ifndef GNOME_GLOBAL_MENU
-   g_return_if_fail (allocation != NULL);
-+#endif
- 
-   menu_bar = GTK_MENU_BAR (widget);
-   menu_shell = GTK_MENU_SHELL (widget);
-@@ -377,12 +458,36 @@
+-gtk_menu_bar_size_allocate (GtkWidget     *widget,
++_gtk_menu_bar_size_allocate (GtkWidget     *widget,
+ 			    GtkAllocation *allocation)
+ {
+   GtkMenuBar *menu_bar;
+@@ -377,12 +461,13 @@
  
    direction = gtk_widget_get_direction (widget);
  
-+#ifdef GNOME_GLOBAL_MENU
-+  gtk_menu_bar_ensure_style(widget); 
-+#endif
-+
-+#ifdef GNOME_GLOBAL_MENU
-+  if(!allocation){ /*if allocation == NULL, it is from _cb, allocate chilrens*/
-+	/*window resizing is handled in _cb*/
-+	allocation = &priv->container_allocation;
-+    need_allocate_child = TRUE;
-+  }else{ /*if it is globalized, don't allocate childrens*/
-+#endif
++#ifndef GNOME_GLOBAL_MENU /*we will deal with windows in the true size_allocate*/
    widget->allocation = *allocation;
    if (GTK_WIDGET_REALIZED (widget))
      gdk_window_move_resize (widget->window,
  			    allocation->x, allocation->y,
  			    allocation->width, allocation->height);
- 
-+#ifdef GNOME_GLOBAL_MENU
-+  if (GTK_WIDGET_REALIZED (widget))
-+	  if (!priv->globalized)
-+		gdk_window_move_resize (priv->container_window,
-+					0, 0,
-+					allocation->width, allocation->height);
-+#endif
-+
-+#ifdef GNOME_GLOBAL_MENU
-+      if (!priv->globalized) need_allocate_child = TRUE;
-+  }
-+  if(!need_allocate_child) return;
+-
 +#endif
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -507,7 +612,17 @@
+@@ -502,11 +587,52 @@
+ 	}
+     }
+ }
++static void
++gtk_menu_bar_size_allocate (GtkWidget     *widget,
++			    GtkAllocation *allocation){
++#ifdef GNOME_GLOBAL_MENU
++  GtkMenuBar *menu_bar;
++  GtkMenuShell *menu_shell;
++  GtkMenuBarPrivate *priv;
++
++  g_return_if_fail (GTK_IS_MENU_BAR (widget));
++  g_return_if_fail (allocation != NULL);
++
++  menu_bar = GTK_MENU_BAR (widget);
++  menu_shell = GTK_MENU_SHELL (widget);
++  priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
++
++  if (GTK_WIDGET_REALIZED (widget)){
++	  if (!priv->globalized){
++		gdk_window_move_resize (priv->container_window,
++					0, 0,
++					allocation->width, allocation->height);
++      }
++	  gdk_window_move_resize (widget->window,
++					allocation->x, allocation->y,
++					allocation->width, allocation->height);
++
++  }
++  widget->allocation = *allocation;
++  if(!priv->globalized){ /*if globalized, allocate the childrens in _cb instead of parent's request*/
++  	_gtk_menu_bar_size_allocate(widget, allocation);
++  }
++#else
++	_gtk_menu_bar_size_allocate(widget, allocation);
++#endif
++}
+ 
+ static void
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
@@ -192,13 +209,49 @@
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +#endif
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
+ 
+   if (GTK_WIDGET_DRAWABLE (widget))
+@@ -514,7 +640,17 @@
+       gint border;
+ 
+       border = GTK_CONTAINER (widget)->border_width;
+-      
 +#ifdef GNOME_GLOBAL_MENU
-+  if(priv->globalized) return;
++	border = 5;
++      gtk_paint_box (widget->style,
++		     priv->container_window,
++                     GTK_WIDGET_STATE (widget),
++                     get_shadow_type (GTK_MENU_BAR (widget)),
++		     area, widget, "menubar",
++		     border, border,
++		     priv->container_allocation.width - border * 2,
++                     priv->container_allocation.height - border * 2);
++#else
+       gtk_paint_box (widget->style,
+ 		     widget->window,
+                      GTK_WIDGET_STATE (widget),
+@@ -523,6 +659,7 @@
+ 		     border, border,
+ 		     widget->allocation.width - border * 2,
+                      widget->allocation.height - border * 2);
 +#endif
+     }
+ }
+ 
+@@ -535,6 +672,12 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
-@@ -648,6 +763,9 @@
++#ifdef GNOME_GLOBAL_MENU
++	GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(widget);
++	if(event->window == priv->container_window ||
++/*globalized and*/	event->window == priv->float_window ||
++/*not globalized and*/	event->window == widget->window)
++#endif
+       gtk_menu_bar_paint (widget, &event->area);
+ 
+       (* GTK_WIDGET_CLASS (gtk_menu_bar_parent_class)->expose_event) (widget, event);
+@@ -648,6 +791,9 @@
  
    if (!menubars)
      {
@@ -208,7 +261,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1056,405 @@
+@@ -938,5 +1084,453 @@
      }
  }
  
@@ -246,21 +299,19 @@
 +		  GlobalMenuNotify notify;
 +		  priv->globalized = TRUE;
 +		  g_message("Master window found:%x", priv->master_window);
++
 +		  if(GTK_WIDGET_REALIZED(menubar)){
++			  gdk_window_hide(priv->container_window);
++			  gdk_window_hide(priv->float_window); /*ensure it is hidden*/
 +			  gdk_window_reparent(priv->container_window, priv->float_window, 0, 0); 
 +			  notify.type = GM_NOTIFY_NEW;
 +			  notify.ClientNew.client_xid = GDK_WINDOW_XWINDOW(priv->socket->window);
 +			  notify.ClientNew.float_xid = GDK_WINDOW_XWINDOW(priv->float_window);
 +			  notify.ClientNew.master_xid = GDK_WINDOW_XWINDOW(priv->master_window);
 +			  global_menu_socket_send(priv->socket, &notify);
-+
-+			  gtk_menu_bar_size_allocate(GTK_WIDGET(menubar), NULL); /*allocate according to container_allocation*/
-+			  if(GTK_WIDGET_MAPPED(menubar)){
-+				gtk_widget_queue_resize(GTK_WIDGET(menubar));
-+				gdk_window_hide(priv->float_window); /*perhaps we need to hide it*/
-+			  }else{
-+				gtk_widget_queue_resize_no_redraw(GTK_WIDGET(menubar));
-+			   }
++			  gtk_widget_queue_resize(menubar);
++			
++			/*  Then we shall wait the server's ack by a SizeAllocate Notify*/
 +		  }
 +	  } else {
 +		priv->master_window = NULL;
@@ -276,20 +327,22 @@
 +	  GlobalMenuNotify notify;
 +	  priv->globalized = FALSE;
 +	  priv->pack_direction = GTK_PACK_DIRECTION_LTR; /*perhaps need to restore users pref here(for RTL languages)*/
-+	  if(GTK_WIDGET_REALIZED(menubar)){
-+		  gdk_window_reparent(priv->container_window, 
-+				GTK_WIDGET(menubar)->window, 0, 0); 
-+		  if(GTK_WIDGET_MAPPED(menubar)){
-+			  gdk_window_hide(priv->float_window);
-+			  gtk_widget_queue_resize(GTK_WIDGET(menubar));
-+		  }else
-+			  gtk_widget_queue_resize_no_redraw(GTK_WIDGET(menubar));
-+	  }
 +	  notify.type = GM_NOTIFY_DESTROY;
 +      notify.ClientDestroy.client_xid = GDK_WINDOW_XWINDOW(priv->socket->window);
 +	  notify.ClientDestroy.float_xid = GDK_WINDOW_XWINDOW(priv->float_window);
 +	  notify.ClientDestroy.master_xid = GDK_WINDOW_XWINDOW(priv->master_window);
 +	  global_menu_socket_send(priv->socket, &notify);
++
++	  if(GTK_WIDGET_REALIZED(menubar)){
++		  gdk_window_reparent(priv->container_window, 
++				GTK_WIDGET(menubar)->window, 0, 0); 
++		  gtk_widget_queue_resize_no_redraw(GTK_WIDGET(menubar));
++		  if(GTK_WIDGET_MAPPED(menubar)){
++			  gdk_window_hide(priv->float_window);
++			  gdk_window_show(priv->container_window);
++			  gdk_window_invalidate_rect(priv->container_window, NULL, TRUE);
++		  }
++	  }
 +  }
 +}
 +static void
@@ -306,49 +359,43 @@
 +
 +  g_return_if_fail (GTK_IS_MENU_SHELL (widget));
 +
-+//  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED); set by parent class realize
-+  GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->realize(widget);
-+  //gdk_window_set_user_data (widget->window, widget); I think it is also set
-+// parent realize will also create widget->window
-+
-+
-+/*Then we create the float window*/
-+
-+  priv->container_allocation.x = 0;
-+  priv->container_allocation.y = 0;
-+  priv->container_allocation.width = priv->container_requisition.width;
-+  priv->container_allocation.height = priv->container_requisition.height;
-+
-+  attributes.title = "GTK MENUBAR2";
++  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
++/*********the widget window **********/
 +  attributes.x = widget->allocation.x;
 +  attributes.y = widget->allocation.y;
-+  attributes.width = priv->container_allocation.width;
-+  attributes.height = priv->container_allocation.height;
-+  attributes.window_type = GDK_WINDOW_TEMP;
++  attributes.width = widget->allocation.width;
++  attributes.height = widget->allocation.height;
++  attributes.window_type = GDK_WINDOW_CHILD;
 +  attributes.wclass = GDK_INPUT_OUTPUT;
-+
 +  attributes.visual = gtk_widget_get_visual (widget);
 +  attributes.colormap = gtk_widget_get_colormap (widget);
 +  attributes.event_mask = gtk_widget_get_events (widget);
 +  attributes.event_mask |= (GDK_EXPOSURE_MASK |
-+			    GDK_BUTTON_PRESS_MASK |
-+			    GDK_BUTTON_RELEASE_MASK |
-+			    GDK_POINTER_MOTION_MASK |
-+                GDK_POINTER_MOTION_HINT_MASK |
-+				GDK_STRUCTURE_MASK |
-+			    GDK_KEY_PRESS_MASK |
-+			    GDK_ENTER_NOTIFY_MASK |
-+			    GDK_LEAVE_NOTIFY_MASK);
++                GDK_BUTTON_PRESS_MASK |
++                GDK_BUTTON_RELEASE_MASK |
++                GDK_KEY_PRESS_MASK |
++                GDK_ENTER_NOTIFY_MASK |
++                GDK_LEAVE_NOTIFY_MASK);
 +
-+//  attributes.type_hint = GDK_WINDOW_TYPE_HINT_DOCK;
++  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
++  widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
++  gdk_window_set_user_data (widget->window, widget);
 +
-+  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP | GDK_WA_TITLE;
-+  priv->float_window = gdk_window_new (gtk_widget_get_root_window (widget), &attributes, attributes_mask);
 +
-+  gdk_window_stick(priv->float_window);
-+  gdk_window_set_user_data (priv->float_window, widget);
++/*Then we create the container window*/
 +
-+/*********Then the container window *********/
++/* First allocate the size according to the state*/
++  priv->container_allocation.x = 0;
++  priv->container_allocation.y = 0;
++  if(!priv->globalized){
++	  priv->container_allocation.width = widget->allocation.width;
++	  priv->container_allocation.height = widget->allocation.height;
++  } else {
++	  priv->container_allocation.width = 0; //priv->container_requisition.width;
++	  priv->container_allocation.height = 0; //priv->container_requisition.height;
++  }
++
++/*********Then the container window itself*********/
 +  attributes.x = 0;
 +  attributes.y = 0;
 +  attributes.width = priv->container_allocation.width;
@@ -360,22 +407,51 @@
 +               GDK_POINTER_MOTION_HINT_MASK |
 +               GDK_BUTTON_PRESS_MASK |
 +                GDK_BUTTON_RELEASE_MASK);
++  attributes.visual = gtk_widget_get_visual (widget);
++  attributes.colormap = gtk_widget_get_colormap (widget);
++/*I don't think they it need visual and colormap, let me try to remove these later*/
 +  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
++
 +  priv->container_window = gdk_window_new (widget->window, &attributes, attributes_mask);
 +  gdk_window_set_user_data (priv->container_window, widget);
-+/*Then move all the exsited menuitems's gdk parent window to the container */
++
++/********next, the float window ************/
++  attributes.x = widget->allocation.x;
++  attributes.y = widget->allocation.y;
++  attributes.width = priv->container_allocation.width;
++  attributes.height = priv->container_allocation.height;
++  attributes.window_type = GDK_WINDOW_TEMP;
++  attributes.wclass = GDK_INPUT_OUTPUT;
++
++  attributes.visual = gtk_widget_get_visual (widget);
++  attributes.colormap = gtk_widget_get_colormap (widget);
++  attributes.event_mask = gtk_widget_get_events (widget);
++  attributes.event_mask |= (GDK_EXPOSURE_MASK |
++				GDK_STRUCTURE_MASK |
++			    GDK_KEY_PRESS_MASK |
++			    GDK_ENTER_NOTIFY_MASK |
++			    GDK_LEAVE_NOTIFY_MASK);
++
++  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
++  priv->float_window = gdk_window_new (gtk_widget_get_root_window (widget), &attributes, attributes_mask);
++
++  gdk_window_stick(priv->float_window); 
++  /*Sticky so it shows on every desktop, perhaps not useful*/
++  gdk_window_set_user_data (priv->float_window, widget);
++
++/*Set some painting hints*/
++  /*attach the style, so widget will get painting visual and colormap from widget->window*/
++  widget->style = gtk_style_attach(widget->style, widget->window); 
++  gtk_style_set_background (widget->style, priv->container_window, GTK_WIDGET_STATE (menubar));
++/**Set the background of two containers, I don't think they are useful, try to remove them later*/
++  gtk_style_set_background (widget->style, widget->window, GTK_WIDGET_STATE (menubar));
++  gtk_style_set_background (widget->style, priv->float_window, GTK_WIDGET_STATE (menubar));
++
++/*Then set all the exsited menuitems's gdk parent window to the container, also not useful, remove it */
 +  gtk_container_forall(GTK_CONTAINER(widget), 
 +			(GtkCallback)(gtk_widget_set_parent_window), 
 +			(gpointer)(priv->container_window));
 +
-+/*Set some painting hints*/
-+  gtk_style_set_background (widget->style, widget->window, GTK_WIDGET_STATE (menubar));
-+  gtk_style_set_background (widget->style, priv->container_window, GTK_WIDGET_STATE (menubar));
-+  gtk_style_set_background (widget->style, priv->float_window, GTK_WIDGET_STATE (menubar));
-+  gdk_window_set_back_pixmap (widget->window, NULL, TRUE);
-+  if(priv->connected){
-+		gtk_menu_bar_globalize(menubar);
-+	}
 +
 +}
 +
@@ -390,8 +466,9 @@
 +  menubar = GTK_MENU_BAR(widget);
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +
-+  if(priv->globalized) gtk_menu_bar_unglobalize(menubar);
 +
++  if(GTK_WIDGET_MAPPED(widget))
++	  gtk_menu_bar_unmap(widget);
 +  gdk_window_set_user_data (priv->container_window, NULL);
 +  gdk_window_destroy (priv->container_window);
 +  priv->container_window = NULL;
@@ -427,17 +504,13 @@
 +            gtk_menu_bar_map_child,
 +            NULL);
 +
-+  gdk_window_move_resize(priv->container_window,
-+		0, 0, 
-+        priv->container_allocation.width,
-+        priv->container_allocation.height);
-+
-+  gdk_window_show(priv->container_window);
-+  if(priv->globalized){
-+	 gdk_window_show(priv->float_window);
-+
++  if(priv->connected){ /**/
++		gtk_menu_bar_globalize(menubar);
 +  }
-+	  gdk_window_show(widget->window);
++  if(!priv->globalized){
++  gdk_window_show(priv->container_window);
++  }
++  gdk_window_show(widget->window);
 +}
 +
 +static void
@@ -450,6 +523,8 @@
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +
 +  GTK_WIDGET_UNSET_FLAGS (widget, GTK_MAPPED); 
++
++  if(priv->globalized) gtk_menu_bar_unglobalize(menubar);
 +
 +  gdk_window_hide(priv->float_window);
 +  gdk_window_hide(widget->window);
@@ -468,6 +543,7 @@
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +
 +  GTK_MENU_SHELL_CLASS(gtk_menu_bar_parent_class)->insert(menu_shell, child, position);
++  if(GTK_WIDGET_REALIZED(menubar)) /*if we have a container_window, move the child to container_window*/
 +  gtk_widget_set_parent_window(child, priv->container_window);
 +}
 +static gboolean 
@@ -492,7 +568,7 @@
 +LOG_FUNC_NAME;
 +	if(priv->globalized && event->window == priv->float_window){
 +		/*If we receive a delete_event from float_window, and we are globalized,
-+          this is a signal to unglobalize. */
++          it must be because of the server is dying. a signal to unglobalize. */
 +		gtk_menu_bar_unglobalize(menubar);
 +		return TRUE;
 +	}
@@ -524,7 +600,7 @@
 +	gdk_window_resize(priv->container_window, 
 +		allocation.width, allocation.height);
 +
-+	gtk_menu_bar_ensure_style(GTK_WIDGET(menubar));
++	//gtk_menu_bar_ensure_style(GTK_WIDGET(menubar));
 +
 +/****auto change direction if size is not enough******/
 +    if(allocation.width > allocation.height){
@@ -536,7 +612,28 @@
 +		priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
 +	}
 +
-+	gtk_menu_bar_size_allocate(GTK_WIDGET(menubar), NULL);
++	_gtk_menu_bar_size_allocate(GTK_WIDGET(menubar), &priv->container_allocation);
++	gdk_window_invalidate_rect(priv->container_window, NULL, TRUE);
++
++}
++static void
++gtk_menu_bar_notify_set_visible_cb(GlobalMenuSocket * socket,
++		GlobalMenuNotify * notify,
++		GtkMenuBar * menubar){
++	GtkMenuBarPrivate * priv;
++LOG_FUNC_NAME;
++	priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++	priv->visible = TRUE;
++    g_return_if_fail( priv->connected );
++	g_return_if_fail( notify->SetVisible.server_xid == socket->dest_xid); /*if not from our server*/
++	if(notify->SetVisible.visible == TRUE) {
++	  gdk_window_show(priv->container_window);
++	  gdk_window_show(priv->float_window);
++	} else{
++	  gdk_window_hide(priv->container_window);
++	  gdk_window_hide(priv->float_window);
++	}
++
 +}
 +static void
 +gtk_menu_bar_notify_server_destroy_cb(GlobalMenuSocket * socket, 
@@ -574,9 +671,10 @@
 +	GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +	GtkStyle * style;
 +
-+	gtk_widget_ensure_style(GTK_WIDGET(menubar));
-+	style = GTK_WIDGET(menubar)->style;
-+
++	gtk_widget_ensure_style(widget);
++    if(GTK_WIDGET_REALIZED(widget))
++    widget->style = gtk_style_attach(widget->style, priv->container_window);
++    style = widget->style;
 +	if(priv->ythickness_backup == -1 || priv->xthickness_backup == -1){
 +		priv->xthickness_backup = style->xthickness;
 +		priv->ythickness_backup = style->ythickness;
@@ -606,6 +704,9 @@
 +  global_menu_socket_set_callback(priv->socket,
 +	GM_NOTIFY_SERVER_DESTROY,
 +	(GlobalMenuCallback) gtk_menu_bar_notify_server_destroy_cb);
++  global_menu_socket_set_callback(priv->socket,
++	GM_NOTIFY_SET_VISIBLE,
++	(GlobalMenuCallback) gtk_menu_bar_notify_set_visible_cb);
 +/**we will receive notifications even if don't connect, so always check priv->connect (or priv->globalized)
 + * if we want to make sure we are connected!***/
 +  priv->connected = global_menu_socket_connect_by_name(priv->socket, 
@@ -614,9 +715,9 @@
 +#endif
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
---- /dev/null	2008-01-01 12:10:11.160011886 -0500
-+++ gtk/gtkmenuembed-x11.h	2008-01-01 20:07:37.000000000 -0500
-@@ -0,0 +1,273 @@
+--- /dev/null	2008-01-02 12:19:34.431094985 -0500
++++ gtk/gtkmenuembed-x11.h	2008-01-03 02:03:02.000000000 -0500
+@@ -0,0 +1,283 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
 +	GM_NOTIFY_MIN,
@@ -625,6 +726,7 @@
 +	GM_NOTIFY_SERVER_NEW,
 +	GM_NOTIFY_SERVER_DESTROY,
 +	GM_NOTIFY_SIZE_ALLOCATE,
++	GM_NOTIFY_SET_VISIBLE,
 +	GM_NOTIFY_MAX,
 +} GlobalMenuNotifyType;
 +#define ATOM_STRING "_GTKMENUBAR_EMBED"
@@ -635,7 +737,7 @@
 +	GlobalMenuNotifyType type;
 +	union{
 +	struct {
-+		gulong param1;
++		gulong param1; /*always set to be the source socket's window id*/
 +		gulong param2;
 +		gulong param3;
 +	}; /*general*/
@@ -660,6 +762,10 @@
 +			glong width;
 +			glong height;
 +		} SizeAllocate;
++		struct {
++			Window server_xid;
++			gboolean visible;
++		} SetVisible;
 +	};
 +} GlobalMenuNotify;
 +
@@ -729,13 +835,17 @@
 +static GdkFilterReturn global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocket * socket){
 +	GlobalMenuNotify notify;
 +	GlobalMenuNotifyType type;
-+	if(global_menu_xevent_to_notify(xevent, &notify)){
-+		g_message("global menu notify received");
++	g_message("XClientMessage received");
++	if(event->any.window == socket->window 
++		&& global_menu_xevent_to_notify(xevent, &notify)){
 +		type = notify.type;
 +		if(socket->callbacks[type] ){
 +			(*(socket->callbacks[type]))(socket, &notify, socket->userdata);
 +		}
 +		return GDK_FILTER_REMOVE;
++	} else{
++	g_message("Pass to futher handlers, not a MenuBar message");
++
 +	}
 +	return GDK_FILTER_CONTINUE;
 +	
@@ -843,7 +953,7 @@
 +}
 +static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, GlobalMenuNotify * message){
 +	XClientMessageEvent xclient;
-+
++	
 +	memset (&xclient, 0, sizeof (xclient));
 +	xclient.window = xid;
 +	xclient.type = ClientMessage;
@@ -851,7 +961,7 @@
 +	xclient.format = 32;
 +	xclient.data.l[0] = gtk_get_current_event_time();
 +	xclient.data.l[1] = message->type;
-+	xclient.data.l[2] = message->param1;
++	xclient.data.l[2] = GDK_WINDOW_XID(socket->window);/*Just use this socket's window id is Fine. message->param1;*/
 +	xclient.data.l[3] = message->param2;
 +	xclient.data.l[4] = message->param3;
 +	gdk_error_trap_push ();
@@ -860,6 +970,7 @@
 +		  False, NoEventMask, (XEvent *)&xclient);
 +	gdk_display_sync (socket->display);
 +	gdk_error_trap_pop ();
++	g_message("socket send");
 +}
 +static void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
 +	global_menu_socket_send_to(socket, socket->dest_xid, message);

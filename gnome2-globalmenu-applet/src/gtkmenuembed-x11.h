@@ -6,6 +6,7 @@ typedef enum {
 	GM_NOTIFY_SERVER_NEW,
 	GM_NOTIFY_SERVER_DESTROY,
 	GM_NOTIFY_SIZE_ALLOCATE,
+	GM_NOTIFY_SET_VISIBLE,
 	GM_NOTIFY_MAX,
 } GlobalMenuNotifyType;
 #define ATOM_STRING "_GTKMENUBAR_EMBED"
@@ -16,7 +17,7 @@ typedef struct _GlobalMenuNotify {
 	GlobalMenuNotifyType type;
 	union{
 	struct {
-		gulong param1;
+		gulong param1; /*always set to be the source socket's window id*/
 		gulong param2;
 		gulong param3;
 	}; /*general*/
@@ -41,6 +42,10 @@ typedef struct _GlobalMenuNotify {
 			glong width;
 			glong height;
 		} SizeAllocate;
+		struct {
+			Window server_xid;
+			gboolean visible;
+		} SetVisible;
 	};
 } GlobalMenuNotify;
 
@@ -110,13 +115,17 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 static GdkFilterReturn global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocket * socket){
 	GlobalMenuNotify notify;
 	GlobalMenuNotifyType type;
-	if(global_menu_xevent_to_notify(xevent, &notify)){
-		g_message("global menu notify received");
+	g_message("XClientMessage received");
+	if(event->any.window == socket->window 
+		&& global_menu_xevent_to_notify(xevent, &notify)){
 		type = notify.type;
 		if(socket->callbacks[type] ){
 			(*(socket->callbacks[type]))(socket, &notify, socket->userdata);
 		}
 		return GDK_FILTER_REMOVE;
+	} else{
+	g_message("Pass to futher handlers, not a MenuBar message");
+
 	}
 	return GDK_FILTER_CONTINUE;
 	
@@ -224,7 +233,7 @@ static Window global_menu_socket_get_xid(GlobalMenuSocket * socket){
 }
 static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, GlobalMenuNotify * message){
 	XClientMessageEvent xclient;
-
+	
 	memset (&xclient, 0, sizeof (xclient));
 	xclient.window = xid;
 	xclient.type = ClientMessage;
@@ -232,7 +241,7 @@ static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, Gl
 	xclient.format = 32;
 	xclient.data.l[0] = gtk_get_current_event_time();
 	xclient.data.l[1] = message->type;
-	xclient.data.l[2] = message->param1;
+	xclient.data.l[2] = GDK_WINDOW_XID(socket->window);/*Just use this socket's window id is Fine. message->param1;*/
 	xclient.data.l[3] = message->param2;
 	xclient.data.l[4] = message->param3;
 	gdk_error_trap_push ();
@@ -241,6 +250,7 @@ static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, Gl
 		  False, NoEventMask, (XEvent *)&xclient);
 	gdk_display_sync (socket->display);
 	gdk_error_trap_pop ();
+	g_message("socket send");
 }
 static void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
 	global_menu_socket_send_to(socket, socket->dest_xid, message);

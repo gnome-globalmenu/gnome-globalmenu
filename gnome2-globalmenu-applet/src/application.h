@@ -14,6 +14,10 @@ struct _Application {
 		GtkEventBox * Backward;
 		GtkEventBox * Forward;
 	}; /*Widgets*/
+	struct {
+		GdkPixmap * Background;
+		GdkColor Color;
+	} AppletProperty;
 	struct _WnckScreen * Screen;
 	struct _ClientInfo * ActiveClient;
 	GList * Clients;

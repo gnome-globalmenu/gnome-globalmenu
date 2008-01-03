@@ -17,6 +17,7 @@ GtkEventBox * ui_create_label_area(Application * App){
 	GtkBox * label_area_box = NULL;
 	label_area = GTK_EVENT_BOX(gtk_event_box_new());
 	label_area_box = GTK_BOX(gtk_hbox_new(FALSE, 0));
+	gtk_event_box_set_visible_window(label_area, FALSE);
 	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->ClientIcon), FALSE, FALSE, 0);
 	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(label_area), GTK_WIDGET(label_area_box));
@@ -27,6 +28,7 @@ GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id){
 	GtkEventBox * rt;
 	GtkImage * icon;
 	rt = GTK_EVENT_BOX(gtk_event_box_new());
+	gtk_event_box_set_visible_window(rt, FALSE);
 	icon = GTK_IMAGE(gtk_image_new_from_stock(
 			stock_id, GTK_ICON_SIZE_MENU));
 	gtk_container_add(GTK_CONTAINER(rt), GTK_WIDGET(icon));
@@ -81,6 +83,9 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	if(App->Mode == APP_APPLET){ /*setup a compact visual if in a panel*/
 		gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
 	}
+/*****Hide them since they don't do nothing**********/
+	gtk_widget_hide(GTK_WIDGET(App->Forward));
+	gtk_widget_hide(GTK_WIDGET(App->Backward));
 
 
 }
@@ -90,8 +95,8 @@ void ui_repaint_all(Application * App){
 	gboolean show_forward;
 
 
-	show_backward = FALSE;
-	show_forward = FALSE;
+	show_backward = TRUE;
+	show_forward = TRUE;
 	
 
 	if(show_forward) 
