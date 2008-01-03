@@ -49,11 +49,11 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	App->TitleLabel = GTK_LABEL(gtk_label_new(""));
 	gtk_label_set_max_width_chars(App->TitleLabel, 10);
 
-	label_area = ui_create_label_area(App);
+/*	label_area = ui_create_label_area(App);
 	gtk_box_pack_start(basebox, GTK_WIDGET(label_area), FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(label_area), "button-press-event",
 			G_CALLBACK(callbacks->label_area_action_cb), App);
-
+*/
 /****** Move Backward ***********/
 	App->Backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Backward), FALSE, FALSE, 0);

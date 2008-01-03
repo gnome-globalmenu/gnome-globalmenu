@@ -71,6 +71,8 @@
 typedef struct _ClientInfo{
 	MenuClient * menu_client;
 	GdkWindow * float_window;
+	int x;
+	int y;
 } ClientInfo;
 static void return_client_float_window(ClientInfo * client, Application * App){
 	g_print("Return client float window\n");
@@ -87,17 +89,8 @@ static void steal_client_float_window(ClientInfo * client, Application * App){
 	notify.type = GM_NOTIFY_SET_VISIBLE;
 	notify.SetVisible.visible = TRUE;
 	gdk_window_reparent(client->float_window, 
-		GTK_WIDGET(App->Holder)->window, 0, 0);
+		GTK_WIDGET(App->Holder)->window, client->x, client->y);
 	menu_server_send_to(App->Server, client->menu_client, &notify);	
-}
-static void set_client_size_allocation(ClientInfo * info, GtkAllocation * allocation, Application * App){
-	GlobalMenuNotify notify;
-	g_print("Send message to the active child\n");
-	notify.type = GM_NOTIFY_SIZE_ALLOCATE;
-//	notify.SizeAllocate.server_xid = GDK_WINDOW_XWINDOW(App->Server->socket->window);
-	notify.SizeAllocate.width = allocation->width;
-	notify.SizeAllocate.height = allocation->height;
-	menu_server_send_to(App->Server, info->menu_client, &notify);
 }
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
 	WnckWindow * active_window = NULL;
@@ -143,9 +136,6 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 				return_client_float_window(App->ActiveClient, App);
 			steal_client_float_window(info, App);
 			App->ActiveClient = info;
-			set_client_size_allocation(App->ActiveClient, 
-				&GTK_WIDGET(App->Holder)->allocation, 
-				App);
 		}
 	}
 	ui_repaint_all(App);
@@ -163,6 +153,8 @@ static void client_new_cb(MenuServer * server, MenuClient * client, Application 
 	g_print("Applet: Client New\n");
 	info->menu_client = client;
 	info->float_window = gdk_window_foreign_new(client->float_xid);
+	info->x = 0;
+	info->y = 0;
 /*since we don't want it be shown in the screen, perhaps its better to hide it in the menubar patch**/
 	gdk_window_hide(info->float_window);
 	App->Clients = g_list_append(App->Clients, info);
@@ -179,12 +171,6 @@ static void client_destroy_cb(MenuServer * server, MenuClient * client, Applicat
 	}	
 	g_return_if_fail( node );
 	g_return_if_fail( info );
-/* We don't need to return window, the Client Application will be destroying the menu bar when we receive the notification
-	if(node->data == App->ActiveClient->menu_client){
-		return_float_window(App->ActiveClient->float_window, App);
-		App->ActiveClient = NULL;
-	}
-*/
 /*****special deal if it is the current application********/
 	if(info == App->ActiveClient) App->ActiveClient = NULL;
 /* However, We need to tell our gdk this window no longer exists. I hope gdk_iwndow_unref will deal with it if the window still exists.*/
@@ -218,11 +204,16 @@ static void main_window_change_background_cb(PanelApplet * applet, PanelAppletBa
 static void main_window_change_orient_cb(PanelApplet * applet, PanelAppletOrient orient, Application * App){
 	g_print("Applet Orientation has changed\n");
 }
+
 static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, Application * App){
 	g_print("Holder resizesd.\n");
-	if(App->ActiveClient){
-		set_client_size_allocation(App->ActiveClient, allocation, App);
-	}
+	GlobalMenuNotify notify;
+	g_print("Broadcast message to all clients\n");
+	notify.type = GM_NOTIFY_SIZE_ALLOCATE;
+	notify.SizeAllocate.width = allocation->width;
+	notify.SizeAllocate.height = allocation->height;
+	menu_server_broadcast(App->Server, &notify);
+
 }
 static void label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
 	g_print("client icon action.\n");
@@ -234,10 +225,22 @@ static void label_area_action_cb(GtkWidget * widget, GdkEventButton* button, App
 }
 static void backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
 	g_print("backward action.\n");
+	if(App->ActiveClient){
+		App->ActiveClient->x -= 10;
+		gdk_window_move(App->ActiveClient->float_window, 
+				App->ActiveClient->x,
+				App->ActiveClient->y);
+	}
 	ui_repaint_all(App);
 }
 static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
 	g_print("forward action.\n");
+	if(App->ActiveClient){
+		App->ActiveClient->x += 10;
+		gdk_window_move(App->ActiveClient->float_window, 
+				App->ActiveClient->x,
+				App->ActiveClient->y);
+	}
 	ui_repaint_all(App);
 }
 
@@ -314,7 +317,6 @@ static void application_free(Application * App){
 		App->ActiveClient = NULL;
 	}
 	menu_server_shutdown(App->Server);
-    usleep(1000000); /*sleep for clients to get their menubar back*/
 	menu_server_free(App->Server);
 	g_free(App);
 }
@@ -339,7 +341,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	Application * App;
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
-		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR);
+		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
     App = application_new(GTK_CONTAINER(applet), APP_APPLET);
     return TRUE;
   } else {
