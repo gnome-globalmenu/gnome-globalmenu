@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-03 16:33:58.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-03 16:36:13.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-07 00:10:58.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-07 00:11:39.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -270,12 +270,12 @@
        border = GTK_CONTAINER (widget)->border_width;
        
 +#ifdef GNOME_GLOBAL_MENU
-+	  //if(!priv->globalized)
++	  if(!priv->globalized)
 +      gtk_paint_box (widget->style,
 +		     priv->container_window,
 +                     GTK_WIDGET_STATE (widget),
 +                     get_shadow_type (GTK_MENU_BAR (widget)),
-+		     area, widget, NULL/* "optionmenu"*/,
++		     area, widget, "menubar",
 +		     border, border,
 +		     priv->container_allocation.width - border * 2,
 +                     priv->container_allocation.height - border * 2);
@@ -316,7 +316,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1104,459 @@
+@@ -938,5 +1104,456 @@
      }
  }
  
@@ -502,11 +502,6 @@
 +  /*attach the style, so widget will get painting visual and colormap from container_window*/
 +  widget->style = gtk_style_attach(widget->style, priv->container_window); 
 +  gtk_style_set_background (widget->style, priv->container_window, GTK_WIDGET_STATE (menubar));
-+/**Set the background of two containers, I don't think they are useful, try to remove them later*/
-+/*
-+  gtk_style_set_background (widget->style, widget->window, GTK_WIDGET_STATE (menubar));
-+  gtk_style_set_background (widget->style, priv->float_window, GTK_WIDGET_STATE (menubar));
-+*/
 +/*Then set all the exsited menuitems's gdk parent window to the container, also not useful, remove it */
 +  gdk_window_set_back_pixmap (widget->window, NULL, FALSE);
 +  gtk_container_forall(GTK_CONTAINER(widget), 
@@ -727,30 +722,29 @@
 +	}
 +}
 +static void
-+gtk_menu_bar_ensure_style (GtkWidget * widget){
-+	GtkMenuBar * menubar = GTK_MENU_BAR(widget);
-+	GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
-+	GtkStyle * style;
-+
-+	gtk_widget_ensure_style(widget);
-+    if(GTK_WIDGET_REALIZED(widget))
-+    widget->style = gtk_style_attach(widget->style, priv->container_window);
-+    style = widget->style;
-+	if(priv->ythickness_backup == -1 || priv->xthickness_backup == -1){
-+		priv->xthickness_backup = style->xthickness;
-+		priv->ythickness_backup = style->ythickness;
-+	}
-+	if(priv->globalized){
-+		if(priv->pack_direction == GTK_PACK_DIRECTION_LTR
-+		|| priv->pack_direction == GTK_PACK_DIRECTION_RTL){
-+			style->ythickness = 0;
-+			style->xthickness = priv->xthickness_backup;
++gtk_menu_bar_notify_set_background_cb(GlobalMenuSocket * socket,
++		GlobalMenuNotify * notify,
++		GtkMenuBar * menubar){
++	GtkMenuBarPrivate * priv;
++	GdkColor color;
++	GdkPixmap * pixmap;
++LOG_FUNC_NAME;
++	priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
++    g_return_if_fail( priv->connected );
++	g_return_if_fail( notify->SetBackground.server_xid == socket->dest_xid); /*if not from our server*/
++	if(notify->SetBackground.color_atom){
++		if(gdk_color_parse(
++			gdk_x11_get_xatom_name(notify->SetBackground.color_atom),
++			&color)){
++		g_message("Set bg color to %s\n", gdk_color_to_string(&color));
++		gtk_widget_modify_bg(menubar, GTK_STATE_NORMAL, &color);
 +		}
-+        else {
-+			style->xthickness = 0;
-+			style->ythickness = priv->ythickness_backup;
-+		}
++	}else{
++		pixmap = gdk_pixmap_foreign_new(notify->SetBackground.pixmap_xid);
++		gdk_window_set_back_pixmap(priv->container_window, pixmap, FALSE);
++		g_object_unref(pixmap);
 +	}
++	gtk_widget_queue_draw(menubar);
 +}
 +static void gtk_menu_bar_connect_to_menu_server(GtkMenuBar * menubar){
 +  GtkMenuBarPrivate * priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
@@ -768,6 +762,9 @@
 +  global_menu_socket_set_callback(priv->socket,
 +	GM_NOTIFY_SET_VISIBLE,
 +	(GlobalMenuCallback) gtk_menu_bar_notify_set_visible_cb);
++  global_menu_socket_set_callback(priv->socket, 
++	GM_NOTIFY_SET_BACKGROUND,
++	(GlobalMenuCallback) gtk_menu_bar_notify_set_background_cb);
 +/**we will receive notifications even if don't connect, so always check priv->connect (or priv->globalized)
 + * if we want to make sure we are connected!***/
 +  priv->connected = global_menu_socket_connect_by_name(priv->socket, 
@@ -776,9 +773,9 @@
 +#endif
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
---- /dev/null	2008-01-03 11:02:19.441094085 -0500
-+++ gtk/gtkmenuembed-x11.h	2008-01-03 02:03:02.000000000 -0500
-@@ -0,0 +1,283 @@
+--- /dev/null	2008-01-06 21:35:32.443092065 -0500
++++ gtk/gtkmenuembed-x11.h	2008-01-06 23:29:56.000000000 -0500
+@@ -0,0 +1,291 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
 +	GM_NOTIFY_MIN,
@@ -788,6 +785,7 @@
 +	GM_NOTIFY_SERVER_DESTROY,
 +	GM_NOTIFY_SIZE_ALLOCATE,
 +	GM_NOTIFY_SET_VISIBLE,
++	GM_NOTIFY_SET_BACKGROUND,
 +	GM_NOTIFY_MAX,
 +} GlobalMenuNotifyType;
 +#define ATOM_STRING "_GTKMENUBAR_EMBED"
@@ -827,6 +825,11 @@
 +			Window server_xid;
 +			gboolean visible;
 +		} SetVisible;
++		struct {
++			Window server_xid;
++			Atom color_atom;
++			Window pixmap_xid;
++		} SetBackground;
 +	};
 +} GlobalMenuNotify;
 +
@@ -855,6 +858,8 @@
 +	CASE(GM_NOTIFY_SERVER_NEW)
 +	CASE(GM_NOTIFY_SERVER_DESTROY)
 +	CASE(GM_NOTIFY_SIZE_ALLOCATE)
++	CASE(GM_NOTIFY_SET_VISIBLE)
++	CASE(GM_NOTIFY_SET_BACKGROUND)
 +	default:
 +		return "Unknown notification";
 +	}

@@ -7,6 +7,7 @@ typedef enum {
 	GM_NOTIFY_SERVER_DESTROY,
 	GM_NOTIFY_SIZE_ALLOCATE,
 	GM_NOTIFY_SET_VISIBLE,
+	GM_NOTIFY_SET_BACKGROUND,
 	GM_NOTIFY_MAX,
 } GlobalMenuNotifyType;
 #define ATOM_STRING "_GTKMENUBAR_EMBED"
@@ -46,6 +47,11 @@ typedef struct _GlobalMenuNotify {
 			Window server_xid;
 			gboolean visible;
 		} SetVisible;
+		struct {
+			Window server_xid;
+			Atom color_atom;
+			Window pixmap_xid;
+		} SetBackground;
 	};
 } GlobalMenuNotify;
 
@@ -74,6 +80,8 @@ static const gchar * global_menu_notify_get_name(GlobalMenuNotifyType type){
 	CASE(GM_NOTIFY_SERVER_NEW)
 	CASE(GM_NOTIFY_SERVER_DESTROY)
 	CASE(GM_NOTIFY_SIZE_ALLOCATE)
+	CASE(GM_NOTIFY_SET_VISIBLE)
+	CASE(GM_NOTIFY_SET_BACKGROUND)
 	default:
 		return "Unknown notification";
 	}

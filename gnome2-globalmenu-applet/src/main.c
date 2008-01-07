@@ -150,6 +150,8 @@ static void window_closed_cb(WnckScreen* screen, WnckWindow *window, Application
 
 static void client_new_cb(MenuServer * server, MenuClient * client, Application * App){
 	ClientInfo * info = g_new0(ClientInfo, 1);
+	GlobalMenuNotify notify;
+	GtkAllocation * allocation;
 	g_print("Applet: Client New\n");
 	info->menu_client = client;
 	info->float_window = gdk_window_foreign_new(client->float_xid);
@@ -157,6 +159,11 @@ static void client_new_cb(MenuServer * server, MenuClient * client, Application 
 	info->y = 0;
 /*since we don't want it be shown in the screen, perhaps its better to hide it in the menubar patch**/
 	gdk_window_hide(info->float_window);
+	allocation = &GTK_WIDGET(App->Holder)->allocation;
+	notify.type = GM_NOTIFY_SIZE_ALLOCATE;
+	notify.SizeAllocate.width = allocation->width;
+	notify.SizeAllocate.height = allocation->height;
+	menu_server_send_to(App->Server, info->menu_client, &notify);
 	App->Clients = g_list_append(App->Clients, info);
 }
 static void client_destroy_cb(MenuServer * server, MenuClient * client, Application * App){
@@ -190,16 +197,56 @@ static gboolean main_window_delete_cb(GtkWindow * MainWindow, GdkEvent * event, 
 	return FALSE;
 }
 static void main_window_change_background_cb(PanelApplet * applet, PanelAppletBackgroundType type, GdkColor * color, GdkPixmap * pixmap, Application * App){
+	GtkStyle * style;
+	Window bg_xid;
+	Atom color_atom;
+	GlobalMenuNotify notify;
+	gchar * color_name = NULL;
 	g_print("Applet Background has changed\n");
 /*Should notify the client!*/
+	GdkWindow * window = GTK_WIDGET(App->Holder)->window;
+	g_return_if_fail(window);
 	switch(type){
+		case PANEL_NO_BACKGROUND:{
+			style = gtk_widget_get_style(App->MainWindow);
+			gdk_window_set_back_pixmap(window, NULL, FALSE);
+			gtk_widget_modify_bg(App->Holder, GTK_STATE_NORMAL, &style->bg[GTK_STATE_NORMAL]);
+			color_name = gdk_color_to_string(&style->bg[GTK_STATE_NORMAL]);
+			break;
+		}
 		case PANEL_COLOR_BACKGROUND:
-			//gdk_window_set_background(GTK_WIDGET(App->Container)->window
+			gdk_window_set_back_pixmap(window, NULL, FALSE);
+			gtk_widget_modify_bg(App->Holder, GTK_STATE_NORMAL, color);
+			color_name = gdk_color_to_string(color);
 			break;
 		case PANEL_PIXMAP_BACKGROUND:
-			//gdk_window_set_back_pixmap
+			{
+			GdkPixmap * holder_bg;
+			GdkGC * gc;
+			gint x, y;
+			gint w, h;
+			gdk_window_get_position(window, &x, &y);
+			gdk_window_get_size(window, &w, &h);
+			g_print("%d, %d, %d, %d\n", x, y, w, h);
+			holder_bg = gdk_pixmap_new(pixmap, w, h, -1);
+			gc = gdk_gc_new(pixmap);
+			gdk_draw_drawable(holder_bg, gc, pixmap, x, y, 0, 0, w, h);
+			gdk_window_set_back_pixmap(window, holder_bg, FALSE);
+			g_object_unref(gc);
+			bg_xid = GDK_PIXMAP_XID(holder_bg);
+			}
 			break;
 	}
+	gtk_widget_queue_draw(GTK_WIDGET(App->Holder));
+	if(color_name){
+		color_atom = gdk_x11_get_xatom_by_name(color_name);
+		g_free(color_name);
+	} else 
+		color_atom = 0;
+	notify.SetBackground.color_atom = color_atom;
+	notify.SetBackground.pixmap_xid = bg_xid;
+	notify.type = GM_NOTIFY_SET_BACKGROUND;
+	menu_server_broadcast(App->Server, &notify);
 }
 static void main_window_change_orient_cb(PanelApplet * applet, PanelAppletOrient orient, Application * App){
 	g_print("Applet Orientation has changed\n");
