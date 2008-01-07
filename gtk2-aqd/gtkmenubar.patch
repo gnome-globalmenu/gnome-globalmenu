@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-07 00:10:58.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-07 00:11:39.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-07 00:11:49.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-07 00:15:53.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -203,10 +203,12 @@
  	      if (priv->child_pack_direction == GTK_PACK_DIRECTION_LTR ||
  		  priv->child_pack_direction == GTK_PACK_DIRECTION_RTL)
  		child_requisition.width += toggle_size;
-@@ -502,11 +597,61 @@
+@@ -502,11 +597,63 @@
  	}
      }
  }
++/**either the parent widget or the menu server can invoke this,
++ * Hope we can distinguish them*/
 +static void
 +gtk_menu_bar_size_allocate (GtkWidget     *widget,
 +			    GtkAllocation *allocation){
@@ -265,7 +267,7 @@
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
  
    if (GTK_WIDGET_DRAWABLE (widget))
-@@ -515,6 +660,17 @@
+@@ -515,6 +662,17 @@
  
        border = GTK_CONTAINER (widget)->border_width;
        
@@ -283,7 +285,7 @@
        gtk_paint_box (widget->style,
  		     widget->window,
                       GTK_WIDGET_STATE (widget),
-@@ -523,7 +679,8 @@
+@@ -523,7 +681,8 @@
  		     border, border,
  		     widget->allocation.width - border * 2,
                       widget->allocation.height - border * 2);
@@ -293,7 +295,7 @@
  }
  
  static gint
-@@ -535,6 +692,12 @@
+@@ -535,6 +694,12 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
@@ -306,7 +308,7 @@
        gtk_menu_bar_paint (widget, &event->area);
  
        (* GTK_WIDGET_CLASS (gtk_menu_bar_parent_class)->expose_event) (widget, event);
-@@ -648,6 +811,9 @@
+@@ -648,6 +813,9 @@
  
    if (!menubars)
      {
@@ -316,7 +318,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1104,456 @@
+@@ -938,5 +1106,456 @@
      }
  }
  
