@@ -16,7 +16,7 @@ mv gtk2.spec gtk2-aqd.spec
 
 cp gtkmenubar.patch $RPMDEVROOT/SOURCES/
 
-rpmbuild -bc gtk2-aqd.spec
+rpmbuild -ba gtk2-aqd.spec
 
 rm -rf libs
 mkdir libs

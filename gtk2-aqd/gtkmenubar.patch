@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-07 19:10:49.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-07 19:10:51.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-08 00:13:51.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-08 00:14:10.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -318,7 +318,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1106,456 @@
+@@ -938,5 +1106,459 @@
      }
  }
  
@@ -601,9 +601,12 @@
 +  menubar = GTK_MENU_BAR(menu_shell);
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +
-+  GTK_MENU_SHELL_CLASS(gtk_menu_bar_parent_class)->insert(menu_shell, child, position);
-+  if(GTK_WIDGET_REALIZED(menubar)) /*if we have a container_window, move the child to container_window*/
++  if(GTK_WIDGET_REALIZED(menubar)){ /*if we have a container_window, move the child to container_window*/
++	g_message("set parent window to container_window");
 +  gtk_widget_set_parent_window(child, priv->container_window);
++	}
++
++  GTK_MENU_SHELL_CLASS(gtk_menu_bar_parent_class)->insert(menu_shell, child, position);
 +}
 +static gboolean 
 +gtk_menu_bar_motion (GtkWidget * widget, 
@@ -776,7 +779,7 @@
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
 --- /dev/null	2008-01-07 12:06:53.443092546 -0500
-+++ gtk/gtkmenuembed-x11.h	2008-01-07 19:10:54.000000000 -0500
++++ gtk/gtkmenuembed-x11.h	2008-01-08 00:13:51.000000000 -0500
 @@ -0,0 +1,291 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
