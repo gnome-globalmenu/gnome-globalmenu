@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-07 00:11:49.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-07 00:15:53.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-07 19:10:49.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-07 19:10:51.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -775,8 +775,8 @@
 +#endif
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
---- /dev/null	2008-01-06 21:35:32.443092065 -0500
-+++ gtk/gtkmenuembed-x11.h	2008-01-06 23:29:56.000000000 -0500
+--- /dev/null	2008-01-07 12:06:53.443092546 -0500
++++ gtk/gtkmenuembed-x11.h	2008-01-07 19:10:54.000000000 -0500
 @@ -0,0 +1,291 @@
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
