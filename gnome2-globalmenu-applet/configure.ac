@@ -42,7 +42,9 @@ AC_SUBST(TEST_CLIENT_CFLAGS)
 AC_SUBST(TEST_CLIENT_LIBS)
 
 AC_OUTPUT([
+bonobo-server.sh
 Makefile
 src/Makefile
 po/Makefile.in
-])
+],
+[chmod +x bonobo-server.sh])

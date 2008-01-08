@@ -34,10 +34,10 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing \
-	mkinstalldirs
+	$(srcdir)/Makefile.in $(srcdir)/bonobo-server.sh.in \
+	$(srcdir)/config.h.in $(top_srcdir)/configure AUTHORS COPYING \
+	ChangeLog INSTALL NEWS config.guess config.sub depcomp \
+	install-sh ltmain.sh missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -46,7 +46,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = bonobo-server.sh
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -62,9 +62,11 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(gnome2_globalmenu_appletdocdir)"
+am__installdirs = "$(DESTDIR)$(bonobodir)" \
+	"$(DESTDIR)$(gnome2_globalmenu_appletdocdir)"
+bonoboDATA_INSTALL = $(INSTALL_DATA)
 gnome2_globalmenu_appletdocDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(gnome2_globalmenu_appletdoc_DATA)
+DATA = $(bonobo_DATA) $(gnome2_globalmenu_appletdoc_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 ETAGS = etags
@@ -251,7 +253,10 @@ intltool_in_files = intltool-extract.in\
 
 intltool_files = intltool-extract intltool-merge intltool-update
 EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files)
-DISTCLEANFILES = $(intltool_files)
+DISTCLEANFILES = $(intltool_files) bonobo-server.sh \
+	GNOME_GlobalMenuApplet.server
+bonobodir = $(libdir)/bonobo/servers
+bonobo_DATA = GNOME_GlobalMenuApplet.server
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -306,6 +311,8 @@ $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+bonobo-server.sh: $(top_builddir)/config.status $(srcdir)/bonobo-server.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -315,6 +322,23 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool
+install-bonoboDATA: $(bonobo_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(bonobodir)" || $(MKDIR_P) "$(DESTDIR)$(bonobodir)"
+	@list='$(bonobo_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(bonoboDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(bonobodir)/$$f'"; \
+	  $(bonoboDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(bonobodir)/$$f"; \
+	done
+
+uninstall-bonoboDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bonobo_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(bonobodir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(bonobodir)/$$f"; \
+	done
 install-gnome2_globalmenu_appletdocDATA: $(gnome2_globalmenu_appletdoc_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(gnome2_globalmenu_appletdocdir)" || $(MKDIR_P) "$(DESTDIR)$(gnome2_globalmenu_appletdocdir)"
@@ -614,7 +638,7 @@ check: check-recursive
 all-am: Makefile $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(gnome2_globalmenu_appletdocdir)"; do \
+	for dir in "$(DESTDIR)$(bonobodir)" "$(DESTDIR)$(gnome2_globalmenu_appletdocdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -662,7 +686,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-gnome2_globalmenu_appletdocDATA
+install-data-am: install-bonoboDATA \
+	install-gnome2_globalmenu_appletdocDATA
 
 install-dvi: install-dvi-recursive
 
@@ -698,7 +723,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-gnome2_globalmenu_appletdocDATA
+uninstall-am: uninstall-bonoboDATA \
+	uninstall-gnome2_globalmenu_appletdocDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) install-am \
 	install-strip
@@ -710,8 +736,8 @@ uninstall-am: uninstall-gnome2_globalmenu_appletdocDATA
 	distclean distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags distcleancheck distdir distuninstallcheck dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am \
+	install-bonoboDATA install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am \
 	install-gnome2_globalmenu_appletdocDATA install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
@@ -719,8 +745,11 @@ uninstall-am: uninstall-gnome2_globalmenu_appletdocDATA
 	installdirs-am maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
 	ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-gnome2_globalmenu_appletdocDATA
+	uninstall-bonoboDATA uninstall-gnome2_globalmenu_appletdocDATA
 
+
+GNOME_GlobalMenuApplet.server: bonobo-server.sh
+	./bonobo-server.sh > $@
 #
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:

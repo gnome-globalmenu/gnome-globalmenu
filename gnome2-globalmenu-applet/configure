@@ -23239,7 +23239,9 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile po/Makefile.in"
+ac_config_files="$ac_config_files bonobo-server.sh Makefile src/Makefile po/Makefile.in"
+
+ac_config_commands="$ac_config_commands default"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -23858,9 +23860,11 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
     "intltool") CONFIG_COMMANDS="$CONFIG_COMMANDS intltool" ;;
+    "bonobo-server.sh") CONFIG_FILES="$CONFIG_FILES bonobo-server.sh" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in" ;;
+    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
     "po/stamp-it") CONFIG_COMMANDS="$CONFIG_COMMANDS po/stamp-it" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -24706,6 +24710,7 @@ for file in intltool-extract intltool-merge intltool-update; do
 done
 
  ;;
+    "default":C) chmod +x bonobo-server.sh ;;
     "po/stamp-it":C)
     rm -f "po/stamp-it" "po/stamp-it.tmp" "po/POTFILES" "po/Makefile.tmp"
     >"po/stamp-it.tmp"

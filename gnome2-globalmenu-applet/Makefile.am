@@ -20,7 +20,13 @@ intltool_in_files = intltool-extract.in\
 intltool_files = intltool-extract intltool-merge intltool-update
 
 EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files)
-DISTCLEANFILES = $(intltool_files)
+DISTCLEANFILES = $(intltool_files) bonobo-server.sh
+bonobodir= $(libdir)/bonobo/servers
+bonobo_DATA= GNOME_GlobalMenuApplet.server
+DISTCLEANFILES += GNOME_GlobalMenuApplet.server
+
+GNOME_GlobalMenuApplet.server: bonobo-server.sh
+	./bonobo-server.sh > $@
 #
 # Copy all the spec files. Of cource, only one is actually used.
 dist-hook:
