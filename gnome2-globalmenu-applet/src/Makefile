@@ -45,8 +45,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(libexecdir)"
 libexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(libexec_PROGRAMS)
-am_gnome2_globalmenu_applet_OBJECTS = clients.$(OBJEXT) main.$(OBJEXT) \
-	misc.$(OBJEXT) ui.$(OBJEXT)
+am_gnome2_globalmenu_applet_OBJECTS = main.$(OBJEXT) ui.$(OBJEXT) \
+	menuclients.$(OBJEXT) menuserver.$(OBJEXT)
 gnome2_globalmenu_applet_OBJECTS =  \
 	$(am_gnome2_globalmenu_applet_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -71,13 +71,13 @@ DIST_SOURCES = $(gnome2_globalmenu_applet_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run aclocal-1.10
+ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run aclocal-1.10
 ALL_LINGUAS = 
-AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run tar
+AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run automake-1.10
+AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run automake-1.10
 AWK = gawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -145,7 +145,7 @@ LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = 
-MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -154,9 +154,9 @@ OBJEXT = o
 PACKAGE = gnome2-globalmenu-applet
 PACKAGE_BUGREPORT = 
 PACKAGE_NAME = gnome2-globalmenu-applet
-PACKAGE_STRING = gnome2-globalmenu-applet 0.2.1
+PACKAGE_STRING = gnome2-globalmenu-applet 0.3
 PACKAGE_TARNAME = gnome2-globalmenu-applet
-PACKAGE_VERSION = 0.2.1
+PACKAGE_VERSION = 0.3
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 POFILES = 
@@ -171,12 +171,12 @@ STRIP = strip
 TEST_CLIENT_CFLAGS = -I/usr/include/gtk-2.0 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libglade-2.0 -I/usr/include/libxml2  
 TEST_CLIENT_LIBS = -lglade-2.0 -lgtk-x11-2.0 -lxml2 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lpango-1.0 -lcairo -lgobject-2.0 -lgmodule-2.0 -ldl -lglib-2.0  
 USE_NLS = yes
-VERSION = 0.2.1
+VERSION = 0.3
 XGETTEXT = /usr/bin/xgettext
-abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/src
-abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/src
-abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
-abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet
+abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/src
+abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/src
+abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
+abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = gfortran
@@ -205,7 +205,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-applet/install-sh
+install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-applet/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -236,14 +236,16 @@ AM_CFLAGS = \
 	 -g
 
 gnome2_globalmenu_applet_SOURCES = \
-	clients.c                 \
-	clients.h                 \
 	main.c                 \
-	misc.c                 \
-	misc.h                 \
 	typedefs.h                 \
 	ui.c                 \
-	ui.h 
+	ui.h                 \
+	menuclients.c                 \
+	menuclients.h                 \
+	menuserver.c                 \
+	menuserver.h                 \
+	gtkmenuembed-x11.h                 \
+	application.h 
 
 gnome2_globalmenu_applet_LDFLAGS = 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
@@ -319,9 +321,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/clients.Po
 include ./$(DEPDIR)/main.Po
-include ./$(DEPDIR)/misc.Po
+include ./$(DEPDIR)/menuclients.Po
+include ./$(DEPDIR)/menuserver.Po
 include ./$(DEPDIR)/ui.Po
 
 .c.o:

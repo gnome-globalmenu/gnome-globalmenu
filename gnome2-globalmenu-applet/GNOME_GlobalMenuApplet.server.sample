@@ -1,5 +1,5 @@
 <oaf_info>
-  <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet_Factory" type="exe"
+  <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet2_Factory" type="exe"
     location="APP_LOCATION/gnome2-globalmenu-applet">
     <oaf_attribute name="repo_ids" type="stringv">
       <item value="IDL:Bonobo/GenericFactory:1.0"/>
@@ -8,8 +8,8 @@
     <oaf_attribute name="name" type="string" value="GlobalMenu applet Factory"/>
     <oaf_attribute name="description" type="string" value="Global Menu applet factory"/>
   </oaf_server>
-  <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet" type="factory"
-    location="OAFIID:GNOME_GlobalMenuApplet_Factory">
+  <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet2" type="factory"
+    location="OAFIID:GNOME_GlobalMenuApplet2_Factory">
     <oaf_attribute name="repo_ids" type="stringv">
       <item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
       <item value="IDL:Bonobo/Control:1.0"/>

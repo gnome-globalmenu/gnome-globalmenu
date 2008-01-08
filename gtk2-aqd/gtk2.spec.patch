@@ -1,15 +1,21 @@
---- gtk2.spec	2007-12-24 21:02:13.000000000 -0500
-+++ gtk2-aqd.spec	2007-12-24 20:37:59.000000000 -0500
-@@ -14,7 +14,7 @@
+--- gtk2.spec	2008-01-07 18:23:06.000000000 -0500
++++ gtk2-aqd.spec	2008-01-07 18:23:57.000000000 -0500
+@@ -12,17 +12,20 @@
+ 
+ %define base_version 2.12.3
  %define bin_version 2.10.0
++%define aqd_version 0.3.193
  
  Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
 -Name: gtk2
+-Version: %{base_version}
 +Name: gtk2-aqd
- Version: %{base_version}
++Version: %{aqd_version}.%{base_version}
  Release: 3%{?dist}
  License: LGPLv2+
-@@ -23,6 +23,8 @@
+ Group: System Environment/Libraries
+-Source: http://download.gnome.org/sources/gtk+/2.12/gtk+-%{version}.tar.bz2
++Source: http://download.gnome.org/sources/gtk+/2.12/gtk+-%{base_version}.tar.bz2
  Source1: update-gdk-pixbuf-loaders
  Source2: update-gtk-immodules 
  
@@ -18,7 +24,7 @@
  # Biarch changes
  Patch0: gtk+-2.4.1-lib64.patch
  # Fedora patch
-@@ -37,6 +39,9 @@
+@@ -37,6 +40,9 @@
  # fixed in upstream svn
  Patch4: tab-label.patch
  
@@ -28,7 +34,7 @@
  BuildRequires: atk-devel >= %{atk_version}
  BuildRequires: pango-devel >= %{pango_version}
  BuildRequires: glib2-devel >= %{glib2_version}
-@@ -89,7 +94,7 @@
+@@ -89,7 +95,7 @@
  %package devel
  Summary: Development tools for GTK+ applications
  Group: Development/Libraries
@@ -37,17 +43,24 @@
  Requires: pango-devel >= %{pango_version}
  Requires: atk-devel >= %{atk_version}
  Requires: glib2-devel >= %{glib2_version}
-@@ -103,7 +108,8 @@
+@@ -103,13 +109,14 @@
  Requires: automake
  # for /usr/share/gtk-doc/html
  Requires: gtk-doc
 -
-+Provides: gtk2-devel = %{version}-%{release}
-+Obsoletes: gtk2-devel = %{version}-%{release}
++Provides: gtk2-devel = %{base_version}-%{release}
++Obsoletes: gtk2-devel = %{base_version}-%{release}
  %description devel
  The gtk+-devel package contains the header files and developer
  docs for the GTK+ widget toolkit.  
-@@ -117,6 +123,7 @@
+ 
+ %prep
+-%setup -q -n gtk+-%{version}
++%setup -q -n gtk+-%{base_version}
+ 
+ %patch0 -p1 -b .lib64
+ %patch1 -p1 -b .set-invisible-char-to-bullet
+@@ -117,6 +124,7 @@
  %patch3 -p1 -b .system-log-crash
  %patch4 -p1 -b .tab-label
  

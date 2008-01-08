@@ -45,8 +45,8 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(libexecdir)"
 libexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(libexec_PROGRAMS)
-am_gnome2_globalmenu_applet_OBJECTS = clients.$(OBJEXT) main.$(OBJEXT) \
-	misc.$(OBJEXT) ui.$(OBJEXT)
+am_gnome2_globalmenu_applet_OBJECTS = main.$(OBJEXT) ui.$(OBJEXT) \
+	menuclients.$(OBJEXT) menuserver.$(OBJEXT)
 gnome2_globalmenu_applet_OBJECTS =  \
 	$(am_gnome2_globalmenu_applet_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -236,14 +236,16 @@ AM_CFLAGS = \
 	 -g
 
 gnome2_globalmenu_applet_SOURCES = \
-	clients.c                 \
-	clients.h                 \
 	main.c                 \
-	misc.c                 \
-	misc.h                 \
 	typedefs.h                 \
 	ui.c                 \
-	ui.h 
+	ui.h                 \
+	menuclients.c                 \
+	menuclients.h                 \
+	menuserver.c                 \
+	menuserver.h                 \
+	gtkmenuembed-x11.h                 \
+	application.h 
 
 gnome2_globalmenu_applet_LDFLAGS = 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
@@ -319,9 +321,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clients.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuclients.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuserver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ui.Po@am__quote@
 
 .c.o:

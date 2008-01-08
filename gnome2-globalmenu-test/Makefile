@@ -81,13 +81,13 @@ DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run aclocal-1.10
+ACLOCAL = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run aclocal-1.10
 ALL_LINGUAS = 
-AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run tar
+AMTAR = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run tar
 AR = ar
-AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run automake-1.10
+AUTOCONF = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run automake-1.10
 AWK = gawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -154,8 +154,8 @@ LIBS =
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
-MAINT = 
-MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/missing --run makeinfo
+MAINT = #
+MAKEINFO = ${SHELL} /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -181,10 +181,10 @@ STRIP = strip
 USE_NLS = yes
 VERSION = 0.1
 XGETTEXT = /usr/bin/xgettext
-abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test
-abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test
-abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test
-abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test
+abs_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test
+abs_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test
+abs_top_builddir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test
+abs_top_srcdir = /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = gfortran
@@ -213,7 +213,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu/gnome2-globalmenu-test/install-sh
+install_sh = $(SHELL) /home/rainwoodman/Projects/gnome2-globalmenu-0.3/gnome2-globalmenu-test/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -249,7 +249,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: # $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -276,9 +276,9 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 
-$(top_srcdir)/configure:  $(am__configure_deps)
+$(top_srcdir)/configure: # $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
-$(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+$(ACLOCAL_M4): # $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -290,7 +290,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in:  $(am__configure_deps) 
+$(srcdir)/config.h.in: # $(am__configure_deps) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	rm -f stamp-h1
 	touch $@
