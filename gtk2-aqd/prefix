@@ -1,3 +1,3 @@
 #! /bin/bash
-env LD_LIBRARY_PATH=./libs $*
+env LD_LIBRARY_PATH=`pwd`/libs $*
 

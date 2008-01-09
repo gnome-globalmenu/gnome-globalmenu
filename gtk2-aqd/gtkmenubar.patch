@@ -1,5 +1,5 @@
---- gtk/gtkmenubar.orig	2008-01-08 00:13:51.000000000 -0500
-+++ gtk/gtkmenubar.c	2008-01-08 00:14:10.000000000 -0500
+--- gtk/gtkmenubar.orig	2008-01-08 20:38:04.000000000 -0500
++++ gtk/gtkmenubar.c	2008-01-08 20:42:30.000000000 -0500
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
@@ -318,7 +318,7 @@
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1106,459 @@
+@@ -938,5 +1106,460 @@
      }
  }
  
@@ -601,7 +601,7 @@
 +  menubar = GTK_MENU_BAR(menu_shell);
 +  priv = GTK_MENU_BAR_GET_PRIVATE(menubar);
 +
-+  if(GTK_WIDGET_REALIZED(menubar)){ /*if we have a container_window, move the child to container_window*/
++  if(GTK_WIDGET_REALIZED(GTK_WIDGET(menubar))){ /*if we have a container_window, move the child to container_window*/
 +	g_message("set parent window to container_window");
 +  gtk_widget_set_parent_window(child, priv->container_window);
 +	}
@@ -632,6 +632,7 @@
 +		/*If we receive a delete_event from float_window, and we are globalized,
 +          it must be because of the server is dying. a signal to unglobalize. */
 +		gtk_menu_bar_unglobalize(menubar);
++		priv->connected = FALSE;
 +		return TRUE;
 +	}
 +	return FALSE;		
@@ -778,7 +779,7 @@
 +#endif
  #define __GTK_MENU_BAR_C__
  #include "gtkaliasdef.c"
---- /dev/null	2008-01-07 12:06:53.443092546 -0500
+--- /dev/null	2008-01-08 18:34:27.457093934 -0500
 +++ gtk/gtkmenuembed-x11.h	2008-01-08 00:13:51.000000000 -0500
 @@ -0,0 +1,291 @@
 +typedef enum {
