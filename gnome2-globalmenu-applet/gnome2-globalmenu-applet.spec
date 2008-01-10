@@ -14,7 +14,7 @@ Requires:	gtk2-aqd
 Requires:	libwnck
 
 %description
-Null
+A panel applet, if the user has installed gtk2-aqd, the menubar of current activated window will be shown in the applet instead of the window; the menubar of unactivated window will disappear.
 
 %prep
 %setup
