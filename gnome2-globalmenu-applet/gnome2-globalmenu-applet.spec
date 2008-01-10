@@ -1,6 +1,6 @@
 Name: 		gnome2-globalmenu-applet
 Version: 	0.3
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Global menubar applet for Gnome2
 
 Group:		User Interface/Desktops
@@ -48,3 +48,6 @@ rm -rf %{buildroot}
 %{_libexecdir}/gnome2-globalmenu-applet
 %{_libdir}/bonobo/servers/GNOME_GlobalMenuApplet.server
 
+%changelog 
+* Wed Jan 09 2008 Feng Yu <rainwoodman@gmail.com>
+- Added description
