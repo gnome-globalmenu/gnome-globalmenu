@@ -189,7 +189,8 @@ static void application_free(Application * App);
 static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App){
 	g_print("Main window destroyed.\n");
 	application_free(App);
-	gtk_main_quit();
+	if (App->Mode == APP_STANDALONE)
+		gtk_main_quit();
 	return TRUE;
 }
 static gboolean main_window_delete_cb(GtkWindow * MainWindow, GdkEvent * event, Application * App){
