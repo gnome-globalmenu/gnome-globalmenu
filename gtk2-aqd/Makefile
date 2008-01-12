@@ -1,7 +1,7 @@
 #! /bin/bash
 
 prepare:
-	svn checkout -r "{2007-11-15}" http://svn.gnome.org/svn/gtk+/trunk gtk+-aqd
+	svn checkout http://svn.gnome.org/svn/gtk+/tags/GTK_2_12_5 gtk+-aqd
 	patch -p0 < patch.diff
 diff: patch.diff
 patch.diff:
