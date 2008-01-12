@@ -117,8 +117,12 @@ void menu_server_send_to(MenuServer * server, MenuClient * client, GlobalMenuNot
 	global_menu_socket_send_to(server->socket, client->client_xid, message);
 }
 static void menu_server_broadcast_cb(MenuClient * client, struct menu_server_broadcast_cb_struct * data){
-	g_message("menu server broadcasting to %p", 
-		(gpointer) client->client_xid);
+	g_message("menu server broadcasting to %p, with type: %s, data: %lu, %lu, %lu", 
+		(gpointer) client->client_xid, global_menu_notify_get_name(data->message->type),
+		data->message->param1,
+		data->message->param2,
+		data->message->param3
+		);
 	menu_server_send_to(data->server, client, data->message);
 }
 void menu_server_broadcast(MenuServer * server, GlobalMenuNotify * message){

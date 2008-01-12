@@ -3,10 +3,6 @@ struct _ClientInfo;
 struct _Application {
 	GtkContainer * MainWindow;
 	struct _MenuServer * Server;
-	enum AppMode {
-		APP_STANDALONE,
-		APP_APPLET
-	} Mode;
 	struct {
 		GtkImage * ClientIcon;
 		GtkLabel * TitleLabel;

@@ -269,7 +269,7 @@ static gboolean global_menu_socket_broadcast_by_name(GlobalMenuSocket * socket, 
 	window_list = _global_menu_find_windows(socket, dest_name);
 	for(node = g_list_first(window_list); node ; node = g_list_next(node)){
 		g_message("%s: sending to %p", __func__, (gpointer) node->data);
-		global_menu_socket_send_to(socket, node->data, notify);
+		global_menu_socket_send_to(socket, (Window)node->data, notify);
 	}
 	g_list_free(window_list);
 }

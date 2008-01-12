@@ -99,16 +99,6 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	ClientInfo * info;
 	GList * node = NULL;
 
-	if(App->Mode == APP_STANDALONE && 
-		gtk_window_has_toplevel_focus(
-			GTK_WINDOW(gtk_widget_get_toplevel(
-				GTK_WIDGET(App->MainWindow))
-			)
-		)
-	) {
-				/*Don't change if I am activted*/
-		return;
-	}
 	active_window = wnck_screen_get_active_window(screen);
 
 	g_print("Active Window_changed\n");
@@ -152,7 +142,7 @@ static void client_new_cb(MenuServer * server, MenuClient * client, Application 
 	ClientInfo * info = g_new0(ClientInfo, 1);
 	GlobalMenuNotify notify;
 	GtkAllocation * allocation;
-	g_print("Applet: Client New\n");
+	g_print("Applet: Client New:%p\n", (void*)client->client_xid);
 	info->menu_client = client;
 	info->float_window = gdk_window_foreign_new(client->float_xid);
 	info->x = 0;
@@ -163,6 +153,8 @@ static void client_new_cb(MenuServer * server, MenuClient * client, Application 
 	notify.type = GM_NOTIFY_SIZE_ALLOCATE;
 	notify.SizeAllocate.width = allocation->width;
 	notify.SizeAllocate.height = allocation->height;
+	g_message("client_new_cb: allocate->w, h = %d, %d", allocation->width,
+			allocation->height);
 	menu_server_send_to(App->Server, info->menu_client, &notify);
 	App->Clients = g_list_append(App->Clients, info);
 }
@@ -189,8 +181,6 @@ static void application_free(Application * App);
 static gboolean main_window_destroy_cb(GtkWindow * MainWindow, Application * App){
 	g_print("Main window destroyed.\n");
 	application_free(App);
-	if (App->Mode == APP_STANDALONE)
-		gtk_main_quit();
 	return TRUE;
 }
 static gboolean main_window_delete_cb(GtkWindow * MainWindow, GdkEvent * event, Application * App){
@@ -209,15 +199,15 @@ static void main_window_change_background_cb(PanelApplet * applet, PanelAppletBa
 	g_return_if_fail(window);
 	switch(type){
 		case PANEL_NO_BACKGROUND:{
-			style = gtk_widget_get_style(App->MainWindow);
+			style = gtk_widget_get_style(GTK_WIDGET(App->MainWindow));
 			gdk_window_set_back_pixmap(window, NULL, FALSE);
-			gtk_widget_modify_bg(App->Holder, GTK_STATE_NORMAL, &style->bg[GTK_STATE_NORMAL]);
+			gtk_widget_modify_bg(GTK_WIDGET(App->Holder), GTK_STATE_NORMAL, &style->bg[GTK_STATE_NORMAL]);
 			color_name = gdk_color_to_string(&style->bg[GTK_STATE_NORMAL]);
 			break;
 		}
 		case PANEL_COLOR_BACKGROUND:
 			gdk_window_set_back_pixmap(window, NULL, FALSE);
-			gtk_widget_modify_bg(App->Holder, GTK_STATE_NORMAL, color);
+			gtk_widget_modify_bg(GTK_WIDGET(App->Holder), GTK_STATE_NORMAL, color);
 			color_name = gdk_color_to_string(color);
 			break;
 		case PANEL_PIXMAP_BACKGROUND:
@@ -256,19 +246,20 @@ static void main_window_change_orient_cb(PanelApplet * applet, PanelAppletOrient
 static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, Application * App){
 	g_print("Holder resizesd.\n");
 	GlobalMenuNotify notify;
-	g_print("Broadcast message to all clients\n");
-	notify.type = GM_NOTIFY_SIZE_ALLOCATE;
-	notify.SizeAllocate.width = allocation->width;
-	notify.SizeAllocate.height = allocation->height;
-	menu_server_broadcast(App->Server, &notify);
+	g_print("holder_resize_cb:Broadcast message to all clients\n");
+	if (App->ActiveClient) {
+		notify.type = GM_NOTIFY_SIZE_ALLOCATE;
+		notify.SizeAllocate.width = allocation->width;
+		notify.SizeAllocate.height = allocation->height;
+		menu_server_broadcast(App->Server, &notify);
+//		menu_server_send_to(App->Server, App->ActiveClient->menu_client, &notify);
+	}
 
 }
 static void label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
 	g_print("client icon action.\n");
-	if(App->Mode == APP_APPLET){ /*Emit the applet popup menu*/
-		if(button->button == 1){
-			g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", NULL);
-		}
+	if(button->button == 1){
+		g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", NULL);
 	}
 }
 static void backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
@@ -318,7 +309,7 @@ static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Appli
 	ui_repaint_all(App);
 }
 
-static Application * application_new(GtkContainer * mainwindow, enum AppMode Mode){
+static Application * application_new(GtkContainer * mainwindow){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	UICallbacks callback_table;
@@ -333,7 +324,6 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 	menu_server_set_callback(App->Server, 
 		MS_CB_CLIENT_DESTROY, 
 		(MenuServerCallback) client_destroy_cb);
-	App->Mode = Mode;
 	App->MainWindow = mainwindow;
 
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
@@ -341,13 +331,11 @@ static Application * application_new(GtkContainer * mainwindow, enum AppMode Mod
 /******The delete-event not useful any more, since panel-applet dont receive it. *******/
 	g_signal_connect(G_OBJECT(App->MainWindow), "delete-event",
 		G_CALLBACK(main_window_delete_cb), App);
-	if(App->Mode == APP_APPLET){
-		g_signal_connect(G_OBJECT(App->MainWindow), "change-background",
+	g_signal_connect(G_OBJECT(App->MainWindow), "change-background",
 			G_CALLBACK(main_window_change_background_cb), App);
-		g_signal_connect(G_OBJECT(App->MainWindow), "change-orient",
+	g_signal_connect(G_OBJECT(App->MainWindow), "change-orient",
 			G_CALLBACK(main_window_change_orient_cb), App);
-		panel_applet_set_background_widget(App->MainWindow, App->MainWindow);
-	}
+	panel_applet_set_background_widget(App->MainWindow, App->MainWindow);
 /**The Screen***/
 	gdkscreen = gtk_widget_get_screen(GTK_WIDGET(App->MainWindow));
 	g_print("GDK SCREEN number is %d\n", gdk_screen_get_number(gdkscreen));
@@ -396,12 +384,6 @@ static void application_free(Application * App){
 }
 
 
-static gboolean start_standalone(GtkWindow * mainwindow, gpointer unused){
-	Application * App;
-	App = application_new(GTK_CONTAINER(mainwindow), APP_STANDALONE);
-	
-	return TRUE;
-}
 
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet2_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet2"
@@ -416,7 +398,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
-    App = application_new(GTK_CONTAINER(applet), APP_APPLET);
+    App = application_new(GTK_CONTAINER(applet));
     return TRUE;
   } else {
 	return FALSE;
@@ -434,27 +416,14 @@ int main (int argc, char *argv [])
 	textdomain (GETTEXT_PACKAGE);
 #endif
 	
-	if(argc == 1){
-	/*standalone mode*/
-		GtkWindow * mainwindow;
-		gtk_set_locale ();
-		gtk_init (&argc, &argv);
-		mainwindow = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-		g_signal_connect(G_OBJECT(mainwindow), "show", G_CALLBACK(start_standalone), NULL);
-		gtk_widget_show_all(GTK_WIDGET(mainwindow));
-		gtk_main ();
-		return 0;
-	} else{
-	/*bonobo server mode*/
-		context = g_option_context_new("");
-		program = gnome_program_init (APP_NAME, APP_VERSION,
-						  LIBGNOMEUI_MODULE,
-						  argc, argv,
-						  GNOME_PARAM_GOPTION_CONTEXT, context,	
-						  GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
-						  GNOME_PARAM_NONE);
-		retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
-		g_object_unref (program);
-		return retval;
-	}
+	context = g_option_context_new("");
+	program = gnome_program_init (APP_NAME, APP_VERSION,
+			LIBGNOMEUI_MODULE,
+			argc, argv,
+			GNOME_PARAM_GOPTION_CONTEXT, context,	
+			GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
+			GNOME_PARAM_NONE);
+	retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
+	g_object_unref (program);
+	return retval;
 }

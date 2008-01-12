@@ -80,9 +80,7 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 				FALSE, FALSE, 0);
 
 /*******Applet tweaks*************/
-	if(App->Mode == APP_APPLET){ /*setup a compact visual if in a panel*/
-		gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
-	}
+	gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
 /*****Hide them since they don't do nothing**********/
 	gtk_widget_hide(GTK_WIDGET(App->Forward));
 	gtk_widget_hide(GTK_WIDGET(App->Backward));
