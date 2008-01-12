@@ -1,5 +1,5 @@
 Name: 		gnome2-globalmenu-applet
-Version: 	0.3
+Version: 	0.3.@SVNVERSION@
 Release:	3%{?dist}
 Summary:	Global menubar applet for Gnome2
 
@@ -22,13 +22,10 @@ A panel applet, if the user has installed gtk2-aqd, the menubar of current activ
 %build
 %configure
 make
-#cat GNOME_GlobalMenuApplet.server.sample | sed "s;APP_LOCATION;"%{_libexecdir}";" > GNOME_GlobalMenuApplet.server
 
 %install
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
-#install -d %{buildroot}%{_libdir}/bonobo/servers
-#install -p GNOME_GlobalMenuApplet.server %{buildroot}%{_libdir}/bonobo/servers
 
 %clean
 rm -rf %{buildroot}
