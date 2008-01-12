@@ -7,7 +7,7 @@ SVNVERSION="`svnversion`"
 AC_SUBST(SVNVERSION)
 AC_DEFINE_UNQUOTED(SVNVERSION,"$SVNVERSION", [svn version])
 
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION."$SVNVERSION")
+AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
@@ -47,9 +47,13 @@ AC_SUBST(TEST_CLIENT_LIBS)
 
 AC_OUTPUT([
 bonobo-server.sh
+dist.sh
 Makefile
 gnome2-globalmenu-applet.spec
 src/Makefile
 po/Makefile.in
 ],
-[chmod +x bonobo-server.sh])
+[
+chmod +x bonobo-server.sh
+chmod +x dist.sh
+])
