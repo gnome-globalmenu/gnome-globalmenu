@@ -15,6 +15,7 @@ AM_CFLAGS =\
 
 libexec_PROGRAMS = gnome2-globalmenu-applet 
 
+
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
 	typedefs.h                 \
@@ -28,11 +29,11 @@ gnome2_globalmenu_applet_SOURCES = \
 	application.h 		\
 	preference.h	\
 	preference.c
-.PHONY: gtkmenuembed-x11.h
-gtkmenuembed-x11.h:
-	([ -f ../../gtk2-aqd/gtkmenuembed-x11.h ] && \
-	[ ../../gtk2-aqd/gtkmenuembed-x11.h -nt $@ ] && \
-	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ ) || echo 1
+
+gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
+	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
+
+
 gnome2_globalmenu_applet_LDFLAGS = 
 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
