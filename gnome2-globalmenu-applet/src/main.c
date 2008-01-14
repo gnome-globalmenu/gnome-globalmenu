@@ -252,7 +252,6 @@ static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, App
 		notify.SizeAllocate.width = allocation->width;
 		notify.SizeAllocate.height = allocation->height;
 		menu_server_broadcast(App->Server, &notify);
-//		menu_server_send_to(App->Server, App->ActiveClient->menu_client, &notify);
 	}
 
 }
@@ -303,7 +302,10 @@ static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Appli
 	}
 	ui_repaint_all(App);
 }
-
+static void menu_about_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
+	g_message("%s: cname = %s", __func__, cname);
+	ui_show_about(App);
+}
 static Application * application_new(GtkContainer * mainwindow){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
@@ -349,6 +351,7 @@ static Application * application_new(GtkContainer * mainwindow){
 	callback_table.forward_action_cb = G_CALLBACK(forward_action_cb);
 	callback_table.backward_action_cb = G_CALLBACK(backward_action_cb);
 	callback_table.holder_resize_cb = G_CALLBACK(holder_resize_cb);
+	callback_table.menu_about_cb = (BonoboUIVerbFn)menu_about_cb;
 
 	ui_create_all(App, &callback_table);
 

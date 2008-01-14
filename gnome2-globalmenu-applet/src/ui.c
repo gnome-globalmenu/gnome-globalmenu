@@ -7,6 +7,7 @@
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libbonoboui.h>
 
 #include "typedefs.h"
 #include "application.h"
@@ -33,6 +34,27 @@ GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id){
 			stock_id, GTK_ICON_SIZE_MENU));
 	gtk_container_add(GTK_CONTAINER(rt), GTK_WIDGET(icon));
 	return rt;
+}
+void ui_create_popup_menu(Application * App, UICallbacks * callbacks){
+	static const char toggle_menu_xml [] =
+	"<popup name=\"button3\">\n"
+		"<menuitem name=\"About\" "
+		"          verb=\"About\" "
+		"          _label=\"_About\" "
+		"          pixtype=\"stock\" "
+		"          pixname=\"gtk-about\"/>\n"
+   "</popup>\n";
+	static BonoboUIVerb toggle_menu_verbs[] = {
+		BONOBO_UI_VERB ("About", NULL),
+		BONOBO_UI_VERB_END
+	};
+	toggle_menu_verbs[0].cb = callbacks->menu_about_cb;
+	BonoboUIComponent* popup_component = 
+		panel_applet_get_popup_component(App->MainWindow);
+	panel_applet_setup_menu(App->MainWindow, 
+			toggle_menu_xml, 
+			toggle_menu_verbs, 
+			App);
 }
 void ui_create_all(Application * App, UICallbacks * callbacks){
 	GtkBox * basebox = NULL;
@@ -84,7 +106,7 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 /*****Hide them since they don't do nothing**********/
 	gtk_widget_hide(GTK_WIDGET(App->Forward));
 	gtk_widget_hide(GTK_WIDGET(App->Backward));
-
+	ui_create_popup_menu(App, callbacks);
 
 }
 
@@ -108,4 +130,14 @@ void ui_repaint_all(Application * App){
 
 	gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
 
+}
+
+void ui_show_about(Application * App){
+	gchar * authors[] = {
+		"Yu Feng <rainwoodman@gmail.com>",
+		"Mingxi Wu <fengshenx.@gmail.com>",
+		NULL
+		}	;
+	gtk_show_about_dialog(NULL, 
+				"authors", authors, NULL);
 }
