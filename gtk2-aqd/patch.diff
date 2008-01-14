@@ -24,7 +24,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  /* Properties */
  enum {
    PROP_0,
-@@ -55,6 +66,20 @@
+@@ -55,6 +66,18 @@
  {
    GtkPackDirection pack_direction;
    GtkPackDirection child_pack_direction;
@@ -39,13 +39,11 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +  GdkWindow * container_window;
 +  GdkWindow * master_window;
 +  gboolean visible;
-+  gint ythickness_backup;
-+  gint xthickness_backup;
 +#endif
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -82,6 +107,23 @@
+@@ -82,6 +105,23 @@
  static gint gtk_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
@@ -69,7 +67,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
-@@ -112,6 +154,16 @@
+@@ -112,6 +152,16 @@
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
    menu_shell_class->move_current = gtk_menu_bar_move_current;
  
@@ -86,7 +84,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    binding_set = gtk_binding_set_by_class (class);
    gtk_binding_entry_add_signal (binding_set,
  				GDK_Left, 0,
-@@ -220,6 +272,21 @@
+@@ -220,6 +270,19 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -100,15 +98,13 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	priv->container_window = NULL;
 +	priv->float_window = NULL;
 +	priv->master_window = NULL;
-+	priv->ythickness_backup = -1;
-+	priv->xthickness_backup = -1;
 +	priv->visible = FALSE;
 +	priv->detached = FALSE;
 +#endif
  }
  
  GtkWidget*
-@@ -273,7 +340,7 @@
+@@ -273,7 +336,7 @@
  }
  
  static void
@@ -117,28 +113,17 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  			   GtkRequisition *requisition)
  {
    GtkMenuBar *menu_bar;
-@@ -288,8 +355,8 @@
-   g_return_if_fail (GTK_IS_MENU_BAR (widget));
-   g_return_if_fail (requisition != NULL);
- 
--  requisition->width = 0;
--  requisition->height = 0;
-+  requisition->width = -1;
-+  requisition->height = -1;
-   
-   if (GTK_WIDGET_VISIBLE (widget))
-     {
-@@ -344,6 +411,9 @@
+@@ -344,6 +407,9 @@
                                ipadding +
  			      BORDER_SPACING) * 2;
  
 +#ifdef GNOME_GLOBAL_MENU
-+	if(!priv->globalized)
++	if(!priv->detached) /*no matter realized or not*/
 +#endif
        if (get_shadow_type (menu_bar) != GTK_SHADOW_NONE)
  	{
  	  requisition->width += widget->style->xthickness * 2;
-@@ -351,9 +421,39 @@
+@@ -351,9 +417,39 @@
  	}
      }
  }
@@ -179,7 +164,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  			    GtkAllocation *allocation)
  {
    GtkMenuBar *menu_bar;
-@@ -377,12 +477,14 @@
+@@ -377,12 +473,14 @@
  
    direction = gtk_widget_get_direction (widget);
  
@@ -195,17 +180,20 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
    
    if (menu_shell->children)
-@@ -393,6 +495,9 @@
+@@ -393,6 +491,12 @@
        child_allocation.y = (GTK_CONTAINER (menu_bar)->border_width +
  			    BORDER_SPACING);
        
 +#ifdef GNOME_GLOBAL_MENU
-+	if(!priv->globalized)
++	g_message("detached = %d", priv->detached);
++	g_message("thickness = %d", widget->style->ythickness);
++	g_message("shadowtype<>shandow_now = %d", get_shadow_type(menu_bar)!=GTK_SHADOW_NONE);
++	if(!priv->detached)
 +#endif
        if (get_shadow_type (menu_bar) != GTK_SHADOW_NONE)
  	{
  	  child_allocation.x += widget->style->xthickness;
-@@ -417,8 +522,11 @@
+@@ -417,8 +521,11 @@
  	      
  	      gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
  						 &toggle_size);
@@ -218,7 +206,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  	      if (priv->child_pack_direction == GTK_PACK_DIRECTION_LTR ||
  		  priv->child_pack_direction == GTK_PACK_DIRECTION_RTL)
  		child_requisition.width += toggle_size;
-@@ -502,11 +610,64 @@
+@@ -502,11 +609,64 @@
  	}
      }
  }
@@ -240,7 +228,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +  priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
 +
 +  if (GTK_WIDGET_REALIZED (widget)){
-+	  if (!priv->globalized){
++	  if (!priv->detached){
 +	    priv->container_allocation = *allocation;
 +		gdk_window_move_resize (priv->container_window,
 +					0, 0,
@@ -283,7 +271,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
  
    if (GTK_WIDGET_DRAWABLE (widget))
-@@ -515,7 +676,18 @@
+@@ -515,7 +675,18 @@
  
        border = GTK_CONTAINER (widget)->border_width;
        
@@ -302,7 +290,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  		     widget->window,
                       GTK_WIDGET_STATE (widget),
                       get_shadow_type (GTK_MENU_BAR (widget)),
-@@ -523,7 +695,8 @@
+@@ -523,7 +694,8 @@
  		     border, border,
  		     widget->allocation.width - border * 2,
                       widget->allocation.height - border * 2);
@@ -312,7 +300,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static gint
-@@ -535,6 +708,12 @@
+@@ -535,6 +707,12 @@
  
    if (GTK_WIDGET_DRAWABLE (widget))
      {
@@ -325,7 +313,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
        gtk_menu_bar_paint (widget, &event->area);
  
        (* GTK_WIDGET_CLASS (gtk_menu_bar_parent_class)->expose_event) (widget, event);
-@@ -648,6 +827,13 @@
+@@ -648,6 +826,13 @@
  
    if (!menubars)
      {
@@ -339,7 +327,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1124,464 @@
+@@ -938,5 +1123,464 @@
      }
  }
  

@@ -12,7 +12,7 @@
 
 %define base_version 2.12.3
 %define bin_version 2.10.0
-%define svn_version 0.3.svn267
+%define svn_version 0.3.svn268
 
 Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
 Name: gtk2-aqd
