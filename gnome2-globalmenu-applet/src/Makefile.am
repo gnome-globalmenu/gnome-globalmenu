@@ -28,10 +28,11 @@ gnome2_globalmenu_applet_SOURCES = \
 	application.h 		\
 	preference.h	\
 	preference.c
-
-gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
-	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@
-
+.PHONY: gtkmenuembed-x11.h
+gtkmenuembed-x11.h:
+	([ -f ../../gtk2-aqd/gtkmenuembed-x11.h ] && \
+	[ ../../gtk2-aqd/gtkmenuembed-x11.h -nt $@ ] && \
+	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ ) || echo 1
 gnome2_globalmenu_applet_LDFLAGS = 
 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
