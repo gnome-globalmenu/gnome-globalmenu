@@ -76,11 +76,11 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	App->TitleLabel = GTK_LABEL(gtk_label_new(""));
 	gtk_label_set_max_width_chars(App->TitleLabel, 10);
 
-/*	label_area = ui_create_label_area(App);
+	label_area = ui_create_label_area(App);
 	gtk_box_pack_start(basebox, GTK_WIDGET(label_area), FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(label_area), "button-press-event",
 			G_CALLBACK(callbacks->label_area_action_cb), App);
-*/
+
 /****** Move Backward ***********/
 	App->Backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Backward), FALSE, FALSE, 0);
@@ -116,10 +116,15 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 }
 
 void ui_repaint_all(Application * App){
+	gboolean show_arrows = App->AppletProperty.show_arrows;
 	gboolean show_backward;
 	gboolean show_forward;
-
-	gboolean show_arrows = App->AppletProperty.show_arrows;
+	gboolean show_icon = App->AppletProperty.show_icon;
+	gboolean show_title = App->AppletProperty.show_title;
+	
+	GdkPixbuf * icon;
+	gint icon_width;
+	gint icon_height;
 	show_backward = TRUE & show_arrows;
 	show_forward = TRUE & show_arrows;
 
@@ -132,7 +137,24 @@ void ui_repaint_all(Application * App){
 	else
 		gtk_widget_hide(GTK_WIDGET(App->Backward));
 
-	gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
+	if(show_icon && App->ActiveIcon){
+		icon_width = GTK_WIDGET(App->MainWindow)->allocation.width;
+		icon_height = GTK_WIDGET(App->MainWindow)->allocation.height;
+		if(icon_height < icon_width) 
+			icon_width = icon_height;
+		else 
+			icon_height = icon_width;
+		icon = gdk_pixbuf_scale_simple(App->ActiveIcon, icon_width, icon_height, GDK_INTERP_BILINEAR);
+		gtk_image_set_from_pixbuf(App->ClientIcon, icon);
+		g_object_unref(icon);
+		gtk_widget_show(GTK_WIDGET(App->ClientIcon));
+	}else
+		gtk_widget_hide(GTK_WIDGET(App->ClientIcon));
+	if(show_title && App->ActiveTitle){
+		gtk_label_set_text(GTK_LABEL(App->TitleLabel), App->ActiveTitle);
+		gtk_widget_show(GTK_WIDGET(App->TitleLabel));
+	}else
+		gtk_widget_hide(GTK_WIDGET(App->TitleLabel));
 
 }
 

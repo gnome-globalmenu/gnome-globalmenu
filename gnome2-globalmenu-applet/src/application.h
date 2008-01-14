@@ -20,6 +20,8 @@ struct _Application {
 	} AppletProperty;
 	struct _WnckScreen * Screen;
 	struct _ClientInfo * ActiveClient;
+	gchar * ActiveTitle;
+	GdkPixbuf * ActiveIcon;
 	GList * Clients;
 };
 

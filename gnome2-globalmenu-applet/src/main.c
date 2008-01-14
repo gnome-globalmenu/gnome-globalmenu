@@ -100,11 +100,23 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	ClientInfo * info;
 	GList * node = NULL;
 
+	if(App->ActiveTitle){
+		g_free(App->ActiveTitle);
+		App->ActiveTitle = NULL;
+	}
+	if(App->ActiveIcon){
+		g_object_unref(App->ActiveIcon);
+		App->ActiveIcon = NULL;
+	}
+
 	active_window = wnck_screen_get_active_window(screen);
 
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_xid = wnck_window_get_xid(active_window);
+		App->ActiveTitle = g_strdup(wnck_window_get_name(active_window));
+		App->ActiveIcon = wnck_window_get_icon(active_window);
+		g_object_ref(App->ActiveIcon);
 		g_print("Active XWin ID is %p\n", (gpointer) active_xid);
 		for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
 			if(((ClientInfo*)node->data)->menu_client->master_xid == active_xid){
@@ -112,6 +124,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 				break;
 			}
 		}
+				
 	}else {
 		g_print("Active Window is not a window, that's Stupid!\n");
 	}
@@ -256,13 +269,15 @@ static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, App
 	}
 
 }
-static void label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
+static gboolean label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
 	g_print("client icon action.\n");
 	if(button->button == 1){
-		g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", NULL);
+		gboolean rt;
+		g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", &rt);
 	}
+	return TRUE;
 }
-static void backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+static gboolean backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
 	GtkAllocation *allocation;
 	GlobalMenuNotify notify;
 	g_print("backward action.\n");
@@ -281,8 +296,9 @@ static void backward_action_cb(GtkWidget * widget, GdkEventButton * button, Appl
 				App->ActiveClient->y);
 	}
 	ui_repaint_all(App);
+	return TRUE;
 }
-static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+static gboolean forward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
 	GtkAllocation *allocation;
 	GlobalMenuNotify notify;
 	g_print("forward action.\n");
@@ -302,6 +318,7 @@ static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Appli
 				App->ActiveClient->y);
 	}
 	ui_repaint_all(App);
+	return TRUE;
 }
 static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
 	g_message("%s: cname = %s", __func__, cname);
@@ -318,6 +335,9 @@ static Application * application_new(GtkContainer * mainwindow){
 	App->Server = menu_server_new();
 	App->Clients = NULL;
 	App->ActiveClient = NULL;
+	App->ActiveTitle = NULL;
+	App->ActiveIcon = NULL;
+
 	menu_server_set_user_data(App->Server, App);
 	menu_server_set_callback(App->Server, 
 		MS_CB_CLIENT_NEW, 

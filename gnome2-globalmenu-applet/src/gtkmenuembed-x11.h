@@ -1,3 +1,15 @@
+/***************************/
+/*!!! don't edit this file if you are in applet directory */
+/*!!1 edit it in gtk2-aqd directory */
+/*!!! when making the applet, it will cp this file from gtk2-aqd to applet directory */
+/*!!! see applet/src/Makefile.am:
+ *!!! gtkmenuembed-x11.h: ......
+ *!!! 	cp ... ... */
+/************************
+ * !!! Also, part of this file is contained in the patch. If you want to make a new patch
+ * after editing this file, cp it to the gtk+-aqd/gtk and make diff */
+ /* If your edit is in gtk+-aqd/gtk/gtkmenuembed-x11.h, don't forget to copy it here in order to let the applet know you changes*/
+
 typedef enum {
 	GM_NOTIFY_NOT_GM,
 	GM_NOTIFY_MIN,
