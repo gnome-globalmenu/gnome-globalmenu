@@ -52,6 +52,7 @@ Makefile
 gnome2-globalmenu-applet.spec
 src/Makefile
 po/Makefile.in
+gnome2-globalmenu-applet.schema
 ],
 [
 chmod +x bonobo-server.sh

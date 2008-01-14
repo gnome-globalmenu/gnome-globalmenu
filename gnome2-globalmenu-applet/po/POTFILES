@@ -1,1 +1,2 @@
-	../src/main.c
+	../src/main.c \
+	../src/preference.c

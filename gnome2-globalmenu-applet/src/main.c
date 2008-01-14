@@ -38,7 +38,6 @@
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
-#include <gconf/gconf-client.h>
 #include <panel-applet.h>
 /*
  * Standard gettext macros.
@@ -314,6 +313,8 @@ static Application * application_new(GtkContainer * mainwindow){
 	GdkScreen * gdkscreen = NULL;
 	UICallbacks callback_table;
 	
+	preference_load_conf(App);
+
 	App->Server = menu_server_new();
 	App->Clients = NULL;
 	App->ActiveClient = NULL;

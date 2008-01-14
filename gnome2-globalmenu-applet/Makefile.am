@@ -24,7 +24,10 @@ EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files) $(script_i
 DISTCLEANFILES = $(intltool_files) $(scripts_files)
 bonobodir= $(libdir)/bonobo/servers
 bonobo_DATA= GNOME_GlobalMenuApplet.server
-DISTCLEANFILES += GNOME_GlobalMenuApplet.server
+schemadir= $(etcdir)/schema
+schema_DATA= gnome2-globalmenu-applet.schema
+
+DISTCLEANFILES += GNOME_GlobalMenuApplet.server gnome2-globalmenu-applet.schema
 
 GNOME_GlobalMenuApplet.server: bonobo-server.sh
 	./bonobo-server.sh > $@
