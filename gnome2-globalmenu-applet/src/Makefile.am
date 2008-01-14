@@ -25,7 +25,9 @@ gnome2_globalmenu_applet_SOURCES = \
 	menuserver.c                 \
 	menuserver.h                 \
 	gtkmenuembed-x11.h                 \
-	application.h 
+	application.h 		\
+	preference.h	\
+	preference.c
 
 gnome2_globalmenu_applet_LDFLAGS = 
 

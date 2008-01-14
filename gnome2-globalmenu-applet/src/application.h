@@ -13,6 +13,10 @@ struct _Application {
 	struct {
 		GdkPixmap * Background;
 		GdkColor Color;
+		gboolean show_title; /*If show current window's title*/
+		gboolean show_icon; /*current window's icon*/
+/*The above two property has no effect, since not implemented yet.*/
+		gboolean show_arrows; /*whether show the stupid scrolling arrows*/
 	} AppletProperty;
 	struct _WnckScreen * Screen;
 	struct _ClientInfo * ActiveClient;

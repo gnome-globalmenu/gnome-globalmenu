@@ -4,7 +4,7 @@ struct _UICallbacks {
 	GCallback forward_action_cb; 
 	GCallback backward_action_cb;
 	GCallback holder_resize_cb;
-	BonoboUIVerbFn menu_about_cb;
+	BonoboUIVerbFn popup_menu_cb;
 };
 typedef struct _UICallbacks UICallbacks;
 GtkEventBox * ui_create_label_area(struct _Application * App);

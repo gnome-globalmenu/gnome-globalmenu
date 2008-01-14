@@ -46,7 +46,8 @@ am__installdirs = "$(DESTDIR)$(libexecdir)"
 libexecPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(libexec_PROGRAMS)
 am_gnome2_globalmenu_applet_OBJECTS = main.$(OBJEXT) ui.$(OBJEXT) \
-	menuclients.$(OBJEXT) menuserver.$(OBJEXT)
+	menuclients.$(OBJEXT) menuserver.$(OBJEXT) \
+	preference.$(OBJEXT)
 gnome2_globalmenu_applet_OBJECTS =  \
 	$(am_gnome2_globalmenu_applet_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -246,7 +247,9 @@ gnome2_globalmenu_applet_SOURCES = \
 	menuserver.c                 \
 	menuserver.h                 \
 	gtkmenuembed-x11.h                 \
-	application.h 
+	application.h 		\
+	preference.h	\
+	preference.c
 
 gnome2_globalmenu_applet_LDFLAGS = 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
@@ -325,6 +328,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuclients.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuserver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preference.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ui.Po@am__quote@
 
 .c.o:

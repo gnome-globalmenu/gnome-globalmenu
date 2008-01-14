@@ -68,6 +68,8 @@
 #include "menuclients.h"
 #include "menuserver.h"
 #include "ui.h"
+#include "preference.h"
+
 typedef struct _ClientInfo{
 	MenuClient * menu_client;
 	GdkWindow * float_window;
@@ -302,9 +304,10 @@ static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Appli
 	}
 	ui_repaint_all(App);
 }
-static void menu_about_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
+static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
 	g_message("%s: cname = %s", __func__, cname);
-	ui_show_about(App);
+	if(g_str_equal(cname, "About")) ui_show_about(App);
+	if(g_str_equal(cname, "Preference")) preference_show_dialog(App);
 }
 static Application * application_new(GtkContainer * mainwindow){
 	Application * App = g_new0(Application, 1);
@@ -351,7 +354,7 @@ static Application * application_new(GtkContainer * mainwindow){
 	callback_table.forward_action_cb = G_CALLBACK(forward_action_cb);
 	callback_table.backward_action_cb = G_CALLBACK(backward_action_cb);
 	callback_table.holder_resize_cb = G_CALLBACK(holder_resize_cb);
-	callback_table.menu_about_cb = (BonoboUIVerbFn)menu_about_cb;
+	callback_table.popup_menu_cb = (BonoboUIVerbFn)popup_menu_cb;
 
 	ui_create_all(App, &callback_table);
 

@@ -43,12 +43,17 @@ void ui_create_popup_menu(Application * App, UICallbacks * callbacks){
 		"          _label=\"_About\" "
 		"          pixtype=\"stock\" "
 		"          pixname=\"gtk-about\"/>\n"
+		"<menuitem name=\"Preference\" "
+		"          verb=\"Preference\" "
+		"          _label=\"_Preference\" "
+		"          pixtype=\"stock\" "
+		"          pixname=\"gtk-preferences\"/>\n"
    "</popup>\n";
-	static BonoboUIVerb toggle_menu_verbs[] = {
-		BONOBO_UI_VERB ("About", NULL),
+	BonoboUIVerb toggle_menu_verbs[] = {
+		BONOBO_UI_VERB ("About", callbacks->popup_menu_cb),
+		BONOBO_UI_VERB ("Preference", callbacks->popup_menu_cb),
 		BONOBO_UI_VERB_END
 	};
-	toggle_menu_verbs[0].cb = callbacks->menu_about_cb;
 	BonoboUIComponent* popup_component = 
 		panel_applet_get_popup_component(App->MainWindow);
 	panel_applet_setup_menu(App->MainWindow, 
@@ -114,10 +119,9 @@ void ui_repaint_all(Application * App){
 	gboolean show_backward;
 	gboolean show_forward;
 
-
-	show_backward = TRUE;
-	show_forward = TRUE;
-	
+	gboolean show_arrows = App->AppletProperty.show_arrows;
+	show_backward = TRUE & show_arrows;
+	show_forward = TRUE & show_arrows;
 
 	if(show_forward) 
 		gtk_widget_show(GTK_WIDGET(App->Forward));
