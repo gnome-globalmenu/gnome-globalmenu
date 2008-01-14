@@ -330,7 +330,6 @@ static Application * application_new(GtkContainer * mainwindow){
 	GdkScreen * gdkscreen = NULL;
 	UICallbacks callback_table;
 	
-	preference_load_conf(App);
 
 	App->Server = menu_server_new();
 	App->Clients = NULL;
@@ -346,6 +345,8 @@ static Application * application_new(GtkContainer * mainwindow){
 		MS_CB_CLIENT_DESTROY, 
 		(MenuServerCallback) client_destroy_cb);
 	App->MainWindow = mainwindow;
+/*Only when MainWindow is known we can load conf*/
+	preference_load_conf(App);
 
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
 		G_CALLBACK(main_window_destroy_cb), App);
