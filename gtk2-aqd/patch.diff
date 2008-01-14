@@ -1,6 +1,6 @@
 Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
---- gtk+-aqd/gtk/gtkmenubar.c	(revision 19353)
+--- gtk+-aqd/gtk/gtkmenubar.c	(revision 19362)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
@@ -803,7 +803,19 @@ Index: gtk+-aqd/gtk/gtkmenuembed-x11.h
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenuembed-x11.h	(revision 0)
 +++ gtk+-aqd/gtk/gtkmenuembed-x11.h	(revision 0)
-@@ -0,0 +1,291 @@
+@@ -0,0 +1,303 @@
++/***************************/
++/*!!! don't edit this file if you are in applet directory */
++/*!!1 edit it in gtk2-aqd directory */
++/*!!! when making the applet, it will cp this file from gtk2-aqd to applet directory */
++/*!!! see applet/src/Makefile.am:
++ *!!! gtkmenuembed-x11.h: ......
++ *!!! 	cp ... ... */
++/************************
++ * !!! Also, part of this file is contained in the patch. If you want to make a new patch
++ * after editing this file, cp it to the gtk+-aqd/gtk and make diff */
++ /* If your edit is in gtk+-aqd/gtk/gtkmenuembed-x11.h, don't forget to copy it here in order to let the applet know you changes*/
++
 +typedef enum {
 +	GM_NOTIFY_NOT_GM,
 +	GM_NOTIFY_MIN,
@@ -1075,7 +1087,7 @@ Index: gtk+-aqd/gtk/gtkmenuembed-x11.h
 +	window_list = _global_menu_find_windows(socket, dest_name);
 +	for(node = g_list_first(window_list); node ; node = g_list_next(node)){
 +		g_message("%s: sending to %p", __func__, (gpointer) node->data);
-+		global_menu_socket_send_to(socket, node->data, notify);
++		global_menu_socket_send_to(socket, (Window)node->data, notify);
 +	}
 +	g_list_free(window_list);
 +}
