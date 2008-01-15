@@ -31,6 +31,7 @@
 #include <config.h>
 
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
@@ -74,7 +75,11 @@ typedef struct _ClientInfo{
 	GdkWindow * float_window;
 	int x;
 	int y;
+	int pid;
 } ClientInfo;
+
+static gboolean get_cardinal_by_atom(Window xwin, Display *display, Atom atom, int* ret);
+
 static void return_client_float_window(ClientInfo * client, Application * App){
 	g_print("Return client float window\n");
 	GlobalMenuNotify notify;
@@ -96,6 +101,7 @@ static void steal_client_float_window(ClientInfo * client, Application * App){
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
 	WnckWindow * active_window = NULL;
 	Window active_xid = 0; 
+	int active_pid = 0;
 	gboolean client_known = FALSE;
 	ClientInfo * info;
 	GList * node = NULL;
@@ -110,17 +116,25 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	}
 
 	active_window = wnck_screen_get_active_window(screen);
+/* XXX:why sometimes active_window is NULL? */
+	if(active_window == NULL){
+		g_warning("active window is NULL!");
+		return;
+	}
 
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_xid = wnck_window_get_xid(active_window);
+		active_pid = wnck_window_get_pid(active_window);
 		App->ActiveTitle = g_strdup(wnck_window_get_name(active_window));
 		App->ActiveIcon = wnck_window_get_icon(active_window);
 		g_object_ref(App->ActiveIcon);
 		g_print("Active XWin ID is %p\n", (gpointer) active_xid);
+		g_print("Active XWin pid is %d\n", active_pid);
 		for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
 			if(((ClientInfo*)node->data)->menu_client->master_xid == active_xid){
 				client_known = TRUE;
+				g_print("Client menubar found\n");
 				break;
 			}
 		}
@@ -128,19 +142,40 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	}else {
 		g_print("Active Window is not a window, that's Stupid!\n");
 	}
-	if(App->ActiveClient){
-		return_client_float_window(App->ActiveClient, App);
-		App->ActiveClient = NULL;
-	}
+/* Try to find if its parent has menubar. */
+	
+//	int ret, gdk_err;
+//	Window parent, root;
+//	Window *children = NULL;
+//	guint nchildren;
+//	gboolean result;
+//	gdk_error_trap_push();
+//	result = XQueryTree(GDK_DISPLAY_XDISPLAY(App->Server->socket->display),active_xid,
+//			&root, &parent, &children, &nchildren);
+//	gdk_err = gdk_error_trap_pop();
+//	if(!result || gdk_err != Success){
+//		g_warning("XQueryTree failed.");
+//	} else {
+//		g_message("Parent, root, nchildren = %p, %d, %d", (void*)parent, root, nchildren);
+//	}
+
+/* if the active_window has menu, we always use its own menu */
 	if(client_known){
 		info = (ClientInfo*)node->data;
-		g_print("Client menubar found\n");
 		if(App->ActiveClient != info){
 			if(App->ActiveClient)
 				return_client_float_window(App->ActiveClient, App);
 			steal_client_float_window(info, App);
 			App->ActiveClient = info;
 		}
+	}else if (App->ActiveClient && App->ActiveClient->pid == active_pid){
+		/* do nothing, other window in the same progress has menu, we keep the previous menu */
+
+	}else if(App->ActiveClient ){
+		g_debug("active pid = %d, new window pid = %d", App->ActiveClient->pid,
+				active_pid);
+		return_client_float_window(App->ActiveClient, App);
+		App->ActiveClient = NULL;
 	}
 	ui_repaint_all(App);
 }
@@ -152,15 +187,58 @@ static void window_closed_cb(WnckScreen* screen, WnckWindow *window, Application
 	g_print("Window closed: %s\n", wnck_window_get_name(window));
 }
 
+gboolean get_cardinal_by_atom(Window xwin, Display *display, Atom atom, int* ret){
+	Atom type_return;
+	gint format_return;
+	gulong nitems_return;
+	gulong bytes_after_return;
+	gulong* data;
+	gint rt;
+	gint err;
+	
+	g_return_val_if_fail( ret != NULL, FALSE);
+
+	gdk_error_trap_push();
+	rt = XGetWindowProperty (display, xwin, atom,
+			0, G_MAXLONG, False, XA_CARDINAL, &type_return,
+			&format_return, &nitems_return, &bytes_after_return,
+			(void*)&data);
+	err = gdk_error_trap_pop();
+
+	if ( err != Success || rt != Success)
+		return FALSE;
+	if( type_return != XA_CARDINAL){
+		XFree(data);
+		return FALSE;
+	}
+	*ret = *data;
+	XFree(data);
+	return TRUE;
+}
+
 static void client_new_cb(MenuServer * server, MenuClient * client, Application * App){
 	ClientInfo * info = g_new0(ClientInfo, 1);
 	GlobalMenuNotify notify;
 	GtkAllocation * allocation;
+	Atom atom;
+	int pid_return;
+
 	g_print("Applet: Client New:%p\n", (void*)client->client_xid);
 	info->menu_client = client;
 	info->float_window = gdk_window_foreign_new(client->float_xid);
 	info->x = 0;
 	info->y = 0;
+
+	atom = gdk_x11_get_xatom_by_name_for_display(server->socket->display, "_NET_WM_PID");
+	if (!get_cardinal_by_atom(client->client_xid, 
+				GDK_DISPLAY_XDISPLAY(server->socket->display), 
+				atom, &pid_return)){
+		g_warning("Can't get pid.");
+		info->pid = 0;
+	}else{
+		g_message("get client pid: %d", pid_return);
+		info->pid = pid_return;
+	}
 /*since we don't want it be shown in the screen, perhaps its better to hide it in the menubar patch**/
 	gdk_window_hide(info->float_window);
 	allocation = &GTK_WIDGET(App->Holder)->allocation;
