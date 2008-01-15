@@ -99,13 +99,6 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	g_signal_connect(G_OBJECT(App->Forward), "button-press-event",
 			G_CALLBACK(callbacks->forward_action_cb), App);
 
-/********Button: focus hack*********/
-	button = GTK_BUTTON(gtk_button_new());
-	gtk_button_set_relief(button, GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(GTK_BUTTON(button), FALSE);
-	gtk_box_pack_start(basebox, GTK_WIDGET(button),
-				FALSE, FALSE, 0);
-
 /*******Applet tweaks*************/
 	gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
 /*****Hide them since they don't do nothing**********/
