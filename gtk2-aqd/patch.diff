@@ -1,6 +1,6 @@
 Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
---- gtk+-aqd/gtk/gtkmenubar.c	(revision 19362)
+--- gtk+-aqd/gtk/gtkmenubar.c	(revision 19373)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
 @@ -39,10 +39,21 @@
  #include "gtkprivate.h"
@@ -327,7 +327,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
        g_signal_connect (window,
  			"key_press_event",
  			G_CALLBACK (window_key_press_handler),
-@@ -938,5 +1123,464 @@
+@@ -938,5 +1123,465 @@
      }
  }
  
@@ -700,15 +700,16 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	priv->visible = TRUE;
 +    g_return_if_fail( priv->connected );
 +	g_return_if_fail( notify->SetVisible.server_xid == socket->dest_xid); /*if not from our server*/
-+	if(notify->SetVisible.visible == TRUE) {
-+	  gdk_window_show(priv->container_window);
-+	  gdk_window_show(priv->float_window);
-+	  gtk_widget_queue_draw(menubar);
-+	} else{
-+	  gdk_window_hide(priv->container_window);
-+	  gdk_window_hide(priv->float_window);
++	if(GTK_WIDGET_REALIZED(menubar)){
++		if(notify->SetVisible.visible == TRUE) {
++		  gdk_window_show(priv->container_window);
++		  gdk_window_show(priv->float_window);
++		  gtk_widget_queue_draw(menubar);
++		} else{
++		  gdk_window_hide(priv->container_window);
++		  gdk_window_hide(priv->float_window);
++		}
 +	}
-+
 +}
 +static void
 +gtk_menu_bar_notify_server_destroy_cb(GlobalMenuSocket * socket, 
