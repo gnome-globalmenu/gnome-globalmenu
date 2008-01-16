@@ -3,35 +3,19 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtkprivate.h>
+#include <gdk/gdkx.h>
 #include "gtkintl.h"
+#include "gnome-globalmenu.h"
 
 #define GTK_MENU_INTERNALS
 
-/*
-#include "gdk/gdkkeysyms.h"
-#include "gtkbindings.h"
-#include "gtkmain.h"
-#include "gtkmarshalers.h"
-#include "gtkmenubar.h"
-#include "gtkmenuitem.h"
-#include "gtksettings.h"
-#include "gtkintl.h"
-#include "gtkwindow.h"
-#include "gtkprivate.h"
-#include "gtkalias.h"
-*/
-#ifdef GDK_WINDOWING_X11
-#define GNOME_GLOBAL_MENU
+#ifndef GDK_WINDOWING_X11
+#error this only works under x11 by now
 #endif
 
-#undef GNOME_GLOBAL_MENU
-
-#ifdef GNOME_GLOBAL_MENU
-#include "x11/gdkx.h"
 #define INCLUDE_SOURCE
 #include "gtkmenuembed-x11.h"
 #undef INCLUDE_SOURCE
-#endif
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
