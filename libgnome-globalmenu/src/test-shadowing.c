@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 
 void main(){
-	g_print("hello, gtk!");
+	void * x;
+	x = gtk_menu_bar_new();
+	g_print("menu bar new returns: %p\n", x);
 }
