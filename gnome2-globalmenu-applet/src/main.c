@@ -461,6 +461,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
+	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
     App = application_new(GTK_CONTAINER(applet));
     return TRUE;
   } else {
@@ -486,6 +487,17 @@ int main (int argc, char *argv [])
 			GNOME_PARAM_GOPTION_CONTEXT, context,	
 			GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
 			GNOME_PARAM_NONE);
+	gtk_rc_parse_string("\n"
+			"style \"gmb_event_box_style\" \n"
+			"{\n"
+			" 	GtkWidget::focus-line-width=0\n"
+			" 	GtkWidget::focus-padding=0\n"
+			"}\n"
+			"\n"
+//			"widget \"*.globalmenu-applet\" style \"gmb_event_box_style\"\n"
+			"widget \"*.globalmenu-applet-eventbox\" style \"gmb_event_box_style\"\n"
+			"\n");
+
 	retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
 	g_object_unref (program);
 	return retval;
