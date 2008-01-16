@@ -3,8 +3,8 @@
 
 SUBDIRS = src po
 
-libgnomeglobalmenudocdir = ${datadir}/doc/gnome2-globalmenu-applet
-libgnomeglobalmenudoc_DATA = \
+libgnome_globalmenudocdir = ${datadir}/doc/libgnome-globalmenu
+libgnome_globalmenudoc_DATA = \
 	README\
 	COPYING\
 	AUTHORS\
@@ -18,7 +18,7 @@ intltool_in_files = intltool-extract.in\
 
 intltool_files = intltool-extract intltool-merge intltool-update
 
-EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files) $(script_in_files)
+EXTRA_DIST = $(libgnome_globalmenudoc_DATA) $(intltool_in_files) $(script_in_files)
 DISTCLEANFILES = $(intltool_files) $(scripts_files)
 
 #
