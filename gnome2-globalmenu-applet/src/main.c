@@ -97,6 +97,16 @@ static void steal_client_float_window(ClientInfo * client, Application * App){
 		GTK_WIDGET(App->Holder)->window, client->x, client->y);
 	menu_server_send_to(App->Server, client->menu_client, &notify);	
 }
+ClientInfo * find_client_info_by_master(Window master_xid, Application * App){
+	GList * node;
+	for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
+		if(((ClientInfo*)node->data)->menu_client->master_xid == master_xid){
+			g_print("Client menubar found\n");
+			return node->data;
+		}
+	}
+	return NULL;
+}
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
 	WnckWindow * active_window = NULL;
 	WnckWindow * parent_window;
@@ -104,6 +114,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	Window parent_xid = 0;
 	gboolean client_known = FALSE;
 	ClientInfo * info;
+	ClientInfo * info_fallback;
 	GList * node = NULL;
 
 	if(App->ActiveTitle){
@@ -116,7 +127,9 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	}
 
 	active_window = wnck_screen_get_active_window(screen);
-/* XXX:why sometimes active_window is NULL? */
+/* XXX:why sometimes active_window is NULL? 
+ * Because it is destroyed before wnck return it to us.
+ * */
 	if(active_window == NULL){
 		g_warning("active window is NULL!");
 		return;
@@ -125,42 +138,35 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_xid = wnck_window_get_xid(active_window);
+
+		parent_window = wnck_window_get_transient(active_window);
+		if(WNCK_IS_WINDOW(parent_window))
+			parent_xid = wnck_window_get_xid(parent_window);
+		else parent_xid = 0;
+		
+		g_print("Active window ID is %p\n", (gpointer) active_xid);
+		g_print("Parent window (of active window) xid: %p\n", (gpointer)parent_xid);
+
+		g_debug("Group leader xid = %p\n", wnck_window_get_group_leader(active_window));
+
 		App->ActiveTitle = g_strdup(wnck_window_get_name(active_window));
 		App->ActiveIcon = wnck_window_get_icon(active_window);
 		g_object_ref(App->ActiveIcon);
-		g_print("Active XWin ID is %p\n", (gpointer) active_xid);
-		for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
-			if(((ClientInfo*)node->data)->menu_client->master_xid == active_xid){
-				client_known = TRUE;
-				g_print("Client menubar found\n");
-				break;
-			}
-		}
+
+		info = find_client_info_by_master(active_xid, App);
+/* Try to find if its parent has menubar. */
+		info_fallback = find_client_info_by_master(parent_xid, App);
+		if(info == NULL) info = info_fallback;
+		if(info == NULL) client_known = FALSE;
+			else client_known = TRUE;
 				
 	}else {
 		g_print("Active Window is not a window, that's Stupid!\n");
 	}
 
-	g_debug("Group leader xid = %p\n", wnck_window_get_group_leader(active_window));
-/* Try to find if its parent has menubar. */
-	if (!client_known){
-		parent_window = wnck_window_get_transient(active_window);
-		if (WNCK_IS_WINDOW(parent_window)) {
-			parent_xid = wnck_window_get_xid(parent_window);
-			g_print("Parent window xid: %p\n", (gpointer)parent_xid);
-			for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
-				if(((ClientInfo*)node->data)->menu_client->master_xid == parent_xid){
-					client_known = TRUE;
-					g_print("Found parent's menubar\n");
-					break;
-				}
-			}
-		}
-	}
 
 /* if the active_window has menu, we always use its own menu */
 	if(client_known){
-		info = (ClientInfo*)node->data;
 		if(App->ActiveClient != info){
 			if(App->ActiveClient)
 				return_client_float_window(App->ActiveClient, App);
