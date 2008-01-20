@@ -9,7 +9,9 @@ BUILT_SOURCES = gdksocket-marshall.h gdksocket-marshall.c
 libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	gdksocket.h \
-	gdksocket.c
+	gdksocket.c \
+	gnomenu-server.h \
+	gnomenu-server.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
