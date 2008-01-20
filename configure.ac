@@ -24,9 +24,16 @@ AC_SUBST(TEST_SUITE_LIBS)
 
 AC_PROG_LIBTOOL
 
+GTK_DOC_CHECK([1.0])
+
+GNOME_DOC_INIT
+
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
+doc/Makefile
+doc/reference/Makefile
+doc/reference/libgnomenu/Makefile
 libgnomenu/libgnomenu.pc
 gnome-globalmenu-applet/Makefile
 test/Makefile

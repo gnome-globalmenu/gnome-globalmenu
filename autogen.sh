@@ -1,6 +1,9 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
+USE_GNOME2_MACROS=1 USE_COMMON_DOC_BUILD=yes . gnome-autogen.sh
+
+exit;
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 

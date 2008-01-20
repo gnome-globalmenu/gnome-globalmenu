@@ -1,0 +1,4 @@
+#include <gtk/gtk.h>
+#include <libgnomenu/gdksocket.h>
+
+gdk_socket_get_type
