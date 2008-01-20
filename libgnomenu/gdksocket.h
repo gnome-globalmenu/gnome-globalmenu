@@ -8,7 +8,7 @@ G_BEGIN_DECLS
  * SECTION: gdksocket
  * @short_description: Connectionless socket for GTK.
  * @see_also: #GdkWindow, #GtkGlobalMenuBar
- * @stability: unstable, development
+ * @stability: Unstable
  * @include: libgnomenu/gdksocket.h
  *
  * GdkSocket handles inter-process communication of GTK applications. 
@@ -32,6 +32,9 @@ typedef struct _GdkSocket GdkSocket;
  *   @GDK_SOCKET_SHUTDOWN: The socket was shutdown. LACK DEFINITION.
  *   @GDK_SOCKET_DISPOSED: The socket was disposed. Can not receive or
  *   			send any message
+ *
+ * The status of a #GdkSocket.
+ * TODO: write more about how status changes.
  */
 typedef enum {
 	GDK_SOCKET_NEW,
@@ -75,6 +78,8 @@ GType gdk_socket_get_type (void);
 GdkSocket * gdk_socket_new (gchar * name);
 
 gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
+gboolean gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
+gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 
 GdkNativeWindow gdk_socket_get_native(GdkSocket * self);
 

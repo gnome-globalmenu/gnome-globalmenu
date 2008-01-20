@@ -28,9 +28,9 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
 
 gdksocket-marshall.c: gdksocket-marshall.list
-	glib-genmarshal --body --prefix=gdk_socket_marshall gdksocket-marshall.list > $@
+	glib-genmarshal --internal --body --prefix=gdk_socket_marshall gdksocket-marshall.list > $@
 gdksocket-marshall.h: gdksocket-marshall.list
-	glib-genmarshal --header --prefix=gdk_socket_marshall gdksocket-marshall.list > $@
+	glib-genmarshal --internal --header --prefix=gdk_socket_marshall gdksocket-marshall.list > $@
 
 
 CLEANFILES = $(BUILT_SOURCES)

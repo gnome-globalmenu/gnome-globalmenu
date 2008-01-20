@@ -35,6 +35,8 @@ gdk_socket_init(GdkSocket * self){
  * gdk_socket_new:
  * @name: the name of the newly created socket, do not need to be unique.
  *
+ * Creates a new #GdkSocket.
+ *
  * Returns: a newly created the #GdkSocket in #GDK_SOCKET_NEW state.
  */
 GdkSocket *
@@ -130,6 +132,8 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * gdk_socket_get_native:
  * 	@self: the #GdkSocket this method acts on.
  *
+ * find out the native id of the socket
+ *
  * Returns: the native id of this socket. It happens to be the Window ID of the
  * 	@GdkWindow the GdkSocket wraps, in current implement.
  */
@@ -176,6 +180,121 @@ gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data
           False, NoEventMask, (XEvent *)&xclient);
     gdk_display_sync (self->display); /*resolve the message*/
     return gdk_error_trap_pop () == 0;
+}
+
+/**
+ * _gdk_socket_find_targets:
+ * @self: self
+ * @name: the name for the targets
+ * 
+ * Find every possible @GdkSocket on this display with the name @name.
+ *
+ * Returns: a GList contains the list of those sockets' native ID. 
+ * It is the caller's obligation to free the list.
+ */
+static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
+	GList * window_list = NULL;
+	GdkScreen * screen;
+	GdkWindow * root_window;
+
+    Window root_return;
+    Window parent_return;
+    Window * children_return;
+    unsigned int nchildren_return;
+    unsigned int i;
+
+	screen = gdk_drawable_get_screen(self->window);
+	g_return_val_if_fail(screen != NULL, NULL);
+
+	root_window = gdk_screen_get_root_window(screen);
+	g_return_val_if_fail(root_window != NULL, NULL);
+
+    gdk_error_trap_push();
+    XQueryTree(GDK_DISPLAY_XDISPLAY(self->display),
+        GDK_WINDOW_XWINDOW(root_window),
+        &root_return,
+        &parent_return,
+        &children_return,
+        &nchildren_return);
+    if(gdk_error_trap_pop()){
+        g_warning("%s: XQueryTree Failed", __func__);
+        return NULL;
+    }
+	g_return_val_if_fail(nchildren_return != 0, NULL);
+		
+	for(i = 0; i < nchildren_return; i++){
+        Atom type_return;
+        Atom type_req = gdk_x11_get_xatom_by_name_for_display (self->display, "UTF8_STRING");
+        gint format_return;
+        gulong nitems_return;
+        gulong bytes_after_return;
+        guchar * wm_name;
+        gint rt;
+        gdk_error_trap_push();
+        rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (self->display), children_return[i],
+                          gdk_x11_get_xatom_by_name_for_display (self->display, "_NET_WM_NAME"),
+                          0, G_MAXLONG, False, type_req, &type_return,
+                          &format_return, &nitems_return, &bytes_after_return,
+                          &wm_name);
+		if(!gdk_error_trap_pop()){
+			if(rt == Success && type_return == type_req){
+			if(g_str_equal(name, wm_name)){
+				window_list = g_list_append(window_list, (gpointer) children_return[i]);
+			}
+		}
+		}else{
+			g_warning("%s:XGetWindowProperty Failed",__func__);
+		}
+	}
+	XFree(children_return);
+	return window_list;
+}
+
+/**
+ * gdk_socket_send_by_name:
+ * @self: you understand.
+ * @name: the target socket's name.
+ * @data: the data buffer. After calling this function, the buffer can be freed.
+ * @bytes: the length of data wanted to send.
+ *
+ * this method find out the all the #GdkSocket with name @name and calls #gdk_socket_send to the
+ * first (successfully sended) target
+ *
+ * Returns:  TRUE if the message is successfully sent to a target.
+ * 	FALSE if the message is not sent to anywhere.
+ */
+gboolean 
+	gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes){
+	GList * window_list = _gdk_socket_find_targets(self, name);
+	GList * node;
+	for(node = g_list_first(window_list); node; node = g_list_next(node)){
+		if(gdk_socket_send(self, (GdkNativeWindow)node->data, data, bytes)) return TRUE;
+	}
+	return FALSE;
+}
+
+/**
+ * gdk_socket_broadcast_by_name:
+ * @self: you understand.
+ * @name: the target socket's name.
+ * @data: the data buffer. After calling this function, the buffer can be freed.
+ * @bytes: the length of data wanted to send.
+ *
+ * this method find out the all the #GdkSocket with name @name and calls #gdk_socket_send
+ * on first target.
+ *
+ * Returns:  TRUE if the message is successfully sent to at least one target.
+ * 	FALSE if the message is not sent to anywhere.
+ */
+gboolean
+gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes){
+	GList * window_list = _gdk_socket_find_targets(self, name);
+	GList * node;
+	gboolean rt = FALSE;
+	for(node = g_list_first(window_list); node; node = g_list_next(node)){
+		rt = rt || gdk_socket_send(self, (GdkNativeWindow)node->data, data, bytes);
+	}
+	return rt;
 }
 
 static GdkFilterReturn 
