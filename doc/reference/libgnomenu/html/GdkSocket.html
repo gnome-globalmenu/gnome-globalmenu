@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>GdkSocket</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="">
+<link rel="up" href="reference.html" title="The Gnome Global Menu library Reference">
+<link rel="prev" href="reference.html" title="The Gnome Global Menu library Reference">
+<meta name="generator" content="GTK-Doc V1.8 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="reference.html" title="The Gnome Global Menu library Reference">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="reference.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="reference.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center"></th>
+<td>&#160;</td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2787688" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2750333" class="shortcut">Description</a>
+                  &#160;|&#160;
+                  <a href="#id2750281" class="shortcut">Object Hierarchy</a>
+                  &#160;|&#160;
+                  <a href="#id2750306" class="shortcut">Signals</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="GdkSocket"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2787688"></a><span class="refentrytitle">GdkSocket</span>
+</h2>
+<p>GdkSocket &#8212; Connectionless socket for GTK.</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1" lang="en">
+<a name="id2754840"></a><h2>Stability Level</h2>
+unstable, development, unless otherwise indicated
+</div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;libgnomenu/gdksocket.h&gt;
+
+
+enum                <a class="link" href="GdkSocket.html#GdkSocketStatus">GdkSocketStatus</a>;
+                    <a class="link" href="GdkSocket.html#GdkSocket-struct">GdkSocket</a>;
+<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a>*          <a class="link" href="GdkSocket.html#gdk-socket-new">gdk_socket_new</a>                      (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);
+<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            <a class="link" href="GdkSocket.html#gdk-socket-send">gdk_socket_send</a>                     (<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a> *self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Event-Structures.html#GdkNativeWindow"
+>GdkNativeWindow</a> target,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a> bytes);
+<a
+href="/usr/share/gtk-doc/html/gdk/gdk-Event-Structures.html#GdkNativeWindow"
+>GdkNativeWindow</a>     <a class="link" href="GdkSocket.html#gdk-socket-get-native">gdk_socket_get_native</a>               (<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a> *self);
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2750281"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+
+  <a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a>
+   +----GdkSocket
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2750306"></a><h2>Signals</h2>
+<pre class="synopsis">
+
+  "<a class="link" href="GdkSocket.html#GdkSocket-data-arrival">data-arrival</a>"                                   : Cleanup / No Recursion / No Hooks
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2750333"></a><h2>Description</h2>
+<p>
+GdkSocket handles inter-process communication of GTK applications. 
+It is the fundanmental communication mechanism for <a class="link" href="index.html"><span class="type">libgnomenu</span></a>.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2750361"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2750371"></a><h3>
+<a name="GdkSocketStatus"></a>enum GdkSocketStatus</h3>
+<a class="indexterm" name="id2796911"></a><pre class="programlisting">typedef enum {
+	GDK_SOCKET_NEW,
+	GDK_SOCKET_SHUTDOWN,
+	GDK_SOCKET_DISPOSED
+} GdkSocketStatus;
+</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a name="GDK-SOCKET-NEW:CAPS"></a><code class="literal">GDK_SOCKET_NEW</code></span></p></td>
+<td> A newly created GdkSocket, the associated GdkWindow is created.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a name="GDK-SOCKET-SHUTDOWN:CAPS"></a><code class="literal">GDK_SOCKET_SHUTDOWN</code></span></p></td>
+<td> The socket was shutdown. LACK DEFINITION.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a name="GDK-SOCKET-DISPOSED:CAPS"></a><code class="literal">GDK_SOCKET_DISPOSED</code></span></p></td>
+<td> The socket was disposed. Can not receive or
+  			send any message
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2796994"></a><h3>
+<a name="GdkSocket-struct"></a>GdkSocket</h3>
+<a class="indexterm" name="id2797004"></a><pre class="programlisting">typedef struct {
+	gchar * name;
+	GdkWindow * window;
+	GdkDisplay * display;
+	GdkSocketStatus status;
+} GdkSocket;
+</pre>
+<p>
+The GdkSocket object.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a>&#160;*<em class="structfield"><code>name</code></em>;</span></p></td>
+<td>	name of the socket.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+>GdkWindow</a>&#160;*<em class="structfield"><code>window</code></em>;</span></p></td>
+<td> the <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+><span class="type">GdkWindow</span></a> used to receive messages. Its <span class="type">GdkWindow::title</span> will be <em class="parameter"><code>name</code></em>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a
+href="/usr/share/gtk-doc/html/gdk/GdkDisplay.html"
+>GdkDisplay</a>&#160;*<em class="structfield"><code>display</code></em>;</span></p></td>
+<td> the <a
+href="/usr/share/gtk-doc/html/gdk/GdkDisplay.html"
+><span class="type">GdkDisplay</span></a> this socket belongs to. Though we can always obtain 
+		this information from <em class="parameter"><code>window</code></em>, we cache it here for saving code lines.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><a class="link" href="GdkSocket.html#GdkSocketStatus">GdkSocketStatus</a>&#160;<em class="structfield"><code>status</code></em>;</span></p></td>
+<td> the status. See <a class="link" href="GdkSocket.html#GdkSocketStatus"><span class="type">GdkSocketStatus</span></a>.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2797156"></a><h3>
+<a name="gdk-socket-new"></a>gdk_socket_new ()</h3>
+<a class="indexterm" name="id2797168"></a><pre class="programlisting"><a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a>*          gdk_socket_new                      (<a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gchar"
+>gchar</a> *name);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em>&#160;:</span></p></td>
+<td> the name of the newly created socket, do not need to be unique.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a newly created the <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a> in <a class="link" href="GdkSocket.html#GDK-SOCKET-NEW:CAPS"><span class="type">GDK_SOCKET_NEW</span></a> state.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2797242"></a><h3>
+<a name="gdk-socket-send"></a>gdk_socket_send ()</h3>
+<a class="indexterm" name="id2797252"></a><pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gboolean"
+>gboolean</a>            gdk_socket_send                     (<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a> *self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Event-Structures.html#GdkNativeWindow"
+>GdkNativeWindow</a> target,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a> data,
+                                                         <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a> bytes);</pre>
+<p>
+This method of <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a> sends a messange to the target socket whose id 
+is <em class="parameter"><code>target</code></em>. Whether or not the target is a GdkSocket is not checked
+(and impossible to check). The length of data has is limited by XClientMessage
+to be 20 bytes. (or even fewer if in the future the socket adds a header to the
+message.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a> this method acts on.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>target</code></em>&#160;:</span></p></td>
+<td> the native window id of target socket. In current implement, this
+		identifies the native window id of <span class="type">GdkSocket::window</span>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em>&#160;:</span></p></td>
+<td> the data buffer. After calling this function, the buffer can be freed.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bytes</code></em>&#160;:</span></p></td>
+<td> the length of data wanted to send.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> if successful, return TRUE else return FALSE.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2797396"></a><h3>
+<a name="gdk-socket-get-native"></a>gdk_socket_get_native ()</h3>
+<a class="indexterm" name="id2797406"></a><pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/gdk/gdk-Event-Structures.html#GdkNativeWindow"
+>GdkNativeWindow</a>     gdk_socket_get_native               (<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a> *self);</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a> this method acts on.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> the native id of this socket. It happens to be the Window ID of the
+	<em class="parameter"><code>GdkWindow</code></em> the GdkSocket wraps, in current implement.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2797474"></a><h2>Signal Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2797483"></a><h3>
+<a name="GdkSocket-data-arrival"></a>The "data-arrival" signal</h3>
+<a class="indexterm" name="id2797491"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>   data,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a>      bytes,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>   user_data)      : Cleanup / No Recursion / No Hooks</pre>
+<p>
+The ::data-arrival signal is emitted each time a message arrives to
+the socket.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a> that receives this signal.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>data</code></em>&#160;:</span></p></td>
+<td> the received data. It is owned by <em class="parameter"><code>self</code></em> and the signal handler 
+		should not free it.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>bytes</code></em>&#160;:</span></p></td>
+<td> the length of received data.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2797610"></a><h2>See Also</h2>
+<a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+><span class="type">GdkWindow</span></a>, <span class="type">GtkGlobalMenuBar</span>
+</div>
+</div>
+</body>
+</html>

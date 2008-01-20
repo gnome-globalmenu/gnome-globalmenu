@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="" link="index.html" author=" " name="libgnomenu">
+  <chapters>
+    <sub name="The Gnome Global Menu library Reference" link="reference.html">
+      <sub name="GdkSocket" link="GdkSocket.html"/>
+    </sub>
+  </chapters>
+  <functions>
+    <function name="enum GdkSocketStatus" link="GdkSocket.html#GdkSocketStatus"/>
+    <function name="GdkSocket" link="GdkSocket.html#GdkSocket-struct"/>
+    <function name="gdk_socket_new ()" link="GdkSocket.html#gdk-socket-new"/>
+    <function name="gdk_socket_send ()" link="GdkSocket.html#gdk-socket-send"/>
+    <function name="gdk_socket_get_native ()" link="GdkSocket.html#gdk-socket-get-native"/>
+    <function name="The &quot;data-arrival&quot; signal" link="GdkSocket.html#GdkSocket-data-arrival"/>
+  </functions>
+</book>

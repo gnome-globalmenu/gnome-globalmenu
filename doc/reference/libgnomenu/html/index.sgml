@@ -1,0 +1,10 @@
+<ANCHOR id="GdkSocket" href="libgnomenu/GdkSocket.html">
+<ANCHOR id="GdkSocketStatus" href="libgnomenu/GdkSocket.html#GdkSocketStatus">
+<ANCHOR id="GDK-SOCKET-NEW:CAPS" href="libgnomenu/GdkSocket.html#GDK-SOCKET-NEW:CAPS">
+<ANCHOR id="GDK-SOCKET-SHUTDOWN:CAPS" href="libgnomenu/GdkSocket.html#GDK-SOCKET-SHUTDOWN:CAPS">
+<ANCHOR id="GDK-SOCKET-DISPOSED:CAPS" href="libgnomenu/GdkSocket.html#GDK-SOCKET-DISPOSED:CAPS">
+<ANCHOR id="GdkSocket-struct" href="libgnomenu/GdkSocket.html#GdkSocket-struct">
+<ANCHOR id="gdk-socket-new" href="libgnomenu/GdkSocket.html#gdk-socket-new">
+<ANCHOR id="gdk-socket-send" href="libgnomenu/GdkSocket.html#gdk-socket-send">
+<ANCHOR id="gdk-socket-get-native" href="libgnomenu/GdkSocket.html#gdk-socket-get-native">
+<ANCHOR id="GdkSocket-data-arrival" href="libgnomenu/GdkSocket.html#GdkSocket-data-arrival">
