@@ -1,0 +1,36 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
+]>
+
+
+<book id="libgnomenu">
+	<bookinfo>
+		<title></title>
+	<authorgroup>
+		<author>
+			<firstname></firstname>
+			<surname></surname>
+			<affiliation>
+				<address>
+					<email></email>
+				</address>
+			</affiliation>
+		</author>
+	</authorgroup>
+	
+	<copyright>
+		<year>2008</year>
+		<holder></holder>
+	</copyright>
+
+	<abstract>
+	</abstract>
+
+	</bookinfo>
+	<chapter id="reference">
+		<title>The Gnome Global Menu library Reference</title>
+		&gdksocket;
+	</chapter>
+</book>
