@@ -78,6 +78,7 @@ GType gdk_socket_get_type (void);
 GdkSocket * gdk_socket_new (gchar * name);
 
 gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
+gboolean gdk_socket_send_nosync(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
 gboolean gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 

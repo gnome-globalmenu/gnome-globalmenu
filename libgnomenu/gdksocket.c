@@ -156,8 +156,28 @@ GdkNativeWindow gdk_socket_get_native(GdkSocket * self){
  * message.
  *
  * Returns: if successful, return TRUE else return FALSE.
+ * SeeAlso: #gdk_socket_send_nosync
  */
 gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes){
+
+	gboolean rt;
+	rt = gdk_socket_send_nosync(self, target, data, bytes);
+    gdk_display_sync (self->display); /*resolve the message, sync the state*/
+	return rt;
+}
+/**
+ * gdk_socket_send_nosync:
+ * @self: the #GdkSocket this method acts on.
+ * @target: the native window id of target socket. In current implement, this
+ * 		identifies the native window id of #GdkSocket::window.
+ * @data: the data buffer. After calling this function, the buffer can be freed.
+ * @bytes: the length of data wanted to send.
+ *
+ * This function don't call #gdk_display_sync at the end. See #gdk_socket_send. 
+ *
+ * Returns: if sucessful, TRUE; else FALSE.
+ */
+gboolean gdk_socket_send_nosync(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes){
 #ifndef GDK_WINDOWING_X11
 #error ONLY X11 is supported. other targets are not yet supported.
 #endif
@@ -178,7 +198,6 @@ gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data
     XSendEvent (GDK_DISPLAY_XDISPLAY(self->display),
           target,
           False, NoEventMask, (XEvent *)&xclient);
-    gdk_display_sync (self->display); /*resolve the message*/
     return gdk_error_trap_pop () == 0;
 }
 
@@ -247,6 +266,7 @@ static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
 		}
 	}
 	XFree(children_return);
+	g_message("%s:length=%d", __func__, g_list_length(window_list));
 	return window_list;
 }
 
@@ -257,8 +277,8 @@ static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
  * @data: the data buffer. After calling this function, the buffer can be freed.
  * @bytes: the length of data wanted to send.
  *
- * this method find out the all the #GdkSocket with name @name and calls #gdk_socket_send to the
- * first (successfully sended) target
+ * this method find out the all the #GdkSocket with name @name and calls 
+ * #gdk_socket_send_nosync to the * first (successfully sended) target
  *
  * Returns:  TRUE if the message is successfully sent to a target.
  * 	FALSE if the message is not sent to anywhere.
@@ -267,10 +287,16 @@ gboolean
 	gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes){
 	GList * window_list = _gdk_socket_find_targets(self, name);
 	GList * node;
+	gboolean rt = FALSE;
 	for(node = g_list_first(window_list); node; node = g_list_next(node)){
-		if(gdk_socket_send(self, (GdkNativeWindow)node->data, data, bytes)) return TRUE;
+		if(gdk_socket_send_nosync(self, (GdkNativeWindow)node->data, data, bytes)){
+			rt = TRUE;
+			break;
+		}
 	}
-	return FALSE;
+    gdk_display_sync (self->display); /*resolve the message, sync the state*/
+	g_list_free(window_list);
+	return rt;
 }
 
 /**
@@ -280,23 +306,41 @@ gboolean
  * @data: the data buffer. After calling this function, the buffer can be freed.
  * @bytes: the length of data wanted to send.
  *
- * this method find out the all the #GdkSocket with name @name and calls #gdk_socket_send
+ * this method find out the all the #GdkSocket with name @name and calls #gdk_socket_send_nosync
  * on first target.
  *
  * Returns:  TRUE if the message is successfully sent to at least one target.
  * 	FALSE if the message is not sent to anywhere.
+ *
+ * FIXME: 
+ *    seems won't work properly if I don't trace the g_message. 
+ *    Messages are sent but except for the first socket, #gdk_socket_window_filter 
+ *    don't receive them. Perhaps this means we need to get rid of the GdkWindow.
+ *
+ * TODO:
+ *    Figure out why. 
  */
 gboolean
 gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes){
 	GList * window_list = _gdk_socket_find_targets(self, name);
 	GList * node;
 	gboolean rt = FALSE;
+	gboolean rt1;
 	for(node = g_list_first(window_list); node; node = g_list_next(node)){
-		rt = rt || gdk_socket_send(self, (GdkNativeWindow)node->data, data, bytes);
+		rt1 =  gdk_socket_send_nosync(self, (GdkNativeWindow)node->data, data, bytes);
+		g_message("%s, sent to one target, %d", __func__, rt1);
+		rt = rt || rt1;
 	}
+    gdk_display_sync (self->display); /*resolve the message, sync the state*/
+	g_list_free(window_list);
 	return rt;
 }
 
+/**
+ * gdk_socket_window_filter_cb
+ *
+ * internal filter function related to this X11 implement of #GdkSocket
+ */
 static GdkFilterReturn 
 	gdk_socket_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer user_data){
 	GdkSocket * self = GDK_SOCKET(user_data);
