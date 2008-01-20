@@ -101,7 +101,7 @@ gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data
 	}
 
     memset (&xclient, 0, sizeof (xclient));
-    xclient.window = target;
+    xclient.window = target; /*Though X11 places no interpretation of this field, GDK interpretes this field at the target window.*/
     xclient.type = ClientMessage;
     xclient.message_type = gdk_x11_get_xatom_by_name_for_display (self->display, GDK_SOCKET_ATOM_STRING);
     xclient.format = 32;

@@ -17,6 +17,9 @@ static void create_clicked_cb(GtkButton * button, gpointer user_data){
 	g_message("button pressed");
 	socket1 = gdk_socket_new("test socket 1");
 	socket2 = gdk_socket_new("test socket 2");
+	g_message("socket1: native window is %x", gdk_socket_get_native(socket1));
+	g_message("socket2: native window is %x", gdk_socket_get_native(socket2));
+
 	g_signal_connect(G_OBJECT(socket1), "data-arrival",
 			socket_data_arrival_cb, NULL);
 	g_signal_connect(G_OBJECT(socket2), "data-arrival",
