@@ -10,8 +10,8 @@ libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	gdksocket.h \
 	gdksocket.c \
-	gnomenu-server.h \
-	gnomenu-server.c
+	gnomenuserver.h \
+	gnomenuserver.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
