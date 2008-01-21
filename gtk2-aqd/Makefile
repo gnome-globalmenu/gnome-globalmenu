@@ -1,10 +1,10 @@
-patchsource:
-	./patchsource.sh
-setup: setup.sh gtk2.spec.patch
-	./setup.sh
-patch: gtkmenubar.patch	
-	./patch.sh
-gtkmenubar.patch: gtkmenubar.c gtkmenubar.orig
-	diff -uNa gtkmenubar.orig gtkmenubar.c | sed 's/\([+\\-]*\)\ gtkmenubar/\1\ gtk\/gtkmenubar/' > gtkmenubar.patch
-	diff -uNa /dev/null gtkmenuembed-x11.h | sed 's/\([+\\-]*\)\ gtkmenu/\1\ gtk\/gtkmenu/' >> gtkmenubar.patch
-
+prepare:
+	svn checkout http://svn.gnome.org/svn/gtk+/tags/GTK_2_12_5 gtk+-aqd
+	patch -p0 < patch.diff
+	cp gtkmenuembed-x11.h gtk+-aqd/gtk
+	(cd gtk+-aqd; svn add gtk/gtkmenuembed-x11.h)	
+diff: 
+	svn diff gtk+-aqd > patch.diff
+dist: diff
+	cp patch.diff gtk2-aqd.patch
+	tar -czvf gtk2-aqd.patch.tar.gz gtk2-aqd.patch
