@@ -7,6 +7,7 @@
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libbonoboui.h>
 
 #include "typedefs.h"
 #include "application.h"
@@ -34,6 +35,32 @@ GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id){
 	gtk_container_add(GTK_CONTAINER(rt), GTK_WIDGET(icon));
 	return rt;
 }
+void ui_create_popup_menu(Application * App, UICallbacks * callbacks){
+	static const char toggle_menu_xml [] =
+	"<popup name=\"button3\">\n"
+		"<menuitem name=\"About\" "
+		"          verb=\"About\" "
+		"          _label=\"_About\" "
+		"          pixtype=\"stock\" "
+		"          pixname=\"gtk-about\"/>\n"
+		"<menuitem name=\"Preference\" "
+		"          verb=\"Preference\" "
+		"          _label=\"_Preference\" "
+		"          pixtype=\"stock\" "
+		"          pixname=\"gtk-preferences\"/>\n"
+   "</popup>\n";
+	BonoboUIVerb toggle_menu_verbs[] = {
+		BONOBO_UI_VERB ("About", callbacks->popup_menu_cb),
+		BONOBO_UI_VERB ("Preference", callbacks->popup_menu_cb),
+		BONOBO_UI_VERB_END
+	};
+	BonoboUIComponent* popup_component = 
+		panel_applet_get_popup_component(App->MainWindow);
+	panel_applet_setup_menu(App->MainWindow, 
+			toggle_menu_xml, 
+			toggle_menu_verbs, 
+			App);
+}
 void ui_create_all(Application * App, UICallbacks * callbacks){
 	GtkBox * basebox = NULL;
 	GtkEventBox * label_area = NULL;
@@ -49,11 +76,11 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	App->TitleLabel = GTK_LABEL(gtk_label_new(""));
 	gtk_label_set_max_width_chars(App->TitleLabel, 10);
 
-/*	label_area = ui_create_label_area(App);
+	label_area = ui_create_label_area(App);
 	gtk_box_pack_start(basebox, GTK_WIDGET(label_area), FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(label_area), "button-press-event",
 			G_CALLBACK(callbacks->label_area_action_cb), App);
-*/
+
 /****** Move Backward ***********/
 	App->Backward = ui_create_event_box_with_icon(GTK_STOCK_GO_BACK);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Backward), FALSE, FALSE, 0);
@@ -72,30 +99,27 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 	g_signal_connect(G_OBJECT(App->Forward), "button-press-event",
 			G_CALLBACK(callbacks->forward_action_cb), App);
 
-/********Button: focus hack*********/
-	button = GTK_BUTTON(gtk_button_new());
-	gtk_button_set_relief(button, GTK_RELIEF_NONE);
-	gtk_button_set_focus_on_click(GTK_BUTTON(button), FALSE);
-	gtk_box_pack_start(basebox, GTK_WIDGET(button),
-				FALSE, FALSE, 0);
-
 /*******Applet tweaks*************/
 	gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
 /*****Hide them since they don't do nothing**********/
 	gtk_widget_hide(GTK_WIDGET(App->Forward));
 	gtk_widget_hide(GTK_WIDGET(App->Backward));
-
+	ui_create_popup_menu(App, callbacks);
 
 }
 
 void ui_repaint_all(Application * App){
+	gboolean show_arrows = App->AppletProperty.show_arrows;
 	gboolean show_backward;
 	gboolean show_forward;
-
-
-	show_backward = TRUE;
-	show_forward = TRUE;
+	gboolean show_icon = App->AppletProperty.show_icon;
+	gboolean show_title = App->AppletProperty.show_title;
 	
+	GdkPixbuf * icon;
+	gint icon_width;
+	gint icon_height;
+	show_backward = TRUE & show_arrows;
+	show_forward = TRUE & show_arrows;
 
 	if(show_forward) 
 		gtk_widget_show(GTK_WIDGET(App->Forward));
@@ -106,6 +130,33 @@ void ui_repaint_all(Application * App){
 	else
 		gtk_widget_hide(GTK_WIDGET(App->Backward));
 
-	gtk_image_set_from_stock(App->ClientIcon, GTK_STOCK_YES, GTK_ICON_SIZE_MENU);
+	if(show_icon && App->ActiveIcon){
+		icon_width = GTK_WIDGET(App->MainWindow)->allocation.width;
+		icon_height = GTK_WIDGET(App->MainWindow)->allocation.height;
+		if(icon_height < icon_width) 
+			icon_width = icon_height;
+		else 
+			icon_height = icon_width;
+		icon = gdk_pixbuf_scale_simple(App->ActiveIcon, icon_width, icon_height, GDK_INTERP_BILINEAR);
+		gtk_image_set_from_pixbuf(App->ClientIcon, icon);
+		g_object_unref(icon);
+		gtk_widget_show(GTK_WIDGET(App->ClientIcon));
+	}else
+		gtk_widget_hide(GTK_WIDGET(App->ClientIcon));
+	if(show_title && App->ActiveTitle){
+		gtk_label_set_text(GTK_LABEL(App->TitleLabel), App->ActiveTitle);
+		gtk_widget_show(GTK_WIDGET(App->TitleLabel));
+	}else
+		gtk_widget_hide(GTK_WIDGET(App->TitleLabel));
 
+}
+
+void ui_show_about(Application * App){
+	gchar * authors[] = {
+		"Yu Feng <rainwoodman@gmail.com>",
+		"Mingxi Wu <fengshenx.@gmail.com>",
+		NULL
+		}	;
+	gtk_show_about_dialog(NULL, 
+				"authors", authors, NULL);
 }

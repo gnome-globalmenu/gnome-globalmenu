@@ -31,6 +31,7 @@
 #include <config.h>
 
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
@@ -38,7 +39,6 @@
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
-#include <gconf/gconf-client.h>
 #include <panel-applet.h>
 /*
  * Standard gettext macros.
@@ -68,12 +68,17 @@
 #include "menuclients.h"
 #include "menuserver.h"
 #include "ui.h"
+#include "preference.h"
+
 typedef struct _ClientInfo{
 	MenuClient * menu_client;
 	GdkWindow * float_window;
 	int x;
 	int y;
 } ClientInfo;
+
+static gboolean get_cardinal_by_atom(Window xwin, Display *display, Atom atom, int* ret);
+
 static void return_client_float_window(ClientInfo * client, Application * App){
 	g_print("Return client float window\n");
 	GlobalMenuNotify notify;
@@ -92,41 +97,87 @@ static void steal_client_float_window(ClientInfo * client, Application * App){
 		GTK_WIDGET(App->Holder)->window, client->x, client->y);
 	menu_server_send_to(App->Server, client->menu_client, &notify);	
 }
+ClientInfo * find_client_info_by_master(Window master_xid, Application * App){
+	GList * node;
+	for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
+		if(((ClientInfo*)node->data)->menu_client->master_xid == master_xid){
+			g_print("Client menubar found\n");
+			return node->data;
+		}
+	}
+	return NULL;
+}
 static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_window, Application * App){
 	WnckWindow * active_window = NULL;
+	WnckWindow * parent_window;
 	Window active_xid = 0; 
+	Window parent_xid = 0;
 	gboolean client_known = FALSE;
 	ClientInfo * info;
+	ClientInfo * info_fallback;
 	GList * node = NULL;
 
+	if(App->ActiveTitle){
+		g_free(App->ActiveTitle);
+		App->ActiveTitle = NULL;
+	}
+	if(App->ActiveIcon){
+		g_object_unref(App->ActiveIcon);
+		App->ActiveIcon = NULL;
+	}
+
 	active_window = wnck_screen_get_active_window(screen);
+/* XXX:why sometimes active_window is NULL? 
+ * Because it is destroyed before wnck return it to us.
+ * */
+	if(active_window == NULL){
+		g_warning("active window is NULL!");
+		return;
+	}
 
 	g_print("Active Window_changed\n");
 	if(WNCK_IS_WINDOW(active_window)){
 		active_xid = wnck_window_get_xid(active_window);
-		g_print("Active XWin ID is %p\n", (gpointer) active_xid);
-		for(node = g_list_first(App->Clients); node ; node = g_list_next(node)){
-			if(((ClientInfo*)node->data)->menu_client->master_xid == active_xid){
-				client_known = TRUE;
-				break;
-			}
-		}
+
+		parent_window = wnck_window_get_transient(active_window);
+		if(WNCK_IS_WINDOW(parent_window))
+			parent_xid = wnck_window_get_xid(parent_window);
+		else parent_xid = 0;
+		
+		g_print("Active window ID is %p\n", (gpointer) active_xid);
+		g_print("Parent window (of active window) xid: %p\n", (gpointer)parent_xid);
+
+		g_debug("Group leader xid = %p\n", wnck_window_get_group_leader(active_window));
+
+		App->ActiveTitle = g_strdup(wnck_window_get_name(active_window));
+		App->ActiveIcon = wnck_window_get_icon(active_window);
+		g_object_ref(App->ActiveIcon);
+
+		info = find_client_info_by_master(active_xid, App);
+/* Try to find if its parent has menubar. */
+		info_fallback = find_client_info_by_master(parent_xid, App);
+		if(info == NULL) info = info_fallback;
+		if(info == NULL) client_known = FALSE;
+			else client_known = TRUE;
+				
 	}else {
 		g_print("Active Window is not a window, that's Stupid!\n");
 	}
-	if(App->ActiveClient){
-		return_client_float_window(App->ActiveClient, App);
-		App->ActiveClient = NULL;
-	}
+
+
+/* if the active_window has menu, we always use its own menu */
 	if(client_known){
-		info = (ClientInfo*)node->data;
-		g_print("Client menubar found\n");
 		if(App->ActiveClient != info){
 			if(App->ActiveClient)
 				return_client_float_window(App->ActiveClient, App);
 			steal_client_float_window(info, App);
 			App->ActiveClient = info;
 		}
+	}else if(App->ActiveClient ){
+		/* both the new active winodw and group leader don't have the menbar, return the
+		 * menubar to owner.*/
+		return_client_float_window(App->ActiveClient, App);
+		App->ActiveClient = NULL;
 	}
 	ui_repaint_all(App);
 }
@@ -142,11 +193,14 @@ static void client_new_cb(MenuServer * server, MenuClient * client, Application 
 	ClientInfo * info = g_new0(ClientInfo, 1);
 	GlobalMenuNotify notify;
 	GtkAllocation * allocation;
+	Atom atom;
+
 	g_print("Applet: Client New:%p\n", (void*)client->client_xid);
 	info->menu_client = client;
 	info->float_window = gdk_window_foreign_new(client->float_xid);
 	info->x = 0;
 	info->y = 0;
+
 /*since we don't want it be shown in the screen, perhaps its better to hide it in the menubar patch**/
 	gdk_window_hide(info->float_window);
 	allocation = &GTK_WIDGET(App->Holder)->allocation;
@@ -246,51 +300,83 @@ static void main_window_change_orient_cb(PanelApplet * applet, PanelAppletOrient
 static void holder_resize_cb(GtkWidget * widget, GtkAllocation * allocation, Application * App){
 	g_print("Holder resizesd.\n");
 	GlobalMenuNotify notify;
-	g_print("holder_resize_cb:Broadcast message to all clients\n");
+	g_print("holder_resize_cb:Broadcast message to all clients: %d, %d, %d, %d\n", *allocation);
 	if (App->ActiveClient) {
 		notify.type = GM_NOTIFY_SIZE_ALLOCATE;
 		notify.SizeAllocate.width = allocation->width;
 		notify.SizeAllocate.height = allocation->height;
 		menu_server_broadcast(App->Server, &notify);
-//		menu_server_send_to(App->Server, App->ActiveClient->menu_client, &notify);
 	}
 
 }
-static void label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
+static gboolean label_area_action_cb(GtkWidget * widget, GdkEventButton* button, Application * App){
 	g_print("client icon action.\n");
 	if(button->button == 1){
-		g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", NULL);
+		gboolean rt;
+		g_signal_emit_by_name(G_OBJECT(App->MainWindow), "popup_menu", &rt);
 	}
+	return TRUE;
 }
-static void backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+static gboolean backward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+	GtkAllocation *allocation;
+	GlobalMenuNotify notify;
 	g_print("backward action.\n");
 	if(App->ActiveClient){
 		App->ActiveClient->x -= 10;
+ 
+		memset(&notify, 0 ,sizeof(notify));
+		allocation = &(GTK_WIDGET(App->Holder))->allocation;
+		notify.type = GM_NOTIFY_SIZE_ALLOCATE;
+		notify.SizeAllocate.width = allocation->width - App->ActiveClient->x;
+		notify.SizeAllocate.height = allocation->height;
+		menu_server_send_to(App->Server, App->ActiveClient->menu_client, &notify);
+ 
 		gdk_window_move(App->ActiveClient->float_window, 
 				App->ActiveClient->x,
 				App->ActiveClient->y);
 	}
 	ui_repaint_all(App);
+	return TRUE;
 }
-static void forward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+static gboolean forward_action_cb(GtkWidget * widget, GdkEventButton * button, Application * App){
+	GtkAllocation *allocation;
+	GlobalMenuNotify notify;
 	g_print("forward action.\n");
 	if(App->ActiveClient){
 		App->ActiveClient->x += 10;
+		allocation = &(GTK_WIDGET(App->Holder))->allocation;
+		if ( allocation->width - App->ActiveClient->x > 0)
+		{
+			memset(&notify, 0 ,sizeof(notify));
+			notify.type = GM_NOTIFY_SIZE_ALLOCATE;
+			notify.SizeAllocate.width = allocation->width - App->ActiveClient->x;
+			notify.SizeAllocate.height = allocation->height;
+			menu_server_send_to(App->Server, App->ActiveClient->menu_client, &notify);
+		}
 		gdk_window_move(App->ActiveClient->float_window, 
 				App->ActiveClient->x,
 				App->ActiveClient->y);
 	}
 	ui_repaint_all(App);
+	return TRUE;
 }
-
+static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
+	g_message("%s: cname = %s", __func__, cname);
+	if(g_str_equal(cname, "About")) ui_show_about(App);
+	if(g_str_equal(cname, "Preference")) preference_show_dialog(App);
+}
 static Application * application_new(GtkContainer * mainwindow){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
 	UICallbacks callback_table;
 	
+
 	App->Server = menu_server_new();
 	App->Clients = NULL;
 	App->ActiveClient = NULL;
+	App->ActiveTitle = NULL;
+	App->ActiveIcon = NULL;
+
 	menu_server_set_user_data(App->Server, App);
 	menu_server_set_callback(App->Server, 
 		MS_CB_CLIENT_NEW, 
@@ -299,6 +385,8 @@ static Application * application_new(GtkContainer * mainwindow){
 		MS_CB_CLIENT_DESTROY, 
 		(MenuServerCallback) client_destroy_cb);
 	App->MainWindow = mainwindow;
+/*Only when MainWindow is known we can load conf*/
+	preference_load_conf(App);
 
 	g_signal_connect(G_OBJECT(App->MainWindow), "destroy",
 		G_CALLBACK(main_window_destroy_cb), App);
@@ -328,6 +416,7 @@ static Application * application_new(GtkContainer * mainwindow){
 	callback_table.forward_action_cb = G_CALLBACK(forward_action_cb);
 	callback_table.backward_action_cb = G_CALLBACK(backward_action_cb);
 	callback_table.holder_resize_cb = G_CALLBACK(holder_resize_cb);
+	callback_table.popup_menu_cb = (BonoboUIVerbFn)popup_menu_cb;
 
 	ui_create_all(App, &callback_table);
 
@@ -372,6 +461,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
+	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
     App = application_new(GTK_CONTAINER(applet));
     return TRUE;
   } else {
@@ -397,6 +487,17 @@ int main (int argc, char *argv [])
 			GNOME_PARAM_GOPTION_CONTEXT, context,	
 			GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
 			GNOME_PARAM_NONE);
+	gtk_rc_parse_string("\n"
+			"style \"gmb_event_box_style\" \n"
+			"{\n"
+			" 	GtkWidget::focus-line-width=0\n"
+			" 	GtkWidget::focus-padding=0\n"
+			"}\n"
+			"\n"
+//			"widget \"*.globalmenu-applet\" style \"gmb_event_box_style\"\n"
+			"widget \"*.globalmenu-applet-eventbox\" style \"gmb_event_box_style\"\n"
+			"\n");
+
 	retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
 	g_object_unref (program);
 	return retval;

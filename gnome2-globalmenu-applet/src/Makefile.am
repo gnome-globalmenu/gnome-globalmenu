@@ -15,6 +15,7 @@ AM_CFLAGS =\
 
 libexec_PROGRAMS = gnome2-globalmenu-applet 
 
+
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
 	typedefs.h                 \
@@ -25,7 +26,13 @@ gnome2_globalmenu_applet_SOURCES = \
 	menuserver.c                 \
 	menuserver.h                 \
 	gtkmenuembed-x11.h                 \
-	application.h 
+	application.h 		\
+	preference.h	\
+	preference.c
+
+gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
+	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
+
 
 gnome2_globalmenu_applet_LDFLAGS = 
 
