@@ -7,6 +7,6 @@ prepare:
 	(cd gtk+-aqd; svn add gtk/gtkmenuembed-x11.h)	
 diff: 
 	svn diff gtk+-aqd > patch.diff
-dist: diff
+dist: patch.diff
 	cp patch.diff gtk2-aqd.patch
 	tar -czvf gtk2-aqd.patch.tar.gz gtk2-aqd.patch
