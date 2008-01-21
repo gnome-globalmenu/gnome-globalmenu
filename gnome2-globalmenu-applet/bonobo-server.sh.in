@@ -1,4 +1,6 @@
 #! /bin/sh
+prefix=@prefix@
+exec_prefix=@exec_prefix@
 libexec_dir=@libexecdir@
 cat <<EOF
 <oaf_info>
