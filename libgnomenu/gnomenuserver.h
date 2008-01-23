@@ -1,8 +1,8 @@
-#error Cant continue before deciding to use virtual functions or signals.
-
 #ifndef GNOMENU_SERVER_H
 #define GNOMENU_SERVER_H
-
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
+#include "gdksocket.h"
 G_BEGIN_DECLS
 /**
  * SECTION: gnomenuserver
@@ -27,13 +27,24 @@ typedef struct _GnomeMenuServer GnomeMenuServer;
 
 /**
  * GnomeMenuServer:
- *  
- *  GnomeMenuServer is the parent class for user defined menu server. It provides basic
- *  operations and interface a menu server should have.
+ *  @clients: A List of all the clients, each is GnomeMenuServerClient
+ *
+ *  GnomeMenuServer is the parent class for user defined menu server. 
+ *  It provides basic operations and interface a menu server should have.
  */
 struct _GnomeMenuServer{
-	GObject parent;
+	GObject * parent;
+	GdkSocket * socket;
 /*< public >*/
+	GList * clients;
+};
+
+/*< private >*/
+enum {
+	GMS_SIGNAL_CLIENT_NEW,
+	GMS_SIGNAL_CLIENT_DESTROY,
+	GMS_SIGNAL_CLIENT_SIZE_REQUEST,
+	GMS_SIGNAL_MAX
 };
 /**
  * GdkSocketClass:
@@ -43,9 +54,16 @@ struct _GnomeMenuServerClass{
 	GObjectClass parent;
 /*< private >*/	
 	guint signals[GMS_SIGNAL_MAX];
-	void (*menu_create)(GnomeMenuServer * self, GnomeMenuClientInfo * clientinfo);
-	void (*menu_destroy)(GnomeMenuServer * self, GnomeMenuClientInfo * clientinfo);
-
+	void (*signal_client_new)(GnomeMenuServer * self, GdkNativeWindow client);
+	void (*signal_client_destroy)(GnomeMenuServer * self, GdkNativeWindow client);
+	void (*signal_client_size_request)(GnomeMenuServer * self, GdkNativeWindow client, GtkRequisition * req);
 };
+/**
+ * GNOME_MENU_SERVER_NAME:
+ *
+ * Name of the socket
+ */
+#define GNOME_MENU_SERVER_NAME "GNOME MENU SERVER"
+
 G_END_DECLS
 #endif
