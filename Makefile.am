@@ -1,7 +1,10 @@
 #
 
-SUBDIRS = libgnomenu gnome-globalmenu-applet test doc
+SUBDIRS = libgnomenu gnome-globalmenu-applet test contrib
 
+if ENABLE_GTK_DOC
+SUBDIRS += doc
+endif
 gnome_globalmenu_docdir = ${docdir}
 gnome_globalmenu_doc_DATA = \
     README\

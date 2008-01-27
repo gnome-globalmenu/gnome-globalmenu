@@ -32,6 +32,8 @@ libgnomenuinclude_HEADERS = gdksocket.h gnomenuserver.h gnomenumessage.h gnomenu
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
 
+EXTRA_DIST = gnomenu-marshall.list
+
 gnomenu-marshall.c: gnomenu-marshall.list
 	glib-genmarshal --internal --body --prefix=gnomenu_marshall gnomenu-marshall.list > $@
 gnomenu-marshall.h: gnomenu-marshall.list
@@ -66,6 +68,7 @@ gnomenu-enums.h: $(gnomenu_enum_headers)
         $(gnomenu_enum_headers) > $@ 
 
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = 
+#$(BUILT_SOURCES)
 dist-hook:
 	cd $(distdir) ; rm -f $(CLEANFILES)

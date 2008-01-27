@@ -328,7 +328,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec="/usr/lib /lib /usr/local/lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
+sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/atlas /usr/lib/openmpi/1.2.4-gcc /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7563,7 +7563,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec="/usr/lib /lib /usr/local/lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
+sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/atlas /usr/lib/openmpi/1.2.4-gcc /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7871,7 +7871,7 @@ link_all_deplibs=unknown
 sys_lib_search_path_spec="/usr/lib /lib /usr/local/lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
+sys_lib_dlsearch_path_spec="/usr/lib /lib /usr/lib/atlas /usr/lib/openmpi/1.2.4-gcc /usr/lib/mysql /usr/lib/qt-3.3/lib /usr/lib/wine/ "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
