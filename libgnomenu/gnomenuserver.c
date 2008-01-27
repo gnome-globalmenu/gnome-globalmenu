@@ -41,6 +41,7 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 	klass->client_destroy = gnomenu_server_client_destroy;
 	klass->client_size_request = gnomenu_server_client_size_request;
 
+	klass->signals[GMS_SIGNAL_CLIENT_NEW] = 
 /**
  * GnomenuServer::client-new:
  * @client_info: the client info.
@@ -49,7 +50,6 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
  * 	 server receives a  message indicates a new client is born;
  * 	 and server finished initializing internal data structures for the new client.
  */
-	klass->signals[GMS_SIGNAL_CLIENT_NEW] = 
 		g_signal_new ("client-new",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
@@ -59,6 +59,7 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
+	klass->signals[GMS_SIGNAL_CLIENT_DESTROY] = 
 /**
  * GnomenuServer::client-destroy:
  * @client_info: the client info.
@@ -67,7 +68,6 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
  * 	 server receives a  message indicates a client is die;
  * 	 and before server disposing internal data structures for the dead client.
  */
-	klass->signals[GMS_SIGNAL_CLIENT_DESTROY] = 
 		g_signal_new ("client-destroy",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
@@ -77,6 +77,7 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
+	klass->signals[GMS_SIGNAL_CLIENT_SIZE_REQUEST] = 
 /**
  * GnomenuServer::client-size-request:
  * @client_info: the client info.
@@ -84,13 +85,12 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
  *
  * ::client-size-request signal is emitted when:
  * 	 server receives a  message indicates a client request a size allocation;
- * 	Typically this happens after a server sends a get-requisition message to
+ * 	Typically this happens after a server sends a query-requisition message to
  * 	the client.
  */
-	klass->signals[GMS_SIGNAL_CLIENT_SIZE_REQUEST] = 
 		g_signal_new ("client-size-request",
 			G_TYPE_FROM_CLASS(klass),
-			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuServerClass, client_size_request),
 		NULL, NULL,
 			gnomenu_marshall_VOID__POINTER_POINTER,
@@ -162,7 +162,7 @@ static void gnomenu_server_data_arrival_cb(GdkSocket * socket,
 					GNOMENU_SERVER_GET_CLASS(server)->type_gnomenu_message_type, 
 					message->any.type);
 	g_message("message arrival: %s", enumvalue->value_name);
-
+/*TODO: dispatch and emit signals*/
 }
 /* virtual functions for signal handling*/
 static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info){

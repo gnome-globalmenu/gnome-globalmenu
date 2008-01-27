@@ -12,7 +12,9 @@ libgnomenu_la_SOURCES = \
 	gdksocket.h \
 	gdksocket.c \
 	gnomenuserver.h \
-	gnomenuserver.c
+	gnomenuserver.c \
+	gnomenuclient.h \
+	gnomenuclient.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
@@ -25,7 +27,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = gdksocket.h gnomenuserver.h gnomenumessage.h
+libgnomenuinclude_HEADERS = gdksocket.h gnomenuserver.h gnomenumessage.h gnomenuclient.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
