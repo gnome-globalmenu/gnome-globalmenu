@@ -4,7 +4,9 @@ INCLUDES = -I$(top_srcdir) \
 
 LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la
 
-noinst_PROGRAMS = testsocket
+noinst_PROGRAMS = testsocket testserver
 
 testsocket_SOURCES = testsocket.c
 testsocket_LDADD = $(LDADDS)
+testserver_SOURCES = testserver.c
+testserver_LDADD = $(LDADDS)

@@ -13,6 +13,7 @@
 typedef struct _GdkSocketPrivate GdkSocketPrivate;
 
 struct _GdkSocketPrivate {
+	gboolean disposed;
 	int foo;
 };
 
@@ -44,9 +45,11 @@ gdk_socket_new(char * name){
 	GdkWindowAttr attr;
 	GdkWindowAttributesType mask;
 	GdkSocket * socket = NULL;
+	GdkSocketPrivate * priv;
 
 	LOG_FUNC_NAME;
 	socket = g_object_new(GDK_TYPE_SOCKET, NULL);
+	priv = GDK_SOCKET_GET_PRIVATE(socket);
 
 	socket->name = g_strdup(name);
 	socket->display = gdk_display_get_default();
@@ -59,6 +62,7 @@ gdk_socket_new(char * name){
 	socket->window = gdk_window_new(NULL, &attr, mask);
 	socket->status = GDK_SOCKET_NEW;
 	gdk_window_add_filter(socket->window, gdk_socket_window_filter_cb, socket);
+	priv->disposed = FALSE;
 	return socket;
 }
 /**
@@ -71,7 +75,14 @@ gdk_socket_new(char * name){
 static void
 gdk_socket_dispose(GObject * object){
 	GdkSocket * self = GDK_SOCKET(object);
+	GdkSocketPrivate * priv;
 	LOG_FUNC_NAME;
+	priv = GDK_SOCKET_GET_PRIVATE(self);
+	if(! priv->disposed){
+		gdk_window_remove_filter(self->window, gdk_socket_window_filter_cb, self);
+		g_object_unref(self->window);
+		priv->disposed = TRUE;	
+	}
 	G_OBJECT_CLASS(gdk_socket_parent_class)->dispose(object);
 }
 /**

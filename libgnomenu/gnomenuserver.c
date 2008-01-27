@@ -9,7 +9,7 @@
 typedef struct _GnomenuServerPrivate GnomenuServerPrivate;
 
 struct _GnomenuServerPrivate {
-	int foo;
+	gboolean disposed;
 };
 
 #define GNOMENU_SERVER_GET_PRIVATE(obj) \
@@ -21,7 +21,7 @@ static void gnomenu_server_init(GnomenuServer * self);
 static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 static void gnomenu_server_client_destroy(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 static void gnomenu_server_client_size_request(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * requisition);
-static void gnomenu_server_data_arrival_cb(GnomenuServer *self, gpointer * data, gint bytes, GdkSocket * socket);
+static void gnomenu_server_data_arrival_cb(GdkSocket * socket, gpointer * data, gint bytes, GnomenuServer * server);
 
 G_DEFINE_TYPE (GnomenuServer, gnomenu_server, GTK_TYPE_WIDGET)
 
@@ -111,18 +111,27 @@ gnomenu_server_init(GnomenuServer * self){
 GnomenuServer * 
 gnomenu_server_new(){
 	GnomenuServer * self;
+	GnomenuServerPrivate * priv;
 	LOG_FUNC_NAME;
 	self = g_object_new(GNOMENU_TYPE_SERVER, NULL);
+	priv = GNOMENU_SERVER_GET_PRIVATE(self);
 	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);
 	self->clients = NULL;
-	g_signal_connect_swapped(self->socket, "data-arrival", G_CALLBACK(gnomenu_server_data_arrival_cb), self);
+	g_signal_connect(self->socket, "data-arrival", G_CALLBACK(gnomenu_server_data_arrival_cb), self);
+	priv->disposed = FALSE;
 }
 
 static void gnomenu_server_dispose(GObject * object){
 	GnomenuServer *self;
+	GnomenuServerPrivate * priv;
 	LOG_FUNC_NAME;
 	self = GNOMENU_SERVER(object);
-	g_object_unref(self->socket);
+	priv = GNOMENU_SERVER_GET_PRIVATE(self);
+	
+	if(! priv->disposed){
+		g_object_unref(self->socket);
+		priv->disposed = TRUE;
+	}
 	G_OBJECT_CLASS(gnomenu_server_parent_class)->dispose(object);
 }
 
@@ -130,7 +139,7 @@ static void gnomenu_server_finalize(GObject * object){
 	GnomenuServer *self;
 	LOG_FUNC_NAME;
 	self = GNOMENU_SERVER(object);
-	g_list_for_each(self->clients, g_free, NULL);
+	g_list_foreach(self->clients, g_free, NULL);
 	g_list_free(self->clients);
 	G_OBJECT_CLASS(gnomenu_server_parent_class)->finalize(object);
 }
@@ -139,14 +148,14 @@ static void gnomenu_server_finalize(GObject * object){
  *
  * 	callback when ::socket receives data
  */
-static void gnomenu_server_data_arrival_cb(GnomenuServer *self, 
-		gpointer * data, gint bytes, GdkSocket * socket){
+static void gnomenu_server_data_arrival_cb(GdkSocket * socket, 
+		gpointer * data, gint bytes, GnomenuServer * server){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
-	enumvalue = g_enum_get_value(g_class_peek_static(GNOMENU_TYPE_MESSAGE_TYPE), message->any.type);
-	g_message("message arrival: %s", enumvalue->value_name);
+	//enumvalue = g_enum_get_value(G_ENUM_CLASS(g_type_class_peek_parent(GNOMENU_TYPE_MESSAGE_TYPE)), message->any.type);
+	//g_message("message arrival: %s", enumvalue->value_name);
 
 }
 /* virtual functions for signal handling*/

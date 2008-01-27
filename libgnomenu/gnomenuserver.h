@@ -35,7 +35,7 @@ typedef struct _GnomenuServer GnomenuServer;
  *  It provides basic operations and interface a menu server should have.
  */
 struct _GnomenuServer{
-	GtkWidget * parent;
+	GtkWidget parent;
 	GdkSocket * socket;
 /*< public >*/
 	GList * clients;
