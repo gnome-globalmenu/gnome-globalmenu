@@ -7,13 +7,13 @@
 
 G_BEGIN_DECLS
 /**
- * SECTION: gnomenuserver
- * @short_description: Gnome Global Menu Server.
+ * SECTION: GnomenuServer
+ * @short_description: Menu server class
  * @see_also: #GtkMenuBar, #GtkGlobalMenuBar, #GdkSocket.
  * @stablility: Unstable
  * @include: libgnomenu/gnomenuserver.h
  *
- * GnomenuServer is the widget for a menu server.
+ * GnomenuServer provides fundanmental messaging mechanism for a menu server
  * 
  */
 
@@ -31,8 +31,7 @@ typedef struct _GnomenuServer GnomenuServer;
  * GnomenuServer:
  *  @clients: A List of all the clients, each is GnomenuServerClientInfo
  *
- *  GnomenuServer is the parent class for user defined menu server. 
- *  It provides basic operations and interface a menu server should have.
+ * GnomenuServer provides fundanmental messaging mechanism for a menu server
  */
 struct _GnomenuServer{
 	GtkWidget parent;
@@ -51,7 +50,7 @@ struct _GnomenuServer{
  * 		care of the changing of the focused window, and takes care of switching 
  * 		the active menu. 
  *
- * This structure is how GnomenuServer stores the client infomations;
+ * This structure is where #GnomenuServer stores client infomation;
  */
 typedef struct _GnomenuServerClientInfo GnomenuServerClientInfo;
 
@@ -69,13 +68,14 @@ enum {
 	GMS_SIGNAL_MAX
 };
 /**
- * GdkSocketClass:
+ * GnomenuServerClass:
  * @menu_create: the virtual function invoked.
  */
-struct _GnomenuServerClass{
+struct _GnomenuServerClass {
 	GtkWidgetClass parent;
 /*< private >*/	
 	guint signals[GMS_SIGNAL_MAX];
+	GType * type_gnomenu_message_type;
 	void (*client_new)(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 	void (*client_destroy)(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 	void (*client_size_request)(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * req);

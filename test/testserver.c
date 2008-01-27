@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
 	GtkButton * button;
 	
 	gtk_init(&argc, &argv);
+
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	server = gnomenu_server_new();
 	button = GTK_BUTTON(gtk_button_new_with_label("send message"));

@@ -30,6 +30,9 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
 	LOG_FUNC_NAME;
 
+	/*FIXME: unref the type at class_finalize*/
+	klass->type_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
+
 	g_type_class_add_private(gobject_class, sizeof (GnomenuServerPrivate));
 	gobject_class->dispose = gnomenu_server_dispose;
 	gobject_class->finalize = gnomenu_server_finalize;
@@ -146,7 +149,7 @@ static void gnomenu_server_finalize(GObject * object){
 
 /** gnomenu_server_data_arrival_cb:
  *
- * 	callback when ::socket receives data
+ * 	callback, invoked when the embeded socket receives data
  */
 static void gnomenu_server_data_arrival_cb(GdkSocket * socket, 
 		gpointer * data, gint bytes, GnomenuServer * server){
@@ -154,8 +157,11 @@ static void gnomenu_server_data_arrival_cb(GdkSocket * socket,
 	GEnumValue * enumvalue = NULL;
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
-	//enumvalue = g_enum_get_value(G_ENUM_CLASS(g_type_class_peek_parent(GNOMENU_TYPE_MESSAGE_TYPE)), message->any.type);
-	//g_message("message arrival: %s", enumvalue->value_name);
+
+	enumvalue = g_enum_get_value(
+					GNOMENU_SERVER_GET_CLASS(server)->type_gnomenu_message_type, 
+					message->any.type);
+	g_message("message arrival: %s", enumvalue->value_name);
 
 }
 /* virtual functions for signal handling*/

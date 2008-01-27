@@ -2,6 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
+<!ENTITY gnomenuserver SYSTEM "xml/gnomenuserver.xml">
 ]>
 
 
@@ -32,5 +33,6 @@
 	<chapter id="reference">
 		<title>The Gnome Global Menu library Reference</title>
 		&gdksocket;
+		&gnomenuserver;
 	</chapter>
 </book>
