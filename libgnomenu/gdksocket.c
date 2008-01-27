@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "gdksocket.h"
-#include "gdksocket-marshall.h"
+#include "gnomenu-marshall.h"
 
 #define LOG_FUNC_NAME g_message(__func__)
 
@@ -120,7 +120,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			G_STRUCT_OFFSET (GdkSocketClass, data_arrival_cleanup),
 			NULL /* accumulator */,
 			NULL /* accu_data */,
-			gdk_socket_marshall_VOID__POINTER_UINT,
+			gnomenu_marshall_VOID__POINTER_UINT,
 			G_TYPE_NONE /* return_type */,
 			2     /* n_params */,
 			G_TYPE_POINTER,

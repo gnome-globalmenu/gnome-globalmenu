@@ -1,57 +1,165 @@
 #include <gtk/gtk.h>
 
 #include "gnomenuserver.h"
+#include "gnomenu-marshall.h"
+#include "gnomenu-enums.h"
 
 #define LOG_FUNC_NAME g_message(__func__)
 
-typedef struct _GnomeMenuServerPrivate GnomeMenuServerPrivate;
+typedef struct _GnomenuServerPrivate GnomenuServerPrivate;
 
-struct _GnomeMenuServerPrivate {
+struct _GnomenuServerPrivate {
 	int foo;
 };
 
-#define GNOME_MENU_SERVER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOME_TYPE_MENU_SERVER, GnomeMenuServerPrivate))
+#define GNOMENU_SERVER_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_SERVER, GnomenuServerPrivate))
 
-static void gnome_menu_server_dispose(GObject * self);
-static void gnome_menu_server_finalize(GObject * self);
-static void gnome_menu_server_init(GnomeMenuServer * self);
-static void gnome_menu_server_client_new(GnomeMenuServer * self, GdkNativeWindow client);
-static void gnome_menu_server_client_destroy(GnomeMenuServer * self, GdkNativeWindow client);
-static void gnome_menu_server_client_size_request(GnomeMenuServer * self, GdkNativeWindow client, GtkRequisition * requisition);
+static void gnomenu_server_dispose(GObject * self);
+static void gnomenu_server_finalize(GObject * self);
+static void gnomenu_server_init(GnomenuServer * self);
+static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info);
+static void gnomenu_server_client_destroy(GnomenuServer * self, GnomenuServerClientInfo * client_info);
+static void gnomenu_server_client_size_request(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * requisition);
+static void gnomenu_server_data_arrival_cb(GnomenuServer *self, gpointer * data, gint bytes, GdkSocket * socket);
 
-G_DEFINE_TYPE (GnomeMenuServer, gnome_menu_server, G_TYPE_OBJECT)
+G_DEFINE_TYPE (GnomenuServer, gnomenu_server, GTK_TYPE_WIDGET)
 
 static void
-gnome_menu_server_class_init(GnomeMenuServerClass *klass){
+gnomenu_server_class_init(GnomenuServerClass *klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
 	LOG_FUNC_NAME;
 
-	g_type_class_add_private(gobject_class, sizeof (GnomeMenuServerPrivate));
-	gobject_class->dispose = gnome_menu_server_dispose;
-	gobject_class->finalize = gnome_menu_server_finalize;
+	g_type_class_add_private(gobject_class, sizeof (GnomenuServerPrivate));
+	gobject_class->dispose = gnomenu_server_dispose;
+	gobject_class->finalize = gnomenu_server_finalize;
 
-	klass->signal_client_new = gnome_menu_server_client_new;
-	klass->signal_client_destroy = gnome_menu_server_client_destroy;
-	klass->signal_client_size_request = gnome_menu_server_client_size_request;
+	klass->client_new = gnomenu_server_client_new;
+	klass->client_destroy = gnomenu_server_client_destroy;
+	klass->client_size_request = gnomenu_server_client_size_request;
+
+/**
+ * GnomenuServer::client-new:
+ * @client_info: the client info.
+ *
+ * ::client-new signal is emitted when:
+ * 	 server receives a  message indicates a new client is born;
+ * 	 and server finished initializing internal data structures for the new client.
+ */
+	klass->signals[GMS_SIGNAL_CLIENT_NEW] = 
+		g_signal_new ("client-new",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerClass, client_new),
+		NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
+/**
+ * GnomenuServer::client-destroy:
+ * @client_info: the client info.
+ *
+ * ::client-destroy signal is emitted when:
+ * 	 server receives a  message indicates a client is die;
+ * 	 and before server disposing internal data structures for the dead client.
+ */
+	klass->signals[GMS_SIGNAL_CLIENT_DESTROY] = 
+		g_signal_new ("client-destroy",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerClass, client_destroy),
+		NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
+/**
+ * GnomenuServer::client-size-request:
+ * @client_info: the client info.
+ * @requisition: the size requisition.
+ *
+ * ::client-size-request signal is emitted when:
+ * 	 server receives a  message indicates a client request a size allocation;
+ * 	Typically this happens after a server sends a get-requisition message to
+ * 	the client.
+ */
+	klass->signals[GMS_SIGNAL_CLIENT_SIZE_REQUEST] = 
+		g_signal_new ("client-size-request",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerClass, client_size_request),
+		NULL, NULL,
+			gnomenu_marshall_VOID__POINTER_POINTER,
+			G_TYPE_NONE,
+			2,
+			G_TYPE_POINTER,
+			G_TYPE_POINTER
+			);
 }
 
 static void
-gnome_menu_server_init(GnomeMenuServer * self){
+gnomenu_server_init(GnomenuServer * self){
 	LOG_FUNC_NAME;
 }
 
 /**
- * gnome_menu_server_new:
+ * gnomenu_server_new:
  * 
  * create a new menu server object
  */
-GnomeMenuServer * 
-gnome_menu_server_new(){
-	GnomeMenuServer * self;
+GnomenuServer * 
+gnomenu_server_new(){
+	GnomenuServer * self;
 	LOG_FUNC_NAME;
-	self = g_object_new(GNOME_TYPE_MENU_SERVER, NULL);
-	self->socket = gdk_socket_new(GNOME_MENU_SERVER_NAME);
+	self = g_object_new(GNOMENU_TYPE_SERVER, NULL);
+	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);
 	self->clients = NULL;
+	g_signal_connect_swapped(self->socket, "data-arrival", G_CALLBACK(gnomenu_server_data_arrival_cb), self);
+}
+
+static void gnomenu_server_dispose(GObject * object){
+	GnomenuServer *self;
+	LOG_FUNC_NAME;
+	self = GNOMENU_SERVER(object);
+	g_object_unref(self->socket);
+	G_OBJECT_CLASS(gnomenu_server_parent_class)->dispose(object);
+}
+
+static void gnomenu_server_finalize(GObject * object){
+	GnomenuServer *self;
+	LOG_FUNC_NAME;
+	self = GNOMENU_SERVER(object);
+	g_list_for_each(self->clients, g_free, NULL);
+	g_list_free(self->clients);
+	G_OBJECT_CLASS(gnomenu_server_parent_class)->finalize(object);
+}
+
+/** gnomenu_server_data_arrival_cb:
+ *
+ * 	callback when ::socket receives data
+ */
+static void gnomenu_server_data_arrival_cb(GnomenuServer *self, 
+		gpointer * data, gint bytes, GdkSocket * socket){
+	GnomenuMessage * message = data;
+	GEnumValue * enumvalue = NULL;
+	LOG_FUNC_NAME;
+	g_assert(bytes >= sizeof(GnomenuMessage));
+	enumvalue = g_enum_get_value(g_class_peek_static(GNOMENU_TYPE_MESSAGE_TYPE), message->any.type);
+	g_message("message arrival: %s", enumvalue->value_name);
+
+}
+/* virtual functions for signal handling*/
+static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info){
+	LOG_FUNC_NAME;
+	self->clients = g_list_prepend(self->clients, client_info);
+}
+static void gnomenu_server_client_destroy(GnomenuServer * self, GnomenuServerClientInfo * client_info){
+	LOG_FUNC_NAME;
+	self->clients = g_list_remove_all(self->clients, client_info);
+}
+static void gnomenu_server_client_size_request(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * requisition){
+	LOG_FUNC_NAME;
+	g_free(requisition);
 }
 
