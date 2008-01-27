@@ -23,7 +23,7 @@ static void gnomenu_server_client_destroy(GnomenuServer * self, GnomenuServerCli
 static void gnomenu_server_client_size_request(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * requisition);
 static void gnomenu_server_data_arrival_cb(GdkSocket * socket, gpointer * data, gint bytes, GnomenuServer * server);
 
-G_DEFINE_TYPE (GnomenuServer, gnomenu_server, GTK_TYPE_WIDGET)
+G_DEFINE_TYPE (GnomenuServer, gnomenu_server, G_TYPE_OBJECT)
 
 static void
 gnomenu_server_class_init(GnomenuServerClass *klass){

@@ -26,7 +26,7 @@ static void gnomenu_client_query_requisition(GnomenuClient * self, GnomenuClient
 
 static void gnomenu_client_data_arrival_cb(GdkSocket * socket, gpointer * data, gint bytes, GnomenuClient * client);
 
-G_DEFINE_TYPE (GnomenuClient, gnomenu_client, GTK_TYPE_WIDGET)
+G_DEFINE_TYPE (GnomenuClient, gnomenu_client, G_TYPE_OBJECT)
 
 static void
 gnomenu_client_class_init(GnomenuClientClass *klass){
@@ -170,10 +170,11 @@ static void gnomenu_client_data_arrival_cb(GdkSocket * socket,
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
 	LOG_FUNC_NAME;
+
 	g_assert(bytes >= sizeof(GnomenuMessage));
 
-	enumvalue = g_enum_get_value(
-					GNOMENU_CLIENT_GET_CLASS(client)->type_gnomenu_message_type, 
+	enumvalue = g_enum_get_value( 
+			GNOMENU_CLIENT_GET_CLASS(client)->type_gnomenu_message_type,
 					message->any.type);
 	g_message("message arrival: %s", enumvalue->value_name);
 	/*TODO: Dispatch the message and emit signals*/

@@ -17,11 +17,11 @@ G_BEGIN_DECLS
  * 
  */
 
-#define GNOMENU_TYPE_CLIENT	(gnomenu_server_get_type())
+#define GNOMENU_TYPE_CLIENT	(gnomenu_client_get_type())
 #define GNOMENU_CLIENT(obj) 	(G_TYPE_CHECK_INSTANCE_CAST((obj), GNOMENU_TYPE_CLIENT, GnomenuClient))
 #define GNOMENU_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_CLIENT, GnomenuClientClass))
-#define GNOME_IS_MENU_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_CLIENT))
-#define GNOME_IS_MENU_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_CLIENT))
+#define GNOMENU_IS_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_CLIENT))
+#define GNOMENU_IS_CLIENT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_CLIENT))
 #define GNOMENU_CLIENT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), GNOMENU_TYPE_CLIENT, GnomenuClientClass))
 
 typedef struct _GnomenuClientClass GnomenuClientClass;
