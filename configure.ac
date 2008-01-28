@@ -13,6 +13,8 @@ PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
 PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0])
 PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10, gdk-2.0])
 
+
+
 AC_SUBST(LIBGNOMENU_CFLAGS)
 AC_SUBST(LIBGNOMENU_LIBS)
 
@@ -24,10 +26,18 @@ AC_SUBST(TEST_SUITE_LIBS)
 
 AC_PROG_LIBTOOL
 
-GTK_DOC_CHECK([1.0])
+AC_SUBST(DIA)
 
+AC_CHECK_PROGS(DIA, dia)
+
+GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
 
+if test x$enable_gtk_doc = xyes ; then
+	if test x$DIA = "x" ; then
+		AC_MSG_ERROR([dia is needed to build the doc])
+	fi
+fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
