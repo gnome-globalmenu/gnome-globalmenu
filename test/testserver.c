@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/gdksocket.h>
-#include <libgnomenu/gnomenuserver.h>
+#include <libgnomenu/serverhelper.h>
 
 
 static void create_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
@@ -34,7 +34,7 @@ static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer 
 
 int main(int argc, char* argv[]){
 	GtkWindow * window;
-	GnomenuServer * server;
+	GnomenuServerHelper * server;
 	GtkButton * create, * destroy, * size;
 	GdkSocket * socket;
 	GtkBox * box;
@@ -44,9 +44,9 @@ int main(int argc, char* argv[]){
 	socket = gdk_socket_new("test socket");
 
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-	server = gnomenu_server_new();
-	create = GTK_BUTTON(gtk_button_new_with_label("create client"));
-	destroy = GTK_BUTTON(gtk_button_new_with_label("destroy client"));
+	server = gnomenu_server_helper_new();
+	create = GTK_BUTTON(gtk_button_new_with_label("create fake client"));
+	destroy = GTK_BUTTON(gtk_button_new_with_label("destroy fake client"));
 	size = GTK_BUTTON(gtk_button_new_with_label("size request"));
 
 
