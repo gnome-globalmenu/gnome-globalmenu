@@ -24,6 +24,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_ANY,
 	GNOMENU_MSG_CLIENT_NEW,
 	GNOMENU_MSG_CLIENT_DESTROY,
+	GNOMENU_MSG_SIZE_REQUEST,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -54,6 +55,18 @@ typedef struct {
 } GnomenuMessageClientNew;
 
 /**
+ * GnomenuMessageSizeRequest:
+ * @type:
+ * @width:
+ * @height:
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow socket_id;
+	gint	width;
+	gint 	height;
+} GnomenuMessageSizeRequest;
+/**
  * GnomenuMessageClientDestroy:
  * @type:
  * @socket_id:
@@ -74,6 +87,7 @@ struct _GnomenuMessage {
 		GnomenuMessageAny any;
 		GnomenuMessageClientNew client_new;
 		GnomenuMessageClientDestroy client_destroy;
+		GnomenuMessageSizeRequest	size_request;
 	};
 };
 typedef struct _GnomenuMessage GnomenuMessage;

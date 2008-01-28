@@ -20,6 +20,14 @@ static void destroy_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
 
 }
+static void size_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
+	msg.size_request.socket_id = gdk_socket_get_native(socket);
+	msg.size_request.width = 123;
+	msg.size_request.height = 45;
+	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
+}
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
 }
@@ -27,7 +35,7 @@ static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer 
 int main(int argc, char* argv[]){
 	GtkWindow * window;
 	GnomenuServer * server;
-	GtkButton * create, * destroy;
+	GtkButton * create, * destroy, * size;
 	GdkSocket * socket;
 	GtkBox * box;
 
@@ -39,6 +47,8 @@ int main(int argc, char* argv[]){
 	server = gnomenu_server_new();
 	create = GTK_BUTTON(gtk_button_new_with_label("create client"));
 	destroy = GTK_BUTTON(gtk_button_new_with_label("destroy client"));
+	size = GTK_BUTTON(gtk_button_new_with_label("size request"));
+
 
 	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
 	
@@ -49,11 +59,15 @@ int main(int argc, char* argv[]){
 			create_clicked_event_cb, socket);
 	g_signal_connect(G_OBJECT(destroy), "clicked",
 			destroy_clicked_event_cb, socket);
-	
-	gtk_container_add(window, box);
+	g_signal_connect(G_OBJECT(size), "clicked",
+			size_clicked_event_cb, socket);
 
 	gtk_box_pack_start_defaults(box, create);
+	gtk_box_pack_start_defaults(box, size);
 	gtk_box_pack_start_defaults(box, destroy);
+
+	gtk_container_add(window, box);
+
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_main();
 //	g_object_unref(server);

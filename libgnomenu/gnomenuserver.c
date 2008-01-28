@@ -77,7 +77,7 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
-	klass->signals[GMS_SIGNAL_CLIENT_SIZE_REQUEST] = 
+	klass->signals[GMS_SIGNAL_SIZE_REQUEST] = 
 /**
  * GnomenuServer::client-size-request:
  * @client_info: the client info.
@@ -159,6 +159,20 @@ static gboolean gnomenu_server_client_info_compare_by_socket_id(
 	g_message("compare");
 	return !( p1 && p2 && p1->socket_id == p2->socket_id);
 }
+static GnomenuServerClientInfo * 
+gnomenu_server_find_client_info_by_socket_id(
+		GnomenuServer * self,
+		GdkNativeWindow socket_id){
+
+	GnomenuServerClientInfo ci_key;
+	GList * found;
+	ci_key.socket_id = socket_id;
+	
+	found = g_list_find_custom(self->clients, 
+		&ci_key, gnomenu_server_client_info_compare_by_socket_id);
+	if(found) return found->data;
+	return NULL;
+}
 /** gnomenu_server_data_arrival_cb:
  *
  * 	callback, invoked when the embeded socket receives data
@@ -167,47 +181,64 @@ static void gnomenu_server_data_arrival_cb(GdkSocket * socket,
 		gpointer * data, gint bytes, GnomenuServer * server){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
+	guint * signals = NULL;
+	GnomenuServerClientInfo * ci = NULL;
+
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
+	/*initialize varialbes*/
+	signals = GNOMENU_SERVER_GET_CLASS(server)->signals;
+	ci = gnomenu_server_find_client_info_by_socket_id(server, message->client_destroy.socket_id);
 
 	enumvalue = g_enum_get_value(
 					GNOMENU_SERVER_GET_CLASS(server)->type_gnomenu_message_type, 
 					message->any.type);
 	g_message("message arrival: %s", enumvalue->value_name);
-/*TODO: dispatch and emit signals*/
+
 	switch(enumvalue->value){
-		case GNOMENU_MSG_CLIENT_NEW:{
-			GnomenuServerClientInfo * ci = g_new0(GnomenuServerClientInfo, 1);
+		case GNOMENU_MSG_CLIENT_NEW:
+			if(ci){
+				g_warning("client already recorded, "
+						"(silently) remove it and continue");
+				server->clients = g_list_remove_all(server->clients, ci);
+			}
+			ci = g_new0(GnomenuServerClientInfo, 1);
 			ci->socket_id = message->client_new.socket_id;
 			ci->ui_window = message->client_new.ui_window;
 			ci->parent_window = message->client_new.parent_window;
 			g_signal_emit(G_OBJECT(server), 
-					GNOMENU_SERVER_GET_CLASS(server)->signals[GMS_SIGNAL_CLIENT_NEW],
+					signals[GMS_SIGNAL_CLIENT_NEW],
 					0,
 					ci);
-		}
-		break;
-		case GNOMENU_MSG_CLIENT_DESTROY:{
-			GnomenuServerClientInfo ci_key, * ci;
-			GList * found;
-			ci_key.socket_id = message->client_destroy.socket_id;
-			
-			found = g_list_find_custom(server->clients, 
-				&ci_key, gnomenu_server_client_info_compare_by_socket_id);
-			if(! found) {
-				g_warning("client not found");
+			break;
+		case GNOMENU_MSG_CLIENT_DESTROY:
+			if(!ci) {
+				g_warning("client not found,"
+					"(silently) ignore this message and continue");
 				break;
-			} else {
-				ci = found->data;
-				g_signal_emit(G_OBJECT(server), 
-					GNOMENU_SERVER_GET_CLASS(server)->signals[GMS_SIGNAL_CLIENT_DESTROY],
-					0,
-					ci);
+			} 
+			g_signal_emit(G_OBJECT(server), 
+					signals[GMS_SIGNAL_CLIENT_DESTROY],
+					0, ci);
+			break;
+		case GNOMENU_MSG_SIZE_REQUEST:
+			if(!ci){
+				g_warning("client not found,"
+					"(silently) ignore this message and continue");
+				break;
+			} /*else*/
+			{
+				GtkRequisition * requisition = NULL;
+				requisition = g_new0(GtkRequisition, 1);
+				requisition->width = message->size_request.width;
+				requisition->height = message->size_request.height;
+				g_signal_emit(G_OBJECT(server),
+						signals[GMS_SIGNAL_SIZE_REQUEST],
+						0, ci, requisition);
 			}
-		}
 		break;
 		default:
-		g_warning("unknown message");
+		g_warning("unknown message, ignore and continue");
 	}
 }
 /* virtual functions for signal handling*/
