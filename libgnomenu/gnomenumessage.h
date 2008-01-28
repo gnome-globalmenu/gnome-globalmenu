@@ -25,6 +25,8 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_CLIENT_NEW,
 	GNOMENU_MSG_CLIENT_DESTROY,
 	GNOMENU_MSG_SIZE_REQUEST,
+	GNOMENU_MSG_SERVER_NEW,
+	GNOMENU_MSG_SERVER_DESTROY,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -77,6 +79,29 @@ typedef struct {
 	GdkNativeWindow socket_id;
 } GnomenuMessageClientDestroy;
 /**
+ * GnomenuMessageServerNew:
+ * 	@type:
+ * 	@socket_id:
+ * 	@container_window:	perhaps this is useless in current implement;
+ * 		However, if we are moving to Etolite's WildMenu alike implementation(
+ * 		i.e. the client takes care of everything)
+ * 		This field will be useful.
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow socket_id;
+	GdkNativeWindow container_window;
+} GnomenuMessageServerNew;
+/**
+ * GnomenuMessageServerDestroy:
+ * @type:
+ * @socket_id:
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow socket_id;
+} GnomenuMessageServerDestroy;
+/**
  * GnomenuMessage:
  * @any: general form of message;
  *
@@ -88,6 +113,8 @@ struct _GnomenuMessage {
 		GnomenuMessageClientNew client_new;
 		GnomenuMessageClientDestroy client_destroy;
 		GnomenuMessageSizeRequest	size_request;
+		GnomenuMessageServerNew server_new;
+		GnomenuMessageServerDestroy server_destroy;
 	};
 };
 typedef struct _GnomenuMessage GnomenuMessage;

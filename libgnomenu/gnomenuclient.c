@@ -24,7 +24,7 @@ static void gnomenu_client_server_destroy(GnomenuClient * self, GnomenuClientSer
 static void gnomenu_client_allocate_size(GnomenuClient * self, GnomenuClientServerInfo * server_info, GtkAllocation * allocation);
 static void gnomenu_client_query_requisition(GnomenuClient * self, GnomenuClientServerInfo * server_info, GtkRequisition * req);
 
-static void gnomenu_client_data_arrival_cb(GdkSocket * socket, gpointer * data, gint bytes, GnomenuClient * client);
+static void gnomenu_client_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, GnomenuClient * client);
 
 G_DEFINE_TYPE (GnomenuClient, gnomenu_client, G_TYPE_OBJECT)
 
@@ -51,6 +51,9 @@ gnomenu_client_class_init(GnomenuClientClass *klass){
  * @server_info: server_info, owned by GnomenuClient. Do not free it.
  * 
  * emitted when the client receives a server's announcement for its creation.
+ * it is the responsibility of the true client who listens to this signal
+ * to reset its internal state to get ready for a new menu server; even if the
+ * client has established a relation with another menu server;
  */
 		g_signal_new("server-new",
 			G_TYPE_FROM_CLASS(klass),
@@ -67,6 +70,7 @@ gnomenu_client_class_init(GnomenuClientClass *klass){
  * @server_info: server_info, owned by GnomenuClient. Do not free it.
  * 
  * emitted when the client receives a server's announcement for its death.
+ * 
  */
 		g_signal_new("server-destroy",
 			G_TYPE_FROM_CLASS(klass),
@@ -149,6 +153,7 @@ static void gnomenu_client_dispose(GObject * object){
 	if(! priv->disposed){
 		g_object_unref(self->socket);
 		priv->disposed = TRUE;
+	/*FIXME: should I send a client_destroy here?*/
 	}
 	G_OBJECT_CLASS(gnomenu_client_parent_class)->dispose(object);
 }
@@ -166,31 +171,65 @@ static void gnomenu_client_finalize(GObject * object){
  * 	callback, invoked when the embeded socket receives data
  */
 static void gnomenu_client_data_arrival_cb(GdkSocket * socket, 
-		gpointer * data, gint bytes, GnomenuClient * client){
+		gpointer data, gint bytes, GnomenuClient * client){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
+	GnomenuClientServerInfo * server_info = NULL;
+	guint * signals = GNOMENU_CLIENT_GET_CLASS(client)->signals;
 	LOG_FUNC_NAME;
 
 	g_assert(bytes >= sizeof(GnomenuMessage));
-
+	server_info = client->server_info;
+	
 	enumvalue = g_enum_get_value( 
 			GNOMENU_CLIENT_GET_CLASS(client)->type_gnomenu_message_type,
 					message->any.type);
 	g_message("message arrival: %s", enumvalue->value_name);
 	/*TODO: Dispatch the message and emit signals*/
+	switch(enumvalue->value){
+		case GNOMENU_MSG_SERVER_NEW:
+			if(server_info){
+				g_warning("already established a relation with a menu server."
+					"so let's forget about the old one");
+/*thus the client who listens on 
+ * ::server-new signal has to make sure 
+ * it forget everything about the former menu server*/
+			/*FIXME: perhaps send a client-destroy to the old server is polite*/
+				g_free(server_info);
+			}
+			server_info = g_new0(GnomenuClientServerInfo, 1);
+			server_info->socket_id = message->server_new.socket_id;
+			/*FIXME: the container_window field in the message is defined, 
+  			but never used. MAKE SURE it is well defined!*/
+			g_signal_emit(G_OBJECT(client),
+				signals[GMC_SIGNAL_SERVER_NEW],
+				0,
+				server_info);
+		break;
+		case GNOMENU_MSG_SERVER_DESTROY:
+			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
+				g_warning("haven't establish a "
+					"relation with that server, ignore this message");
+				break;
+			}
+			g_signal_emit(G_OBJECT(client),
+				signals[GMC_SIGNAL_SERVER_DESTROY],
+				0,
+				server_info);
+		break;
+		default:
+			g_warning("unknown message, ignore it and continue");
+		break;
+	}
 }
 
 static void gnomenu_client_server_new(GnomenuClient * self, GnomenuClientServerInfo * server_info){
-	if(self->server_info){
-		g_warning("a new server is launched befoer the old one dies");
-		/*TODO: perhaps need to send the old server a client_destroy message*/
-		g_free(self->server_info);
-	} 
+	LOG_FUNC_NAME;
 	self->server_info = server_info;
 }
 static void gnomenu_client_server_destroy(GnomenuClient * self, GnomenuClientServerInfo * server_info){
 	g_warning("Menu server quited before client exits");
-	g_free(self->server_info);
+	g_free(server_info);
 	self->server_info = NULL;
 }
 static void gnomenu_client_allocate_size(GnomenuClient * self, GnomenuClientServerInfo * server_info, GtkAllocation * allocation){

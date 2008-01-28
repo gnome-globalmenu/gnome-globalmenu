@@ -21,7 +21,7 @@ static void gnomenu_server_init(GnomenuServer * self);
 static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 static void gnomenu_server_client_destroy(GnomenuServer * self, GnomenuServerClientInfo * client_info);
 static void gnomenu_server_client_size_request(GnomenuServer * self, GnomenuServerClientInfo * client_info, GtkRequisition * requisition);
-static void gnomenu_server_data_arrival_cb(GdkSocket * socket, gpointer * data, gint bytes, GnomenuServer * server);
+static void gnomenu_server_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, GnomenuServer * server);
 
 G_DEFINE_TYPE (GnomenuServer, gnomenu_server, G_TYPE_OBJECT)
 
@@ -178,7 +178,7 @@ gnomenu_server_find_client_info_by_socket_id(
  * 	callback, invoked when the embeded socket receives data
  */
 static void gnomenu_server_data_arrival_cb(GdkSocket * socket, 
-		gpointer * data, gint bytes, GnomenuServer * server){
+		gpointer data, gint bytes, GnomenuServer * server){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
 	guint * signals = NULL;
