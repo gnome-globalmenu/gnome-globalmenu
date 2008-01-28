@@ -31,7 +31,6 @@ GNOME_DOC_INIT
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
-contrib/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
