@@ -25,7 +25,6 @@ G_BEGIN_DECLS
 #define GNOMENU_SERVER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), GNOMENU_TYPE_SERVER, GnomenuServerClass))
 
 typedef struct _GnomenuServerClass GnomenuServerClass;
-typedef struct _GnomenuServer GnomenuServer;
 
 /**
  * GnomenuServer:
@@ -33,6 +32,7 @@ typedef struct _GnomenuServer GnomenuServer;
  *
  * GnomenuServer provides fundanmental messaging mechanism for a menu server
  */
+typedef struct _GnomenuServer GnomenuServer;
 struct _GnomenuServer{
 	GObject parent;
 	GdkSocket * socket;
@@ -60,7 +60,6 @@ struct _GnomenuServerClientInfo {
 	GdkNativeWindow parent_window;
 };
 
-/*< private >*/
 enum {
 	GMS_SIGNAL_CLIENT_NEW,
 	GMS_SIGNAL_CLIENT_DESTROY,

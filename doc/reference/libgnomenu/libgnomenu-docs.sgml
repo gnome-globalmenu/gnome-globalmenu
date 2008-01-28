@@ -3,19 +3,20 @@
 	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
 <!ENTITY gnomenuserver SYSTEM "xml/gnomenuserver.xml">
+<!ENTITY gnomenuclient SYSTEM "xml/gnomenuclient.xml">
 ]>
 
 
 <book id="libgnomenu">
 	<bookinfo>
-		<title></title>
+		<title> libgnomenu Reference Book</title>
 	<authorgroup>
 		<author>
-			<firstname></firstname>
-			<surname></surname>
+			<firstname>Yu</firstname>
+			<surname>Feng</surname>
 			<affiliation>
 				<address>
-					<email></email>
+					<email>rainwoodman@gmail.com</email>
 				</address>
 			</affiliation>
 		</author>
@@ -23,10 +24,13 @@
 	
 	<copyright>
 		<year>2008</year>
-		<holder></holder>
+		<holder>Nowhere</holder>
 	</copyright>
 
 	<abstract>
+		This is the Reference Book for 
+		writing Global menu application under GNOME enviornment with GTK and
+		libgnomenu.
 	</abstract>
 
 	</bookinfo>
@@ -34,5 +38,6 @@
 		<title>The Gnome Global Menu library Reference</title>
 		&gdksocket;
 		&gnomenuserver;
+		&gnomenuclient;
 	</chapter>
 </book>

@@ -48,7 +48,8 @@ gnomenu_client_class_init(GnomenuClientClass *klass){
 	klass->signals[GMC_SIGNAL_SERVER_NEW] =
 /**
  * GnomenuClient::server-new:
- * @server_info: server_info, owned by GnomenuClient. Do not free it.
+ * @self: the GnomenuClient who emits this signal.
+ * @server_info: owned by GnomenuClient. Do not free it.
  * 
  * emitted when the client receives a server's announcement for its creation.
  * it is the responsibility of the true client who listens to this signal
@@ -67,7 +68,8 @@ gnomenu_client_class_init(GnomenuClientClass *klass){
 	klass->signals[GMC_SIGNAL_SERVER_DESTROY] =
 /**
  * GnomenuClient::server-destroy:
- * @server_info: server_info, owned by GnomenuClient. Do not free it.
+ * @self: the GnomenuClient who emits this signal.
+ * @server_info: owned by GnomenuClient. Do not free it.
  * 
  * emitted when the client receives a server's announcement for its death.
  * 
@@ -84,8 +86,9 @@ gnomenu_client_class_init(GnomenuClientClass *klass){
 	klass->signals[GMC_SIGNAL_ALLOCATE_SIZE] =
 /**
  * GnomenuClient::allocate-size:
- * @server_info: server_info, owned by GnomenuClient. Do not free it.
- * 
+ * @self: the GnomenuClient who emits this signal.
+ * @server_info: owned by GnomenuClient. Do not free it.
+ * @allocation: don't free it either.
  * emitted when client receives server's sizes allocation.
  */
 		g_signal_new("allocate-size",

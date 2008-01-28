@@ -44,7 +44,8 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 	klass->signals[GMS_SIGNAL_CLIENT_NEW] = 
 /**
  * GnomenuServer::client-new:
- * @client_info: the client info.
+ * @self: the GnomenuServe who emits the signal.
+ * @client_info: the client info. #GnomenuServerClientInfo
  *
  * ::client-new signal is emitted when:
  * 	 server receives a  message indicates a new client is born;
@@ -62,7 +63,8 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 	klass->signals[GMS_SIGNAL_CLIENT_DESTROY] = 
 /**
  * GnomenuServer::client-destroy:
- * @client_info: the client info.
+ * @self: the GnomenuServe who emits the signal.
+ * @client_info: the client info. #GnomenuServerClientInfo
  *
  * ::client-destroy signal is emitted when:
  * 	 server receives a  message indicates a client is die;
@@ -80,8 +82,9 @@ gnomenu_server_class_init(GnomenuServerClass *klass){
 	klass->signals[GMS_SIGNAL_SIZE_REQUEST] = 
 /**
  * GnomenuServer::client-size-request:
- * @client_info: the client info.
- * @requisition: the size requisition.
+ * @self: the GnomenuServe who emits the signal.
+ * @client_info: the client info. #GnomenuServerClientInfo
+ * @requisition: the size requisition. Don't free it. #GtkRequisition
  *
  * ::client-size-request signal is emitted when:
  * 	 server receives a  message indicates a client request a size allocation;
@@ -173,7 +176,8 @@ gnomenu_server_find_client_info_by_socket_id(
 	if(found) return found->data;
 	return NULL;
 }
-/** gnomenu_server_data_arrival_cb:
+/** 
+ * gnomenu_server_data_arrival_cb:
  *
  * 	callback, invoked when the embeded socket receives data
  */

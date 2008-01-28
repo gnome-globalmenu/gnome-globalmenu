@@ -148,7 +148,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * Returns: the native id of this socket. It happens to be the Window ID of the
  * 	@GdkWindow the GdkSocket wraps, in current implement.
  */
-GdkNativeWindow gdk_socket_get_native(GdkSocket * self){
+GdkSocketNativeID gdk_socket_get_native(GdkSocket * self){
 	return GDK_WINDOW_XWINDOW(self->window);
 }
 

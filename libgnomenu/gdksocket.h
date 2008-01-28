@@ -5,7 +5,7 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION: gdksocket
+ * SECTION: GdkSocket
  * @short_description: Connectionless socket for GTK.
  * @see_also: #GdkWindow, #GtkGlobalMenuBar
  * @stability: Unstable
@@ -25,7 +25,15 @@ G_BEGIN_DECLS
 
 typedef struct _GdkSocketClass GdkSocketClass;
 typedef struct _GdkSocket GdkSocket;
-
+/**
+ * GdkSocketNativeID:
+ *
+ * The native id for GdkSocket, used for uniquely labelling a socket.
+ * In current implement of #GdkSocket, it is #GdkNativeWindow.
+ *
+ * TODO: perhaps we'll move to dbus in the future.
+ */
+typedef GdkNativeWindow GdkSocketNativeID;
 /** 
  * GdkSocketStatus:
  *   @GDK_SOCKET_NEW: A newly created GdkSocket, the associated GdkWindow is created.
@@ -82,7 +90,7 @@ gboolean gdk_socket_send_nosync(GdkSocket * self, GdkNativeWindow target, gpoint
 gboolean gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 
-GdkNativeWindow gdk_socket_get_native(GdkSocket * self);
+GdkSocketNativeID gdk_socket_get_native(GdkSocket * self);
 
 G_END_DECLS
 #endif

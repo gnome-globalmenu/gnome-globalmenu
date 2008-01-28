@@ -2,6 +2,8 @@
 #define GNOMENU_MESSAGE_H
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include "gdksocket.h"
+
 G_BEGIN_DECLS
 /**
  * SECTION: gnomenumessage
@@ -15,9 +17,13 @@ G_BEGIN_DECLS
 
 /**
  * GnomenuMessageType:
- * GNOMENU_MSG_ANY: any type of message
- * GNOMENU_MSG_CLIENT_NEW: if a client notifies this server its creation.
- * GNOMENU_MSG_CLIENT_REPARENT: if a client's logical parent window is changed.
+ * @GNOMENU_MSG_ANY: any type of message;
+ * @GNOMENU_MSG_CLIENT_NEW: if a client notifies this server its creation.
+ * @GNOMENU_MSG_CLIENT_DESTROY:
+ * @GNOMENU_MSG_SIZE_REQUEST:
+ * @GNOMENU_MSG_SERVER_NEW:
+ * @GNOMENU_MSG_SERVER_DESTROY:
+ *
  * type of a libgnomenu message.
  */
 typedef enum { /*< prefix=GNOMENU >*/
@@ -51,7 +57,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 	GdkNativeWindow ui_window;
 	GdkNativeWindow parent_window;
 } GnomenuMessageClientNew;
@@ -64,7 +70,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 	gint	width;
 	gint 	height;
 } GnomenuMessageSizeRequest;
@@ -76,7 +82,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 } GnomenuMessageClientDestroy;
 /**
  * GnomenuMessageServerNew:
@@ -89,7 +95,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 	GdkNativeWindow container_window;
 } GnomenuMessageServerNew;
 /**
@@ -99,7 +105,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 } GnomenuMessageServerDestroy;
 /**
  * GnomenuMessage:
