@@ -1,3 +1,4 @@
 SUBDIRS = reference
 
-EXTRA_DIST = ClassDiagram.dia
+EXTRA_DIST =
+

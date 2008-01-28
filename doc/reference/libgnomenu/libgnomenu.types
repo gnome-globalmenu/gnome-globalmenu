@@ -2,5 +2,6 @@
 #include <libgnomenu/gdksocket.h>
 
 gdk_socket_get_type
-gnomenu_server_get_type
-gnomenu_client_get_type
+gnomenu_server_helper_get_type
+gnomenu_client_helper_get_type
+gnomenu_message_get_type

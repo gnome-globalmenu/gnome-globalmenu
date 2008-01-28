@@ -9,6 +9,7 @@ BUILT_SOURCES = gnomenu-marshall.h gnomenu-marshall.c gnomenu-enums.c gnomenu-en
 libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	gnomenumessage.h\
+	gnomenumessage.c\
 	gdksocket.h \
 	gdksocket.c \
 	serverhelper.c \

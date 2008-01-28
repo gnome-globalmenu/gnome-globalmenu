@@ -5,7 +5,7 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION: GdkSocket
+ * SECTION: gdksocket
  * @short_description: Connectionless socket for GTK.
  * @see_also: #GdkWindow, #GtkGlobalMenuBar
  * @stability: Unstable

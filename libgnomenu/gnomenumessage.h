@@ -7,7 +7,8 @@
 G_BEGIN_DECLS
 /**
  * SECTION: gnomenumessage
- * @short_description: The underground messages for gnomenu.
+ * @title: GnomenuMessage
+ * @short_description: The underground messages for libgnomenu.
  * @see_also:	#GnomenuServer, #GnomenuClient #GdkSocket
  * @stablility: Unstable
  * @include:	libgnomenu/gnomenumessage.h
@@ -113,6 +114,7 @@ typedef struct {
  *
  * Message.
  */
+typedef struct _GnomenuMessage GnomenuMessage;
 struct _GnomenuMessage {
 	union {
 		GnomenuMessageAny any;
@@ -123,6 +125,7 @@ struct _GnomenuMessage {
 		GnomenuMessageServerDestroy server_destroy;
 	};
 };
-typedef struct _GnomenuMessage GnomenuMessage;
+#define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()
+GType gnomenu_message_get_type (void) ;
 G_END_DECLS
 #endif

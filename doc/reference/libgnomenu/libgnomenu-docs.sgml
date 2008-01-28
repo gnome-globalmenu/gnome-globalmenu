@@ -2,8 +2,9 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
-<!ENTITY gnomenuserver SYSTEM "xml/gnomenuserver.xml">
-<!ENTITY gnomenuclient SYSTEM "xml/gnomenuclient.xml">
+<!ENTITY serverhelper SYSTEM "xml/serverhelper.xml">
+<!ENTITY clienthelper SYSTEM "xml/clienthelper.xml">
+<!ENTITY gnomenumessage SYSTEM "xml/gnomenumessage.xml">
 ]>
 
 
@@ -34,10 +35,16 @@
 	</abstract>
 
 	</bookinfo>
+	<chapter id="svg">
+		<title> Class Diagram </title>
+		<inlinegraphic fileref="ClassDiagram.png" format="PNG"></inlinegraphic>
+
+	</chapter>
 	<chapter id="reference">
 		<title>The Gnome Global Menu library Reference</title>
 		&gdksocket;
-		&gnomenuserver;
-		&gnomenuclient;
+		&gnomenumessage;
+		&serverhelper;
+		&clienthelper;
 	</chapter>
 </book>

@@ -6,15 +6,15 @@
 #include "gnomenumessage.h"
 
 G_BEGIN_DECLS
+
 /**
- * SECTION: GnomenuClientHelper
- * @short_description: Menu client Helper
+ * SECTION: clienthelper
+ * @short_description: Menu client Helper.
  * @see_also: #GtkMenuBar, #GtkGlobalMenuBar, #GdkSocket,
  * @stablility: Unstable
  * @include: libgnomenu/clienthelper.h
  *
  * GnomenuClientHelper provides fundanmental messaging mechanism for a menu client
- * 
  */
 
 #define GNOMENU_TYPE_CLIENT_HELPER	(gnomenu_client_helper_get_type())

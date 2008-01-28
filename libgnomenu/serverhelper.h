@@ -7,8 +7,8 @@
 
 G_BEGIN_DECLS
 /**
- * SECTION: GnomenuServerHelper
- * @short_description: Menu server herlper class
+ * SECTION: serverhelper
+ * @short_description: Menu server herlper class.
  * @see_also: #GtkMenuBar, #GtkGlobalMenuBar, #GdkSocket.
  * @stablility: Unstable
  * @include: libgnomenu/serverhelper.h
