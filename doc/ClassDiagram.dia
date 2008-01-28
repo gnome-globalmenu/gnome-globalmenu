@@ -564,19 +564,19 @@
         <dia:point val="31.3575,9.65"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="31.3075,9.6;39.75,11.9"/>
+        <dia:rectangle val="31.3075,9.6;41.26,11.9"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
         <dia:point val="31.3575,9.65"/>
       </dia:attribute>
       <dia:attribute name="elem_width">
-        <dia:real val="8.3425000000000011"/>
+        <dia:real val="9.8524999999999991"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
         <dia:real val="2.1999999999999997"/>
       </dia:attribute>
       <dia:attribute name="name">
-        <dia:string>#GnomeMenuServer#</dia:string>
+        <dia:string>#GnomenuServerHelper#</dia:string>
       </dia:attribute>
       <dia:attribute name="stereotype">
         <dia:string>##</dia:string>
@@ -672,19 +672,19 @@
         <dia:point val="39.4175,-0.7"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="39.3675,-0.75;47.5,1.55"/>
+        <dia:rectangle val="39.3675,-0.75;49.01,1.55"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
         <dia:point val="39.4175,-0.7"/>
       </dia:attribute>
       <dia:attribute name="elem_width">
-        <dia:real val="8.0324999999999989"/>
+        <dia:real val="9.5425000000000004"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
         <dia:real val="2.1999999999999997"/>
       </dia:attribute>
       <dia:attribute name="name">
-        <dia:string>#GnomeMenuClient#</dia:string>
+        <dia:string>#GnomenuClientHelper#</dia:string>
       </dia:attribute>
       <dia:attribute name="stereotype">
         <dia:string>##</dia:string>
@@ -933,13 +933,13 @@
     </dia:object>
     <dia:object type="UML - Component Feature" version="1" id="O10">
       <dia:attribute name="obj_pos">
-        <dia:point val="39.3683,0.4"/>
+        <dia:point val="39.3677,0.4"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="30.2634,-0.5;40.2683,1.4"/>
+        <dia:rectangle val="30.2634,-0.5;40.2677,1.4"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="39.3683,0.4"/>
+        <dia:point val="39.3677,0.4"/>
         <dia:point val="36.8074,0.4"/>
         <dia:point val="36.8074,0.5"/>
         <dia:point val="31.1634,0.5"/>
@@ -991,13 +991,13 @@
         <dia:point val="35.8375,4.25039"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="34.9375,0.64893;44.3337,5.15039"/>
+        <dia:rectangle val="34.9375,0.648926;45.0887,5.15039"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
         <dia:point val="35.8375,4.25039"/>
         <dia:point val="35.8375,3"/>
-        <dia:point val="43.4337,3"/>
-        <dia:point val="43.4337,1.54893"/>
+        <dia:point val="44.1887,3"/>
+        <dia:point val="44.1887,1.54893"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
         <dia:enum val="1"/>
@@ -1051,8 +1051,8 @@
       <dia:attribute name="orth_points">
         <dia:point val="35.8375,6.55007"/>
         <dia:point val="35.8375,8.075"/>
-        <dia:point val="35.5287,8.075"/>
-        <dia:point val="35.5287,9.59993"/>
+        <dia:point val="36.2837,8.075"/>
+        <dia:point val="36.2837,9.59993"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
         <dia:enum val="1"/>
