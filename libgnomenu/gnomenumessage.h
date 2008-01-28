@@ -16,13 +16,17 @@ G_BEGIN_DECLS
 /**
  * GnomenuMessageType:
  * GNOMENU_MSG_ANY: any type of message
- *
+ * GNOMENU_MSG_CLIENT_NEW: if a client notifies this server its creation.
+ * GNOMENU_MSG_CLIENT_REPARENT: if a client's logical parent window is changed.
  * type of a libgnomenu message.
  */
 typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_ANY,
+	GNOMENU_MSG_CLIENT_NEW,
+	GNOMENU_MSG_CLIENT_DESTROY,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
+
 /**
  * GnomenuMessageAny:
  * @type:	type of the message;
@@ -30,11 +34,35 @@ typedef enum { /*< prefix=GNOMENU >*/
  *
  * An generic message. useless if not debugging.
  */
-typedef struct _GnomenuMessageAny {
+typedef struct {
 	GnomenuMessageType type;
 	gulong data[3];
 } GnomenuMessageAny;
 
+/**
+ * GnomenuMessageClientNew:
+ * @type: 
+ * @socket_id:
+ *
+ * FIXME: should seperate into three different messages.
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow socket_id;
+	GdkNativeWindow ui_window;
+	GdkNativeWindow parent_window;
+} GnomenuMessageClientNew;
+
+/**
+ * GnomenuMessageClientDestroy:
+ * @type:
+ * @socket_id:
+ *
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow socket_id;
+} GnomenuMessageClientDestroy;
 /**
  * GnomenuMessage:
  * @any: general form of message;
@@ -44,7 +72,8 @@ typedef struct _GnomenuMessageAny {
 struct _GnomenuMessage {
 	union {
 		GnomenuMessageAny any;
-		
+		GnomenuMessageClientNew client_new;
+		GnomenuMessageClientDestroy client_destroy;
 	};
 };
 typedef struct _GnomenuMessage GnomenuMessage;

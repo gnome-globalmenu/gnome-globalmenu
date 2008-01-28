@@ -138,15 +138,27 @@ static void gnomenu_server_dispose(GObject * object){
 	G_OBJECT_CLASS(gnomenu_server_parent_class)->dispose(object);
 }
 
+static void gnomenu_server_client_info_free(gpointer  p, gpointer data){
+	g_free(p);
+}
 static void gnomenu_server_finalize(GObject * object){
 	GnomenuServer *self;
 	LOG_FUNC_NAME;
+/**
+ * FIXME: perhaps this is buggy
+ */
 	self = GNOMENU_SERVER(object);
-	g_list_foreach(self->clients, g_free, NULL);
+	g_list_foreach(self->clients, gnomenu_server_client_info_free, NULL);
 	g_list_free(self->clients);
 	G_OBJECT_CLASS(gnomenu_server_parent_class)->finalize(object);
 }
 
+static gboolean gnomenu_server_client_info_compare_by_socket_id(
+	GnomenuServerClientInfo * p1,
+	GnomenuServerClientInfo * p2){
+	g_message("compare");
+	return !( p1 && p2 && p1->socket_id == p2->socket_id);
+}
 /** gnomenu_server_data_arrival_cb:
  *
  * 	callback, invoked when the embeded socket receives data
@@ -163,6 +175,40 @@ static void gnomenu_server_data_arrival_cb(GdkSocket * socket,
 					message->any.type);
 	g_message("message arrival: %s", enumvalue->value_name);
 /*TODO: dispatch and emit signals*/
+	switch(enumvalue->value){
+		case GNOMENU_MSG_CLIENT_NEW:{
+			GnomenuServerClientInfo * ci = g_new0(GnomenuServerClientInfo, 1);
+			ci->socket_id = message->client_new.socket_id;
+			ci->ui_window = message->client_new.ui_window;
+			ci->parent_window = message->client_new.parent_window;
+			g_signal_emit(G_OBJECT(server), 
+					GNOMENU_SERVER_GET_CLASS(server)->signals[GMS_SIGNAL_CLIENT_NEW],
+					0,
+					ci);
+		}
+		break;
+		case GNOMENU_MSG_CLIENT_DESTROY:{
+			GnomenuServerClientInfo ci_key, * ci;
+			GList * found;
+			ci_key.socket_id = message->client_destroy.socket_id;
+			
+			found = g_list_find_custom(server->clients, 
+				&ci_key, gnomenu_server_client_info_compare_by_socket_id);
+			if(! found) {
+				g_warning("client not found");
+				break;
+			} else {
+				ci = found->data;
+				g_signal_emit(G_OBJECT(server), 
+					GNOMENU_SERVER_GET_CLASS(server)->signals[GMS_SIGNAL_CLIENT_DESTROY],
+					0,
+					ci);
+			}
+		}
+		break;
+		default:
+		g_warning("unknown message");
+	}
 }
 /* virtual functions for signal handling*/
 static void gnomenu_server_client_new(GnomenuServer * self, GnomenuServerClientInfo * client_info){
