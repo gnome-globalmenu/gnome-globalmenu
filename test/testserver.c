@@ -31,7 +31,9 @@ static void size_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
 }
-
+static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata){
+	g_message("\n\n\n\n\n ding");
+}
 int main(int argc, char* argv[]){
 	GtkWindow * window;
 	GnomenuServerHelper * server;
@@ -61,7 +63,8 @@ int main(int argc, char* argv[]){
 			destroy_clicked_event_cb, socket);
 	g_signal_connect(G_OBJECT(size), "clicked",
 			size_clicked_event_cb, socket);
-
+	g_signal_connect(G_OBJECT(socket), "data-arrival",
+			socket_data_arrival_cb, NULL);
 	gtk_box_pack_start_defaults(box, create);
 	gtk_box_pack_start_defaults(box, size);
 	gtk_box_pack_start_defaults(box, destroy);

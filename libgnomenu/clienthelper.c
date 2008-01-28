@@ -20,13 +20,13 @@ static void gnomenu_client_helper_finalize(GObject * self);
 static void gnomenu_client_helper_init(GnomenuClientHelper * self);
 
 static void gnomenu_client_helper_server_new
-		(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
+			(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
 static void gnomenu_client_helper_server_destroy
-		(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
-static void gnomenu_client_helper_allocate_size
-		(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkAllocation * allocation);
-static void gnomenu_client_helper_query_requisition
-		(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkRequisition * req);
+			(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
+static void gnomenu_client_helper_size_allocate
+			(GnomenuClientHelper * self, GtkAllocation * allocation);
+static void gnomenu_client_helper_size_query
+			(GnomenuClientHelper * self, GtkRequisition * req);
 
 static void gnomenu_client_helper_data_arrival_cb
 		(GdkSocket * socket, gpointer data, gint bytes, GnomenuClientHelper * client);
@@ -47,8 +47,8 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	
 	klass->server_new = gnomenu_client_helper_server_new;
 	klass->server_destroy = gnomenu_client_helper_server_destroy;
-	klass->allocate_size = gnomenu_client_helper_allocate_size;
-	klass->query_requisition = gnomenu_client_helper_query_requisition;
+	klass->size_allocate = gnomenu_client_helper_size_allocate;
+	klass->size_query = gnomenu_client_helper_size_query;
 
 	klass->signals[GMC_SIGNAL_SERVER_NEW] =
 /**
@@ -88,41 +88,41 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
-	klass->signals[GMC_SIGNAL_ALLOCATE_SIZE] =
+	klass->signals[GMC_SIGNAL_SIZE_ALLOCATE] =
 /**
- * GnomenuClient::allocate-size:
+ * GnomenuClient::size-allocate:
  * @self: the #GnomenuClientHelper who emits this signal.
- * @server_info: owned by #GnomenuClientHelper. Do not free it.
- * @allocation: don't free it either.
+ * @allocation: don't free it and don't pass it around. it is disposed when the signal ends.
+ *
  * emitted when client receives server's sizes allocation.
  */
-		g_signal_new("allocate-size",
+		g_signal_new("size-allocate",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuClientHelperClass, allocate_size),
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, size_allocate),
 			NULL, NULL,
-			gnomenu_marshall_VOID__POINTER_POINTER,
+			gnomenu_marshall_VOID__POINTER,
 			G_TYPE_NONE,
-			2,
-			G_TYPE_POINTER,
-			G_TYPE_POINTER);
-	klass->signals[GMC_SIGNAL_QUERY_REQUISITION] =
+			1,
+			G_TYPE_POINTER
+			);
+	klass->signals[GMC_SIGNAL_SIZE_QUERY] =
 /**
- * GnomenuClient::query-requisition:
- * @server_info: server_info, owned by #GnomenuClientHelper. Do not free it.
- * 
+ * GnomenuClient::size-query:
+ * @self: the #GnomenuClientHelper who emits this signal.
+ * @req: the requisition the client need to fill in.
+ *
  * emitted when the client receives a server's request for querying 
  * its size requisition.
  */
-		g_signal_new("query-requisition",
+		g_signal_new("size-query",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuClientHelperClass, allocate_size),
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, size_query),
 			NULL, NULL,
-			gnomenu_marshall_VOID__POINTER_POINTER,
+			gnomenu_marshall_VOID__POINTER,
 			G_TYPE_NONE,
-			2,
-			G_TYPE_POINTER,
+			1,
 			G_TYPE_POINTER);
 
 }
@@ -244,13 +244,13 @@ gnomenu_client_helper_server_destroy(GnomenuClientHelper * self, GnomenuServerIn
 	self->server_info = NULL;
 }
 static void 
-gnomenu_client_helper_allocate_size(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkAllocation * allocation){
+gnomenu_client_helper_size_allocate(GnomenuClientHelper * self, GtkAllocation * allocation){
 	/*other signal handlers will deal with the allocation*/
 	/*At the cleanup stage, we can safely free allocation*/
 	g_free(allocation);
 }
 static void
-gnomenu_client_helper_query_requisition(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkRequisition * req){
+gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * req){
 	/*TODO: send the requistion to the server*/
 	g_free(req);
 }

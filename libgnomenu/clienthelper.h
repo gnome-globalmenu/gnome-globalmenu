@@ -53,8 +53,8 @@ struct _GnomenuClientHelper {
 enum {
 	GMC_SIGNAL_SERVER_NEW,
 	GMC_SIGNAL_SERVER_DESTROY,
-	GMC_SIGNAL_ALLOCATE_SIZE,
-	GMC_SIGNAL_QUERY_REQUISITION,
+	GMC_SIGNAL_SIZE_ALLOCATE,
+	GMC_SIGNAL_SIZE_QUERY,
 	GMC_SIGNAL_MAX
 };
 /**
@@ -69,8 +69,8 @@ struct _GnomenuClientHelperClass {
 
 	void (*server_new)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
 	void (*server_destroy)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
-	void (*allocate_size)(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkAllocation * allocation);
-	void (*query_requisition)(GnomenuClientHelper * self, GnomenuServerInfo * server_info, GtkRequisition * req);
+	void (*size_allocate)(GnomenuClientHelper * self, GtkAllocation * allocation);
+	void (*size_query)(GnomenuClientHelper * self, GtkRequisition * req);
 };
 
 /**

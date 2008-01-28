@@ -15,13 +15,20 @@ struct _GnomenuServerHelperPrivate {
 #define GNOMENU_SERVER_HELPER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_SERVER_HELPER, GnomenuServerHelperPrivate))
 
-static void gnomenu_server_helper_dispose(GObject * self);
-static void gnomenu_server_helper_finalize(GObject * self);
-static void gnomenu_server_helper_init(GnomenuServerHelper * self);
-static void gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-static void gnomenu_server_helper_client_destroy(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-static void gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * client_info, GtkRequisition * requisition);
-static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, GnomenuServerHelper * server);
+static void gnomenu_server_helper_dispose
+			(GObject * self);
+static void gnomenu_server_helper_finalize
+			(GObject * self);
+static void gnomenu_server_helper_init
+			(GnomenuServerHelper * self);
+static void gnomenu_server_helper_client_new
+			(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+static void gnomenu_server_helper_client_destroy
+			(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+static void gnomenu_server_helper_client_size_request
+			(GnomenuServerHelper * self, GnomenuClientInfo * client_info, GtkRequisition * requisition, GtkAllocation * allocation);
+static void gnomenu_server_helper_data_arrival_cb
+			(GdkSocket * socket, gpointer data, gint bytes, GnomenuServerHelper * server);
 
 G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, G_TYPE_OBJECT)
 
@@ -81,24 +88,32 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 			G_TYPE_POINTER);
 	klass->signals[GMS_SIGNAL_SIZE_REQUEST] = 
 /**
- * GnomenuServerHelper::client-size-request:
+ * GnomenuServerHelper::size-request:
  * @self: the GnomenuServe who emits the signal.
  * @client_info: the client info. #GnomenuClientInfo
  * @requisition: the size requisition. Don't free it. #GtkRequisition
+ * @allocation:  the allocation the server want to assign the the client,
+ * 		The initial value assigned as the @requisition.
  *
- * ::client-size-request signal is emitted when:
- * 	 server receives a  message indicates a client request a size allocation;
- * 	Typically this happens after a server sends a query-requisition message to
- * 	the client.
+ * #GNOMENU_MSG_SIZE_QUERY, \\
+ * #GnomenuClientHelper::size-query, \\
+ * #GNOMENU_MSG_SIZE_REQUEST, \\
+ * #GnomenuServerHelper::size-request,
+ * #GNOMENU_MSG_SIZE_ALLOCATE, \\
+ * #GnomenuClientHelper::size-allocate, \\
+ *
+ * are chained up to finish a size allocation. See #GnomenuMessageSizeQuery for some other 
+ * desciptions.
  */
-		g_signal_new ("client-size-request",
+		g_signal_new ("size-request",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_size_request),
 		NULL, NULL,
-			gnomenu_marshall_VOID__POINTER_POINTER,
+			gnomenu_marshall_VOID__POINTER_POINTER_POINTER,
 			G_TYPE_NONE,
-			2,
+			3,
+			G_TYPE_POINTER,
 			G_TYPE_POINTER,
 			G_TYPE_POINTER
 			);
@@ -233,12 +248,17 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 			} /*else*/
 			{
 				GtkRequisition * requisition = NULL;
+				GtkAllocation * allocation = NULL;
 				requisition = g_new0(GtkRequisition, 1);
+				allocation = g_new0(GtkAllocation, 1);
+			/*NOTE: here we set some sanity value for the allocation*/
+				allocation->width =
 				requisition->width = message->size_request.width;
+				allocation->height =
 				requisition->height = message->size_request.height;
 				g_signal_emit(G_OBJECT(self),
 						signals[GMS_SIGNAL_SIZE_REQUEST],
-						0, ci, requisition);
+						0, ci, requisition, allocation);
 			}
 		break;
 		default:
@@ -246,16 +266,29 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 	}
 }
 /* virtual functions for signal handling*/
-static void gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
+static void 
+gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
 	LOG_FUNC_NAME;
 	self->clients = g_list_prepend(self->clients, client_info);
 }
-static void gnomenu_server_helper_client_destroy(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
+static void 
+gnomenu_server_helper_client_destroy(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
 	LOG_FUNC_NAME;
 	self->clients = g_list_remove_all(self->clients, client_info);
 }
-static void gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * client_info, GtkRequisition * requisition){
+static void 
+gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * client_info, 
+		GtkRequisition * requisition, GtkAllocation * allocation){
+	GnomenuMessage msg;
 	LOG_FUNC_NAME;
+/*TODO: send the allocation to the client*/
+	msg.any.type = GNOMENU_MSG_SIZE_ALLOCATE;
+	msg.size_allocate.width = allocation->width;
+	msg.size_allocate.height = allocation->height;
+	
+	gdk_socket_send(self->socket, client_info->socket_id, 
+		&msg, sizeof(msg));
+	g_free(allocation);
 	g_free(requisition);
 }
 
