@@ -150,6 +150,7 @@ gnomenu_client_helper_new(){
 
 	g_signal_connect(self->socket, "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), self);
 	priv->disposed = FALSE;
+	return self;
 }
 
 static void gnomenu_client_helper_dispose(GObject * object){
@@ -226,6 +227,36 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 				0,
 				server_info);
 		break;
+		case GNOMENU_MSG_SIZE_ALLOCATE:
+			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
+				g_warning("haven't establish a "
+					"relation with that server, ignore this message");
+				break;
+			}
+			{
+				GtkAllocation * allocation = g_new0(GtkAllocation, 1);
+				allocation->width = message->size_allocate.width;
+				allocation->height = message->size_allocate.height;
+				g_signal_emit(G_OBJECT(self),
+					signals[GMC_SIGNAL_SIZE_ALLOCATE],
+					0,
+					allocation);
+			}
+		break;
+		case GNOMENU_MSG_SIZE_QUERY:
+			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
+				g_warning("haven't establish a "
+					"relation with that server, ignore this message");
+				break;
+			}
+			{
+				GtkRequisition * req = g_new0(GtkRequisition, 1);
+				g_signal_emit(G_OBJECT(self),
+					signals[GMC_SIGNAL_SIZE_QUERY],
+					0,
+					req);
+			}
+		break;
 		default:
 			g_warning("unknown message, ignore it and continue");
 		break;
@@ -251,6 +282,13 @@ gnomenu_client_helper_size_allocate(GnomenuClientHelper * self, GtkAllocation * 
 }
 static void
 gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * req){
-	/*TODO: send the requistion to the server*/
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
+	msg.size_request.width = req->width;
+	msg.size_request.height = req->height;
+/*FIXME: is it possible that we are in this handler, but self->server_info is NULL?*/
 	g_free(req);
+	g_return_if_fail(self->server_info);
+	gdk_socket_send(self->socket, 
+		self->server_info->socket_id, &msg, sizeof(msg));
 }

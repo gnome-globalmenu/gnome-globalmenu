@@ -19,16 +19,15 @@ static void destroy_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 }
 static void size_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 	GnomenuMessage msg;
-/* TODO: simulate a size-request allocate-size period*/
-/*	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
-	msg.size_request.socket_id = gdk_socket_get_native(socket);
-	msg.size_request.width = 123;
-	msg.size_request.height = 45;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
-*/
+	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
+	msg.size_query.socket_id = gdk_socket_get_native(socket);
+	gdk_socket_send_by_name(socket, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 }
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
+}
+static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata){
+	g_message("ding: %d", *(gint*)data);
 }
 
 int main(int argc, char* argv[]){
@@ -60,6 +59,9 @@ int main(int argc, char* argv[]){
 			destroy_clicked_event_cb, socket);
 	g_signal_connect(G_OBJECT(size), "clicked",
 			size_clicked_event_cb, socket);
+
+	g_signal_connect(G_OBJECT(socket), "data-arrival",
+			socket_data_arrival_cb, NULL);
 
 	gtk_box_pack_start_defaults(box, create);
 	gtk_box_pack_start_defaults(box, size);

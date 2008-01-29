@@ -140,6 +140,7 @@ gnomenu_server_helper_new(){
 	self->clients = NULL;
 	g_signal_connect(self->socket, "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), self);
 	priv->disposed = FALSE;
+	return self;
 }
 
 static void gnomenu_server_helper_dispose(GObject * object){
