@@ -441,7 +441,6 @@ static GObject* gdk_socket_constructor(GType type, guint n_construct_properties,
 
 	priv = GDK_SOCKET_GET_PRIVATE(socket);
 
-/*	socket->name = g_strdup(name);*/
 	socket->display = gdk_display_get_default();
 	attr.title = socket->name;
 	attr.wclass = GDK_INPUT_ONLY;
