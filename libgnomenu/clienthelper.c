@@ -52,7 +52,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 
 	klass->signals[GMC_SIGNAL_SERVER_NEW] =
 /**
- * GnomenuClient::server-new:
+ * GnomenuClientHelper::server-new:
  * @self: the #GnomenuClientHelper who emits this signal.
  * @server_info: owned by GnomenuClient. Do not free it.
  * 
@@ -72,12 +72,11 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_POINTER);
 	klass->signals[GMC_SIGNAL_SERVER_DESTROY] =
 /**
- * GnomenuClient::server-destroy:
+ * GnomenuClientHelper::server-destroy:
  * @self: the #GnomenuClientHelper who emits this signal.
  * @server_info: owned by GnomenuClient. Do not free it.
  * 
  * emitted when the client receives a server's announcement for its death.
- * 
  */
 		g_signal_new("server-destroy",
 			G_TYPE_FROM_CLASS(klass),
@@ -90,7 +89,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_POINTER);
 	klass->signals[GMC_SIGNAL_SIZE_ALLOCATE] =
 /**
- * GnomenuClient::size-allocate:
+ * GnomenuClientHelper::size-allocate:
  * @self: the #GnomenuClientHelper who emits this signal.
  * @allocation: don't free it and don't pass it around. it is disposed when the signal ends.
  *
@@ -108,7 +107,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			);
 	klass->signals[GMC_SIGNAL_SIZE_QUERY] =
 /**
- * GnomenuClient::size-query:
+ * GnomenuClientHelper::size-query:
  * @self: the #GnomenuClientHelper who emits this signal.
  * @req: the requisition the client need to fill in.
  *

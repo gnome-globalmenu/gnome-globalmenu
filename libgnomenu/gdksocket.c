@@ -10,6 +10,10 @@
 
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
+enum {
+	PROP_NAME
+};
+
 typedef struct _GdkSocketPrivate GdkSocketPrivate;
 struct _GdkSocketPrivate {
 	gboolean disposed;
@@ -145,18 +149,18 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			G_TYPE_UINT
 			);
 
-	pspec =  g_param_spec_string ("name",
-						"GdkSocket name prop",
-						"Set GdkSocket's name",
-						"GdkSocket",
-						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 /**
  * GdkSocket:name:
  *
  * the name of the socket
  */
 	g_object_class_install_property (gobject_class, 
-			GDK_SOCKET_PROP_NAME, pspec);
+			PROP_NAME,
+			g_param_spec_string ("name",
+						"GdkSocket name prop",
+						"Set GdkSocket's name",
+						"GdkSocket",
+						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 			
 }
 
@@ -407,7 +411,7 @@ static void
 gdk_socket_get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
 	GdkSocket * self = GDK_SOCKET(object);
 	switch (property_id){
-		case GDK_SOCKET_PROP_NAME:
+		case PROP_NAME:
 			g_value_set_string(value, self->name);
 		break;
 		default:
@@ -419,7 +423,7 @@ static void
 gdk_socket_set_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
 	GdkSocket * self = GDK_SOCKET(object);
 	switch (property_id){
-		case GDK_SOCKET_PROP_NAME:
+		case PROP_NAME:
 			g_free(self->name);
 			self->name = g_value_dup_string(value);
 		break;
