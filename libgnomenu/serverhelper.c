@@ -30,7 +30,7 @@ static void gnomenu_server_helper_client_size_request
 static void gnomenu_server_helper_data_arrival_cb
 			(GdkSocket * socket, gpointer data, gint bytes, GnomenuServerHelper * server);
 
-G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, G_TYPE_OBJECT)
+G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, GDK_TYPE_SOCKET)
 
 static void
 gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
@@ -134,11 +134,11 @@ gnomenu_server_helper_new(){
 	GnomenuServerHelper * self;
 	GnomenuServerHelperPrivate * priv;
 	LOG_FUNC_NAME;
-	self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, NULL);
+	self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
-	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);
+/*	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);*/
 	self->clients = NULL;
-	g_signal_connect(self->socket, "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), self);
+	g_signal_connect(self, "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), self);
 	priv->disposed = FALSE;
 	return self;
 }
@@ -151,7 +151,6 @@ static void gnomenu_server_helper_dispose(GObject * object){
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
 	
 	if(! priv->disposed){
-		g_object_unref(self->socket);
 		priv->disposed = TRUE;
 	}
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->dispose(object);
@@ -181,7 +180,7 @@ static gboolean gnomenu_server_helper_client_info_compare_by_socket_id(
 static GnomenuClientInfo * 
 gnomenu_server_helper_find_client_info_by_socket_id(
 		GnomenuServerHelper * self,
-		GdkNativeWindow socket_id){
+		GdkSocketNativeID socket_id){
 
 	GnomenuClientInfo ci_key;
 	GList * found;
@@ -287,7 +286,7 @@ gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuCli
 	msg.size_allocate.width = allocation->width;
 	msg.size_allocate.height = allocation->height;
 	
-	gdk_socket_send(self->socket, client_info->socket_id, 
+	gdk_socket_send(GDK_SOCKET(self), client_info->socket_id, 
 		&msg, sizeof(msg));
 	g_free(allocation);
 	g_free(requisition);

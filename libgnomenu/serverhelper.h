@@ -34,8 +34,7 @@ typedef struct _GnomenuServerHelperClass GnomenuServerHelperClass;
  */
 typedef struct _GnomenuServerHelper GnomenuServerHelper;
 struct _GnomenuServerHelper{
-	GObject parent;
-	GdkSocket * socket;
+	GdkSocket parent;
 /*< public >*/
 	GList * clients;
 };
@@ -71,7 +70,7 @@ enum {
  * @menu_create: the virtual function invoked.
  */
 struct _GnomenuServerHelperClass {
-	GObjectClass parent;
+	GdkSocketClass parent;
 /*< private >*/	
 	guint signals[GMS_SIGNAL_MAX];
 	GType * type_gnomenu_message_type;
