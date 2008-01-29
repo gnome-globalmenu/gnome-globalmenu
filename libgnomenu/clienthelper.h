@@ -34,7 +34,7 @@ typedef struct _GnomenuClientHelper GnomenuClientHelper;
  * GnomenuServerInfo is used by GnomenuClientHelper to store server info.
  */
 typedef struct _GnomenuServerInfo {
-	GdkNativeWindow socket_id;
+	GdkSocketNativeID socket_id;
 } GnomenuServerInfo;
 /**
  * GnomenuClientHelper:
@@ -42,8 +42,7 @@ typedef struct _GnomenuServerInfo {
  * GnomenuClientHelper provides fundanmental messaging mechanism for a menu server
  */
 struct _GnomenuClientHelper {
-	GObject parent;
-	GdkSocket * socket;
+	GdkSocket parent;
 	GnomenuServerInfo * server_info;
 /*< public >*/
 };
@@ -62,7 +61,7 @@ enum {
  * @menu_create: the virtual function invoked.
  */
 struct _GnomenuClientHelperClass {
-	GObjectClass parent;
+	GdkSocketClass parent;
 /*< private >*/	
 	guint signals[GMC_SIGNAL_MAX];
 	GType * type_gnomenu_message_type;

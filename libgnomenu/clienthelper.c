@@ -31,7 +31,7 @@ static void gnomenu_client_helper_size_query
 static void gnomenu_client_helper_data_arrival_cb
 		(GdkSocket * socket, gpointer data, gint bytes, GnomenuClientHelper * client);
 
-G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, G_TYPE_OBJECT)
+G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
 
 static void
 gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
@@ -141,13 +141,13 @@ gnomenu_client_helper_new(){
 	GnomenuClientHelper * self;
 	GnomenuClientHelperPrivate * priv;
 	LOG_FUNC_NAME;
-	self = g_object_new(GNOMENU_TYPE_CLIENT_HELPER, NULL);
+	self = g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME,NULL);
 	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
 
-	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);
+/*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
 	self->server_info = NULL;
 
-	g_signal_connect(self->socket, "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), self);
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), self);
 	priv->disposed = FALSE;
 	return self;
 }
@@ -160,7 +160,6 @@ static void gnomenu_client_helper_dispose(GObject * object){
 	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
 	
 	if(! priv->disposed){
-		g_object_unref(self->socket);
 		priv->disposed = TRUE;
 	/*FIXME: should I send a client_destroy here?*/
 	}
@@ -288,6 +287,6 @@ gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * re
 /*FIXME: is it possible that we are in this handler, but self->server_info is NULL?*/
 	g_free(req);
 	g_return_if_fail(self->server_info);
-	gdk_socket_send(self->socket, 
+	gdk_socket_send(GDK_SOCKET(self), 
 		self->server_info->socket_id, &msg, sizeof(msg));
 }
