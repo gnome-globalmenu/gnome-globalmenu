@@ -29,7 +29,7 @@ static void gnomenu_client_helper_size_query
 			(GnomenuClientHelper * self, GtkRequisition * req);
 
 static void gnomenu_client_helper_data_arrival_cb
-		(GdkSocket * socket, gpointer data, gint bytes, GnomenuClientHelper * client);
+		(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
 
 G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
 
@@ -147,7 +147,7 @@ gnomenu_client_helper_new(){
 /*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
 	self->server_info = NULL;
 
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), self);
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), NULL);
 	priv->disposed = FALSE;
 	return self;
 }
@@ -179,10 +179,12 @@ static void gnomenu_client_helper_finalize(GObject * object){
  * 	callback, invoked when the embeded socket receives data
  */
 static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket, 
-		gpointer data, gint bytes, GnomenuClientHelper * self){
+		gpointer data, gint bytes, gpointer userdata){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
 	GnomenuServerInfo * server_info = NULL;
+	GnomenuClientHelper * self = GNOMENU_CLIENT_HELPER(socket);
+
 	guint * signals = GNOMENU_CLIENT_HELPER_GET_CLASS(self)->signals;
 	LOG_FUNC_NAME;
 
