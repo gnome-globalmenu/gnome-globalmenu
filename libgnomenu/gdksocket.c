@@ -11,6 +11,7 @@
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
 enum {
+	PROP_0,
 	PROP_NAME
 };
 
@@ -32,6 +33,9 @@ static void gdk_socket_set_property
 static void gdk_socket_get_property
 			(GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 
+static GObject* gdk_socket_constructor
+			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
+
 G_DEFINE_TYPE (GdkSocket, gdk_socket, G_TYPE_OBJECT)
 
 static void
@@ -49,27 +53,12 @@ gdk_socket_init(GdkSocket * self){
  */
 GdkSocket *
 gdk_socket_new(char * name){
-	GdkWindowAttr attr;
-	GdkWindowAttributesType mask;
 	GdkSocket * socket = NULL;
 	GdkSocketPrivate * priv;
 
 	LOG_FUNC_NAME;
 	socket = g_object_new(GDK_TYPE_SOCKET, "name", name, NULL);
-	priv = GDK_SOCKET_GET_PRIVATE(socket);
 
-/*	socket->name = g_strdup(name);*/
-	socket->display = gdk_display_get_default();
-
-	attr.title = name;
-	attr.wclass = GDK_INPUT_ONLY;
-	attr.window_type = GDK_WINDOW_TEMP;
-	mask = GDK_WA_TITLE;
-	
-	socket->window = gdk_window_new(NULL, &attr, mask);
-	socket->status = GDK_SOCKET_NEW;
-	gdk_window_add_filter(socket->window, gdk_socket_window_filter_cb, socket);
-	priv->disposed = FALSE;
 	return socket;
 }
 /**
@@ -120,6 +109,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
 	g_type_class_add_private(gobject_class, sizeof (GdkSocketPrivate));
 
 	gobject_class->dispose = gdk_socket_dispose;
+	gobject_class->constructor = gdk_socket_constructor;
 	gobject_class->finalize = gdk_socket_finalize;
 	gobject_class->get_property = gdk_socket_get_property;
 	gobject_class->set_property = gdk_socket_set_property;
@@ -430,4 +420,38 @@ gdk_socket_set_property( GObject * object, guint property_id, GValue * value, GP
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
 	}
+}
+
+
+static GObject* gdk_socket_constructor(GType type, guint n_construct_properties,
+		GObjectConstructParam *construct_params){
+	GObject *obj;
+	GdkSocket *socket;
+	GdkSocketPrivate * priv;
+	GdkWindowAttr attr;
+	GdkWindowAttributesType mask;
+	gchar *name;
+
+	LOG_FUNC_NAME;
+
+	obj = ( *G_OBJECT_CLASS(gdk_socket_parent_class)->constructor)(type,
+			n_construct_properties,
+			construct_params);
+	socket = GDK_SOCKET(obj);
+
+	priv = GDK_SOCKET_GET_PRIVATE(socket);
+
+/*	socket->name = g_strdup(name);*/
+	socket->display = gdk_display_get_default();
+	attr.title = socket->name;
+	attr.wclass = GDK_INPUT_ONLY;
+	attr.window_type = GDK_WINDOW_TEMP;
+	mask = GDK_WA_TITLE;
+	
+	socket->window = gdk_window_new(NULL, &attr, mask);
+	socket->status = GDK_SOCKET_NEW;
+	gdk_window_add_filter(socket->window, gdk_socket_window_filter_cb, socket);
+	priv->disposed = FALSE;
+
+	return obj;
 }
