@@ -81,6 +81,10 @@ struct _GdkSocketClass {
 	void (*data_arrival_cleanup) (GdkSocket * self, gpointer data, guint length);
 };
 
+enum {
+	GDK_SOCKET_PROP_NAME
+};
+
 GType gdk_socket_get_type (void);
 
 GdkSocket * gdk_socket_new (gchar * name);

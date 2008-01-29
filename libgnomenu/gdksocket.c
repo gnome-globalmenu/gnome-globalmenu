@@ -11,7 +11,6 @@
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
 typedef struct _GdkSocketPrivate GdkSocketPrivate;
-
 struct _GdkSocketPrivate {
 	gboolean disposed;
 	int foo;
@@ -24,6 +23,10 @@ static GdkFilterReturn
 	gdk_socket_window_filter_cb			(GdkXEvent* xevent, GdkEvent * event, gpointer data);
 static void 
 	cleanup_data_arrival_signal_handler	(GdkSocket * socket, gpointer data, guint size);
+static void gdk_socket_set_property
+			(GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
+static void gdk_socket_get_property
+			(GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 
 G_DEFINE_TYPE (GdkSocket, gdk_socket, G_TYPE_OBJECT)
 
@@ -48,10 +51,10 @@ gdk_socket_new(char * name){
 	GdkSocketPrivate * priv;
 
 	LOG_FUNC_NAME;
-	socket = g_object_new(GDK_TYPE_SOCKET, NULL);
+	socket = g_object_new(GDK_TYPE_SOCKET, "name", name, NULL);
 	priv = GDK_SOCKET_GET_PRIVATE(socket);
 
-	socket->name = g_strdup(name);
+/*	socket->name = g_strdup(name);*/
 	socket->display = gdk_display_get_default();
 
 	attr.title = name;
@@ -106,12 +109,16 @@ gdk_socket_finalize(GObject * object){
 static void
 gdk_socket_class_init(GdkSocketClass * klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
+	GParamSpec * pspec;
+
 	LOG_FUNC_NAME;
 
 	g_type_class_add_private(gobject_class, sizeof (GdkSocketPrivate));
 
 	gobject_class->dispose = gdk_socket_dispose;
 	gobject_class->finalize = gdk_socket_finalize;
+	gobject_class->get_property = gdk_socket_get_property;
+	gobject_class->set_property = gdk_socket_set_property;
 
 	klass->data_arrival_cleanup = cleanup_data_arrival_signal_handler;
 	klass->data_arrival_signal_id = 
@@ -120,7 +127,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * @self: the #GdkSocket that receives this signal.
  * @data: the received data. It is owned by @self and the signal handler 
  * 		should not free it.
- * @bytes: the length of received data.
+ Gdk* @bytes: the length of received data.
  *
  * The ::data-arrival signal is emitted each time a message arrives to
  * the socket.
@@ -137,6 +144,20 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			G_TYPE_POINTER,
 			G_TYPE_UINT
 			);
+
+	pspec =  g_param_spec_string ("name",
+						"GdkSocket name prop",
+						"Set GdkSocket's name",
+						"GdkSocket",
+						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+/**
+ * GdkSocket:name:
+ *
+ * the name of the socket
+ */
+	g_object_class_install_property (gobject_class, 
+			GDK_SOCKET_PROP_NAME, pspec);
+			
 }
 
 /**
@@ -380,4 +401,29 @@ static void cleanup_data_arrival_signal_handler(GdkSocket * socket,
 	gpointer data, guint size){
 	g_free(data);
 	g_message("GdkSocket(%s)::%s ", socket->name, __func__);
+}
+
+static void 
+gdk_socket_get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
+	GdkSocket * self = GDK_SOCKET(object);
+	switch (property_id){
+		case GDK_SOCKET_PROP_NAME:
+			g_value_set_string(value, self->name);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+	}
+}
+
+static void 
+gdk_socket_set_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
+	GdkSocket * self = GDK_SOCKET(object);
+	switch (property_id){
+		case GDK_SOCKET_PROP_NAME:
+			g_free(self->name);
+			self->name = g_value_dup_string(value);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
+	}
 }
