@@ -1,6 +1,6 @@
 #
 
-SUBDIRS = libgnomenu gnome-globalmenu-applet test 
+SUBDIRS = libgnomenu gnome-globalmenu-applet test contrib
 
 if ENABLE_GTK_DOC
 SUBDIRS += doc

@@ -32,13 +32,16 @@ static void create_clicked_cb(GtkButton * button, gpointer user_data){
 			socket_data_arrival_cb, NULL);
 }
 static void send_clicked_cb(GtkButton * button, gpointer user_data){
-	gdk_socket_send(socket1, gdk_socket_get_native(socket2_dup), MSG, 4);
+	if (socket1)
+		gdk_socket_send(socket1, gdk_socket_get_native(socket2_dup), MSG, 4);
 }
 static void broadcast_clicked_cb(GtkButton * button, gpointer user_data){
-	gdk_socket_broadcast_by_name(socket1, "test socket 2", MSG, 4);
+	if(socket1)
+		gdk_socket_broadcast_by_name(socket1, "test socket 2", MSG, 4);
 }
 static void send_by_name_clicked_cb(GtkButton * button, gpointer user_data){
-	gdk_socket_send_by_name(socket1, "test socket 2", MSG, 4);
+	if(socket1)
+		gdk_socket_send_by_name(socket1, "test socket 2", MSG, 4);
 }
 static void quit_clicked_cb(GtkButton * button, gpointer user_data){
 	gtk_widget_destroy(window);
@@ -50,6 +53,7 @@ int main(int argc, char* argv[]){
 	GdkSocket * socket ;
 	GtkButton * create, * send, * send_by_name, * broadcast, * quit;
 	GtkBox * vbox;
+
 
 	gtk_init(&argc, &argv);
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
