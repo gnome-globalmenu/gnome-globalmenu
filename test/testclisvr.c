@@ -45,23 +45,23 @@ int main(int argc, char* argv[]){
 	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
 	
 	g_signal_connect(G_OBJECT(App.window), "destroy",
-			window_destroy_event_cb, NULL);
+			G_CALLBACK(window_destroy_event_cb), NULL);
 
 	g_signal_connect(G_OBJECT(App.create), "clicked",
-			create_clicked_event_cb, &App);
+			G_CALLBACK(create_clicked_event_cb), &App);
 	g_signal_connect(G_OBJECT(App.destroy), "clicked",
-			destroy_clicked_event_cb, &App);
+			G_CALLBACK(destroy_clicked_event_cb), &App);
 	g_signal_connect(G_OBJECT(App.size), "clicked",
-			size_clicked_event_cb, &App);
+			G_CALLBACK(size_clicked_event_cb), &App);
 	g_signal_connect(G_OBJECT(App.connect), "clicked",
-			connect_clicked_event_cb, &App);
+			G_CALLBACK(connect_clicked_event_cb), &App);
 
-	gtk_box_pack_start_defaults(box, App.create);
-	gtk_box_pack_start_defaults(box, App.size);
-	gtk_box_pack_start_defaults(box, App.destroy);
-	gtk_box_pack_start_defaults(box, App.connect);
+	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.create));
+	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.size));
+	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.destroy));
+	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.connect));
 
-	gtk_container_add(App.window, box);
+	gtk_container_add(GTK_CONTAINER(App.window), GTK_WIDGET(box));
 
 	gtk_widget_show_all(GTK_WIDGET(App.window));
 	gtk_main();

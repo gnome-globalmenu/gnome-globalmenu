@@ -137,7 +137,8 @@ gnomenu_client_helper_init(GnomenuClientHelper * self){
 
 /**
  * gnomenu_client_helper_new:
- * * create a new menu client object */ GnomenuClientHelper * 
+ * * create a new menu client object */ 
+GnomenuClientHelper * 
 gnomenu_client_helper_new(){
 	GnomenuClientHelper * self;
 	LOG_FUNC_NAME;

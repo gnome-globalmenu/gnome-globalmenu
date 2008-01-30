@@ -78,5 +78,7 @@ struct _GnomenuClientHelperClass {
  */
 #define GNOMENU_CLIENT_NAME "GNOME MENU CLIENT"
 
+
+GnomenuClientHelper * gnomenu_client_helper_new(void);
 G_END_DECLS
 #endif

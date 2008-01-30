@@ -33,7 +33,7 @@ static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes
 int main(int argc, char* argv[]){
 	GtkWindow * window;
 	GnomenuClientHelper * client;
-	GtkButton * create, * destroy, * size;
+	GtkWidget * create, * destroy, * size;
 	GdkSocket * socket;
 	GtkBox * box;
 
@@ -43,31 +43,31 @@ int main(int argc, char* argv[]){
 
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	client = gnomenu_client_helper_new();
-	create = GTK_BUTTON(gtk_button_new_with_label("create fake server"));
-	destroy = GTK_BUTTON(gtk_button_new_with_label("destroy fake server"));
-	size = GTK_BUTTON(gtk_button_new_with_label("size request"));
+	create = gtk_button_new_with_label("create fake server");
+	destroy = gtk_button_new_with_label("destroy fake server");
+	size = gtk_button_new_with_label("size request");
 
 
 	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
 	
 	g_signal_connect(G_OBJECT(window), "destroy",
-			window_destroy_event_cb, NULL);
+			G_CALLBACK(window_destroy_event_cb), NULL);
 
 	g_signal_connect(G_OBJECT(create), "clicked",
-			create_clicked_event_cb, socket);
+			G_CALLBACK(create_clicked_event_cb), socket);
 	g_signal_connect(G_OBJECT(destroy), "clicked",
-			destroy_clicked_event_cb, socket);
+			G_CALLBACK(destroy_clicked_event_cb), socket);
 	g_signal_connect(G_OBJECT(size), "clicked",
-			size_clicked_event_cb, socket);
+			G_CALLBACK(size_clicked_event_cb), socket);
 
 	g_signal_connect(G_OBJECT(socket), "data-arrival",
-			socket_data_arrival_cb, NULL);
+			G_CALLBACK(socket_data_arrival_cb), NULL);
 
 	gtk_box_pack_start_defaults(box, create);
 	gtk_box_pack_start_defaults(box, size);
 	gtk_box_pack_start_defaults(box, destroy);
 
-	gtk_container_add(window, box);
+	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
 
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_main();

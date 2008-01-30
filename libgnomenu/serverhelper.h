@@ -86,5 +86,7 @@ struct _GnomenuServerHelperClass {
  */
 #define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
 
+GnomenuServerHelper *gnomenu_server_helper_new(void);
+
 G_END_DECLS
 #endif
