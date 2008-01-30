@@ -95,12 +95,6 @@ struct _GnomenuServerHelperClass {
 	void (*client_realize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_unrealize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 };
-/**
- * GNOMENU_SERVER_NAME:
- *
- * Name of the socket
- */
-#define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
 
 GnomenuServerHelper *gnomenu_server_helper_new(void);
 GnomenuClientInfo * gnomenu_server_helper_find_client_by_socket_id(
@@ -109,5 +103,7 @@ GnomenuClientInfo * gnomenu_server_helper_find_client_by_socket_id(
 GnomenuClientInfo * gnomenu_server_helper_find_client_by_parent_window(
 		GnomenuServerHelper * self,
 		GdkNativeWindow parent_window);
+void gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci);
+
 G_END_DECLS
 #endif

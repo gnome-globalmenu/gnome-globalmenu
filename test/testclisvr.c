@@ -6,7 +6,7 @@ typedef struct {
 	GtkWindow * window;
 	GnomenuServerHelper * server;
 	GnomenuClientHelper * client;
-	GtkButton * create, * destroy, * size, *connect;
+	GtkButton * create, * destroy, * size;
 } Application;
 
 static void create_clicked_event_cb(GtkWidget * button, Application * App){
@@ -14,18 +14,15 @@ static void create_clicked_event_cb(GtkWidget * button, Application * App){
 	App->client = gnomenu_client_helper_new();
 }
 static void destroy_clicked_event_cb(GtkWidget * button, Application * App){
-	g_object_unref(App->server);
 	g_object_unref(App->client);
-}
-static void connect_clicked_event_cb(GtkWidget * button, Application *App){
-	/*TODO: finish gnomenu_client_helper and gnomenu_server_helper first,
- * 		perhaps need to use inheritance to make use of gdk_socket_get_native.
- * 		Should the native ID of a server helper identify with the wrapped socket's? */
-	//gnomenu_client_helper_send_client_new(App->client,
-	//	gnomenu_server_helper_get_native(App->server));
+	g_object_unref(App->server);
 }
 static void size_clicked_event_cb(GtkWidget * button, Application * App){
+	GnomenuClientInfo * ci;
+	ci =  gnomenu_server_helper_find_client_by_socket_id(App->server,
+			gdk_socket_get_native(App->client));
 	
+	gnomenu_server_helper_client_queue_resize(App->server, ci);
 }
 
 static void window_destroy_event_cb(GtkWidget * widget, GdkEvent * ev, Application * App){
@@ -40,7 +37,6 @@ int main(int argc, char* argv[]){
 	App.create = GTK_BUTTON(gtk_button_new_with_label("create them"));
 	App.destroy = GTK_BUTTON(gtk_button_new_with_label("destroy them"));
 	App.size = GTK_BUTTON(gtk_button_new_with_label("test size chain"));
-	App.connect = GTK_BUTTON(gtk_button_new_with_label("connect"));
 
 	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
 	
@@ -53,13 +49,10 @@ int main(int argc, char* argv[]){
 			G_CALLBACK(destroy_clicked_event_cb), &App);
 	g_signal_connect(G_OBJECT(App.size), "clicked",
 			G_CALLBACK(size_clicked_event_cb), &App);
-	g_signal_connect(G_OBJECT(App.connect), "clicked",
-			G_CALLBACK(connect_clicked_event_cb), &App);
 
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.create));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.size));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.destroy));
-	gtk_box_pack_start_defaults(box, GTK_WIDGET(App.connect));
 
 	gtk_container_add(GTK_CONTAINER(App.window), GTK_WIDGET(box));
 

@@ -153,6 +153,12 @@ static void gnomenu_client_helper_dispose(GObject * object){
 	self = GNOMENU_CLIENT_HELPER(object);
 	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
 	
+	if(self->server_info){
+		GnomenuMessage msg;
+		msg.any.type = GNOMENU_MSG_CLIENT_DESTROY;
+		msg.client_destroy.socket_id = gdk_socket_get_native(self);
+		gdk_socket_send(self, self->server_info->socket_id, &msg, sizeof(msg));
+	}
 	if(! priv->disposed){
 		priv->disposed = TRUE;
 	/*FIXME: should I send a client_destroy here?*/
@@ -211,7 +217,7 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 				server_info);
 		break;
 		case GNOMENU_MSG_SERVER_DESTROY:
-			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
+			if(!server_info || server_info->socket_id !=message->server_destroy.socket_id){
 				g_warning("haven't establish a "
 					"relation with that server, ignore this message");
 				break;
@@ -222,7 +228,7 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 				server_info);
 		break;
 		case GNOMENU_MSG_SIZE_ALLOCATE:
-			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
+			if(!server_info || server_info->socket_id != message->size_allocate.socket_id){
 				g_warning("haven't establish a "
 					"relation with that server, ignore this message");
 				break;
@@ -278,6 +284,7 @@ static void
 gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * req){
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
+	msg.size_request.socket_id = gdk_socket_get_native(self);
 	msg.size_request.width = req->width;
 	msg.size_request.height = req->height;
 /*FIXME: is it possible that we are in this handler, but self->server_info is NULL?*/
@@ -286,7 +293,6 @@ gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * re
 	gdk_socket_send(GDK_SOCKET(self), 
 		self->server_info->socket_id, &msg, sizeof(msg));
 }
-
 
 static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_properties,
 		GObjectConstructParam *construct_params){
@@ -306,5 +312,11 @@ static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_
 	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), NULL);
 	priv->disposed = FALSE;
 
+	{
+		GnomenuMessage msg;
+		msg.any.type = GNOMENU_MSG_CLIENT_NEW;
+		msg.client_new.socket_id = gdk_socket_get_native(self);
+		gdk_socket_broadcast_by_name(self, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
+	}
 	return obj;
 }

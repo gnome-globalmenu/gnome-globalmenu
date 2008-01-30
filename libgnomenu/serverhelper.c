@@ -334,7 +334,6 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 static gboolean gnomenu_server_helper_client_compare_by_socket_id(
 	const GnomenuClientInfo * p1,
 	const GnomenuClientInfo * p2){
-	g_message("compare");
 	return !( p1 && p2 && p1->socket_id == p2->socket_id);
 }
 /**
@@ -345,7 +344,6 @@ static gboolean gnomenu_server_helper_client_compare_by_socket_id(
 static gboolean gnomenu_server_helper_client_compare_by_parent_window(
 	const GnomenuClientInfo * p1,
 	const GnomenuClientInfo * p2){
-	g_message("compare");
 	return !( p1 && p2 && p1->parent_window == p2->parent_window);
 }
 
@@ -388,14 +386,26 @@ gnomenu_server_helper_find_client_by_parent_window(
 	return NULL;
 }
 void
-gnomenu_server_client_issue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
-
+gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+	GnomenuMessage msg;
+	LOG_FUNC_NAME;
+	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
+	msg.size_query.socket_id = gdk_socket_get_native(self);
+	ci->size_stage = GNOMENU_CI_STAGE_QUERYING;
+	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
 }
 /* virtual functions for signal handling*/
 static void 
 gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+	GnomenuMessage msg;
 	LOG_FUNC_NAME;
+
 	self->clients = g_list_prepend(self->clients, ci);
+
+/*then we tell the client about us*/
+	msg.any.type = GNOMENU_MSG_SERVER_NEW;
+	msg.server_new.socket_id = gdk_socket_get_native(self);
+	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
 }
 static void 
 gnomenu_server_helper_client_realize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
@@ -418,6 +428,8 @@ gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuCli
 	LOG_FUNC_NAME;
 /*TODO: send the allocation to the client*/
 	msg.any.type = GNOMENU_MSG_SIZE_ALLOCATE;
+
+	msg.size_allocate.socket_id = gdk_socket_get_native(self);
 	msg.size_allocate.width = ci->allocation.width;
 	msg.size_allocate.height = ci->allocation.height;
 	

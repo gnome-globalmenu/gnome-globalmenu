@@ -71,12 +71,6 @@ struct _GnomenuClientHelperClass {
 	void (*size_query)(GnomenuClientHelper * self, GtkRequisition * req);
 };
 
-/**
- * GNOMENU_CLIENT_NAME:
- *
- * Name of the socket
- */
-#define GNOMENU_CLIENT_NAME "GNOME MENU CLIENT"
 
 
 GnomenuClientHelper * gnomenu_client_helper_new(void);

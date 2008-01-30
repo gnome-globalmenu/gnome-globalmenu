@@ -113,6 +113,8 @@ typedef struct {
  * 		However, if we are moving to Etolite's WildMenu alike implementation(
  * 		i.e. the client takes care of everything)
  * 		This field will be useful.
+ *
+ *  This message is only intended to be a response of ClientNew message.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -169,6 +171,7 @@ typedef struct {
 /**
  * GnomenuMessageSizeAllocate
  * @type: #GNOMENU_MSG_SIZE_ALLOCATE
+ * @socket_id: the native socket id for the server socket.
  * @width:
  * @height:
  *
@@ -176,6 +179,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
 	gint width;
 	gint height;
 } GnomenuMessageSizeAllocate;
@@ -202,5 +206,21 @@ struct _GnomenuMessage {
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()
 GType gnomenu_message_get_type (void) ;
+
+/**
+ * GNOMENU_CLIENT_NAME:
+ *
+ * Name of the socket for client helper
+ */
+#define GNOMENU_CLIENT_NAME "GNOME MENU CLIENT"
+
+/**
+ * GNOMENU_SERVER_NAME:
+ *
+ * Name of the socket for server helper
+ */
+#define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
+
+
 G_END_DECLS
 #endif
