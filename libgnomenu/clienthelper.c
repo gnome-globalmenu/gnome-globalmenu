@@ -28,6 +28,9 @@ static void gnomenu_client_helper_size_allocate
 static void gnomenu_client_helper_size_query
 			(GnomenuClientHelper * self, GtkRequisition * req);
 
+static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_properties,
+		GObjectConstructParam *construct_params);
+
 static void gnomenu_client_helper_data_arrival_cb
 		(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
 
@@ -42,6 +45,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	klass->type_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
 
 	g_type_class_add_private(gobject_class, sizeof (GnomenuClientHelperPrivate));
+	gobject_class->constructor = gnomenu_client_helper_constructor;
 	gobject_class->dispose = gnomenu_client_helper_dispose;
 	gobject_class->finalize = gnomenu_client_helper_finalize;
 	
@@ -133,22 +137,11 @@ gnomenu_client_helper_init(GnomenuClientHelper * self){
 
 /**
  * gnomenu_client_helper_new:
- * 
- * create a new menu client object
- */
-GnomenuClientHelper * 
+ * * create a new menu client object */ GnomenuClientHelper * 
 gnomenu_client_helper_new(){
 	GnomenuClientHelper * self;
-	GnomenuClientHelperPrivate * priv;
 	LOG_FUNC_NAME;
 	self = g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME,NULL);
-	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
-
-/*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
-	self->server_info = NULL;
-
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), NULL);
-	priv->disposed = FALSE;
 	return self;
 }
 
@@ -291,4 +284,26 @@ gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * re
 	g_return_if_fail(self->server_info);
 	gdk_socket_send(GDK_SOCKET(self), 
 		self->server_info->socket_id, &msg, sizeof(msg));
+}
+
+
+static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_properties,
+		GObjectConstructParam *construct_params){
+	GObject *obj;
+	GnomenuClientHelper * self;
+	GnomenuClientHelperPrivate * priv;
+	
+	obj = (*G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->constructor)(type,
+			n_construct_properties,
+			construct_params);
+
+	self = GNOMENU_CLIENT_HELPER(obj);
+	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
+
+/*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
+	self->server_info = NULL;
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_client_helper_data_arrival_cb), NULL);
+	priv->disposed = FALSE;
+
+	return obj;
 }

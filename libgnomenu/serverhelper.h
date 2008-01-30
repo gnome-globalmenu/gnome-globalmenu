@@ -76,7 +76,8 @@ struct _GnomenuServerHelperClass {
 
 	void (*client_new)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_destroy)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_size_request)(GnomenuServerHelper * self, GnomenuClientInfo * client_info, GtkRequisition * req);
+	void (*client_size_request)(GnomenuServerHelper * self, GnomenuClientInfo * client_info, 
+			GtkRequisition * req, GtkAllocation *alloc);
 };
 /**
  * GNOMENU_SERVER_NAME:

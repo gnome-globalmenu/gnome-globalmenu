@@ -19,6 +19,8 @@ static void gnomenu_server_helper_dispose
 			(GObject * self);
 static void gnomenu_server_helper_finalize
 			(GObject * self);
+static GObject* gnomenu_server_helper_constructor
+			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
 static void gnomenu_server_helper_init
 			(GnomenuServerHelper * self);
 static void gnomenu_server_helper_client_new
@@ -41,6 +43,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	klass->type_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
 
 	g_type_class_add_private(gobject_class, sizeof (GnomenuServerHelperPrivate));
+	gobject_class->constructor = gnomenu_server_helper_constructor;
 	gobject_class->dispose = gnomenu_server_helper_dispose;
 	gobject_class->finalize = gnomenu_server_helper_finalize;
 
@@ -132,14 +135,8 @@ gnomenu_server_helper_init(GnomenuServerHelper * self){
 GnomenuServerHelper * 
 gnomenu_server_helper_new(){
 	GnomenuServerHelper * self;
-	GnomenuServerHelperPrivate * priv;
 	LOG_FUNC_NAME;
 	self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
-	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
-/*	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);*/
-	self->clients = NULL;
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), NULL);
-	priv->disposed = FALSE;
 	return self;
 }
 
@@ -172,8 +169,8 @@ static void gnomenu_server_helper_finalize(GObject * object){
 }
 
 static gboolean gnomenu_server_helper_client_info_compare_by_socket_id(
-	GnomenuClientInfo * p1,
-	GnomenuClientInfo * p2){
+	const GnomenuClientInfo * p1,
+	const GnomenuClientInfo * p2){
 	g_message("compare");
 	return !( p1 && p2 && p1->socket_id == p2->socket_id);
 }
@@ -187,7 +184,7 @@ gnomenu_server_helper_find_client_info_by_socket_id(
 	ci_key.socket_id = socket_id;
 	
 	found = g_list_find_custom(self->clients, 
-		&ci_key, gnomenu_server_helper_client_info_compare_by_socket_id);
+		&ci_key, (GCompareFunc)gnomenu_server_helper_client_info_compare_by_socket_id);
 	if(found) return found->data;
 	return NULL;
 }
@@ -293,3 +290,22 @@ gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuCli
 	g_free(requisition);
 }
 
+static GObject* gnomenu_server_helper_constructor(
+		GType type, guint n_construct_properties, GObjectConstructParam *construct_params){
+	GObject *obj;
+	GnomenuServerHelper *self;
+	GnomenuServerHelperPrivate * priv;
+		
+	obj = ( *G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->constructor)(type,
+			n_construct_properties,
+			construct_params);
+	self = GNOMENU_SERVER_HELPER(obj);
+
+	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
+/*	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);*/
+	self->clients = NULL;
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), NULL);
+	priv->disposed = FALSE;
+
+	return obj;
+}
