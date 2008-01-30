@@ -35,10 +35,10 @@
 	</abstract>
 
 	</bookinfo>
-	<chapter id="svg">
-		<title> Class Diagram </title>
-		<inlinegraphic fileref="ClassDiagram.png" format="PNG"></inlinegraphic>
-
+	<chapter id="figures">
+		<title> Design Figures </title>
+		<inlinegraphic fileref="ClassDiagram.png" format="PNG">Class Diagram</inlinegraphic>
+		<inlinegraphic fileref="LifeTimeDiagram.png" format="PNG">Life Time Diagram</inlinegraphic>
 	</chapter>
 	<chapter id="reference">
 		<title>The Gnome Global Menu library Reference</title>

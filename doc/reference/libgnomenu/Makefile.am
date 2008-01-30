@@ -51,7 +51,7 @@ IGNORE_HFILES=
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
-HTML_IMAGES=ClassDiagram.png
+HTML_IMAGES=ClassDiagram.png LifeTimeDiagram.png
 
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
@@ -75,9 +75,13 @@ include $(top_srcdir)/gtk-doc.make
 
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
-EXTRA_DIST += ClassDiagram.dia
+EXTRA_DIST += ClassDiagram.dia LifeTimeDiagram.dia
 
 imagedir = .
-image_DATA = ClassDiagram.png
-ClassDiagram.png: ClassDiagram.dia
+image_DATA = ClassDiagram.png LifeTimeDiagram.png
+#image_SOURCES = ClassDiagram.dia LifeTimeDiagram.dia
+
+SUFFIXES = .dia .png
+
+.dia.png:
 	dia -e $@ -t png $<
