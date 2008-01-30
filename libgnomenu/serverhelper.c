@@ -24,11 +24,15 @@ static GObject* gnomenu_server_helper_constructor
 static void gnomenu_server_helper_init
 			(GnomenuServerHelper * self);
 static void gnomenu_server_helper_client_new
-			(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
+static void gnomenu_server_helper_client_realize
+			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
+static void gnomenu_server_helper_client_unrealize
+			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 static void gnomenu_server_helper_client_destroy
-			(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 static void gnomenu_server_helper_client_size_request
-			(GnomenuServerHelper * self, GnomenuClientInfo * client_info, GtkRequisition * requisition, GtkAllocation * allocation);
+			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 static void gnomenu_server_helper_data_arrival_cb
 			(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
 
@@ -48,6 +52,8 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	gobject_class->finalize = gnomenu_server_helper_finalize;
 
 	klass->client_new = gnomenu_server_helper_client_new;
+	klass->client_realize = gnomenu_server_helper_client_realize;
+	klass->client_unrealize = gnomenu_server_helper_client_unrealize;
 	klass->client_destroy = gnomenu_server_helper_client_destroy;
 	klass->client_size_request = gnomenu_server_helper_client_size_request;
 
@@ -55,7 +61,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 /**
  * GnomenuServerHelper::client-new:
  * @self: the GnomenuServe who emits the signal.
- * @client_info: the client info. #GnomenuClientInfo
+ * @client_info: the client info. #GnomenuClientInfo. However only the socket_id field is defined.
  *
  * ::client-new signal is emitted when:
  * 	 server receives a  message indicates a new client is born;
@@ -70,6 +76,43 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
+
+	klass->signals[GMS_SIGNAL_CLIENT_REALIZE] =
+/**
+ * GnomenuServerHelper::client-realize:
+ * 	@self: self.
+ * 	@client_info: the client info.
+ *
+ * ::client-reailze signal is emitted when the client's window is realized.
+ */
+		g_signal_new ("client-realize",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_realize),
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
+
+	klass->signals[GMS_SIGNAL_CLIENT_UNREALIZE] = 
+/**
+ * GnomenuServerHelper::client-unrealize:
+ * 	@self: self.
+ * 	@client_info: the client info.
+ *
+ * ::client-unreailze signal is emitted when the client's window is realized.
+ */
+		g_signal_new ("client-unrealize",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_unrealize),
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
+
 	klass->signals[GMS_SIGNAL_CLIENT_DESTROY] = 
 /**
  * GnomenuServerHelper::client-destroy:
@@ -112,12 +155,10 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_size_request),
-		NULL, NULL,
-			gnomenu_marshall_VOID__POINTER_POINTER_POINTER,
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
 			G_TYPE_NONE,
-			3,
-			G_TYPE_POINTER,
-			G_TYPE_POINTER,
+			1,
 			G_TYPE_POINTER
 			);
 }
@@ -168,26 +209,6 @@ static void gnomenu_server_helper_finalize(GObject * object){
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->finalize(object);
 }
 
-static gboolean gnomenu_server_helper_client_info_compare_by_socket_id(
-	const GnomenuClientInfo * p1,
-	const GnomenuClientInfo * p2){
-	g_message("compare");
-	return !( p1 && p2 && p1->socket_id == p2->socket_id);
-}
-static GnomenuClientInfo * 
-gnomenu_server_helper_find_client_info_by_socket_id(
-		GnomenuServerHelper * self,
-		GdkSocketNativeID socket_id){
-
-	GnomenuClientInfo ci_key;
-	GList * found;
-	ci_key.socket_id = socket_id;
-	
-	found = g_list_find_custom(self->clients, 
-		&ci_key, (GCompareFunc)gnomenu_server_helper_client_info_compare_by_socket_id);
-	if(found) return found->data;
-	return NULL;
-}
 /** 
  * gnomenu_server_helper_data_arrival_cb:
  *
@@ -205,7 +226,7 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 	g_assert(bytes >= sizeof(GnomenuMessage));
 	/*initialize varialbes*/
 	signals = GNOMENU_SERVER_HELPER_GET_CLASS(self)->signals;
-	ci = gnomenu_server_helper_find_client_info_by_socket_id(self, message->client_destroy.socket_id);
+	ci = gnomenu_server_helper_find_client_by_socket_id(self, message->client_destroy.socket_id);
 
 	enumvalue = g_enum_get_value(
 					GNOMENU_SERVER_HELPER_GET_CLASS(self)->type_gnomenu_message_type, 
@@ -220,20 +241,60 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 				self->clients = g_list_remove_all(self->clients, ci);
 			}
 			ci = g_new0(GnomenuClientInfo, 1);
+			ci->stage = GNOMENU_CI_STAGE_NEW;
+			ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 			ci->socket_id = message->client_new.socket_id;
-			ci->ui_window = message->client_new.ui_window;
-			ci->parent_window = message->client_new.parent_window;
 			g_signal_emit(G_OBJECT(self), 
 					signals[GMS_SIGNAL_CLIENT_NEW],
 					0,
 					ci);
 			break;
+		case GNOMENU_MSG_CLIENT_REALIZE:
+			if(!ci) {
+				g_warning("an non managed client is realized, ignore and continue");
+			}
+			if(ci->stage == GNOMENU_CI_STAGE_REALIZED){
+				g_warning("already realized. forget about the old one."
+				"");
+				/*FIXME: Shall we Simulate an unrealize signal?*/
+			}
+			ci->ui_window = message->client_realize.ui_window;
+			ci->parent_window = message->client_realize.parent_window;
+			ci->stage = GNOMENU_CI_STAGE_REALIZED;
+			g_signal_emit(G_OBJECT(self),
+					signals[GMS_SIGNAL_CLIENT_REALIZE],
+					0, ci);
+			break;
+		case GNOMENU_MSG_CLIENT_UNREALIZE:
+			if(!ci) {
+				g_warning("an non managed client is unrealized, ignore and continue");
+			}
+			if(ci->stage != GNOMENU_CI_STAGE_REALIZED){
+				g_warning("unrealize a not realized client? ignore it");
+				break;
+			}
+			ci->ui_window = NULL;
+			ci->parent_window = NULL;
+			ci->stage = GNOMENU_CI_STAGE_UNREALIZED;
+			g_signal_emit(G_OBJECT(self),
+					signals[GMS_SIGNAL_CLIENT_UNREALIZE],
+					0, ci);
+			break;
 		case GNOMENU_MSG_CLIENT_DESTROY:
 			if(!ci) {
-				g_warning("client not found,"
+				g_warning("Destroying an non-exist client,"
 					"(silently) ignore this message and continue");
 				break;
 			} 
+			if(ci->stage != GNOMENU_CI_STAGE_UNREALIZED){
+				ci->stage = GNOMENU_CI_STAGE_DESTROYED;
+				g_warning("an unrealize message is missing, stimulate one here");
+			/*NOTE: however in this unrealize signal ci->stage will be DESTROYED*/
+				g_signal_emit(G_OBJECT(self),
+					signals[GMS_SIGNAL_CLIENT_UNREALIZE],
+					0, ci);
+			}
+			ci->stage = GNOMENU_CI_STAGE_DESTROYED;
 			g_signal_emit(G_OBJECT(self), 
 					signals[GMS_SIGNAL_CLIENT_DESTROY],
 					0, ci);
@@ -244,50 +305,125 @@ static void gnomenu_server_helper_data_arrival_cb(GdkSocket * socket,
 					"(silently) ignore this message and continue");
 				break;
 			} /*else*/
+			if(ci->size_stage != GNOMENU_CI_STAGE_QUERYING){
+				g_message("this resize queue is issued by the client");
+			}
 			{
-				GtkRequisition * requisition = NULL;
-				GtkAllocation * allocation = NULL;
-				requisition = g_new0(GtkRequisition, 1);
-				allocation = g_new0(GtkAllocation, 1);
 			/*NOTE: here we set some sanity value for the allocation*/
-				allocation->width =
-				requisition->width = message->size_request.width;
-				allocation->height =
-				requisition->height = message->size_request.height;
+				ci->allocation.width =
+				ci->requisition.width = message->size_request.width;
+				ci->allocation.height =
+				ci->requisition.height = message->size_request.height;
+				ci->size_stage = GNOMENU_CI_STAGE_RESPONSED;
 				g_signal_emit(G_OBJECT(self),
 						signals[GMS_SIGNAL_SIZE_REQUEST],
-						0, ci, requisition, allocation);
+						0, ci);
 			}
 		break;
 		default:
 		g_warning("unknown message, ignore and continue");
 	}
 }
+
+/*public methods*/
+/**
+ * gnomenu_server_helper_client_compare_by_socket_id:
+ *
+ * Return: TRUE if socket_id matches. FALSE if else.
+ */
+static gboolean gnomenu_server_helper_client_compare_by_socket_id(
+	const GnomenuClientInfo * p1,
+	const GnomenuClientInfo * p2){
+	g_message("compare");
+	return !( p1 && p2 && p1->socket_id == p2->socket_id);
+}
+/**
+ * gnomenu_server_helper_client_compare_by_parent_window:
+ *
+ * Return: TRUE if socket_id matches. FALSE if else.
+ */
+static gboolean gnomenu_server_helper_client_compare_by_parent_window(
+	const GnomenuClientInfo * p1,
+	const GnomenuClientInfo * p2){
+	g_message("compare");
+	return !( p1 && p2 && p1->parent_window == p2->parent_window);
+}
+
+/**
+ * gnomenu_server_helper_find_client_by_socket_id:
+ *
+ * Find a client by socket_id
+ */
+GnomenuClientInfo * 
+gnomenu_server_helper_find_client_by_socket_id(
+		GnomenuServerHelper * self,
+		GdkSocketNativeID socket_id){
+
+	GnomenuClientInfo ci_key;
+	GList * found;
+	ci_key.socket_id = socket_id;
+	
+	found = g_list_find_custom(self->clients, 
+		&ci_key, (GCompareFunc)gnomenu_server_helper_client_compare_by_socket_id);
+	if(found) return found->data;
+	return NULL;
+}
+/**
+ * gnomenu_server_helper_find_client_by_parent_window:
+ *
+ * Find a client by parent_window
+ */
+GnomenuClientInfo * 
+gnomenu_server_helper_find_client_by_parent_window(
+		GnomenuServerHelper * self,
+		GdkNativeWindow parent_window){
+
+	GnomenuClientInfo ci_key;
+	GList * found;
+	ci_key.parent_window = parent_window;
+	
+	found = g_list_find_custom(self->clients, 
+		&ci_key, (GCompareFunc)gnomenu_server_helper_client_compare_by_parent_window);
+	if(found) return found->data;
+	return NULL;
+}
+void
+gnomenu_server_client_issue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+
+}
 /* virtual functions for signal handling*/
 static void 
-gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
+gnomenu_server_helper_client_new(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
-	self->clients = g_list_prepend(self->clients, client_info);
+	self->clients = g_list_prepend(self->clients, ci);
 }
 static void 
-gnomenu_server_helper_client_destroy(GnomenuServerHelper * self, GnomenuClientInfo * client_info){
+gnomenu_server_helper_client_realize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
-	self->clients = g_list_remove_all(self->clients, client_info);
+	/*Do nothing */
 }
 static void 
-gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * client_info, 
-		GtkRequisition * requisition, GtkAllocation * allocation){
+gnomenu_server_helper_client_unrealize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+	LOG_FUNC_NAME;
+	/*Do nothing */
+}
+static void 
+gnomenu_server_helper_client_destroy(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+	LOG_FUNC_NAME;
+	self->clients = g_list_remove_all(self->clients, ci);
+}
+static void 
+gnomenu_server_helper_client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 	GnomenuMessage msg;
 	LOG_FUNC_NAME;
 /*TODO: send the allocation to the client*/
 	msg.any.type = GNOMENU_MSG_SIZE_ALLOCATE;
-	msg.size_allocate.width = allocation->width;
-	msg.size_allocate.height = allocation->height;
+	msg.size_allocate.width = ci->allocation.width;
+	msg.size_allocate.height = ci->allocation.height;
 	
-	gdk_socket_send(GDK_SOCKET(self), client_info->socket_id, 
+	gdk_socket_send(GDK_SOCKET(self), ci->socket_id, 
 		&msg, sizeof(msg));
-	g_free(allocation);
-	g_free(requisition);
+	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 }
 
 static GObject* gnomenu_server_helper_constructor(
@@ -302,7 +438,6 @@ static GObject* gnomenu_server_helper_constructor(
 	self = GNOMENU_SERVER_HELPER(obj);
 
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
-/*	self->socket = gdk_socket_new(GNOMENU_SERVER_NAME);*/
 	self->clients = NULL;
 	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(gnomenu_server_helper_data_arrival_cb), NULL);
 	priv->disposed = FALSE;

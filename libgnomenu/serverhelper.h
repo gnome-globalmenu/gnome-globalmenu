@@ -56,10 +56,25 @@ struct _GnomenuClientInfo {
 	GdkSocketNativeID socket_id;
 	GdkNativeWindow ui_window;
 	GdkNativeWindow parent_window;
+	GtkRequisition requisition;
+	GtkAllocation allocation;
+	enum {
+		GNOMENU_CI_STAGE_NEW,
+		GNOMENU_CI_STAGE_REALIZED,
+		GNOMENU_CI_STAGE_UNREALIZED,
+		GNOMENU_CI_STAGE_DESTROYED,
+	} stage;
+	enum {
+		GNOMENU_CI_STAGE_QUERYING,
+		GNOMENU_CI_STAGE_RESPONSED,
+		GNOMENU_CI_STAGE_RESOLVED
+	} size_stage, reskin_stage;
 };
 
 enum {
 	GMS_SIGNAL_CLIENT_NEW,
+	GMS_SIGNAL_CLIENT_REALIZE,
+	GMS_SIGNAL_CLIENT_UNREALIZE,
 	GMS_SIGNAL_CLIENT_DESTROY,
 	GMS_SIGNAL_SIZE_REQUEST,
 	GMS_SIGNAL_MAX
@@ -76,8 +91,9 @@ struct _GnomenuServerHelperClass {
 
 	void (*client_new)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_destroy)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_size_request)(GnomenuServerHelper * self, GnomenuClientInfo * client_info, 
-			GtkRequisition * req, GtkAllocation *alloc);
+	void (*client_size_request)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_realize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_unrealize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 };
 /**
  * GNOMENU_SERVER_NAME:
@@ -87,6 +103,11 @@ struct _GnomenuServerHelperClass {
 #define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
 
 GnomenuServerHelper *gnomenu_server_helper_new(void);
-
+GnomenuClientInfo * gnomenu_server_helper_find_client_by_socket_id(
+		GnomenuServerHelper * self,
+		GdkSocketNativeID socket_id);
+GnomenuClientInfo * gnomenu_server_helper_find_client_by_parent_window(
+		GnomenuServerHelper * self,
+		GdkNativeWindow parent_window);
 G_END_DECLS
 #endif

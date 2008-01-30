@@ -20,6 +20,8 @@ G_BEGIN_DECLS
  * @GNOMENU_MSG_CLIENT_NEW: 	#GnomenuMessageClientNew
  * @GNOMENU_MSG_CLIENT_DESTROY: #GnomenuMessageClientDestroy
  * @GNOMENU_MSG_SERVER_NEW: 	#GnomenuMessageServerNew
+ * @GNOMENU_MSG_CLIENT_REALIZE:
+ * @GNOMENU_MSG_CLIENT_UNREALIZE:
  * @GNOMENU_MSG_SERVER_DESTROY: #GnomenuMessageServerDestroy
  * @GNOMENU_MSG_SIZE_REQUEST: 	#GnomenuMessageSizeRequest
  * @GNOMENU_MSG_SIZE_ALLOCATE:	#GnomenuMessageSizeAllocate
@@ -31,6 +33,8 @@ G_BEGIN_DECLS
 typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_ANY,
 	GNOMENU_MSG_CLIENT_NEW,
+	GNOMENU_MSG_CLIENT_REALIZE,
+	GNOMENU_MSG_CLIENT_UNREALIZE,
 	GNOMENU_MSG_CLIENT_DESTROY,
 	GNOMENU_MSG_SERVER_NEW,
 	GNOMENU_MSG_SERVER_DESTROY,
@@ -57,15 +61,39 @@ typedef struct {
  * @type: 	#GNOMENU_MSG_CLIENT_NEW
  * @socket_id:
  *
- * FIXME: should seperate into three different messages.
+ * A client socket is created.
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
+} GnomenuMessageClientNew;
+
+/**
+ * GnomenuMessageClientRealize:
+ * @type: #GNOMENU_MSG_CLIENT_REALIZE
+ * @socket_id:
+ * @ui_window:
+ * @parent_window:
+ *
+ * A client has been realized;
  */
 typedef struct {
 	GnomenuMessageType type;
 	GdkSocketNativeID socket_id;
 	GdkNativeWindow ui_window;
 	GdkNativeWindow parent_window;
-} GnomenuMessageClientNew;
+} GnomenuMessageClientRealize;
 
+/** GnomenuMessageClientUnrealize:
+ * @type: #GNOMENU_MSG_CLIENT_UNREALIZE
+ * @socket_id:
+ *
+ * A client has been realized;
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
+} GnomenuMessageClientUnrealize;
 /**
  * GnomenuMessageClientDestroy:
  * @type: #GNOMENU_MSG_CLIENT_DESTROY
@@ -80,7 +108,8 @@ typedef struct {
  * GnomenuMessageServerNew:
  * 	@type: #GNOMENU_MSG_SERVER_NEW
  * 	@socket_id:
- * 	@container_window:	perhaps this is useless in current implement;
+ * 	@container_window:	REMOVED. should be in ServerRealize, which is not implemented yet
+ * 		perhaps this is useless in current implement;
  * 		However, if we are moving to Etolite's WildMenu alike implementation(
  * 		i.e. the client takes care of everything)
  * 		This field will be useful.
@@ -88,7 +117,6 @@ typedef struct {
 typedef struct {
 	GnomenuMessageType type;
 	GdkSocketNativeID socket_id;
-	GdkNativeWindow container_window;
 } GnomenuMessageServerNew;
 /**
  * GnomenuMessageServerDestroy:
@@ -162,13 +190,14 @@ struct _GnomenuMessage {
 	union {
 		GnomenuMessageAny any;
 		GnomenuMessageClientNew client_new;
+		GnomenuMessageClientRealize client_realize;
+		GnomenuMessageClientUnrealize client_unrealize;
 		GnomenuMessageClientDestroy client_destroy;
 		GnomenuMessageServerNew server_new;
 		GnomenuMessageServerDestroy server_destroy;
 		GnomenuMessageSizeRequest	size_request;
 		GnomenuMessageSizeAllocate	size_allocate;
 		GnomenuMessageSizeQuery	size_query;
-
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()

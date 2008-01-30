@@ -7,7 +7,6 @@ static void create_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SERVER_NEW;
 	msg.server_new.socket_id = gdk_socket_get_native(socket);
-	msg.server_new.container_window =0xbeafdead;
 	gdk_socket_send_by_name(socket, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 }
 static void destroy_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
