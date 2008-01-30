@@ -1,7 +1,6 @@
 #ifndef GNOMENU_CLIENT_H
 #define GNOMENU_CLIENT_H
-#include <gdk/gdk.h>
-#include <gdk/gdkx.h>
+
 #include "gdksocket.h"
 #include "gnomenumessage.h"
 

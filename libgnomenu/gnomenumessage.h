@@ -1,9 +1,7 @@
 #ifndef GNOMENU_MESSAGE_H
 #define GNOMENU_MESSAGE_H
 #include <gdk/gdk.h>
-#include <gdk/gdkx.h>
 #include "gdksocket.h"
-
 G_BEGIN_DECLS
 /**
  * SECTION: gnomenumessage

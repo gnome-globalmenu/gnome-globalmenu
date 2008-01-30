@@ -1,6 +1,7 @@
 
 #ifndef GDK_SOCKET_H
 #define GDK_SOCKET_H
+#include <gdk/gdk.h>
 
 G_BEGIN_DECLS
 
