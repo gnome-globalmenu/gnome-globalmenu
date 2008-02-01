@@ -22,7 +22,7 @@ script_in_files = dist.sh.in bonobo-server.sh.in
 script_files = dist.sh bonobo-server.sh
 EXTRA_DIST = $(gnome2_globalmenu_appletdoc_DATA) $(intltool_in_files) $(script_in_files)
 DISTCLEANFILES = $(intltool_files) $(scripts_files)
-bonobodir= $(libdir)/bonobo/servers
+bonobodir= `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
 bonobo_DATA= GNOME_GlobalMenuApplet.server
 schemadir= $(sysconfdir)/gconf/schemas
 schema_DATA= gnome2-globalmenu-applet.schema
