@@ -385,13 +385,28 @@ gnomenu_server_helper_find_client_by_parent_window(
 	if(found) return found->data;
 	return NULL;
 }
+
+static gboolean gnomenu_server_helper_is_client(GnomenuServerHelper * self, GnomenuClientInfo * ci){
+	return g_list_find(self->clients, ci);
+}
 void
 gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 	GnomenuMessage msg;
 	LOG_FUNC_NAME;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
 	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
-	msg.size_query.socket_id = gdk_socket_get_native(self);
+	msg.any.socket_id = gdk_socket_get_native(self);
 	ci->size_stage = GNOMENU_CI_STAGE_QUERYING;
+	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
+}
+void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GtkOrientation ori){
+	GnomenuMessage msg;
+	LOG_FUNC_NAME;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
+	msg.any.type = GNOMENU_MSG_ORIENTATION_CHANGE;
+	msg.any.socket_id = gdk_socket_get_native(self);
+	msg.orientation_change.orientation = ori;
 	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
 }
 /* virtual functions for signal handling*/

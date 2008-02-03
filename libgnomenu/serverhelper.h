@@ -95,6 +95,7 @@ GnomenuClientInfo * gnomenu_server_helper_find_client_by_parent_window(
 		GnomenuServerHelper * self,
 		GdkNativeWindow parent_window);
 void gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci);
-
+void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GtkOrientation ori);
 G_END_DECLS
 #endif

@@ -288,6 +288,7 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 					0,
 					ori);
 			}
+		break;
 		default:
 			g_warning("unknown message, ignore it and continue");
 		break;
