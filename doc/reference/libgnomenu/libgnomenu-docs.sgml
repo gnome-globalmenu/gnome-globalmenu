@@ -5,6 +5,7 @@
 <!ENTITY serverhelper SYSTEM "xml/serverhelper.xml">
 <!ENTITY clienthelper SYSTEM "xml/clienthelper.xml">
 <!ENTITY gnomenumessage SYSTEM "xml/gnomenumessage.xml">
+<!ENTITY quirks SYSTEM "xml/quirks.xml">
 ]>
 
 
@@ -46,5 +47,6 @@
 		&gnomenumessage;
 		&serverhelper;
 		&clienthelper;
+		&quirks;
 	</chapter>
 </book>
