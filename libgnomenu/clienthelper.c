@@ -27,14 +27,26 @@ static void gnomenu_client_helper_size_allocate
 			(GnomenuClientHelper * self, GtkAllocation * allocation);
 static void gnomenu_client_helper_size_query
 			(GnomenuClientHelper * self, GtkRequisition * req);
-
-static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_properties,
-		GObjectConstructParam *construct_params);
+static void gnomenu_client_helper_orientation_change
+			(GnomenuClientHelper * self, GtkOrientation ori);
+static GObject * gnomenu_client_helper_constructor
+			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
 
 static void gnomenu_client_helper_data_arrival_cb
-		(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
+			(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
 
 G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
+
+/*< private >*/
+enum {
+	SERVER_NEW,
+	SERVER_DESTROY,
+	SIZE_ALLOCATE,
+	SIZE_QUERY,
+	ORIENTATION_CHANGE,
+	SIGNAL_MAX
+};
+static guint class_signals[SIGNAL_MAX] = {0};
 
 static void
 gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
@@ -53,8 +65,9 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	klass->server_destroy = gnomenu_client_helper_server_destroy;
 	klass->size_allocate = gnomenu_client_helper_size_allocate;
 	klass->size_query = gnomenu_client_helper_size_query;
+	klass->orientation_change = gnomenu_client_helper_orientation_change;
 
-	klass->signals[GMC_SIGNAL_SERVER_NEW] =
+	class_signals[SERVER_NEW] =
 /**
  * GnomenuClientHelper::server-new:
  * @self: the #GnomenuClientHelper who emits this signal.
@@ -74,7 +87,8 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
-	klass->signals[GMC_SIGNAL_SERVER_DESTROY] =
+
+	class_signals[SERVER_DESTROY] =
 /**
  * GnomenuClientHelper::server-destroy:
  * @self: the #GnomenuClientHelper who emits this signal.
@@ -91,7 +105,8 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_POINTER);
-	klass->signals[GMC_SIGNAL_SIZE_ALLOCATE] =
+
+	class_signals[SIZE_ALLOCATE] =
 /**
  * GnomenuClientHelper::size-allocate:
  * @self: the #GnomenuClientHelper who emits this signal.
@@ -109,7 +124,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			1,
 			G_TYPE_POINTER
 			);
-	klass->signals[GMC_SIGNAL_SIZE_QUERY] =
+	class_signals[SIZE_QUERY] =
 /**
  * GnomenuClientHelper::size-query:
  * @self: the #GnomenuClientHelper who emits this signal.
@@ -128,6 +143,20 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			1,
 			G_TYPE_POINTER);
 
+	class_signals[ORIENTATION_CHANGE] =
+/**
+ * GnomenuClientHelper::orientation-change:
+ *
+*/
+		g_signal_new("orientation-change",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, orientation_change),
+			NULL, NULL,
+			gnomenu_marshall_VOID__UINT,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_UINT);
 }
 
 static void
@@ -184,8 +213,13 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 	GEnumValue * enumvalue = NULL;
 	GnomenuServerInfo * server_info = NULL;
 	GnomenuClientHelper * self = GNOMENU_CLIENT_HELPER(socket);
+#define CHECK_SERVER(server, msg) \
+			if (!(server) || (server)->socket_id !=(msg)->any.socket_id) {\
+				g_warning("haven't establish a " \
+					"relation with that server, ignore this message"); \
+				break; \
+			} 
 
-	guint * signals = GNOMENU_CLIENT_HELPER_GET_CLASS(self)->signals;
 	LOG_FUNC_NAME;
 
 	g_assert(bytes >= sizeof(GnomenuMessage));
@@ -201,7 +235,7 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 			if(server_info){
 				g_warning("already established a relation with a menu server."
 					"so let's forget about the old one");
-/*thus the client who listens on 
+/* thus the client who listens on 
  * ::server-new signal has to make sure 
  * it forget everything about the former menu server*/
 			/*FIXME: perhaps send a client-destroy to the old server is polite*/
@@ -212,51 +246,48 @@ static void gnomenu_client_helper_data_arrival_cb(GdkSocket * socket,
 			/*FIXME: the container_window field in the message is defined, 
   			but never used. MAKE SURE it is well defined!*/
 			g_signal_emit(G_OBJECT(self),
-				signals[GMC_SIGNAL_SERVER_NEW],
+				class_signals[SERVER_NEW],
 				0,
 				server_info);
 		break;
 		case GNOMENU_MSG_SERVER_DESTROY:
-			if(!server_info || server_info->socket_id !=message->server_destroy.socket_id){
-				g_warning("haven't establish a "
-					"relation with that server, ignore this message");
-				break;
-			}
+			CHECK_SERVER(server_info, message);
 			g_signal_emit(G_OBJECT(self),
-				signals[GMC_SIGNAL_SERVER_DESTROY],
+				class_signals[SERVER_DESTROY],
 				0,
 				server_info);
 		break;
 		case GNOMENU_MSG_SIZE_ALLOCATE:
-			if(!server_info || server_info->socket_id != message->size_allocate.socket_id){
-				g_warning("haven't establish a "
-					"relation with that server, ignore this message");
-				break;
-			}
+			CHECK_SERVER(server_info, message);
 			{
 				GtkAllocation * allocation = g_new0(GtkAllocation, 1);
 				allocation->width = message->size_allocate.width;
 				allocation->height = message->size_allocate.height;
 				g_signal_emit(G_OBJECT(self),
-					signals[GMC_SIGNAL_SIZE_ALLOCATE],
+					class_signals[SIZE_ALLOCATE],
 					0,
 					allocation);
 			}
 		break;
 		case GNOMENU_MSG_SIZE_QUERY:
-			if(!server_info || server_info->socket_id !=message->server_new.socket_id){
-				g_warning("haven't establish a "
-					"relation with that server, ignore this message");
-				break;
-			}
+			CHECK_SERVER(server_info, message);
 			{
 				GtkRequisition * req = g_new0(GtkRequisition, 1);
 				g_signal_emit(G_OBJECT(self),
-					signals[GMC_SIGNAL_SIZE_QUERY],
+					class_signals[SIZE_QUERY],
 					0,
 					req);
 			}
 		break;
+		case GNOMENU_MSG_ORIENTATION_CHANGE:
+			CHECK_SERVER(server_info, message);
+			{
+				GtkOrientation ori = message->orientation_change.orientation;
+				g_signal_emit(G_OBJECT(self),
+					class_signals[ORIENTATION_CHANGE],
+					0,
+					ori);
+			}
 		default:
 			g_warning("unknown message, ignore it and continue");
 		break;
@@ -292,6 +323,11 @@ gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * re
 	g_return_if_fail(self->server_info);
 	gdk_socket_send(GDK_SOCKET(self), 
 		self->server_info->socket_id, &msg, sizeof(msg));
+}
+
+static void gnomenu_client_helper_orientation_change
+			(GnomenuClientHelper * self, GtkOrientation ori){
+	LOG_FUNC_NAME;
 }
 
 static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_properties,

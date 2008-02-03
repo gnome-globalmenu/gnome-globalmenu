@@ -1,6 +1,7 @@
 #ifndef GNOMENU_MESSAGE_H
 #define GNOMENU_MESSAGE_H
 #include <gdk/gdk.h>
+#include <gtk/gtk.h>
 #include "gdksocket.h"
 G_BEGIN_DECLS
 /**
@@ -41,6 +42,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_SIZE_ALLOCATE,
 	GNOMENU_MSG_SIZE_REQUEST,
 	GNOMENU_MSG_SIZE_QUERY,
+	GNOMENU_MSG_ORIENTATION_CHANGE,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -53,7 +55,8 @@ typedef enum { /*< prefix=GNOMENU >*/
  */
 typedef struct {
 	GnomenuMessageType type;
-	gulong data[3];
+	GdkSocketNativeID socket_id;
+	gulong data[2];
 } GnomenuMessageAny;
 
 /**
@@ -169,7 +172,7 @@ typedef struct {
 } GnomenuMessageSizeRequest;
 
 /**
- * GnomenuMessageSizeAllocate
+ * GnomenuMessageSizeAllocate:
  * @type: #GNOMENU_MSG_SIZE_ALLOCATE
  * @socket_id: the native socket id for the server socket.
  * @width:
@@ -184,6 +187,18 @@ typedef struct {
 	gint height;
 } GnomenuMessageSizeAllocate;
 
+/**
+ * GnomenuMessageOrientationChange:
+ * @type: #GNOMENU_MSG_ORIENTATION_CHANGE
+ * @socket_id: the native socket id for the server socket.
+ * @orientation: new orientation
+ *
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
+	GtkOrientation orientation;
+} GnomenuMessageOrientationChange;
 /**
  * GnomenuMessage:
  *
@@ -202,6 +217,7 @@ struct _GnomenuMessage {
 		GnomenuMessageSizeRequest	size_request;
 		GnomenuMessageSizeAllocate	size_allocate;
 		GnomenuMessageSizeQuery	size_query;
+		GnomenuMessageOrientationChange orientation_change;
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()

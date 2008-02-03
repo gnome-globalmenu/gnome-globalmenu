@@ -68,17 +68,9 @@ struct _GnomenuClientInfo {
 		GNOMENU_CI_STAGE_QUERYING,
 		GNOMENU_CI_STAGE_RESPONSED,
 		GNOMENU_CI_STAGE_RESOLVED
-	} size_stage, reskin_stage;
+	} size_stage;
 };
 
-enum {
-	GMS_SIGNAL_CLIENT_NEW,
-	GMS_SIGNAL_CLIENT_REALIZE,
-	GMS_SIGNAL_CLIENT_UNREALIZE,
-	GMS_SIGNAL_CLIENT_DESTROY,
-	GMS_SIGNAL_SIZE_REQUEST,
-	GMS_SIGNAL_MAX
-};
 /**
  * GnomenuServerHelperClass:
  * @menu_create: the virtual function invoked.
@@ -86,14 +78,13 @@ enum {
 struct _GnomenuServerHelperClass {
 	GdkSocketClass parent;
 /*< private >*/	
-	guint signals[GMS_SIGNAL_MAX];
 	GType * type_gnomenu_message_type;
 
-	void (*client_new)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_destroy)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_size_request)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_realize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
-	void (*client_unrealize)(GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_new) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_destroy) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_size_request) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_realize) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_unrealize) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 };
 
 GnomenuServerHelper *gnomenu_server_helper_new(void);

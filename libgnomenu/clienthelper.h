@@ -47,14 +47,6 @@ struct _GnomenuClientHelper {
 };
 
 
-/*< private >*/
-enum {
-	GMC_SIGNAL_SERVER_NEW,
-	GMC_SIGNAL_SERVER_DESTROY,
-	GMC_SIGNAL_SIZE_ALLOCATE,
-	GMC_SIGNAL_SIZE_QUERY,
-	GMC_SIGNAL_MAX
-};
 /**
  * GnomenuClientHelperClass:
  * @menu_create: the virtual function invoked.
@@ -62,13 +54,13 @@ enum {
 struct _GnomenuClientHelperClass {
 	GdkSocketClass parent;
 /*< private >*/	
-	guint signals[GMC_SIGNAL_MAX];
 	GType * type_gnomenu_message_type;
 
 	void (*server_new)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
 	void (*server_destroy)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
 	void (*size_allocate)(GnomenuClientHelper * self, GtkAllocation * allocation);
 	void (*size_query)(GnomenuClientHelper * self, GtkRequisition * req);
+	void (*orientation_change)(GnomenuClientHelper * self, GtkOrientation ori);
 };
 
 
