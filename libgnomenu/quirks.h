@@ -31,7 +31,7 @@ G_BEGIN_DECLS
 typedef struct _GnomenuQuirksClass GnomenuQuirksClass;
 typedef struct _GnomenuQuirks GnomenuQuirks;
 typedef enum {
-	GNOMENU_QUIRK_MASK_APPNAME,
+	GNOMENU_QUIRK_MASK_APPNAME
 } GnomenuQuirkMask;
 typedef enum {
 	GNOMENU_QUIRK_NO_QUIRK = 0x0,
@@ -62,6 +62,8 @@ struct _GnomenuQuirks {
 struct _GnomenuQuirksClass {
 	GObjectClass  parent;
 };
+
+
 GnomenuQuirk * gnomenu_quirks_match(GtkMenuBar * menubar); /*FIXME: change this to GtkLegacyMenuBar*/
 GnomenuQuirks * gnomenu_quirks_get_default();
 GnomenuQuirks * gnomenu_quirks_add_rule(GnomenuQuirks * self, gchar * rule);
