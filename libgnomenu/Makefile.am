@@ -16,6 +16,8 @@ libgnomenu_la_SOURCES = \
 	serverhelper.h \
 	clienthelper.c \
 	clienthelper.h \
+    gtkglobalmenubar.h \
+	gtkglobalmenubar.c \
 	quirks.h	\
 	quirks.c
 
@@ -30,7 +32,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = gdksocket.h serverhelper.h gnomenumessage.h clienthelper.h quirks.h
+libgnomenuinclude_HEADERS = gdksocket.h serverhelper.h gnomenumessage.h clienthelper.h quirks.h gtkglobalmenubar.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
