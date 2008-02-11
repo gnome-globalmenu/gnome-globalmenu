@@ -11,15 +11,16 @@ libgnomenu_la_SOURCES = \
 	gnomenumessage.h\
 	gnomenumessage.c\
 	gdksocket.h \
-	gdksocket.c \
-	serverhelper.c \
-	serverhelper.h \
-	clienthelper.c \
-	clienthelper.h \
-    gtkglobalmenubar.h \
-	gtkglobalmenubar.c \
-	quirks.h	\
-	quirks.c
+	gdksocket.c
+
+#	serverhelper.c \
+#	serverhelper.h \
+#	clienthelper.c \
+#	clienthelper.h \
+#    gtkglobalmenubar.h \
+#	gtkglobalmenubar.c \
+#	quirks.h	\
+#	quirks.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
@@ -45,7 +46,7 @@ gnomenu-marshall.c: gnomenu-marshall.list
 gnomenu-marshall.h: gnomenu-marshall.list
 	glib-genmarshal --internal --header --prefix=gnomenu_marshall gnomenu-marshall.list > $@
 
-gnomenu_enum_headers = gnomenumessage.h
+gnomenu_enum_headers = gnomenumessage.h gdksocket.h
 
 gnomenu-enums.c: $(gnomenu_enum_headers) 
 	glib-mkenums --fhead "#include <glib-object.h>\n" \

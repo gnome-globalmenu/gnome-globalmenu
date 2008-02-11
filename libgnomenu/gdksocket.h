@@ -7,7 +7,7 @@ G_BEGIN_DECLS
 
 /**
  * SECTION: gdksocket
- * @short_description: Connectionless socket for GTK.
+ * @short_description: Socket Communication for GTK.
  * @see_also: #GdkWindow, #GtkGlobalMenuBar
  * @stability: Unstable
  * @include: libgnomenu/gdksocket.h
@@ -37,18 +37,18 @@ typedef struct _GdkSocket GdkSocket;
 typedef GdkNativeWindow GdkSocketNativeID;
 /** 
  * GdkSocketStatus:
- *   @GDK_SOCKET_NEW: A newly created GdkSocket, the associated GdkWindow is created.
- *   @GDK_SOCKET_SHUTDOWN: The socket was shutdown. LACK DEFINITION.
- *   @GDK_SOCKET_DISPOSED: The socket was disposed. Can not receive or
- *   			send any message
+ *   @GDK_SOCKET_DISCONNECTED: A newly created GdkSocket, the associated GdkWindow is created.
+ *   @GDK_SOCKET_CONNECTED: The socket is connected to somewhere.
+ *   @GDK_SOCKET_LISTEN: The socket is a server and is waiting for CONNECT_REQ
  *
  * The status of a #GdkSocket.
  * TODO: write more about how status changes.
  */
-typedef enum {
+typedef enum { /*< prefix = GDK_SOCKET >*/
 	GDK_SOCKET_DISCONNECTED,
 	GDK_SOCKET_CONNECTED,
-	GDK_SOCKET_LISTEN
+	GDK_SOCKET_LISTEN,
+	GDK_SOCKET_STATUS_MAX
 } GdkSocketStatus;
 
 /**
@@ -60,6 +60,10 @@ typedef enum {
  * 	@status: the status. See #GdkSocketStatus.
  *  @target: to whom this socket is connected
  *  @queue: message buffer, 
+ *	@acks: number of ACKs received. (and without send a DATA) if @acks > 0, 
+ *			it is ok to directly send message to the server without push it to the queue
+ *			and wait for a ACK.
+ *	       if we send message to the server decrease @acks by 1.
  *
  *  The GdkSocket object.
  */
@@ -72,6 +76,7 @@ struct _GdkSocket {
 	GdkSocketStatus status;
 	GdkSocketNativeID target;
 	GQueue * queue;
+	gint acks;
 };
 
 /**
@@ -82,21 +87,23 @@ struct _GdkSocket {
 struct _GdkSocketClass {
 	GObjectClass parent;
 /* < private >*/
-	guint data_arrival_signal_id;
-	void (*data_arrival_cleanup) (GdkSocket * self, gpointer data, guint length);
+	void (*data_arrival) (GdkSocket * self, gpointer data, guint length);
+	void (*connect_req) (GdkSocket * self, GdkSocketNativeID target);
 };
 
 
 GType gdk_socket_get_type (void);
 
 GdkSocket * gdk_socket_new (gchar * name);
-
-gboolean gdk_socket_send(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
-gboolean gdk_socket_send_nosync(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
-gboolean gdk_socket_send_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
-gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
-
 GdkSocketNativeID gdk_socket_get_native(GdkSocket * self);
+
+gboolean gdk_socket_listen(GdkSocket * self);
+GdkSocket * gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target);
+
+gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes);
+//gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
+
+
 
 G_END_DECLS
 #endif
