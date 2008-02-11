@@ -8,7 +8,6 @@
 	GdkSocket * socket1 = NULL;
 	GdkSocket * socket2 = NULL;
 	GtkWindow * window;
-	gchar MSG[] = "HELO";
 	GtkButton * create, * send, * send_by_name, * broadcast, * quit, * connect, * shutdown;
 
 static void socket_data_arrival_cb(GdkSocket * socket, 
@@ -28,8 +27,17 @@ static void create_clicked_cb(GtkButton * button, gpointer user_data){
 
 }
 static void button_clicked_cb(GtkButton * button, gpointer user_data){
+	gchar MSG1[] = "SHELO";
+	gchar MSG2[] = "CHELO";
+	gchar buffer[12]="            ";
 	if(button == send) {
-		gdk_socket_send(socket1, MSG, 4);
+		int i;
+		for(i=0; i< 10; i++){
+			g_sprintf(buffer, "%s%d", MSG1, i);
+			gdk_socket_send(socket1, buffer, sizeof(buffer));
+			g_sprintf(buffer, "%s%d", MSG2, i);
+			gdk_socket_send(service, buffer, sizeof(buffer));
+		}
 	}
 	if(button == create){
 		server = gdk_socket_new("server");
@@ -59,12 +67,12 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 	}
 }
 static void broadcast_clicked_cb(GtkButton * button, gpointer user_data){
-	if(socket1)
-		gdk_socket_broadcast_by_name(socket1, "test socket 2", MSG, 4);
+//	if(socket1)
+		//gdk_socket_broadcast_by_name(socket1, "test socket 2", MSG, 4);
 }
 static void send_by_name_clicked_cb(GtkButton * button, gpointer user_data){
-	if(socket1)
-		gdk_socket_send_by_name(socket1, "test socket 2", MSG, 4);
+//	if(socket1)
+//		gdk_socket_send_by_name(socket1, "test socket 2", MSG, 4);
 }
 static void window_destroy_event_cb(GtkWidget * widget, GdkEvent * event, gpointer userdata){
 	gtk_main_quit();
