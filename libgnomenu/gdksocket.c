@@ -23,6 +23,7 @@ enum {
 enum {
 	DATA_ARRIVAL,
 	CONNECT_REQ,
+	SHUTDOWN,
 	SIGNAL_MAX,
 };
 typedef struct _GdkSocketPrivate GdkSocketPrivate;
@@ -51,10 +52,9 @@ static GObject * _constructor
 			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
 static void _dispose(GObject * object);
 static void _finalize(GObject * object);
-static void 
-	_data_arrival (GdkSocket * socket, gpointer data, guint size);
-static void
-	_connect_req (GdkSocket * socket, GdkSocketNativeID target);
+static void _data_arrival (GdkSocket * socket, gpointer data, guint size);
+static void _connect_req (GdkSocket * socket, GdkSocketNativeID target);
+static void _shutdown (GdkSocket * socket);
 
 static void _set_property
 			(GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
@@ -64,7 +64,7 @@ static void _get_property
 static gboolean _raw_send(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
 static gboolean _raw_send_nosync(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes);
 static gboolean _raw_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
-
+static void _destroy_on_shutdown(GdkSocket * self, gpointer userdata);
 G_DEFINE_TYPE (GdkSocket, gdk_socket, G_TYPE_OBJECT)
 static gulong class_signals[SIGNAL_MAX] = {0};
 static GdkFilterReturn 
@@ -92,6 +92,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
 
 	klass->data_arrival = _data_arrival;
 	klass->connect_req = _connect_req;
+	klass->shutdown = _shutdown;
 
 	class_signals[DATA_ARRIVAL] =
 /**
@@ -123,7 +124,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * @self: the #GdkSocket that receives this signal.
  * @data: the received data. It is owned by @self and the signal handler 
  * 		should not free it.
- Gdk* @bytes: the length of received data.
+ * @bytes: the length of received data.
  *
  * The ::data-arrival signal is emitted each time a message arrives to
  * the socket.
@@ -139,6 +140,22 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			1     /* n_params */,
 			G_TYPE_UINT
 			);
+	class_signals[SHUTDOWN] =
+/**
+ * GdkSocket::shutdown
+ * @self:
+ * 
+ * invoked when the socket is shutdown from the other peer.
+ */
+		g_signal_new ("shutdown",
+			G_TYPE_FROM_CLASS (klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GdkSocketClass, shutdown),
+			NULL,
+			NULL,
+			gnomenu_marshall_VOID__VOID,
+			G_TYPE_NONE,
+			0);
 
 /**
  * GdkSocket:name:
@@ -208,6 +225,7 @@ static GObject* _constructor(GType type, guint n_construct_properties,
 	socket->acks = 0;
 
 	gdk_window_add_filter(socket->window, _window_filter_cb, socket);
+
 	priv->disposed = FALSE;
 
 	return obj;
@@ -234,6 +252,7 @@ gdk_socket_new(char * name){
 
 	return socket;
 }
+
 GdkSocket *
 gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target){
 	GdkSocket * rt;
@@ -243,6 +262,7 @@ gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target){
 		rt = g_object_new(GDK_TYPE_SOCKET, "name", newname, "target", target,
 				"status", GDK_SOCKET_CONNECTED, NULL);
 		g_free(newname);
+		g_signal_connect(rt, "shutdown", _destroy_on_shutdown, NULL);
 /*Issue the first ACK message.*/
 		ack.header = GDK_SOCKET_ACK;
 		ack.source = gdk_socket_get_native(rt);
@@ -329,9 +349,14 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 		g_error("%s: Can not send more than 12 bytes", __func__);
 		return FALSE;
 	}
+	if(self->status != GDK_SOCKET_CONNECTED){
+		g_error("Not connected, can not send");
+		return FALSE;
+	}
 	msg->header = GDK_SOCKET_DATA;
 	msg->source = gdk_socket_get_native(self);
 	g_memmove(msg->l, data, bytes);
+	g_print("status = %d\n", self->status);
 	g_print("data = %*s", bytes, data);
 	g_print("ACKS = %d\n", self->acks);
 	if(self->acks <= 0){
@@ -342,6 +367,29 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 		g_free(msg);
 	}
 	return TRUE;
+}
+/**
+ * gdk_socket_shutdown:
+ *
+ * Shutdown a socket connection
+ */
+void gdk_socket_shutdown(GdkSocket * self) {
+	GdkSocketMessage msg;
+	LOG_FUNC_NAME;
+	if(self->status == GDK_SOCKET_CONNECTED){
+		GdkSocketMessage  * q_msg;
+		self->status = GDK_SOCKET_DISCONNECTED;
+		self->acks = 0;
+		while(q_msg = g_queue_pop_head(self->queue)){
+			g_free(q_msg);
+		}
+		msg.header = GDK_SOCKET_SHUTDOWN;
+		msg.source = gdk_socket_get_native(self);
+		_raw_send(self, self->target, &msg, sizeof(msg));
+		
+	} else{
+		g_warning("Not connected, can not shutdown");
+	}
 }
 /**
  * gdk_socket_window_filter_cb
@@ -414,13 +462,26 @@ static GdkFilterReturn
 				break;
 				case GDK_SOCKET_BROADCAST:	
 					if(self->status != GDK_SOCKET_CONNECTED){
-					g_waring("Not implemented BROADCAST");
+					g_warning("Not implemented BROADCAST");
 					} else
 					g_warning("Wrong socket status, ignore DATA");
 					return GDK_FILTER_REMOVE;
 				break;
 				case GDK_SOCKET_SHUTDOWN:
-					g_warning("Donno how to deal with shutdown");
+					if(self->status != GDK_SOCKET_CONNECTED){
+						g_warning("SHUTDOWN a non connected socket");
+					} else{
+						GdkSocketMessage * queue_message;
+						while(queue_message = g_queue_pop_head(self->queue)){
+					/*FIXME: maybe sending all these message will be better than freeing them*/
+							g_free(queue_message);
+						}
+						self->acks = 0;
+						self->status == GDK_SOCKET_DISCONNECTED;
+						g_signal_emit(self,
+								class_signals[SHUTDOWN],
+								0);
+					}
 				break;
 				default:
 					g_error("Should never reach here!");
@@ -437,7 +498,10 @@ static void _data_arrival(GdkSocket * self,
 }
 static void _connect_req(GdkSocket * self,
 	GdkSocketNativeID target){
-//		GdkSocket * newsocket = gdk_socket_accept(self, msg->source);
+	LOG_FUNC_NAME;
+}
+static void _shutdown (GdkSocket * self){
+	LOG_FUNC_NAME;
 }
 static void 
 _get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
@@ -672,4 +736,6 @@ _raw_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint byte
 	g_list_free(window_list);
 	return rt;
 }
-
+static void _destroy_on_shutdown( GdkSocket * self, gpointer userdata){
+	g_object_unref(self);
+}

@@ -9,7 +9,7 @@
 	GdkSocket * socket2 = NULL;
 	GtkWindow * window;
 	gchar MSG[] = "HELO";
-	GtkButton * create, * send, * send_by_name, * broadcast, * quit, * connect;
+	GtkButton * create, * send, * send_by_name, * broadcast, * quit, * connect, * shutdown;
 
 static void socket_data_arrival_cb(GdkSocket * socket, 
 	gpointer data, guint bytes, gpointer userdata){
@@ -54,6 +54,9 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 	gtk_widget_destroy(GTK_WIDGET(window));
 
 	}
+	if(button == shutdown){
+		gdk_socket_shutdown(socket1);
+	}
 }
 static void broadcast_clicked_cb(GtkButton * button, gpointer user_data){
 	if(socket1)
@@ -85,6 +88,11 @@ int main(int argc, char* argv[]){
 	connect = GTK_BUTTON(gtk_button_new_with_label("connect"));
 	g_signal_connect(G_OBJECT(connect), "clicked",
 			G_CALLBACK(button_clicked_cb), NULL);
+
+	shutdown = GTK_BUTTON(gtk_button_new_with_label("shutdown"));
+	g_signal_connect(G_OBJECT(shutdown), "clicked", 
+			G_CALLBACK(button_clicked_cb), NULL);
+
 	send = GTK_BUTTON(gtk_button_new_with_label("send"));
 	g_signal_connect(G_OBJECT(send), "clicked", 
 			G_CALLBACK(button_clicked_cb), NULL);
@@ -104,6 +112,7 @@ int main(int argc, char* argv[]){
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(create));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(send));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(connect));
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(shutdown));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(send_by_name));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(broadcast));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(quit));
