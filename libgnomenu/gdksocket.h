@@ -46,9 +46,9 @@ typedef GdkNativeWindow GdkSocketNativeID;
  * TODO: write more about how status changes.
  */
 typedef enum {
-	GDK_SOCKET_NEW,
-	GDK_SOCKET_SHUTDOWN,
-	GDK_SOCKET_DISPOSED
+	GDK_SOCKET_DISCONNECTED,
+	GDK_SOCKET_CONNECTED,
+	GDK_SOCKET_LISTEN
 } GdkSocketStatus;
 
 /**
@@ -58,6 +58,8 @@ typedef enum {
  * 	@display: the #GdkDisplay this socket belongs to. Though we can always obtain 
  * 		this information from @window, we cache it here for saving code lines.
  * 	@status: the status. See #GdkSocketStatus.
+ *  @target: to whom this socket is connected
+ *  @queue: message buffer, 
  *
  *  The GdkSocket object.
  */
@@ -68,6 +70,8 @@ struct _GdkSocket {
 	GdkWindow * window;
 	GdkDisplay * display;
 	GdkSocketStatus status;
+	GdkSocketNativeID target;
+	GQueue * queue;
 };
 
 /**

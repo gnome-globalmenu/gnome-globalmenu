@@ -479,17 +479,25 @@ static void
 _hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel)
 {
-  GtkWidget *toplevel;  
-  GtkMenuBar *menubar;
+	GtkWidget *toplevel;  
+	GtkGlobalMenuBar *menu_bar;
 
-  menubar = GTK_MENU_BAR (widget);
+	menu_bar = GTK_GLOBAL_MENU_BAR (widget);
 
-  GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
+	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
+	toplevel = gtk_widget_get_toplevel(widget);
+	if(GTK_WIDGET_TOPLEVEL(toplevel)){
+		if(GTK_WIDGET_REALIZED(toplevel)){
+/* NOTE: This signal is rarely captured, because usually a menubar is added to a toplevel
+ * BEFORE the toplevel is realized. So we need to handle this in _realize. */
+			gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
+		}
+	}
 }
-
 static void
 _realize (GtkWidget * widget){
 	GtkGlobalMenuBar * menu_bar;
+	GtkWidget *toplevel;  
 
 	GdkWindowAttr attributes;
 	guint attributes_mask;
@@ -531,6 +539,15 @@ _realize (GtkWidget * widget){
 	gtk_container_forall(GTK_CONTAINER(widget), 
            (GtkCallback)(gtk_widget_set_parent_window), 
            (gpointer)(menu_bar->container));
+
+	gnomenu_client_helper_send_realize(menu_bar->helper, 
+		menu_bar->container);
+
+	toplevel = gtk_widget_get_toplevel(widget);
+	if(GTK_WIDGET_TOPLEVEL(toplevel)){
+		/*If we are in _realize, the toplevel widget must have been realized.*/
+		gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
+	}
 }
 static void
 _unrealize (GtkWidget * widget){
@@ -539,6 +556,7 @@ _unrealize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->unrealize(widget);
 	gdk_window_destroy(menu_bar->container);
+	gnomenu_client_helper_send_unrealize(menu_bar->helper);
 }
 static void
 _map (GtkWidget * widget){

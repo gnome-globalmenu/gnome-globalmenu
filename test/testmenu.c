@@ -55,8 +55,8 @@ int main(int argc, char* argv[]){
 	GnomenuServerHelper * helper;
 
 	gtk_init(&argc , &argv);
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	helper = gnomenu_server_helper_new();
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
 	box = gtk_vbox_new(0, FALSE);
 	gtk_box_pack_start_defaults(box, create_menu_bar());

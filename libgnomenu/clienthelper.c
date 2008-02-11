@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-
+#include <gdk/gdkx.h>
 #include "clienthelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
@@ -189,8 +189,8 @@ static void gnomenu_client_helper_dispose(GObject * object){
 		if(self->server_info){
 			GnomenuMessage msg;
 			msg.any.type = GNOMENU_MSG_CLIENT_DESTROY;
-			msg.client_destroy.socket_id = gdk_socket_get_native(self);
-			gdk_socket_send(self, self->server_info->socket_id, &msg, sizeof(msg));
+			msg.client_destroy.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
+			gdk_socket_send(GDK_SOCKET(self), self->server_info->socket_id, &msg, sizeof(msg));
 		}
 	}
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(object);
@@ -317,10 +317,11 @@ static void
 gnomenu_client_helper_size_query(GnomenuClientHelper * self, GtkRequisition * req){
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
-	msg.size_request.socket_id = gdk_socket_get_native(self);
+	msg.size_request.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
 	msg.size_request.width = req->width;
 	msg.size_request.height = req->height;
-/*FIXME: is it possible that we are in this handler, but self->server_info is NULL?*/
+/* FIXME: is it possible that we are in this handler, but self->server_info is NULL?,
+ * Here it is almost impossible, unless a server dies before we issue this message*/
 	g_free(req);
 	g_return_if_fail(self->server_info);
 	gdk_socket_send(GDK_SOCKET(self), 
@@ -353,8 +354,41 @@ static GObject* gnomenu_client_helper_constructor(GType type, guint n_construct_
 	{
 		GnomenuMessage msg;
 		msg.any.type = GNOMENU_MSG_CLIENT_NEW;
-		msg.client_new.socket_id = gdk_socket_get_native(self);
+		msg.client_new.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
 		gdk_socket_broadcast_by_name(self, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
 	}
 	return obj;
 }
+
+void gnomenu_client_helper_send_realize(GnomenuClientHelper * self, 
+		GdkWindow * ui_window){
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
+	msg.any.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
+	msg.client_realize.ui_window = GDK_WINDOW_XWINDOW(ui_window);
+	g_return_if_fail(self->server_info);
+	gdk_socket_send(GDK_SOCKET(self),
+		self->server_info->socket_id,
+		&msg, sizeof(msg));
+}
+void gnomenu_client_helper_send_reparent(GnomenuClientHelper * self, 
+		GdkWindow * parent_window){
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
+	msg.any.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
+	msg.client_reparent.parent_window = GDK_WINDOW_XWINDOW(parent_window);	
+	g_return_if_fail(self->server_info);
+	gdk_socket_send(GDK_SOCKET(self),
+		self->server_info->socket_id,
+		&msg, sizeof(msg));
+}
+void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * self){
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
+	msg.any.socket_id = gdk_socket_get_native(GDK_SOCKET(self));
+	g_return_if_fail(self->server_info);
+	gdk_socket_send(GDK_SOCKET(self),
+		self->server_info->socket_id,
+		&msg, sizeof(msg));
+}
+

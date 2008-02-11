@@ -66,5 +66,11 @@ struct _GnomenuClientHelperClass {
 
 
 GnomenuClientHelper * gnomenu_client_helper_new(void);
+void gnomenu_client_helper_send_realize(GnomenuClientHelper * self, 
+		GdkWindow * ui_window);
+void gnomenu_client_helper_send_reparent(GnomenuClientHelper * self,
+		GdkWindow * parent_window);
+void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * self);
+
 G_END_DECLS
 #endif

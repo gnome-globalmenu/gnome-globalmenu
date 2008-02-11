@@ -14,7 +14,13 @@ static void realize_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 	msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
 	msg.client_realize.socket_id = gdk_socket_get_native(socket);
 	msg.client_realize.ui_window =0xdeadbeaf;
-	msg.client_realize.parent_window =0xbeafdead;
+	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
+}
+static void reparent_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
+	msg.client_reparent.socket_id = gdk_socket_get_native(socket);
+	msg.client_reparent.parent_window =0xbeefbeef;
 	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
 }
 static void unrealize_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
@@ -46,7 +52,7 @@ static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes
 int main(int argc, char* argv[]){
 	GtkWindow * window;
 	GnomenuServerHelper * server;
-	GtkButton * create, * realize, * unrealize, * destroy, * size;
+	GtkButton * create, * realize, * unrealize, * destroy, * size, * reparent;
 	GdkSocket * socket;
 	GtkBox * box;
 
@@ -58,6 +64,7 @@ int main(int argc, char* argv[]){
 	server = gnomenu_server_helper_new();
 	create = GTK_BUTTON(gtk_button_new_with_label("create fake client"));
 	realize = GTK_BUTTON(gtk_button_new_with_label("realize fake client"));
+	reparent = GTK_BUTTON(gtk_button_new_with_label("reparent fake client"));
 	unrealize = GTK_BUTTON(gtk_button_new_with_label("unrealize fake client"));
 	destroy = GTK_BUTTON(gtk_button_new_with_label("destroy fake client"));
 	size = GTK_BUTTON(gtk_button_new_with_label("size request"));
@@ -72,6 +79,8 @@ int main(int argc, char* argv[]){
 			G_CALLBACK(create_clicked_event_cb), socket);
 	g_signal_connect(G_OBJECT(realize), "clicked",
 			G_CALLBACK(realize_clicked_event_cb), socket);
+	g_signal_connect(G_OBJECT(reparent), "clicked",
+			G_CALLBACK(reparent_clicked_event_cb), socket);
 	g_signal_connect(G_OBJECT(unrealize), "clicked",
 			G_CALLBACK(unrealize_clicked_event_cb), socket);
 	g_signal_connect(G_OBJECT(destroy), "clicked",
@@ -83,6 +92,7 @@ int main(int argc, char* argv[]){
 
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(create));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(realize));
+	gtk_box_pack_start_defaults(box, GTK_WIDGET(reparent));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(unrealize));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(size));
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(destroy));

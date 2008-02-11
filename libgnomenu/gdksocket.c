@@ -20,6 +20,18 @@ struct _GdkSocketPrivate {
 	gboolean disposed;
 	int foo;
 };
+typedef enum {
+	GDK_SOCKET_BROADCAST,
+	GDK_SOCKET_CONNECT_REQ,
+	GDK_SOCKET_ACK,
+	GDK_SOCKET_DATA,
+	GDK_SOCKET_SHUTDOWN,
+} GdkSocketHeaderType;
+
+typedef struct _GdkSocketMessage {
+	GdkSocketHeaderType header;
+	gulong l[4];
+} GdkSocketMessage;
 
 #define GDK_SOCKET_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GDK_TYPE_SOCKET, GdkSocketPrivate))
@@ -154,6 +166,37 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			
 }
 
+static GObject* gdk_socket_constructor(GType type, guint n_construct_properties,
+		GObjectConstructParam *construct_params){
+	GObject *obj;
+	GdkSocket *socket;
+	GdkSocketPrivate * priv;
+	GdkWindowAttr attr;
+	GdkWindowAttributesType mask;
+	gchar *name;
+
+	obj = ( *G_OBJECT_CLASS(gdk_socket_parent_class)->constructor)(type,
+			n_construct_properties,
+			construct_params);
+	socket = GDK_SOCKET(obj);
+
+	priv = GDK_SOCKET_GET_PRIVATE(socket);
+
+	socket->display = gdk_display_get_default();
+	attr.title = socket->name;
+	attr.wclass = GDK_INPUT_ONLY;
+	attr.window_type = GDK_WINDOW_TEMP;
+	mask = GDK_WA_TITLE;
+
+	socket->window = gdk_window_new(NULL, &attr, mask);
+	socket->status = GDK_SOCKET_DISCONNECTED;
+	socket->target = 0;	
+
+	gdk_window_add_filter(socket->window, gdk_socket_window_filter_cb, socket);
+	priv->disposed = FALSE;
+
+	return obj;
+}
 /**
  * gdk_socket_get_native:
  * 	@self: the #GdkSocket this method acts on.
@@ -167,6 +210,12 @@ GdkSocketNativeID gdk_socket_get_native(GdkSocket * self){
 	return GDK_WINDOW_XWINDOW(self->window);
 }
 
+gboolean gdk_socket_connect(GdkSocket * self, GdkSocketNativeID target){
+
+}
+gboolean gdk_socket_listen(GdkSocket * self){
+
+}
 /**
  * gdk_socket_send:
  * @self: the #GdkSocket this method acts on.
@@ -209,8 +258,8 @@ gboolean gdk_socket_send_nosync(GdkSocket * self, GdkNativeWindow target, gpoint
 #endif
 	LOG_FUNC_NAME;
     XClientMessageEvent xclient;
-	if(bytes > 20){
-		g_error("GdkSocket: Can not send more than 20 bytes");
+	if(bytes > 16){
+		g_error("GdkSocket: Can not send more than 16 bytes");
 		return FALSE; /*X can not send more information*/
 	}
 
@@ -421,34 +470,3 @@ gdk_socket_set_property( GObject * object, guint property_id, GValue * value, GP
 }
 
 
-static GObject* gdk_socket_constructor(GType type, guint n_construct_properties,
-		GObjectConstructParam *construct_params){
-	GObject *obj;
-	GdkSocket *socket;
-	GdkSocketPrivate * priv;
-	GdkWindowAttr attr;
-	GdkWindowAttributesType mask;
-	gchar *name;
-
-	LOG_FUNC_NAME;
-
-	obj = ( *G_OBJECT_CLASS(gdk_socket_parent_class)->constructor)(type,
-			n_construct_properties,
-			construct_params);
-	socket = GDK_SOCKET(obj);
-
-	priv = GDK_SOCKET_GET_PRIVATE(socket);
-
-	socket->display = gdk_display_get_default();
-	attr.title = socket->name;
-	attr.wclass = GDK_INPUT_ONLY;
-	attr.window_type = GDK_WINDOW_TEMP;
-	mask = GDK_WA_TITLE;
-	
-	socket->window = gdk_window_new(NULL, &attr, mask);
-	socket->status = GDK_SOCKET_NEW;
-	gdk_window_add_filter(socket->window, gdk_socket_window_filter_cb, socket);
-	priv->disposed = FALSE;
-
-	return obj;
-}

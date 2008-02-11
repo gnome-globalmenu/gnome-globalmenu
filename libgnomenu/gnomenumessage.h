@@ -21,8 +21,9 @@ G_BEGIN_DECLS
  * @GNOMENU_MSG_CLIENT_NEW: 	#GnomenuMessageClientNew
  * @GNOMENU_MSG_CLIENT_DESTROY: #GnomenuMessageClientDestroy
  * @GNOMENU_MSG_SERVER_NEW: 	#GnomenuMessageServerNew
- * @GNOMENU_MSG_CLIENT_REALIZE:
- * @GNOMENU_MSG_CLIENT_UNREALIZE:
+ * @GNOMENU_MSG_CLIENT_REALIZE: #GnmenuMessageClientRealize
+ * @GNOMENU_MSG_CLIENT_REPARENT: #GnomenuMessageClientReparent
+ * @GNOMENU_MSG_CLIENT_UNREALIZE: #GnomenuMessageClientUnrealize
  * @GNOMENU_MSG_SERVER_DESTROY: #GnomenuMessageServerDestroy
  * @GNOMENU_MSG_SIZE_REQUEST: 	#GnomenuMessageSizeRequest
  * @GNOMENU_MSG_SIZE_ALLOCATE:	#GnomenuMessageSizeAllocate
@@ -35,6 +36,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_ANY,
 	GNOMENU_MSG_CLIENT_NEW,
 	GNOMENU_MSG_CLIENT_REALIZE,
+	GNOMENU_MSG_CLIENT_REPARENT,
 	GNOMENU_MSG_CLIENT_UNREALIZE,
 	GNOMENU_MSG_CLIENT_DESTROY,
 	GNOMENU_MSG_SERVER_NEW,
@@ -76,7 +78,6 @@ typedef struct {
  * @type: #GNOMENU_MSG_CLIENT_REALIZE
  * @socket_id:
  * @ui_window:
- * @parent_window:
  *
  * A client has been realized;
  */
@@ -84,8 +85,20 @@ typedef struct {
 	GnomenuMessageType type;
 	GdkSocketNativeID socket_id;
 	GdkNativeWindow ui_window;
-	GdkNativeWindow parent_window;
 } GnomenuMessageClientRealize;
+
+/** GnomenuMessageClientReparent:
+ * @type: #GNOMENU_MSG_CLIENT_REPARENT
+ * @socket_id:
+ * @parent_window:
+ *
+ * A client has been reparented
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
+	GdkNativeWindow parent_window;
+} GnomenuMessageClientReparent;
 
 /** GnomenuMessageClientUnrealize:
  * @type: #GNOMENU_MSG_CLIENT_UNREALIZE
@@ -210,6 +223,7 @@ struct _GnomenuMessage {
 		GnomenuMessageAny any;
 		GnomenuMessageClientNew client_new;
 		GnomenuMessageClientRealize client_realize;
+		GnomenuMessageClientReparent client_reparent;
 		GnomenuMessageClientUnrealize client_unrealize;
 		GnomenuMessageClientDestroy client_destroy;
 		GnomenuMessageServerNew server_new;
