@@ -23,8 +23,9 @@ libgnomenu_la_SOURCES = \
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
-	-no-undefined \
 	-no-allow-shlib-undefined
+
+# -no-undefined 
 
 libgnomenu_la_LIBADD = $(LIBGNOMENU_LIBS)
 

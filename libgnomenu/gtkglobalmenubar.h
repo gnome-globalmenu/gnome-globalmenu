@@ -32,7 +32,7 @@
 
 #include <gdk/gdk.h>
 #include <gtk/gtkmenubar.h>
-
+#include "clienthelper.h"
 
 G_BEGIN_DECLS
 
@@ -49,7 +49,11 @@ typedef struct _GtkGlobalMenuBarClass  GtkGlobalMenuBarClass;
 
 struct _GtkGlobalMenuBar
 {
-  GtkMenuBar menu_shell;
+	GtkMenuBar parent;
+	GnomenuClientHelper * helper;
+	GdkWindow * container;
+	GtkAllocation allocation;
+	GtkRequisition requisition;
 };
 
 struct _GtkGlobalMenuBarClass

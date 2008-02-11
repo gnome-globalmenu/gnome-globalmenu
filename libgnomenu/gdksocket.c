@@ -370,7 +370,6 @@ gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guin
 static GdkFilterReturn 
 	gdk_socket_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer user_data){
 	GdkSocket * self = GDK_SOCKET(user_data);
-	LOG_FUNC_NAME;
 #ifndef GDK_WINDOWING_X11
 #error other targets are not yet supported.
 #endif
@@ -394,7 +393,6 @@ static GdkFilterReturn
 static void cleanup_data_arrival_signal_handler(GdkSocket * socket,
 	gpointer data, guint size){
 	g_free(data);
-	g_message("GdkSocket(%s)::%s ", socket->name, __func__);
 }
 
 static void 

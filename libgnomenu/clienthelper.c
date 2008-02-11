@@ -182,15 +182,16 @@ static void gnomenu_client_helper_dispose(GObject * object){
 	self = GNOMENU_CLIENT_HELPER(object);
 	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
 	
-	if(self->server_info){
-		GnomenuMessage msg;
-		msg.any.type = GNOMENU_MSG_CLIENT_DESTROY;
-		msg.client_destroy.socket_id = gdk_socket_get_native(self);
-		gdk_socket_send(self, self->server_info->socket_id, &msg, sizeof(msg));
-	}
 	if(! priv->disposed){
 		priv->disposed = TRUE;
 	/*FIXME: should I send a client_destroy here?*/
+		/* YES, I should.*/
+		if(self->server_info){
+			GnomenuMessage msg;
+			msg.any.type = GNOMENU_MSG_CLIENT_DESTROY;
+			msg.client_destroy.socket_id = gdk_socket_get_native(self);
+			gdk_socket_send(self, self->server_info->socket_id, &msg, sizeof(msg));
+		}
 	}
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(object);
 }
