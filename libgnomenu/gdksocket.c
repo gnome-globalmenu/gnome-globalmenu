@@ -436,6 +436,13 @@ static GdkFilterReturn
 					/*These two simple lines is essential, we establish a connection here.*/
 						self->status = GDK_SOCKET_CONNECTED;
 						self->target = msg->source;
+						{
+					/*Then we send an ACK to the other peer to allow it begin data transfer*/
+							GdkSocketMessage ack;
+							ack.header = GDK_SOCKET_ACK;
+							ack.source = gdk_socket_get_native(self);
+							_raw_send(self, self->target, &ack, sizeof(ack));
+						}
 					}
 					if(self->status == GDK_SOCKET_CONNECTED){
 						if(msg->source == self->target){
