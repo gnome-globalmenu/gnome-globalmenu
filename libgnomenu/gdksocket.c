@@ -145,11 +145,12 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * GdkSocket::shutdown
  * @self:
  * 
- * invoked when the socket is shutdown from the other peer.
+ * invoked when the socket is shut down. either from this peer or
+ * the other peer. the default handler will cleanup the message queue.
  */
 		g_signal_new ("shutdown",
 			G_TYPE_FROM_CLASS (klass),
-			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GdkSocketClass, shutdown),
 			NULL,
 			NULL,
@@ -350,7 +351,7 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 		return FALSE;
 	}
 	if(self->status != GDK_SOCKET_CONNECTED){
-		g_error("Not connected, can not send");
+		g_warning("Not connected, can not send");
 		return FALSE;
 	}
 	msg->header = GDK_SOCKET_DATA;
@@ -377,16 +378,12 @@ void gdk_socket_shutdown(GdkSocket * self) {
 	GdkSocketMessage msg;
 	LOG_FUNC_NAME;
 	if(self->status == GDK_SOCKET_CONNECTED){
-		GdkSocketMessage  * q_msg;
-		self->status = GDK_SOCKET_DISCONNECTED;
-		self->acks = 0;
-		while(q_msg = g_queue_pop_head(self->queue)){
-			g_free(q_msg);
-		}
+		self->status == GDK_SOCKET_DISCONNECTED;
 		msg.header = GDK_SOCKET_SHUTDOWN;
 		msg.source = gdk_socket_get_native(self);
 		_raw_send(self, self->target, &msg, sizeof(msg));
-		
+		g_signal_emit(G_OBJECT(self),
+			class_signals[SHUTDOWN], 0);	
 	} else{
 		g_warning("Not connected, can not shutdown");
 	}
@@ -478,13 +475,6 @@ static GdkFilterReturn
 					if(self->status != GDK_SOCKET_CONNECTED){
 						g_warning("SHUTDOWN a non connected socket");
 					} else{
-						GdkSocketMessage * queue_message;
-						while(queue_message = g_queue_pop_head(self->queue)){
-					/*FIXME: maybe sending all these message will be better than freeing them*/
-							g_free(queue_message);
-						}
-						self->acks = 0;
-						self->status == GDK_SOCKET_DISCONNECTED;
 						g_signal_emit(self,
 								class_signals[SHUTDOWN],
 								0);
@@ -508,7 +498,14 @@ static void _connect_req(GdkSocket * self,
 	LOG_FUNC_NAME;
 }
 static void _shutdown (GdkSocket * self){
+	GdkSocketMessage * queue_message;
 	LOG_FUNC_NAME;
+	while(queue_message = g_queue_pop_head(self->queue)){
+/*FIXME: maybe sending all these message will be better than freeing them*/
+		g_free(queue_message);
+	}
+	self->acks = 0;
+	self->status == GDK_SOCKET_DISCONNECTED;
 }
 static void 
 _get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
@@ -592,7 +589,7 @@ static gboolean _raw_send_nosync(GdkSocket * self, GdkNativeWindow target, gpoin
 	LOG_FUNC_NAME;
     XClientMessageEvent xclient;
 	if(bytes > 20){
-		g_error("GdkSocket: Can not send more than 20 bytes");
+		g_error("GdkSocket: Can not send raw data for more than 20 bytes");
 		return FALSE; /*X can not send more information*/
 	}
 
