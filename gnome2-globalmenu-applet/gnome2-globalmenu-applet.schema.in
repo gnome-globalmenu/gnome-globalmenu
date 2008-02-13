@@ -16,7 +16,7 @@
             <applyto>/apps/gnome2-globalmenu-applet/show_title</applyto>
             <owner>gnome2-globalmenu-applet</owner>
             <type>bool</type>
-            <default>FALSE</default>
+            <default>TRUE</default>
             <locale name="C">
 				<short> Whether or not show the active window's title</short>
 				<long> Whether or not show the active window's title</long>
@@ -31,6 +31,17 @@
             <locale name="C">
 				<short> Whether or not show the scrolling arrows</short>
 				<long> Whether or not show the scrolling arrows</long>
+            </locale>
+		</schema>
+        <schema>
+            <key>/schemas/apps/gnome2-globalmenu-applet/title_max_width_chars</key>
+            <applyto>/apps/gnome2-globalmenu-applet/title_max_width_chars</applyto>
+            <owner>gnome2-globalmenu-applet</owner>
+            <type>int</type>
+            <default>20</default>
+            <locale name="C">
+				<short> How long the title label should be</short>
+				<long> How long the title label should be</long>
             </locale>
 		</schema>
 	</schemalist>
