@@ -101,9 +101,6 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 
 /*******Applet tweaks*************/
 	gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
-/*****Hide them since they don't do nothing**********/
-	gtk_widget_hide(GTK_WIDGET(App->Forward));
-	gtk_widget_hide(GTK_WIDGET(App->Backward));
 	ui_create_popup_menu(App, callbacks);
 
 }

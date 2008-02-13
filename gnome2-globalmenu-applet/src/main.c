@@ -423,6 +423,10 @@ static Application * application_new(GtkContainer * mainwindow){
 /**********All done**********/
 
 	gtk_widget_show_all(GTK_WIDGET(mainwindow));
+
+/*****Hide them since they don't do nothing**********/
+	gtk_widget_hide(GTK_WIDGET(App->Forward));
+	gtk_widget_hide(GTK_WIDGET(App->Backward));
 	/*I think it is not nessary since we have an app icon already. Maybe can let user choose whether use TitleLabel or Icon*/
 	gtk_widget_hide(GTK_WIDGET(App->TitleLabel)); 
 	/*if we have registered the signals of App->Screen, all clients can be discovered in this function. if we haven't, here we can not find any windows.*/

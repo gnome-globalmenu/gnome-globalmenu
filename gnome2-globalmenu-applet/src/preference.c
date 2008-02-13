@@ -50,7 +50,7 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 			MY_STORE_PROP(show_title);
 			MY_STORE_PROP(show_icon);
 			MY_STORE_PROP(show_arrows);
-#undef MY_STORE_PROP(x)
+#undef MY_STORE_PROP
 			ui_repaint_all(dlg->App);
 			break;
 		default:
@@ -59,7 +59,7 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 	gtk_widget_destroy(GTK_WIDGET(dlg->window));
 }
 void preference_load_conf(Application * App){
-	panel_applet_add_preferences(App->MainWindow, "app/gnome2-globalmenu-applet", NULL);
+	panel_applet_add_preferences(App->MainWindow, "/app/gnome2-globalmenu-applet", NULL);
 #define MY_GET_PROP(x) App->AppletProperty.x = panel_applet_gconf_get_bool(App->MainWindow, #x, NULL) 
 	MY_GET_PROP(show_title);
 	MY_GET_PROP(show_icon);
