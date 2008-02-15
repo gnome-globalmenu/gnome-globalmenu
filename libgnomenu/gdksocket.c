@@ -40,8 +40,8 @@ struct _GdkSocketPrivate {
  * #GDK_SOCKET_ACK: ready to accept a new data
  * #GDK_SOCKET_DATA: send data
  * #GDK_SOCKET_SHUTDOWN: peer closed, clean up your stuff
- * #GDK_SOCKET_ISALIVE: are you alive? NOT DONE. inprogress
- * #GDK_SOCKET_ALIVE: yes i am. NOT DOne in progress
+ * #GDK_SOCKET_ISALIVE: are you alive?
+ * #GDK_SOCKET_ALIVE: yes i am.
  * #GDK_SOCKET_PING: are you a socket?  NOT DONE
  * #GDK_SOCKET_ECHO: yes I am. NOT DONE
  * */
@@ -123,15 +123,18 @@ gdk_socket_class_init(GdkSocketClass * klass){
  * GdkSocket::data-arrival:
  * @self: the #GdkSocket that receives this signal.
  * @data: the received data. It is owned by @self and the signal handler 
- * 		should not free it.
- Gdk* @bytes: the length of received data.
+ * 		should not free it.  
+ * @bytes: the length of received data.
  *
  * The ::data-arrival signal is emitted each time a message arrives to
- * the socket.
+ * the socket. the detail can be ::peer and ::broadcast.
+ *
+ * ::peer stands for data arrives from the other peer of the connection.
+ * ::broadcast stands for data arrives from a broadcasting source.
  */
 		g_signal_new ("data-arrival",
 			G_TYPE_FROM_CLASS (klass),
-			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_SIGNAL_DETAILED | G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GdkSocketClass, data_arrival),
 			NULL /* accumulator */,
 			NULL /* accu_data */,
@@ -463,6 +466,26 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 	return TRUE;
 }
 /**
+ * gdk_socket_broadcast_by_name:
+ * 	@self:
+ * 	@name:
+ * 	@data:
+ * 	@bytes:
+ * 
+ * broadcast a message to every socket with a given name.
+ */
+gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes){
+	GdkSocketMessage msg;
+	if(bytes >12) {
+		g_error("%s: Can not send more than 12 bytes", __func__);
+		return FALSE;
+	}
+	msg.header = GDK_SOCKET_BROADCAST;
+	msg.source = gdk_socket_get_native(self);
+	g_memmove(msg.l, data, bytes);
+	return _raw_broadcast_by_name(self, name, &msg, sizeof(msg));	
+}
+/**
  * gdk_socket_shutdown:
  *
  * Shutdown a socket connection
@@ -510,7 +533,7 @@ static GdkFilterReturn
 							gpointer data = g_memdup(msg->l, bytes); 
 							g_signal_emit(G_OBJECT(self), 
 							class_signals[DATA_ARRIVAL],
-							0,
+							g_quark_from_string("peer"),
 							data,
 							bytes);
 							}
@@ -577,7 +600,14 @@ static GdkFilterReturn
 				break;
 				case GDK_SOCKET_BROADCAST:	
 					if(self->status != GDK_SOCKET_CONNECTED){
-					g_warning("Not implemented BROADCAST");
+						guint bytes = 12; /*on x11 we always round off to 12 bytes*/
+						/*FIXME: bytes should be squeezed in to GdkSocketMessage.*/
+						gpointer data = g_memdup(msg->l, bytes); 
+						g_signal_emit(G_OBJECT(self), 
+							class_signals[DATA_ARRIVAL],
+							g_quark_from_string("broadcast"),
+							data,
+							bytes);
 					} else
 					g_warning("Wrong socket status, ignore DATA");
 					return GDK_FILTER_REMOVE;
@@ -884,7 +914,7 @@ _raw_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint byte
 	gboolean rt = FALSE;
 	gboolean rt1;
 	for(node = g_list_first(window_list); node; node = g_list_next(node)){
-		rt1 =  gdk_socket_send_nosync(self, (GdkNativeWindow)node->data, data, bytes);
+		rt1 =  _raw_send_nosync(self, (GdkNativeWindow)node->data, data, bytes);
 		g_message("%s, sent to one target, %d", __func__, rt1);
 		rt = rt || rt1;
 	}
