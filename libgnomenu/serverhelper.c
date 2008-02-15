@@ -46,8 +46,16 @@ static void _client_destroy
 static void _client_size_request
 			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 
-static void _data_arrival_cb
+static void _data_arrival
 			(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
+static void _connect_req(GnomenuServerHelper * self,
+		GdkSocketNativeID target);
+static void _service_shutdown(GnomenuServerHelper * self, GdkSocket * service);
+
+static GnomenuClientInfo * 
+_find_ci_by_service(
+		GnomenuServerHelper * self,
+		GdkSocket* socket);
 
 static guint class_signals[SIGNAL_MAX];
 
@@ -212,6 +220,7 @@ gnomenu_server_helper_new(){
 	GnomenuServerHelper * self;
 	LOG_FUNC_NAME;
 	self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
+	gdk_socket_listen(self);
 	return self;
 }
 /**
@@ -285,10 +294,10 @@ static void _connect_req(GnomenuServerHelper * self,
 }
 static void _service_shutdown(GnomenuServerHelper * self, GdkSocket * service){
 	GnomenuClientInfo * ci;
-	ci = _find_ci_by_service(server, service);
+	ci = _find_ci_by_service(self, service);
 	g_return_if_fail(ci);
 
-	g_signal_emit(G_BOJECT(self), class_signals[CLIENT_DESTROY], 0, ci);
+	g_signal_emit(G_OBJECT(self), class_signals[CLIENT_DESTROY], 0, ci);
 }
 
 /** 
@@ -306,7 +315,7 @@ static void _data_arrival(GdkSocket * socket,
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
 	/*initialize varialbes*/
-	ci = _find_client_by_socket_id(self, socket->target);
+	ci = _find_ci_by_service(self, socket);
 #define CHECK_CLIENT(c)  \
 			if(!(c)) { \
 				g_warning("This client is not known by me, ignore and continue"); \
@@ -376,14 +385,14 @@ static void _data_arrival(GdkSocket * socket,
 }
 
 /**
- * _client_compare_by_socket_id:
+ * _client_compare_by_service:
  *
- * Return: TRUE if socket_id matches. FALSE if else.
+ * Return: TRUE if two service socket matches. FALSE if else.
  */
-static gboolean _client_compare_by_socket_id(
+static gboolean _client_compare_by_socket(
 	const GnomenuClientInfo * p1,
 	const GnomenuClientInfo * p2){
-	return !( p1 && p2 && p1->socket_id == p2->socket_id);
+	return !( p1 && p2 && p1->service == p2->service);
 }
 /**
  * _client_compare_by_parent_window:
@@ -402,17 +411,17 @@ static gboolean _client_compare_by_parent_window(
  *
  * Find a client by socket_id
  */
-GnomenuClientInfo * 
-gnomenu_server_helper_find_client_by_socket_id(
+static GnomenuClientInfo * 
+_find_ci_by_service(
 		GnomenuServerHelper * self,
-		GdkSocketNativeID socket_id){
+		GdkSocket* socket){
 
 	GnomenuClientInfo ci_key;
 	GList * found;
-	ci_key.socket_id = socket_id;
+	ci_key.service = socket;
 	
 	found = g_list_find_custom(self->clients, 
-		&ci_key, (GCompareFunc)_client_compare_by_socket_id);
+		&ci_key, (GCompareFunc)_client_compare_by_socket);
 	if(found) return found->data;
 	return NULL;
 }
@@ -446,9 +455,8 @@ gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuCli
 	LOG_FUNC_NAME;
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
 	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
-	msg.any.socket_id = gdk_socket_get_native(self);
 	ci->size_stage = GNOMENU_CI_STAGE_QUERYING;
-	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
+	gdk_socket_send(ci->service, &msg, sizeof(msg));
 }
 
 void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
@@ -457,9 +465,8 @@ void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, Gn
 	LOG_FUNC_NAME;
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
 	msg.any.type = GNOMENU_MSG_ORIENTATION_CHANGE;
-	msg.any.socket_id = gdk_socket_get_native(self);
 	msg.orientation_change.orientation = ori;
-	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
+	gdk_socket_send(ci->service, &msg, sizeof(msg));
 }
 /* virtual functions for signal handling*/
 static void 
@@ -468,11 +475,6 @@ _client_new(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 
 	self->clients = g_list_prepend(self->clients, ci);
-
-/*then we tell the client about us*/
-	msg.any.type = GNOMENU_MSG_SERVER_NEW;
-	msg.server_new.socket_id = gdk_socket_get_native(self);
-	gdk_socket_send(self, ci->socket_id, &msg, sizeof(msg));
 }
 static void 
 _client_realize(GnomenuServerHelper * self, GnomenuClientInfo * ci){
@@ -501,11 +503,10 @@ _client_size_request(GnomenuServerHelper * self, GnomenuClientInfo * ci){
 /*TODO: send the allocation to the client*/
 	msg.any.type = GNOMENU_MSG_SIZE_ALLOCATE;
 
-	msg.size_allocate.socket_id = gdk_socket_get_native(self);
 	msg.size_allocate.width = ci->allocation.width;
 	msg.size_allocate.height = ci->allocation.height;
 	
-	gdk_socket_send(GDK_SOCKET(self), ci->socket_id, 
+	gdk_socket_send(ci->service, 
 		&msg, sizeof(msg));
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 }

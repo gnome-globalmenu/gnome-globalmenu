@@ -488,7 +488,7 @@ gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer d
 /**
  * gdk_socket_shutdown:
  *
- * Shutdown a socket connection
+ * Shutdown a socket connection. Note that this doesn't unref the object.
  */
 void gdk_socket_shutdown(GdkSocket * self) {
 	GdkSocketMessage msg;
@@ -853,6 +853,7 @@ static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
 			g_warning("%s:XGetWindowProperty Failed",__func__);
 		}
 	}
+	g_message("length = %d\n", g_list_length(window_list));
 	XFree(children_return);
 	return window_list;
 }

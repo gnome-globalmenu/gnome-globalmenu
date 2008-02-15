@@ -8,7 +8,7 @@
 	GdkSocket * socket1 = NULL;
 	GdkSocket * socket2 = NULL;
 	GtkWindow * window;
-	GtkButton * create, * send, * send_by_name, * broadcast, * quit, * connect, * shutdown;
+	GtkButton * create, * send, * send_by_name, * broadcast, * quit, * connect, * shutdown, * sudden;
 
 static void socket_data_arrival_cb(GdkSocket * socket, 
 	gpointer data, guint bytes, gpointer userdata){
@@ -36,34 +36,41 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 			g_sprintf(buffer, "%s%d", MSG1, i);
 			gdk_socket_send(socket1, buffer, sizeof(buffer));
 			g_sprintf(buffer, "%s%d", MSG2, i);
+			if(service)
 			gdk_socket_send(service, buffer, sizeof(buffer));
 		}
 	}
 	if(button == create){
 		server = gdk_socket_new("server");
+		server->timeout = 1;
 		gdk_socket_listen(server);
 
-		socket1 = gdk_socket_new("test socket 1");
-		socket2 = gdk_socket_new("test socket 2");
-
+		socket1 = gdk_socket_new("test socket");
+		socket2 = gdk_socket_new("test socket");
+		socket1->timeout = 10;
 		g_signal_connect(G_OBJECT(server), "data-arrival",
 				G_CALLBACK(socket_data_arrival_cb), NULL);
-		g_signal_connect(G_OBJECT(socket1), "data-arrival",
+		g_signal_connect(G_OBJECT(socket1), "data-arrival::peer",
 				G_CALLBACK(socket_data_arrival_cb), NULL);
 		g_signal_connect(G_OBJECT(socket2), "data-arrival",
 				G_CALLBACK(socket_data_arrival_cb), NULL);
 		g_signal_connect(G_OBJECT(server), "connect-request",
 				G_CALLBACK(socket_connect_req_cb), NULL);
 	}
+	if(button == broadcast){
+		gdk_socket_broadcast_by_name(server, "test socket", MSG1, sizeof(MSG1));
+	}
 	if(button == connect){
 		gdk_socket_connect(socket1, gdk_socket_get_native(server));
 	}
 	if(button == quit){
 	gtk_widget_destroy(GTK_WIDGET(window));
-
 	}
 	if(button == shutdown){
 		gdk_socket_shutdown(socket1);
+	}
+	if(button == sudden){
+		socket1->status = GDK_SOCKET_DISCONNECTED;
 	}
 }
 static void broadcast_clicked_cb(GtkButton * button, gpointer user_data){
@@ -88,42 +95,20 @@ int main(int argc, char* argv[]){
 			G_CALLBACK(window_destroy_event_cb), NULL);
 
 	vbox = GTK_BOX(gtk_vbox_new(FALSE, 0));
+#define ADD_BUTTON(buttonname) \
+	buttonname = GTK_BUTTON(gtk_button_new_with_label(#buttonname)); \
+	g_signal_connect(G_OBJECT(buttonname), "clicked",  \
+			G_CALLBACK(button_clicked_cb), NULL); \
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(buttonname));
 
-	create = GTK_BUTTON(gtk_button_new_with_label("create"));
-	g_signal_connect(G_OBJECT(create), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
+	ADD_BUTTON(create);
+	ADD_BUTTON(broadcast);
+	ADD_BUTTON(connect);
+	ADD_BUTTON(send);
+	ADD_BUTTON(shutdown);
+	ADD_BUTTON(sudden);
+	ADD_BUTTON(quit);
 
-	connect = GTK_BUTTON(gtk_button_new_with_label("connect"));
-	g_signal_connect(G_OBJECT(connect), "clicked",
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	shutdown = GTK_BUTTON(gtk_button_new_with_label("shutdown"));
-	g_signal_connect(G_OBJECT(shutdown), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	send = GTK_BUTTON(gtk_button_new_with_label("send"));
-	g_signal_connect(G_OBJECT(send), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	send_by_name = GTK_BUTTON(gtk_button_new_with_label("send by name"));
-	g_signal_connect(G_OBJECT(send_by_name), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	broadcast = GTK_BUTTON(gtk_button_new_with_label("broadcast"));
-	g_signal_connect(G_OBJECT(broadcast), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	quit = GTK_BUTTON(gtk_button_new_with_label("quit"));
-	g_signal_connect(G_OBJECT(quit), "clicked", 
-			G_CALLBACK(button_clicked_cb), NULL);
-
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(create));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(send));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(connect));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(shutdown));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(send_by_name));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(broadcast));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(quit));
 
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(vbox));
 	gtk_widget_show_all(GTK_WIDGET(window));
