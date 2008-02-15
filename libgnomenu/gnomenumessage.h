@@ -57,7 +57,6 @@ typedef enum { /*< prefix=GNOMENU >*/
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	gulong data[2];
 } GnomenuMessageAny;
 
@@ -70,7 +69,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageClientNew;
 
 /**
@@ -83,7 +81,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	GdkNativeWindow ui_window;
 } GnomenuMessageClientRealize;
 
@@ -96,7 +93,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	GdkNativeWindow parent_window;
 } GnomenuMessageClientReparent;
 
@@ -108,7 +104,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageClientUnrealize;
 /**
  * GnomenuMessageClientDestroy:
@@ -118,7 +113,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageClientDestroy;
 /**
  * GnomenuMessageServerNew:
@@ -134,7 +128,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageServerNew;
 /**
  * GnomenuMessageServerDestroy:
@@ -143,7 +136,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageServerDestroy;
 
 /**
@@ -165,7 +157,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 } GnomenuMessageSizeQuery;
 
 /**
@@ -179,7 +170,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	gint	width;
 	gint 	height;
 } GnomenuMessageSizeRequest;
@@ -195,7 +185,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	gint width;
 	gint height;
 } GnomenuMessageSizeAllocate;
@@ -209,7 +198,6 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
 	GtkOrientation orientation;
 } GnomenuMessageOrientationChange;
 /**

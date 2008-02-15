@@ -230,8 +230,9 @@ static GObject* _constructor(
 
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
 	self->clients = NULL;
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_data_arrival_cb), NULL);
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_data_arrival), NULL);
 	priv->disposed = FALSE;
+	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_connect_req), NULL);
 
 	return obj;
 }
@@ -263,13 +264,39 @@ static void _finalize(GObject * object){
 	g_list_free(self->clients);
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->finalize(object);
 }
+/**
+ * _connect_req:
+ *
+ */
+static void _connect_req(GnomenuServerHelper * self,
+		GdkSocketNativeID target){
+	GnomenuClientInfo * ci = NULL;
+	ci = g_new0(GnomenuClientInfo, 1);
+	ci->stage = GNOMENU_CI_STAGE_NEW;
+	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
+	ci->service = gdk_socket_accept(self, target);
+	g_signal_connect_swapped(ci->service, "shutdown", _service_shutdown, self);
+
+	g_signal_emit(G_OBJECT(self), 
+			class_signals[CLIENT_NEW],
+			0,
+			ci);
+		
+}
+static void _service_shutdown(GnomenuServerHelper * self, GdkSocket * service){
+	GnomenuClientInfo * ci;
+	ci = _find_ci_by_service(server, service);
+	g_return_if_fail(ci);
+
+	g_signal_emit(G_BOJECT(self), class_signals[CLIENT_DESTROY], 0, ci);
+}
 
 /** 
- * _data_arrival_cb:
+ * _data_arrival:
  *
  * 	callback, invoked when the embeded socket receives data
  */
-static void _data_arrival_cb(GdkSocket * socket, 
+static void _data_arrival(GdkSocket * socket, 
 		gpointer data, gint bytes, gpointer userdata){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
@@ -279,7 +306,7 @@ static void _data_arrival_cb(GdkSocket * socket,
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
 	/*initialize varialbes*/
-	ci = gnomenu_server_helper_find_client_by_socket_id(self, message->client_destroy.socket_id);
+	ci = _find_client_by_socket_id(self, socket->target);
 #define CHECK_CLIENT(c)  \
 			if(!(c)) { \
 				g_warning("This client is not known by me, ignore and continue"); \
@@ -292,21 +319,6 @@ static void _data_arrival_cb(GdkSocket * socket,
 	g_message("message arrival: %s", enumvalue->value_name);
 
 	switch(enumvalue->value){
-		case GNOMENU_MSG_CLIENT_NEW:
-			if(ci){
-				g_warning("client already recorded, "
-						"(silently) remove it and continue");
-				self->clients = g_list_remove_all(self->clients, ci);
-			}
-			ci = g_new0(GnomenuClientInfo, 1);
-			ci->stage = GNOMENU_CI_STAGE_NEW;
-			ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
-			ci->socket_id = message->client_new.socket_id;
-			g_signal_emit(G_OBJECT(self), 
-					class_signals[CLIENT_NEW],
-					0,
-					ci);
-			break;
 		case GNOMENU_MSG_CLIENT_REALIZE:
 			CHECK_CLIENT(ci);
 			if(ci->stage == GNOMENU_CI_STAGE_REALIZED){
@@ -341,21 +353,6 @@ static void _data_arrival_cb(GdkSocket * socket,
 			ci->stage = GNOMENU_CI_STAGE_UNREALIZED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[CLIENT_UNREALIZE],
-					0, ci);
-			break;
-		case GNOMENU_MSG_CLIENT_DESTROY:
-			CHECK_CLIENT(ci);
-			if(ci->stage != GNOMENU_CI_STAGE_UNREALIZED){
-				ci->stage = GNOMENU_CI_STAGE_DESTROYED;
-				g_warning("an unrealize message is missing, stimulate one here");
-			/*NOTE: however in this unrealize signal ci->stage will be DESTROYED*/
-				g_signal_emit(G_OBJECT(self),
-					class_signals[CLIENT_UNREALIZE],
-					0, ci);
-			}
-			ci->stage = GNOMENU_CI_STAGE_DESTROYED;
-			g_signal_emit(G_OBJECT(self), 
-					class_signals[CLIENT_DESTROY],
 					0, ci);
 			break;
 		case GNOMENU_MSG_SIZE_REQUEST:

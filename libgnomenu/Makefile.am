@@ -12,9 +12,8 @@ libgnomenu_la_SOURCES = \
 	gnomenumessage.c\
 	gdksocket.h \
 	gdksocket.c
-
-#	serverhelper.c \
-#	serverhelper.h \
+	serverhelper.c \
+	serverhelper.h 
 #	clienthelper.c \
 #	clienthelper.h \
 #    gtkglobalmenubar.h \

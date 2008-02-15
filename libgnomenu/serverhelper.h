@@ -53,7 +53,7 @@ struct _GnomenuServerHelper{
 typedef struct _GnomenuClientInfo GnomenuClientInfo;
 
 struct _GnomenuClientInfo {
-	GdkSocketNativeID socket_id;
+	GdkSocket * service;
 	GdkNativeWindow ui_window;
 	GdkNativeWindow parent_window;
 	GtkRequisition requisition;
