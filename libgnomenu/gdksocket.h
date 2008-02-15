@@ -64,7 +64,9 @@ typedef enum { /*< prefix = GDK_SOCKET >*/
  *			it is ok to directly send message to the server without push it to the queue
  *			and wait for a ACK.
  *	       if we send message to the server decrease @acks by 1.
- *
+ *  @timeout: number of seconds for a connection to timeout.
+ *  @alives: number of replied ISALIVE messages.
+ *  
  *  The GdkSocket object.
  */
 struct _GdkSocket {
@@ -77,6 +79,8 @@ struct _GdkSocket {
 	GdkSocketNativeID target;
 	GQueue * queue;
 	gint acks;
+	gint timeout;
+	gint alives;
 };
 
 /**
@@ -90,6 +94,7 @@ struct _GdkSocketClass {
 	void (*data_arrival) (GdkSocket * self, gpointer data, guint length);
 	void (*connect_req) (GdkSocket * self, GdkSocketNativeID target);
 	void (*shutdown) (GdkSocket * self);
+	void (*connected) (GdkSocket * self, GdkSocketNativeID target);
 };
 
 

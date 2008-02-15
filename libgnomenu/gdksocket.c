@@ -18,11 +18,13 @@ enum {
 	PROP_0,
 	PROP_NAME,
 	PROP_TARGET,
-	PROP_STATUS
+	PROP_STATUS,
+	PROP_TIMEOUT
 };
 enum {
 	DATA_ARRIVAL,
 	CONNECT_REQ,
+	CONNECTED,
 	SHUTDOWN,
 	SIGNAL_MAX,
 };
@@ -31,12 +33,29 @@ struct _GdkSocketPrivate {
 	gboolean disposed;
 	int foo;
 };
+/**
+ * GdkSocketHeaderType:
+ * #GDK_SOCKET_BROADCAST: a broadcast (connectionless) mesage. NOT DONE.
+ * #GDK_SOCKET_CONNECT_REQ: a connect request.
+ * #GDK_SOCKET_ACK: ready to accept a new data
+ * #GDK_SOCKET_DATA: send data
+ * #GDK_SOCKET_SHUTDOWN: peer closed, clean up your stuff
+ * #GDK_SOCKET_ISALIVE: are you alive? NOT DONE. inprogress
+ * #GDK_SOCKET_ALIVE: yes i am. NOT DOne in progress
+ * #GDK_SOCKET_PING: are you a socket?  NOT DONE
+ * #GDK_SOCKET_ECHO: yes I am. NOT DONE
+ * */
 typedef enum {
-	GDK_SOCKET_BROADCAST, /*NOT IMPLEMENTED, because of the limitation of GdkFilter*/
+	GDK_SOCKET_BROADCAST, 
 	GDK_SOCKET_CONNECT_REQ,
+	GDK_SOCKET_CONNECT_ACK,
 	GDK_SOCKET_ACK,
 	GDK_SOCKET_DATA,
 	GDK_SOCKET_SHUTDOWN,
+	GDK_SOCKET_ISALIVE,
+	GDK_SOCKET_ALIVE,
+	GDK_SOCKET_PING,
+	GDK_SOCKET_ECHO
 } GdkSocketHeaderType;
 
 typedef struct _GdkSocketMessage {
@@ -48,12 +67,16 @@ typedef struct _GdkSocketMessage {
 #define GDK_SOCKET_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GDK_TYPE_SOCKET, GdkSocketPrivate))
 
+static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name);
+static gboolean _gdk_socket_is_alive(GdkSocket * self); /*send the ISALIVE message, invoked every self->timeout*/
+
 static GObject * _constructor
 			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
 static void _dispose(GObject * object);
 static void _finalize(GObject * object);
 static void _data_arrival (GdkSocket * socket, gpointer data, guint size);
 static void _connect_req (GdkSocket * socket, GdkSocketNativeID target);
+static void _connected (GdkSocket * socket, GdkSocketNativeID target);
 static void _shutdown (GdkSocket * socket);
 
 static void _set_property
@@ -92,6 +115,7 @@ gdk_socket_class_init(GdkSocketClass * klass){
 
 	klass->data_arrival = _data_arrival;
 	klass->connect_req = _connect_req;
+	klass->connected = _connected;
 	klass->shutdown = _shutdown;
 
 	class_signals[DATA_ARRIVAL] =
@@ -140,6 +164,28 @@ gdk_socket_class_init(GdkSocketClass * klass){
 			1     /* n_params */,
 			G_TYPE_UINT
 			);
+	class_signals[CONNECTED] =
+/**
+ * GdkSocket::connected:
+ * @self: the #GdkSocket that receives this signal.
+ * @target: the other peer which this socket is connect to.
+ *
+ * The ::connected signal is emitted on both sides
+ * when the connection request is
+ * resolved and the connection is created.
+ */
+		g_signal_new ("connected",
+			G_TYPE_FROM_CLASS (klass),
+			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GdkSocketClass, connected),
+			NULL /* accumulator */,
+			NULL /* accu_data */,
+			gnomenu_marshall_VOID__UINT,
+			G_TYPE_NONE /* return_type */,
+			1     /* n_params */,
+			G_TYPE_UINT
+			);
+
 	class_signals[SHUTDOWN] =
 /**
  * GdkSocket::shutdown
@@ -196,6 +242,18 @@ gdk_socket_class_init(GdkSocketClass * klass){
 						gdk_socket_status_get_type(),
 						GDK_SOCKET_DISCONNECTED,
 						G_PARAM_READWRITE));
+/**
+ * GdkSocket::timeout
+ *
+ * number of seconds for the socket to shutdown without other peers response
+ */
+	g_object_class_install_property (gobject_class,
+			PROP_TIMEOUT,
+			g_param_spec_int ("timeout",
+						"GdkSocket timeout prop",
+						"Set GdkSocket's timeout",
+						0, 2000, 30,
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
 static GObject* _constructor(GType type, guint n_construct_properties,
@@ -224,9 +282,9 @@ static GObject* _constructor(GType type, guint n_construct_properties,
 
 	socket->queue = g_queue_new();
 	socket->acks = 0;
-
+	socket->alives = 0;
+	g_print("%s:timeout = %d\n", socket->name, socket->timeout);
 	gdk_window_add_filter(socket->window, _window_filter_cb, socket);
-
 	priv->disposed = FALSE;
 
 	return obj;
@@ -248,8 +306,8 @@ GdkSocket *
 gdk_socket_new(char * name){
 	GdkSocket * socket = NULL;
 
-	socket = g_object_new(GDK_TYPE_SOCKET, "name", name, "target", 0,
-				"status", GDK_SOCKET_DISCONNECTED, NULL);
+	socket = g_object_new(GDK_TYPE_SOCKET, "name", name,
+				"timeout", 10, NULL);
 
 	return socket;
 }
@@ -257,15 +315,17 @@ gdk_socket_new(char * name){
 GdkSocket *
 gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target){
 	GdkSocket * rt;
+	LOG_FUNC_NAME;
 	if(self->status == GDK_SOCKET_LISTEN){
 		GdkSocketMessage ack;
 		gchar * newname = g_strconcat(self->name, "_ACCEPGT", NULL);
-		rt = g_object_new(GDK_TYPE_SOCKET, "name", newname, "target", target,
-				"status", GDK_SOCKET_CONNECTED, NULL);
+		rt = g_object_new(GDK_TYPE_SOCKET, "name", newname, "timeout", self->timeout,NULL);
 		g_free(newname);
+		rt->target = target;
+	g_print("status = %d\n",  rt->status);
 		g_signal_connect(rt, "shutdown", _destroy_on_shutdown, NULL);
 /*Issue the first ACK message.*/
-		ack.header = GDK_SOCKET_ACK;
+		ack.header = GDK_SOCKET_CONNECT_ACK;
 		ack.source = gdk_socket_get_native(rt);
 		_raw_send(rt, rt->target, &ack, sizeof(ack));
 		return rt;
@@ -322,21 +382,54 @@ _finalize(GObject * object){
 GdkSocketNativeID gdk_socket_get_native(GdkSocket * self){
 	return GDK_WINDOW_XWINDOW(self->window);
 }
-
+/**
+ * gdk_socket_connect:
+ * @self: self
+ * @target: the native id of the target socket.
+ *
+ * Connect to a remote socket. Don't check if the target socket is in listening
+ * state.
+ *
+ * If the target socket is listening, a GdkSocket::connect-request signal
+ * will be emitted. Then it is up to the user  whether to accept this request.
+ * in the signal handler.
+ */
 gboolean gdk_socket_connect(GdkSocket * self, GdkSocketNativeID target){
 	GdkSocketMessage msg;
 	LOG_FUNC_NAME;
 	if(self->status != GDK_SOCKET_DISCONNECTED){
-		g_warning("Can change to connected state from DISCONNECTED state");
+		g_warning("Can change to CONNECTED state from other than DISCONNECTED state:%d", self->status);
 		return FALSE;
 	}
 	msg.header = GDK_SOCKET_CONNECT_REQ;
 	msg.source = gdk_socket_get_native(self);
 	return _raw_send(self, target, &msg, sizeof(msg));
 }
+/** gdk_socket_connect_by_name:
+ * @self: self
+ * @name: the name of the remote socket to connect to. It has to be listening.
+ *
+ * connect to a remote socket by name. If multiple socket has the same name,
+ * only one of them will receive the connecting request. It is possible that
+ * the one that receives the request is not the listening one.
+ * */
+gboolean gdk_socket_connect_by_name(GdkSocket * self, gchar * name){
+	GdkSocketNativeID target;
+	GList * list;
+	list = _gdk_socket_find_targets(self, name);
+	if(!list) return FALSE;
+	target = list->data;
+	g_list_free(list);
+	return gdk_socket_connect(self, target);
+}
 gboolean gdk_socket_listen(GdkSocket * self){
 	self->status = GDK_SOCKET_LISTEN;
 /* FIXME: should I broadcast some message here or invoke a signal?*/
+/* NOTE: don't broadcast any message here. maybe a signal will
+ * be useful, but not now.*/
+/* FIXME: should I set a flag on the window so that other sockets can
+ * test if this socket is listening?*/
+
 	return TRUE;
 }
 /**
@@ -378,7 +471,7 @@ void gdk_socket_shutdown(GdkSocket * self) {
 	GdkSocketMessage msg;
 	LOG_FUNC_NAME;
 	if(self->status == GDK_SOCKET_CONNECTED){
-		self->status == GDK_SOCKET_DISCONNECTED;
+		self->status = GDK_SOCKET_DISCONNECTED;
 		msg.header = GDK_SOCKET_SHUTDOWN;
 		msg.source = gdk_socket_get_native(self);
 		_raw_send(self, self->target, &msg, sizeof(msg));
@@ -404,7 +497,6 @@ static GdkFilterReturn
 			GdkSocketMessage * msg =(GdkSocketMessage*) xevent->xclient.data.l;
 			switch (msg->header){
 				case GDK_SOCKET_DATA:
-					g_message("DATA");
 					if(self->status == GDK_SOCKET_CONNECTED){
 						g_print("msg->source =%d , self->target = %d\n", msg->source, self->target);
 						if(msg->source == self->target){ 
@@ -427,20 +519,22 @@ static GdkFilterReturn
 					g_warning("Wrong socket status, ignore DATA");
 					return GDK_FILTER_REMOVE;
 				break;
-				case GDK_SOCKET_ACK:
-					g_message("ACK");
+				case GDK_SOCKET_CONNECT_ACK:
 					if(self->status == GDK_SOCKET_DISCONNECTED){
 					/*These two simple lines is essential, we establish a connection here.*/
 						self->status = GDK_SOCKET_CONNECTED;
 						self->target = msg->source;
 						{
-					/*Then we send an ACK to the other peer to allow it begin data transfer*/
+					/*Then we send an CONNECT_ACK to the other peer to allow it begin data transfer*/
 							GdkSocketMessage ack;
-							ack.header = GDK_SOCKET_ACK;
+							ack.header = GDK_SOCKET_CONNECT_ACK;
 							ack.source = gdk_socket_get_native(self);
 							_raw_send(self, self->target, &ack, sizeof(ack));
 						}
+						g_signal_emit(self, class_signals[CONNECTED], 0, msg->source);
 					}
+				/*No break here*/
+				case GDK_SOCKET_ACK:
 					if(self->status == GDK_SOCKET_CONNECTED){
 						if(msg->source == self->target){
 							self->acks++;
@@ -463,6 +557,23 @@ static GdkFilterReturn
 					}else
 						g_warning("Wrong socket status, ignore CONNECT_REQ");
 					return GDK_FILTER_REMOVE;
+				break;
+				case GDK_SOCKET_ISALIVE:
+					if(self->status == GDK_SOCKET_CONNECTED
+						&& self->target == msg->source)
+					{
+						GdkSocketMessage alive;
+						alive.header = GDK_SOCKET_ALIVE;
+						alive.source = gdk_socket_get_native(self);
+						_raw_send(self, self->target, &alive, sizeof(alive));
+					}
+				break;
+				case GDK_SOCKET_ALIVE:
+					if(self->status == GDK_SOCKET_CONNECTED
+						&& self->alives > 0
+						&& self->target == msg->source){
+						self->alives--;
+					}
 				break;
 				case GDK_SOCKET_BROADCAST:	
 					if(self->status != GDK_SOCKET_CONNECTED){
@@ -497,6 +608,11 @@ static void _connect_req(GdkSocket * self,
 	GdkSocketNativeID target){
 	LOG_FUNC_NAME;
 }
+static void _connected(GdkSocket * self,
+	GdkSocketNativeID target){
+	LOG_FUNC_NAME;
+	g_timeout_add_seconds(self->timeout, _gdk_socket_is_alive, self);
+}
 static void _shutdown (GdkSocket * self){
 	GdkSocketMessage * queue_message;
 	LOG_FUNC_NAME;
@@ -505,11 +621,12 @@ static void _shutdown (GdkSocket * self){
 		g_free(queue_message);
 	}
 	self->acks = 0;
-	self->status == GDK_SOCKET_DISCONNECTED;
+	self->status = GDK_SOCKET_DISCONNECTED;
 }
 static void 
 _get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
 	GdkSocket * self = GDK_SOCKET(object);
+	LOG_FUNC_NAME;
 	switch (property_id){
 		case PROP_NAME:
 			g_value_set_string(value, self->name);
@@ -520,6 +637,9 @@ _get_property( GObject * object, guint property_id, GValue * value, GParamSpec *
 		case PROP_STATUS:
 			g_value_set_enum(value, self->status);
 		break;
+		case PROP_TIMEOUT:
+			g_value_set_int(value, self->timeout);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
 	}
@@ -528,6 +648,7 @@ _get_property( GObject * object, guint property_id, GValue * value, GParamSpec *
 static void 
 _set_property( GObject * object, guint property_id, const GValue * value, GParamSpec * pspec){
 	GdkSocket * self = GDK_SOCKET(object);
+	LOG_FUNC_NAME;
 	switch (property_id){
 		case PROP_NAME:
 			g_free(self->name);
@@ -538,6 +659,9 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 		break;
 		case PROP_STATUS:
 			self->status = g_value_get_enum(value);
+		break;
+		case PROP_TIMEOUT:
+			self->timeout = g_value_get_int(value);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
@@ -586,7 +710,6 @@ static gboolean _raw_send(GdkSocket * self,
  * Returns: if sucessful, TRUE; else FALSE.
  */
 static gboolean _raw_send_nosync(GdkSocket * self, GdkNativeWindow target, gpointer data, guint bytes){
-	LOG_FUNC_NAME;
     XClientMessageEvent xclient;
 	if(bytes > 20){
 		g_error("GdkSocket: Can not send raw data for more than 20 bytes");
@@ -605,7 +728,37 @@ static gboolean _raw_send_nosync(GdkSocket * self, GdkNativeWindow target, gpoin
           False, NoEventMask, (XEvent *)&xclient);
     return gdk_error_trap_pop () == 0;
 }
-
+/**
+ * _gdk_socket_is_alive:
+ * @self:
+ *
+ * Returns: usually TRUE, unless the connection is dead.
+ */
+static gboolean _gdk_socket_is_alive(GdkSocket * self){
+	LOG_FUNC_NAME;
+	if(!GDK_IS_SOCKET(self)) return FALSE; /*The socket already is destroyed*/
+	g_print("%s\n", self->name);
+	if(self->status != GDK_SOCKET_CONNECTED) return FALSE;
+	if(self->alives >2) /*FIXME: which number is better?*/{
+		g_signal_emit(self,
+				class_signals[SHUTDOWN],
+				0);
+		/*Last obligation to the other peer, hope it will receive this SHUTDOWN message*/
+		{
+			GdkSocketMessage msg;
+			msg.header = GDK_SOCKET_SHUTDOWN;
+			msg.source = gdk_socket_get_native(self);
+			_raw_send(self, self->target, &msg, sizeof(msg));
+		}
+		return FALSE;
+	} else {
+		GdkSocketMessage msg;
+		msg.header = GDK_SOCKET_ISALIVE;
+		msg.source = gdk_socket_get_native(self);
+		_raw_send(self, self->target, &msg, sizeof(msg));
+		self->alives ++;
+	}
+}
 /**
  * _gdk_socket_find_targets:
  * @self: self
@@ -671,7 +824,6 @@ static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
 		}
 	}
 	XFree(children_return);
-	g_message("%s:length=%d", __func__, g_list_length(window_list));
 	return window_list;
 }
 
