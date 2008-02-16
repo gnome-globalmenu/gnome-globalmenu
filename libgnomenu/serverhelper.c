@@ -502,3 +502,6 @@ _client_size_request(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 }
 
+/*
+vim:ts=4:sw=4
+*/

@@ -21,7 +21,7 @@
 	GdkSocket * s = GDK_SOCKET(_s); \
 	GdkSocketPrivate * p = GDK_SOCKET_GET_PRIVATE(_s);
 
-#define LOG(fmt, args...) g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)
+#define LOG(fmt, args...) /*g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)*/
 #define LOG_FUNC_NAME LOG("%s", __func__)
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
@@ -492,11 +492,12 @@ gboolean gdk_socket_listen(GdkSocket * _self){
  */
 gboolean gdk_socket_send(GdkSocket * _self, gpointer data, guint bytes){
 	GdkSocketMessage * msg = g_new0(GdkSocketMessage, 1);
+	LOG_FUNC_NAME;
+	g_return_val_if_fail(GDK_IS_SOCKET(_self), FALSE);
 	GET_OBJECT(_self, self, priv);
 	gchar buffer[1024];
 	gint i;
 	gint j;
-	LOG_FUNC_NAME;
 	if(bytes >12){
 		g_error("Can not send more than 12 byte");
 		return FALSE;
@@ -982,3 +983,6 @@ _raw_broadcast_by_name(GdkSocket * _self, gchar * name, gpointer data, guint byt
 static void _destroy_on_shutdown( GdkSocket * _self, gpointer userdata){
 	g_object_unref(_self);
 }
+/*
+vim:ts=4:sw=4
+*/

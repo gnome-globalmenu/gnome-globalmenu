@@ -15,9 +15,9 @@ libgnomenu_la_SOURCES = \
 	serverhelper.c \
 	serverhelper.h \
 	clienthelper.c \
-	clienthelper.h 
-#    gtkglobalmenubar.h \
-#	gtkglobalmenubar.c \
+	clienthelper.h \
+    gtkglobalmenubar.h \
+	gtkglobalmenubar.c
 #	quirks.h	\
 #	quirks.c
 

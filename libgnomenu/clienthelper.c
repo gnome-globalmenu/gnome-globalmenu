@@ -350,4 +350,6 @@ void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
 	gdk_socket_send(GDK_SOCKET(_self),
 		&msg, sizeof(msg.client_unrealize));
 }
-
+/*
+vim:ts=4:sw=4
+*/
