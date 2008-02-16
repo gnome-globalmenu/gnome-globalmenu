@@ -247,6 +247,12 @@ static GObject* _constructor(
 	return obj;
 }
 
+static void _client_info_free(gpointer  p, gpointer data){
+	GnomenuClientInfo * ci = p;
+	gdk_socket_shutdown(ci->service);
+	g_free(p);
+}
+
 static void _dispose(GObject * object){
 	GnomenuServerHelper *self;
 	GnomenuServerHelperPrivate * priv;
@@ -256,15 +262,13 @@ static void _dispose(GObject * object){
 	
 	if(! priv->disposed){
 		priv->disposed = TRUE;
+		g_list_foreach(self->clients, _client_info_free, NULL);
+		g_list_free(self->clients);
+		self->clients = NULL;
 	}
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->dispose(object);
 }
 
-static void _client_info_free(gpointer  p, gpointer data){
-	GnomenuClientInfo * ci = p;
-	gdk_socket_shutdown(ci->service);
-	g_free(p);
-}
 static void _finalize(GObject * object){
 	GnomenuServerHelper *self;
 	LOG_FUNC_NAME;
@@ -272,8 +276,6 @@ static void _finalize(GObject * object){
  * FIXME: perhaps this is buggy
  */
 	self = GNOMENU_SERVER_HELPER(object);
-	g_list_foreach(self->clients, _client_info_free, NULL);
-	g_list_free(self->clients);
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->finalize(object);
 }
 /**

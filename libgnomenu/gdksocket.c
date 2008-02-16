@@ -342,8 +342,7 @@ gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target){
  * _dispose:
  * 	@object: The #GdkSocket to be disposed.
  *
- *  Should release all of the ref counts and set a disposed state of the object
- *  TODO: unref all the resources and set state to #GDK_SOCKET_DISPOSED.
+ * Disposer. Note that it don't shutdown any existed connections.
  */
 static void
 _dispose(GObject * object){

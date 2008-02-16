@@ -27,22 +27,12 @@ typedef struct _GnomenuClientHelperClass GnomenuClientHelperClass;
 typedef struct _GnomenuClientHelper GnomenuClientHelper;
 
 /**
- * GnomenuServerInfo:
- * @socket_id: the native id of the socket which the server is using.
- *
- * GnomenuServerInfo is used by GnomenuClientHelper to store server info.
- */
-typedef struct _GnomenuServerInfo {
-	GdkSocketNativeID socket_id;
-} GnomenuServerInfo;
-/**
  * GnomenuClientHelper:
  *
  * GnomenuClientHelper provides fundanmental messaging mechanism for a menu server
  */
 struct _GnomenuClientHelper {
 	GdkSocket parent;
-	GnomenuServerInfo * server_info;
 /*< public >*/
 };
 
@@ -54,10 +44,9 @@ struct _GnomenuClientHelper {
 struct _GnomenuClientHelperClass {
 	GdkSocketClass parent;
 /*< private >*/	
-	GType * type_gnomenu_message_type;
 
-	void (*server_new)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
-	void (*server_destroy)(GnomenuClientHelper * self, GnomenuServerInfo * server_info);
+	void (*server_new)(GnomenuClientHelper * self);
+	void (*server_destroy)(GnomenuClientHelper * self);
 	void (*size_allocate)(GnomenuClientHelper * self, GtkAllocation * allocation);
 	void (*size_query)(GnomenuClientHelper * self, GtkRequisition * req);
 	void (*orientation_change)(GnomenuClientHelper * self, GtkOrientation ori);
@@ -66,11 +55,9 @@ struct _GnomenuClientHelperClass {
 
 
 GnomenuClientHelper * gnomenu_client_helper_new(void);
-void gnomenu_client_helper_send_realize(GnomenuClientHelper * self, 
-		GdkWindow * ui_window);
-void gnomenu_client_helper_send_reparent(GnomenuClientHelper * self,
-		GdkWindow * parent_window);
-void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * self);
+void gnomenu_client_helper_send_realize(GnomenuClientHelper * self, GdkWindow * ui_window);
+void gnomenu_client_helper_send_reparent(GnomenuClientHelper * self, GdkWindow * parent_window);
+void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * self); 
 
 G_END_DECLS
 #endif
