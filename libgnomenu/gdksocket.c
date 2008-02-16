@@ -5,13 +5,14 @@
 
 #include "gdksocket.h"
 #include "gnomenu-marshall.h"
+#include "gnomenu-enums.h"
 
 #ifndef GDK_WINDOWING_X11
 #error ONLY X11 is supported. other targets are not yet supported.
 #endif
 
-#define LOG_FUNC_NAME g_message(__func__)
-
+#define LOG(fmt, args...) g_message("GdkSocket::" fmt, ## args)
+#define LOG_FUNC_NAME LOG("%s", __func__)
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
 enum {
@@ -325,8 +326,7 @@ gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target){
 		rt = g_object_new(GDK_TYPE_SOCKET, "name", newname, "timeout", self->timeout,NULL);
 		g_free(newname);
 		rt->target = target;
-	g_print("status = %d\n",  rt->status);
-		g_signal_connect(rt, "shutdown", _destroy_on_shutdown, NULL);
+		g_signal_connect(G_OBJECT(rt), "shutdown", G_CALLBACK(_destroy_on_shutdown), NULL);
 /*Issue the first ACK message.*/
 		ack.header = GDK_SOCKET_CONNECT_ACK;
 		ack.source = gdk_socket_get_native(rt);
@@ -401,7 +401,8 @@ gboolean gdk_socket_connect(GdkSocket * self, GdkSocketNativeID target){
 	GdkSocketMessage msg;
 	LOG_FUNC_NAME;
 	if(self->status != GDK_SOCKET_DISCONNECTED){
-		g_warning("Can change to CONNECTED state from other than DISCONNECTED state:%d", self->status);
+		g_warning("Can change to CONNECTED state from other than DISCONNECTED state: %s", 
+			gdk_socket_status_get_value(self->status)->value_name);
 		return FALSE;
 	}
 	msg.header = GDK_SOCKET_CONNECT_REQ;
@@ -421,7 +422,7 @@ gboolean gdk_socket_connect_by_name(GdkSocket * self, gchar * name){
 	GList * list;
 	list = _gdk_socket_find_targets(self, name);
 	if(!list) return FALSE;
-	target = list->data;
+	target = (GdkSocketNativeID)list->data;
 	g_list_free(list);
 	return gdk_socket_connect(self, target);
 }
@@ -441,6 +442,9 @@ gboolean gdk_socket_listen(GdkSocket * self){
  */
 gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 	GdkSocketMessage * msg = g_new0(GdkSocketMessage, 1);
+	gchar buffer[1024];
+	gint i;
+	gint j;
 	LOG_FUNC_NAME;
 	if(bytes >12){
 		g_error("%s: Can not send more than 12 bytes", __func__);
@@ -453,9 +457,11 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes){
 	msg->header = GDK_SOCKET_DATA;
 	msg->source = gdk_socket_get_native(self);
 	g_memmove(msg->l, data, bytes);
-	g_print("status = %d\n", self->status);
-	g_print("data = %*s", bytes, data);
-	g_print("ACKS = %d\n", self->acks);
+	LOG("status = %s, ACKS=%d", gdk_socket_status_get_value(self->status)->value_name, self->acks);
+	for(i = 0, j=0; i< bytes && j< sizeof(buffer); i++){
+		j+=g_sprintf(&buffer[j], "%02hhX ", ((gchar * ) data) [i]);
+	}
+	LOG("data = %s", buffer);
 	if(self->acks <= 0){
 		g_queue_push_tail(self->queue, 	msg);
 	} else {
@@ -532,10 +538,10 @@ static GdkFilterReturn
 							{
 							gpointer data = g_memdup(msg->l, bytes); 
 							g_signal_emit(G_OBJECT(self), 
-							class_signals[DATA_ARRIVAL],
-							g_quark_from_string("peer"),
-							data,
-							bytes);
+								class_signals[DATA_ARRIVAL],
+								g_quark_from_string("peer"),
+								data,
+								bytes);
 							}
 						}
 					} else
@@ -641,7 +647,7 @@ static void _connect_req(GdkSocket * self,
 static void _connected(GdkSocket * self,
 	GdkSocketNativeID target){
 	LOG_FUNC_NAME;
-	g_timeout_add_seconds(self->timeout, _gdk_socket_is_alive, self);
+	g_timeout_add_seconds(self->timeout, G_CALLBACK(_gdk_socket_is_alive), self);
 }
 static void _shutdown (GdkSocket * self){
 	GdkSocketMessage * queue_message;
@@ -853,7 +859,6 @@ static GList * _gdk_socket_find_targets(GdkSocket * self, gchar * name){
 			g_warning("%s:XGetWindowProperty Failed",__func__);
 		}
 	}
-	g_message("length = %d\n", g_list_length(window_list));
 	XFree(children_return);
 	return window_list;
 }
@@ -916,7 +921,7 @@ _raw_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint byte
 	gboolean rt1;
 	for(node = g_list_first(window_list); node; node = g_list_next(node)){
 		rt1 =  _raw_send_nosync(self, (GdkNativeWindow)node->data, data, bytes);
-		g_message("%s, sent to one target, %d", __func__, rt1);
+		LOG("%s, sent to one target, %d", __func__, rt1);
 		rt = rt || rt1;
 	}
     gdk_display_sync (self->display); /*resolve the message, sync the state*/

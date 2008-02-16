@@ -4,34 +4,8 @@
 
 GtkButton * create, * realize, * unrealize, * destroy, * size, * reparent, * quit;
 
-static void realize_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
-	msg.client_realize.ui_window =0xdeadbeaf;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
-}
-static void reparent_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
-	msg.client_reparent.parent_window =0xbeefbeef;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
-}
-static void unrealize_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
-}
-static void destroy_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_CLIENT_DESTROY;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
-}
 static void size_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
 	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
-	msg.size_request.width = 123;
-	msg.size_request.height = 45;
-	gdk_socket_send_by_name(socket, GNOMENU_SERVER_NAME, &msg, sizeof(msg));
 }
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
@@ -40,11 +14,32 @@ static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes
 	g_message("\n\n\n\n\n ding");
 }
 static void button_clicked(GtkButton * button, GdkSocket * client){
+	GnomenuMessage msg;
 	if(button == create){
 		gdk_socket_connect_by_name(client, GNOMENU_SERVER_NAME);
 	}
 	if(button == destroy){
 		gdk_socket_shutdown(client);
+	}
+	if(button == realize){
+		msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
+		msg.client_realize.ui_window =0xdeadbeaf;
+		gdk_socket_send(client, &msg, sizeof(msg));
+	}
+	if(button == reparent){
+		msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
+		msg.client_reparent.parent_window =0xbeefbeef;
+		gdk_socket_send(client, &msg, sizeof(msg));
+	}
+	if(button == unrealize){
+		msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
+		gdk_socket_send(client, &msg, sizeof(msg));
+	}
+	if(button == size){
+		msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
+		msg.size_request.width = 123;
+		msg.size_request.height = 45;
+		gdk_socket_send(client, &msg, sizeof(msg));
 	}
 }
 int main(int argc, char* argv[]){

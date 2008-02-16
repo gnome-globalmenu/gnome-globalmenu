@@ -60,6 +60,11 @@ gnomenu-enums.c: $(gnomenu_enum_headers)
              --vtail "  if (!type)\n" \
              --vtail "    type = g_@type@_register_static (\"@EnumName@\", _@enum_name@_values);\n\n" \
              --vtail "  return type;\n}\n\n" \
+             --vtail "GEnumValue *\n @enum_name@_get_value(gint i)\n{\n  " \
+             --vtail "  static GTypeClass * type_class = NULL;\n" \
+             --vtail "  if(type_class == NULL) type_class = g_type_class_ref(@enum_name@_get_type());\n" \
+             --vtail " return g_enum_get_value(type_class, i);\n" \
+             --vtail "}\n" \
         $(gnomenu_enum_headers) > $@ 
  
 gnomenu-enums.h: $(gnomenu_enum_headers) 
@@ -71,6 +76,7 @@ gnomenu-enums.h: $(gnomenu_enum_headers)
              --fprod "\n/* --- @filename@ --- */" \
              --eprod "#define GNOMENU_TYPE_@ENUMSHORT@ @enum_name@_get_type()\n" \
              --eprod "GType @enum_name@_get_type (void);\n" \
+             --eprod "GEnumValue * @enum_name@_get_value (gint i);\n" \
         $(gnomenu_enum_headers) > $@ 
 
 

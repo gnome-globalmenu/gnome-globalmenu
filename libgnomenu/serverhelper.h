@@ -78,7 +78,6 @@ struct _GnomenuClientInfo {
 struct _GnomenuServerHelperClass {
 	GdkSocketClass parent;
 /*< private >*/	
-	GType * type_gnomenu_message_type;
 
 	void (*client_new) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_destroy) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);

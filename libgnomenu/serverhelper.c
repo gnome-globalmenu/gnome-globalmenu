@@ -1,10 +1,10 @@
 #include <gtk/gtk.h>
-
 #include "serverhelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
 
-#define LOG_FUNC_NAME g_message(__func__)
+#define LOG(fmt, args...) g_message("GnomenuServerHelper::" fmt, ## args )
+#define LOG_FUNC_NAME LOG("%s", __func__)
 
 typedef struct _GnomenuServerHelperPrivate GnomenuServerHelperPrivate;
 
@@ -46,11 +46,12 @@ static void _client_destroy
 static void _client_size_request
 			(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 
-static void _data_arrival
-			(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
 static void _connect_req(GnomenuServerHelper * self,
 		GdkSocketNativeID target);
+
 static void _service_shutdown(GnomenuServerHelper * self, GdkSocket * service);
+static void _service_data_arrival
+			(GnomenuServerHelper * self, gpointer data, gint bytes, GdkSocket * service);
 
 static GnomenuClientInfo * 
 _find_ci_by_service(
@@ -58,6 +59,7 @@ _find_ci_by_service(
 		GdkSocket* socket);
 
 static guint class_signals[SIGNAL_MAX];
+//static GType * _gnomenu_message_type;
 
 G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, GDK_TYPE_SOCKET)
 
@@ -67,7 +69,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	LOG_FUNC_NAME;
 
 	/*FIXME: unref the type at class_finalize*/
-	klass->type_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
+//	_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
 
 	g_type_class_add_private(gobject_class, sizeof (GnomenuServerHelperPrivate));
 	gobject_class->constructor = _constructor;
@@ -220,7 +222,7 @@ gnomenu_server_helper_new(){
 	GnomenuServerHelper * self;
 	LOG_FUNC_NAME;
 	self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
-	gdk_socket_listen(self);
+	gdk_socket_listen(GDK_SOCKET(self));
 	return self;
 }
 /**
@@ -239,7 +241,6 @@ static GObject* _constructor(
 
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
 	self->clients = NULL;
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_data_arrival), NULL);
 	priv->disposed = FALSE;
 	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_connect_req), NULL);
 
@@ -260,6 +261,8 @@ static void _dispose(GObject * object){
 }
 
 static void _client_info_free(gpointer  p, gpointer data){
+	GnomenuClientInfo * ci = p;
+	gdk_socket_shutdown(ci->service);
 	g_free(p);
 }
 static void _finalize(GObject * object){
@@ -283,8 +286,9 @@ static void _connect_req(GnomenuServerHelper * self,
 	ci = g_new0(GnomenuClientInfo, 1);
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
-	ci->service = gdk_socket_accept(self, target);
-	g_signal_connect_swapped(ci->service, "shutdown", _service_shutdown, self);
+	ci->service = gdk_socket_accept(GDK_SOCKET(self), target);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_service_shutdown), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_service_data_arrival), self);
 
 	g_signal_emit(G_OBJECT(self), 
 			class_signals[CLIENT_NEW],
@@ -301,35 +305,27 @@ static void _service_shutdown(GnomenuServerHelper * self, GdkSocket * service){
 }
 
 /** 
- * _data_arrival:
+ * _service_data_arrival:
  *
- * 	callback, invoked when the embeded socket receives data
+ * 	callback, invoked when the embeded socket for serving clients receives data
  */
-static void _data_arrival(GdkSocket * socket, 
-		gpointer data, gint bytes, gpointer userdata){
+static void _service_data_arrival(GnomenuServerHelper * self, 
+		gpointer data, gint bytes, GdkSocket * service){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
 	GnomenuClientInfo * ci = NULL;
-	GnomenuServerHelper * self = GNOMENU_SERVER_HELPER(socket);
 
 	LOG_FUNC_NAME;
 	g_assert(bytes >= sizeof(GnomenuMessage));
 	/*initialize varialbes*/
-	ci = _find_ci_by_service(self, socket);
-#define CHECK_CLIENT(c)  \
-			if(!(c)) { \
-				g_warning("This client is not known by me, ignore and continue"); \
-				break; \
-			}
+	ci = _find_ci_by_service(self, service);
+	g_return_if_fail(ci != NULL);
 
-	enumvalue = g_enum_get_value(
-					GNOMENU_SERVER_HELPER_GET_CLASS(self)->type_gnomenu_message_type, 
-					message->any.type);
-	g_message("message arrival: %s", enumvalue->value_name);
+	enumvalue = gnomenu_message_type_get_value(message->any.type);
+	LOG("message arrival: %s", enumvalue->value_name);
 
 	switch(enumvalue->value){
 		case GNOMENU_MSG_CLIENT_REALIZE:
-			CHECK_CLIENT(ci);
 			if(ci->stage == GNOMENU_CI_STAGE_REALIZED){
 				g_warning("already realized. forget about the old one."
 				"");
@@ -341,8 +337,7 @@ static void _data_arrival(GdkSocket * socket,
 					class_signals[CLIENT_REALIZE],
 					0, ci);
 			break;
-		case GNOMENU_MSG_CLIENT_REPARENT:
-			CHECK_CLIENT(ci);
+		case GNOMENU_MSG_CLIENT_REPARENT:{
 			GdkNativeWindow old_parent = ci->parent_window;
 			ci->parent_window = message->client_reparent.parent_window;
 			if(old_parent != ci->parent_window){
@@ -351,23 +346,21 @@ static void _data_arrival(GdkSocket * socket,
 						0, ci);
 			}
 			break;
+			}
 		case GNOMENU_MSG_CLIENT_UNREALIZE:
-			CHECK_CLIENT(ci);
 			if(ci->stage != GNOMENU_CI_STAGE_REALIZED){
 				g_warning("unrealize a not realized client? ignore it");
 				break;
 			}
 			ci->ui_window = NULL;
-			ci->parent_window = NULL;
 			ci->stage = GNOMENU_CI_STAGE_UNREALIZED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[CLIENT_UNREALIZE],
 					0, ci);
 			break;
 		case GNOMENU_MSG_SIZE_REQUEST:
-			CHECK_CLIENT(ci);
 			if(ci->size_stage != GNOMENU_CI_STAGE_QUERYING){
-				g_message("this resize queue is issued by the client");
+				LOG("this resize queue is issued by the client");
 			}
 			/*NOTE: here we set some sanity value for the allocation*/
 			ci->allocation.width =
