@@ -4,7 +4,16 @@
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
 
-#define LOG(fmt, args...) g_message("GnomenuClientHelper::" fmt, ## args)
+#define GNOMENU_CLIENT_HELPER_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_CLIENT_HELPER, GnomenuClientHelperPrivate))
+
+#define SELF (GNOMENU_CLIENT_HELPER(_self))
+#define PRIV (GNOMENU_CLIENT_HELPER_GET_PRIVATE(_self))
+#define GET_OBJECT(_s, s, p) \
+	GnomenuClientHelper * s = GNOMENU_CLIENT_HELPER(_s); \
+	GnomenuClientHelperPrivate * p = GNOMENU_CLIENT_HELPER_GET_PRIVATE(_s);
+	
+#define LOG(fmt, args...) g_message("<GnomenuClientHelper>::" fmt, ## args)
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 typedef struct _GnomenuClientHelperPrivate GnomenuClientHelperPrivate;
@@ -13,35 +22,27 @@ struct _GnomenuClientHelperPrivate {
 	gboolean disposed;
 };
 
-#define GNOMENU_CLIENT_HELPER_GET_PRIVATE(obj) \
-	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_CLIENT_HELPER, GnomenuClientHelperPrivate))
+/* GObject interface */
+static GObject * _constructor 		( GType type, guint n_construct_properties, 
+									  GObjectConstructParam *construct_params );
+static void _dispose				( GObject * _self );
+static void _finalize				( GObject * _self );
 
-static void _dispose(GObject * self);
-static void _finalize(GObject * self);
-static void gnomenu_client_helper_init(GnomenuClientHelper * self);
+/* Default Signal Handlers */
+static void _server_new 			( GnomenuClientHelper * _self );
+static void _server_destroy 		( GnomenuClientHelper * _self );
+static void _size_allocate			( GnomenuClientHelper * _self, GtkAllocation * allocation );
+static void _size_query 			( GnomenuClientHelper * _self, GtkRequisition * req );
+static void _orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
 
-static void _server_new
-			(GnomenuClientHelper * self);
-static void _server_destroy
-			(GnomenuClientHelper * self);
-static void _size_allocate
-			(GnomenuClientHelper * self, GtkAllocation * allocation);
-static void _size_query
-			(GnomenuClientHelper * self, GtkRequisition * req);
-static void _orientation_change
-			(GnomenuClientHelper * self, GtkOrientation ori);
-static GObject * _constructor
-			(GType type, guint n_construct_properties, GObjectConstructParam *construct_params);
+/* Signal Handlers */
+static void _data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
+static void _connected 				( GdkSocket * _self, GdkSocketNativeID target);
+static void _shutdown				( GdkSocket * _self);
 
-static void _data_arrival
-			(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata);
-static void _connected
-			(GdkSocket * socket, GdkSocketNativeID target);
-static void _shutdown(GdkSocket * socket);
 G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
 
-/*< private >*/
-enum {
+enum { /*< private >*/
 	SERVER_NEW,
 	SERVER_DESTROY,
 	SIZE_ALLOCATE,
@@ -50,6 +51,10 @@ enum {
 	SIGNAL_MAX
 };
 static guint class_signals[SIGNAL_MAX] = {0};
+
+static void 
+gnomenu_client_helper_init			( GnomenuClientHelper * _self );
+
 
 static void
 gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
@@ -85,7 +90,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuClientHelperClass, server_new),
 			NULL, NULL,
-			gnomenu_marshall_VOID__POINTER,
+			gnomenu_marshall_VOID__VOID,
 			G_TYPE_NONE,
 			0);
 
@@ -102,7 +107,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuClientHelperClass, server_destroy),
 			NULL, NULL,
-			gnomenu_marshall_VOID__POINTER,
+			gnomenu_marshall_VOID__VOID,
 			G_TYPE_NONE,
 			0);
 
@@ -160,8 +165,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 }
 
 static void
-gnomenu_client_helper_init(GnomenuClientHelper * self){
-	LOG_FUNC_NAME;
+gnomenu_client_helper_init(GnomenuClientHelper * _self){
 }
 
 /**
@@ -169,33 +173,31 @@ gnomenu_client_helper_init(GnomenuClientHelper * self){
  * * create a new menu client object */ 
 GnomenuClientHelper * 
 gnomenu_client_helper_new(){
-	GnomenuClientHelper * self;
-	LOG_FUNC_NAME;
-	self = g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME,NULL);
-	return self;
+	return g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME,NULL);
 }
 
 static GObject* _constructor(GType type, guint n_construct_properties,
 		GObjectConstructParam *construct_params){
-	GObject *obj;
+	GObject * _self;
 	GnomenuClientHelper * self;
 	GnomenuClientHelperPrivate * priv;
 	
-	obj = (*G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->constructor)(type,
+	_self = (*G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
 
-	self = GNOMENU_CLIENT_HELPER(obj);
-	priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(self);
+	self = SELF;
+	priv = PRIV;
 
 /*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
 	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_data_arrival), NULL);
 	g_signal_connect(G_OBJECT(self), "connected", G_CALLBACK(_connected), NULL);
 	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_shutdown), NULL);
 	priv->disposed = FALSE;
+/* try to connect to the server */
+	gdk_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
 
-	gdk_socket_connect_by_name(GDK_SOCKET(self), GNOMENU_SERVER_NAME);
-	return obj;
+	return _self;
 }
 /**
  * _dispose:
@@ -203,31 +205,34 @@ static GObject* _constructor(GType type, guint n_construct_properties,
  *
  *  dispose the object. will shutdown the connection if it is connected
  */
-static void _dispose(GObject * object){
-	GdkSocket * socket = GDK_SOCKET(object);
-	GnomenuClientHelperPrivate * priv = GNOMENU_CLIENT_HELPER_GET_PRIVATE(object);
+static void _dispose(GObject * _self){
+	GET_OBJECT(_self, self, priv);
+	GdkSocket * socket = GDK_SOCKET(self);
+	LOG_FUNC_NAME;
 	if(! priv->disposed){
 		priv->disposed = TRUE;
 		if(socket->status == GDK_SOCKET_CONNECTED){
-			gdk_socket_shutdown(GDK_SOCKET(object));
+			gdk_socket_shutdown(socket);
 		}
 	}
-	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(object);
+	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(_self);
 }
 
-static void _finalize(GObject * object){
+static void _finalize(GObject * _self){
 	LOG_FUNC_NAME;
-	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->finalize(object);
+	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->finalize(_self);
 }
 
-static void _shutdown(GdkSocket * socket){
-	g_signal_emit(G_OBJECT(socket),
+static void _shutdown(GdkSocket * _self){
+	LOG_FUNC_NAME;
+	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_DESTROY],
 		0);
 
 }
-static void _connected(GdkSocket * socket, GdkSocketNativeID target){
-	g_signal_emit(G_OBJECT(socket),
+static void _connected(GdkSocket * _self, GdkSocketNativeID target){
+	LOG_FUNC_NAME;
+	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_NEW],
 		0);
 }
@@ -235,20 +240,22 @@ static void _connected(GdkSocket * socket, GdkSocketNativeID target){
  *
  * 	callback, invoked when the embeded socket receives data
  */
-static void _data_arrival(GdkSocket * socket, 
+static void _data_arrival(GdkSocket * _self, 
 		gpointer data, gint bytes, gpointer userdata){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
-	GnomenuClientHelper * self = GNOMENU_CLIENT_HELPER(socket);
+	GET_OBJECT(_self, self, priv);
 
 	LOG_FUNC_NAME;
 
-	g_assert(bytes >= sizeof(GnomenuMessage));
+//	g_assert(bytes >= sizeof(GnomenuMessage));
 	
 	enumvalue = gnomenu_message_type_get_value(message->any.type);
-	g_message("message arrival: %s", enumvalue->value_name);
+	LOG("message arrival: %s", enumvalue->value_name);
 	/*TODO: Dispatch the message and emit signals*/
 	switch(enumvalue->value){
+		case GNOMENU_MSG_SERVER_NEW:
+			gdk_socket_connect(self, message->server_new.socket_id);
 		case GNOMENU_MSG_SIZE_ALLOCATE:
 			{
 				GtkAllocation * allocation = g_new0(GtkAllocation, 1);
@@ -285,22 +292,24 @@ static void _data_arrival(GdkSocket * socket,
 }
 
 static void 
-_server_new(GnomenuClientHelper * self){
+_server_new(GnomenuClientHelper * _self){
 	LOG_FUNC_NAME;
 }
 static void 
-_server_destroy(GnomenuClientHelper * self){
+_server_destroy(GnomenuClientHelper * _self){
 	LOG_FUNC_NAME;
-	g_warning("Menu server quited before client exits");
+	LOG("Menu server quited before client exits");
 }
 static void 
-_size_allocate(GnomenuClientHelper * self, GtkAllocation * allocation){
+_size_allocate(GnomenuClientHelper * _self, GtkAllocation * allocation){
+	LOG_FUNC_NAME;
 	/*other signal handlers will deal with the allocation*/
 	/*At the cleanup stage, we can safely free allocation*/
 	g_free(allocation);
 }
 static void
-_size_query(GnomenuClientHelper * self, GtkRequisition * req){
+_size_query(GnomenuClientHelper * _self, GtkRequisition * req){
+	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
 	msg.size_request.width = req->width;
@@ -308,37 +317,37 @@ _size_query(GnomenuClientHelper * self, GtkRequisition * req){
 /* FIXME: is it possible that we are in this handler, but self->server_info is NULL?,
  * Here it is almost impossible, unless a server dies before we issue this message*/
 	g_free(req);
-	gdk_socket_send(GDK_SOCKET(self), &msg, sizeof(msg));
+	gdk_socket_send(GDK_SOCKET(_self), &msg, sizeof(msg.size_request));
 }
 
 static void 
 _orientation_change
-			(GnomenuClientHelper * self, GtkOrientation ori){
+			(GnomenuClientHelper * _self, GtkOrientation ori){
 	LOG_FUNC_NAME;
 }
 
 
-void gnomenu_client_helper_send_realize(GnomenuClientHelper * self, 
+void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self, 
 		GdkWindow * ui_window){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
 	msg.client_realize.ui_window = GDK_WINDOW_XWINDOW(ui_window);
-	gdk_socket_send(GDK_SOCKET(self),
-		&msg, sizeof(msg));
+	gdk_socket_send(GDK_SOCKET(_self),
+		&msg, sizeof(msg.client_realize));
 }
-void gnomenu_client_helper_send_reparent(GnomenuClientHelper * self, 
+void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self, 
 		GdkWindow * parent_window){
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
 	msg.client_reparent.parent_window = GDK_WINDOW_XWINDOW(parent_window);	
-	gdk_socket_send(GDK_SOCKET(self),
-		&msg, sizeof(msg));
+	gdk_socket_send(GDK_SOCKET(_self),
+		&msg, sizeof(msg.client_reparent));
 }
-void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * self){
+void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
-	gdk_socket_send(GDK_SOCKET(self),
-		&msg, sizeof(msg));
+	gdk_socket_send(GDK_SOCKET(_self),
+		&msg, sizeof(msg.client_unrealize));
 }
 

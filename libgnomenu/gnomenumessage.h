@@ -128,6 +128,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
+	GdkSocketNativeID socket_id;
 } GnomenuMessageServerNew;
 /**
  * GnomenuMessageServerDestroy:

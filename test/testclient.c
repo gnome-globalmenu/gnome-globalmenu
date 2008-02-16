@@ -4,45 +4,49 @@
 
 
 GtkWidget * create, * destroy, * size;
+GnomenuClientHelper * client;
+GdkSocket * server;
+GdkSocket * service;
 
-static void create_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_SERVER_NEW;
-	gdk_socket_send_by_name(socket, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
-}
-static void destroy_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_SERVER_DESTROY;
-	gdk_socket_send_by_name(socket, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
-
-}
-static void size_clicked_event_cb(GtkWidget * button, GdkSocket * socket){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
-	gdk_socket_send_by_name(socket, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
-}
-static void button_click(GtkButton * button, gpointer usrdata){
-
-}
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
 }
-static void socket_data_arrival_cb(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata){
+static void service_data_arrival(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata){
 	g_message("ding: %d", *(gint*)data);
 }
-
+static void server_connect_req(GdkSocket * socket, GdkSocketNativeID target, gpointer userdata){
+	service = gdk_socket_accept(socket, target);
+	g_signal_connect(G_OBJECT(service), "data-arrival", service_data_arrival, 0);	
+}
+static void button_clicked(GtkButton * button, gpointer usrdata){
+	if(button == create){
+		GnomenuMessage msg;
+		server = gdk_socket_new(GNOMENU_SERVER_NAME);
+		g_signal_connect(G_OBJECT(server), "connect-request",
+				G_CALLBACK(server_connect_req), NULL);
+		gdk_socket_listen(server);
+		msg.any.type = GNOMENU_MSG_SERVER_NEW;
+		msg.server_new.socket_id = gdk_socket_get_native(server);
+		gdk_socket_broadcast_by_name(server, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+	}
+	if(button == size){
+		GnomenuMessage msg;
+		msg.any.type = GNOMENU_MSG_SIZE_QUERY;
+		gdk_socket_send(service, &msg, sizeof(msg));
+	}
+	if(button == destroy){
+		gdk_socket_shutdown(service);
+	}
+}
 int main(int argc, char* argv[]){
 	GtkWindow * window;
-	GnomenuClientHelper * client;
 	GtkBox * box;
-	GdkSocket * server;
 
 	gtk_init(&argc, &argv);
 
-	socket = gdk_socket_new("test socket");
-
-	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	client = gnomenu_client_helper_new();
+	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+
 	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
 
 #define ADD_BUTTON(bn) \
@@ -57,13 +61,6 @@ int main(int argc, char* argv[]){
 	
 	g_signal_connect(G_OBJECT(window), "destroy",
 			G_CALLBACK(window_destroy_event_cb), NULL);
-
-	g_signal_connect(G_OBJECT(socket), "data-arrival",
-			G_CALLBACK(socket_data_arrival_cb), NULL);
-
-	gtk_box_pack_start_defaults(box, create);
-	gtk_box_pack_start_defaults(box, size);
-	gtk_box_pack_start_defaults(box, destroy);
 
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
 
