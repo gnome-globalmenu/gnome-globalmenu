@@ -47,6 +47,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_POSITION_SET,
 	GNOMENU_MSG_VISIBILITY_SET,
 	GNOMENU_MSG_ORIENTATION_CHANGE,
+	GNOMENU_MSG_BGCOLOR_SET,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -224,6 +225,13 @@ typedef struct {
 	gboolean visibility;
 } GnomenuMessageVisibilitySet;
 
+typedef struct {
+	GnomenuMessageType type;
+	guint16 red;
+	guint16 green;
+	guint16 blue;
+} GnomenuMessageBgColorSet;
+
 /**
  * GnomenuMessage:
  *
@@ -246,6 +254,7 @@ struct _GnomenuMessage {
 		GnomenuMessageOrientationChange orientation_change;
 		GnomenuMessageVisibilitySet visibility_set;
 		GnomenuMessagePositionSet position_set;
+		GnomenuMessageBgColorSet bgcolor_set;
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()

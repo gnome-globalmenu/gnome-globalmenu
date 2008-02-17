@@ -50,6 +50,8 @@ typedef struct
 {
 	gboolean disposed;
 	gboolean detached;
+	GdkColor bgcolor;
+	
 } GtkGlobalMenuBarPrivate;
 
 /* GObject interface */
@@ -97,10 +99,14 @@ static void _s_position_set 		( GtkWidget  * menubar,
 static void _s_visibility_set 		( GtkWidget  * menubar, 
 									  gboolean vis,
 									  GnomenuClientHelper * helper); 
+static void _s_bgcolor_set	 		( GtkWidget  * menubar, 
+									  GdkColor * bgcolor,
+									  GnomenuClientHelper * helper); 
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
-static void _sync_state				( GtkGlobalMenuBar * menubar);
+static void _sync_remote_state				( GtkGlobalMenuBar * menubar);
+static void _sync_local_state				( GtkGlobalMenuBar * menubar);
 
 G_DEFINE_TYPE (GtkGlobalMenuBar, gtk_global_menu_bar, GTK_TYPE_MENU_BAR)
 
@@ -161,6 +167,8 @@ static GObject* _constructor(GType type,
 	priv = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(menu_bar);
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
+	priv->bgcolor = gtk_widget_get_style(menu_bar)->bg[GTK_STATE_NORMAL];
+	LOG("default color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
 	menu_bar->helper = gnomenu_client_helper_new();
 	menu_bar->allocation.width = 200;
 	menu_bar->allocation.height = 20;
@@ -168,19 +176,23 @@ static GObject* _constructor(GType type,
 	menu_bar->allocation.y = 0;
 	menu_bar->requisition.width = 0;
 	menu_bar->requisition.height = 0;
-	
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "size-allocate",
 				G_CALLBACK(_s_size_allocate), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "size-query",
 				G_CALLBACK(_s_size_request), menu_bar);
-	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "connected",
-				G_CALLBACK(_s_connected), menu_bar);
+
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "position-set",
 				G_CALLBACK(_s_position_set), menu_bar);
+	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "bgcolor-set",
+				G_CALLBACK(_s_bgcolor_set), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "visibility-set",
 				G_CALLBACK(_s_visibility_set), menu_bar);
+
+	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "connected",
+				G_CALLBACK(_s_connected), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "shutdown",
 				G_CALLBACK(_s_shutdown), menu_bar);
+	
 	return object;
 }
 
@@ -262,7 +274,7 @@ _size_allocate (GtkWidget     *widget,
 	g_return_if_fail (GTK_IS_MENU_BAR (widget));
 	g_return_if_fail (allocation != NULL);
 	GET_OBJECT(widget, menu_bar, priv);
-	widget->allocation = *allocation;
+	//widget->allocation = *allocation;
 	if (priv->detached) {
 		/*Do nothing*/
 	} else {
@@ -286,13 +298,18 @@ static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, Gnomen
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = TRUE;
 	gtk_widget_queue_resize(widget);
-	_sync_state(menu_bar);
+	if(GTK_WIDGET_REALIZED(widget)){
+		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
+	}
+	_sync_remote_state(menu_bar);
 }
 static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = FALSE;	
 	
+	gtk_widget_reset_rc_styles(widget);
+	gtk_widget_restore_default_style(widget);
 	if(GTK_WIDGET_REALIZED(widget)){
 		gtk_widget_hide_all(widget);
 		gtk_widget_unrealize(widget);
@@ -321,6 +338,16 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 		gdk_window_hide(menu_bar->container);
 	}	
 }
+static void _s_bgcolor_set	 		( GtkWidget  * widget, 
+									  GdkColor * bgcolor,
+									  GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
+	priv->bgcolor.red = bgcolor->red;
+	priv->bgcolor.blue = bgcolor->blue;
+	priv->bgcolor.green = bgcolor->green;
+	_sync_local_state(menu_bar);;
+}
 
 static gint
 _expose (GtkWidget      *widget,
@@ -336,15 +363,18 @@ _expose (GtkWidget      *widget,
     {
 		border = GTK_CONTAINER(widget)->border_width;
 		g_message("Expose from %p", event->window);
-		gtk_paint_box (widget->style,
-				menu_bar->container,
-				GTK_WIDGET_STATE (widget),
-				GTK_SHADOW_NONE,
-				&event->area, widget, "menubar",
-				border, border,
-				menu_bar->allocation.width - border * 2,
-				menu_bar->allocation.height - border * 2);
-
+		if(!priv->detached){
+			gtk_paint_box (widget->style,
+					menu_bar->container,
+					GTK_WIDGET_STATE (widget),
+					GTK_SHADOW_NONE,
+					&event->area, widget, "menubar",
+					border, border,
+					menu_bar->allocation.width - border * 2,
+					menu_bar->allocation.height - border * 2);
+		} else {
+			gdk_window_clear(menu_bar->container);
+		}
 		(* GTK_WIDGET_CLASS (gtk_global_menu_bar_parent_class)->expose_event) (widget, event);
     }
 
@@ -413,7 +443,8 @@ _realize (GtkWidget * widget){
            (GtkCallback)(gtk_widget_set_parent_window), 
            (gpointer)(menu_bar->container));
 
-	_sync_state(menu_bar);
+	_sync_remote_state(menu_bar);
+	_sync_local_state(menu_bar);
 }
 static void
 _unrealize (GtkWidget * widget){
@@ -444,9 +475,10 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
 }
 
-static void _sync_state				( GtkGlobalMenuBar * menu_bar){
+static void _sync_remote_state				( GtkGlobalMenuBar * _self){
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
+	GET_OBJECT(_self, menu_bar, priv);
 	if(GTK_WIDGET_REALIZED(menu_bar)){
 		gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->container);
 	}
@@ -455,6 +487,17 @@ static void _sync_state				( GtkGlobalMenuBar * menu_bar){
 		if(GTK_WIDGET_REALIZED(toplevel)){
 			gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
 		}
+	}
+}
+static void _sync_local_state				( GtkGlobalMenuBar * _self){
+	LOG_FUNC_NAME;
+	GET_OBJECT(_self, menu_bar, priv);
+	if(GTK_WIDGET_REALIZED(menu_bar)){
+		GdkColormap * colormap = gtk_widget_get_colormap(GTK_WIDGET(menu_bar));
+		gdk_rgb_find_color(colormap, &priv->bgcolor);
+		gdk_window_set_background(menu_bar->container, &priv->bgcolor);
+		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
+
 	}
 }
 static void 

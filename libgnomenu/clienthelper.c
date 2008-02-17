@@ -3,6 +3,7 @@
 #include "clienthelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
+#include <string.h>
 
 #define GNOMENU_CLIENT_HELPER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_CLIENT_HELPER, GnomenuClientHelperPrivate))
@@ -36,6 +37,7 @@ static void _size_query 			( GnomenuClientHelper * _self, GtkRequisition * req )
 static void _orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
 static void _position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
 static void _visibility_set			( GnomenuClientHelper * _self, gboolean vis );
+static void _bgcolor_set				( GnomenuClientHelper * _self, GdkColor * color);
 
 /* Signal Handlers */
 static void _data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
@@ -52,6 +54,7 @@ enum { /*< private >*/
 	ORIENTATION_CHANGE,
 	POSITION_SET,
 	VISIBILITY_SET,
+	BGCOLOR_SET,
 	SIGNAL_MAX
 };
 static guint class_signals[SIGNAL_MAX] = {0};
@@ -79,6 +82,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	klass->orientation_change = _orientation_change;
 	klass->position_set = _position_set;
 	klass->visibility_set = _visibility_set;
+	klass->bgcolor_set = _bgcolor_set;
 
 	class_signals[SERVER_NEW] =
 /**
@@ -186,8 +190,9 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 
 	class_signals[VISIBILITY_SET] =
 /**
- * GnomenuClientHelper::position-set:
+ * GnomenuClientHelper::visibility-set:
  *
+ * notifies that the server request for a visibility change.(show/hide);
 */
 		g_signal_new("visibility-set",
 			G_TYPE_FROM_CLASS(klass),
@@ -198,6 +203,23 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_NONE,
 			1,
 			G_TYPE_UINT);
+
+	class_signals[BGCOLOR_SET] =
+/**
+ * GnomenuClientHelper::bgcolor-set:
+ *  @self: self,
+ *  @color: color, NOT allocated. You have to call #gdk_colormap_alloc_color yourself.
+ *  @userdata: userdata;
+ */
+		g_signal_new("bgcolor-set",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, bgcolor_set),
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
 }
 
 static void
@@ -338,6 +360,17 @@ static void _data_arrival(GdkSocket * _self,
 					0, message->visibility_set.visibility);
 			}
 		break;	
+		case GNOMENU_MSG_BGCOLOR_SET:
+			{
+				GdkColor * color = g_new0(GdkColor, 1);
+				color->red = message->bgcolor_set.red;	
+				color->green = message->bgcolor_set.green;	
+				color->blue = message->bgcolor_set.blue;	
+				g_signal_emit(G_OBJECT(self),
+					class_signals[BGCOLOR_SET],
+					0, color);
+			}
+		break;
 		default:
 			g_warning("unknown message, ignore it and continue");
 		break;
@@ -390,7 +423,12 @@ _visibility_set
 			(GnomenuClientHelper * _self, gboolean vis){
 	LOG_FUNC_NAME;
 }
-
+static void
+_bgcolor_set
+			(GnomenuClientHelper * _self, GdkColor * color){
+	LOG_FUNC_NAME;
+	g_free(color);
+}
 
 void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self, 
 		GdkWindow * ui_window){

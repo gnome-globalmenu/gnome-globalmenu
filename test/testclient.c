@@ -3,7 +3,7 @@
 #include <libgnomenu/clienthelper.h>
 
 
-GtkWidget * create, * destroy, * size;
+GtkWidget * create, * destroy, * size, * bgcolor;
 GnomenuClientHelper * client;
 GdkSocket * server;
 GdkSocket * service;
@@ -37,6 +37,14 @@ static void button_clicked(GtkButton * button, gpointer usrdata){
 	if(button == destroy){
 		gdk_socket_shutdown(service);
 	}
+	if(button == bgcolor){
+		GnomenuMessage msg;
+		msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
+		msg.bgcolor_set.red = 0xffff;
+		msg.bgcolor_set.blue = 0;
+		msg.bgcolor_set.green = 0x8000;
+		gdk_socket_send(service, &msg, sizeof(msg));
+	}
 }
 int main(int argc, char* argv[]){
 	GtkWindow * window;
@@ -55,9 +63,9 @@ int main(int argc, char* argv[]){
 			G_CALLBACK(button_clicked), client);\
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(bn));
 	ADD_BUTTON(create)
+	ADD_BUTTON(bgcolor);
 	ADD_BUTTON(size)
 	ADD_BUTTON(destroy);
-
 	
 	g_signal_connect(G_OBJECT(window), "destroy",
 			G_CALLBACK(window_destroy_event_cb), NULL);

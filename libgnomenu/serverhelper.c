@@ -441,7 +441,7 @@ gboolean gnomenu_server_helper_is_client(GnomenuServerHelper * _self, GnomenuCli
 }
 
 void
-gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+gnomenu_server_helper_queue_resize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 	g_return_if_fail(gnomenu_server_helper_is_client(_self, ci));
@@ -450,7 +450,7 @@ gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * _self, GnomenuCl
 	gdk_socket_send(ci->service, &msg, sizeof(msg.size_query));
 }
 
-void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GtkOrientation ori){
 	GnomenuMessage msg;
 	LOG_FUNC_NAME;
@@ -460,7 +460,7 @@ void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, Gn
 	gdk_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
 }
 
-void gnomenu_server_helper_client_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkPoint * position){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
@@ -472,7 +472,7 @@ void gnomenu_server_helper_client_set_position(GnomenuServerHelper * self, Gnome
 	ci->allocation.y = position->y;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.position_set));
 }
-void gnomenu_server_helper_client_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			gboolean vis){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
@@ -480,6 +480,18 @@ void gnomenu_server_helper_client_set_visibility(GnomenuServerHelper * self, Gno
 	msg.any.type = GNOMENU_MSG_VISIBILITY_SET;
 	msg.visibility_set.visibility = vis;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
+}
+void gnomenu_server_helper_set_bgcolor(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GdkColor * color){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
+	msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
+	msg.bgcolor_set.red = color->red;
+	msg.bgcolor_set.blue = color->blue;
+	msg.bgcolor_set.green = color->green;
+	gdk_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
+	
 }
 /* virtual functions for signal handling*/
 static void 

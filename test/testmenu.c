@@ -59,6 +59,7 @@ enum {
 	SHOW,
 	HIDE,
 	MOVE,
+	BGCOLOR,
 	DESTROY_SERVER,
 	DESTROY_MENU,
 	BTN_MAX
@@ -78,7 +79,7 @@ static void server_client_realize(GnomenuServerHelper * server, GnomenuClientInf
 	g_assert(foreign);
 	gdk_window_reparent(foreign, GTK_WIDGET(menuwindow)->window, 10, 10);
 	g_object_unref(foreign);
-	gnomenu_server_helper_client_queue_resize(server, ci);
+	gnomenu_server_helper_queue_resize(server, ci);
 }
 static void menuwindow_destroy(GtkWidget * widget, GdkEvent * event, gpointer userdata){
 	g_object_unref(server);
@@ -113,21 +114,28 @@ static void button_clicked(GtkButton * button, gpointer ddddd){
 		case SHOW:
 		case HIDE:
 		case MOVE:
+		case BGCOLOR:
 		for(node = g_list_first(server->clients);
 			node;
 			node = g_list_next(node)){
 			if(btn == ALLOCATE)
-				gnomenu_server_helper_client_queue_resize(server, node->data);
+				gnomenu_server_helper_queue_resize(server, node->data);
 			if(btn == SHOW)
-				gnomenu_server_helper_client_set_visibility(server, node->data, TRUE);
+				gnomenu_server_helper_set_visibility(server, node->data, TRUE);
 			if(btn == HIDE)
-				gnomenu_server_helper_client_set_visibility(server, node->data, FALSE);
+				gnomenu_server_helper_set_visibility(server, node->data, FALSE);
 			if(btn == MOVE){
 				GdkPoint pt = {10, 100};
-				gnomenu_server_helper_client_set_position(server, node->data, &pt);
+				gnomenu_server_helper_set_position(server, node->data, &pt);
+			}
+			if(btn == BGCOLOR){
+				GdkColor color = {0, 0xffff, 0x8000, 0};
+				gnomenu_server_helper_set_bgcolor(server, node->data, &color);
 			}
 		}	
 		break;	
+		default:
+			g_error("unhandlerd");
 	}
 }
 int main(int argc, char* argv[]){
@@ -153,6 +161,7 @@ int main(int argc, char* argv[]){
 	ADD_BUTTON(CREATE_MENU);
 	ADD_BUTTON(ALLOCATE);
 	ADD_BUTTON(SHOW);
+	ADD_BUTTON(BGCOLOR);
 	ADD_BUTTON(HIDE);
 	ADD_BUTTON(MOVE);
 	ADD_BUTTON(DESTROY_SERVER);
