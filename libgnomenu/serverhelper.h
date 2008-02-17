@@ -2,7 +2,6 @@
 #define GNOMENU_SERVER_H
 
 #include "gdksocket.h"
-#include "gnomenumessage.h"
 
 G_BEGIN_DECLS
 /**

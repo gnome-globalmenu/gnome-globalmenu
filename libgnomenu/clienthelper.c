@@ -3,6 +3,7 @@
 #include "clienthelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
+#include "messages.h"
 #include <string.h>
 
 #define GNOMENU_CLIENT_HELPER_GET_PRIVATE(obj) \

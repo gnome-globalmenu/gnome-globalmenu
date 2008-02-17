@@ -2,6 +2,7 @@
 #include "serverhelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
+#include "messages.h"
 
 #define SELF (GNOMENU_SERVER_HELPER(_self))
 #define PRIV (GNOMENU_SERVER_HELPER_GET_PRIVATE(_self))

@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/gdksocket.h>
 #include <libgnomenu/clienthelper.h>
-
+#include <libgnomenu/messages.h>
 
 GtkWidget * create, * destroy, * size, * bgcolor;
 GnomenuClientHelper * client;

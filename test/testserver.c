@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/gdksocket.h>
 #include <libgnomenu/serverhelper.h>
+#include <libgnomenu/messages.h>
 
 GtkButton * create, * realize, * unrealize, * destroy, * size, * reparent, * quit;
 

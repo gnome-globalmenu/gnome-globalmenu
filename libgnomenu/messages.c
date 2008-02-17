@@ -1,5 +1,5 @@
 #include <glib-object.h>
-#include "gnomenumessage.h"
+#include "messages.h"
 
 gpointer gnomenu_message_copy(gpointer src){
 	return g_memdup(src, sizeof(GnomenuMessage));
