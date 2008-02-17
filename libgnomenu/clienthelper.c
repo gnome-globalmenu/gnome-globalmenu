@@ -30,20 +30,20 @@ static GObject * _constructor 		( GType type, guint n_construct_properties,
 static void _dispose				( GObject * _self );
 static void _finalize				( GObject * _self );
 
-/* Default Signal Handlers */
-static void _server_new 			( GnomenuClientHelper * _self );
-static void _server_destroy 		( GnomenuClientHelper * _self );
-static void _size_allocate			( GnomenuClientHelper * _self, GtkAllocation * allocation );
-static void _size_query 			( GnomenuClientHelper * _self, GtkRequisition * req );
-static void _orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
-static void _position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
-static void _visibility_set			( GnomenuClientHelper * _self, gboolean vis );
-static void _bgcolor_set				( GnomenuClientHelper * _self, GdkColor * color);
+/* Default Signal Closures */
+static void _c_server_new 			( GnomenuClientHelper * _self );
+static void _c_server_destroy 		( GnomenuClientHelper * _self );
+static void _c_size_allocate			( GnomenuClientHelper * _self, GtkAllocation * allocation );
+static void _c_size_query 			( GnomenuClientHelper * _self, GtkRequisition * req );
+static void _c_orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
+static void _c_position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
+static void _c_visibility_set			( GnomenuClientHelper * _self, gboolean vis );
+static void _c_bgcolor_set				( GnomenuClientHelper * _self, GdkColor * color);
 
 /* Signal Handlers */
-static void _data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
-static void _connected 				( GdkSocket * _self, GdkSocketNativeID target);
-static void _shutdown				( GdkSocket * _self);
+static void _s_data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
+static void _s_connected 				( GdkSocket * _self, GdkSocketNativeID target);
+static void _s_shutdown				( GdkSocket * _self);
 
 G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
 
@@ -76,14 +76,14 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	gobject_class->dispose = _dispose;
 	gobject_class->finalize = _finalize;
 	
-	klass->server_new = _server_new;
-	klass->server_destroy = _server_destroy;
-	klass->size_allocate = _size_allocate;
-	klass->size_query = _size_query;
-	klass->orientation_change = _orientation_change;
-	klass->position_set = _position_set;
-	klass->visibility_set = _visibility_set;
-	klass->bgcolor_set = _bgcolor_set;
+	klass->server_new = _c_server_new;
+	klass->server_destroy = _c_server_destroy;
+	klass->size_allocate = _c_size_allocate;
+	klass->size_query = _c_size_query;
+	klass->orientation_change = _c_orientation_change;
+	klass->position_set = _c_position_set;
+	klass->visibility_set = _c_visibility_set;
+	klass->bgcolor_set = _c_bgcolor_set;
 
 	class_signals[SERVER_NEW] =
 /**
@@ -248,10 +248,9 @@ static GObject* _constructor(GType type, guint n_construct_properties,
 	self = SELF;
 	priv = PRIV;
 
-/*	self->socket = gdk_socket_new(GNOMENU_CLIENT_NAME);*/
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_data_arrival), NULL);
-	g_signal_connect(G_OBJECT(self), "connected", G_CALLBACK(_connected), NULL);
-	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_shutdown), NULL);
+	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_s_data_arrival), NULL);
+	g_signal_connect(G_OBJECT(self), "connected", G_CALLBACK(_s_connected), NULL);
+	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_s_shutdown), NULL);
 	priv->disposed = FALSE;
 /* try to connect to the server */
 	gdk_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
@@ -282,14 +281,14 @@ static void _finalize(GObject * _self){
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->finalize(_self);
 }
 
-static void _shutdown(GdkSocket * _self){
+static void _s_shutdown(GdkSocket * _self){
 	LOG_FUNC_NAME;
 	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_DESTROY],
 		0);
 
 }
-static void _connected(GdkSocket * _self, GdkSocketNativeID target){
+static void _s_connected(GdkSocket * _self, GdkSocketNativeID target){
 	LOG_FUNC_NAME;
 	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_NEW],
@@ -299,7 +298,7 @@ static void _connected(GdkSocket * _self, GdkSocketNativeID target){
  *
  * 	callback, invoked when the embeded socket receives data
  */
-static void _data_arrival(GdkSocket * _self, 
+static void _s_data_arrival(GdkSocket * _self, 
 		gpointer data, gint bytes, gpointer userdata){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
@@ -379,23 +378,23 @@ static void _data_arrival(GdkSocket * _self,
 }
 
 static void 
-_server_new(GnomenuClientHelper * _self){
+_c_server_new(GnomenuClientHelper * _self){
 	LOG_FUNC_NAME;
 }
 static void 
-_server_destroy(GnomenuClientHelper * _self){
+_c_server_destroy(GnomenuClientHelper * _self){
 	LOG_FUNC_NAME;
 	LOG("Menu server quited before client exits");
 }
 static void 
-_size_allocate(GnomenuClientHelper * _self, GtkAllocation * allocation){
+_c_size_allocate(GnomenuClientHelper * _self, GtkAllocation * allocation){
 	LOG_FUNC_NAME;
 	/*other signal handlers will deal with the allocation*/
 	/*At the cleanup stage, we can safely free allocation*/
 	g_free(allocation);
 }
 static void
-_size_query(GnomenuClientHelper * _self, GtkRequisition * req){
+_c_size_query(GnomenuClientHelper * _self, GtkRequisition * req){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
@@ -408,24 +407,24 @@ _size_query(GnomenuClientHelper * _self, GtkRequisition * req){
 }
 
 static void 
-_orientation_change
+_c_orientation_change
 			(GnomenuClientHelper * _self, GtkOrientation ori){
 	LOG_FUNC_NAME;
 }
 static void 
-_position_set
+_c_position_set
 			(GnomenuClientHelper * _self, GdkPoint * pt){
 	LOG_FUNC_NAME;
 	LOG("x = %d, y = %d", pt->x, pt->y);
 	g_free(pt);
 }
 static void 
-_visibility_set
+_c_visibility_set
 			(GnomenuClientHelper * _self, gboolean vis){
 	LOG_FUNC_NAME;
 }
 static void
-_bgcolor_set
+_c_bgcolor_set
 			(GnomenuClientHelper * _self, GdkColor * color){
 	LOG_FUNC_NAME;
 	g_free(color);

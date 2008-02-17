@@ -114,11 +114,11 @@ static void _set_property 		( GObject * _self,
 static void _get_property 		( GObject * _self, 
 								  guint property_id, GValue * value, GParamSpec * pspec );
 
-/* Default signal handlers */
-static void _data_arrival 		( GdkSocket * _self, gpointer data, guint size );
-static void _connect_req 		( GdkSocket * _self, GdkSocketNativeID target );
-static void _connected 			( GdkSocket * _self, GdkSocketNativeID target );
-static void _shutdown 			( GdkSocket * _self );
+/* Default signal closures */
+static void _c_data_arrival 		( GdkSocket * _self, gpointer data, guint size );
+static void _c_connect_req 		( GdkSocket * _self, GdkSocketNativeID target );
+static void _c_connected 			( GdkSocket * _self, GdkSocketNativeID target );
+static void _c_shutdown 			( GdkSocket * _self );
 
 /* Raw data sending */
 static gboolean _raw_send 		( GdkSocket * _self, 
@@ -165,10 +165,10 @@ gdk_socket_class_init(GdkSocketClass * klass){
 	gobject_class->get_property = _get_property;
 	gobject_class->set_property = _set_property;
 
-	klass->data_arrival = _data_arrival;
-	klass->connect_req = _connect_req;
-	klass->connected = _connected;
-	klass->shutdown = _shutdown;
+	klass->data_arrival = _c_data_arrival;
+	klass->connect_req = _c_connect_req;
+	klass->connected = _c_connected;
+	klass->shutdown = _c_shutdown;
 
 	class_signals[DATA_ARRIVAL] =
 /**
@@ -687,21 +687,21 @@ static GdkFilterReturn
 	return GDK_FILTER_CONTINUE;
 }
 
-static void _data_arrival(GdkSocket * _self,
+static void _c_data_arrival(GdkSocket * _self,
 	gpointer data, guint size){
 	LOG_FUNC_NAME;
 	g_free(data);
 }
-static void _connect_req(GdkSocket * _self,
+static void _c_connect_req(GdkSocket * _self,
 	GdkSocketNativeID target){
 	LOG_FUNC_NAME;
 }
-static void _connected(GdkSocket * _self,
+static void _c_connected(GdkSocket * _self,
 	GdkSocketNativeID target){
 	LOG_FUNC_NAME;
 	g_timeout_add_seconds(_self->timeout, _gdk_socket_is_alive, _self);
 }
-static void _shutdown (GdkSocket * _self){
+static void _c_shutdown (GdkSocket * _self){
 	GdkSocketMessage * queue_message;
 	GET_OBJECT(_self, self, priv);
 	LOG_FUNC_NAME;
