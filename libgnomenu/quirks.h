@@ -21,54 +21,11 @@ G_BEGIN_DECLS
  * fake the call.
  *
  */
-#define GNOMENU_TYPE_QUIRKS	(gnomenu_quirks_get_type())
-#define GNOMENU_QUIRKS(obj) (G_TYPE_CHECK_INSTANCE_CAST((obj), GNOMENU_TYPE_QUIRKS, GnomenuQuirks))
-#define GNOMENU_QUIRKS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST((klass), GNOMENU_TYPE_QUIRKS, GnomenuQuirksClass))
-#define GNOMENU_IS_QUIRKS(obj) (G_TYPE_CHECK_INSTANCE_TYPE((obj), GNOMENU_TYPE_QUIRKS))
-#define GNOMENU_IS_QUIRKS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), GNOMENU_TYPE_QUIRKS))
-#define GNOMENU_QUIRKS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), GNOMENU_TYPE_QUIRKS, GnomenuQuirksClass))
-
-typedef struct _GnomenuQuirksClass GnomenuQuirksClass;
-typedef struct _GnomenuQuirks GnomenuQuirks;
-typedef enum {
-	GNOMENU_QUIRK_MASK_APPNAME
+typedef enum { /*< prefix = GNOMENU_QUIRK >*/
+	GNOMENU_QUIRK_NONE,
+	GNOMENU_QUIRK_IGNORE,
 } GnomenuQuirkMask;
-typedef enum {
-	GNOMENU_QUIRK_NO_QUIRK = 0x0,
-	GNOMENU_QUIRK_ZERO_SIZE = 0x1,
-	GNOMENU_QUIRK_POSITION_HACK = 0x2,
-} GnomenuQuirkType;
-/**
- * GnomenuQuirk:
- *	@app_name: the name of the application;
- *	@type: type of the quirk.
- *	@mask: decides which field in the quirk is used for matching.
- *
- * one entry of quirks. TODO: need more matching critiea;
- */
-typedef struct _GnomenuQuirk {
-	gchar * app_name;
-	GnomenuQuirkType type;
-	GnomenuQuirkMask mask;
-} GnomenuQuirk;
-/**
- * GnomenuQuirks:
- * @quirks: the hash table for all quirks
- */
-struct _GnomenuQuirks {
-	GObject parent;
-	GHashTable * quirks;
-};
-struct _GnomenuQuirksClass {
-	GObjectClass  parent;
-};
-
-
-GnomenuQuirk * gnomenu_quirks_match(GtkMenuBar * menubar); /*FIXME: change this to GtkLegacyMenuBar*/
-GnomenuQuirks * gnomenu_quirks_get_default();
-GnomenuQuirks * gnomenu_quirks_add_rule(GnomenuQuirks * self, gchar * rule);
-GnomenuQuirks * gnomenu_quirks_new_by_file(GnomenuQuirks * self, gchar * filename);
-GnomenuQuirks * gnomenu_quirks_new_by_string(GnomenuQuirks * self, gchar * rule);
-
+GnomenuQuirkMask gnomenu_get_default_quirk(); 
+GtkMenuBar * gtk_legacy_menu_bar_new();
 G_END_DECLS
 #endif

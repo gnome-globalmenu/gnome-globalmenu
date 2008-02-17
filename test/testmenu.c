@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/serverhelper.h>
 #include <libgnomenu/gtkglobalmenubar.h>
+#include <libgnomenu/quirks.h>
 
 
 GtkMenuBar * create_menu_bar(){
@@ -36,7 +37,7 @@ GtkMenuBar * create_menu_bar(){
 		{NULL, NULL, NULL}
 	};
 
-	menu_bar = GTK_MENU_BAR(gtk_global_menu_bar_new());
+	menu_bar = GTK_MENU_BAR(gtk_legacy_menu_bar_new());
 	
 	for(p = menus; p->name; p++){
 		new_item = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic (p->name));

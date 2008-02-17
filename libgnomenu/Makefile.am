@@ -1,6 +1,7 @@
 #
 
 INCLUDES = $(LIBGNOMENU_CFLAGS)
+INCLUDES += -DSYSCONFDIR=\"$(sysconfdir)\"
 
 lib_LTLIBRARIES = libgnomenu.la
 
@@ -17,9 +18,9 @@ libgnomenu_la_SOURCES = \
 	clienthelper.c \
 	clienthelper.h \
     gtkglobalmenubar.h \
-	gtkglobalmenubar.c
-#	quirks.h	\
-#	quirks.c
+	gtkglobalmenubar.c \
+	quirks.h	\
+	quirks.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
@@ -37,6 +38,8 @@ libgnomenuinclude_HEADERS = gdksocket.h serverhelper.h messages.h clienthelper.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
+confdir = $(sysconfdir)
+conf_DATA = libgnomenu.conf
 
 EXTRA_DIST = gnomenu-marshall.list
 
