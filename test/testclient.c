@@ -40,9 +40,10 @@ static void button_clicked(GtkButton * button, gpointer usrdata){
 	if(button == bgcolor){
 		GnomenuMessage msg;
 		msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
-		msg.bgcolor_set.red = 0xffff;
-		msg.bgcolor_set.blue = 0;
-		msg.bgcolor_set.green = 0x8000;
+		msg.bgcolor_set.red = g_random_int();
+		msg.bgcolor_set.blue = g_random_int();
+		msg.bgcolor_set.green = g_random_int();
+		
 		gdk_socket_send(service, &msg, sizeof(msg));
 	}
 }

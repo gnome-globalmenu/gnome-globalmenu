@@ -168,7 +168,7 @@ static GObject* _constructor(GType type,
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
 	priv->bgcolor = gtk_widget_get_style(menu_bar)->bg[GTK_STATE_NORMAL];
-	LOG("default color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
+
 	menu_bar->helper = gnomenu_client_helper_new();
 	menu_bar->allocation.width = 200;
 	menu_bar->allocation.height = 20;
@@ -346,6 +346,7 @@ static void _s_bgcolor_set	 		( GtkWidget  * widget,
 	priv->bgcolor.red = bgcolor->red;
 	priv->bgcolor.blue = bgcolor->blue;
 	priv->bgcolor.green = bgcolor->green;
+	LOG("new bg color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
 	_sync_local_state(menu_bar);;
 }
 
