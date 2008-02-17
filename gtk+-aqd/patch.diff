@@ -2,25 +2,25 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -84,7 +84,8 @@
-                                             GtkMenuDirectionType direction);
+@@ -85,6 +85,9 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
--
+ 
 +static GModule * libgnomenu = NULL;
-+static GtkWidget * (*_gtk_global_menu_bar_new)(void) = NULL;
++static GtkWidget * (*_gtk_legacy_menu_bar_new)(void) = NULL;
++
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  
  static void
-@@ -215,6 +216,15 @@
+@@ -215,6 +218,15 @@
  						   GTK_PARAM_READWRITE));
  
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
 +
 +	libgnomenu = g_module_open("libgnomenu", G_MODULE_BIND_LOCAL);
 +	if(libgnomenu) {
-+		if(!g_module_symbol(libgnomenu, "gtk_global_menu_bar_new", &_gtk_global_menu_bar_new)){
-+			g_warning("gtk_global_menu_bar_new not found");
++		if(!g_module_symbol(libgnomenu, "gtk_legacy_menu_bar_new", &_gtk_legacy_menu_bar_new)){
++			g_warning("gtk_legacy_menu_bar_new not found");
 +		}
 +	} else {
 +		g_warning("Global Menu Library not found");
@@ -28,13 +28,13 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -225,6 +235,10 @@
+@@ -225,6 +237,10 @@
  GtkWidget*
  gtk_menu_bar_new (void)
  {
-+	if(_gtk_global_menu_bar_new) {
-+		g_warning("Use Global Menu !");
-+		return _gtk_global_menu_bar_new();
++	if(_gtk_legacy_menu_bar_new) {
++		g_warning("Using Global Menu, might be unstable");
++		return _gtk_legacy_menu_bar_new();
 +	}
    return g_object_new (GTK_TYPE_MENU_BAR, NULL);
  }
