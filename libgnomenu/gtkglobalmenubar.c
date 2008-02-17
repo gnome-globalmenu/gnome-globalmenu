@@ -49,6 +49,7 @@ enum {
 typedef struct 
 {
 	gboolean disposed;
+	gboolean detached;
 } GtkGlobalMenuBarPrivate;
 
 /* GObject interface */
@@ -88,6 +89,8 @@ static void _s_size_allocate 		( GtkWidget       *widget,
 static void _s_connected 			( GtkWidget  * menubar, 
 									  GdkSocketNativeID target, 
 									  GnomenuClientHelper * helper); 
+static void _s_shutdown				( GtkWidget * menubar,
+									  GnomenuClientHelper * helper);
 static void _s_position_set 		( GtkWidget  * menubar, 
 									  GdkPoint * pt,
 									  GnomenuClientHelper * helper); 
@@ -97,6 +100,7 @@ static void _s_visibility_set 		( GtkWidget  * menubar,
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
+static void _sync_state				( GtkGlobalMenuBar * menubar);
 
 G_DEFINE_TYPE (GtkGlobalMenuBar, gtk_global_menu_bar, GTK_TYPE_MENU_BAR)
 
@@ -156,6 +160,7 @@ static GObject* _constructor(GType type,
 	menu_bar = GTK_GLOBAL_MENU_BAR(object);
 	priv = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(menu_bar);
 	priv->disposed = FALSE;
+	priv->detached = FALSE;
 	menu_bar->helper = gnomenu_client_helper_new();
 	menu_bar->allocation.width = 200;
 	menu_bar->allocation.height = 20;
@@ -174,7 +179,8 @@ static GObject* _constructor(GType type,
 				G_CALLBACK(_s_position_set), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "visibility-set",
 				G_CALLBACK(_s_visibility_set), menu_bar);
-
+	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "shutdown",
+				G_CALLBACK(_s_shutdown), menu_bar);
 	return object;
 }
 
@@ -230,12 +236,17 @@ _size_request (GtkWidget      *widget,
 /* Should Return 0 to the caller, a global menu bar is invisible to the
  * user in the parent widget.*/
 
-  g_return_if_fail (GTK_IS_MENU_BAR (widget));
-  g_return_if_fail (requisition != NULL);
+	g_return_if_fail (GTK_IS_MENU_BAR (widget));
+	g_return_if_fail (requisition != NULL);
 
-  requisition->width = 0;
-  requisition->height = 0;
-  
+	GET_OBJECT(widget, menu_bar, priv);
+	if (priv->detached) {
+		requisition->width = 0;
+		requisition->height = 0;
+ 	} else {
+		_calc_size_request(widget, requisition);
+	}
+	widget->requisition = *requisition;
 }
 static void
 _s_size_request (
@@ -248,9 +259,16 @@ static void
 _size_allocate (GtkWidget     *widget,
 			    GtkAllocation *allocation)
 {
-  g_return_if_fail (GTK_IS_MENU_BAR (widget));
-  g_return_if_fail (allocation != NULL);
- 
+	g_return_if_fail (GTK_IS_MENU_BAR (widget));
+	g_return_if_fail (allocation != NULL);
+	GET_OBJECT(widget, menu_bar, priv);
+	widget->allocation = *allocation;
+	if (priv->detached) {
+		/*Do nothing*/
+	} else {
+		menu_bar->allocation = *allocation;	
+		_do_size_allocate(widget, allocation);
+	}
 }
 static void
 _s_size_allocate (GtkWidget * widget, 
@@ -266,16 +284,22 @@ static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, Gnomen
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);
-	if(GTK_WIDGET_REALIZED(menu_bar)){
-		gnomenu_client_helper_send_realize(helper, menu_bar->container);
+	priv->detached = TRUE;
+	gtk_widget_queue_resize(widget);
+	_sync_state(menu_bar);
+}
+static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
+	priv->detached = FALSE;	
+	
+	if(GTK_WIDGET_REALIZED(widget)){
+		gtk_widget_hide_all(widget);
+		gtk_widget_unrealize(widget);
+		gtk_widget_realize(widget);
+		gtk_widget_show_all(widget);
 	}
-	toplevel = gtk_widget_get_toplevel(widget);
-	if(GTK_WIDGET_TOPLEVEL(toplevel)){
-		if(GTK_WIDGET_REALIZED(toplevel)){
-			gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
-		}
-	}
-
+	gtk_widget_queue_resize(widget);
 }
 static void _s_position_set 		( GtkWidget  * widget, 
 									  GdkPoint * pt,
@@ -389,14 +413,7 @@ _realize (GtkWidget * widget){
            (GtkCallback)(gtk_widget_set_parent_window), 
            (gpointer)(menu_bar->container));
 
-	gnomenu_client_helper_send_realize(menu_bar->helper, 
-		menu_bar->container);
-
-	toplevel = gtk_widget_get_toplevel(widget);
-	if(GTK_WIDGET_TOPLEVEL(toplevel)){
-		/*If we are in _realize, the toplevel widget must have been realized.*/
-		gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
-	}
+	_sync_state(menu_bar);
 }
 static void
 _unrealize (GtkWidget * widget){
@@ -411,8 +428,9 @@ _map (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	g_return_if_fail(GTK_WIDGET_REALIZED(widget));
-
-//	gdk_window_show(menu_bar->container);
+	if(!priv->detached){
+		gdk_window_show(menu_bar->container);
+	}
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->map(widget);
 }
 
@@ -426,6 +444,19 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
 }
 
+static void _sync_state				( GtkGlobalMenuBar * menu_bar){
+	LOG_FUNC_NAME;
+	GtkWidget * toplevel;
+	if(GTK_WIDGET_REALIZED(menu_bar)){
+		gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->container);
+	}
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menu_bar));
+	if(GTK_WIDGET_TOPLEVEL(toplevel)){
+		if(GTK_WIDGET_REALIZED(toplevel)){
+			gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
+		}
+	}
+}
 static void 
 _calc_size_request (
 	GtkWidget * widget,
@@ -529,10 +560,10 @@ GET_OBJECT(widget, glb_menu_bar, glb_priv);
 
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move_resize(glb_menu_bar->container,
-			glb_menu_bar->allocation.x,
-			glb_menu_bar->allocation.y,
-			glb_menu_bar->allocation.width,
-			glb_menu_bar->allocation.height);
+			allocation->x,
+			allocation->y,
+			allocation->width,
+			allocation->height);
 	}
   direction = gtk_widget_get_direction (widget);
 
