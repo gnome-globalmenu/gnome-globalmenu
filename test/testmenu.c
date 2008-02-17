@@ -11,12 +11,19 @@ GtkMenuBar * create_menu_bar(){
 		gchar * name;
 		GFunc * func;
 	};
-	struct s_sub_items * s_p, file_items[] = {
+	struct s_sub_items * s_p, 
+	file_items[] = {
 		{"_New", NULL},
 		{"_Open", NULL},
 		{"_Close", NULL},
 		{"_Save", NULL},
 		{"Q_uit", NULL},
+		{NULL, NULL}
+	},
+	edit_items[] = {
+		{"_Copy", NULL},
+		{"_Paste", NULL},
+		{"_Clear", NULL},
 		{NULL, NULL}
 	};
 	struct s_items {
@@ -25,6 +32,7 @@ GtkMenuBar * create_menu_bar(){
 		GFunc * func;
 	} * p, menus[] =  {
 		{"_File", file_items, NULL},
+		{"_Edit", edit_items, NULL},
 		{NULL, NULL, NULL}
 	};
 
@@ -72,6 +80,8 @@ GtkMenuBar * menubar;
 GtkBox * box;
 
 static void server_size_request(GnomenuServerHelper * server, GnomenuClientInfo * ci, gpointer userdata){
+	ci->allocation.width = GTK_WIDGET(menuwindow)->allocation.width;
+	ci->allocation.height = GTK_WIDGET(menuwindow)->allocation.height;
 	g_message("size_request!!");
 }
 static void server_client_realize(GnomenuServerHelper * server, GnomenuClientInfo * ci, gpointer userdata){
@@ -83,6 +93,19 @@ static void server_client_realize(GnomenuServerHelper * server, GnomenuClientInf
 }
 static void menuwindow_destroy(GtkWidget * widget, GdkEvent * event, gpointer userdata){
 	g_object_unref(server);
+}
+static void menuwindow_size_allocate(GtkWidget * widget, GtkAllocation *allocation, gpointer userdata){
+	GtkAllocation allo;
+	GList * node;
+	allo.x = 0;
+	allo.y = 0;
+	allo.width = allocation->width;
+	allo.height = allocation->height;
+	for(node = g_list_first(server->clients);
+			node;
+			node = g_list_next(node)){
+		gnomenu_server_helper_allocate_size(server, node->data, &allo);
+	}
 }
 static void button_clicked(GtkButton * button, gpointer ddddd){
 	GList * node;
@@ -102,6 +125,7 @@ static void button_clicked(GtkButton * button, gpointer ddddd){
 			g_signal_connect(G_OBJECT(server), "client-realize", G_CALLBACK(server_client_realize), NULL);
 			menuwindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);	
 			g_signal_connect(G_OBJECT(menuwindow), "destroy", G_CALLBACK(menuwindow_destroy), NULL);
+			g_signal_connect(G_OBJECT(menuwindow), "size-allocate", G_CALLBACK(menuwindow_size_allocate), NULL);
 			gtk_widget_show_all(GTK_WIDGET(menuwindow));
 		break;
 		case DESTROY_SERVER:

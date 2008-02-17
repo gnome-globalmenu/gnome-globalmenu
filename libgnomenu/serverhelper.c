@@ -36,21 +36,25 @@ static GObject* _constructor 			( GType type, guint n_construct_properties,
 static void _dispose 					( GObject * _self);
 static void _finalize 					( GObject * _self);
 
-static void _client_new 				( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
-static void _client_realize 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
-static void _client_reparent 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
-static void _client_unrealize 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
-static void _client_destroy 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
-static void _client_size_request 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+/* signal closures */
+static void _c_client_new 				( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_realize 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_reparent 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_unrealize 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_destroy 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_size_request 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 
-static void _connect_req				( GnomenuServerHelper * _self, GdkSocketNativeID target);
+/* signal handlers */
+static void _s_connect_req				( GnomenuServerHelper * _self, GdkSocketNativeID target);
 
-static void _service_shutdown			( GnomenuServerHelper * _self, GdkSocket * service);
-static void _service_data_arrival 		( GnomenuServerHelper * _self, gpointer data, gint bytes, 
+static void _s_service_shutdown			( GnomenuServerHelper * _self, GdkSocket * service);
+static void _s_service_data_arrival		( GnomenuServerHelper * _self, gpointer data, gint bytes, 
 										  GdkSocket * service);
+/* utilities */
 
 static GnomenuClientInfo * 
 _find_ci_by_service						( GnomenuServerHelper * _self, GdkSocket* socket);
+static void _client_do_allocate_size	( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 
 static guint class_signals[SIGNAL_MAX] = {0};
 
@@ -68,12 +72,12 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	gobject_class->dispose = _dispose;
 	gobject_class->finalize = _finalize;
 
-	klass->client_new = _client_new;
-	klass->client_realize = _client_realize;
-	klass->client_reparent = _client_reparent;
-	klass->client_unrealize = _client_unrealize;
-	klass->client_destroy = _client_destroy;
-	klass->client_size_request = _client_size_request;
+	klass->client_new = _c_client_new;
+	klass->client_realize = _c_client_realize;
+	klass->client_reparent = _c_client_reparent;
+	klass->client_unrealize = _c_client_unrealize;
+	klass->client_destroy = _c_client_destroy;
+	klass->client_size_request = _c_client_size_request;
 
 	class_signals[CLIENT_NEW] = 
 /**
@@ -238,7 +242,7 @@ static GObject* _constructor(
 	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
 	self->clients = NULL;
 	priv->disposed = FALSE;
-	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_connect_req), NULL);
+	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_s_connect_req), NULL);
 
 	return obj;
 }
@@ -268,10 +272,10 @@ static void _finalize(GObject * _self){
 	G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->finalize(_self);
 }
 /**
- * _connect_req:
+ * _s_connect_req:
  *
  */
-static void _connect_req(GnomenuServerHelper * _self,
+static void _s_connect_req(GnomenuServerHelper * _self,
 		GdkSocketNativeID target){
 	LOG_FUNC_NAME;
 	GnomenuClientInfo * ci = NULL;
@@ -281,8 +285,8 @@ static void _connect_req(GnomenuServerHelper * _self,
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 	ci->service = gdk_socket_accept(GDK_SOCKET(self), target);
-	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_service_shutdown), self);
-	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_service_data_arrival), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_s_service_data_arrival), self);
 
 	g_signal_emit(G_OBJECT(self), 
 			class_signals[CLIENT_NEW],
@@ -290,7 +294,7 @@ static void _connect_req(GnomenuServerHelper * _self,
 			ci);
 		
 }
-static void _service_shutdown(GnomenuServerHelper * _self, GdkSocket * service){
+static void _s_service_shutdown(GnomenuServerHelper * _self, GdkSocket * service){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_self, self, priv);
 	GnomenuClientInfo * ci;
@@ -306,7 +310,7 @@ static void _service_shutdown(GnomenuServerHelper * _self, GdkSocket * service){
  *
  * 	callback, invoked when the embeded socket for serving clients receives data
  */
-static void _service_data_arrival(GnomenuServerHelper * _self, 
+static void _s_service_data_arrival(GnomenuServerHelper * _self, 
 		gpointer data, gint bytes, GdkSocket * service){
 	LOG_FUNC_NAME;
 	GnomenuMessage * message = data;
@@ -459,7 +463,15 @@ void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuCl
 	msg.orientation_change.orientation = ori;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
 }
-
+void gnomenu_server_helper_allocate_size(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GtkAllocation * allocation){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
+	ci->allocation.width = allocation->width;
+	ci->allocation.height = allocation->height;
+	_client_do_allocate_size(self, ci);
+}
 void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkPoint * position){
 	LOG_FUNC_NAME;
@@ -495,37 +507,41 @@ void gnomenu_server_helper_set_bgcolor(GnomenuServerHelper * self, GnomenuClient
 }
 /* virtual functions for signal handling*/
 static void 
-_client_new(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+_c_client_new(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 
 	_self->clients = g_list_prepend(_self->clients, ci);
 }
 static void 
-_client_realize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+_c_client_realize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	/*Do nothing */
 }
 static void 
-_client_reparent(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+_c_client_reparent(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	/*Do nothing */
 }
 static void 
-_client_unrealize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+_c_client_unrealize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	/*Do nothing */
 }
 static void 
-_client_destroy(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+_c_client_destroy(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	_self->clients = g_list_remove_all(_self->clients, ci);
 }
 static void 
-_client_size_request(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
-	GnomenuMessage msg;
+_c_client_size_request(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
-/*TODO: send the allocation to the client*/
+	_client_do_allocate_size(_self, ci);
+}
+static void 
+_client_do_allocate_size(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_SIZE_ALLOCATE;
 
 	msg.size_allocate.width = ci->allocation.width;
@@ -534,8 +550,8 @@ _client_size_request(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	gdk_socket_send(ci->service, 
 		&msg, sizeof(msg.size_allocate));
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
-}
 
+}
 /*
 vim:ts=4:sw=4
 */
