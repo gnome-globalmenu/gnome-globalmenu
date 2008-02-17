@@ -45,7 +45,7 @@ fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
-contrib/Makefile
+gtk+-aqd/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
