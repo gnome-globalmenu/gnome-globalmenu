@@ -34,6 +34,8 @@ static void _server_destroy 		( GnomenuClientHelper * _self );
 static void _size_allocate			( GnomenuClientHelper * _self, GtkAllocation * allocation );
 static void _size_query 			( GnomenuClientHelper * _self, GtkRequisition * req );
 static void _orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
+static void _position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
+static void _visibility_set			( GnomenuClientHelper * _self, gboolean vis );
 
 /* Signal Handlers */
 static void _data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
@@ -48,6 +50,8 @@ enum { /*< private >*/
 	SIZE_ALLOCATE,
 	SIZE_QUERY,
 	ORIENTATION_CHANGE,
+	POSITION_SET,
+	VISIBILITY_SET,
 	SIGNAL_MAX
 };
 static guint class_signals[SIGNAL_MAX] = {0};
@@ -73,6 +77,8 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	klass->size_allocate = _size_allocate;
 	klass->size_query = _size_query;
 	klass->orientation_change = _orientation_change;
+	klass->position_set = _position_set;
+	klass->visibility_set = _visibility_set;
 
 	class_signals[SERVER_NEW] =
 /**
@@ -157,6 +163,36 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuClientHelperClass, orientation_change),
+			NULL, NULL,
+			gnomenu_marshall_VOID__UINT,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_UINT);
+
+	class_signals[POSITION_SET] =
+/**
+ * GnomenuClientHelper::position-set:
+ *
+*/
+		g_signal_new("position-set",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, position_set),
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER);
+
+	class_signals[VISIBILITY_SET] =
+/**
+ * GnomenuClientHelper::position-set:
+ *
+*/
+		g_signal_new("visibility-set",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, visibility_set),
 			NULL, NULL,
 			gnomenu_marshall_VOID__UINT,
 			G_TYPE_NONE,
@@ -285,6 +321,23 @@ static void _data_arrival(GdkSocket * _self,
 					ori);
 			}
 		break;
+		case GNOMENU_MSG_POSITION_SET:
+			{
+				GdkPoint * pt = g_new0(GdkPoint, 1);
+				pt->x = message->position_set.x;
+				pt->y = message->position_set.y;
+				g_signal_emit(G_OBJECT(self),
+					class_signals[POSITION_SET],
+					0, pt);
+			}
+		break;
+		case GNOMENU_MSG_VISIBILITY_SET:
+			{
+				g_signal_emit(G_OBJECT(self),
+					class_signals[VISIBILITY_SET],
+					0, message->visibility_set.visibility);
+			}
+		break;	
 		default:
 			g_warning("unknown message, ignore it and continue");
 		break;
@@ -323,6 +376,18 @@ _size_query(GnomenuClientHelper * _self, GtkRequisition * req){
 static void 
 _orientation_change
 			(GnomenuClientHelper * _self, GtkOrientation ori){
+	LOG_FUNC_NAME;
+}
+static void 
+_position_set
+			(GnomenuClientHelper * _self, GdkPoint * pt){
+	LOG_FUNC_NAME;
+	LOG("x = %d, y = %d", pt->x, pt->y);
+	g_free(pt);
+}
+static void 
+_visibility_set
+			(GnomenuClientHelper * _self, gboolean vis){
 	LOG_FUNC_NAME;
 }
 

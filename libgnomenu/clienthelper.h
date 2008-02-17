@@ -50,6 +50,8 @@ struct _GnomenuClientHelperClass {
 	void (*size_allocate)(GnomenuClientHelper * self, GtkAllocation * allocation);
 	void (*size_query)(GnomenuClientHelper * self, GtkRequisition * req);
 	void (*orientation_change)(GnomenuClientHelper * self, GtkOrientation ori);
+	void (*position_set)(GnomenuClientHelper * self, GdkPoint * pt);
+	void (*visibility_set)(GnomenuClientHelper * self, gboolean vis);
 };
 
 

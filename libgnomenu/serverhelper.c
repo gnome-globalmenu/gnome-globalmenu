@@ -351,7 +351,7 @@ static void _service_data_arrival(GnomenuServerHelper * _self,
 				g_warning("unrealize a not realized client? ignore it");
 				break;
 			}
-			ci->ui_window = NULL;
+			ci->ui_window = 0;
 			ci->stage = GNOMENU_CI_STAGE_UNREALIZED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[CLIENT_UNREALIZE],
@@ -458,6 +458,28 @@ void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, Gn
 	msg.any.type = GNOMENU_MSG_ORIENTATION_CHANGE;
 	msg.orientation_change.orientation = ori;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
+}
+
+void gnomenu_server_helper_client_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GdkPoint * position){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
+	msg.any.type = GNOMENU_MSG_POSITION_SET;
+	msg.position_set.x = position->x;
+	msg.position_set.y = position->y;
+	ci->allocation.x = position->x;
+	ci->allocation.y = position->y;
+	gdk_socket_send(ci->service, &msg, sizeof(msg.position_set));
+}
+void gnomenu_server_helper_client_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			gboolean vis){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
+	msg.any.type = GNOMENU_MSG_VISIBILITY_SET;
+	msg.visibility_set.visibility = vis;
+	gdk_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
 }
 /* virtual functions for signal handling*/
 static void 

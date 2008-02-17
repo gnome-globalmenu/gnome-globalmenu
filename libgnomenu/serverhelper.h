@@ -97,6 +97,10 @@ GnomenuClientInfo * gnomenu_server_helper_find_client_by_parent_window(
 void gnomenu_server_helper_client_queue_resize(GnomenuServerHelper * self, GnomenuClientInfo * ci);
 void gnomenu_server_helper_client_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GtkOrientation ori);
+void gnomenu_server_helper_client_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GdkPoint * position);
+void gnomenu_server_helper_client_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			gboolean vis);
 
 G_END_DECLS
 #endif

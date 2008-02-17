@@ -44,6 +44,8 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_SIZE_ALLOCATE,
 	GNOMENU_MSG_SIZE_REQUEST,
 	GNOMENU_MSG_SIZE_QUERY,
+	GNOMENU_MSG_POSITION_SET,
+	GNOMENU_MSG_VISIBILITY_SET,
 	GNOMENU_MSG_ORIENTATION_CHANGE,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
@@ -193,7 +195,6 @@ typedef struct {
 /**
  * GnomenuMessageOrientationChange:
  * @type: #GNOMENU_MSG_ORIENTATION_CHANGE
- * @socket_id: the native socket id for the server socket.
  * @orientation: new orientation
  *
  */
@@ -201,6 +202,28 @@ typedef struct {
 	GnomenuMessageType type;
 	GtkOrientation orientation;
 } GnomenuMessageOrientationChange;
+/**
+ * GnomenuMessagePositionSet:
+ *  @type: #GNOMENU_MSG_POSITION_SET
+ *  @x:
+ *  @y:
+ */
+typedef struct {
+	GnomenuMessageType type;
+	gint x;
+	gint y;
+} GnomenuMessagePositionSet;
+/**
+ * GnomenuMessageVisibility:
+ *  @type: #GNOMENU_MSG_VISIBILITY_SET
+ *  @x:
+ *  @y:
+ */
+typedef struct {
+	GnomenuMessageType type;
+	gboolean visibility;
+} GnomenuMessageVisibilitySet;
+
 /**
  * GnomenuMessage:
  *
@@ -221,6 +244,8 @@ struct _GnomenuMessage {
 		GnomenuMessageSizeAllocate	size_allocate;
 		GnomenuMessageSizeQuery	size_query;
 		GnomenuMessageOrientationChange orientation_change;
+		GnomenuMessageVisibilitySet visibility_set;
+		GnomenuMessagePositionSet position_set;
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()
