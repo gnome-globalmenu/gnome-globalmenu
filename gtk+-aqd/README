@@ -12,15 +12,9 @@ HOW DOES IT WORK
 ================
 
 After several major changes in the framework, we ended up with very little modifications in GTK.
-The patch only does 2 things:
-	1) Load libgnomenu when the GtkMenuBarClass is initialized,
-	2) invoke gtk_global_menu_new when gtk_menu_bar_new is invoked.
+The patch only does 1 thing:
+	1) invoke gtk_legacy_menu_new when gtk_menu_bar_new is invoked.
 
-The second thing might be changed in the future, candidates are
-	a) 	use gtk_global_menu_bar_get_type instead of GTK_TYPE_MENU_BAR when
-		gtk_menu_bar_new dispatch the request to g_object_new.
-	b)	define a new class to wrap around GtkGlobalMenuBar and do some smart detection
-		over broken application.
 
 HACKING
 ========

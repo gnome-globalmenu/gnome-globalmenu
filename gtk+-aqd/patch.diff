@@ -12,30 +12,37 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  
  static void
-@@ -215,6 +218,15 @@
+@@ -215,6 +218,7 @@
  						   GTK_PARAM_READWRITE));
  
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
 +
-+	libgnomenu = g_module_open("libgnomenu", G_MODULE_BIND_LOCAL);
-+	if(libgnomenu) {
-+		if(!g_module_symbol(libgnomenu, "gtk_legacy_menu_bar_new", &_gtk_legacy_menu_bar_new)){
-+			g_warning("gtk_legacy_menu_bar_new not found");
-+		}
-+	} else {
-+		g_warning("Global Menu Library not found");
-+	}
  }
  
  static void
-@@ -225,6 +237,10 @@
+@@ -225,6 +229,25 @@
  GtkWidget*
  gtk_menu_bar_new (void)
  {
++	if(!libgnomenu)
++		libgnomenu = g_module_open("libgnomenu", 0/*G_MODULE_BIND_LOCAL*/);
++	if(libgnomenu) {
++		if(!g_module_symbol(libgnomenu, 
++				"gtk_legacy_menu_bar_new", 
++				&_gtk_legacy_menu_bar_new)){
++			g_warning("gtk_legacy_menu_bar_new not found");
++		}else 
++			g_warning("gtk_legacy_menu_bar_new found at %p", 
++				_gtk_legacy_menu_bar_new);
++		
++	} else 
++		g_warning("Global Menu Library not found");
++	
 +	if(_gtk_legacy_menu_bar_new) {
 +		g_warning("Using Global Menu, might be unstable");
 +		return _gtk_legacy_menu_bar_new();
 +	}
++	g_warning("Using GtkMenuBar");
    return g_object_new (GTK_TYPE_MENU_BAR, NULL);
  }
  
