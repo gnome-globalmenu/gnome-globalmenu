@@ -103,6 +103,11 @@ static void _s_visibility_set 		( GtkWidget  * menubar,
 static void _s_bgcolor_set	 		( GtkWidget  * menubar, 
 									  GdkColor * bgcolor,
 									  GnomenuClientHelper * helper); 
+/* workaround the delete event*/
+static gboolean _s_delete_event			( GtkWidget * widget,
+									  GdkEvent * event,
+									  GnomenuClientHelper * helper);
+
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
@@ -194,6 +199,8 @@ static GObject* _constructor(GType type,
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "shutdown",
 				G_CALLBACK(_s_shutdown), menu_bar);
 	
+	g_signal_connect(G_OBJECT(menu_bar), "delete-event",
+				G_CALLBACK(_s_delete_event), menu_bar->helper);
 	return object;
 }
 
@@ -287,6 +294,8 @@ static void
 _s_size_allocate (GtkWidget * widget, 
 	GtkAllocation * allocation,
 	GnomenuClientHelper * helper){
+	GET_OBJECT(widget, menu_bar, priv);
+	menu_bar->allocation = *allocation;	
 	_do_size_allocate(widget, allocation);
 }
 /** _s_connected:
@@ -328,13 +337,25 @@ static void _s_position_set 		( GtkWidget  * widget,
 	menu_bar->allocation.y = pt->y;
 	_do_size_allocate(widget, &menu_bar->allocation);	
 }
+static void
+gtk_container_map_child (GtkWidget *child,
+             gpointer   client_data)
+{
+  if (GTK_WIDGET_VISIBLE (child) &&
+      !GTK_WIDGET_MAPPED (child))
+    gtk_widget_map (child);
+}
 static void _s_visibility_set 		( GtkWidget  * widget, 
 									  gboolean vis,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	if(vis){
+		gtk_container_forall (GTK_CONTAINER (widget),
+				gtk_container_map_child,
+				NULL);
 		gdk_window_show(menu_bar->container);
+
 	}else {
 		gdk_window_hide(menu_bar->container);
 	}	
@@ -350,6 +371,19 @@ static void _s_bgcolor_set	 		( GtkWidget  * widget,
 	LOG("new bg color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
 	_sync_local_state(menu_bar);;
 }
+static gboolean _s_delete_event			( GtkWidget * widget,
+									  GdkEvent * event,
+									  GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
+	
+	if(event->any.window == menu_bar->container){
+	LOG("it's from container window, ignore delete event");
+		return TRUE;
+	}
+	LOG("it's from widget window, do delete event");
+	return FALSE;
+}
 
 static gint
 _expose (GtkWidget      *widget,
@@ -364,7 +398,8 @@ _expose (GtkWidget      *widget,
 	if (GTK_WIDGET_DRAWABLE (widget))
     {
 		border = GTK_CONTAINER(widget)->border_width;
-		g_message("Expose from %p", event->window);
+		LOG("Expose from %p", event->window);
+		
 		if(!priv->detached){
 			gtk_paint_box (widget->style,
 					menu_bar->container,
@@ -375,7 +410,28 @@ _expose (GtkWidget      *widget,
 					menu_bar->allocation.width - border * 2,
 					menu_bar->allocation.height - border * 2);
 		} else {
-			gdk_window_clear(menu_bar->container);
+			if(event->window == menu_bar->container){
+		/*FIXME: figure out why we always get a very small area if the client and server is in different process. */
+				GdkRectangle dest;
+				GdkRectangle src1;
+				src1 = menu_bar->allocation;
+				src1.x = 0;
+				src1.y = 0;
+				gdk_rectangle_union(&src1, &event->area, &dest);
+				event->area = dest;
+				LOG("area=%d, %d, %d,%d", event->area);
+				gdk_window_clear(menu_bar->container);
+				
+			}else
+				LOG("event not from container, ignore");
+			/*gtk_paint_box (widget->style,
+					menu_bar->container,
+					GTK_WIDGET_STATE (widget),
+					GTK_SHADOW_NONE,
+					&event->area, widget, "menubar",
+					border, border,
+					menu_bar->allocation.width - border * 2,
+					menu_bar->allocation.height - border * 2);*/
 		}
 		(* GTK_WIDGET_CLASS (gtk_global_menu_bar_parent_class)->expose_event) (widget, event);
     }
@@ -464,6 +520,7 @@ _map (GtkWidget * widget){
 	if(!priv->detached){
 		gdk_window_show(menu_bar->container);
 	}
+	gdk_window_show(widget->window);
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->map(widget);
 }
 
@@ -595,7 +652,7 @@ _do_size_allocate (GtkWidget * widget,
   GtkPackDirection pack_direction, child_pack_direction;
 
 	LOG_FUNC_NAME;
-
+	LOG("x=%d, y=%d, width=%d, height=%d\n", *allocation);
   g_return_if_fail (GTK_IS_MENU_BAR (widget));
   g_return_if_fail (allocation != NULL);
 

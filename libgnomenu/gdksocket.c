@@ -399,7 +399,7 @@ _dispose (GObject * _self){
 	GET_OBJECT(_self, self, priv);
 	if(! priv->disposed){
 		gdk_window_remove_filter(self->window, _window_filter_cb, self);
-		g_object_unref(self->window);
+		gdk_window_destroy(self->window);
 		priv->disposed = TRUE;	
 	}
 	G_OBJECT_CLASS(gdk_socket_parent_class)->dispose(_self);
