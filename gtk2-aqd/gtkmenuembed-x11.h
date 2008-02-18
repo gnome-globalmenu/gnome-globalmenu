@@ -13,7 +13,7 @@
 //#define LOG g_message
 #define LOG fake_log
 /**/
-void fake_log(int a, ...){
+static void fake_log(char *a, ...){
 
 }
 typedef enum {
