@@ -281,12 +281,26 @@ _size_allocate (GtkWidget     *widget,
 {
 	g_return_if_fail (GTK_IS_MENU_BAR (widget));
 	g_return_if_fail (allocation != NULL);
+	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	//widget->allocation = *allocation;
+	widget->allocation = *allocation;
 	if (priv->detached) {
-		/*Do nothing*/
+		if(GTK_WIDGET_REALIZED(widget)){
+			gdk_window_move_resize(widget->window, 
+				allocation->x,
+				allocation->y,
+				allocation->width,
+				allocation->height);
+		}
 	} else {
 		menu_bar->allocation = *allocation;	
+		if(GTK_WIDGET_REALIZED(widget)){
+			gdk_window_move_resize(widget->window, 
+				allocation->x,
+				allocation->y,
+				allocation->width,
+				allocation->height);
+		}
 		_do_size_allocate(widget, allocation);
 	}
 }
@@ -296,6 +310,13 @@ _s_size_allocate (GtkWidget * widget,
 	GnomenuClientHelper * helper){
 	GET_OBJECT(widget, menu_bar, priv);
 	menu_bar->allocation = *allocation;	
+	if(GTK_WIDGET_REALIZED(widget)){
+		gdk_window_move_resize(menu_bar->floater,
+			allocation->x,
+			allocation->y,
+			allocation->width,
+			allocation->height);
+	}
 	_do_size_allocate(widget, allocation);
 }
 /** _s_connected:
@@ -309,7 +330,7 @@ static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, Gnomen
 	priv->detached = TRUE;
 	gtk_widget_queue_resize(widget);
 	if(GTK_WIDGET_REALIZED(widget)){
-		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
+		gdk_window_reparent(menu_bar->container, menu_bar->floater, 0, 0);
 	}
 	_sync_remote_state(menu_bar);
 }
@@ -320,22 +341,30 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	
 	gtk_widget_reset_rc_styles(widget);
 	gtk_widget_restore_default_style(widget);
-	if(GTK_WIDGET_REALIZED(widget)){
-		gtk_widget_hide_all(widget);
-		gtk_widget_unrealize(widget);
-		gtk_widget_realize(widget);
-		gtk_widget_show_all(widget);
-	}
 	gtk_widget_queue_resize(widget);
+	if(GTK_WIDGET_REALIZED(widget)){
+		gdk_window_reparent(menu_bar->container, widget->window, 0, 0);
+		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
+	}
 }
 static void _s_position_set 		( GtkWidget  * widget, 
 									  GdkPoint * pt,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
+	GtkAllocation * allocation = &menu_bar->allocation;
 	menu_bar->allocation.x = pt->x;
 	menu_bar->allocation.y = pt->y;
-	_do_size_allocate(widget, &menu_bar->allocation);	
+
+	if(GTK_WIDGET_REALIZED(widget)){
+		gdk_window_move_resize(menu_bar->floater,
+			allocation->x,
+			allocation->y,
+			allocation->width,
+			allocation->height);
+	}
+
+	_do_size_allocate(widget, allocation);
 }
 static void
 gtk_container_map_child (GtkWidget *child,
@@ -355,9 +384,10 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 				gtk_container_map_child,
 				NULL);
 		gdk_window_show(menu_bar->container);
-
+		gdk_window_show(menu_bar->floater);
 	}else {
 		gdk_window_hide(menu_bar->container);
+		gdk_window_hide(menu_bar->floater);
 	}	
 }
 static void _s_bgcolor_set	 		( GtkWidget  * widget, 
@@ -377,7 +407,7 @@ static gboolean _s_delete_event			( GtkWidget * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	
-	if(event->any.window == menu_bar->container){
+	if(event->any.window == menu_bar->floater){
 	LOG("it's from container window, ignore delete event");
 		return TRUE;
 	}
@@ -400,39 +430,28 @@ _expose (GtkWidget      *widget,
 		border = GTK_CONTAINER(widget)->border_width;
 		LOG("Expose from %p", event->window);
 		
-		if(!priv->detached){
-			gtk_paint_box (widget->style,
-					menu_bar->container,
-					GTK_WIDGET_STATE (widget),
-					GTK_SHADOW_NONE,
-					&event->area, widget, "menubar",
-					border, border,
-					menu_bar->allocation.width - border * 2,
-					menu_bar->allocation.height - border * 2);
-		} else {
-			if(event->window == menu_bar->container){
+		if(event->window == menu_bar->container){
+			if(!priv->detached){
+				gtk_paint_box (widget->style,
+						menu_bar->container,
+						GTK_WIDGET_STATE (widget),
+						GTK_SHADOW_NONE,
+						&event->area, widget, "menubar",
+						border, border,
+						menu_bar->allocation.width - border * 2,
+						menu_bar->allocation.height - border * 2);
+			} else {
 		/*FIXME: figure out why we always get a very small area if the client and server is in different process. */
-				GdkRectangle dest;
-				GdkRectangle src1;
-				src1 = menu_bar->allocation;
-				src1.x = 0;
-				src1.y = 0;
-				gdk_rectangle_union(&src1, &event->area, &dest);
-				event->area = dest;
 				LOG("area=%d, %d, %d,%d", event->area);
-				gdk_window_clear(menu_bar->container);
+				gdk_window_clear_area(menu_bar->container, 
+					event->area.x, 
+					event->area.y, 
+					event->area.width, 
+					event->area.height);
 				
-			}else
-				LOG("event not from container, ignore");
-			/*gtk_paint_box (widget->style,
-					menu_bar->container,
-					GTK_WIDGET_STATE (widget),
-					GTK_SHADOW_NONE,
-					&event->area, widget, "menubar",
-					border, border,
-					menu_bar->allocation.width - border * 2,
-					menu_bar->allocation.height - border * 2);*/
-		}
+			}
+		} else LOG("event not from container, ignore");
+
 		(* GTK_WIDGET_CLASS (gtk_global_menu_bar_parent_class)->expose_event) (widget, event);
     }
 
@@ -466,12 +485,16 @@ _realize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 
-	attributes.x = menu_bar->allocation.x;
-	attributes.y = menu_bar->allocation.y;
+/*TODO: remove calling the parent realize function. use our own instead to
+ * avoid side effects.*/
+	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
+
+	attributes.x = 0;
+	attributes.y = 0;
 	attributes.width = menu_bar->allocation.width;
 	attributes.height = menu_bar->allocation.height; 
 /*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
- * WM's decorations!*/
+ * WM's decorations! HOWever child doesn't work very well*/
 	attributes.window_type = GDK_WINDOW_CHILD;
 
 	attributes.wclass = GDK_INPUT_OUTPUT;
@@ -491,11 +514,32 @@ _realize (GtkWidget * widget){
 	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
 
 	menu_bar->container = gdk_window_new (
-		gtk_widget_get_parent_window(widget), &attributes, attributes_mask);
+		/*gtk_widget_get_parent_window(widget)*/ widget->window, &attributes, attributes_mask);
+	//gdk_window_set_user_data (menu_bar->container, widget);
+
+	attributes.x = menu_bar->allocation.x;
+	attributes.y = menu_bar->allocation.y;
+	attributes.width = menu_bar->allocation.width;
+	attributes.height = menu_bar->allocation.height; 
+/*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
+ * WM's decorations! HOWever child doesn't work very well*/
+	attributes.window_type = GDK_WINDOW_TEMP;
+
+	attributes.wclass = GDK_INPUT_OUTPUT;
+	attributes.event_mask = gtk_widget_get_events (widget);
+
+	attributes.visual = gtk_widget_get_visual (widget);
+	attributes.colormap = gtk_widget_get_colormap (widget);
+
+	/* FIXME: I don't think it will need visual and colormap, 
+ 	 * let me try to remove these later*/
+	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+
+	menu_bar->floater = gdk_window_new (
+		gtk_widget_get_root_window(widget), &attributes, attributes_mask);
+
 	gdk_window_set_user_data (menu_bar->container, widget);
-/*TODO: remove calling the parent realize function. use our own instead to
- * avoid side effects.*/
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
+	gdk_window_set_user_data (menu_bar->floater, widget);
 
 	gtk_container_forall(GTK_CONTAINER(widget), 
            (GtkCallback)(gtk_widget_set_parent_window), 
@@ -510,6 +554,7 @@ _unrealize (GtkWidget * widget){
 	GET_OBJECT(widget, menu_bar, priv);
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->unrealize(widget);
 	gdk_window_destroy(menu_bar->container);
+	gdk_window_destroy(menu_bar->floater);
 	gnomenu_client_helper_send_unrealize(menu_bar->helper);
 }
 static void
@@ -539,7 +584,7 @@ static void _sync_remote_state				( GtkGlobalMenuBar * _self){
 	GtkWidget * toplevel;
 	GET_OBJECT(_self, menu_bar, priv);
 	if(GTK_WIDGET_REALIZED(menu_bar)){
-		gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->container);
+		gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->floater);
 	}
 	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menu_bar));
 	if(GTK_WIDGET_TOPLEVEL(toplevel)){
@@ -662,8 +707,8 @@ GET_OBJECT(widget, glb_menu_bar, glb_priv);
 
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move_resize(glb_menu_bar->container,
-			allocation->x,
-			allocation->y,
+			0,
+			0,
 			allocation->width,
 			allocation->height);
 	}

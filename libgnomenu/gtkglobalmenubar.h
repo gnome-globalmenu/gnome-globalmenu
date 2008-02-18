@@ -52,6 +52,7 @@ struct _GtkGlobalMenuBar
 	GtkMenuBar parent;
 	GnomenuClientHelper * helper;
 	GdkWindow * container;
+	GdkWindow * floater;
 	GtkAllocation allocation;
 	GtkRequisition requisition;
 };

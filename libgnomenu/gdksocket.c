@@ -399,7 +399,6 @@ _dispose (GObject * _self){
 	GET_OBJECT(_self, self, priv);
 	if(! priv->disposed){
 		gdk_window_remove_filter(self->window, _window_filter_cb, self);
-		gdk_window_destroy(self->window);
 		priv->disposed = TRUE;	
 	}
 	G_OBJECT_CLASS(gdk_socket_parent_class)->dispose(_self);
@@ -414,6 +413,7 @@ static void
 _finalize(GObject * _self){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_self, self, priv);
+	gdk_window_destroy(self->window);
 	g_free(self->name);
 	g_queue_free(self->queue);
 	G_OBJECT_CLASS(gdk_socket_parent_class)->finalize(_self);

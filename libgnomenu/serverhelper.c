@@ -371,6 +371,7 @@ static void _s_service_data_arrival(GnomenuServerHelper * _self,
 			ci->requisition.width = message->size_request.width;
 			ci->allocation.height =
 			ci->requisition.height = message->size_request.height;
+			LOG("requisition: %d, %d", ci->requisition);
 			ci->size_stage = GNOMENU_CI_STAGE_RESPONSED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[SIZE_REQUEST],
