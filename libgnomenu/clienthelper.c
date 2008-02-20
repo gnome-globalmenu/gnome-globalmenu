@@ -69,8 +69,6 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
 	LOG_FUNC_NAME;
 
-	/*FIXME: unref the type at class_finalize*/
-
 	g_type_class_add_private(gobject_class, sizeof (GnomenuClientHelperPrivate));
 	gobject_class->constructor = _constructor;
 	gobject_class->dispose = _dispose;
@@ -89,12 +87,19 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 /**
  * GnomenuClientHelper::server-new:
  * @self: the #GnomenuClientHelper who emits this signal.
- * @server_info: owned by GnomenuClient. Do not free it.
  * 
- * emitted when the client receives a server's announcement for its creation.
- * it is the responsibility of the true client who listens to this signal
- * to reset its internal state to get ready for a new menu server; even if the
- * client has established a relation with another menu server;
+ * emitted when the client receives a server's creation announcement. The 
+ * anouncement, as the name indicates, is a broadcast message to every
+ * #GdkSocket with a name #GNOMENU_CLIENT_NAME. 
+ *
+ * It is the responsibility of the true client who listens to this signal
+ * to reset its internal state, getting ready, and notify the server its
+ * most recent state (eg, is it realized? who is its parent?)
+ *
+ * Note that the true client don't have a choice whether or not connect
+ * to the server. This bahavior is not good and may change in the future.
+ * If it changes, this signal shall be invoked with some parameter or
+ * return value.
  */
 		g_signal_new("server-new",
 			G_TYPE_FROM_CLASS(klass),
@@ -108,10 +113,13 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	class_signals[SERVER_DESTROY] =
 /**
  * GnomenuClientHelper::server-destroy:
- * @self: the #GnomenuClientHelper who emits this signal.
- * @server_info: owned by GnomenuClient. Do not free it.
- * 
- * emitted when the client receives a server's announcement for its death.
+ *	@self: the #GnomenuClientHelper who emits this signal.
+ *  
+ * emitted when the connection between the client and the server is dead.
+ *
+ * 	Deprecated: Use GdkSocket::shutdown instead. 
+ * 	GnomenuClientHelper::server-destory is
+ * 	emitted when it receives a GdkSocket::shutdown signal.
  */
 		g_signal_new("server-destroy",
 			G_TYPE_FROM_CLASS(klass),
@@ -125,10 +133,12 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	class_signals[SIZE_ALLOCATE] =
 /**
  * GnomenuClientHelper::size-allocate:
- * @self: the #GnomenuClientHelper who emits this signal.
- * @allocation: don't free it and don't pass it around. it is disposed when the signal ends.
+ * 	@self: the #GnomenuClientHelper who emits this signal.
+ * 	@allocation: Don't free it and don't rely on it. 
+ * 			It is disposed when the signal ends.
  *
- * emitted when client receives server's sizes allocation.
+ * emitted when client receives size allocation from server. Only the
+ * width and height field is meaningful.
  */
 		g_signal_new("size-allocate",
 			G_TYPE_FROM_CLASS(klass),
@@ -140,14 +150,16 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			1,
 			G_TYPE_POINTER
 			);
+
 	class_signals[SIZE_QUERY] =
 /**
  * GnomenuClientHelper::size-query:
- * @self: the #GnomenuClientHelper who emits this signal.
- * @req: the requisition the client need to fill in.
+ * 	@self: the #GnomenuClientHelper who emits this signal.
+ * 	@req: the requisition the client need to fill in.
  *
  * emitted when the client receives a server's request for querying 
- * its size requisition.
+ * its size requisition. then the default handler will send the filled
+ * in requisition to the server.
  */
 		g_signal_new("size-query",
 			G_TYPE_FROM_CLASS(klass),
@@ -162,7 +174,10 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	class_signals[ORIENTATION_CHANGE] =
 /**
  * GnomenuClientHelper::orientation-change:
+ *	@self: self
+ *	@orientation: the new orientation. #GtkOrientation
  *
+ * Implemented but the bahavior is not defined. 
 */
 		g_signal_new("orientation-change",
 			G_TYPE_FROM_CLASS(klass),
@@ -177,7 +192,10 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	class_signals[POSITION_SET] =
 /**
  * GnomenuClientHelper::position-set:
+ * 	@self: self
+ * 	@allocation: the allocation.
  *
+ * only the x and y field of @allocation is defined.
 */
 		g_signal_new("position-set",
 			G_TYPE_FROM_CLASS(klass),

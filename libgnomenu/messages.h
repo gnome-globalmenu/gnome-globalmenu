@@ -8,7 +8,7 @@ G_BEGIN_DECLS
  * SECTION: messages
  * @title: Messages
  * @short_description: The messages used by libgnomenu for remote widgets.
- * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper #GdkSocket
+ * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper, #GdkSocket
  * @stablility: Unstable
  * @include:	libgnomenu/messages.h
  *
@@ -17,6 +17,20 @@ G_BEGIN_DECLS
  * menu itself. Use #GnomenuServerHelper and #GnomenuClientHelper
  * to avoid problems.
  */
+
+/**
+ * GNOMENU_CLIENT_NAME:
+ * 
+ * Name of the socket for client helper
+ */
+#define GNOMENU_CLIENT_NAME "GNOME MENU CLIENT"
+
+/**
+ * GNOMENU_SERVER_NAME:
+ *
+ * Name of the socket for server helper
+ */
+#define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
 
 /**
  * GnomenuMessageType:
@@ -262,19 +276,6 @@ struct _GnomenuMessage {
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()
 GType gnomenu_message_get_type (void) ;
 
-/**
- * GNOMENU_CLIENT_NAME:
- *
- * Name of the socket for client helper
- */
-#define GNOMENU_CLIENT_NAME "GNOME MENU CLIENT"
-
-/**
- * GNOMENU_SERVER_NAME:
- *
- * Name of the socket for server helper
- */
-#define GNOMENU_SERVER_NAME "GNOME MENU SERVER"
 
 
 G_END_DECLS

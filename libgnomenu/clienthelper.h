@@ -12,11 +12,12 @@ G_BEGIN_DECLS
  * @stablility: Unstable
  * @include: libgnomenu/clienthelper.h
  *
- * GnomenuClientHelper provides fundanmental messaging mechanism 
+ * #GnomenuClientHelper provides fundanmental messaging mechanism 
  * for a menu client. As the name indicates, it helps a GlobalMenu
- * client, which eventually is a GtkGlobalMenuBar widget. Usually
- * you never use it. Use #GtkGlobalMenuBar instead if you want to
- * take the benefits of a global menu.
+ * client, which eventually is a #GtkGlobalMenuBar widget. Usually
+ * you never use this class directly. 
+ * Use #GtkGlobalMenuBar instead if you want to
+ * create a global menu.
  */
 
 #define GNOMENU_TYPE_CLIENT_HELPER	(gnomenu_client_helper_get_type())
@@ -32,7 +33,6 @@ typedef struct _GnomenuClientHelper GnomenuClientHelper;
 /**
  * GnomenuClientHelper:
  *
- * GnomenuClientHelper provides fundanmental messaging mechanism for a menu server
  */
 struct _GnomenuClientHelper {
 	GdkSocket parent;
@@ -42,7 +42,6 @@ struct _GnomenuClientHelper {
 
 /**
  * GnomenuClientHelperClass:
- * @menu_create: the virtual function invoked.
  */
 struct _GnomenuClientHelperClass {
 	GdkSocketClass parent;

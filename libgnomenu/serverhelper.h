@@ -6,12 +6,13 @@
 G_BEGIN_DECLS
 /**
  * SECTION: serverhelper
- * @short_description: Menu server herlper class.
- * @see_also: #GtkMenuBar, #GtkGlobalMenuBar, #GdkSocket.
+ * @short_description: Menu server helper class.
+ * @see_also: #GnomenuClientHelper, #GtkGlobalMenuBar, #GdkSocket.
  * @stablility: Unstable
  * @include: libgnomenu/serverhelper.h
  *
- * GnomenuServerHelper provides fundanmental messaging mechanism for a menu server
+ * GnomenuServerHelper provides fundanmental messaging 
+ * mechanism for a menu server
  * 
  */
 
@@ -26,9 +27,9 @@ typedef struct _GnomenuServerHelperClass GnomenuServerHelperClass;
 
 /**
  * GnomenuServerHelper:
- *  @clients: A List of all the clients, each of which is GnomenuClientInfo
+ *  @clients: A List of all the clients, the node data is
+ *  	always a #GnomenuClientInfo struct.
  *
- * GnomenuServerHelper provides fundanmental messaging mechanism for a menu server
  */
 typedef struct _GnomenuServerHelper GnomenuServerHelper;
 struct _GnomenuServerHelper{
@@ -39,15 +40,23 @@ struct _GnomenuServerHelper{
 
 /**
  * GnomenuServerHelperClientInfo:
- * @socket_id: the native id of the #GdkSocket the client is using. This value is
- * 			returned by #gdk_socket_get_native;
- * @ui_window: the container window which contains all the ui elements of the menu;
- * 			A menu server application can steal it and arrange its position.
- * @parent_window: the parent window of the menubar. The menu server application take
- * 		care of the changing of the focused window, and takes care of switching 
+ * 	@service: the #GdkSocket used to serve this client.
+ * 	@ui_window: the container window which contains 
+ * 			all the ui elements of the menu;
+ * 			A menu server application will reparent it, but nothing more.
+ * 			Anything else is done in the owner process of the menu bar,
+ * 			upon the request by the server.
+ * 	@parent_window: the parent window of the menubar. 
+ * 		The menu server application keeps track of 
+ * 		the changing of the focused window, and takes care of switching 
  * 		the active menu. 
+ *	@requisition: the size requisition.
+ * 	@allocatoin: the size allocation. both x, y, width, height are defined.
+ * 	@stage: indicates the most recent state the server knows that the
+ * 		client is in.
+ * 	@size_stage: a typical sizing chain is defined in #GnomenuMessageSizeQuery.
  *
- * This structure is where #GnomenuServerHelper stores client infomation;
+ * This structure stores client infomation;
  */
 typedef struct _GnomenuClientInfo GnomenuClientInfo;
 

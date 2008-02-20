@@ -65,9 +65,6 @@ static void
 gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
 
-	/*FIXME: unref the type at class_finalize*/
-//	_gnomenu_message_type = g_type_class_ref(GNOMENU_TYPE_MESSAGE_TYPE); 
-
 	g_type_class_add_private(gobject_class, sizeof (GnomenuServerHelperPrivate));
 	gobject_class->constructor = _constructor;
 	gobject_class->dispose = _dispose;
@@ -83,12 +80,15 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	class_signals[CLIENT_NEW] = 
 /**
  * GnomenuServerHelper::client-new:
- * @self: the GnomenuServe who emits the signal.
+ * @self: who emits the signal.
  * @client_info: the client info. #GnomenuClientInfo. However only the socket_id field is defined.
  *
  * ::client-new signal is emitted when:
  * 	 server receives a  message indicates a new client is born;
  * 	 and server finished initializing internal data structures for the new client.
+ * When you receive the signal, the connection between server and client
+ * is not established yet, though the sockets are ready. every packet you
+ * send before the establishment will be buffered.
  */
 		g_signal_new ("client-new",
 			G_TYPE_FROM_CLASS(klass),
@@ -104,7 +104,8 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 /**
  * GnomenuServerHelper::client-realize:
  * 	@self: self.
- * 	@client_info: the client info.
+ * 	@client_info: the client info. the realized window is contained
+ * 	in ui_window field.
  *
  * ::client-reailze signal is emitted when the client's window is realized.
  */
@@ -124,7 +125,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
  * 	@self: self.
  * 	@client_info: the client info.
  *
- * ::client-reailze signal is emitted when the client is reparented.
+ * ::client-reparent signal is emitted when the client is reparented.
  */
 		g_signal_new ("client-reparent",
 			G_TYPE_FROM_CLASS(klass),
@@ -161,8 +162,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
  * @client_info: the client info. #GnomenuClientInfo
  *
  * ::client-destroy signal is emitted when:
- * 	 server receives a  message indicates a client is die;
- * 	 and before server disposing internal data structures for the dead client.
+ * the connection between a service and the client is dead.
  */
 		g_signal_new ("client-destroy",
 			G_TYPE_FROM_CLASS(klass),
@@ -441,11 +441,27 @@ gnomenu_server_helper_find_client_by_parent_window(
 	return NULL;
 }
 
+/**
+ * gnomenu_server_helper_is_client:
+ * 	@_self: self,
+ * 	@ci: client info pointer.
+ *
+ * 	Test if @ci is a client of @_self.
+ *
+ * 	Returns: TRUE if it is. FALSE elsewhere.
+ */
 gboolean gnomenu_server_helper_is_client(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	return g_list_find(_self->clients, ci) != NULL;
 }
 
+/**
+ * gnomenu_server_helper_queue_resize:
+ * 	@_self: self,
+ * 	@ci: the client.
+ *
+ * 	queue a resize chain to the given client.
+ */
 void
 gnomenu_server_helper_queue_resize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
@@ -465,6 +481,15 @@ void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuCl
 	msg.orientation_change.orientation = ori;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
 }
+
+/**
+ * gnomenu_server_helper_allocate_size:
+ * 	@self:
+ * 	@ci:
+ * 	@allocation:
+ *
+ * set the allocation. only width and height is defined.
+ */
 void gnomenu_server_helper_allocate_size(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GtkAllocation * allocation){
 	LOG_FUNC_NAME;
@@ -474,6 +499,18 @@ void gnomenu_server_helper_allocate_size(GnomenuServerHelper * self, GnomenuClie
 	ci->allocation.height = allocation->height;
 	_client_do_allocate_size(self, ci);
 }
+
+/**
+ * gnomenu_server_helper_set_position:
+ * 	@self:
+ * 	@ci:
+ * 	@position:
+ *
+ * set the position of the menubar within its parent 
+ * only width and height is defined.
+ * A possible vulnerability note: if the global menu is not 
+ * detached it should ignore this message. 
+ */
 void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkPoint * position){
 	LOG_FUNC_NAME;
@@ -486,6 +523,16 @@ void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClien
 	ci->allocation.y = position->y;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.position_set));
 }
+/**
+ * gnomenu_server_helper_set_visibility:
+ * 	@self:
+ * 	@ci:
+ * 	@vis:
+ *
+ * set the visibility of the menubar
+ * A possible vulnerability note: if the global menu is not 
+ * detached it should ignore this message. 
+ */
 void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			gboolean vis){
 	LOG_FUNC_NAME;
@@ -495,6 +542,16 @@ void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuCli
 	msg.visibility_set.visibility = vis;
 	gdk_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
 }
+/**
+ * gnomenu_server_helper_set_bgcolor:
+ * 	@self:
+ * 	@ci:
+ * 	@vis:
+ *
+ * set the bgcolor of the menubar
+ * A possible vulnerability note: if the global menu is not 
+ * detached it should ignore this message. 
+ */
 void gnomenu_server_helper_set_bgcolor(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkColor * color){
 	LOG_FUNC_NAME;
