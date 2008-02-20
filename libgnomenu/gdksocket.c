@@ -45,17 +45,17 @@ struct _GdkSocketPrivate {
 	int foo;
 };
 /**
- * GdkSocketMsgType:
- * #GDK_SOCKET_BROADCAST: a broadcast (connectionless) mesage. NOT DONE.
- * #GDK_SOCKET_CONNECT_REQ: a connect request.
- * #GDK_SOCKET_ACK: ready to accept a new data
- * #GDK_SOCKET_DATA: send data
- * #GDK_SOCKET_SHUTDOWN: peer closed, clean up your stuff
- * #GDK_SOCKET_ISALIVE: are you alive?
- * #GDK_SOCKET_ALIVE: yes i am.
- * #GDK_SOCKET_PING: are you a socket?  NOT DONE
- * #GDK_SOCKET_ECHO: yes I am. NOT DONE
- * */
+ * GdkSocketHeaderType:
+ * @GDK_SOCKET_BROADCAST: a broadcast (connectionless) mesage;
+ * @GDK_SOCKET_CONNECT_REQ: a connect request;
+ * @GDK_SOCKET_ACK: ready to accept a new data;
+ * @GDK_SOCKET_DATA: send data;
+ * @GDK_SOCKET_SHUTDOWN: peer closed, clean up your stuff;
+ * @GDK_SOCKET_ISALIVE: are you alive?
+ * @GDK_SOCKET_ALIVE: yes i am.
+ * @GDK_SOCKET_PING: are you a socket?  NOT DONE
+ * @GDK_SOCKET_ECHO: yes I am. NOT DONE
+ **/
 typedef enum {
 	GDK_SOCKET_BROADCAST = 0,
 	GDK_SOCKET_CONNECT_REQ = 1,
@@ -68,6 +68,7 @@ typedef enum {
 	GDK_SOCKET_PING = 8,
 	GDK_SOCKET_ECHO = 9
 } GdkSocketHeaderType;
+
 /**
  * GdkSocketHeader:
  *	@header_type: type of the header
@@ -455,8 +456,9 @@ gboolean gdk_socket_connect(GdkSocket * _self, GdkSocketNativeID target){
 	FILL_HEADER(&msg, GDK_SOCKET_CONNECT_REQ, self, 0, 0);
 	return _raw_send(self, target, &msg, sizeof(msg));
 }
-/** gdk_socket_connect_by_name:
- * @self: self
+/** 
+ * gdk_socket_connect_by_name:
+ * @_self: self
  * @name: the name of the remote socket to connect to. It has to be listening.
  *
  * connect to a remote socket by name. If multiple socket has the same name,
@@ -488,7 +490,11 @@ gboolean gdk_socket_listen(GdkSocket * _self){
 }
 /**
  * gdk_socket_send:
+ * @_self: self;
  * @data: you can free the data after calling this function
+ * @bytes: bytes to send;
+ *
+ * Send data via a #GdkSocket.
  */
 gboolean gdk_socket_send(GdkSocket * _self, gpointer data, guint bytes){
 	GdkSocketMessage * msg = g_new0(GdkSocketMessage, 1);

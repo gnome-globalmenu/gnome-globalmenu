@@ -4,7 +4,7 @@
 <!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
 <!ENTITY serverhelper SYSTEM "xml/serverhelper.xml">
 <!ENTITY clienthelper SYSTEM "xml/clienthelper.xml">
-<!ENTITY gnomenumessage SYSTEM "xml/gnomenumessage.xml">
+<!ENTITY messages SYSTEM "xml/messages.xml">
 <!ENTITY quirks SYSTEM "xml/quirks.xml">
 ]>
 
@@ -44,7 +44,7 @@
 	<chapter id="reference">
 		<title>The Gnome Global Menu library Reference</title>
 		&gdksocket;
-		&gnomenumessage;
+		&messages;
 		&serverhelper;
 		&clienthelper;
 		&quirks;

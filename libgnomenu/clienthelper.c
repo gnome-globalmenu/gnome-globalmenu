@@ -229,7 +229,10 @@ gnomenu_client_helper_init(GnomenuClientHelper * _self){
 
 /**
  * gnomenu_client_helper_new:
- * * create a new menu client object */ 
+ *
+ * create a new menu client helper object
+ * Returns: the created client.
+ **/ 
 GnomenuClientHelper * 
 gnomenu_client_helper_new(){
 	return g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME,NULL);
@@ -430,6 +433,16 @@ _c_bgcolor_set
 	g_free(color);
 }
 
+/**
+ * gnomenu_client_helper_send_realize:
+ * @_self: self;
+ * @ui_window: the realized window which the client want the server to know
+ * about. server will (possibily, depends on the implementation) 
+ * grab this window so be careful.
+ *
+ * notify a #GnomenuServerHelper that the menu client's owner widget 
+ * has been realized .
+ */
 void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self, 
 		GdkWindow * ui_window){
 	LOG_FUNC_NAME;
@@ -448,8 +461,7 @@ void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self,
 		&msg, sizeof(msg.client_reparent));
 }
 void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
+	GnomenuMessage msg; msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
 	gdk_socket_send(GDK_SOCKET(_self),
 		&msg, sizeof(msg.client_unrealize));
 }

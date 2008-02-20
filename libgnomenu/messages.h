@@ -5,14 +5,17 @@
 #include "gdksocket.h"
 G_BEGIN_DECLS
 /**
- * SECTION: gnomenumessage
- * @title: GnomenuMessage
- * @short_description: The underground messages for libgnomenu.
- * @see_also:	#GnomenuServer, #GnomenuClient #GdkSocket
+ * SECTION: messages
+ * @title: Messages
+ * @short_description: The messages used by libgnomenu for remote widgets.
+ * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper #GdkSocket
  * @stablility: Unstable
- * @include:	libgnomenu/gnomenumessage.h
+ * @include:	libgnomenu/messages.h
  *
- * gnomenumessage is the data type for the messages passed around in libgnomenu.
+ * data type for the messages passed around in libgnomenu. Anyway, it is
+ * you should not use it in any application other than developing the global
+ * menu itself. Use #GnomenuServerHelper and #GnomenuClientHelper
+ * to avoid problems.
  */
 
 /**
@@ -21,13 +24,17 @@ G_BEGIN_DECLS
  * @GNOMENU_MSG_CLIENT_NEW: 	#GnomenuMessageClientNew
  * @GNOMENU_MSG_CLIENT_DESTROY: #GnomenuMessageClientDestroy
  * @GNOMENU_MSG_SERVER_NEW: 	#GnomenuMessageServerNew
- * @GNOMENU_MSG_CLIENT_REALIZE: #GnmenuMessageClientRealize
+ * @GNOMENU_MSG_CLIENT_REALIZE: #GnomenuMessageClientRealize
  * @GNOMENU_MSG_CLIENT_REPARENT: #GnomenuMessageClientReparent
  * @GNOMENU_MSG_CLIENT_UNREALIZE: #GnomenuMessageClientUnrealize
  * @GNOMENU_MSG_SERVER_DESTROY: #GnomenuMessageServerDestroy
  * @GNOMENU_MSG_SIZE_REQUEST: 	#GnomenuMessageSizeRequest
  * @GNOMENU_MSG_SIZE_ALLOCATE:	#GnomenuMessageSizeAllocate
  * @GNOMENU_MSG_SIZE_QUERY:		#GnomenuMessageSizeQuery
+ * @GNOMENU_MSG_POSITION_SET:	#GnomenuMessagePositionSet
+ * @GNOMENU_MSG_VISIBILITY_SET: #GnomenuMessageVisibilitySet
+ * @GNOMENU_MSG_ORIENTATION_CHANGE: #GnomenuMessageOrientationChange
+ * @GNOMENU_MSG_BGCOLOR_SET:	#GnomenuMessageBgColorSet
  * @GNOMENU_MSG_MAX:		no meaning
  *
  * type of a libgnomenu message.
@@ -66,7 +73,6 @@ typedef struct {
 /**
  * GnomenuMessageClientNew:
  * @type: 	#GNOMENU_MSG_CLIENT_NEW
- * @socket_id:
  *
  * A client socket is created.
  */
@@ -77,7 +83,6 @@ typedef struct {
 /**
  * GnomenuMessageClientRealize:
  * @type: #GNOMENU_MSG_CLIENT_REALIZE
- * @socket_id:
  * @ui_window:
  *
  * A client has been realized;
@@ -89,7 +94,6 @@ typedef struct {
 
 /** GnomenuMessageClientReparent:
  * @type: #GNOMENU_MSG_CLIENT_REPARENT
- * @socket_id:
  * @parent_window:
  *
  * A client has been reparented
@@ -101,7 +105,6 @@ typedef struct {
 
 /** GnomenuMessageClientUnrealize:
  * @type: #GNOMENU_MSG_CLIENT_UNREALIZE
- * @socket_id:
  *
  * A client has been realized;
  */
@@ -111,7 +114,6 @@ typedef struct {
 /**
  * GnomenuMessageClientDestroy:
  * @type: #GNOMENU_MSG_CLIENT_DESTROY
- * @socket_id:
  *
  */
 typedef struct {
@@ -120,14 +122,10 @@ typedef struct {
 /**
  * GnomenuMessageServerNew:
  * 	@type: #GNOMENU_MSG_SERVER_NEW
- * 	@socket_id:
- * 	@container_window:	REMOVED. should be in ServerRealize, which is not implemented yet
- * 		perhaps this is useless in current implement;
- * 		However, if we are moving to Etolite's WildMenu alike implementation(
- * 		i.e. the client takes care of everything)
- * 		This field will be useful.
+ * 	@socket_id: the server 
  *
- *  This message is only intended to be a response of ClientNew message.
+ * When a server is launched it broadcast this message; then the 
+ * client can response by making connections.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -136,7 +134,6 @@ typedef struct {
 /**
  * GnomenuMessageServerDestroy:
  * @type: #GNOMENU_MSG_SERVER_DESTROY
- * @socket_id:
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -145,7 +142,6 @@ typedef struct {
 /**
  * GnomenuMessageSizeQuery:
  * @type: #GNOMENU_MSG_SIZE_QUERY
- * @socket_id: native socket id of the server.
  *
  * A size query message begins a sequency of size allocation operation
  * between the server and client.
@@ -166,7 +162,6 @@ typedef struct {
 /**
  * GnomenuMessageSizeRequest:
  * @type: #GNOMENU_MSG_SIZE_REQUEST
- * @socket_id: the native socket id for the client's socket.
  * @width:
  * @height:
  *
@@ -181,7 +176,6 @@ typedef struct {
 /**
  * GnomenuMessageSizeAllocate:
  * @type: #GNOMENU_MSG_SIZE_ALLOCATE
- * @socket_id: the native socket id for the server socket.
  * @width:
  * @height:
  *
@@ -208,6 +202,8 @@ typedef struct {
  *  @type: #GNOMENU_MSG_POSITION_SET
  *  @x:
  *  @y:
+ *
+ * To move the menubar.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -215,16 +211,22 @@ typedef struct {
 	gint y;
 } GnomenuMessagePositionSet;
 /**
- * GnomenuMessageVisibility:
+ * GnomenuMessageVisibilitySet:
  *  @type: #GNOMENU_MSG_VISIBILITY_SET
- *  @x:
- *  @y:
+ *  @visibility: 
+ *
+ *  To show or hide the menu bar.
  */
 typedef struct {
 	GnomenuMessageType type;
 	gboolean visibility;
 } GnomenuMessageVisibilitySet;
 
+/**
+ * GnomenuMessageBgColorSet:
+ *
+ * To set the bg color of the menubar.
+ */
 typedef struct {
 	GnomenuMessageType type;
 	guint16 red;
