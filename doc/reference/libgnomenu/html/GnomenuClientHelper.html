@@ -1,0 +1,489 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>GnomenuClientHelper</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libgnomenu Reference Book">
+<link rel="up" href="reference.html" title="The Gnome Global Menu library Reference">
+<link rel="prev" href="GnomenuServerHelper.html" title="GnomenuServerHelper">
+<link rel="next" href="libgnomenu-quirks.html" title="GnomenuQuirks">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="figures.html" title="Design Figures">
+<link rel="chapter" href="reference.html" title="The Gnome Global Menu library Reference">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="GnomenuServerHelper.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="reference.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center"> libgnomenu Reference Book</th>
+<td><a accesskey="n" href="libgnomenu-quirks.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2602895" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2603156" class="shortcut">Description</a>
+                  &#160;|&#160;
+                  <a href="#id2603018" class="shortcut">Object Hierarchy</a>
+                  &#160;|&#160;
+                  <a href="#id2603049" class="shortcut">Signals</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="GnomenuClientHelper"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2602895"></a><span class="refentrytitle">GnomenuClientHelper</span>
+</h2>
+<p>GnomenuClientHelper &#8212; Menu client Helper.</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+#include &lt;libgnomenu/clienthelper.h&gt;
+
+
+                    <a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-struct">GnomenuClientHelper</a>;
+<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a>* <a class="link" href="GnomenuClientHelper.html#gnomenu-client-helper-new">gnomenu_client_helper_new</a>          (void);
+void                <a class="link" href="GnomenuClientHelper.html#gnomenu-client-helper-send-realize">gnomenu_client_helper_send_realize</a>  (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+>GdkWindow</a> *ui_window);
+void                <a class="link" href="GnomenuClientHelper.html#gnomenu-client-helper-send-reparent">gnomenu_client_helper_send_reparent</a> (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+>GdkWindow</a> *parent_window);
+void                <a class="link" href="GnomenuClientHelper.html#gnomenu-client-helper-send-unrealize">gnomenu_client_helper_send_unrealize</a>
+                                                        (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self);
+
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603018"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+
+  <a
+href="/usr/share/gtk-doc/html/gobject/gobject-The-Base-Object-Type.html#GObject"
+>GObject</a>
+   +----<a class="link" href="GdkSocket.html" title="GdkSocket">GdkSocket</a>
+         +----GnomenuClientHelper
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603049"></a><h2>Signals</h2>
+<pre class="synopsis">
+
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-bgcolor-set">bgcolor-set</a>"                                    : Cleanup / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-orientation-change">orientation-change</a>"                             : Run Last / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-position-set">position-set</a>"                                   : Cleanup / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-server-destroy">server-destroy</a>"                                 : Cleanup / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-server-new">server-new</a>"                                     : Run First / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-size-allocate">size-allocate</a>"                                  : Cleanup / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-size-query">size-query</a>"                                     : Run Last / No Recursion / No Hooks
+  "<a class="link" href="GnomenuClientHelper.html#GnomenuClientHelper-visibility-set">visibility-set</a>"                                 : Run Last / No Recursion / No Hooks
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603156"></a><h2>Description</h2>
+<p>
+GnomenuClientHelper provides fundanmental messaging mechanism 
+for a menu client. As the name indicates, it helps a GlobalMenu
+client, which eventually is a GtkGlobalMenuBar widget. Usually
+you never use it. Use <a class="link" href="GtkGlobalMenuBar.html" title="GtkGlobalMenuBar"><span class="type">GtkGlobalMenuBar</span></a> instead if you want to
+take the benefits of a global menu.</p>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603186"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2603197"></a><h3>
+<a name="GnomenuClientHelper-struct"></a>GnomenuClientHelper</h3>
+<a class="indexterm" name="id2603210"></a><pre class="programlisting">typedef struct _GnomenuClientHelper GnomenuClientHelper;</pre>
+<p>
+GnomenuClientHelper provides fundanmental messaging mechanism for a menu server</p>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603230"></a><h3>
+<a name="gnomenu-client-helper-new"></a>gnomenu_client_helper_new ()</h3>
+<a class="indexterm" name="id2603242"></a><pre class="programlisting"><a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a>* gnomenu_client_helper_new          (void);</pre>
+<p>
+create a new menu client helper object</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> the created client.
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603282"></a><h3>
+<a name="gnomenu-client-helper-send-realize"></a>gnomenu_client_helper_send_realize ()</h3>
+<a class="indexterm" name="id2603296"></a><pre class="programlisting">void                gnomenu_client_helper_send_realize  (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+>GdkWindow</a> *ui_window);</pre>
+<p>
+notify a <a class="link" href="GnomenuServerHelper.html" title="GnomenuServerHelper"><span class="type">GnomenuServerHelper</span></a> that the menu client's owner widget 
+has been realized .</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>_self</code></em>&#160;:</span></p></td>
+<td> self;
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>ui_window</code></em>&#160;:</span></p></td>
+<td> the realized window which the client want the server to know
+		about. server will (possibily, depends on the implementation) 
+		grab this window so be careful.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603379"></a><h3>
+<a name="gnomenu-client-helper-send-reparent"></a>gnomenu_client_helper_send_reparent ()</h3>
+<a class="indexterm" name="id2603393"></a><pre class="programlisting">void                gnomenu_client_helper_send_reparent (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self,
+                                                         <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Windows.html#GdkWindow"
+>GdkWindow</a> *parent_window);</pre>
+<p>
+notify a <a class="link" href="GnomenuServerHelper.html" title="GnomenuServerHelper"><span class="type">GnomenuServerHelper</span></a> that the menu client's parent window
+exists.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>_self</code></em>&#160;:</span></p></td>
+<td> self;
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>parent_window</code></em>&#160;:</span></p></td>
+<td> the realized new parent toplevel gdk window 
+		of the menu bar which the client want the server to know
+		about. 
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603476"></a><h3>
+<a name="gnomenu-client-helper-send-unrealize"></a>gnomenu_client_helper_send_unrealize ()</h3>
+<a class="indexterm" name="id2603490"></a><pre class="programlisting">void                gnomenu_client_helper_send_unrealize
+                                                        (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *_self);</pre>
+<p>
+notify a <a class="link" href="GnomenuServerHelper.html" title="GnomenuServerHelper"><span class="type">GnomenuServerHelper</span></a> that the menu client is unrealized.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>_self</code></em>&#160;:</span></p></td>
+<td> self;
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2603552"></a><h2>Signal Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2603562"></a><h3>
+<a name="GnomenuClientHelper-bgcolor-set"></a>The <code class="literal">"bgcolor-set"</code> signal</h3>
+<a class="indexterm" name="id2603578"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             color,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Cleanup / No Recursion / No Hooks</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> self,
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>color</code></em>&#160;:</span></p></td>
+<td> color, NOT allocated. You have to call <a
+href="/usr/share/gtk-doc/html/gdk/gdk-Colormaps-and-Colors.html#gdk-colormap-alloc-color"
+><span class="type">gdk_colormap_alloc_color</span></a> yourself.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em>&#160;:</span></p></td>
+<td> userdata;
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603697"></a><h3>
+<a name="GnomenuClientHelper-orientation-change"></a>The <code class="literal">"orientation-change"</code> signal</h3>
+<a class="indexterm" name="id2603714"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *arg0,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a>                arg1,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Run Last / No Recursion / No Hooks</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603780"></a><h3>
+<a name="GnomenuClientHelper-position-set"></a>The <code class="literal">"position-set"</code> signal</h3>
+<a class="indexterm" name="id2603796"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *arg0,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             arg1,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Cleanup / No Recursion / No Hooks</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603862"></a><h3>
+<a name="GnomenuClientHelper-server-destroy"></a>The <code class="literal">"server-destroy"</code> signal</h3>
+<a class="indexterm" name="id2603879"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Cleanup / No Recursion / No Hooks</pre>
+<p>
+emitted when the client receives a server's announcement for its death.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper"><span class="type">GnomenuClientHelper</span></a> who emits this signal.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>server_info</code></em>&#160;:</span></p></td>
+<td> owned by GnomenuClient. Do not free it.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2603975"></a><h3>
+<a name="GnomenuClientHelper-server-new"></a>The <code class="literal">"server-new"</code> signal</h3>
+<a class="indexterm" name="id2603992"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Run First / No Recursion / No Hooks</pre>
+<p>
+emitted when the client receives a server's announcement for its creation.
+it is the responsibility of the true client who listens to this signal
+to reset its internal state to get ready for a new menu server; even if the
+client has established a relation with another menu server;</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper"><span class="type">GnomenuClientHelper</span></a> who emits this signal.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>server_info</code></em>&#160;:</span></p></td>
+<td> owned by GnomenuClient. Do not free it.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604091"></a><h3>
+<a name="GnomenuClientHelper-size-allocate"></a>The <code class="literal">"size-allocate"</code> signal</h3>
+<a class="indexterm" name="id2604108"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             allocation,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)       : Cleanup / No Recursion / No Hooks</pre>
+<p>
+emitted when client receives server's sizes allocation.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper"><span class="type">GnomenuClientHelper</span></a> who emits this signal.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>allocation</code></em>&#160;:</span></p></td>
+<td> don't free it and don't pass it around. it is disposed when the signal ends.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604212"></a><h3>
+<a name="GnomenuClientHelper-size-query"></a>The <code class="literal">"size-query"</code> signal</h3>
+<a class="indexterm" name="id2604229"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *self,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             req,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Run Last / No Recursion / No Hooks</pre>
+<p>
+emitted when the client receives a server's request for querying 
+its size requisition.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>self</code></em>&#160;:</span></p></td>
+<td> the <a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper"><span class="type">GnomenuClientHelper</span></a> who emits this signal.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>req</code></em>&#160;:</span></p></td>
+<td> the requisition the client need to fill in.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2604333"></a><h3>
+<a name="GnomenuClientHelper-visibility-set"></a>The <code class="literal">"visibility-set"</code> signal</h3>
+<a class="indexterm" name="id2604350"></a><pre class="programlisting">void                user_function                      (<a class="link" href="GnomenuClientHelper.html" title="GnomenuClientHelper">GnomenuClientHelper</a> *arg0,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#guint"
+>guint</a>                arg1,
+                                                        <a
+href="/usr/share/gtk-doc/html/glib/glib-Basic-Types.html#gpointer"
+>gpointer</a>             user_data)      : Run Last / No Recursion / No Hooks</pre>
+<p>
+notifies that the server request for a visibility change.(show/hide);</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em>&#160;:</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2604420"></a><h2>See Also</h2>
+<a class="link" href="GnomenuServerHelper.html" title="GnomenuServerHelper"><span class="type">GnomenuServerHelper</span></a>, <a class="link" href="GtkGlobalMenuBar.html" title="GtkGlobalMenuBar"><span class="type">GtkGlobalMenuBar</span></a>, <a class="link" href="GdkSocket.html" title="GdkSocket"><span class="type">GdkSocket</span></a>,
+</div>
+<div class="refsect1" lang="en">
+<a name="id2604450"></a><div class="refsect2" lang="en"><a name="id2604452"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2604453"></a></div>
+</div>
+</div>
+</body>
+</html>

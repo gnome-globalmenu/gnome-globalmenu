@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>GnomenuQuirks</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="libgnomenu Reference Book">
+<link rel="up" href="reference.html" title="The Gnome Global Menu library Reference">
+<link rel="prev" href="GnomenuClientHelper.html" title="GnomenuClientHelper">
+<link rel="next" href="GtkGlobalMenuBar.html" title="GtkGlobalMenuBar">
+<meta name="generator" content="GTK-Doc V1.9 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="figures.html" title="Design Figures">
+<link rel="chapter" href="reference.html" title="The Gnome Global Menu library Reference">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="GnomenuClientHelper.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="reference.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center"> libgnomenu Reference Book</th>
+<td><a accesskey="n" href="GtkGlobalMenuBar.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#id2606027" class="shortcut">Top</a>
+                  &#160;|&#160;
+                  <a href="#id2606077" class="shortcut">Description</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="libgnomenu-quirks"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2>
+<a name="id2606027"></a><span class="refentrytitle">GnomenuQuirks</span>
+</h2>
+<p>GnomenuQuirks</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<h2>Synopsis</h2>
+<pre class="synopsis">
+
+
+
+enum                <a class="link" href="libgnomenu-quirks.html#GnomenuQuirkMask">GnomenuQuirkMask</a>;
+<a class="link" href="libgnomenu-quirks.html#GnomenuQuirkMask">GnomenuQuirkMask</a>    <a class="link" href="libgnomenu-quirks.html#gnomenu-get-default-quirk">gnomenu_get_default_quirk</a>           ();
+<a
+href="/usr/share/gtk-doc/html/gtk/GtkMenuBar.html"
+>GtkMenuBar</a>*         <a class="link" href="libgnomenu-quirks.html#gtk-legacy-menu-bar-new">gtk_legacy_menu_bar_new</a>             ();
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2606077"></a><h2>Description</h2>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2606092"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="id2606102"></a><h3>
+<a name="GnomenuQuirkMask"></a>enum GnomenuQuirkMask</h3>
+<a class="indexterm" name="id2606115"></a><pre class="programlisting">typedef enum { /*&lt; prefix = GNOMENU_QUIRK &gt;*/
+	GNOMENU_QUIRK_NONE,
+	GNOMENU_QUIRK_IGNORE,
+} GnomenuQuirkMask;
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606131"></a><h3>
+<a name="gnomenu-get-default-quirk"></a>gnomenu_get_default_quirk ()</h3>
+<a class="indexterm" name="id2606145"></a><pre class="programlisting"><a class="link" href="libgnomenu-quirks.html#GnomenuQuirkMask">GnomenuQuirkMask</a>    gnomenu_get_default_quirk           ();</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> the default quirk for current application
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="id2606185"></a><h3>
+<a name="gtk-legacy-menu-bar-new"></a>gtk_legacy_menu_bar_new ()</h3>
+<a class="indexterm" name="id2606198"></a><pre class="programlisting"><a
+href="/usr/share/gtk-doc/html/gtk/GtkMenuBar.html"
+>GtkMenuBar</a>*         gtk_legacy_menu_bar_new             ();</pre>
+<p>
+</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span>&#160;:</span></p></td>
+<td> a <a
+href="/usr/share/gtk-doc/html/gtk/GtkMenuBar.html"
+><span class="type">GtkMenuBar</span></a> or a <a class="link" href="GtkGlobalMenuBar.html" title="GtkGlobalMenuBar"><span class="type">GtkGlobalMenuBar</span></a>(with quirks), depending on the value
+of <a class="link" href="libgnomenu-quirks.html#gnomenu-get-default-quirk"><span class="type">gnomenu_get_default_quirk</span></a>;
+</td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="id2606264"></a><div class="refsect2" lang="en"><a name="id2606265"></a></div>
+<hr>
+<div class="refsect2" lang="en"><a name="id2606266"></a></div>
+</div>
+</div>
+</body>
+</html>

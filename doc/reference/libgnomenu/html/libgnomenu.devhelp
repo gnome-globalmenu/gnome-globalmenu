@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title=" libgnomenu Reference Book" link="index.html" author="Yu Feng" name="libgnomenu">
+  <chapters>
+    <sub name=" Design Figures " link="figures.html"/>
+    <sub name="The Gnome Global Menu library Reference" link="reference.html">
+      <sub name="GdkSocket" link="GdkSocket.html"/>
+      <sub name="Messages" link="libgnomenu-messages.html"/>
+      <sub name="GnomenuServerHelper" link="GnomenuServerHelper.html"/>
+      <sub name="GnomenuClientHelper" link="GnomenuClientHelper.html"/>
+      <sub name="GnomenuQuirks" link="libgnomenu-quirks.html"/>
+      <sub name="GtkGlobalMenuBar" link="GtkGlobalMenuBar.html"/>
+    </sub>
+  </chapters>
+  <functions>
+    <function name="GdkSocketNativeID" link="GdkSocket.html#GdkSocketNativeID"/>
+    <function name="enum GdkSocketStatus" link="GdkSocket.html#GdkSocketStatus"/>
+    <function name="GdkSocket" link="GdkSocket.html#GdkSocket-struct"/>
+    <function name="gdk_socket_new ()" link="GdkSocket.html#gdk-socket-new"/>
+    <function name="gdk_socket_get_native ()" link="GdkSocket.html#gdk-socket-get-native"/>
+    <function name="gdk_socket_listen ()" link="GdkSocket.html#gdk-socket-listen"/>
+    <function name="gdk_socket_accept ()" link="GdkSocket.html#gdk-socket-accept"/>
+    <function name="gdk_socket_send ()" link="GdkSocket.html#gdk-socket-send"/>
+    <function name="gdk_socket_shutdown ()" link="GdkSocket.html#gdk-socket-shutdown"/>
+    <function name="gdk_socket_broadcast_by_name ()" link="GdkSocket.html#gdk-socket-broadcast-by-name"/>
+    <function name="The &quot;name&quot; property" link="GdkSocket.html#GdkSocket--name"/>
+    <function name="The &quot;status&quot; property" link="GdkSocket.html#GdkSocket--status"/>
+    <function name="The &quot;target&quot; property" link="GdkSocket.html#GdkSocket--target"/>
+    <function name="The &quot;timeout&quot; property" link="GdkSocket.html#GdkSocket--timeout"/>
+    <function name="The &quot;connect-request&quot; signal" link="GdkSocket.html#GdkSocket-connect-request"/>
+    <function name="The &quot;connected&quot; signal" link="GdkSocket.html#GdkSocket-connected"/>
+    <function name="The &quot;data-arrival&quot; signal" link="GdkSocket.html#GdkSocket-data-arrival"/>
+    <function name="The &quot;shutdown&quot; signal" link="GdkSocket.html#GdkSocket-shutdown"/>
+    <function name="" link="GdkSocket.html#id2592595"/>
+    <function name="" link="GdkSocket.html#id2592596"/>
+    <function name="enum GnomenuMessageType" link="libgnomenu-messages.html#GnomenuMessageType"/>
+    <function name="GnomenuMessageAny" link="libgnomenu-messages.html#GnomenuMessageAny"/>
+    <function name="GnomenuMessageClientNew" link="libgnomenu-messages.html#GnomenuMessageClientNew"/>
+    <function name="GnomenuMessageClientRealize" link="libgnomenu-messages.html#GnomenuMessageClientRealize"/>
+    <function name="GnomenuMessageClientReparent" link="libgnomenu-messages.html#GnomenuMessageClientReparent"/>
+    <function name="GnomenuMessageClientUnrealize" link="libgnomenu-messages.html#GnomenuMessageClientUnrealize"/>
+    <function name="GnomenuMessageClientDestroy" link="libgnomenu-messages.html#GnomenuMessageClientDestroy"/>
+    <function name="GnomenuMessageServerNew" link="libgnomenu-messages.html#GnomenuMessageServerNew"/>
+    <function name="GnomenuMessageServerDestroy" link="libgnomenu-messages.html#GnomenuMessageServerDestroy"/>
+    <function name="GnomenuMessageSizeQuery" link="libgnomenu-messages.html#GnomenuMessageSizeQuery"/>
+    <function name="GnomenuMessageSizeRequest" link="libgnomenu-messages.html#GnomenuMessageSizeRequest"/>
+    <function name="GnomenuMessageSizeAllocate" link="libgnomenu-messages.html#GnomenuMessageSizeAllocate"/>
+    <function name="GnomenuMessageOrientationChange" link="libgnomenu-messages.html#GnomenuMessageOrientationChange"/>
+    <function name="GnomenuMessagePositionSet" link="libgnomenu-messages.html#GnomenuMessagePositionSet"/>
+    <function name="GnomenuMessageVisibilitySet" link="libgnomenu-messages.html#GnomenuMessageVisibilitySet"/>
+    <function name="GnomenuMessageBgColorSet" link="libgnomenu-messages.html#GnomenuMessageBgColorSet"/>
+    <function name="GnomenuMessage" link="libgnomenu-messages.html#GnomenuMessage"/>
+    <function name="" link="libgnomenu-messages.html#id2596471"/>
+    <function name="" link="libgnomenu-messages.html#id2596472"/>
+    <function name="GnomenuClientInfo" link="GnomenuServerHelper.html#GnomenuClientInfo"/>
+    <function name="GnomenuServerHelper" link="GnomenuServerHelper.html#GnomenuServerHelper-struct"/>
+    <function name="gnomenu_server_helper_new ()" link="GnomenuServerHelper.html#gnomenu-server-helper-new"/>
+    <function name="gnomenu_server_helper_find_client_by_socket_id ()" link="GnomenuServerHelper.html#gnomenu-server-helper-find-client-by-socket-id"/>
+    <function name="gnomenu_server_helper_find_client_by_parent_window ()" link="GnomenuServerHelper.html#gnomenu-server-helper-find-client-by-parent-window"/>
+    <function name="gnomenu_server_helper_queue_resize ()" link="GnomenuServerHelper.html#gnomenu-server-helper-queue-resize"/>
+    <function name="gnomenu_server_helper_allocate_size ()" link="GnomenuServerHelper.html#gnomenu-server-helper-allocate-size"/>
+    <function name="gnomenu_server_helper_set_orientation ()" link="GnomenuServerHelper.html#gnomenu-server-helper-set-orientation"/>
+    <function name="gnomenu_server_helper_set_position ()" link="GnomenuServerHelper.html#gnomenu-server-helper-set-position"/>
+    <function name="gnomenu_server_helper_set_visibility ()" link="GnomenuServerHelper.html#gnomenu-server-helper-set-visibility"/>
+    <function name="gnomenu_server_helper_set_bgcolor ()" link="GnomenuServerHelper.html#gnomenu-server-helper-set-bgcolor"/>
+    <function name="The &quot;client-destroy&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-client-destroy"/>
+    <function name="The &quot;client-new&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-client-new"/>
+    <function name="The &quot;client-realize&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-client-realize"/>
+    <function name="The &quot;client-reparent&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-client-reparent"/>
+    <function name="The &quot;client-unrealize&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-client-unrealize"/>
+    <function name="The &quot;size-request&quot; signal" link="GnomenuServerHelper.html#GnomenuServerHelper-size-request"/>
+    <function name="" link="GnomenuServerHelper.html#id2600616"/>
+    <function name="" link="GnomenuServerHelper.html#id2600617"/>
+    <function name="GnomenuClientHelper" link="GnomenuClientHelper.html#GnomenuClientHelper-struct"/>
+    <function name="gnomenu_client_helper_new ()" link="GnomenuClientHelper.html#gnomenu-client-helper-new"/>
+    <function name="gnomenu_client_helper_send_realize ()" link="GnomenuClientHelper.html#gnomenu-client-helper-send-realize"/>
+    <function name="gnomenu_client_helper_send_reparent ()" link="GnomenuClientHelper.html#gnomenu-client-helper-send-reparent"/>
+    <function name="gnomenu_client_helper_send_unrealize ()" link="GnomenuClientHelper.html#gnomenu-client-helper-send-unrealize"/>
+    <function name="The &quot;bgcolor-set&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-bgcolor-set"/>
+    <function name="The &quot;orientation-change&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-orientation-change"/>
+    <function name="The &quot;position-set&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-position-set"/>
+    <function name="The &quot;server-destroy&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-server-destroy"/>
+    <function name="The &quot;server-new&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-server-new"/>
+    <function name="The &quot;size-allocate&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-size-allocate"/>
+    <function name="The &quot;size-query&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-size-query"/>
+    <function name="The &quot;visibility-set&quot; signal" link="GnomenuClientHelper.html#GnomenuClientHelper-visibility-set"/>
+    <function name="" link="GnomenuClientHelper.html#id2604452"/>
+    <function name="" link="GnomenuClientHelper.html#id2604453"/>
+    <function name="enum GnomenuQuirkMask" link="libgnomenu-quirks.html#GnomenuQuirkMask"/>
+    <function name="gnomenu_get_default_quirk ()" link="libgnomenu-quirks.html#gnomenu-get-default-quirk"/>
+    <function name="gtk_legacy_menu_bar_new ()" link="libgnomenu-quirks.html#gtk-legacy-menu-bar-new"/>
+    <function name="" link="libgnomenu-quirks.html#id2606265"/>
+    <function name="" link="libgnomenu-quirks.html#id2606266"/>
+    <function name="GtkGlobalMenuBar" link="GtkGlobalMenuBar.html#GtkGlobalMenuBar-struct"/>
+    <function name="gtk_global_menu_bar_new ()" link="GtkGlobalMenuBar.html#gtk-global-menu-bar-new"/>
+    <function name="" link="GtkGlobalMenuBar.html#id2607189"/>
+    <function name="" link="GtkGlobalMenuBar.html#id2607190"/>
+  </functions>
+</book>
