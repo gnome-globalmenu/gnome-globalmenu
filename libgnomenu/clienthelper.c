@@ -435,10 +435,10 @@ _c_bgcolor_set
 
 /**
  * gnomenu_client_helper_send_realize:
- * @_self: self;
- * @ui_window: the realized window which the client want the server to know
- * about. server will (possibily, depends on the implementation) 
- * grab this window so be careful.
+ * 	@_self: self;
+ * 	@ui_window: the realized window which the client want the server to know
+ * 		about. server will (possibily, depends on the implementation) 
+ * 		grab this window so be careful.
  *
  * notify a #GnomenuServerHelper that the menu client's owner widget 
  * has been realized .
@@ -452,6 +452,16 @@ void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self,
 	gdk_socket_send(GDK_SOCKET(_self),
 		&msg, sizeof(msg.client_realize));
 }
+/**
+ * gnomenu_client_helper_send_reparent:
+ * 	@_self: self;
+ * 	@parent_window: the realized new parent toplevel gdk window 
+ * 		of the menu bar which the client want the server to know
+ * 		about. 
+ *
+ * notify a #GnomenuServerHelper that the menu client's parent window
+ * exists.
+ */
 void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self, 
 		GdkWindow * parent_window){
 	GnomenuMessage msg;
@@ -460,6 +470,12 @@ void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self,
 	gdk_socket_send(GDK_SOCKET(_self),
 		&msg, sizeof(msg.client_reparent));
 }
+/**
+ * gnomenu_client_helper_send_unrealize:
+ * 	@_self: self;
+ *
+ * notify a #GnomenuServerHelper that the menu client is unrealized.
+ */
 void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
 	GnomenuMessage msg; msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
 	gdk_socket_send(GDK_SOCKET(_self),

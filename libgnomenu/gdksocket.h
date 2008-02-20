@@ -8,7 +8,7 @@ G_BEGIN_DECLS
 /**
  * SECTION: gdksocket
  * @short_description: Socket Communication for GTK.
- * @see_also: #GdkWindow, #GtkGlobalMenuBar
+ * @see_also: #GdkWindow, #GnomenuClientHelper, #GnomenuServerHelper
  * @stability: Unstable
  * @include: libgnomenu/gdksocket.h
  *

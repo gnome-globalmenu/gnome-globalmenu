@@ -152,7 +152,35 @@ gtk_global_menu_bar_init (GtkGlobalMenuBar *object)
 {
 }
 
-GtkWidget*
+/**
+ * gtk_global_menu_bar_new:
+ *
+ * Oops, this is the only function I exposed to you! Don't be mad,
+ * because #GtkGlobalMenuBar is a subclass of #GtkMenuBar,
+ * and you can (by definition you always can) use any function who
+ * work for a #GtkMenuBar on a #GtkGlobalMenuBar.
+ *
+ * If you are patching GTK to replace #GtkMenuBar with 
+ * #GtkGlobalMenuBar completely via #gtk_menu_bar_new, 
+ * don't use this function. The interface compatibility
+ * doesn't means everything. At a first glance the potentially vulnerabilities
+ * are:
+ *
+ * 1 if some GTK client subclassed GtkMenuBar, and you rudely replace
+ * #GtkMenuBar with #GtkGlobalMenuBar. The entire #GType inheriting
+ * tree will be screwed. Everything will become weird. Your applications
+ * might still be able to work, in a very undefined way.
+ * 
+ * 2 if some GTK client are just nerdy. Usually those application are written
+ * by very talent hackers who understand what they are doing very well. 
+ * Eclipse might be one of those examples.
+ *
+ * Under either cirumstances, what you'll want is Quirks. You call
+ * #gtk_legacy_menu_bar_new instead.
+ *
+ * Returns: the created global menu bar.
+ */
+GtkWidget *
 gtk_global_menu_bar_new (void)
 {
   return g_object_new (GTK_TYPE_GLOBAL_MENU_BAR, NULL);
