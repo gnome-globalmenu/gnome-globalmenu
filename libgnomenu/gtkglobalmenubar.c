@@ -372,6 +372,7 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	gtk_widget_queue_resize(widget);
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_reparent(menu_bar->container, widget->window, 0, 0);
+		gdk_window_show(menu_bar->container);
 		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
 	}
 }
