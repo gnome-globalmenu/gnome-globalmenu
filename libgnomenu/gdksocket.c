@@ -519,15 +519,8 @@ gboolean gdk_socket_send(GdkSocket * _self, gpointer data, guint bytes){
 		j+=g_sprintf(&buffer[j], "%02hhX ", ((gchar * ) data) [i]);
 	}
 	LOG("data = %s", buffer);
-	if(self->acks <= 0){
-		g_queue_push_tail(self->queue, 	msg);
-	} else {
-		if(_raw_send(self, self->target, msg, sizeof(GdkSocketMessage))){
-		self->acks--;
-		g_free(msg);
-		} else  /* if can't send this message, push it to the queue */
-			g_queue_push_tail(self->queue, msg);
-	}
+	g_queue_push_tail(self->queue, 	msg);
+	gdk_socket_flush(self);
 	LOG("send queue length = %d\n", g_queue_get_length(self->queue));
 	return TRUE;
 }
@@ -570,6 +563,32 @@ void gdk_socket_shutdown(GdkSocket * _self) {
 	} else{
 		g_warning("Not connected, can not shutdown");
 	}
+}
+/**
+ * gdk_socket_flush:
+ *
+ * Flush the sending queue of a socket to catch up with ACKs.
+ *
+ * If queue is not long enough, flush everything and return TRUE,
+ *
+ * If queue is too long, flush GdkSocket::acks and return TRUE,
+ *
+ * If one of the send operation fails, return FALSE.
+ *
+ */
+gboolean gdk_socket_flush(GdkSocket * _self){
+	while(_self->acks && !g_queue_is_empty(_self->queue)){
+		GdkSocketMessage * data_msg = g_queue_peek_head(_self->queue);
+		if( _raw_send(_self, _self->target, data_msg, sizeof(GdkSocketMessage))){
+			data_msg = g_queue_pop_head(_self->queue);
+			g_free(data_msg);
+			_self->acks--;
+		} else {
+		LOG("flushing queue failed");
+		return FALSE;
+		}
+	}
+	return TRUE;
 }
 /**
  * gdk_socket_window_filter_cb
@@ -626,20 +645,7 @@ static GdkFilterReturn
 					if(self->status == GDK_SOCKET_CONNECTED){
 						if(msg->header.source == self->target){
 							self->acks++;
-							if(!g_queue_is_empty(self->queue)){
-								while(self->acks){
-									GdkSocketMessage * data_msg = g_queue_peek_head(self->queue);
-									if( _raw_send(self, self->target, data_msg, sizeof(GdkSocketMessage))){
-										self->acks--;
-										data_msg = g_queue_pop_head(self->queue);
-										g_free(data_msg);
-									} else {
-									LOG("ACK: sending data failed"); 
-									/*TODO: maybe need to test alive immediately*/
-									break;
-									}
-								}
-							}
+							gdk_socket_flush(self);
 						}
 					} else
 					g_warning("Wrong socket status(%d), ignore ACK", self->status);
@@ -667,9 +673,9 @@ static GdkFilterReturn
 				break;
 				case GDK_SOCKET_ALIVE:
 					if(self->status == GDK_SOCKET_CONNECTED
-						&& self->alives > 0
 						&& self->target == msg->header.source){
-						self->alives--;
+						if(self->alives > 0) self->alives--;
+						gdk_socket_flush(self);
 					}
 					return GDK_FILTER_REMOVE;
 				break;

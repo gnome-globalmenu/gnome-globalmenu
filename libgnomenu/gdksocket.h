@@ -111,7 +111,7 @@ gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes);
 void gdk_socket_shutdown(GdkSocket * self);
 gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
 
-
+gboolean gdk_socket_flush(GdkSocket * _self);
 
 G_END_DECLS
 #endif
