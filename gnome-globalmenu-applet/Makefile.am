@@ -7,5 +7,6 @@ gnome_globalmenu_applet_SOURCES = \
 	main.c \
 	application.h
 
-gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la
+gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
+				$(GNOME_GLOBALMENU_APPLET_LIBS)
 
