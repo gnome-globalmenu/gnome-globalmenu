@@ -1,7 +1,5 @@
 #! /bin/sh
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libexec_dir=@libexecdir@
+libexec_dir=$1
 cat <<EOF
 <oaf_info>
   <oaf_server iid="OAFIID:GNOME_GlobalMenuApplet2_Factory" type="exe"
