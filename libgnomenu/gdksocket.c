@@ -21,7 +21,7 @@
 	GdkSocket * s = GDK_SOCKET(_s); \
 	GdkSocketPrivate * p = GDK_SOCKET_GET_PRIVATE(_s);
 
-#define LOG(fmt, args...) /*g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)*/
+#define LOG(fmt, args...) g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)
 #define LOG_FUNC_NAME LOG("%s", __func__)
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 
@@ -522,10 +522,13 @@ gboolean gdk_socket_send(GdkSocket * _self, gpointer data, guint bytes){
 	if(self->acks <= 0){
 		g_queue_push_tail(self->queue, 	msg);
 	} else {
-		_raw_send(self, self->target, msg, sizeof(GdkSocketMessage));
+		if(_raw_send(self, self->target, msg, sizeof(GdkSocketMessage))){
 		self->acks--;
 		g_free(msg);
+		} else  /* if can't send this message, push it to the queue */
+			g_queue_push_tail(self->queue, msg);
 	}
+	LOG("send queue length = %d\n", g_queue_get_length(self->queue));
 	return TRUE;
 }
 /**
@@ -624,9 +627,18 @@ static GdkFilterReturn
 						if(msg->header.source == self->target){
 							self->acks++;
 							if(!g_queue_is_empty(self->queue)){
-								GdkSocketMessage * data_msg = g_queue_pop_head(self->queue);
-								_raw_send(self, self->target, data_msg, sizeof(GdkSocketMessage));
-								self->acks--;
+								while(self->acks){
+									GdkSocketMessage * data_msg = g_queue_peek_head(self->queue);
+									if( _raw_send(self, self->target, data_msg, sizeof(GdkSocketMessage))){
+										self->acks--;
+										data_msg = g_queue_pop_head(self->queue);
+										g_free(data_msg);
+									} else {
+									LOG("ACK: sending data failed"); 
+									/*TODO: maybe need to test alive immediately*/
+									break;
+									}
+								}
 							}
 						}
 					} else
@@ -821,6 +833,7 @@ static gboolean _raw_send_nosync(GdkSocket * _self, GdkNativeWindow target, gpoi
     XSendEvent (GDK_DISPLAY_XDISPLAY(_self->display),
           target,
           False, NoEventMask, (XEvent *)&xclient);
+	gdk_flush();
     return gdk_error_trap_pop () == 0;
 }
 /**
@@ -886,6 +899,7 @@ static GList * _gdk_socket_find_targets(GdkSocket * _self, gchar * name){
         &parent_return,
         &children_return,
         &nchildren_return);
+	gdk_flush();
     if(gdk_error_trap_pop()){
         g_warning("%s: XQueryTree Failed", __func__);
         return NULL;
@@ -906,6 +920,7 @@ static GList * _gdk_socket_find_targets(GdkSocket * _self, gchar * name){
                           0, G_MAXLONG, False, type_req, &type_return,
                           &format_return, &nitems_return, &bytes_after_return,
                           &wm_name);
+		gdk_flush();
 		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
 			if(g_str_equal(name, wm_name)){
@@ -979,6 +994,7 @@ _raw_broadcast_by_name(GdkSocket * _self, gchar * name, gpointer data, guint byt
 	int n;
 	for(n = 0, node = g_list_first(window_list); node; n++, node = g_list_next(node)){
 		rt1 =  _raw_send_nosync(_self, (GdkNativeWindow)node->data, data, bytes);
+		gdk_display_sync (_self->display); /* Hope fully it will fix some random X BadWindow errors*/
 		rt = rt || rt1;
 	}
     gdk_display_sync (_self->display); /*resolve the message, sync the state*/
