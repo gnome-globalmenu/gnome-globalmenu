@@ -17,6 +17,9 @@ intltool_in_files = intltool-extract.in\
 	intltool-merge.in\
 	intltool-update.in	
 
+xfce4_panel_pluginsdir = ${datadir}/xfce4/panel-plugins
+xfce4_panel_plugins_DATA = gnome2-globalmenu-applet.desktop
+
 intltool_files = intltool-extract intltool-merge intltool-update
 script_in_files = dist.sh.in bonobo-server.sh.in
 script_files = dist.sh bonobo-server.sh

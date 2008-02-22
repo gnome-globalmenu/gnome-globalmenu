@@ -32,6 +32,7 @@
 
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
+#include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
@@ -39,7 +40,14 @@
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
+#include <libxfce4util/libxfce4util.h>
+#include <libxfcegui4/libxfcegui4.h>
+#include <libxfce4panel/xfce-panel-plugin.h>
+//workaround a weird bug in xfce4 includes
+#undef _
+#undef Q_
 #include <panel-applet.h>
+
 /*
  * Standard gettext macros.
  */
@@ -77,7 +85,10 @@ typedef struct _ClientInfo{
 	int y;
 } ClientInfo;
 
-static gboolean get_cardinal_by_atom(Window xwin, Display *display, Atom atom, int* ret);
+//whether we are running in XFCE mode
+gboolean is_xfce = FALSE;
+
+//static gboolean get_cardinal_by_atom(Window xwin, Display *display, Atom atom, int* ret);
 
 static void return_client_float_window(ClientInfo * client, Application * App){
 	g_print("Return client float window\n");
@@ -117,7 +128,7 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	gboolean client_known = FALSE;
 	ClientInfo * info;
 	ClientInfo * info_fallback;
-	GList * node = NULL;
+	//GList * node = NULL;
 
 	if(App->ActiveTitle){
 		g_free(App->ActiveTitle);
@@ -134,6 +145,10 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
  * */
 	if(active_window == NULL){
 		g_warning("active window is NULL!");
+		if(App->ActiveClient)
+			return_client_float_window(App->ActiveClient, App);
+		App->ActiveClient = NULL;
+		ui_repaint_all(App);
 		return;
 	}
 
@@ -288,6 +303,7 @@ static gboolean main_window_delete_cb(GtkWindow * MainWindow, GdkEvent * event, 
 	g_print("Main window delete-event.\n");
 	return FALSE;
 }
+
 static void main_window_change_background_cb(PanelApplet * applet, PanelAppletBackgroundType type, GdkColor * color, GdkPixmap * pixmap, Application * App){
 	GtkStyle * style;
 	Window bg_xid;
@@ -407,11 +423,13 @@ static gboolean forward_action_cb(GtkWidget * widget, GdkEventButton * button, A
 	ui_repaint_all(App);
 	return TRUE;
 }
+
 static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
 	g_message("%s: cname = %s", __func__, cname);
 	if(g_str_equal(cname, "About")) ui_show_about(App);
 	if(g_str_equal(cname, "Preference")) preference_show_dialog(App);
 }
+
 static Application * application_new(GtkContainer * mainwindow){
 	Application * App = g_new0(Application, 1);
 	GdkScreen * gdkscreen = NULL;
@@ -440,11 +458,13 @@ static Application * application_new(GtkContainer * mainwindow){
 /******The delete-event not useful any more, since panel-applet dont receive it. *******/
 	g_signal_connect(G_OBJECT(App->MainWindow), "delete-event",
 		G_CALLBACK(main_window_delete_cb), App);
-	g_signal_connect(G_OBJECT(App->MainWindow), "change-background",
-			G_CALLBACK(main_window_change_background_cb), App);
-	g_signal_connect(G_OBJECT(App->MainWindow), "change-orient",
-			G_CALLBACK(main_window_change_orient_cb), App);
-	panel_applet_set_background_widget(App->MainWindow, App->MainWindow);
+  if (!is_xfce) {
+		g_signal_connect(G_OBJECT(App->MainWindow), "change-background",
+				G_CALLBACK(main_window_change_background_cb), App);
+		g_signal_connect(G_OBJECT(App->MainWindow), "change-orient",
+				G_CALLBACK(main_window_change_orient_cb), App);
+		panel_applet_set_background_widget(PANEL_APPLET(App->MainWindow), App->MainWindow);
+	}
 /**The Screen***/
 	gdkscreen = gtk_widget_get_screen(GTK_WIDGET(App->MainWindow));
 	g_print("GDK SCREEN number is %d\n", gdk_screen_get_number(gdkscreen));
@@ -463,7 +483,9 @@ static Application * application_new(GtkContainer * mainwindow){
 	callback_table.forward_action_cb = G_CALLBACK(forward_action_cb);
 	callback_table.backward_action_cb = G_CALLBACK(backward_action_cb);
 	callback_table.holder_resize_cb = G_CALLBACK(holder_resize_cb);
-	callback_table.popup_menu_cb = (BonoboUIVerbFn)popup_menu_cb;
+  if (!is_xfce) {
+		callback_table.popup_menu_cb = (BonoboUIVerbFn)popup_menu_cb;
+	}
 
 	ui_create_all(App, &callback_table);
 
@@ -498,7 +520,6 @@ static void application_free(Application * App){
 }
 
 
-
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet2_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet2"
 
@@ -520,36 +541,69 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	}
 }
 
-int main (int argc, char *argv [])
-{
-	GnomeProgram *program;
-	GOptionContext *context;
-	int           retval;
-#ifdef ENABLE_NLS
-	bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
-#endif
-	
-	context = g_option_context_new("");
-	program = gnome_program_init (APP_NAME, APP_VERSION,
-			LIBGNOMEUI_MODULE,
-			argc, argv,
-			GNOME_PARAM_GOPTION_CONTEXT, context,	
-			GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
-			GNOME_PARAM_NONE);
-	gtk_rc_parse_string("\n"
-			"style \"gmb_event_box_style\" \n"
-			"{\n"
-			" 	GtkWidget::focus-line-width=0\n"
-			" 	GtkWidget::focus-padding=0\n"
-			"}\n"
-			"\n"
-//			"widget \"*.globalmenu-applet\" style \"gmb_event_box_style\"\n"
-			"widget \"*.globalmenu-applet-eventbox\" style \"gmb_event_box_style\"\n"
-			"\n");
-
-	retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
-	g_object_unref (program);
-	return retval;
+static gboolean size_changed(GtkWidget* plugin, gint size) {
+	return TRUE;
 }
+
+static void
+xfce_applet_construct(XfcePanelPlugin *plugin)
+{
+	g_print("constructing plugin\n");
+	g_signal_connect(G_OBJECT(plugin), "size-changed", 
+		G_CALLBACK(size_changed), NULL);
+	application_new(GTK_CONTAINER(plugin));
+}
+
+int 
+main (int argc, char **argv) 
+{ 
+  if (strstr(argv[0], "xfce")) {
+		is_xfce = TRUE;
+		g_print("xfce mode\n");
+		// The following code was stolen from xfce4/libxfce4panel/xfce-panel-plugin.h
+		// REGISTER_EXTERNAL_PLUGIN macro
+		GtkWidget *plugin; 
+		gtk_init (&argc, &argv); 
+		plugin = xfce_external_panel_plugin_new (argc, argv, 
+								 (XfcePanelPluginFunc)xfce_applet_construct); 
+		if (!plugin) return 1; 
+		g_signal_connect_after (plugin, "destroy", 
+														G_CALLBACK (exit), NULL); 
+		gtk_widget_show (plugin); 
+		gtk_main (); 
+		return 0; 
+	}
+	else {
+		GnomeProgram *program;
+		GOptionContext *context;
+		int           retval;
+	#ifdef ENABLE_NLS
+		bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+		bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+		textdomain (GETTEXT_PACKAGE);
+	#endif
+		
+		context = g_option_context_new("");
+		program = gnome_program_init (APP_NAME, APP_VERSION,
+				LIBGNOMEUI_MODULE,
+				argc, argv,
+				GNOME_PARAM_GOPTION_CONTEXT, context,	
+				GNOME_CLIENT_PARAM_SM_CONNECT, FALSE,	
+				GNOME_PARAM_NONE);
+		gtk_rc_parse_string("\n"
+				"style \"gmb_event_box_style\" \n"
+				"{\n"
+				" 	GtkWidget::focus-line-width=0\n"
+				" 	GtkWidget::focus-padding=0\n"
+				"}\n"
+				"\n"
+	//			"widget \"*.globalmenu-applet\" style \"gmb_event_box_style\"\n"
+				"widget \"*.globalmenu-applet-eventbox\" style \"gmb_event_box_style\"\n"
+				"\n");
+
+		retval = panel_applet_factory_main (FACTORY_IID, PANEL_TYPE_APPLET, globalmenu_applet_factory, NULL);
+		g_object_unref (program);
+		return retval;
+	}
+}
+

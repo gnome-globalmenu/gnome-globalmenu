@@ -7,6 +7,13 @@
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libxfce4util/libxfce4util.h>
+#include <libxfce4panel/xfce-panel-plugin.h>
+#include <libxfcegui4/libxfcegui4.h>
+// work around a weird bug in xfce4 includes
+#undef _
+#undef Q_
+#include <panel-applet.h>
 #include <libbonoboui.h>
 
 #include "typedefs.h"
@@ -19,8 +26,8 @@ GtkEventBox * ui_create_label_area(Application * App){
 	label_area = GTK_EVENT_BOX(gtk_event_box_new());
 	label_area_box = GTK_BOX(gtk_hbox_new(FALSE, 0));
 	gtk_event_box_set_visible_window(label_area, FALSE);
-	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->ClientIcon), FALSE, FALSE, 0);
-	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 0);
+	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->ClientIcon), FALSE, FALSE, 3);
+	gtk_box_pack_start(label_area_box, GTK_WIDGET(App->TitleLabel), FALSE, FALSE, 3);
 	gtk_container_add(GTK_CONTAINER(label_area), GTK_WIDGET(label_area_box));
 	return label_area;
 }
@@ -35,6 +42,7 @@ GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id){
 	gtk_container_add(GTK_CONTAINER(rt), GTK_WIDGET(icon));
 	return rt;
 }
+
 void ui_create_popup_menu(Application * App, UICallbacks * callbacks){
 	static const char toggle_menu_xml [] =
 	"<popup name=\"button3\">\n"
@@ -61,11 +69,12 @@ void ui_create_popup_menu(Application * App, UICallbacks * callbacks){
 			toggle_menu_verbs, 
 			App);
 }
+
 void ui_create_all(Application * App, UICallbacks * callbacks){
 	GtkBox * basebox = NULL;
 	GtkEventBox * label_area = NULL;
 
-	GtkButton * button = NULL; /*So the dashed box will cover the button instead of the Applet, and the menu will response when clicked at the very top.*/
+	//GtkButton * button = NULL; /*So the dashed box will cover the button instead of the Applet, and the menu will response when clicked at the very top.*/
 
 /****** Applet's Base Horizontal Box*******/
 	basebox = GTK_BOX(gtk_hbox_new(FALSE, 0));
@@ -77,6 +86,9 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 //	gtk_label_set_max_width_chars(App->TitleLabel, 10);
 
 	label_area = ui_create_label_area(App);
+	if (is_xfce) {
+		xfce_panel_plugin_add_action_widget(XFCE_PANEL_PLUGIN(App->MainWindow), GTK_WIDGET(label_area));
+	}
 	gtk_box_pack_start(basebox, GTK_WIDGET(label_area), FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(label_area), "button-press-event",
 			G_CALLBACK(callbacks->label_area_action_cb), App);
@@ -89,6 +101,9 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 
 /**********Holder: Menubars Shows here**********/
 	App->Holder = GTK_FIXED(gtk_fixed_new());
+	if (is_xfce) {
+		gtk_widget_set_size_request(GTK_WIDGET(App->Holder), 512, -1);
+	}
 	gtk_fixed_set_has_window(App->Holder, TRUE);
 	gtk_box_pack_start(basebox, GTK_WIDGET(App->Holder), TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(App->Holder), "size-allocate", 
@@ -101,8 +116,9 @@ void ui_create_all(Application * App, UICallbacks * callbacks){
 
 /*******Applet tweaks*************/
 	gtk_container_set_border_width(GTK_CONTAINER(basebox), 0);
-	ui_create_popup_menu(App, callbacks);
-
+	if (!is_xfce) {
+		ui_create_popup_menu(App, callbacks);
+	}
 }
 
 void ui_repaint_all(Application * App){
@@ -129,12 +145,18 @@ void ui_repaint_all(Application * App){
 		gtk_widget_hide(GTK_WIDGET(App->Backward));
 
 	if(show_icon && App->ActiveIcon){
-		icon_width = GTK_WIDGET(App->MainWindow)->allocation.width;
-		icon_height = GTK_WIDGET(App->MainWindow)->allocation.height;
-		if(icon_height < icon_width) 
-			icon_width = icon_height;
-		else 
-			icon_height = icon_width;
+    if (is_xfce) {
+			// TODO: figure out a way to calculate width & height for XFCE panel
+			icon_width = icon_height = 16;
+		}
+		else {
+			icon_width = GTK_WIDGET(App->MainWindow)->allocation.width;
+			icon_height = GTK_WIDGET(App->MainWindow)->allocation.height;
+			if(icon_height < icon_width) 
+				icon_width = icon_height;
+			else 
+				icon_height = icon_width;
+		}
 		icon = gdk_pixbuf_scale_simple(App->ActiveIcon, icon_width, icon_height, GDK_INTERP_BILINEAR);
 		gtk_image_set_from_pixbuf(App->ClientIcon, icon);
 		g_object_unref(icon);

@@ -48,12 +48,17 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 			MY_GET_PROP(show_arrows, gtk_toggle_button_get_active);
 			MY_GET_PROP(title_max_width_chars, gtk_spin_button_get_value);
 #undef MY_GET_PROP
+			if (is_xfce) {
+				// TODO: Implement saving preferences for XFCE panel
+			}
+			else {
 #define MY_STORE_PROP(type ,x) panel_applet_gconf_set_##type(dlg->App->MainWindow, #x, dlg->App->AppletProperty.x, NULL)
 			MY_STORE_PROP(bool, show_title);
 			MY_STORE_PROP(bool, show_icon);
 			MY_STORE_PROP(bool, show_arrows);
 			MY_STORE_PROP(int, title_max_width_chars);
 #undef MY_STORE_PROP
+			}
 			ui_repaint_all(dlg->App);
 			break;
 		default:
@@ -62,17 +67,27 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 	gtk_widget_destroy(GTK_WIDGET(dlg->window));
 }
 void preference_load_conf(Application * App){
-	panel_applet_add_preferences(App->MainWindow, "/app/gnome2-globalmenu-applet", NULL);
+	if (is_xfce) {
+		// TODO: Implement loading preferences for XFCE panel
+		App->AppletProperty.show_title = TRUE;
+		App->AppletProperty.show_icon = TRUE;
+		App->AppletProperty.show_arrows = FALSE;
+		App->AppletProperty.title_max_width_chars = 15;
+	}
+	else {
+		panel_applet_add_preferences(App->MainWindow, "/app/gnome2-globalmenu-applet", NULL);
 #define MY_GET_PROP(type, x) App->AppletProperty.x = panel_applet_gconf_get_##type(App->MainWindow, #x, NULL) 
-	MY_GET_PROP(bool, show_title);
-	MY_GET_PROP(bool, show_icon);
-	MY_GET_PROP(bool, show_arrows);
-	MY_GET_PROP(int, title_max_width_chars);
+		MY_GET_PROP(bool, show_title);
+		MY_GET_PROP(bool, show_icon);
+		MY_GET_PROP(bool, show_arrows);
+		MY_GET_PROP(int, title_max_width_chars);
 #undef MY_GET_PROP
+	}
 }
+
 void preference_show_dialog(Application * App){
 	PrefDialog * dlg = g_new0(PrefDialog, 1);
-	GtkBox * vbox = gtk_vbox_new(TRUE, 0);
+	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
 	GtkWidget * show = gtk_label_new(_("Display following elements"));
 	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
 	GtkBox * title_box = gtk_hbox_new(TRUE, 0);
