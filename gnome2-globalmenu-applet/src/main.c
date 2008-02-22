@@ -87,6 +87,7 @@ static void return_client_float_window(ClientInfo * client, Application * App){
 	menu_server_send_to(App->Server, client->menu_client, &notify);	
 	gdk_window_reparent(client->float_window, 
 		gtk_widget_get_root_window(GTK_WIDGET(App->Holder)), 0, 0);
+	gdk_window_hide(client->float_window);
 }
 static void steal_client_float_window(ClientInfo * client, Application * App){
 	g_print("Steal client float window\n");
@@ -95,6 +96,7 @@ static void steal_client_float_window(ClientInfo * client, Application * App){
 	notify.SetVisible.visible = TRUE;
 	gdk_window_reparent(client->float_window, 
 		GTK_WIDGET(App->Holder)->window, client->x, client->y);
+	gdk_window_show(client->float_window);
 	menu_server_send_to(App->Server, client->menu_client, &notify);	
 }
 ClientInfo * find_client_info_by_master(Window master_xid, Application * App){
@@ -216,7 +218,17 @@ gboolean is_kde_topmenu(WnckWindow * window){
 }
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
 	g_print("Window opened: %s\n", wnck_window_get_name(window));
-	if(is_kde_topmenu(window)) g_print("a kde top menu\n");
+	if(is_kde_topmenu(window)) {
+		g_print("a kde top menu\n");
+		WnckWindow * transient = wnck_window_get_transient(window);
+		g_print("transient for:%s\n", wnck_window_get_name(transient));
+		GlobalMenuNotify notify;
+		notify.ClientNew.client_xid = 0; //wnck_window_get_xid(window); /*0?*/
+		notify.ClientNew.float_xid = wnck_window_get_xid(window);
+		notify.ClientNew.master_xid = wnck_window_get_xid(transient);
+		/*simulate a client new. hope it works*/
+		menu_server_client_new_cb(NULL, &notify, App->Server);
+	}
 }
 static void window_closed_cb(WnckScreen* screen, WnckWindow *window, Application * App){
 	g_print("Window closed: %s\n", wnck_window_get_name(window));
