@@ -206,10 +206,12 @@ gboolean is_kde_topmenu(WnckWindow * window){
                         &prop_return)){
 		g_print("Failed to get property\n");
 	}else{
+		if(prop_return){
 		window_type = * (Atom *)prop_return;
 		XFree(prop_return);
-		
 		g_print("return= %s\n", XGetAtomName(display, window_type));
+		} else
+		window_type = NULL;
 	}
 	gdk_flush();
 	gdk_error_trap_pop();
