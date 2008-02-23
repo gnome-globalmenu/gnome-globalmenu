@@ -199,14 +199,16 @@ static void active_window_changed_cb(WnckScreen* screen, WnckWindow *previous_wi
 	ui_repaint_all(App);
 }
 
-gboolean is_kde_topmenu(WnckWindow * window){
+gboolean is_kde_topmenu(WnckWindow * window, Window * ptransient){
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	Window w = wnck_window_get_xid(window);
-	Atom property = gdk_x11_atom_to_xatom(gdk_atom_intern("_NET_WM_WINDOW_TYPE", FALSE));
+	Atom win_type_property = gdk_x11_atom_to_xatom(gdk_atom_intern("_NET_WM_WINDOW_TYPE", FALSE));
+	Atom transient_property = gdk_x11_atom_to_xatom(gdk_atom_intern(
+		"WM_TRANSIENT_FOR", FALSE));
+
 	glong long_offset = 0;
 	glong long_length = 128;
 	gboolean delete = FALSE;
-	Atom req_type = XA_ATOM;
 //gdk_x11_atom_to_xatom(gdk_atom_intern("AnyPropertyType", FALSE));
 	Atom actual_type_return;
 	gint actual_format_return;
@@ -215,8 +217,11 @@ gboolean is_kde_topmenu(WnckWindow * window){
 	unsigned char * prop_return;
 	Atom window_type ;
 	Atom kde_type = XInternAtom(display, "_KDE_NET_WM_WINDOW_TYPE_TOPMENU", FALSE);
+	Window transient = NULL;
 	gdk_error_trap_push();
-	if( Success != XGetWindowProperty(display, w, property, long_offset, long_length, delete, req_type, 
+	if( Success != XGetWindowProperty(display, w, 
+						win_type_property, long_offset, 
+						long_length, delete, XA_ATOM, 
                         &actual_type_return, &actual_format_return, &nitems_return, &bytes_after_return, 
                         &prop_return)){
 		g_print("Failed to get property\n");
@@ -224,10 +229,26 @@ gboolean is_kde_topmenu(WnckWindow * window){
 		if(prop_return){
 		window_type = * (Atom *)prop_return;
 		XFree(prop_return);
-		g_print("return= %s\n", XGetAtomName(display, window_type));
+		g_print("windowtype =  %s\n", XGetAtomName(display, window_type));
 		} else
 		window_type = NULL;
 	}
+	if( Success != XGetWindowProperty(display, w, 
+						transient_property, 
+						long_offset, long_length, 
+						delete, XA_WINDOW, 
+                        &actual_type_return, &actual_format_return, 
+						&nitems_return, &bytes_after_return, 
+                        &prop_return)){
+		g_print("Failed to get property\n");
+	}else{
+		if(prop_return){
+			transient = * (Window *) prop_return;
+			XFree(prop_return);
+			g_print("transient = %p\n", transient);
+		}
+	}
+	if(kde_type == window_type) *ptransient = transient;
 	gdk_flush();
 	gdk_error_trap_pop();
 	
@@ -235,14 +256,13 @@ gboolean is_kde_topmenu(WnckWindow * window){
 }
 static void window_opened_cb(WnckScreen* screen, WnckWindow *window, Application * App){
 	g_print("Window opened: %s\n", wnck_window_get_name(window));
-	if(is_kde_topmenu(window)) {
+	Window transient;
+	if(is_kde_topmenu(window, &transient)) {
 		g_print("a kde top menu\n");
-		WnckWindow * transient = wnck_window_get_transient(window);
-		g_print("transient for:%s\n", wnck_window_get_name(transient));
 		GlobalMenuNotify notify;
 		notify.ClientNew.client_xid = 0; //wnck_window_get_xid(window); /*0?*/
 		notify.ClientNew.float_xid = wnck_window_get_xid(window);
-		notify.ClientNew.master_xid = wnck_window_get_xid(transient);
+		notify.ClientNew.master_xid = transient;
 		/*simulate a client new. hope it works*/
 		menu_server_client_new_cb(NULL, &notify, App->Server);
 	}

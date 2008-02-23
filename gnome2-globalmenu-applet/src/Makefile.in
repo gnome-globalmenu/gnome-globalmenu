@@ -32,7 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-libexec_PROGRAMS = gnome2-globalmenu-applet$(EXEEXT)
+libexec_PROGRAMS = gnome2-globalmenu-applet$(EXEEXT) \
+	xfce4-globalmenu-plugin$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -55,6 +56,9 @@ gnome2_globalmenu_applet_DEPENDENCIES = $(am__DEPENDENCIES_1)
 gnome2_globalmenu_applet_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(gnome2_globalmenu_applet_LDFLAGS) $(LDFLAGS) -o $@
+xfce4_globalmenu_plugin_SOURCES = xfce4-globalmenu-plugin.c
+xfce4_globalmenu_plugin_OBJECTS = xfce4-globalmenu-plugin.$(OBJEXT)
+xfce4_globalmenu_plugin_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -67,8 +71,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(gnome2_globalmenu_applet_SOURCES)
-DIST_SOURCES = $(gnome2_globalmenu_applet_SOURCES)
+SOURCES = $(gnome2_globalmenu_applet_SOURCES) \
+	xfce4-globalmenu-plugin.c
+DIST_SOURCES = $(gnome2_globalmenu_applet_SOURCES) \
+	xfce4-globalmenu-plugin.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -330,6 +336,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuserver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preference.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ui.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfce4-globalmenu-plugin.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -538,6 +545,9 @@ uninstall-am: uninstall-libexecPROGRAMS
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-libexecPROGRAMS
 
+
+xfce4-globalmenu-plugin: gnome2-globalmenu-applet
+	ln -s gnome2-globalmenu-applet xfce4-globalmenu-plugin
 
 gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
 	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
