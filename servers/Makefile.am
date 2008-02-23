@@ -53,5 +53,5 @@ server_file_DATA = GNOME_GlobalMenuApplet.server
 DISTCLEANFILES += $(server_file_DATA)
 
 GNOME_GlobalMenuApplet.server:
-	./make-server-file.sh $(libexecdir) > $@
+	./make-server-file.sh $@ $(libexecdir)
 
