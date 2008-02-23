@@ -21,7 +21,7 @@
 	GdkSocket * s = GDK_SOCKET(_s); \
 	GdkSocketPrivate * p = GDK_SOCKET_GET_PRIVATE(_s);
 
-#define LOG(fmt, args...) g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)
+#define LOG(fmt, args...) /*g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)*/
 #define LOG_FUNC_NAME LOG("%s", __func__)
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 

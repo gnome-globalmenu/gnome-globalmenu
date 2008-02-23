@@ -63,6 +63,7 @@ GnomenuClientHelper * gnomenu_client_helper_new(void);
 void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self, GdkWindow * ui_window);
 void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self, GdkWindow * parent_window);
 void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self); 
+void gnomenu_client_helper_request_size(GnomenuClientHelper * _self, GtkRequisition * req); 
 
 G_END_DECLS
 #endif

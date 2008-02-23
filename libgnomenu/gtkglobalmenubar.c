@@ -81,6 +81,8 @@ static gint _expose 				( GtkWidget       *widget,
 /* GtkMenuShell Interface */
 static void _insert 				( GtkMenuShell * menu_shell, 
 									  GtkWidget * widget, gint pos);
+/* GtkContainer Inteface */
+static void _remove 				( GtkContainer * container, GtkWidget * widget);
 /* Signal handler for the helper */
 static void _s_size_request			( GtkWidget * widget,
 									  GtkRequisition * requisition, 
@@ -121,10 +123,12 @@ gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
 {
 	GObjectClass *gobject_class;
 	GtkWidgetClass *widget_class;
+	GtkContainerClass *container_class;
 	GtkMenuShellClass *menu_shell_class;
 
 	gobject_class = (GObjectClass*) class;
 	widget_class = (GtkWidgetClass*) class;
+	container_class = (GtkContainerClass*) class;
 	menu_shell_class = (GtkMenuShellClass*) class;
 
 	gobject_class->get_property = _get_property;
@@ -144,6 +148,9 @@ gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
 
 	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
+
+	container_class->remove = _remove;
+
 	g_type_class_add_private (gobject_class, sizeof (GtkGlobalMenuBarPrivate));  
 }
 
@@ -601,13 +608,30 @@ _map (GtkWidget * widget){
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	LOG_FUNC_NAME;
+	GtkRequisition req;
 	GET_OBJECT(menu_shell, menu_bar, priv);
 	if(GTK_WIDGET_REALIZED(menu_shell)) {
 		gtk_widget_set_parent_window(widget, menu_bar->container);
 	}
 	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
+	if(priv->detached){
+		_calc_size_request(menu_bar, &req);
+		LOG("widget req: %d, %d", widget->requisition);
+		gnomenu_client_helper_request_size(menu_bar->helper, &req);
+	}
 }
 
+static void
+_remove (GtkContainer * container, GtkWidget * widget){
+	LOG_FUNC_NAME;
+	GtkRequisition req;
+	GET_OBJECT(container, menu_bar, priv);
+	GTK_CONTAINER_CLASS(gtk_global_menu_bar_parent_class)->remove(container, widget);
+	if(priv->detached){
+		_calc_size_request(menu_bar, &req);
+		gnomenu_client_helper_request_size(menu_bar->helper, &req);
+	}
+}
 static void _sync_remote_state				( GtkGlobalMenuBar * _self){
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
@@ -709,6 +733,7 @@ _calc_size_request (
 			      BORDER_SPACING) * 2;
 
     }
+	LOG("request:%d, %d", *requisition);
 }
 static void
 _do_size_allocate (GtkWidget * widget,

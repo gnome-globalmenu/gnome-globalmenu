@@ -416,15 +416,8 @@ _c_size_allocate(GnomenuClientHelper * _self, GtkAllocation * allocation){
 }
 static void
 _c_size_query(GnomenuClientHelper * _self, GtkRequisition * req){
-	LOG_FUNC_NAME;
-	GnomenuMessage msg;
-	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
-	msg.size_request.width = req->width;
-	msg.size_request.height = req->height;
-/* FIXME: is it possible that we are in this handler, but self->server_info is NULL?,
- * Here it is almost impossible, unless a server dies before we issue this message*/
+	gnomenu_client_helper_request_size(_self, req);
 	g_free(req);
-	gdk_socket_send(GDK_SOCKET(_self), &msg, sizeof(msg.size_request));
 }
 
 static void 
@@ -498,6 +491,21 @@ void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
 	GnomenuMessage msg; msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
 	gdk_socket_send(GDK_SOCKET(_self),
 		&msg, sizeof(msg.client_unrealize));
+}
+/**
+ * gnomenu_client_helper_request_size:
+ * @_self: self;
+ * @req: requisition;
+ *
+ * Request size from the server.
+ */
+void gnomenu_client_helper_request_size(GnomenuClientHelper * _self, GtkRequisition * req){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
+	msg.size_request.width = req->width;
+	msg.size_request.height = req->height;
+	gdk_socket_send(GDK_SOCKET(_self), &msg, sizeof(msg.size_request));
 }
 /*
 vim:ts=4:sw=4
