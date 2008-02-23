@@ -9,4 +9,4 @@ include /usr/share/gnome-pkg-tools/1/rules/clean-la.mk
 -include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
 
 makebuilddir::
-	test -r $(CURDIR)/configure || $(CURDIR)/autogen.sh
+	test -r $(CURDIR)/configure || NOCONFIGURE=yes $(CURDIR)/autogen.sh
