@@ -12,30 +12,53 @@ AC_ISC_POSIX
 AC_PROG_CC
 AM_PROG_CC_STDC
 AC_HEADER_STDC
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
+enable_standalone="yes"
+enable_gnome_applet="yes"
+
+AC_ARG_ENABLE(standalone,
+	[	--enable-standalone	Include standalone menu server) ]
+	[	enable_standalone=$enableval],
+	[	enable_standalone="no"])
+AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
+AC_ARG_ENABLE(gnome-applet,
+	[	--enable-gnome-applet	Include gnome-applet interface ]
+	[	enable_gnome_applet=$enableval],
+	[	enable_gnome_applet="no"])
+AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
+
 PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
-PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0])
+if test "$enable_standalone" = "yes"; then
+	PKG_CHECK_MODULES(GLOBALMENU_SERVER, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0] )
+	AC_SUBST(GLOBALMENU_SERVER_CFLAGS)
+	AC_SUBST(GLOBALMENU_SERVER_LIBS)
+	AC_DEFINE(ENABLE_STANDALONE)
+fi;
+if test "$enable_gnome_applet" = "yes"; then
+	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0])
+	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
+	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
+	AC_DEFINE(ENABLE_GNOME_APPLET)
+fi;
+
 PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10, gdk-2.0])
-
-
 
 AC_SUBST(LIBGNOMENU_CFLAGS)
 AC_SUBST(LIBGNOMENU_LIBS)
 
-AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
-AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
+
 
 AC_SUBST(TEST_SUITE_CFLAGS)
 AC_SUBST(TEST_SUITE_LIBS)
 
-AC_SUBST(DIA)
-AC_CHECK_PROGS(DIA, dia)
 
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
-
-if test x$enable_gtk_doc = xyes ; then
+if test "$enable_gtk_doc" = "yes" ; then
+	AC_SUBST(DIA)
+	AC_CHECK_PROGS(DIA, dia)
 	if test x$DIA = "x" ; then
 		AC_MSG_ERROR([dia is needed to build the doc])
 	fi
