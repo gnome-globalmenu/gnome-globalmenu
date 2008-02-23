@@ -14,7 +14,7 @@ AM_CFLAGS =\
 	 -g
 
 libexec_PROGRAMS = gnome2-globalmenu-applet xfce4-globalmenu-plugin
-
+xfce4_globalmenu_plugin_SOURCES = 
 
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
@@ -33,8 +33,8 @@ gnome2_globalmenu_applet_SOURCES = \
 xfce4-globalmenu-plugin: gnome2-globalmenu-applet
 	ln -s gnome2-globalmenu-applet xfce4-globalmenu-plugin
 
-gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
-	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
+#gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
+#	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
 
 
 gnome2_globalmenu_applet_LDFLAGS = 

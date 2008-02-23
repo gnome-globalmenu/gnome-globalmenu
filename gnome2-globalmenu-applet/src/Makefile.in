@@ -56,8 +56,9 @@ gnome2_globalmenu_applet_DEPENDENCIES = $(am__DEPENDENCIES_1)
 gnome2_globalmenu_applet_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(gnome2_globalmenu_applet_LDFLAGS) $(LDFLAGS) -o $@
-xfce4_globalmenu_plugin_SOURCES = xfce4-globalmenu-plugin.c
-xfce4_globalmenu_plugin_OBJECTS = xfce4-globalmenu-plugin.$(OBJEXT)
+am_xfce4_globalmenu_plugin_OBJECTS =
+xfce4_globalmenu_plugin_OBJECTS =  \
+	$(am_xfce4_globalmenu_plugin_OBJECTS)
 xfce4_globalmenu_plugin_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -72,9 +73,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(gnome2_globalmenu_applet_SOURCES) \
-	xfce4-globalmenu-plugin.c
+	$(xfce4_globalmenu_plugin_SOURCES)
 DIST_SOURCES = $(gnome2_globalmenu_applet_SOURCES) \
-	xfce4-globalmenu-plugin.c
+	$(xfce4_globalmenu_plugin_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -243,6 +244,7 @@ AM_CFLAGS = \
 	 -Wall\
 	 -g
 
+xfce4_globalmenu_plugin_SOURCES = 
 gnome2_globalmenu_applet_SOURCES = \
 	main.c                 \
 	typedefs.h                 \
@@ -257,6 +259,9 @@ gnome2_globalmenu_applet_SOURCES = \
 	preference.h	\
 	preference.c
 
+
+#gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
+#	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
 gnome2_globalmenu_applet_LDFLAGS = 
 gnome2_globalmenu_applet_LDADD = $(GNOME2_GLOBALMENU_APPLET_LIBS)
 EXTRA_DIST = $(glade_DATA)
@@ -336,7 +341,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/menuserver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/preference.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ui.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xfce4-globalmenu-plugin.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -548,9 +552,6 @@ uninstall-am: uninstall-libexecPROGRAMS
 
 xfce4-globalmenu-plugin: gnome2-globalmenu-applet
 	ln -s gnome2-globalmenu-applet xfce4-globalmenu-plugin
-
-gtkmenuembed-x11.h: ../../gtk2-aqd/gtkmenuembed-x11.h
-	cp ../../gtk2-aqd/gtkmenuembed-x11.h $@ 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

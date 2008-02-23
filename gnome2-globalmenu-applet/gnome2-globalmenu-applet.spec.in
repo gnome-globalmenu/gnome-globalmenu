@@ -1,4 +1,4 @@
-%define base_version 0.3
+%define base_version trunk
 Name: 		gnome2-globalmenu-applet
 Version: 	%{base_version}.@SVNVERSION@
 Release:	4%{?dist}
@@ -8,7 +8,7 @@ Group:		User Interface/Desktops
 License:	GPLv2+
 URL:		http://code.google.com/p/gnome2-globalmenu/
 
-Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome2-globalmenu-applet-%{version}.tar.gz
+Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome2-globalmenu-applet-%{base_version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{base_version}-%{release}-root-%(%{__id_u} -n)
 
 Requires:	gtk2-aqd
@@ -58,6 +58,8 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome2-global
 #%doc GNOME_GlobalMenuApplet.server.sample
 %{_libexecdir}/gnome2-globalmenu-applet
 %{_libdir}/bonobo/servers/GNOME_GlobalMenuApplet.server
+%{_datadir}/xfce4/panel-plugins/gnome2-globalmenu-applet.desktop
+%{_libexecdir}/xfce4-globalmenu-plugin
 %{_sysconfdir}/gconf/schemas/gnome2-globalmenu-applet.schema
 
 %changelog 
