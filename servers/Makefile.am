@@ -5,9 +5,13 @@ AM_CFLAGS = -I$(top_srcdir)
 libexec_PROGRAMS =
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
+gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
+gnome_file_DATA = GNOME_GlobalMenuApplet.server
 endif
 if ENABLE_XFCE_PLUGIN
 libexec_PROGRAMS += xfce-globalmenu-plugin
+xfce_filedir = `pkg-config --variable=desktopdatadir libxfce4panel-1.0`
+xfce_file_DATA = xfce-globalmenu-plugin.desktop
 endif
 
 if ENABLE_STANDALONE
@@ -47,11 +51,9 @@ globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 
 
 				
-server_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
-server_file_DATA = GNOME_GlobalMenuApplet.server
-
 DISTCLEANFILES += $(server_file_DATA)
 
 GNOME_GlobalMenuApplet.server:
-	./make-server-file.sh $@ $(libexecdir)
-
+	./make-gnome-data.sh $@ $(libexecdir)
+xfce-globalmenu-plugin.desktop:
+	./make-xfce-data.sh $@ $(libexecdir)
