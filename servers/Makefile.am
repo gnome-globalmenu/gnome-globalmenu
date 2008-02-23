@@ -8,6 +8,8 @@ bin_PROGRAMS = globalmenu-server
 DISTCLEANFILES = 
 VAST_SOURCE_CODE = application.h \
 	application.c \
+	menuserver.h \
+	menuserver.c \
 	log.h
 
 gnome_globalmenu_applet_SOURCES = \

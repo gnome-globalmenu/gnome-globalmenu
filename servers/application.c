@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include "application.h"
+#include "menuserver.h"
 #include "log.h"
 
 static void _s_window_destroy(GtkWidget * widget, Application * app);
@@ -9,9 +10,7 @@ Application * application_new(GtkContainer * window){
 	Application * app = g_new0(Application, 1);
 	app->window = window;
 	app->screen = wnck_screen_get_default();
-	app->gtk_helper = gnomenu_server_helper_new();
-	app->kde_helper = NULL; /*TODO: implement this*/
-//	app->server = menu_server_new(app);
+	app->server = menu_server_new(window);
 	g_signal_connect(G_OBJECT(app->window), 
 		"destroy",
         G_CALLBACK(_s_window_destroy), app);
@@ -20,8 +19,7 @@ Application * application_new(GtkContainer * window){
 }
 void application_destroy(Application * app){
 	LOG();
-	g_object_unref(app->gtk_helper);
-	//Destroy: app->kde_helper
+	menu_server_destroy(app->server);
 	g_free(app);
 }
 
