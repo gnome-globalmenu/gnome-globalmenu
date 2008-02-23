@@ -15,19 +15,22 @@ AC_HEADER_STDC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
-enable_standalone="yes"
-enable_gnome_applet="yes"
 
+AC_MSG_CHECKING(--enable-standalone argument)
 AC_ARG_ENABLE(standalone,
-	[	--enable-standalone	Include standalone menu server) ]
-	[	enable_standalone=$enableval],
-	[	enable_standalone="no"])
+	[	--enable-standalone	Include standalone menu server) ],
+	[	enable_standalone=$enableval ],
+	[	enable_standalone="yes" ])
 AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
+AC_MSG_RESULT($enable_standalone)
+AC_MSG_CHECKING(--enable-gnome-applet argument)
 AC_ARG_ENABLE(gnome-applet,
-	[	--enable-gnome-applet	Include gnome-applet interface ]
-	[	enable_gnome_applet=$enableval],
-	[	enable_gnome_applet="no"])
+	[	--enable-gnome-applet	Include gnome-applet interface ],
+	[	enable_gnome_applet=$enableval ],
+	[	enable_gnome_applet="yes" ])
 AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
+
+AC_MSG_RESULT($enable_gnome_applet)
 
 PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
 if test "$enable_standalone" = "yes"; then
@@ -35,13 +38,13 @@ if test "$enable_standalone" = "yes"; then
 	AC_SUBST(GLOBALMENU_SERVER_CFLAGS)
 	AC_SUBST(GLOBALMENU_SERVER_LIBS)
 	AC_DEFINE(ENABLE_STANDALONE)
-fi;
+fi
 if test "$enable_gnome_applet" = "yes"; then
 	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0])
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
 	AC_DEFINE(ENABLE_GNOME_APPLET)
-fi;
+fi
 
 PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10, gdk-2.0])
 

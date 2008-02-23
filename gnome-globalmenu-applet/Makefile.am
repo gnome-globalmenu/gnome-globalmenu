@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)
+AM_CFLAGS = -I$(top_srcdir)
 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 

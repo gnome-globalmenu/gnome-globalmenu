@@ -1,5 +1,5 @@
 
-INCLUDES = -I$(top_srcdir) \
+AM_CFLAGS = -I$(top_srcdir) \
 	$(TEST_SUITE_CFLAGS)
 
 LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la

@@ -1,7 +1,7 @@
 #
 
-INCLUDES = $(LIBGNOMENU_CFLAGS)
-INCLUDES += -DSYSCONFDIR=\"$(sysconfdir)\"
+AM_CFLAGS = $(LIBGNOMENU_CFLAGS)
+AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
 lib_LTLIBRARIES = libgnomenu.la
 
