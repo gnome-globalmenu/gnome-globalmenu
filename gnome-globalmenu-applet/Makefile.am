@@ -9,7 +9,8 @@ DISTCLEANFILES =
 gnome_globalmenu_applet_SOURCES = \
 	main-gnome.c \
 	application.h \
-	application.h
+	application.h \
+	log.h
 
 gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
 				$(GNOME_GLOBALMENU_APPLET_LIBS)
