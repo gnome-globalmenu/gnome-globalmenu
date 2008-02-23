@@ -9,7 +9,6 @@ Application * application_new(GtkContainer * window){
 	LOG();	
 	Application * app = g_new0(Application, 1);
 	app->window = window;
-	app->screen = wnck_screen_get_default();
 	app->server = menu_server_new(window);
 	g_signal_connect(G_OBJECT(app->window), 
 		"destroy",
