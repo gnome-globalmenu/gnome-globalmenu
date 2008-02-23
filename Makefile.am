@@ -1,6 +1,6 @@
 #
 
-SUBDIRS = libgnomenu servers test
+SUBDIRS = libgnomenu servers 
 
 if ENABLE_GTK_DOC
 SUBDIRS += doc
