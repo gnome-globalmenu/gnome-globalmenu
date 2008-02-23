@@ -1,40 +1,7 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
-/*
- * main.c
- * Copyright (C) Yu Feng 2007 <rainwoodman@localhost.localdomain>
- * 
- * main.c is free software.
- * 
- * You may redistribute it and/or modify it under the terms of the
- * GNU General Public License, as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option)
- * any later version.
- * 
- * main.c is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with main.c.  If not, write to:
- * 	The Free Software Foundation, Inc.,
- * 	51 Franklin Street, Fifth Floor
- * 	Boston, MA  02110-1301, USA.
- */
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-
 #include <config.h>
 
 #include <gtk/gtk.h>
 
-#define WNCK_I_KNOW_THIS_IS_UNSTABLE
-#include <libwnck/libwnck.h>
-#undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
 #include <panel-applet.h>
 #include "libgnomenu/serverhelper.h"
@@ -63,6 +30,7 @@
 
 #include "application.h"
 
+#include "log.h"
 
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet"
