@@ -2,8 +2,6 @@
 
 #include <gtk/gtk.h>
 
-
-#include <panel-applet.h>
 #include "libgnomenu/serverhelper.h"
 
 #include "application.h"
