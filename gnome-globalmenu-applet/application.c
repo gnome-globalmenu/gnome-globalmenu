@@ -20,7 +20,7 @@ Application * application_new(GtkContainer * window){
 }
 void application_destroy(Application * app){
 	LOG();
-	gnomenu_server_destroy(app->gtk->helper);
+	g_object_unref(app->gtk_helper);
 	//Destroy: app->kde_helper
 	g_free(app);
 }
