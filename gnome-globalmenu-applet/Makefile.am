@@ -1,11 +1,14 @@
 INCLUDES = -I$(top_srcdir) \
 	$(GNOME_GLOBALMENU_APPLET_CFLAGS)
 
+#if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
+
 libexec_PROGRAMS = gnome-globalmenu-applet
 
 DISTCLEANFILES = 
 gnome_globalmenu_applet_SOURCES = \
-	main.c \
+	main-gnome.c \
+	application.h \
 	application.h
 
 gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
