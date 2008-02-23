@@ -74,6 +74,6 @@ doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
 libgnomenu/libgnomenu.pc
-gnome-globalmenu-applet/Makefile
+servers/Makefile
 test/Makefile
 )
