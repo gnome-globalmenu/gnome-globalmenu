@@ -52,7 +52,7 @@ Makefile
 gnome2-globalmenu-applet.spec
 src/Makefile
 po/Makefile.in
-gnome2-globalmenu-applet.schema
+gnome2-globalmenu-applet.schemas
 gnome2-globalmenu-applet.desktop
 ],
 [

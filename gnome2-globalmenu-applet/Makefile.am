@@ -28,7 +28,7 @@ DISTCLEANFILES = $(intltool_files) $(scripts_files)
 bonobodir= `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
 bonobo_DATA= GNOME_GlobalMenuApplet.server
 schemadir= $(sysconfdir)/gconf/schemas
-schema_DATA= gnome2-globalmenu-applet.schema
+schema_DATA= gnome2-globalmenu-applet.schemas
 
 DISTCLEANFILES += GNOME_GlobalMenuApplet.server gnome2-globalmenu-applet.schema
 
