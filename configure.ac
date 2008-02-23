@@ -22,15 +22,26 @@ AC_ARG_ENABLE(standalone,
 	[	enable_standalone=$enableval ],
 	[	enable_standalone="yes" ])
 AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
+AM_CONDITIONAL([ENABLE_STANDALONE], [test "$enable_standalone" = "yes" ])
 AC_MSG_RESULT($enable_standalone)
+
 AC_MSG_CHECKING(--enable-gnome-applet argument)
 AC_ARG_ENABLE(gnome-applet,
 	[	--enable-gnome-applet	Include gnome-applet interface ],
 	[	enable_gnome_applet=$enableval ],
 	[	enable_gnome_applet="yes" ])
 AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
-
+AM_CONDITIONAL([ENABLE_GNOME_APPLET], [test "$enable_gnome_applet" = "yes" ])
 AC_MSG_RESULT($enable_gnome_applet)
+
+AC_MSG_CHECKING(--enable-xfce-plugin argument)
+AC_ARG_ENABLE(xfce-plugin,
+	[	--enable-xfce-plugin	Include xfce-plugin interface ],
+	[	enable_xfce_plugin=$enableval ],
+	[	enable_xfce_plugin="yes" ])
+AC_DEFINE([ENABLE_XFCE_PLUGIN], [], [enable xfce plugin])
+AM_CONDITIONAL([ENABLE_XFCE_PLUGIN], [test "$enable_xfce_plugin" = "yes" ])
+AC_MSG_RESULT($enable_xfce_plugin)
 
 PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
 if test "$enable_standalone" = "yes"; then
@@ -44,6 +55,12 @@ if test "$enable_gnome_applet" = "yes"; then
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
 	AC_DEFINE(ENABLE_GNOME_APPLET)
+fi
+if test "$enable_xfce_plugin" = "yes"; then
+	PKG_CHECK_MODULES(XFCE_GLOBALMENU_PLUGIN, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libxfce4panel-1.0])
+	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
+	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_LIBS)
+	AC_DEFINE(ENABLE_XFCE_PLUGIN)
 fi
 
 PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10, gdk-2.0])
