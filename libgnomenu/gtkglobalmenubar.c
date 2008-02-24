@@ -380,11 +380,8 @@ static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, Gnomen
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = TRUE;
-	gtk_widget_queue_resize(widget);
-	if(GTK_WIDGET_REALIZED(widget)){
-		gdk_window_reparent(menu_bar->container, menu_bar->floater, 0, 0);
-	}
 	_sync_remote_state(menu_bar);
+	_sync_local_state(menu_bar);
 }
 static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
@@ -666,25 +663,32 @@ static void _sync_remote_state				( GtkGlobalMenuBar * _self){
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
 	GET_OBJECT(_self, menu_bar, priv);
-	if(GTK_WIDGET_REALIZED(menu_bar)){
-		gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->floater);
-	}
-	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menu_bar));
-	if(GTK_WIDGET_TOPLEVEL(toplevel)){
-		if(GTK_WIDGET_REALIZED(toplevel)){
-			gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
+	if(priv->detached){
+		if(GTK_WIDGET_REALIZED(menu_bar)){
+			gnomenu_client_helper_send_realize(menu_bar->helper, menu_bar->floater);
+		}
+		toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menu_bar));
+		if(GTK_WIDGET_TOPLEVEL(toplevel)){
+			if(GTK_WIDGET_REALIZED(toplevel)){
+				gnomenu_client_helper_send_reparent(menu_bar->helper, toplevel->window);
+			}
 		}
 	}
 }
 static void _sync_local_state				( GtkGlobalMenuBar * _self){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_self, menu_bar, priv);
+	if(priv->detached)
+		gtk_widget_queue_resize(menu_bar);
+
 	if(GTK_WIDGET_REALIZED(menu_bar)){
 		GdkColormap * colormap = gtk_widget_get_colormap(GTK_WIDGET(menu_bar));
 		gdk_rgb_find_color(colormap, &priv->bgcolor);
 		gdk_window_set_background(menu_bar->container, &priv->bgcolor);
 		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
-
+		if(priv->detached){
+			gdk_window_reparent(menu_bar->container, menu_bar->floater, 0, 0);
+		}
 	}
 }
 static void 
