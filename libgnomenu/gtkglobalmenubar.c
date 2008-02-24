@@ -634,6 +634,7 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GtkRequisition req;
 	GET_OBJECT(menu_shell, menu_bar, priv);
 	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
+	LOG("widget name = %s", gtk_widget_get_name(widget));
 	if(GTK_WIDGET_REALIZED(menu_shell)) {
 		_set_child_parent_window(widget, menu_bar->container);
 	}
@@ -773,6 +774,17 @@ static void
 _set_child_parent_window (GtkWidget * widget, GdkWindow * window){
 	LOG_FUNC_NAME;
 	gtk_widget_set_parent_window(widget, window);
+	if(GTK_WIDGET_REALIZED(widget)){
+		gtk_widget_unrealize(widget);
+		gtk_widget_realize(widget);
+		LOG("realize hack");
+	}
+	if(GTK_WIDGET_VISIBLE(widget)){
+		gtk_widget_unmap(widget);
+		gtk_widget_map(widget);
+		gtk_widget_show(widget);
+		LOG("map hack");
+	}
 }
 static void
 _do_size_allocate (GtkWidget * widget,
