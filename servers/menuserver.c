@@ -145,6 +145,7 @@ static void _update_active_menu_bar (MenuServer * _self){
 	if(c){
 		switch(c->type){
 			case MENU_CLIENT_GTK:
+				gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 			break;

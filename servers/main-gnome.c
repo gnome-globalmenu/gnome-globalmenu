@@ -45,7 +45,11 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
-	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
+	//gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
+	GtkFixed * fixed = gtk_fixed_new();
+	gtk_container_add(applet, fixed);
+	gtk_fixed_set_has_window(fixed, TRUE);
+	application_new(fixed);
     return TRUE;
   } else {
 	return FALSE;
