@@ -50,6 +50,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	gtk_container_add(applet, fixed);
 	gtk_fixed_set_has_window(fixed, TRUE);
 	application_new(fixed);
+	gtk_widget_show_all(applet);
     return TRUE;
   } else {
 	return FALSE;
