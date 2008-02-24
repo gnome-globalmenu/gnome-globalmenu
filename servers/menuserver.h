@@ -18,3 +18,6 @@ typedef struct {
 MenuServer * menu_server_new(GtkWidget * window);
 void menu_server_destroy(MenuServer * server);
 #endif
+/*
+vim:ts=4:sw=4
+*/

@@ -84,3 +84,6 @@ int main (int argc, char *argv [])
 	g_object_unref (program);
 	return retval;
 }
+/*
+vim:ts=4:sw=4
+*/

@@ -16,18 +16,37 @@ struct _MenuClient {
 	GdkWindow * window; /*the window for the menu bar*/
 };
 
-static MenuClient * _add_client		(MenuServer * _self);
-static void _free_client			(MenuClient * client);
-static void _s_client_realize		(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper);
-static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper);
-static void _s_client_unrealize		(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper);
+static MenuClient * _add_client		( MenuServer * _self);
+static void _free_client			( MenuClient * client);
 static void 
-	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen);
+	_s_client_realize				( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
 static void 
-	_s_window_size_allocate			(MenuServer * _self, GtkAllocation * allocation, GtkWidget * widget);
+	_s_client_reparent				( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
 static void 
-	_s_gtk_helper_size_request		(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper);
+	_s_client_unrealize				( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
+static void 
+	_s_screen_active_window_changed	( MenuServer * _self, 
+									  WnckWindow * previous, 
+									  WnckScreen * screen);
+static void 
+	_s_window_size_allocate			( MenuServer * _self, 
+									  GtkAllocation * allocation, 
+									  GtkWidget * widget);
+static void 
+	_s_gtk_helper_size_request		( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
 			
+static void 
+	_update_active_menu_bar 		( MenuServer * _self);
+static MenuClient * 
+	_find_client_by_parent			( MenuServer * _self, GdkNativeWindow parent);
 
 MenuServer * menu_server_new(GtkWidget * window){
 	MenuServer * server = g_new0(MenuServer, 1);
@@ -75,8 +94,14 @@ static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, Gnome
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
 	g_assert(c);
 	c->parent = ci->parent_window;
+	_update_active_menu_bar(_self);
 }
 static void _s_client_unrealize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
+	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
+	g_assert(c);
+	if( _self->active == c ){
+		_self->active = NULL;
+	}
 	g_hash_table_remove(_self->clients, ci);
 }
 static MenuClient * _find_client_by_parent(MenuServer * _self, GdkNativeWindow parent){
@@ -89,11 +114,10 @@ static MenuClient * _find_client_by_parent(MenuServer * _self, GdkNativeWindow p
 	g_list_free(list);
 	return rt;
 }
-static void 
-	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
+static void _update_active_menu_bar (MenuServer * _self){
 	GdkNativeWindow parent_transient ;
 	GdkNativeWindow parent;
-	WnckWindow * active = wnck_screen_get_active_window(screen);
+	WnckWindow * active = wnck_screen_get_active_window(_self->screen);
 	MenuClient * c = NULL;
 	if(active){
 		WnckWindow * active_transient = wnck_window_get_transient(active);
@@ -108,6 +132,16 @@ static void
 	} else {
 		LOG("active is nil");
 	}
+	if(_self->active){
+		switch(_self->active->type){
+			case MENU_CLIENT_GTK:
+				gnomenu_server_helper_set_visibility(_self->gtk_helper, _self->active->handle, FALSE);
+			break;
+			case MENU_CLIENT_KDE:
+				/*try to hide it*/
+			break;
+		}
+	}
 	if(c){
 		switch(c->type){
 			case MENU_CLIENT_GTK:
@@ -118,8 +152,12 @@ static void
 				gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 			break;
 		}
-		_self->active = c;
 	}
+	_self->active = c;
+}
+static void 
+	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
+	_update_active_menu_bar(_self);
 }
 static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	ci->allocation.width = _self->window->allocation.width;
@@ -140,3 +178,6 @@ static void _s_window_size_allocate(MenuServer * _self, GtkAllocation * allocati
 		break;
 	}
 }
+/*
+ vim:ts=4:sw=4
+*/

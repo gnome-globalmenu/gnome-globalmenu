@@ -27,3 +27,6 @@ static void _s_window_destroy(GtkWidget * widget, Application * app){
 	application_destroy(app);
 }
 
+/*
+vim:ts=4:sw=4
+*/

@@ -9,3 +9,6 @@ typedef struct _Application {
 Application * application_new(GtkContainer * window);
 void application_destroy(Application * app);
 #endif
+/*
+vim:ts=4:sw=4
+*/
