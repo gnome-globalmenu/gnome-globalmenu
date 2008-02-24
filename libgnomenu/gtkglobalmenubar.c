@@ -909,3 +909,6 @@ GET_OBJECT(widget, glb_menu_bar, glb_priv);
     }
 
 }
+/*
+vim:ts=4:sw=4
+*/
