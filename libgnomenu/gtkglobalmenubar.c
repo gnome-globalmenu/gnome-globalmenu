@@ -792,7 +792,8 @@ GET_OBJECT(widget, glb_menu_bar, glb_priv);
   direction = gtk_widget_get_direction (widget);
 
   gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
-
+	LOG("internal-padding = %d", ipadding);
+	LOG("border_widget = %d", GTK_CONTAINER(menu_bar)->border_width);
   pack_direction = gtk_menu_bar_get_pack_direction(menu_bar);
   child_pack_direction = gtk_menu_bar_get_child_pack_direction(menu_bar);
   
