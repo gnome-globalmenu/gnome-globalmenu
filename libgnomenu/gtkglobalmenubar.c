@@ -113,8 +113,10 @@ static gboolean _s_delete_event			( GtkWidget * widget,
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
-static void _sync_remote_state				( GtkGlobalMenuBar * menubar);
-static void _sync_local_state				( GtkGlobalMenuBar * menubar);
+static void 
+	_set_child_parent_window		( GtkWidget * widget, GdkWindow * window);
+static void _sync_remote_state		( GtkGlobalMenuBar * menubar);
+static void _sync_local_state		( GtkGlobalMenuBar * menubar);
 
 G_DEFINE_TYPE (GtkGlobalMenuBar, gtk_global_menu_bar, GTK_TYPE_MENU_BAR)
 
@@ -544,9 +546,6 @@ _realize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 
-/*TODO: remove calling the parent realize function. use our own instead to
- * avoid side effects.*/
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
 
 	attributes.x = 0;
 	attributes.y = 0;
@@ -601,8 +600,12 @@ _realize (GtkWidget * widget){
 	gdk_window_set_user_data (menu_bar->floater, widget);
 
 	gtk_container_forall(GTK_CONTAINER(widget), 
-           (GtkCallback)(gtk_widget_set_parent_window), 
+           (GtkCallback)(_set_child_parent_window), 
            (gpointer)(menu_bar->container));
+
+/*TODO: remove calling the parent realize function. use our own instead to
+ * avoid side effects.*/
+	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
 
 	_sync_remote_state(menu_bar);
 	_sync_local_state(menu_bar);
@@ -633,14 +636,16 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	LOG_FUNC_NAME;
 	GtkRequisition req;
 	GET_OBJECT(menu_shell, menu_bar, priv);
-	if(GTK_WIDGET_REALIZED(menu_shell)) {
-		gtk_widget_set_parent_window(widget, menu_bar->container);
-	}
 	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
+	if(GTK_WIDGET_REALIZED(menu_shell)) {
+		_set_child_parent_window(widget, menu_bar->container);
+	}
 	if(priv->detached){
+/*		We depend on widget signal loop
 		_calc_size_request(menu_bar, &req);
 		LOG("widget req: %d, %d", widget->requisition);
 		gnomenu_client_helper_request_size(menu_bar->helper, &req);
+*/
 	}
 }
 
@@ -651,8 +656,10 @@ _remove (GtkContainer * container, GtkWidget * widget){
 	GET_OBJECT(container, menu_bar, priv);
 	GTK_CONTAINER_CLASS(gtk_global_menu_bar_parent_class)->remove(container, widget);
 	if(priv->detached){
-		_calc_size_request(menu_bar, &req);
+/*		we depend on widget signal loop.
+ *		calc_size_request(menu_bar, &req);
 		gnomenu_client_helper_request_size(menu_bar->helper, &req);
+*/
 	}
 }
 static void _sync_remote_state				( GtkGlobalMenuBar * _self){
@@ -757,6 +764,11 @@ _calc_size_request (
 
     }
 	LOG("request:%d, %d", *requisition);
+}
+static void
+_set_child_parent_window (GtkWidget * widget, GdkWindow * window){
+	LOG_FUNC_NAME;
+	gtk_widget_set_parent_window(widget, window);
 }
 static void
 _do_size_allocate (GtkWidget * widget,
