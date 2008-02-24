@@ -11,6 +11,6 @@ GtkEventBox * ui_create_label_area(struct _Application * App);
 GtkEventBox * ui_create_event_box_with_icon(const gchar * stock_id);
 void ui_repaint_all(struct _Application * App);
 void ui_create_all(Application * App, UICallbacks * callbacks);
-void ui_show_about(Application * App);
+void ui_show_about(GtkWidget * widget, Application * App);
 extern gboolean is_xfce;
 

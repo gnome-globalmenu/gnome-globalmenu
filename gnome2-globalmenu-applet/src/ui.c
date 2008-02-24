@@ -175,7 +175,7 @@ void ui_repaint_all(Application * App){
 
 }
 
-void ui_show_about(Application * App){
+void ui_show_about(GtkWidget * widget, Application * App){
 	gchar * authors[] = {
 		"Yu Feng <rainwoodman@gmail.com>",
 		"Mingxi Wu <fengshenx.@gmail.com>",

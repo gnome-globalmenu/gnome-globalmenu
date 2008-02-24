@@ -43,6 +43,7 @@
 #include <libxfce4util/libxfce4util.h>
 #include <libxfcegui4/libxfcegui4.h>
 #include <libxfce4panel/xfce-panel-plugin.h>
+#include <libxfce4panel/xfce-panel-plugin-iface.h>
 //workaround a weird bug in xfce4 includes
 #undef _
 #undef Q_
@@ -446,8 +447,8 @@ static gboolean forward_action_cb(GtkWidget * widget, GdkEventButton * button, A
 
 static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
 	g_message("%s: cname = %s", __func__, cname);
-	if(g_str_equal(cname, "About")) ui_show_about(App);
-	if(g_str_equal(cname, "Preference")) preference_show_dialog(App);
+	if(g_str_equal(cname, "About")) ui_show_about(NULL, App);
+	if(g_str_equal(cname, "Preference")) preference_show_dialog(NULL, App);
 }
 
 static Application * application_new(GtkContainer * mainwindow){
@@ -478,7 +479,15 @@ static Application * application_new(GtkContainer * mainwindow){
 /******The delete-event not useful any more, since panel-applet dont receive it. *******/
 	g_signal_connect(G_OBJECT(App->MainWindow), "delete-event",
 		G_CALLBACK(main_window_delete_cb), App);
-  if (!is_xfce) {
+  if (is_xfce) {
+		xfce_panel_plugin_menu_show_about(XFCE_PANEL_PLUGIN(App->MainWindow));
+		xfce_panel_plugin_menu_show_configure(XFCE_PANEL_PLUGIN(App->MainWindow));
+		g_signal_connect(G_OBJECT(App->MainWindow), "about",
+				G_CALLBACK(ui_show_about), App);
+		g_signal_connect(G_OBJECT(App->MainWindow), "configure-plugin",
+				G_CALLBACK(preference_show_dialog), App);
+	}
+	else {
 		g_signal_connect(G_OBJECT(App->MainWindow), "change-background",
 				G_CALLBACK(main_window_change_background_cb), App);
 		g_signal_connect(G_OBJECT(App->MainWindow), "change-orient",

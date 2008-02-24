@@ -3,6 +3,11 @@
 #include <X11/Xatom.h>
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
+#include <libxfce4util/libxfce4util.h>
+#include <libxfce4panel/xfce-panel-plugin.h>
+// work around a weird bug in XFCE includes
+#undef _
+#undef Q_
 #include <panel-applet.h>
 
 #include "typedefs.h"
@@ -42,14 +47,27 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 	switch(arg){
 		case GTK_RESPONSE_ACCEPT: 
 			g_message("Preference Accepted");
-#define MY_GET_PROP(x, func) dlg->App->AppletProperty.x = func (dlg->x)
+#define MY_GET_PROP(x, func) dlg->App->AppletProperty.x = func (GTK_TOGGLE_BUTTON(dlg->x))
 			MY_GET_PROP(show_title, gtk_toggle_button_get_active);
 			MY_GET_PROP(show_icon, gtk_toggle_button_get_active);
 			MY_GET_PROP(show_arrows, gtk_toggle_button_get_active);
 			MY_GET_PROP(title_max_width_chars, gtk_spin_button_get_value);
 #undef MY_GET_PROP
 			if (is_xfce) {
-				// TODO: Implement saving preferences for XFCE panel
+				gchar *config_name = xfce_panel_plugin_save_location(XFCE_PANEL_PLUGIN(dlg->App->MainWindow), TRUE);
+				if (config_name) {
+					XfceRc* rc = xfce_rc_simple_open(config_name, FALSE);
+					if (rc) {
+#define MY_STORE_PROP(type, x) xfce_rc_write_##type##_entry(rc, #x, dlg->App->AppletProperty.x);
+						MY_STORE_PROP(bool, show_title);
+						MY_STORE_PROP(bool, show_icon);
+						MY_STORE_PROP(bool, show_arrows);
+						MY_STORE_PROP(int, title_max_width_chars);
+#undef MY_STORE_PROP
+						xfce_rc_close(rc);
+					}
+					g_free(config_name);
+				}
 			}
 			else {
 #define MY_STORE_PROP(type ,x) panel_applet_gconf_set_##type(dlg->App->MainWindow, #x, dlg->App->AppletProperty.x, NULL)
@@ -68,11 +86,23 @@ static void preference_dlg_cb(GtkDialog * nouse, gint arg, PrefDialog * dlg){
 }
 void preference_load_conf(Application * App){
 	if (is_xfce) {
-		// TODO: Implement loading preferences for XFCE panel
 		App->AppletProperty.show_title = TRUE;
 		App->AppletProperty.show_icon = TRUE;
 		App->AppletProperty.show_arrows = FALSE;
 		App->AppletProperty.title_max_width_chars = 15;
+
+		gchar * config_name = xfce_panel_plugin_lookup_rc_file(XFCE_PANEL_PLUGIN(App->MainWindow));
+		if (config_name) {
+			XfceRc * rc = xfce_rc_simple_open(config_name, TRUE);
+			if (rc) {
+#define MY_GET_PROP(type, x, fallback) App->AppletProperty.x = xfce_rc_read_##type##_entry(rc, #x, fallback)
+				MY_GET_PROP(bool, show_title, TRUE);
+				MY_GET_PROP(bool, show_icon, TRUE);
+				MY_GET_PROP(bool, show_arrows, FALSE);
+				MY_GET_PROP(int, title_max_width_chars, 15);
+#undef MY_GET_PROP
+			}
+		}
 	}
 	else {
 		panel_applet_add_preferences(App->MainWindow, "/app/gnome2-globalmenu-applet", NULL);
@@ -85,7 +115,7 @@ void preference_load_conf(Application * App){
 	}
 }
 
-void preference_show_dialog(Application * App){
+void preference_show_dialog(GtkWidget * widget, Application * App){
 	PrefDialog * dlg = g_new0(PrefDialog, 1);
 	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
 	GtkWidget * show = gtk_label_new(_("Display following elements"));
