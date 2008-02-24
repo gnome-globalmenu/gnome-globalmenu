@@ -19,8 +19,8 @@ libgnomenu_la_SOURCES = \
 	clienthelper.h \
     gtkglobalmenubar.h \
 	gtkglobalmenubar.c \
-	quirks.h	
-#	quirks.c
+	quirks.h	\
+	quirks.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
