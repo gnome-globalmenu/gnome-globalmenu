@@ -393,9 +393,16 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	gtk_widget_restore_default_style(widget);
 	gtk_widget_queue_resize(widget);
 	if(GTK_WIDGET_REALIZED(widget)){
+	/* TODO: figure out how to detect a sudden death of server */
+		gtk_widget_unrealize(widget);
+		gtk_widget_realize(widget);
+		gtk_widget_unmap(widget);
+		gtk_widget_map(widget);	
+	/* for a regular shutdown, following is enough 
 		gdk_window_reparent(menu_bar->container, widget->window, 0, 0);
 		gdk_window_show(menu_bar->container);
 		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
+	*/
 	}
 }
 static void _s_position_set 		( GtkWidget  * widget, 
