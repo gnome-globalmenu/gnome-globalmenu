@@ -293,9 +293,16 @@ _size_request (GtkWidget      *widget,
 
 	g_return_if_fail (GTK_IS_MENU_BAR (widget));
 	g_return_if_fail (requisition != NULL);
+	LOG_FUNC_NAME;
 
 	GET_OBJECT(widget, menu_bar, priv);
 	if (priv->detached) {
+		/* This is a quirk. Workaround for evolution and other
+ 		   Applications that changes menu item size and use
+		   'gtk_widget_queue_resize' or whatever on the menu bar
+		*/
+		GtkRequisition useless;
+		_calc_size_request(widget, &useless);
 		requisition->width = 0;
 		requisition->height = 0;
  	} else {
@@ -308,6 +315,7 @@ _s_size_request (
 	GtkWidget * widget,
 	GtkRequisition *  requisition,
 	GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
 	_calc_size_request (widget, requisition);
 }
 static void
@@ -327,6 +335,12 @@ _size_allocate (GtkWidget     *widget,
 				allocation->width,
 				allocation->height);
 		}
+		/* This is a quirk. Workaround for evolution and other
+ 		   Applications that changes menu item size and use
+		   'gtk_widget_queue_resize' or whatever on the menu bar
+		*/
+		_do_size_allocate(widget, &menu_bar->allocation);
+		
 	} else {
 		menu_bar->allocation = *allocation;	
 		if(GTK_WIDGET_REALIZED(widget)){
@@ -343,6 +357,7 @@ static void
 _s_size_allocate (GtkWidget * widget, 
 	GtkAllocation * allocation,
 	GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	menu_bar->allocation = *allocation;	
 	if(GTK_WIDGET_REALIZED(widget)){
@@ -500,6 +515,7 @@ _hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel)
 {
 	GtkWidget *toplevel;  
+	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
 	toplevel = gtk_widget_get_toplevel(widget);
