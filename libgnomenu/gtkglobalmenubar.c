@@ -546,6 +546,9 @@ _realize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 
+/*TODO: remove calling the parent realize function. use our own instead to
+ * avoid side effects.*/
+	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
 
 	attributes.x = 0;
 	attributes.y = 0;
@@ -603,9 +606,6 @@ _realize (GtkWidget * widget){
            (GtkCallback)(_set_child_parent_window), 
            (gpointer)(menu_bar->container));
 
-/*TODO: remove calling the parent realize function. use our own instead to
- * avoid side effects.*/
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
 
 	_sync_remote_state(menu_bar);
 	_sync_local_state(menu_bar);
