@@ -158,6 +158,10 @@ static void _update_active_menu_bar (MenuServer * _self){
 }
 static void 
 	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
+	WnckWindow * active = wnck_screen_get_active_window(_self->screen);
+	if(wnck_window_get_pid(active) == getpid()){
+		return;
+	}
 	_update_active_menu_bar(_self);
 }
 static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
