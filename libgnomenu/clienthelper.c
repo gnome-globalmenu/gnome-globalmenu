@@ -405,7 +405,6 @@ _c_server_new(GnomenuClientHelper * _self){
 static void 
 _c_server_destroy(GnomenuClientHelper * _self){
 	LOG_FUNC_NAME;
-	LOG("Menu server quited before client exits");
 }
 static void 
 _c_size_allocate(GnomenuClientHelper * _self, GtkAllocation * allocation){
