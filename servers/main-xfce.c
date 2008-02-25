@@ -43,22 +43,7 @@ xfce_applet_construct(XfcePanelPlugin *plugin)
 	application_new(GTK_CONTAINER(plugin));
 }
 
-int 
-main (int argc, char **argv) 
-{ 
-	// The following code was stolen from xfce4/libxfce4panel/xfce-panel-plugin.h
-	// REGISTER_EXTERNAL_PLUGIN macro
-	GtkWidget *plugin; 
-	gtk_init (&argc, &argv); 
-	plugin = xfce_external_panel_plugin_new (argc, argv, 
-							 (XfcePanelPluginFunc)xfce_applet_construct); 
-	if (!plugin) return 1; 
-		g_signal_connect_after (plugin, "destroy", 
-							G_CALLBACK (exit), NULL); 
-	gtk_widget_show (plugin); 
-	gtk_main (); 
-	return 0; 
-}
+XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL(xfce_applet_construct)
 
 /*
 vim:ts=4:sw=4
