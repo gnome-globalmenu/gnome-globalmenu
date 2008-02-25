@@ -897,7 +897,6 @@ _do_child_size_allocate_y(GtkWidget * child,
 static gboolean
 _do_child_size_allocate(GtkWidget * child,
 	GtkAllocation * allocation,
-	GtkAllocation * _child_allocation,
 	gint offset,
 	gint * _ltr_run, 
 	GtkTextDirection direction,
@@ -905,17 +904,23 @@ _do_child_size_allocate(GtkWidget * child,
 	GtkPackDirection child_pack_direction,
 	gboolean respect_right_justify){
 
+	GtkAllocation child_allocation;
+
 	switch(pack_direction){
 		case GTK_PACK_DIRECTION_LTR:
 		case GTK_PACK_DIRECTION_RTL:
+			child_allocation.y = offset;
+			child_allocation.height = MAX (1, (gint)allocation->height - offset * 2);
 			return 
-			_do_child_size_allocate_x(child, allocation, _child_allocation, offset, _ltr_run,
+			_do_child_size_allocate_x(child, allocation, &child_allocation, offset, _ltr_run,
 				direction, pack_direction, child_pack_direction, respect_right_justify);
 		break;	
 		case GTK_PACK_DIRECTION_TTB:
 		case GTK_PACK_DIRECTION_BTT:
+			child_allocation.x = offset;
+			child_allocation.width = MAX (1, (gint)allocation->width - offset * 2);
 			return
-			_do_child_size_allocate_y(child, allocation, _child_allocation, offset, _ltr_run,
+			_do_child_size_allocate_y(child, allocation, &child_allocation, offset, _ltr_run,
 				direction, pack_direction, child_pack_direction, respect_right_justify);
 		break;
 	}
@@ -965,26 +970,10 @@ _do_size_allocate (GtkWidget * widget,
 		children = menu_shell->children;
 		ltr_run = offset;
       
-		switch(pack_direction){
-		
-			case GTK_PACK_DIRECTION_LTR:
-			case GTK_PACK_DIRECTION_RTL:
-				child_allocation.y = offset;
-				child_allocation.height = MAX (1, (gint)allocation->height - child_allocation.y * 2);
-
-			break;
-			case GTK_PACK_DIRECTION_TTB:
-			case GTK_PACK_DIRECTION_BTT:
-				child_allocation.x = offset;
-				child_allocation.width = MAX (1, (gint)allocation->width - child_allocation.x * 2);
-
-			break;
-		}
-
 		while (children) {
 			child = children->data;
 			children = children->next;
-			_do_child_size_allocate(child, allocation, &child_allocation, offset, &ltr_run,
+			_do_child_size_allocate(child, allocation, offset, &ltr_run,
 				direction, pack_direction, child_pack_direction, children == NULL);
 		}
 	}
