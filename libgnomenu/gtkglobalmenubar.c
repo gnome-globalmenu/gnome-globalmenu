@@ -672,10 +672,11 @@ _realize (GtkWidget * widget){
            (GtkCallback)(_set_child_parent_window), 
            (gpointer)(menu_bar->container));
 
-	g_list_foreach(priv->popup_items, 
-           (GtkCallback)(_set_child_parent_window), 
-           (gpointer)(priv->popup));
-
+	if(priv->popup_items){
+		g_list_foreach(priv->popup_items, 
+			   (GtkCallback)(_set_child_parent_window), 
+			   (gpointer)(priv->popup));
+	}
 	_sync_remote_state(menu_bar);
 	_sync_local_state(menu_bar);
 }
@@ -696,6 +697,9 @@ _map (GtkWidget * widget){
 	g_return_if_fail(GTK_WIDGET_REALIZED(widget));
 	if(!priv->detached){
 		gdk_window_show(menu_bar->container);
+	}
+	if(priv->popup_items){
+		gdk_window_show(priv->popup);
 	}
 	gdk_window_show(widget->window);
 	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->map(widget);
@@ -1079,35 +1083,43 @@ _do_size_allocate (GtkWidget * widget,
 
 	npopup_items = g_list_length(priv->popup_items);
 	LOG("# of popup_items: %d\n", npopup_items);
-	priv->popup_allocation.x = 0;
-	priv->popup_allocation.y = 0;
-	priv->popup_allocation.width = 0;
-	priv->popup_allocation.height = 0;
-	offset = 0;
-	ltr_run = 0;
-	for(node = g_list_first(priv->popup_items); node; node = g_list_next(node)){
-		child = node->data;
-		priv->popup_allocation.height += child->requisition.height;
-		priv->popup_allocation.width = MAX(priv->popup_allocation.width, child->requisition.width);
-	}
-	LOG("popup allocation: %d, %d, %d, %d", priv->popup_allocation);
-	child_allocation.x = 0;
-	child_allocation.width = MAX (1, (gint)allocation->width - offset * 2);
-	if(GTK_WIDGET_REALIZED(widget)){
-		gdk_window_move_resize(priv->popup,
-			priv->popup_allocation.x,
-			priv->popup_allocation.y,
-			priv->popup_allocation.width,
-			priv->popup_allocation.height);
-
-	}
-	for(node = g_list_first(priv->popup_items); node; node = g_list_next(node)){
-		child = node->data;
-		if(GTK_WIDGET_REALIZED(node->data)){
-			_set_child_parent_window(child, priv->popup);
+	if(npopup_items >0){
+		priv->popup_allocation.x = 0;
+		priv->popup_allocation.y = 0;
+		priv->popup_allocation.width = 0;
+		priv->popup_allocation.height = 0;
+		offset = 0;
+		ltr_run = 0;
+		for(node = g_list_first(priv->popup_items); node; node = g_list_next(node)){
+			GtkRequisition child_req;
+			child = node->data;
+			gtk_widget_size_request(child, &child_req);
+			priv->popup_allocation.height += child_req.height;
+			priv->popup_allocation.width = MAX(priv->popup_allocation.width, child_req.width);
 		}
-		_do_child_size_allocate_y(child, &priv->popup_allocation, &child_allocation, offset, &ltr_run,
-			direction, pack_direction, child_pack_direction, FALSE);
+		LOG("popup allocation: %d, %d, %d, %d", priv->popup_allocation);
+		child_allocation.x = 0;
+		child_allocation.width = MAX (1, (gint)allocation->width - offset * 2);
+		if(GTK_WIDGET_REALIZED(widget)){
+			gdk_window_move_resize(priv->popup,
+				priv->popup_allocation.x,
+				priv->popup_allocation.y,
+				priv->popup_allocation.width,
+				priv->popup_allocation.height);
+			gdk_window_show(priv->popup);
+		}
+		for(node = g_list_first(priv->popup_items); node; node = g_list_next(node)){
+			child = node->data;
+			if(GTK_WIDGET_REALIZED(node->data)){
+				_set_child_parent_window(child, priv->popup);
+			}
+			_do_child_size_allocate_y(child, &priv->popup_allocation, &child_allocation, offset, &ltr_run,
+				direction, pack_direction, child_pack_direction, FALSE);
+		}
+	} else {
+		if(GTK_WIDGET_REALIZED(widget)){
+			gdk_window_hide(priv->popup);
+		}
 	}
 }
 /*
