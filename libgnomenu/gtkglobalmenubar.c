@@ -960,32 +960,27 @@ _do_size_allocate (GtkWidget * widget,
 	child_pack_direction = gtk_menu_bar_get_child_pack_direction(menu_bar);
   
 	if (menu_shell->children) {
-		child_allocation.x = (GTK_CONTAINER (menu_bar)->border_width +
-				ipadding + 
-				BORDER_SPACING);
-		child_allocation.y = (GTK_CONTAINER (menu_bar)->border_width +
-				BORDER_SPACING);
+		offset = (GTK_CONTAINER(menu_bar)->border_width + ipadding + BORDER_SPACING);
+		
+		children = menu_shell->children;
+		ltr_run = offset;
       
 		switch(pack_direction){
 		
 			case GTK_PACK_DIRECTION_LTR:
 			case GTK_PACK_DIRECTION_RTL:
+				child_allocation.y = offset;
 				child_allocation.height = MAX (1, (gint)allocation->height - child_allocation.y * 2);
 
-				offset = child_allocation.x; 	/* Window edge to menubar start */
 			break;
 			case GTK_PACK_DIRECTION_TTB:
 			case GTK_PACK_DIRECTION_BTT:
+				child_allocation.x = offset;
 				child_allocation.width = MAX (1, (gint)allocation->width - child_allocation.x * 2);
 
-				offset = child_allocation.y; 	/* Window edge to menubar start */
 			break;
 		}
 
-		offset = (GTK_CONTAINER(menu_bar)->border_width + ipadding + BORDER_SPACING);
-		
-		children = menu_shell->children;
-		ltr_run = offset;
 		while (children) {
 			child = children->data;
 			children = children->next;
