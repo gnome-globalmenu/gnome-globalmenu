@@ -67,12 +67,22 @@ static void
 									  GnomenuClientInfo * ci, 
 									  GnomenuServerHelper * helper);
 			
+static void _c_active_client_changed( MenuServer * _self);
+
 static void 
 	_update_active_menu_bar 		( MenuServer * _self);
 static MenuClient * 
 	_find_client_by_parent			( MenuServer * _self, GdkNativeWindow parent);
+static gboolean _is_client			( MenuServer * server, MenuClient * client);
 
 G_DEFINE_TYPE		(MenuServer, menu_server, G_TYPE_OBJECT);
+
+enum {
+	ACTIVE_CLIENT_CHANGED,
+	SIGNAL_MAX,
+};
+gulong class_signals[SIGNAL_MAX] = {0};
+
 static void
 menu_server_class_init(MenuServerClass * klass){
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
@@ -85,6 +95,18 @@ menu_server_class_init(MenuServerClass * klass){
 	gobject_class->constructor = _constructor;
 	gobject_class->set_property = _set_property;
 	gobject_class->get_property = _get_property;
+	klass->active_client_changed = _c_active_client_changed;
+
+	class_signals[ACTIVE_CLIENT_CHANGED] =
+		g_signal_new("active-client-changed",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (MenuServerClass, active_client_changed),
+			NULL,
+			NULL,
+			g_cclosure_marshal_VOID__VOID,
+			G_TYPE_NONE,
+			0);
 
 	g_object_class_install_property (gobject_class,
 		PROP_WINDOW,
@@ -253,6 +275,8 @@ static void _update_active_menu_bar (MenuServer * _self){
 		}
 	}
 	_self->active = c;
+	g_signal_emit(_self, class_signals[ACTIVE_CLIENT_CHANGED],
+		0);
 }
 static void 
 	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
@@ -280,6 +304,26 @@ static void _s_window_size_allocate(MenuServer * _self, GtkAllocation * allocati
 		LOG("KDE unhandled");
 		break;
 	}
+}
+static void _c_active_client_changed( MenuServer * _self){
+
+}
+static gboolean _is_client(MenuServer * server, MenuClient * client){
+	GList * node = NULL;
+	GList * list = g_hash_table_get_values(server->clients);
+	gboolean rt = FALSE;
+	for(node = g_list_first(list); node; node = g_list_next(node)){
+		if(node->data == client) {
+			rt = TRUE;
+			break;
+		}
+	}
+	g_list_free(list);
+	return rt;
+}
+WnckWindow * menu_server_get_client_parent(MenuServer  * server, MenuClient * client){
+	g_assert(_is_client(server, client));
+	return wnck_window_get(client->parent);
 }
 /*
  vim:ts=4:sw=4

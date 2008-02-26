@@ -26,10 +26,13 @@ typedef struct {
 } MenuServer;
 typedef struct {
 	GObjectClass parent;
+	void (*active_client_changed)(MenuServer * server);
 } MenuServerClass;
 GType menu_server_get_type (void);
 
 MenuServer * menu_server_new(GtkWidget * window);
+WnckWindow * menu_server_get_client_parent(MenuServer * server, MenuClient * client);
+
 void menu_server_destroy(MenuServer * server);
 
 G_END_DECLS

@@ -3,7 +3,8 @@
 #include "menuserver.h"
 #include "log.h"
 
-static void _s_window_destroy(GtkWidget * widget, Application * app);
+static void _s_window_destroy(Application * app, GtkWidget * widget);
+static void _s_active_client_changed(Application * app, MenuServer * server);
 
 Application * application_new(GtkContainer * window){
 	LOG();	
@@ -25,10 +26,12 @@ Application * application_new(GtkContainer * window){
 	gtk_container_add(app->window, box);
 	app->server = menu_server_new(app->menu_bar_area);
 
-	g_signal_connect(G_OBJECT(app->window), 
+	g_signal_connect_swapped(G_OBJECT(app->window), 
 		"destroy",
         G_CALLBACK(_s_window_destroy), app);
-
+	g_signal_connect_swapped(G_OBJECT(app->server),
+		"active-client-changed",
+		G_CALLBACK(_s_active_client_changed), app);
 	return app;
 }
 void application_destroy(Application * app){
@@ -36,8 +39,14 @@ void application_destroy(Application * app){
 	menu_server_destroy(app->server);
 	g_free(app);
 }
+static void _s_active_client_changed(Application * app, MenuServer * server){
+	if(server->active){
+		WnckWindow * window = menu_server_get_client_parent(server, server->active);
+		LOG("active window title = %s", wnck_window_get_name(window));
+	}
+}
 
-static void _s_window_destroy(GtkWidget * widget, Application * app){
+static void _s_window_destroy(Application * app, GtkWidget * widget){
 	LOG();
 	application_destroy(app);
 }
