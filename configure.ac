@@ -19,7 +19,7 @@ AC_MSG_CHECKING(--enable-tracing arguement)
 AC_ARG_ENABLE(tracing,
 	[	--enable-tracing Enable many debugging information (1,2,no)],
 	[	enable_tracing=$enableval ],
-	[	enable_tracing="2"	])
+	[	enable_tracing="1"	])
 AC_MSG_RESULT($enable_tracing)
 
 if test "$enable_tracing" != "no"; then
