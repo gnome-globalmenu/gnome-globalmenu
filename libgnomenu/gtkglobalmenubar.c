@@ -818,7 +818,6 @@ _set_child_parent_window (GtkWidget * widget, GdkWindow * window){
 static void
 _do_size_allocate (GtkWidget * widget,
 	GtkAllocation * allocation){
-	GtkMenuBar *menu_bar;
 	GtkMenuShell *menu_shell;
 	GtkWidget *child;
 	GList *children;
@@ -835,12 +834,11 @@ _do_size_allocate (GtkWidget * widget,
 	g_return_if_fail (GTK_IS_MENU_BAR (widget));
 	g_return_if_fail (allocation != NULL);
 
-	GET_OBJECT(widget, glb_menu_bar, glb_priv);
-	menu_bar = GTK_MENU_BAR (widget);
+	GET_OBJECT(widget, menu_bar, priv);
 	menu_shell = GTK_MENU_SHELL (widget);
 
 	if(GTK_WIDGET_REALIZED(widget)){
-		gdk_window_move_resize(glb_menu_bar->container,
+		gdk_window_move_resize(menu_bar->container,
 			0,
 			0,
 			allocation->width,
