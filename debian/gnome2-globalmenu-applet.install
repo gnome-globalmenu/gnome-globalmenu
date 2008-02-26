@@ -1,5 +1,5 @@
-debian/tmp/usr/lib/libgnomenu.so.*
-debian/tmp/etc
 debian/tmp/usr/lib/bonobo
-debian/tmp/usr/lib/gnome2-globalmenu-applet
-debian/tmp/usr/share
+debian/tmp/usr/lib/gnome2-globalmenu-applet/gnome-globalmenu-applet
+debian/tmp/usr/share/doc/gnome-globalmenu
+debian/tmp/usr/lib/libgnomenu.so*
+debian/tmp/etc/

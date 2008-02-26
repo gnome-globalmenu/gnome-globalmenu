@@ -54,6 +54,6 @@ globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 DISTCLEANFILES += $(server_file_DATA)
 
 GNOME_GlobalMenuApplet.server:
-	./make-gnome-data.sh $@ $(libexecdir)
+	/bin/sh make-gnome-data.sh $@ $(libexecdir)
 xfce-globalmenu-plugin.desktop:
-	./make-xfce-data.sh $@ $(libexecdir)
+	/bin/sh make-xfce-data.sh $@ $(libexecdir)
