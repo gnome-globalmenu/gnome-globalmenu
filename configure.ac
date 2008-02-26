@@ -15,10 +15,22 @@ AC_HEADER_STDC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
+AC_MSG_CHECKING(--enable-tracing arguement)
+AC_ARG_ENABLE(tracing,
+	[	--enable-tracing Enable many debugging information ],
+	[	enable_tracing=$enableval ],
+	[	enable_tracing="yes"	])
+AC_MSG_RESULT($enable_tracing)
+
+if test "$enable_tracing" = "yes"; then
+	AC_DEFINE([ENABLE_TRACING], [], [enable tracing])
+fi
+
+dnl Servers;
 
 AC_MSG_CHECKING(--enable-standalone argument)
 AC_ARG_ENABLE(standalone,
-	[	--enable-standalone	Include standalone menu server) ],
+	[	--enable-standalone	Include standalone menu server ],
 	[	enable_standalone=$enableval ],
 	[	enable_standalone="yes" ])
 AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
