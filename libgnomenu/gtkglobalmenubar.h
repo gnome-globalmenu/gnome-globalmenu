@@ -90,7 +90,10 @@ typedef struct _GtkGlobalMenuBarClass  GtkGlobalMenuBarClass;
  *  	field in the #GtkWidget interface.
  *  @requisition: this is the requisition the menu bar request from 
  *  	the menu server. It should never be confused with the requisition
- *  	field in the #GtkWidget interface.
+ *  	field in the #GtkWidget interface. It is the true requisition;
+ *  	whereas the widget's is not always the true requisition.
+ * 	@x: the x position of container in it's parent window. (ltr value)
+ * 	@y: the y position of container in it's parent window. (ltr value)
  *
  *  I think some of these variables can be moved in to the Private
  *  data structure, especially the #allocation and #requisition, since
@@ -108,6 +111,8 @@ struct _GtkGlobalMenuBar
 	GdkWindow * floater;
 	GtkAllocation allocation;
 	GtkRequisition requisition;
+	gint x;
+	gint y;
 };
 
 /**

@@ -225,6 +225,9 @@ static GObject* _constructor(GType type,
 	menu_bar->allocation.y = 0;
 	menu_bar->requisition.width = 0;
 	menu_bar->requisition.height = 0;
+	menu_bar->x = 0;
+	menu_bar->y = 0;
+
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "size-allocate",
 				G_CALLBACK(_s_size_allocate), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "size-query",
@@ -418,19 +421,14 @@ static void _s_position_set 		( GtkWidget  * widget,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	GtkAllocation * allocation = &menu_bar->allocation;
-	menu_bar->allocation.x = pt->x;
-	menu_bar->allocation.y = pt->y;
+	menu_bar->x = pt->x;
+	menu_bar->y = pt->y;
 
 	if(GTK_WIDGET_REALIZED(widget)){
-		gdk_window_move_resize(menu_bar->floater,
-			allocation->x,
-			allocation->y,
-			allocation->width,
-			allocation->height);
+		gdk_window_move(menu_bar->container,
+			menu_bar->x,
+			menu_bar->y);
 	}
-
-	_do_size_allocate(widget, allocation);
 }
 static void
 gtk_container_map_child (GtkWidget *child,
