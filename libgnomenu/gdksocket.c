@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
@@ -21,7 +23,11 @@
 	GdkSocket * s = GDK_SOCKET(_s); \
 	GdkSocketPrivate * p = GDK_SOCKET_GET_PRIVATE(_s);
 
-#define LOG(fmt, args...) /*g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)*/
+#if ENABLE_TRACING > 2
+#define LOG(fmt, args...) g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)
+#else
+#define LOG(fmt, args...)
+#endif 
 #define LOG_FUNC_NAME LOG("%s", __func__)
 #define GDK_SOCKET_ATOM_STRING "GDK_SOCKET_MESSAGE"
 

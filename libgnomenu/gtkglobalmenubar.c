@@ -39,7 +39,11 @@
 	GtkGlobalMenuBar * sgmb = GTK_GLOBAL_MENU_BAR(_s); \
 	GtkGlobalMenuBarPrivate * p = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(_s);
 
+#if ENABLE_TRACING > 1
 #define LOG(fmt, args...) g_message("<GtkGlobalMenuBar>::" fmt,  ## args)
+#else
+#define LOG(fmt, args...)
+#endif
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 /* Properties */

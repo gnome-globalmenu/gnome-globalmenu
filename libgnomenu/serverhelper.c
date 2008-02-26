@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <gtk/gtk.h>
 #include "serverhelper.h"
 #include "gnomenu-marshall.h"
@@ -10,7 +12,11 @@
 	GnomenuServerHelper * s = GNOMENU_SERVER_HELPER(_s); \
 	GnomenuServerHelperPrivate * p = GNOMENU_SERVER_HELPER_GET_PRIVATE(_s);
 
+#if ENABLE_TRACING > 1
 #define LOG(fmt, args...) g_message("<GnomenuServerHelper>::" fmt, ## args )
+#else
+#define LOG(fmt, args...) 
+#endif
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 typedef struct _GnomenuServerHelperPrivate GnomenuServerHelperPrivate;

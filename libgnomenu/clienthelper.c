@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include "clienthelper.h"
@@ -15,7 +17,11 @@
 	GnomenuClientHelper * s = GNOMENU_CLIENT_HELPER(_s); \
 	GnomenuClientHelperPrivate * p = GNOMENU_CLIENT_HELPER_GET_PRIVATE(_s);
 	
+#if ENABLE_TRACING > 1
 #define LOG(fmt, args...) g_message("<GnomenuClientHelper>::" fmt, ## args)
+#else
+#define LOG(fmt, args...) 
+#endif
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 typedef struct _GnomenuClientHelperPrivate GnomenuClientHelperPrivate;

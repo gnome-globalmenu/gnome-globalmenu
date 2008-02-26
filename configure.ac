@@ -17,13 +17,15 @@ AC_PROG_LIBTOOL
 
 AC_MSG_CHECKING(--enable-tracing arguement)
 AC_ARG_ENABLE(tracing,
-	[	--enable-tracing Enable many debugging information ],
+	[	--enable-tracing Enable many debugging information (1,2,no)],
 	[	enable_tracing=$enableval ],
-	[	enable_tracing="yes"	])
+	[	enable_tracing="2"	])
 AC_MSG_RESULT($enable_tracing)
 
-if test "$enable_tracing" = "yes"; then
-	AC_DEFINE([ENABLE_TRACING], [], [enable tracing])
+if test "$enable_tracing" != "no"; then
+	AC_DEFINE([ENABLE_TRACING], $enable_tracing, [enable tracing])
+else
+	AC_DEFINE([ENABLE_TRACING], 0, [enable tracing])
 fi
 
 dnl Servers;
