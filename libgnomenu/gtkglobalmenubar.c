@@ -421,9 +421,9 @@ static void _s_position_set 		( GtkWidget  * widget,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
+
 	menu_bar->x = pt->x;
 	menu_bar->y = pt->y;
-
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move(menu_bar->container,
 			menu_bar->x,
