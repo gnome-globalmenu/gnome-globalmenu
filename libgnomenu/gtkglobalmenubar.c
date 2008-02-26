@@ -77,7 +77,10 @@ static void _unrealize 				( GtkWidget * widget);
 static void _map 					( GtkWidget * widget);
 static gint _expose 				( GtkWidget       *widget,
 									  GdkEventExpose  *event);
-
+static gboolean _motion_notify_event( GtkWidget * widget, 
+									  GdkEventMotion * event);
+static gboolean _button_press_event ( GtkWidget * widget,
+									  GdkEventButton * event);
 /* GtkMenuShell Interface */
 static void _insert 				( GtkMenuShell * menu_shell, 
 									  GtkWidget * widget, gint pos);
@@ -147,6 +150,8 @@ gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
 	widget_class->unrealize = _unrealize;
 	widget_class->hierarchy_changed = _hierarchy_changed;
 	widget_class->map = _map;
+	widget_class->motion_notify_event = _motion_notify_event;
+	widget_class->button_press_event = _button_press_event;
 
 	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
@@ -474,6 +479,26 @@ static gboolean _s_delete_event			( GtkWidget * widget,
 	return FALSE;
 }
 
+static gboolean _button_press_event (GtkWidget * widget,
+								GdkEventButton * event){
+	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
+	
+	return GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->button_press_event(widget, event);
+}
+static gboolean _motion_notify_event	( GtkWidget * widget, 
+									  GdkEventMotion * event){
+
+	gboolean (* func)(GtkWidget * widget, GdkEventMotion * event);
+	GET_OBJECT(widget, menu_bar, priv);
+	
+	if(event && event->is_hint){
+	LOG_FUNC_NAME;
+	}
+	if(func = GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->motion_notify_event)
+	return func(widget, event);
+	return FALSE;
+}
 static gint
 _expose (GtkWidget      *widget,
 		     GdkEventExpose *event)
@@ -564,7 +589,9 @@ _realize (GtkWidget * widget){
                 GDK_BUTTON_RELEASE_MASK |
                 GDK_KEY_PRESS_MASK |
                 GDK_ENTER_NOTIFY_MASK |
-                GDK_LEAVE_NOTIFY_MASK);
+                GDK_LEAVE_NOTIFY_MASK |
+				GDK_BUTTON2_MOTION_MASK |
+				GDK_POINTER_MOTION_HINT_MASK);
 
 	attributes.visual = gtk_widget_get_visual (widget);
 	attributes.colormap = gtk_widget_get_colormap (widget);
