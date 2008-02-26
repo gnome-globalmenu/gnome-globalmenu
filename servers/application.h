@@ -4,7 +4,8 @@
 typedef struct _Application {
 	GtkContainer * window;
 	GtkFixed * menu_bar_area;
-	GCallback * popup_menu;
+	GtkLabel * label;
+	GtkImage * icon;
 	MenuServer * server;
 } Application;
 
