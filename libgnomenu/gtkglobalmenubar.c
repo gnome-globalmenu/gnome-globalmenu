@@ -310,12 +310,12 @@ _size_request (GtkWidget      *widget,
  		   Applications that changes menu item size and use
 		   'gtk_widget_queue_resize' or whatever on the menu bar
 		*/
-		GtkRequisition useless;
-		_calc_size_request(widget, &useless);
+		_calc_size_request(widget, &menu_bar->requisition);
 		requisition->width = 0;
 		requisition->height = 0;
  	} else {
 		_calc_size_request(widget, requisition);
+		menu_bar->requisition = * requisition;
 	}
 	widget->requisition = *requisition;
 }
@@ -325,7 +325,9 @@ _s_size_request (
 	GtkRequisition *  requisition,
 	GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
 	_calc_size_request (widget, requisition);
+	menu_bar->requisition = *requisition;
 }
 static void
 _size_allocate (GtkWidget     *widget,
@@ -576,8 +578,8 @@ _realize (GtkWidget * widget){
 
 	attributes.x = 0;
 	attributes.y = 0;
-	attributes.width = menu_bar->allocation.width;
-	attributes.height = menu_bar->allocation.height; 
+	attributes.width = MAX(menu_bar->requisition.width, menu_bar->allocation.width);
+	attributes.height = MAX(menu_bar->requisition.height, menu_bar->allocation.height);
 /*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
  * WM's decorations! HOWever child doesn't work very well*/
 	attributes.window_type = GDK_WINDOW_CHILD;
@@ -841,8 +843,8 @@ _do_size_allocate (GtkWidget * widget,
 		gdk_window_move_resize(menu_bar->container,
 			0,
 			0,
-			MAX(widget->requisition.width, allocation->width),
-			MAX(widget->requisition.height, allocation->height));
+			MAX(menu_bar->requisition.width, allocation->width),
+			MAX(menu_bar->requisition.height, allocation->height));
 	}
 	direction = gtk_widget_get_direction (widget);
 
