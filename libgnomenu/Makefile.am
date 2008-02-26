@@ -41,7 +41,7 @@ pkgconfig_DATA = libgnomenu.pc
 confdir = $(sysconfdir)
 conf_DATA = libgnomenu.conf
 
-EXTRA_DIST = gnomenu-marshall.list
+EXTRA_DIST = gnomenu-marshall.list libgnomenu.conf
 
 gnomenu-marshall.c: gnomenu-marshall.list
 	glib-genmarshal --internal --body --prefix=gnomenu_marshall gnomenu-marshall.list > $@

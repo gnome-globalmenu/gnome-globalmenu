@@ -1,4 +1,4 @@
-AM_CFLAGS = -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_srcdir)
 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 
@@ -52,8 +52,9 @@ globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 
 				
 DISTCLEANFILES += $(server_file_DATA)
+EXTRA_DIST = make-gnome-data.sh make-xfce-data.sh
 
 GNOME_GlobalMenuApplet.server:
-	/bin/sh make-gnome-data.sh $@ $(libexecdir)
+	/bin/sh $(srcdir)/make-gnome-data.sh $@ $(libexecdir)
 xfce-globalmenu-plugin.desktop:
-	/bin/sh make-xfce-data.sh $@ $(libexecdir)
+	/bin/sh $(srcdir)/make-xfce-data.sh $@ $(libexecdir)
