@@ -322,8 +322,10 @@ static gboolean _is_client(MenuServer * server, MenuClient * client){
 	return rt;
 }
 WnckWindow * menu_server_get_client_parent(MenuServer  * server, MenuClient * client){
-	g_assert(_is_client(server, client));
-	return wnck_window_get(client->parent);
+	if(_is_client(server, client))
+		return wnck_window_get(client->parent);
+	else
+		return NULL;
 }
 /*
  vim:ts=4:sw=4

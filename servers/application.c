@@ -20,8 +20,8 @@ Application * application_new(GtkContainer * window){
 	app->icon = gtk_image_new();
 
 	//gtk_box_pack_start_defaults(box, app->icon);
-	//gtk_box_pack_start_defaults(box, app->label);
-	gtk_box_pack_start_defaults(box, app->menu_bar_area);
+	gtk_box_pack_start(box, app->label, FALSE, FALSE, 0);
+	gtk_box_pack_start(box, app->menu_bar_area, TRUE, TRUE, 0);
 
 	gtk_container_add(app->window, box);
 	app->server = menu_server_new(app->menu_bar_area);
@@ -40,10 +40,9 @@ void application_destroy(Application * app){
 	g_free(app);
 }
 static void _s_active_client_changed(Application * app, MenuServer * server){
-	if(server->active){
-		WnckWindow * window = menu_server_get_client_parent(server, server->active);
-		LOG("active window title = %s", wnck_window_get_name(window));
-	}
+	WnckWindow * window = menu_server_get_client_parent(server, server->active);
+	gchar * name = wnck_window_get_name(window);
+	gtk_label_set_text(app->label, name);
 }
 
 static void _s_window_destroy(Application * app, GtkWidget * widget){
