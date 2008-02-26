@@ -41,7 +41,8 @@ void application_destroy(Application * app){
 }
 static void _s_active_client_changed(Application * app, MenuServer * server){
 	WnckWindow * window = menu_server_get_client_parent(server, server->active);
-	gchar * name = wnck_window_get_name(window);
+	WnckApplication * application = wnck_window_get_application(window);
+	gchar * name = wnck_application_get_name(application);
 	gtk_label_set_text(app->label, name);
 }
 
