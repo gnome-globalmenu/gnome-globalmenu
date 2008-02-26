@@ -3,6 +3,8 @@
 #include "menuserver.h"
 typedef struct _Application {
 	GtkContainer * window;
+	GtkFixed * menu_bar_area;
+	GCallback * popup_menu;
 	MenuServer * server;
 } Application;
 
