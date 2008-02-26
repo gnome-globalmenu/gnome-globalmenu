@@ -841,8 +841,8 @@ _do_size_allocate (GtkWidget * widget,
 		gdk_window_move_resize(menu_bar->container,
 			0,
 			0,
-			allocation->width,
-			allocation->height);
+			MAX(widget->requisition.width, allocation->width),
+			MAX(widget->requisition.height, allocation->height));
 	}
 	direction = gtk_widget_get_direction (widget);
 
