@@ -18,8 +18,8 @@ Application * application_new(GtkContainer * window){
 	app->label = gtk_label_new("");
 	app->icon = gtk_image_new();
 
-	gtk_box_pack_start_defaults(box, app->icon);
-	gtk_box_pack_start_defaults(box, app->label);
+	//gtk_box_pack_start_defaults(box, app->icon);
+	//gtk_box_pack_start_defaults(box, app->label);
 	gtk_box_pack_start_defaults(box, app->menu_bar_area);
 
 	gtk_container_add(app->window, box);

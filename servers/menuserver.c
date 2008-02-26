@@ -2,6 +2,20 @@
 #include "menuserver.h"
 
 #include "log.h"
+#define MENU_SERVER_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_MENU_SERVER, MenuServerPrivate))
+#define GET_OBJECT(_s, s, p) \
+	MenuServer * s = MENU_SERVER(_s); \
+	MenuServerPrivate * p = MENU_SERVER_GET_PRIVATE(_s);
+	
+enum {
+	PROP_0,
+	PROP_WINDOW,
+};
+
+typedef struct {
+	gboolean disposed;
+} MenuServerPrivate;
 
 struct _MenuClient {
 	enum {
@@ -17,7 +31,17 @@ struct _MenuClient {
 };
 
 static MenuClient * _add_client		( MenuServer * _self);
+/* GObject interface */
 static void _free_client			( MenuClient * client);
+static void _dispose				( GObject * object);
+static void _finalize				( GObject * object);
+static GObject * _constructor		( GType type, guint n_construct_properties,
+									  GObjectConstructParam * constrcut_params);
+static void _set_property 		( GObject * _self, 
+								  guint property_id, const GValue * value, GParamSpec * pspec );
+static void _get_property 		( GObject * _self, 
+								  guint property_id, GValue * value, GParamSpec * pspec );
+
 static void 
 	_s_client_realize				( MenuServer * _self, 
 									  GnomenuClientInfo * ci, 
@@ -48,16 +72,43 @@ static void
 static MenuClient * 
 	_find_client_by_parent			( MenuServer * _self, GdkNativeWindow parent);
 
-MenuServer * menu_server_new(GtkWidget * window){
-	MenuServer * server = g_new0(MenuServer, 1);
-	g_assert(!GTK_WIDGET_NO_WINDOW(window));
-    
+G_DEFINE_TYPE		(MenuServer, menu_server, G_TYPE_OBJECT);
+static void
+menu_server_class_init(MenuServerClass * klass){
+	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
+	GParamSpec * psec;
+	LOG("class_init");
+	
+	g_type_class_add_private(gobject_class, sizeof(MenuServerPrivate));
+	gobject_class->dispose = _dispose;
+	gobject_class->finalize = _finalize;
+	gobject_class->constructor = _constructor;
+	gobject_class->set_property = _set_property;
+	gobject_class->get_property = _get_property;
+
+	g_object_class_install_property (gobject_class,
+		PROP_WINDOW,
+		g_param_spec_object ("window",
+						"window",
+						"Widget who has a window to swallow menu bars",
+						GTK_TYPE_WIDGET,
+						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+}
+static void
+menu_server_init(MenuServer * _self){}
+static GObject * 
+_constructor	( GType type, guint n_construct_properties,
+				  GObjectConstructParam * construct_params) {
+	LOG("constructor");
+	GObject * _self = ( *G_OBJECT_CLASS(menu_server_parent_class)->constructor)(type,
+			n_construct_properties,
+			construct_params);
+	GET_OBJECT(_self, server, priv);
 	server->gtk_helper = gnomenu_server_helper_new();
 	server->kde_helper = NULL;
 	server->clients = g_hash_table_new_full(NULL, NULL, NULL, _free_client);
-	server->window = window;
 	server->screen = wnck_screen_get_default();
-
+	
 	g_signal_connect_swapped(server->gtk_helper,
 			"client-realize", _s_client_realize, server);
 	g_signal_connect_swapped(server->gtk_helper,
@@ -71,12 +122,59 @@ MenuServer * menu_server_new(GtkWidget * window){
 			"size-allocate", _s_window_size_allocate, server);
 	g_signal_connect_swapped(server->gtk_helper,
 			"size-request", _s_gtk_helper_size_request, server);
-	return server;
+	return _self;
+}
+static void 
+_set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
+	LOG("set property");
+	GET_OBJECT(_self, self, priv);
+	switch (property_id){
+		case PROP_WINDOW:
+			if(GTK_IS_WIDGET(self->window)) g_object_unref(self->window);
+			self->window = g_value_get_object(value);
+			g_assert(!GTK_WIDGET_NO_WINDOW(self->window));
+			g_object_ref(self->window);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
+}
+static void 
+_get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * pspec){
+	GET_OBJECT(_self, self, priv);
+	switch (property_id){
+		case PROP_WINDOW:
+			g_value_set_object(value, self->window);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
+}
+static void _dispose ( GObject * _self){
+	LOG();
+	GET_OBJECT(_self, self, priv);
+	if(!priv->disposed) {
+		priv->disposed = TRUE;
+		g_object_unref(self->gtk_helper);
+		if(GTK_IS_WIDGET(self->window))
+			g_object_unref(self->window);
+	}
+	G_OBJECT_CLASS(menu_server_parent_class)->dispose(_self);
+}
+static void _finalize ( GObject * _self){
+	LOG();
+	GET_OBJECT(_self, self, priv);
+	g_hash_table_destroy(self->clients);
+	G_OBJECT_CLASS(menu_server_parent_class)->finalize(_self);
+
+}
+MenuServer * menu_server_new(GtkWidget * window){
+	LOG("menu_server_new");
+	return g_object_new(TYPE_MENU_SERVER, "window", window, NULL);
 }
 void menu_server_destroy(MenuServer * server){
-	g_hash_table_destroy(server->clients);
-	g_object_unref(server->gtk_helper);
-	g_free(server);
+	LOG();
+	g_object_unref(server);
 }
 static void _free_client(MenuClient * client){
 	g_free(client);
