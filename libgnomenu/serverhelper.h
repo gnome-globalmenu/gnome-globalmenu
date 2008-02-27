@@ -112,7 +112,7 @@ void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClien
 			GdkPoint * position);
 void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			gboolean vis);
-void gnomenu_server_helper_set_bgcolor(GnomenuServerHelper * self, GnomenuClientInfo * ci,
-			GdkColor * color);
+void gnomenu_server_helper_set_background(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GdkColor * color, GdkPixmap * pixmap);
 G_END_DECLS
 #endif

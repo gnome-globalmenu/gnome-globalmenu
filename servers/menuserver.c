@@ -340,8 +340,7 @@ static void _update_active_menu_bar (MenuServer * _self){
 					gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
-				if(_self->bgcolor)
-					gnomenu_server_helper_set_bgcolor(_self->gtk_helper, c->handle, _self->bgcolor);
+				gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
 			break;
 			case MENU_CLIENT_KDE:
 				if(c->window)

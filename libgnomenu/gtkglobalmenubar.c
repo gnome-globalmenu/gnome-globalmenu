@@ -39,7 +39,7 @@
 	GtkGlobalMenuBar * sgmb = GTK_GLOBAL_MENU_BAR(_s); \
 	GtkGlobalMenuBarPrivate * p = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(_s);
 
-#if ENABLE_TRACING > 1
+#if ENABLE_TRACING >= 1
 #define LOG(fmt, args...) g_message("<GtkGlobalMenuBar>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
@@ -470,11 +470,15 @@ static void _s_background_set	 		( GtkWidget  * widget,
 	GET_OBJECT(widget, menu_bar, priv);
 	_reset_style(widget);
 	if(color){
-		LOG("new bg color %d, %d, %d", color.red, color.green, color.blue);
+		LOG("new bg color %d, %d, %d", color->red, color->green, color->blue);
 		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, color);
 	}
 	if(pixmap){
+		gint w, h;
+		gdk_drawable_get_size(pixmap, &w, &h);
 		LOG("not implemented for pixmap bg yet");
+		LOG("size of pixmap, %d, %d", w, h);
+
 		style = gtk_style_copy (widget->style);
 		if (style->bg_pixmap[GTK_STATE_NORMAL])
 			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
@@ -549,7 +553,7 @@ _expose (GtkWidget      *widget,
 						menu_bar->container,
 						GTK_WIDGET_STATE (widget),
 						GTK_SHADOW_NONE,
-						&event->area, widget, "menubar",
+						&event->area, widget, NULL,
 						border, border,
 						menu_bar->allocation.width - border * 2,
 						menu_bar->allocation.height - border * 2);

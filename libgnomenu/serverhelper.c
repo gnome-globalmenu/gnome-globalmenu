@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include "serverhelper.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
@@ -12,7 +13,7 @@
 	GnomenuServerHelper * s = GNOMENU_SERVER_HELPER(_s); \
 	GnomenuServerHelperPrivate * p = GNOMENU_SERVER_HELPER_GET_PRIVATE(_s);
 
-#if ENABLE_TRACING > 1
+#if ENABLE_TRACING >= 2
 #define LOG(fmt, args...) g_message("<GnomenuServerHelper>::" fmt, ## args )
 #else
 #define LOG(fmt, args...) 
@@ -549,26 +550,33 @@ void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuCli
 	gdk_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
 }
 /**
- * gnomenu_server_helper_set_bgcolor:
+ * gnomenu_server_helper_set_background:
  * 	@self:
  * 	@ci:
- * 	@vis:
+ * 	@color:
+ * 	@pixmap:
  *
- * set the bgcolor of the menubar
+ * set the background of the menubar
  * A possible vulnerability note: if the global menu is not 
  * detached it should ignore this message. 
  */
-void gnomenu_server_helper_set_bgcolor(GnomenuServerHelper * self, GnomenuClientInfo * ci,
-			GdkColor * color){
+void gnomenu_server_helper_set_background(GnomenuServerHelper * self, GnomenuClientInfo * ci,
+			GdkColor * color, GdkPixmap * pixmap){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
-	msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
-	msg.bgcolor_set.red = color->red;
-	msg.bgcolor_set.blue = color->blue;
-	msg.bgcolor_set.green = color->green;
-	gdk_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
-	
+	if(color){
+		msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
+		msg.bgcolor_set.red = color->red;
+		msg.bgcolor_set.blue = color->blue;
+		msg.bgcolor_set.green = color->green;
+		gdk_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
+	} 
+	if(pixmap){
+		msg.any.type = GNOMENU_MSG_BGPIXMAP_SET;
+		msg.bgpixmap_set.pixmap = GDK_PIXMAP_XID(pixmap);
+		gdk_socket_send(ci->service, &msg, sizeof(msg.bgpixmap_set));
+	}	
 }
 /* virtual functions for signal handling*/
 static void 

@@ -52,6 +52,7 @@ static _change_background ( PanelApplet * applet,
 			application_set_background(app, color, NULL);
 		break;
 		case PANEL_PIXMAP_BACKGROUND:
+			LOG("background");
 			application_set_background(app, NULL, pixmap);
 		break;
 	}

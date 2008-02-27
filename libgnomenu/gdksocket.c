@@ -23,7 +23,7 @@
 	GdkSocket * s = GDK_SOCKET(_s); \
 	GdkSocketPrivate * p = GDK_SOCKET_GET_PRIVATE(_s);
 
-#if ENABLE_TRACING > 2
+#if ENABLE_TRACING >= 3
 #define LOG(fmt, args...) g_message("%s<GdkSocket>::" fmt, SELF->name, ## args)
 #else
 #define LOG(fmt, args...)

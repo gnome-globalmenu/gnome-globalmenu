@@ -17,7 +17,7 @@
 	GnomenuClientHelper * s = GNOMENU_CLIENT_HELPER(_s); \
 	GnomenuClientHelperPrivate * p = GNOMENU_CLIENT_HELPER_GET_PRIVATE(_s);
 	
-#if ENABLE_TRACING > 1
+#if ENABLE_TRACING >= 2
 #define LOG(fmt, args...) g_message("<GnomenuClientHelper>::" fmt, ## args)
 #else
 #define LOG(fmt, args...) 
@@ -404,7 +404,11 @@ static void _s_data_arrival(GdkSocket * _self,
 		break;
 		case GNOMENU_MSG_BGPIXMAP_SET:
 			{
+				gint width, height;
 				GdkPixmap * pixmap = gdk_pixmap_foreign_new(message->bgpixmap_set.pixmap);
+				gdk_drawable_set_colormap(pixmap, gdk_colormap_get_system()); /*maybe shall GtkGlobalMenuBar oset the colormap*/
+				gdk_drawable_get_size(pixmap, &width, &height);
+				LOG("drawable size = %d, %d", width, height);
 				g_signal_emit(G_OBJECT(self),
 					class_signals[BACKGROUND_SET],
 					0, NULL, pixmap);
