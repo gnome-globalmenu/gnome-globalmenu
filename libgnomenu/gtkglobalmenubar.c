@@ -554,9 +554,9 @@ _expose (GtkWidget      *widget,
 						GTK_WIDGET_STATE (widget),
 						GTK_SHADOW_NONE,
 						&event->area, widget, NULL,
-						border, border,
-						menu_bar->allocation.width - border * 2,
-						menu_bar->allocation.height - border * 2);
+						0, 0,
+						menu_bar->allocation.width,
+						menu_bar->allocation.height);
 				
 			}
 		} else LOG("event not from container, ignore");

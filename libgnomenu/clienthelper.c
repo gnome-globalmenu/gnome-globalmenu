@@ -404,6 +404,7 @@ static void _s_data_arrival(GdkSocket * _self,
 		break;
 		case GNOMENU_MSG_BGPIXMAP_SET:
 			{
+				if(message->bgpixmap_set.pixmap){
 				gint width, height;
 				GdkPixmap * pixmap = gdk_pixmap_foreign_new(message->bgpixmap_set.pixmap);
 				gdk_drawable_set_colormap(pixmap, gdk_colormap_get_system()); /*maybe shall GtkGlobalMenuBar oset the colormap*/
@@ -412,6 +413,7 @@ static void _s_data_arrival(GdkSocket * _self,
 				g_signal_emit(G_OBJECT(self),
 					class_signals[BACKGROUND_SET],
 					0, NULL, pixmap);
+				}
 			}
 		break;
 		default:
