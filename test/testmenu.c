@@ -155,7 +155,7 @@ static void button_clicked(GtkButton * button, gpointer ddddd){
 			}
 			if(btn == BGCOLOR){
 				GdkColor color = {0,g_random_int(), g_random_int(), g_random_int()};
-				gnomenu_server_helper_set_bgcolor(server, node->data, &color);
+				gnomenu_server_helper_set_background(server, node->data, &color, NULL);
 			}
 		}	
 		break;	
