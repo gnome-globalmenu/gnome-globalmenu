@@ -125,6 +125,7 @@ static void
 	_set_child_parent_window		( GtkWidget * widget, GdkWindow * window);
 static void _sync_remote_state		( GtkGlobalMenuBar * menubar);
 static void _sync_local_state		( GtkGlobalMenuBar * menubar);
+static void _reset_style			( GtkWidget * widget);
 
 G_DEFINE_TYPE (GtkGlobalMenuBar, gtk_global_menu_bar, GTK_TYPE_MENU_BAR)
 
@@ -403,11 +404,11 @@ static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, Gnomen
 static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
+
 	priv->detached = FALSE;	
-	
-	gtk_widget_reset_rc_styles(widget);
-	gtk_widget_restore_default_style(widget);
-	gtk_widget_queue_resize(widget);
+
+	_reset_style(widget);	
+
 	if(GTK_WIDGET_REALIZED(widget)){
 	/* TODO: figure out how to detect a sudden death of server */
 		gtk_widget_unrealize(widget);
@@ -464,15 +465,24 @@ static void _s_background_set	 		( GtkWidget  * widget,
 									  GdkPixmap * pixmap,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
+/*mostly based on panel-applet.c::panel_applet_update_background_for_widget */
+	GtkStyle   *style;
+
 	GET_OBJECT(widget, menu_bar, priv);
+	_reset_style(widget);
 	if(color){
-		priv->bgcolor.red = color->red;
-		priv->bgcolor.blue = color->blue;
-		priv->bgcolor.green = color->green;
-		LOG("new bg color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
+		LOG("new bg color %d, %d, %d", color.red, color.green, color.blue);
+		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, color);
 	}
 	if(pixmap){
 		LOG("not implemented for pixmap bg yet");
+		style = gtk_style_copy (widget->style);
+		if (style->bg_pixmap[GTK_STATE_NORMAL])
+			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
+		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
+		gtk_widget_set_style (widget, style);
+		g_object_unref (style);
+
 	}
 	_sync_local_state(menu_bar);;
 }
@@ -536,13 +546,14 @@ _expose (GtkWidget      *widget,
 						menu_bar->allocation.width - border * 2,
 						menu_bar->allocation.height - border * 2);
 			} else {
-		/*FIXME: figure out why we always get a very small area if the client and server is in different process. */
-				LOG("area=%d, %d, %d,%d", event->area);
-				gdk_window_clear_area(menu_bar->container, 
-					event->area.x, 
-					event->area.y, 
-					event->area.width, 
-					event->area.height);
+				gtk_paint_box (widget->style,
+						menu_bar->container,
+						GTK_WIDGET_STATE (widget),
+						GTK_SHADOW_NONE,
+						&event->area, widget, "menubar",
+						border, border,
+						menu_bar->allocation.width - border * 2,
+						menu_bar->allocation.height - border * 2);
 				
 			}
 		} else LOG("event not from container, ignore");
@@ -965,6 +976,13 @@ _do_size_allocate (GtkWidget * widget,
 		}
 	}
 
+}
+static void _reset_style			( GtkWidget * widget){
+	GtkRcStyle * rc_style;
+	gtk_widget_set_style (widget, NULL);
+	rc_style = gtk_rc_style_new ();
+	gtk_widget_modify_style (widget, rc_style);
+	gtk_rc_style_unref (rc_style);
 }
 
 /*
