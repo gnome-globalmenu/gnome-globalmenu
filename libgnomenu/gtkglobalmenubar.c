@@ -49,10 +49,16 @@
 /* Properties */
 enum {
   PROP_0,
+  PROP_PACK_DIRECTION,
+  PROP_CHILD_PACK_DIRECTION
 };
 
 typedef struct 
 {
+/*Data struct level compatability with GtkMenuBar*/
+	GtkPackDirection pack_direction; 
+	GtkPackDirection child_pack_direction; 
+
 	gboolean disposed;
 	gboolean detached;
 	GList * popup_items;
@@ -168,6 +174,9 @@ gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
 
 	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
+
+//	menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay; 
+//	menu_shell_class->move_current = gtk_menu_bar_move_current; 
 
 	container_class->remove = _remove;
 
@@ -288,6 +297,12 @@ _set_property (GObject      *object,
 {
 	GET_OBJECT(object, self, priv); 
 	switch (prop_id) {
+		case PROP_PACK_DIRECTION:
+			gtk_menu_bar_set_pack_direction (self, g_value_get_enum (value));
+		break;
+		case PROP_CHILD_PACK_DIRECTION:
+			gtk_menu_bar_set_child_pack_direction (self, g_value_get_enum (value));
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -303,6 +318,12 @@ _get_property (GObject    *object,
 	GET_OBJECT(object, self, priv); 
   
 	switch (prop_id) {
+		case PROP_PACK_DIRECTION:
+		  g_value_set_enum (value, gtk_menu_bar_get_pack_direction (self));
+		  break;
+		case PROP_CHILD_PACK_DIRECTION:
+		  g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (self));
+		  break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -991,6 +1012,80 @@ static void _reset_style			( GtkWidget * widget){
 	rc_style = gtk_rc_style_new ();
 	gtk_widget_modify_style (widget, rc_style);
 	gtk_rc_style_unref (rc_style);
+}
+
+static gint
+gtk_global_menu_bar_get_popup_delay (GtkMenuShell *menu_shell)
+{
+  gint popup_delay;
+
+  g_object_get (gtk_widget_get_settings (GTK_WIDGET (menu_shell)),
+        "gtk-menu-bar-popup-delay", &popup_delay,
+        NULL);
+
+  return popup_delay;
+}
+
+static void
+gtk_global_menu_bar_move_current (GtkMenuShell         *menu_shell,
+               GtkMenuDirectionType  direction)
+{
+  GtkMenuBar *menubar = GTK_MENU_BAR (menu_shell);
+  GtkTextDirection text_dir;
+  GtkPackDirection pack_dir;
+
+  text_dir = gtk_widget_get_direction (GTK_WIDGET (menubar));
+  pack_dir = gtk_menu_bar_get_pack_direction (menubar);
+
+  if (pack_dir == GTK_PACK_DIRECTION_LTR || pack_dir == GTK_PACK_DIRECTION_RTL)
+     {
+      if ((text_dir == GTK_TEXT_DIR_RTL) == (pack_dir == GTK_PACK_DIRECTION_LTR))
+    {
+      switch (direction)
+        {
+        case GTK_MENU_DIR_PREV:
+          direction = GTK_MENU_DIR_NEXT;
+          break;
+        case GTK_MENU_DIR_NEXT:
+          direction = GTK_MENU_DIR_PREV;
+          break;
+        default: ;
+        }
+    }
+    }
+  else
+    {
+      switch (direction)
+    {
+    case GTK_MENU_DIR_PARENT:
+      if ((text_dir == GTK_TEXT_DIR_LTR) == (pack_dir == GTK_PACK_DIRECTION_TTB))
+        direction = GTK_MENU_DIR_PREV;
+      else
+        direction = GTK_MENU_DIR_NEXT;
+      break;
+    case GTK_MENU_DIR_CHILD:
+      if ((text_dir == GTK_TEXT_DIR_LTR) == (pack_dir == GTK_PACK_DIRECTION_TTB))
+        direction = GTK_MENU_DIR_NEXT;
+      else
+        direction = GTK_MENU_DIR_PREV;
+      break;
+    case GTK_MENU_DIR_PREV:
+      if (text_dir == GTK_TEXT_DIR_RTL)
+        direction = GTK_MENU_DIR_CHILD;
+      else
+        direction = GTK_MENU_DIR_PARENT;
+      break;
+    case GTK_MENU_DIR_NEXT:
+      if (text_dir == GTK_TEXT_DIR_RTL)
+        direction = GTK_MENU_DIR_PARENT;
+      else
+        direction = GTK_MENU_DIR_CHILD;
+      break;
+    default: ;
+    }
+    }
+
+ // GTK_MENU_SHELL_CLASS (gtk_menu_bar_parent_class)->move_current (menu_shell, direction);
 }
 
 /*
