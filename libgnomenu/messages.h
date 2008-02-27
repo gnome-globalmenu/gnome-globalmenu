@@ -49,6 +49,7 @@ G_BEGIN_DECLS
  * @GNOMENU_MSG_VISIBILITY_SET: #GnomenuMessageVisibilitySet
  * @GNOMENU_MSG_ORIENTATION_CHANGE: #GnomenuMessageOrientationChange
  * @GNOMENU_MSG_BGCOLOR_SET:	#GnomenuMessageBgColorSet
+ * @GNOMENU_MSG_BGPIXMAP_SET:	#GnomenuMessageBgPixmapSet
  * @GNOMENU_MSG_MAX:		no meaning
  *
  * type of a libgnomenu message.
@@ -69,6 +70,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_VISIBILITY_SET,
 	GNOMENU_MSG_ORIENTATION_CHANGE,
 	GNOMENU_MSG_BGCOLOR_SET,
+	GNOMENU_MSG_BGPIXMAP_SET,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -249,6 +251,16 @@ typedef struct {
 } GnomenuMessageBgColorSet;
 
 /**
+ * GnomenuMessageBgPixmapSet:
+ *
+ * To set the bg color of the menubar.
+ */
+typedef struct {
+	GnomenuMessageType type;
+	GdkNativeWindow pixmap;
+} GnomenuMessageBgPixmapSet;
+
+/**
  * GnomenuMessage:
  *
  * This structure wraps every kind of gnomenu message into a union.
@@ -271,6 +283,7 @@ struct _GnomenuMessage {
 		GnomenuMessageVisibilitySet visibility_set;
 		GnomenuMessagePositionSet position_set;
 		GnomenuMessageBgColorSet bgcolor_set;
+		GnomenuMessageBgPixmapSet bgpixmap_set;
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()

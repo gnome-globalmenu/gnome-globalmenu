@@ -44,7 +44,8 @@ static void _c_size_query 			( GnomenuClientHelper * _self, GtkRequisition * req
 static void _c_orientation_change 	( GnomenuClientHelper * _self, GtkOrientation ori );
 static void _c_position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
 static void _c_visibility_set			( GnomenuClientHelper * _self, gboolean vis );
-static void _c_bgcolor_set				( GnomenuClientHelper * _self, GdkColor * color);
+static void _c_background_set				( GnomenuClientHelper * _self, 
+									GdkColor * color, GdkPixmap * pixmap);
 
 /* Signal Handlers */
 static void _s_data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
@@ -61,7 +62,8 @@ enum { /*< private >*/
 	ORIENTATION_CHANGE,
 	POSITION_SET,
 	VISIBILITY_SET,
-	BGCOLOR_SET,
+	BACKGROUND_SET,
+
 	SIGNAL_MAX
 };
 static guint class_signals[SIGNAL_MAX] = {0};
@@ -87,7 +89,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 	klass->orientation_change = _c_orientation_change;
 	klass->position_set = _c_position_set;
 	klass->visibility_set = _c_visibility_set;
-	klass->bgcolor_set = _c_bgcolor_set;
+	klass->background_set = _c_background_set;
 
 	class_signals[SERVER_NEW] =
 /**
@@ -229,21 +231,23 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 			1,
 			G_TYPE_UINT);
 
-	class_signals[BGCOLOR_SET] =
+	class_signals[BACKGROUND_SET] =
 /**
- * GnomenuClientHelper::bgcolor-set:
+ * GnomenuClientHelper::background-set:
  *  @self: self,
- *  @color: color, NOT allocated. You have to call #gdk_colormap_alloc_color yourself.
+ *  @color: color, NOT allocated. You have to call #gdk_colormap_alloc_color yourself, or NULL,
+ *  @pixmap: pixmap, or NULL,
  *  @userdata: userdata;
  */
-		g_signal_new("bgcolor-set",
+		g_signal_new("background-set",
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuClientHelperClass, bgcolor_set),
+			G_STRUCT_OFFSET (GnomenuClientHelperClass, background_set),
 			NULL, NULL,
-			gnomenu_marshall_VOID__POINTER,
+			gnomenu_marshall_VOID__POINTER_POINTER,
 			G_TYPE_NONE,
-			1,
+			2,
+			G_TYPE_POINTER,
 			G_TYPE_POINTER);
 }
 
@@ -394,8 +398,16 @@ static void _s_data_arrival(GdkSocket * _self,
 				color->green = message->bgcolor_set.green;	
 				color->blue = message->bgcolor_set.blue;	
 				g_signal_emit(G_OBJECT(self),
-					class_signals[BGCOLOR_SET],
-					0, color);
+					class_signals[BACKGROUND_SET],
+					0, color, NULL);
+			}
+		break;
+		case GNOMENU_MSG_BGPIXMAP_SET:
+			{
+				GdkPixmap * pixmap = gdk_pixmap_foreign_new(message->bgpixmap_set.pixmap);
+				g_signal_emit(G_OBJECT(self),
+					class_signals[BACKGROUND_SET],
+					0, NULL, pixmap);
 			}
 		break;
 		default:
@@ -443,10 +455,13 @@ _c_visibility_set
 	LOG_FUNC_NAME;
 }
 static void
-_c_bgcolor_set
-			(GnomenuClientHelper * _self, GdkColor * color){
+_c_background_set
+			(GnomenuClientHelper * _self, GdkColor * color, GdkPixmap * pixmap){
 	LOG_FUNC_NAME;
-	g_free(color);
+	if(color)
+		g_free(color);
+	if(pixmap)
+		g_object_unref(pixmap);
 }
 
 /**

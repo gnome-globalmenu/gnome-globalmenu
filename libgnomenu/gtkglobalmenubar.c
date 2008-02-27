@@ -109,8 +109,9 @@ static void _s_position_set 		( GtkWidget  * menubar,
 static void _s_visibility_set 		( GtkWidget  * menubar, 
 									  gboolean vis,
 									  GnomenuClientHelper * helper); 
-static void _s_bgcolor_set	 		( GtkWidget  * menubar, 
+static void _s_background_set	 	( GtkWidget  * menubar, 
 									  GdkColor * bgcolor,
+									  GdkPixmap * pixmap,
 									  GnomenuClientHelper * helper); 
 /* workaround the delete event*/
 static gboolean _s_delete_event			( GtkWidget * widget,
@@ -239,8 +240,8 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "position-set",
 				G_CALLBACK(_s_position_set), menu_bar);
-	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "bgcolor-set",
-				G_CALLBACK(_s_bgcolor_set), menu_bar);
+	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "background-set",
+				G_CALLBACK(_s_background_set), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(menu_bar->helper), "visibility-set",
 				G_CALLBACK(_s_visibility_set), menu_bar);
 
@@ -458,15 +459,21 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 		gdk_window_hide(menu_bar->floater);
 	}	
 }
-static void _s_bgcolor_set	 		( GtkWidget  * widget, 
-									  GdkColor * bgcolor,
+static void _s_background_set	 		( GtkWidget  * widget, 
+									  GdkColor * color,
+									  GdkPixmap * pixmap,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	priv->bgcolor.red = bgcolor->red;
-	priv->bgcolor.blue = bgcolor->blue;
-	priv->bgcolor.green = bgcolor->green;
-	LOG("new bg color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
+	if(color){
+		priv->bgcolor.red = color->red;
+		priv->bgcolor.blue = color->blue;
+		priv->bgcolor.green = color->green;
+		LOG("new bg color %d, %d, %d", priv->bgcolor.red, priv->bgcolor.green, priv->bgcolor.blue);
+	}
+	if(pixmap){
+		LOG("not implemented for pixmap bg yet");
+	}
 	_sync_local_state(menu_bar);;
 }
 static gboolean _s_delete_event			( GtkWidget * widget,

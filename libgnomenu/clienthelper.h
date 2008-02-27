@@ -54,7 +54,7 @@ struct _GnomenuClientHelperClass {
 	void (*orientation_change)(GnomenuClientHelper * self, GtkOrientation ori);
 	void (*position_set)(GnomenuClientHelper * self, GdkPoint * pt);
 	void (*visibility_set)(GnomenuClientHelper * self, gboolean vis);
-	void (*bgcolor_set)(GnomenuClientHelper * self, GdkColor * color);
+	void (*background_set)(GnomenuClientHelper * self, GdkColor * color, GdkPixmap * pixmap);
 };
 
 
