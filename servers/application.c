@@ -5,6 +5,7 @@
 
 static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_active_client_changed(Application * app, MenuServer * server);
+static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
 
 Application * application_new(GtkContainer * window){
 	LOG();	
@@ -36,6 +37,7 @@ Application * application_new(GtkContainer * window){
 }
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
 	g_object_set(app->server, "bg-color", color, "bg-pixmap", pixmap, NULL);
+	_set_background(app->menu_bar_area, color, pixmap);	
 }
 void application_destroy(Application * app){
 	LOG();
@@ -53,7 +55,32 @@ static void _s_window_destroy(Application * app, GtkWidget * widget){
 	LOG();
 	application_destroy(app);
 }
+static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap){
+	GtkRcStyle * rc_style;
+	GtkStyle * style;
+	gtk_widget_set_style (widget, NULL);
+	rc_style = gtk_rc_style_new ();
+	gtk_widget_modify_style (widget, rc_style);
+	gtk_rc_style_unref (rc_style);
+	if(color){
+		LOG("new bg color %d, %d, %d", color->red, color->green, color->blue);
+		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, color);
+	}
+	if(pixmap){
+		gint w, h;
+		gdk_drawable_get_size(pixmap, &w, &h);
+		LOG("not implemented for pixmap bg yet");
+		LOG("size of pixmap, %d, %d", w, h);
 
+		style = gtk_style_copy (widget->style);
+		if (style->bg_pixmap[GTK_STATE_NORMAL])
+			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
+		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
+		gtk_widget_set_style (widget, style);
+		g_object_unref (style);
+
+	}
+}
 /*
 vim:ts=4:sw=4
 */
