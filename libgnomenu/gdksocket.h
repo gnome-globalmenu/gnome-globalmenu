@@ -6,58 +6,58 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION: gdksocket
- * @short_description: Socket Communication for GTK.
+ * SECTION: gnomenusocket
+ * @short_description: Socket Communication for GNOMEU
  * @see_also: #GdkWindow, #GnomenuClientHelper, #GnomenuServerHelper
  * @stability: Unstable
- * @include: libgnomenu/gdksocket.h
+ * @include: libgnomenu/socket.h
  *
  * GdkSocket handles inter-process communication of GTK applications. 
  * It is the fundanmental communication mechanism for #libgnomenu.
  */
 
-#define GDK_TYPE_SOCKET 	(gdk_socket_get_type())
-#define GDK_SOCKET(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), GDK_TYPE_SOCKET, GdkSocket))
-#define GDK_SOCKET_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GDK_TYPE_SOCKET, GdkSocketClass))
-#define GDK_IS_SOCKET(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GDK_TYPE_SOCKET))
-#define GDK_IS_SOCKET_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GDK_TYPE_SOCKET))
-#define GDK_SOCKET_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), GDK_TYPE_SOCKET, GdkSocketClass))
+#define GNOMENU_TYPE_SOCKET 	(gnomenu_socket_get_type())
+#define GNOMENU_SOCKET(obj)		(G_TYPE_CHECK_INSTANCE_CAST((obj), GNOMENU_TYPE_SOCKET, GnomenuSocket))
+#define GNOMENU_SOCKET_CLASS(klass)	(G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_SOCKET, GnomenuSocketClass))
+#define GNOMENU_IS_SOCKET(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_SOCKET))
+#define GNOMENU_IS_SOCKET_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_SOCKET))
+#define GNOMENU_SOCKET_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), GNOMENU_TYPE_SOCKET, GnomenuSocketClass))
 
 
-typedef struct _GdkSocketClass GdkSocketClass;
-typedef struct _GdkSocket GdkSocket;
+typedef struct _GnomenuSocketClass GnomenuSocketClass;
+typedef struct _GnomenuSocket GnomenuSocket;
 /**
- * GdkSocketNativeID:
+ * GnomenuSocketNativeID:
  *
- * The native id for GdkSocket, used for uniquely labelling a socket.
- * In current implement of #GdkSocket, it is #GdkNativeWindow.
+ * The native id for GnomenuSocket, used for uniquely labelling a socket.
+ * In current implement of #GnomenuSocket, it is #GdkNativeWindow.
  *
  * TODO: perhaps we'll move to dbus in the future.
  */
-typedef GdkNativeWindow GdkSocketNativeID;
+typedef GdkNativeWindow GnomenuSocketNativeID;
 /** 
- * GdkSocketStatus:
- *   @GDK_SOCKET_DISCONNECTED: A newly created GdkSocket, the associated GdkWindow is created.
- *   @GDK_SOCKET_CONNECTED: The socket is connected to somewhere.
- *   @GDK_SOCKET_LISTEN: The socket is a server and is waiting for CONNECT_REQ
+ * GnomenuSocketStatus:
+ *   @GNOMENU_SOCKET_DISCONNECTED: A newly created GnomenuSocket, the associated GnomenuWindow is created.
+ *   @GNOMENU_SOCKET_CONNECTED: The socket is connected to somewhere.
+ *   @GNOMENU_SOCKET_LISTEN: The socket is a server and is waiting for CONNECT_REQ
  *
- * The status of a #GdkSocket.
+ * The status of a #GnomenuSocket.
  * TODO: write more about how status changes.
  */
-typedef enum { /*< prefix = GDK_SOCKET >*/
-	GDK_SOCKET_DISCONNECTED,
-	GDK_SOCKET_CONNECTED,
-	GDK_SOCKET_LISTEN,
-	GDK_SOCKET_STATUS_MAX
-} GdkSocketStatus;
+typedef enum { /*< prefix = GNOMENU_SOCKET >*/
+	GNOMENU_SOCKET_DISCONNECTED,
+	GNOMENU_SOCKET_CONNECTED,
+	GNOMENU_SOCKET_LISTEN,
+	GNOMENU_SOCKET_STATUS_MAX
+} GnomenuSocketStatus;
 
 /**
- * GdkSocket:
+ * GnomenuSocket:
  * 	@name:	name of the socket.
  * 	@window: the #GdkWindow used to receive messages. Its #GdkWindow::title will be @name.
  * 	@display: the #GdkDisplay this socket belongs to. Though we can always obtain 
  * 		this information from @window, we cache it here for saving code lines.
- * 	@status: the status. See #GdkSocketStatus.
+ * 	@status: the status. See #GnomenuSocketStatus.
  *  @target: to whom this socket is connected
  *  @queue: message buffer, 
  *	@acks: number of ACKs received. (and without send a DATA) if @acks > 0, 
@@ -67,16 +67,16 @@ typedef enum { /*< prefix = GDK_SOCKET >*/
  *  @timeout: number of seconds for a connection to timeout.
  *  @alives: number of replied ISALIVE messages.
  *  
- *  The GdkSocket object.
+ *  The GnomenuSocket object.
  */
-struct _GdkSocket {
+struct _GnomenuSocket {
 	GObject parent;
 /*< public >*/
 	gchar * name;
 	GdkWindow * window;
 	GdkDisplay * display;
-	GdkSocketStatus status;
-	GdkSocketNativeID target;
+	GnomenuSocketStatus status;
+	GnomenuSocketNativeID target;
 	GQueue * queue;
 	gint acks;
 	gint timeout;
@@ -84,34 +84,34 @@ struct _GdkSocket {
 };
 
 /**
- * GdkSocketClass:
+ * GnomenuSocketClass:
  *   @data_arrival_signal_id: the signal id for ::data-arrival.
  *   @data_arrival_cleanup: the cleanup call back for ::data-arrival signal
  */
-struct _GdkSocketClass {
+struct _GnomenuSocketClass {
 	GObjectClass parent;
 /* < private >*/
-	void (*data_arrival) (GdkSocket * self, gpointer data, guint length);
-	void (*connect_req) (GdkSocket * self, GdkSocketNativeID target);
-	void (*shutdown) (GdkSocket * self);
-	void (*connected) (GdkSocket * self, GdkSocketNativeID target);
+	void (*data_arrival) (GnomenuSocket * self, gpointer data, guint length);
+	void (*connect_req) (GnomenuSocket * self, GnomenuSocketNativeID target);
+	void (*shutdown) (GnomenuSocket * self);
+	void (*connected) (GnomenuSocket * self, GnomenuSocketNativeID target);
 };
 
 
-GType gdk_socket_get_type (void);
+GType gnomenu_socket_get_type (void);
 
-GdkSocket * gdk_socket_new (gchar * name);
-GdkSocketNativeID gdk_socket_get_native(GdkSocket * self);
+GnomenuSocket * gnomenu_socket_new (gchar * name);
+GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * self);
 
-gboolean gdk_socket_listen(GdkSocket * self);
-GdkSocket * gdk_socket_accept(GdkSocket * self, GdkSocketNativeID target);
+gboolean gnomenu_socket_listen(GnomenuSocket * self);
+GnomenuSocket * gnomenu_socket_accept(GnomenuSocket * self, GnomenuSocketNativeID target);
 
-gboolean gdk_socket_send(GdkSocket * self, gpointer data, guint bytes);
+gboolean gnomenu_socket_send(GnomenuSocket * self, gpointer data, guint bytes);
 
-void gdk_socket_shutdown(GdkSocket * self);
-gboolean gdk_socket_broadcast_by_name(GdkSocket * self, gchar * name, gpointer data, guint bytes);
+void gnomenu_socket_shutdown(GnomenuSocket * self);
+gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * self, gchar * name, gpointer data, guint bytes);
 
-gboolean gdk_socket_flush(GdkSocket * _self);
+gboolean gnomenu_socket_flush(GnomenuSocket * _self);
 
 G_END_DECLS
 #endif
