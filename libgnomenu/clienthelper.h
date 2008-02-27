@@ -1,14 +1,14 @@
 #ifndef GNOMENU_CLIENT_H
 #define GNOMENU_CLIENT_H
 
-#include "gdksocket.h"
+#include "socket.h"
 
 G_BEGIN_DECLS
 
 /**
  * SECTION: clienthelper
  * @short_description: Menu client Helper.
- * @see_also: #GnomenuServerHelper, #GtkGlobalMenuBar, #GdkSocket,
+ * @see_also: #GnomenuServerHelper, #GtkGlobalMenuBar, #GnomenuSocket,
  * @stablility: Unstable
  * @include: libgnomenu/clienthelper.h
  *
@@ -35,7 +35,7 @@ typedef struct _GnomenuClientHelper GnomenuClientHelper;
  *
  */
 struct _GnomenuClientHelper {
-	GdkSocket parent;
+	GnomenuSocket parent;
 /*< public >*/
 };
 
@@ -44,7 +44,7 @@ struct _GnomenuClientHelper {
  * GnomenuClientHelperClass:
  */
 struct _GnomenuClientHelperClass {
-	GdkSocketClass parent;
+	GnomenuSocketClass parent;
 /*< private >*/	
 
 	void (*server_new)(GnomenuClientHelper * self);

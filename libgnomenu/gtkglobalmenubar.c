@@ -98,7 +98,7 @@ static void _s_size_allocate 		( GtkWidget       *widget,
 								      GtkAllocation   *allocation, 
 									  GnomenuClientHelper * helper);
 static void _s_connected 			( GtkWidget  * menubar, 
-									  GdkSocketNativeID target, 
+									  GnomenuSocketNativeID target, 
 									  GnomenuClientHelper * helper); 
 static void _s_shutdown				( GtkWidget * menubar,
 									  GnomenuClientHelper * helper);
@@ -392,7 +392,7 @@ _s_size_allocate (GtkWidget * widget,
  *
  * sync the state of the client immeidately after the connection is established
  */
-static void _s_connected ( GtkWidget  * widget, GdkSocketNativeID target, GnomenuClientHelper * helper){
+static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);

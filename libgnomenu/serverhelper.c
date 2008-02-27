@@ -53,20 +53,20 @@ static void _c_client_destroy 			( GnomenuServerHelper * _self, GnomenuClientInf
 static void _c_client_size_request 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 
 /* signal handlers */
-static void _s_connect_req				( GnomenuServerHelper * _self, GdkSocketNativeID target);
+static void _s_connect_req				( GnomenuServerHelper * _self, GnomenuSocketNativeID target);
 
-static void _s_service_shutdown			( GnomenuServerHelper * _self, GdkSocket * service);
+static void _s_service_shutdown			( GnomenuServerHelper * _self, GnomenuSocket * service);
 static void _s_service_data_arrival		( GnomenuServerHelper * _self, gpointer data, gint bytes, 
-										  GdkSocket * service);
+										  GnomenuSocket * service);
 /* utilities */
 
 static GnomenuClientInfo * 
-_find_ci_by_service						( GnomenuServerHelper * _self, GdkSocket* socket);
+_find_ci_by_service						( GnomenuServerHelper * _self, GnomenuSocket* socket);
 static void _client_do_allocate_size	( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 
 static guint class_signals[SIGNAL_MAX] = {0};
 
-G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, GDK_TYPE_SOCKET)
+G_DEFINE_TYPE (GnomenuServerHelper, gnomenu_server_helper, GNOMENU_TYPE_SOCKET)
 
 static void
 gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
@@ -227,10 +227,10 @@ gnomenu_server_helper_new(){
 	GnomenuServerHelper * _self;
 	GnomenuMessage msg;
 	_self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
-	gdk_socket_listen(GDK_SOCKET(_self));
+	gnomenu_socket_listen(GDK_SOCKET(_self));
 	msg.any.type = GNOMENU_MSG_SERVER_NEW;
-	msg.server_new.socket_id = gdk_socket_get_native(GDK_SOCKET(_self));
-	gdk_socket_broadcast_by_name(GDK_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+	msg.server_new.socket_id = gnomenu_socket_get_native(GDK_SOCKET(_self));
+	gnomenu_socket_broadcast_by_name(GDK_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 	return _self;
 }
 /**
@@ -257,7 +257,7 @@ static GObject* _constructor(
 
 static void _client_info_free(gpointer  p, gpointer data){
 	GnomenuClientInfo * ci = p;
-	gdk_socket_shutdown(ci->service);
+	gnomenu_socket_shutdown(ci->service);
 	g_free(p);
 }
 
@@ -284,7 +284,7 @@ static void _finalize(GObject * _self){
  *
  */
 static void _s_connect_req(GnomenuServerHelper * _self,
-		GdkSocketNativeID target){
+		GnomenuSocketNativeID target){
 	LOG_FUNC_NAME;
 	GnomenuClientInfo * ci = NULL;
 	GET_OBJECT(_self, self, priv);
@@ -292,7 +292,7 @@ static void _s_connect_req(GnomenuServerHelper * _self,
 	ci = g_new0(GnomenuClientInfo, 1);
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
-	ci->service = gdk_socket_accept(GDK_SOCKET(self), target);
+	ci->service = gnomenu_socket_accept(GDK_SOCKET(self), target);
 	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
 	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_s_service_data_arrival), self);
 
@@ -302,7 +302,7 @@ static void _s_connect_req(GnomenuServerHelper * _self,
 			ci);
 		
 }
-static void _s_service_shutdown(GnomenuServerHelper * _self, GdkSocket * service){
+static void _s_service_shutdown(GnomenuServerHelper * _self, GnomenuSocket * service){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_self, self, priv);
 	GnomenuClientInfo * ci;
@@ -319,7 +319,7 @@ static void _s_service_shutdown(GnomenuServerHelper * _self, GdkSocket * service
  * 	callback, invoked when the embeded socket for serving clients receives data
  */
 static void _s_service_data_arrival(GnomenuServerHelper * _self, 
-		gpointer data, gint bytes, GdkSocket * service){
+		gpointer data, gint bytes, GnomenuSocket * service){
 	LOG_FUNC_NAME;
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
@@ -417,7 +417,7 @@ static gboolean _client_compare_by_parent_window(
  * Find a client by socket_id
  */
 static GnomenuClientInfo * 
-_find_ci_by_service( GnomenuServerHelper * _self, GdkSocket* socket){
+_find_ci_by_service( GnomenuServerHelper * _self, GnomenuSocket* socket){
 
 	GnomenuClientInfo ci_key;
 	GList * found;
@@ -476,7 +476,7 @@ gnomenu_server_helper_queue_resize(GnomenuServerHelper * _self, GnomenuClientInf
 	g_return_if_fail(gnomenu_server_helper_is_client(_self, ci));
 	msg.any.type = GNOMENU_MSG_SIZE_QUERY;
 	ci->size_stage = GNOMENU_CI_STAGE_QUERYING;
-	gdk_socket_send(ci->service, &msg, sizeof(msg.size_query));
+	gnomenu_socket_send(ci->service, &msg, sizeof(msg.size_query));
 }
 
 void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
@@ -486,7 +486,7 @@ void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuCl
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
 	msg.any.type = GNOMENU_MSG_ORIENTATION_CHANGE;
 	msg.orientation_change.orientation = ori;
-	gdk_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
+	gnomenu_socket_send(ci->service, &msg, sizeof(msg.orientation_change));
 }
 
 /**
@@ -528,7 +528,7 @@ void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClien
 	msg.position_set.y = position->y;
 	ci->allocation.x = position->x;
 	ci->allocation.y = position->y;
-	gdk_socket_send(ci->service, &msg, sizeof(msg.position_set));
+	gnomenu_socket_send(ci->service, &msg, sizeof(msg.position_set));
 }
 /**
  * gnomenu_server_helper_set_visibility:
@@ -547,7 +547,7 @@ void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuCli
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));
 	msg.any.type = GNOMENU_MSG_VISIBILITY_SET;
 	msg.visibility_set.visibility = vis;
-	gdk_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
+	gnomenu_socket_send(ci->service, &msg, sizeof(msg.visibility_set));
 }
 /**
  * gnomenu_server_helper_set_background:
@@ -570,12 +570,12 @@ void gnomenu_server_helper_set_background(GnomenuServerHelper * self, GnomenuCli
 		msg.bgcolor_set.red = color->red;
 		msg.bgcolor_set.blue = color->blue;
 		msg.bgcolor_set.green = color->green;
-		gdk_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
+		gnomenu_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
 	} 
 	if(pixmap){
 		msg.any.type = GNOMENU_MSG_BGPIXMAP_SET;
 		msg.bgpixmap_set.pixmap = GDK_PIXMAP_XID(pixmap);
-		gdk_socket_send(ci->service, &msg, sizeof(msg.bgpixmap_set));
+		gnomenu_socket_send(ci->service, &msg, sizeof(msg.bgpixmap_set));
 	}	
 }
 /* virtual functions for signal handling*/
@@ -620,7 +620,7 @@ _client_do_allocate_size(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	msg.size_allocate.width = ci->allocation.width;
 	msg.size_allocate.height = ci->allocation.height;
 	
-	gdk_socket_send(ci->service, 
+	gnomenu_socket_send(ci->service, 
 		&msg, sizeof(msg.size_allocate));
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 

@@ -11,8 +11,8 @@ libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	messages.h\
 	messages.c\
-	gdksocket.h \
-	gdksocket.c \
+	socket.h \
+	socket.c \
 	serverhelper.c \
 	serverhelper.h \
 	clienthelper.c \
@@ -34,7 +34,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = gdksocket.h serverhelper.h messages.h clienthelper.h quirks.h gtkglobalmenubar.h
+libgnomenuinclude_HEADERS = socket.h serverhelper.h messages.h clienthelper.h quirks.h gtkglobalmenubar.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
@@ -48,7 +48,7 @@ gnomenu-marshall.c: gnomenu-marshall.list
 gnomenu-marshall.h: gnomenu-marshall.list
 	glib-genmarshal --internal --header --prefix=gnomenu_marshall gnomenu-marshall.list > $@
 
-gnomenu_enum_headers = messages.h gdksocket.h
+gnomenu_enum_headers = messages.h socket.h
 
 gnomenu-enums.c: $(gnomenu_enum_headers) 
 	glib-mkenums --fhead "#include <glib-object.h>\n" \

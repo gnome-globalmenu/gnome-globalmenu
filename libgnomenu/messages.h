@@ -2,13 +2,13 @@
 #define GNOMENU_MESSAGE_H
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
-#include "gdksocket.h"
+#include "socket.h"
 G_BEGIN_DECLS
 /**
  * SECTION: messages
  * @title: Messages
  * @short_description: The messages used by libgnomenu for remote widgets.
- * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper, #GdkSocket
+ * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper, #GnomenuSocket
  * @stablility: Unstable
  * @include:	libgnomenu/messages.h
  *
@@ -145,7 +145,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GdkSocketNativeID socket_id;
+	GnomenuSocketNativeID socket_id;
 } GnomenuMessageServerNew;
 /**
  * GnomenuMessageServerDestroy:

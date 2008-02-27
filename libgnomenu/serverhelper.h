@@ -1,7 +1,7 @@
 #ifndef GNOMENU_SERVER_H
 #define GNOMENU_SERVER_H
 
-#include "gdksocket.h"
+#include "socket.h"
 
 G_BEGIN_DECLS
 /**
@@ -33,14 +33,14 @@ typedef struct _GnomenuServerHelperClass GnomenuServerHelperClass;
  */
 typedef struct _GnomenuServerHelper GnomenuServerHelper;
 struct _GnomenuServerHelper{
-	GdkSocket parent;
+	GnomenuSocket parent;
 /*< public >*/
 	GList * clients;
 };
 
 /**
  * GnomenuServerHelperClientInfo:
- * 	@service: the #GdkSocket used to serve this client.
+ * 	@service: the #GnomenuSocket used to serve this client.
  * 	@ui_window: the container window which contains 
  * 			all the ui elements of the menu;
  * 			A menu server application will reparent it, but nothing more.
@@ -61,7 +61,7 @@ struct _GnomenuServerHelper{
 typedef struct _GnomenuClientInfo GnomenuClientInfo;
 
 struct _GnomenuClientInfo {
-	GdkSocket * service;
+	GnomenuSocket * service;
 	GdkNativeWindow ui_window;
 	GdkNativeWindow parent_window;
 	GtkRequisition requisition;
@@ -84,7 +84,7 @@ struct _GnomenuClientInfo {
  * @menu_create: the virtual function invoked.
  */
 struct _GnomenuServerHelperClass {
-	GdkSocketClass parent;
+	GnomenuSocketClass parent;
 /*< private >*/	
 
 	void (*client_new) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
@@ -98,7 +98,7 @@ struct _GnomenuServerHelperClass {
 GnomenuServerHelper *gnomenu_server_helper_new(void);
 GnomenuClientInfo * gnomenu_server_helper_find_client_by_socket_id(
 		GnomenuServerHelper * self,
-		GdkSocketNativeID socket_id);
+		GnomenuSocketNativeID socket_id);
 GnomenuClientInfo * gnomenu_server_helper_find_client_by_parent_window(
 		GnomenuServerHelper * self,
 		GdkNativeWindow parent_window);

@@ -9,7 +9,7 @@
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
 
-#ifndef GNOMENU_WINDOWING_X11
+#ifndef GDK_WINDOWING_X11
 #error ONLY X11 is supported. other targets are not yet supported.
 #endif
 
@@ -129,10 +129,10 @@ static void _c_shutdown 			( GnomenuSocket * _self );
 
 /* Raw data sending */
 static gboolean _raw_send 		( GnomenuSocket * _self, 
-								  GnomenuNativeWindow target, gpointer data, guint bytes );
+								  GdkNativeWindow target, gpointer data, guint bytes );
 static gboolean 
 _raw_send_nosync				( GnomenuSocket * _self, 
-								  GnomenuNativeWindow target, gpointer data, guint bytes );
+								  GdkNativeWindow target, gpointer data, guint bytes );
 static gboolean 
 _raw_broadcast_by_name
 								( GnomenuSocket * _self, gchar * name, gpointer data, guint bytes );
@@ -146,8 +146,8 @@ static gboolean
 _gnomenu_socket_is_alive			(GnomenuSocket * _self); 
 
 /* Wrap XClientMessage */
-static GnomenuFilterReturn 
-_window_filter_cb				(GnomenuXEvent* xevent, GnomenuEvent * event, gpointer data);
+static GdkFilterReturn 
+_window_filter_cb				(GdkXEvent* xevent, GdkEvent * event, gpointer data);
 
 static gulong 
 class_signals[SIGNAL_MAX] 		= {0};
@@ -324,8 +324,8 @@ _constructor	( GType type, guint n_construct_properties,
 	GObject * _self;
 	GnomenuSocket * self ;
 	GnomenuSocketPrivate * priv;
-	GnomenuWindowAttr attr;
-	GnomenuWindowAttributesType mask;
+	GdkWindowAttr attr;
+	GdkWindowAttributesType mask;
 	gchar *name;
 
 	_self = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)(type,
@@ -337,9 +337,9 @@ _constructor	( GType type, guint n_construct_properties,
 
 	self->display = gdk_display_get_default();
 	attr.title = self->name;
-	attr.wclass = GNOMENU_INPUT_ONLY;
-	attr.window_type = GNOMENU_WINDOW_TEMP;
-	mask = GNOMENU_WA_TITLE;
+	attr.wclass = GDK_INPUT_ONLY;
+	attr.window_type = GDK_WINDOW_TEMP;
+	mask = GDK_WA_TITLE;
 
 	self->window = gdk_window_new(NULL, &attr, mask);
 
@@ -601,7 +601,7 @@ gboolean gnomenu_socket_flush(GnomenuSocket * _self){
  *
  * internal filter function related to this X11 implement of #GnomenuSocket
  */
-static GnomenuFilterReturn 
+static GdkFilterReturn 
 	_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer _self){
 	GET_OBJECT(_self, self, priv);
 	XEvent * xevent = gdkxevent;
@@ -631,7 +631,7 @@ static GnomenuFilterReturn
 						}
 					} else
 					g_warning("Wrong socket status, ignore DATA");
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_CONNECT_ACK:
 					if(self->status == GNOMENU_SOCKET_DISCONNECTED){
@@ -657,7 +657,7 @@ static GnomenuFilterReturn
 						}
 					} else
 					g_warning("Wrong socket status(%d), ignore ACK", self->status);
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_CONNECT_REQ:
 					if(self->status == GNOMENU_SOCKET_LISTEN){
@@ -667,7 +667,7 @@ static GnomenuFilterReturn
 								msg->header.source);
 					}else
 						g_warning("Wrong socket status, ignore CONNECT_REQ");
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_ISALIVE:
 					if(self->status == GNOMENU_SOCKET_CONNECTED
@@ -677,7 +677,7 @@ static GnomenuFilterReturn
 						FILL_HEADER(&alive, GNOMENU_SOCKET_ALIVE, self, 0, 0);
 						_raw_send(self, self->target, &alive, sizeof(alive));
 					}
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_ALIVE:
 					if(self->status == GNOMENU_SOCKET_CONNECTED
@@ -685,7 +685,7 @@ static GnomenuFilterReturn
 						if(self->alives > 0) self->alives--;
 						gnomenu_socket_flush(self);
 					}
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_BROADCAST:
 					{
@@ -699,7 +699,7 @@ static GnomenuFilterReturn
 							data,
 							bytes);
 					}
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_SHUTDOWN:
 					if(self->status != GNOMENU_SOCKET_CONNECTED){
@@ -709,14 +709,14 @@ static GnomenuFilterReturn
 								class_signals[SHUTDOWN],
 								0);
 					}
-					return GNOMENU_FILTER_REMOVE;
+					return GDK_FILTER_REMOVE;
 				break;
 				default:
 					g_error("Should never reach here!");
 			}
 		}
 	} 
-	return GNOMENU_FILTER_CONTINUE;
+	return GDK_FILTER_CONTINUE;
 }
 
 static void _c_data_arrival(GnomenuSocket * _self,
@@ -809,7 +809,7 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
  * SeeAlso: #gnomenu_socket_send_nosync
  */
 static gboolean _raw_send(GnomenuSocket * _self, 
-		GnomenuNativeWindow target, 
+		GnomenuSocketNativeID target, 
 		gpointer data, 
 		guint bytes){
 
@@ -830,7 +830,7 @@ static gboolean _raw_send(GnomenuSocket * _self,
  *
  * Returns: if sucessful, TRUE; else FALSE.
  */
-static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuNativeWindow target, gpointer data, guint bytes){
+static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID target, gpointer data, guint bytes){
     XClientMessageEvent xclient;
 	if(bytes > 20){
 		g_error("GnomenuSocket: Can not send raw data for more than 20 bytes");
@@ -896,8 +896,8 @@ static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 static GList * _gnomenu_socket_find_targets(GnomenuSocket * _self, gchar * name){
 	GList * window_list = NULL;
 	GET_OBJECT(_self, self, priv);
-	GnomenuScreen * screen;
-	GnomenuWindow * root_window;
+	GdkScreen * screen;
+	GdkWindow * root_window;
 
     Window root_return;
     Window parent_return;
@@ -933,14 +933,14 @@ static GList * _gnomenu_socket_find_targets(GnomenuSocket * _self, gchar * name)
         gulong bytes_after_return;
         guchar * wm_name;
         gint rt;
-        gnomenu_error_trap_push();
+        gdk_error_trap_push();
         rt = XGetWindowProperty (GNOMENU_DISPLAY_XDISPLAY (self->display), children_return[i],
-                          gnomenu_x11_get_xatom_by_name_for_display (self->display, "_NET_WM_NAME"),
+                          gdk_x11_get_xatom_by_name_for_display (self->display, "_NET_WM_NAME"),
                           0, G_MAXLONG, False, type_req, &type_return,
                           &format_return, &nitems_return, &bytes_after_return,
                           &wm_name);
-		gnomenu_flush();
-		if(!gnomenu_error_trap_pop()){
+		gdk_flush();
+		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
 			if(g_str_equal(name, wm_name)){
 				window_list = g_list_append(window_list, (gpointer) children_return[i]);
@@ -973,7 +973,7 @@ static gboolean
 	GList * node;
 	gboolean rt = FALSE;
 	for(node = g_list_first(window_list); node; node = g_list_next(node)){
-		if(gnomenu_socket_send_nosync(_self, (GnomenuNativeWindow)node->data, data, bytes)){
+		if(gnomenu_socket_send_nosync(_self, (GdkNativeWindow)node->data, data, bytes)){
 			rt = TRUE;
 			break;
 		}
@@ -1012,7 +1012,7 @@ _raw_broadcast_by_name(GnomenuSocket * _self, gchar * name, gpointer data, guint
 	gboolean rt1;
 	int n;
 	for(n = 0, node = g_list_first(window_list); node; n++, node = g_list_next(node)){
-		rt1 =  _raw_send_nosync(_self, (GnomenuNativeWindow)node->data, data, bytes);
+		rt1 =  _raw_send_nosync(_self, (GnomenuSocketNativeID)node->data, data, bytes);
 		gdk_display_sync (_self->display); /* Hope fully it will fix some random X BadWindow errors*/
 		rt = rt || rt1;
 	}

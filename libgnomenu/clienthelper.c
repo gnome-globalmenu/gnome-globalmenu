@@ -48,11 +48,11 @@ static void _c_background_set				( GnomenuClientHelper * _self,
 									GdkColor * color, GdkPixmap * pixmap);
 
 /* Signal Handlers */
-static void _s_data_arrival 			( GdkSocket * _self, gpointer data, gint bytes, gpointer userdata);
-static void _s_connected 				( GdkSocket * _self, GdkSocketNativeID target);
-static void _s_shutdown				( GdkSocket * _self);
+static void _s_data_arrival 			( GnomenuSocket * _self, gpointer data, gint bytes, gpointer userdata);
+static void _s_connected 				( GnomenuSocket * _self, GnomenuSocketNativeID target);
+static void _s_shutdown				( GnomenuSocket * _self);
 
-G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GDK_TYPE_SOCKET)
+G_DEFINE_TYPE (GnomenuClientHelper, gnomenu_client_helper, GNOMENU_TYPE_SOCKET)
 
 enum { /*< private >*/
 	SERVER_NEW,
@@ -98,7 +98,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
  * 
  * emitted when the client receives a server's creation announcement. The 
  * anouncement, as the name indicates, is a broadcast message to every
- * #GdkSocket with a name #GNOMENU_CLIENT_NAME. 
+ * #GnomenuSocket with a name #GNOMENU_CLIENT_NAME. 
  *
  * It is the responsibility of the true client who listens to this signal
  * to reset its internal state, getting ready, and notify the server its
@@ -125,9 +125,9 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
  *  
  * emitted when the connection between the client and the server is dead.
  *
- * 	Deprecated: Use GdkSocket::shutdown instead. 
+ * 	Deprecated: Use GnomenuSocket::shutdown instead. 
  * 	GnomenuClientHelper::server-destory is
- * 	emitted when it receives a GdkSocket::shutdown signal.
+ * 	emitted when it receives a GnomenuSocket::shutdown signal.
  */
 		g_signal_new("server-destroy",
 			G_TYPE_FROM_CLASS(klass),
@@ -284,7 +284,7 @@ static GObject* _constructor(GType type, guint n_construct_properties,
 	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_s_shutdown), NULL);
 	priv->disposed = FALSE;
 /* try to connect to the server */
-	gdk_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
+	gnomenu_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
 
 	return _self;
 }
@@ -296,12 +296,12 @@ static GObject* _constructor(GType type, guint n_construct_properties,
  */
 static void _dispose(GObject * _self){
 	GET_OBJECT(_self, self, priv);
-	GdkSocket * socket = GDK_SOCKET(self);
+	GnomenuSocket * socket = GNOMENU_SOCKET(self);
 	LOG_FUNC_NAME;
 	if(! priv->disposed){
 		priv->disposed = TRUE;
-		if(socket->status == GDK_SOCKET_CONNECTED){
-			gdk_socket_shutdown(socket);
+		if(socket->status == GNOMENU_SOCKET_CONNECTED){
+			gnomenu_socket_shutdown(socket);
 		}
 	}
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(_self);
@@ -312,14 +312,14 @@ static void _finalize(GObject * _self){
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->finalize(_self);
 }
 
-static void _s_shutdown(GdkSocket * _self){
+static void _s_shutdown(GnomenuSocket * _self){
 	LOG_FUNC_NAME;
 	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_DESTROY],
 		0);
 
 }
-static void _s_connected(GdkSocket * _self, GdkSocketNativeID target){
+static void _s_connected(GnomenuSocket * _self, GnomenuSocketNativeID target){
 	LOG_FUNC_NAME;
 	g_signal_emit(G_OBJECT(_self),
 		class_signals[SERVER_NEW],
@@ -329,7 +329,7 @@ static void _s_connected(GdkSocket * _self, GdkSocketNativeID target){
  *
  * 	callback, invoked when the embeded socket receives data
  */
-static void _s_data_arrival(GdkSocket * _self, 
+static void _s_data_arrival(GnomenuSocket * _self, 
 		gpointer data, gint bytes, gpointer userdata){
 	GnomenuMessage * message = data;
 	GEnumValue * enumvalue = NULL;
@@ -344,7 +344,7 @@ static void _s_data_arrival(GdkSocket * _self,
 	/*TODO: Dispatch the message and emit signals*/
 	switch(enumvalue->value){
 		case GNOMENU_MSG_SERVER_NEW:
-			gdk_socket_connect(self, message->server_new.socket_id);
+			gnomenu_socket_connect(self, message->server_new.socket_id);
 		case GNOMENU_MSG_SIZE_ALLOCATE:
 			{
 				GtkAllocation * allocation = g_new0(GtkAllocation, 1);
@@ -486,7 +486,7 @@ void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self,
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_CLIENT_REALIZE;
 	msg.client_realize.ui_window = GDK_WINDOW_XWINDOW(ui_window);
-	gdk_socket_send(GDK_SOCKET(_self),
+	gnomenu_socket_send(GNOMENU_SOCKET(_self),
 		&msg, sizeof(msg.client_realize));
 }
 /**
@@ -504,7 +504,7 @@ void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self,
 	GnomenuMessage msg;
 	msg.any.type = GNOMENU_MSG_CLIENT_REPARENT;
 	msg.client_reparent.parent_window = GDK_WINDOW_XWINDOW(parent_window);	
-	gdk_socket_send(GDK_SOCKET(_self),
+	gnomenu_socket_send(GNOMENU_SOCKET(_self),
 		&msg, sizeof(msg.client_reparent));
 }
 /**
@@ -515,7 +515,7 @@ void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self,
  */
 void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self){
 	GnomenuMessage msg; msg.any.type = GNOMENU_MSG_CLIENT_UNREALIZE;
-	gdk_socket_send(GDK_SOCKET(_self),
+	gnomenu_socket_send(GNOMENU_SOCKET(_self),
 		&msg, sizeof(msg.client_unrealize));
 }
 /**
@@ -531,7 +531,7 @@ void gnomenu_client_helper_request_size(GnomenuClientHelper * _self, GtkRequisit
 	msg.any.type = GNOMENU_MSG_SIZE_REQUEST;
 	msg.size_request.width = req->width;
 	msg.size_request.height = req->height;
-	gdk_socket_send(GDK_SOCKET(_self), &msg, sizeof(msg.size_request));
+	gnomenu_socket_send(GNOMENU_SOCKET(_self), &msg, sizeof(msg.size_request));
 }
 /*
 vim:ts=4:sw=4
