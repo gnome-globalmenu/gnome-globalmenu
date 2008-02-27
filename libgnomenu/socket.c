@@ -436,7 +436,7 @@ _finalize(GObject * _self){
  * 	@GnomenuWindow the GnomenuSocket wraps, in current implement.
  */
 GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * _self){
-	return GNOMENU_WINDOW_XWINDOW(_self->window);
+	return GDK_WINDOW_XWINDOW(_self->window);
 }
 /**
  * gnomenu_socket_connect:
@@ -815,7 +815,7 @@ static gboolean _raw_send(GnomenuSocket * _self,
 
 	gboolean rt;
 	rt = _raw_send_nosync(_self, target, data, bytes);
-    gnomenu_display_sync (_self->display); /*resolve the message, sync the state*/
+    gdk_display_sync (_self->display); /*resolve the message, sync the state*/
 	return rt;
 }
 /**
@@ -826,7 +826,7 @@ static gboolean _raw_send(GnomenuSocket * _self,
  * @data: the data buffer. After calling this function, the buffer can be freed.
  * @bytes: the length of data wanted to send.
  *
- * This function don't call #gnomenu_display_sync at the end. See #gdk_socket_send. 
+ * This function don't call #gdk_display_sync at the end. See #gdk_socket_send. 
  *
  * Returns: if sucessful, TRUE; else FALSE.
  */
@@ -840,15 +840,15 @@ static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID ta
     memset (&xclient, 0, sizeof (xclient));
     xclient.window = target; /*Though X11 places no interpretation of this field, GNOMENU interpretes this field at the target window.*/
     xclient.type = ClientMessage;
-    xclient.message_type = gnomenu_x11_get_xatom_by_name_for_display (_self->display, GNOMENU_SOCKET_ATOM_STRING);
+    xclient.message_type = gdk_x11_get_xatom_by_name_for_display (_self->display, GNOMENU_SOCKET_ATOM_STRING);
     xclient.format = 32;
 	memcpy(&xclient.data.l, data, bytes);
-    gnomenu_error_trap_push ();
-    XSendEvent (GNOMENU_DISPLAY_XDISPLAY(_self->display),
+    gdk_error_trap_push ();
+    XSendEvent (GDK_DISPLAY_XDISPLAY(_self->display),
           target,
           False, NoEventMask, (XEvent *)&xclient);
-	gnomenu_flush();
-    return gnomenu_error_trap_pop () == 0;
+	gdk_flush();
+    return gdk_error_trap_pop () == 0;
 }
 /**
  * _gnomenu_socket_is_alive:
@@ -905,21 +905,21 @@ static GList * _gnomenu_socket_find_targets(GnomenuSocket * _self, gchar * name)
     unsigned int nchildren_return;
     unsigned int i;
 
-	screen = gnomenu_drawable_get_screen(self->window);
+	screen = gdk_drawable_get_screen(self->window);
 	g_return_val_if_fail(screen != NULL, NULL);
 
-	root_window = gnomenu_screen_get_root_window(screen);
+	root_window = gdk_screen_get_root_window(screen);
 	g_return_val_if_fail(root_window != NULL, NULL);
 
-    gnomenu_error_trap_push();
-    XQueryTree(GNOMENU_DISPLAY_XDISPLAY(self->display),
-        GNOMENU_WINDOW_XWINDOW(root_window),
+    gdk_error_trap_push();
+    XQueryTree(GDK_DISPLAY_XDISPLAY(self->display),
+        GDK_WINDOW_XWINDOW(root_window),
         &root_return,
         &parent_return,
         &children_return,
         &nchildren_return);
-	gnomenu_flush();
-    if(gnomenu_error_trap_pop()){
+	gdk_flush();
+    if(gdk_error_trap_pop()){
         g_warning("%s: XQueryTree Failed", __func__);
         return NULL;
     }
@@ -927,14 +927,14 @@ static GList * _gnomenu_socket_find_targets(GnomenuSocket * _self, gchar * name)
 		
 	for(i = 0; i < nchildren_return; i++){
         Atom type_return;
-        Atom type_req = gnomenu_x11_get_xatom_by_name_for_display (self->display, "UTF8_STRING");
+        Atom type_req = gdk_x11_get_xatom_by_name_for_display (self->display, "UTF8_STRING");
         gint format_return;
         gulong nitems_return;
         gulong bytes_after_return;
         guchar * wm_name;
         gint rt;
         gdk_error_trap_push();
-        rt = XGetWindowProperty (GNOMENU_DISPLAY_XDISPLAY (self->display), children_return[i],
+        rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (self->display), children_return[i],
                           gdk_x11_get_xatom_by_name_for_display (self->display, "_NET_WM_NAME"),
                           0, G_MAXLONG, False, type_req, &type_return,
                           &format_return, &nitems_return, &bytes_after_return,
@@ -978,7 +978,7 @@ static gboolean
 			break;
 		}
 	}
-    gnomenu_display_sync (_self->display); /*resolve the message, sync the state*/
+    gdk_display_sync (_self->display); /*resolve the message, sync the state*/
 	g_list_free(window_list);
 	return rt;
 }

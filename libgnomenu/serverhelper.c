@@ -227,10 +227,10 @@ gnomenu_server_helper_new(){
 	GnomenuServerHelper * _self;
 	GnomenuMessage msg;
 	_self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
-	gnomenu_socket_listen(GDK_SOCKET(_self));
+	gnomenu_socket_listen(GNOMENU_SOCKET(_self));
 	msg.any.type = GNOMENU_MSG_SERVER_NEW;
-	msg.server_new.socket_id = gnomenu_socket_get_native(GDK_SOCKET(_self));
-	gnomenu_socket_broadcast_by_name(GDK_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+	msg.server_new.socket_id = gnomenu_socket_get_native(GNOMENU_SOCKET(_self));
+	gnomenu_socket_broadcast_by_name(GNOMENU_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 	return _self;
 }
 /**
@@ -292,7 +292,7 @@ static void _s_connect_req(GnomenuServerHelper * _self,
 	ci = g_new0(GnomenuClientInfo, 1);
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
-	ci->service = gnomenu_socket_accept(GDK_SOCKET(self), target);
+	ci->service = gnomenu_socket_accept(GNOMENU_SOCKET(self), target);
 	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
 	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_s_service_data_arrival), self);
 

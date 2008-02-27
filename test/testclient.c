@@ -1,41 +1,41 @@
 #include <gtk/gtk.h>
-#include <libgnomenu/gdksocket.h>
+#include <libgnomenu/socket.h>
 #include <libgnomenu/clienthelper.h>
 #include <libgnomenu/messages.h>
 
 GtkWidget * create, * destroy, * size, * bgcolor;
 GnomenuClientHelper * client;
-GdkSocket * server;
-GdkSocket * service;
+GnomenuSocket * server;
+GnomenuSocket * service;
 
 static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
 	gtk_main_quit();
 }
-static void service_data_arrival(GdkSocket * socket, gpointer data, gint bytes, gpointer userdata){
+static void service_data_arrival(GnomenuSocket * socket, gpointer data, gint bytes, gpointer userdata){
 	g_message("ding: %d", *(gint*)data);
 }
-static void server_connect_req(GdkSocket * socket, GdkSocketNativeID target, gpointer userdata){
-	service = gdk_socket_accept(socket, target);
+static void server_connect_req(GnomenuSocket * socket, GnomenuSocketNativeID target, gpointer userdata){
+	service = gnomenu_socket_accept(socket, target);
 	g_signal_connect(G_OBJECT(service), "data-arrival", service_data_arrival, 0);	
 }
 static void button_clicked(GtkButton * button, gpointer usrdata){
 	if(button == create){
 		GnomenuMessage msg;
-		server = gdk_socket_new(GNOMENU_SERVER_NAME);
+		server = gnomenu_socket_new(GNOMENU_SERVER_NAME);
 		g_signal_connect(G_OBJECT(server), "connect-request",
 				G_CALLBACK(server_connect_req), NULL);
-		gdk_socket_listen(server);
+		gnomenu_socket_listen(server);
 		msg.any.type = GNOMENU_MSG_SERVER_NEW;
-		msg.server_new.socket_id = gdk_socket_get_native(server);
-		gdk_socket_broadcast_by_name(server, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+		msg.server_new.socket_id = gnomenu_socket_get_native(server);
+		gnomenu_socket_broadcast_by_name(server, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 	}
 	if(button == size){
 		GnomenuMessage msg;
 		msg.any.type = GNOMENU_MSG_SIZE_QUERY;
-		gdk_socket_send(service, &msg, sizeof(msg));
+		gnomenu_socket_send(service, &msg, sizeof(msg));
 	}
 	if(button == destroy){
-		gdk_socket_shutdown(service);
+		gnomenu_socket_shutdown(service);
 	}
 	if(button == bgcolor){
 		GnomenuMessage msg;
@@ -44,7 +44,7 @@ static void button_clicked(GtkButton * button, gpointer usrdata){
 		msg.bgcolor_set.blue = g_random_int();
 		msg.bgcolor_set.green = g_random_int();
 		
-		gdk_socket_send(service, &msg, sizeof(msg));
+		gnomenu_socket_send(service, &msg, sizeof(msg));
 	}
 }
 int main(int argc, char* argv[]){
