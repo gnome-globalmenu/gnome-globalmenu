@@ -638,6 +638,8 @@ static GdkFilterReturn
 					/*These two simple lines is essential, we establish a connection here.*/
 						self->status = GDK_SOCKET_CONNECTED;
 						self->target = msg->header.source;
+						self->alives = 0;
+						self->acks = 0;
 						{
 					/*Then we send an CONNECT_ACK to the other peer to allow it begin data transfer*/
 							GdkSocketMessage ack;
