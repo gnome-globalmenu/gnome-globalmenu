@@ -55,7 +55,6 @@ typedef struct
 {
 	gboolean disposed;
 	gboolean detached;
-	GdkColor bgcolor;
 	GList * popup_items;
 } GtkGlobalMenuBarPrivate;
 
@@ -221,7 +220,7 @@ static GObject* _constructor(GType type,
 	priv = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(menu_bar);
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
-	priv->bgcolor = gtk_widget_get_style(menu_bar)->bg[GTK_STATE_NORMAL];
+
 	priv->popup_items = NULL;
 
 	menu_bar->helper = gnomenu_client_helper_new();
@@ -734,9 +733,6 @@ static void _sync_local_state				( GtkGlobalMenuBar * _self){
 		gtk_widget_queue_resize(menu_bar);
 
 	if(GTK_WIDGET_REALIZED(menu_bar)){
-		GdkColormap * colormap = gtk_widget_get_colormap(GTK_WIDGET(menu_bar));
-		gdk_rgb_find_color(colormap, &priv->bgcolor);
-		gdk_window_set_background(menu_bar->container, &priv->bgcolor);
 		gdk_window_invalidate_rect(menu_bar->container, NULL, TRUE);
 		if(priv->detached){
 			gdk_window_reparent(menu_bar->container, menu_bar->floater, 0, 0);
