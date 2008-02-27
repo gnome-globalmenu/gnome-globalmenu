@@ -106,13 +106,6 @@ typedef struct _GtkGlobalMenuBarClass  GtkGlobalMenuBarClass;
 struct _GtkGlobalMenuBar
 {
 	GtkMenuBar parent;
-	GnomenuClientHelper * helper;
-	GdkWindow * container;
-	GdkWindow * floater;
-	GtkAllocation allocation;
-	GtkRequisition requisition;
-	gint x;
-	gint y;
 };
 
 /**
