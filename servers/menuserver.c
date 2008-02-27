@@ -43,6 +43,14 @@ static void _get_property 		( GObject * _self,
 								  guint property_id, GValue * value, GParamSpec * pspec );
 
 static void 
+	_s_client_new				( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
+static void 
+	_s_client_destroy				( MenuServer * _self, 
+									  GnomenuClientInfo * ci, 
+									  GnomenuServerHelper * helper);
+static void 
 	_s_client_realize				( MenuServer * _self, 
 									  GnomenuClientInfo * ci, 
 									  GnomenuServerHelper * helper);
@@ -132,6 +140,10 @@ _constructor	( GType type, guint n_construct_properties,
 	server->screen = wnck_screen_get_default();
 	
 	g_signal_connect_swapped(server->gtk_helper,
+			"client-new", _s_client_new, server);
+	g_signal_connect_swapped(server->gtk_helper,
+			"client-destroy", _s_client_destroy, server);
+	g_signal_connect_swapped(server->gtk_helper,
 			"client-realize", _s_client_realize, server);
 	g_signal_connect_swapped(server->gtk_helper,
 			"client-reparent", _s_client_reparent, server);
@@ -199,25 +211,45 @@ void menu_server_destroy(MenuServer * server){
 	g_object_unref(server);
 }
 static void _free_client(MenuClient * client){
+
+	if(client->window)
+		gdk_window_destroy(client->window);
 	g_free(client);
 }
-static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
+static void _s_client_new(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	MenuClient * c = g_new0(MenuClient, 1);
+	LOG();
 	c->type = MENU_CLIENT_GTK;
 	c->handle = ci;
-	c->window = gdk_window_foreign_new(ci->ui_window);
+	c->window = NULL;
 	c->parent = NULL;
 	g_hash_table_insert(_self->clients, ci, c);
+
+}
+static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
+	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
+	LOG();
+	g_assert(c);
+	c->window = gdk_window_foreign_new(ci->ui_window);
 	gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 }
 static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
-	g_assert(c);
+	LOG();
+	g_return_if_fail(c); /*work around. wondering why*/
 	c->parent = ci->parent_window;
 	_update_active_menu_bar(_self);
 }
 static void _s_client_unrealize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
+	LOG();
+	g_assert(c);
+	gdk_window_destroy(c->window);
+	c->window = NULL;
+}
+static void _s_client_destroy(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
+	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
+	LOG();
 	g_assert(c);
 	if( _self->active == c ){
 		_self->active = NULL;
@@ -265,12 +297,14 @@ static void _update_active_menu_bar (MenuServer * _self){
 	if(c){
 		switch(c->type){
 			case MENU_CLIENT_GTK:
-				gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
+				if(c->window)
+					gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 			break;
 			case MENU_CLIENT_KDE:
-				gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
+				if(c->window)
+					gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 			break;
 		}
 	}
