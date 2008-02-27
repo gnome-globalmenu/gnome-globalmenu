@@ -22,10 +22,17 @@ AC_ARG_ENABLE(tracing,
 	[	enable_tracing="1"	])
 AC_MSG_RESULT($enable_tracing)
 
-if test "$enable_tracing" != "no"; then
-	AC_DEFINE([ENABLE_TRACING], $enable_tracing, [enable tracing])
-else
+if test "$enable_tracing" == "no"; then
 	AC_DEFINE([ENABLE_TRACING], 0, [enable tracing])
+fi
+if test "$enable_tracing" == "1"; then
+	AC_DEFINE([ENABLE_TRACING], 1, [enable tracing])
+fi
+if test "$enable_tracing" == "2"; then
+	AC_DEFINE([ENABLE_TRACING], 2, [enable tracing])
+fi
+if test "$enable_tracing" == "3"; then
+	AC_DEFINE([ENABLE_TRACING], 3, [enable tracing])
 fi
 
 dnl Servers;
