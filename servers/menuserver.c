@@ -11,6 +11,8 @@
 enum {
 	PROP_0,
 	PROP_WINDOW,
+	PROP_BGPIXMAP,
+	PROP_BGCOLOR
 };
 
 typedef struct {
@@ -123,6 +125,22 @@ menu_server_class_init(MenuServerClass * klass){
 						"Widget who has a window to swallow menu bars",
 						GTK_TYPE_WIDGET,
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+
+	g_object_class_install_property (gobject_class,
+		PROP_BGPIXMAP,
+		g_param_spec_object ("bg-pixmap",
+						"bg-pixmap",
+						"",
+						GDK_TYPE_PIXMAP,
+						G_PARAM_READWRITE));
+
+	g_object_class_install_property (gobject_class,
+		PROP_BGCOLOR,
+		g_param_spec_boxed ("bg-color",
+						"bg-color",
+						"",
+						GDK_TYPE_COLOR,
+						G_PARAM_READWRITE));
 }
 static void
 menu_server_init(MenuServer * _self){}
@@ -169,6 +187,17 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			g_assert(!GTK_WIDGET_NO_WINDOW(self->window));
 			g_object_ref(self->window);
 		break;
+		case PROP_BGCOLOR:
+			if(self->bgcolor) 
+				g_boxed_free(GDK_TYPE_COLOR, self->bgcolor);
+			self->bgcolor = g_value_dup_boxed(value);
+		break;
+		case PROP_BGPIXMAP:
+			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
+			self->bgpixmap = g_value_get_object(value);
+			if(self->bgpixmap)
+				g_object_ref(self->bgpixmap);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -179,6 +208,12 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 	switch (property_id){
 		case PROP_WINDOW:
 			g_value_set_object(value, self->window);
+		break;
+		case PROP_BGCOLOR:
+			g_value_set_static_boxed(value, self->bgcolor);
+		break;
+		case PROP_BGPIXMAP:
+			g_value_set_object(value, self->bgpixmap);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -198,6 +233,10 @@ static void _dispose ( GObject * _self){
 static void _finalize ( GObject * _self){
 	LOG();
 	GET_OBJECT(_self, self, priv);
+	if(self->bgcolor)
+	g_boxed_free(GDK_TYPE_COLOR, self->bgcolor);
+	if(self->bgpixmap)
+	g_object_unref(self->bgpixmap);
 	g_hash_table_destroy(self->clients);
 	G_OBJECT_CLASS(menu_server_parent_class)->finalize(_self);
 
@@ -301,6 +340,8 @@ static void _update_active_menu_bar (MenuServer * _self){
 					gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
+				if(_self->bgcolor)
+					gnomenu_server_helper_set_bgcolor(_self->gtk_helper, c->handle, _self->bgcolor);
 			break;
 			case MENU_CLIENT_KDE:
 				if(c->window)

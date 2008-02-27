@@ -10,6 +10,7 @@ typedef struct _Application {
 } Application;
 
 Application * application_new(GtkContainer * window);
+void applicatoin_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap);
 void application_destroy(Application * app);
 #endif
 /*

@@ -34,6 +34,9 @@ Application * application_new(GtkContainer * window){
 		G_CALLBACK(_s_active_client_changed), app);
 	return app;
 }
+void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
+	g_object_set(app->server, "bg-color", color, "bg-pixmap", pixmap, NULL);
+}
 void application_destroy(Application * app){
 	LOG();
 	menu_server_destroy(app->server);

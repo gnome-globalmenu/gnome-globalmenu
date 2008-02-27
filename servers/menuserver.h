@@ -23,6 +23,8 @@ typedef struct {
 	GtkWidget * window;
 	WnckScreen * screen;
 	MenuClient * active;
+	GdkColor * bgcolor;
+	GdkPixmap * bgpixmap;
 } MenuServer;
 typedef struct {
 	GObjectClass parent;
@@ -32,7 +34,7 @@ GType menu_server_get_type (void);
 
 MenuServer * menu_server_new(GtkWidget * window);
 WnckWindow * menu_server_get_client_parent(MenuServer * server, MenuClient * client);
-
+void menu_server_set_background(MenuServer * server, GdkColor * color, GdkPixmap * pixmap);
 void menu_server_destroy(MenuServer * server);
 
 G_END_DECLS

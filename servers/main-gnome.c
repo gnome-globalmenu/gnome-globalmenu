@@ -38,6 +38,24 @@
 #define APP_NAME "gnome-globalmenu-applet"
 #define APP_VERSION "4"
 
+static _change_background ( PanelApplet * applet, 
+							PanelAppletBackgroundType bgtp,
+							GdkColor * color,
+							GdkPixmap * pixmap,
+							Application * app){
+	GtkStyle * style = gtk_widget_get_style(applet);
+	switch(bgtp){
+		case PANEL_NO_BACKGROUND:
+			application_set_background(app, &style->bg[GTK_STATE_NORMAL], NULL);
+		break;
+		case PANEL_COLOR_BACKGROUND:
+			application_set_background(app, color, NULL);
+		break;
+		case PANEL_PIXMAP_BACKGROUND:
+			application_set_background(app, NULL, pixmap);
+		break;
+	}
+}
 static gboolean globalmenu_applet_factory (PanelApplet *applet,
                                         const gchar *iid,
                                         gpointer data){
@@ -46,7 +64,10 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
-	application_new(applet);
+	panel_applet_set_background_widget(applet, applet);
+	App = application_new(applet);
+	g_signal_connect(G_OBJECT(applet), "change-background", 
+				_change_background, App);
 	gtk_widget_show_all(applet);
     return TRUE;
   } else {
