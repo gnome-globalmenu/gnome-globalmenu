@@ -48,7 +48,7 @@ gnomenu-marshall.c: gnomenu-marshall.list
 gnomenu-marshall.h: gnomenu-marshall.list
 	glib-genmarshal --internal --header --prefix=gnomenu_marshall gnomenu-marshall.list > $@
 
-gnomenu_enum_headers = messages.h socket.h
+gnomenu_enum_headers = messages.h socket.h quirks.h
 
 gnomenu-enums.c: $(gnomenu_enum_headers) 
 	glib-mkenums --fhead "#include <glib-object.h>\n" \

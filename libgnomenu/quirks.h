@@ -24,6 +24,7 @@ G_BEGIN_DECLS
 typedef enum { /*< prefix = GNOMENU_QUIRK >*/
 	GNOMENU_QUIRK_NONE,
 	GNOMENU_QUIRK_IGNORE,
+	GNOMENU_QUIRK_CLASS,
 } GnomenuQuirkMask;
 GnomenuQuirkMask gnomenu_get_default_quirk(); 
 GtkMenuBar * gtk_legacy_menu_bar_new();

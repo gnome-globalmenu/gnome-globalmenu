@@ -16,16 +16,39 @@ typedef struct {
 
 static void _add_default_quirks_from_string(gchar * string){
 	gchar ** lines;
-	int i;
+	gchar ** words;
+	gchar * word;
+	int i, j, l;
 	lines = g_strsplit(string, "\n", 0);
 	for(i = 0; lines[i]; i++){
 		QuirkEntry * entry = g_new0(QuirkEntry, 1);
-		if(lines[i][0] != '#') {
-		entry->match = g_strdup(lines[i]);
-		entry->mask = GNOMENU_QUIRK_IGNORE;
-		g_queue_push_tail(default_quirks, entry);	
-		LOG("new quirk: %s", entry->match);
+		words = g_strsplit(lines[i], ":", 0);
+		if(!words) continue;
+		l = g_strv_length(words);
+		if(l !=2){
+			g_warning("Irregular conf file line(%d):\n%s", l, lines[i]);
+			g_strfreev(words);
+			continue;
 		}
+		word = g_strstrip(words[0]);
+		if(word[0] == '#'){
+			g_strfreev(words);
+			g_free(word);
+			continue;
+		}
+		entry->match = word;
+		word = g_strstrip(words[1]);
+		entry->mask = GNOMENU_QUIRK_NONE;
+		if(g_str_equal(word, "ignore")){
+			entry->mask = GNOMENU_QUIRK_IGNORE;
+		} else 
+		if(g_str_equal(word, "class")){
+			entry->mask = GNOMENU_QUIRK_CLASS;
+		} else
+			g_warning("Unknown quirk type: %s", word);
+		g_queue_push_tail(default_quirks, entry);	
+		LOG("new quirk: %s : %s", entry->match, word);
+		g_free(word);
 	}
 	g_strfreev(lines);
 }
