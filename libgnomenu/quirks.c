@@ -3,7 +3,7 @@
 #include <config.h>
 
 #include "quirks.h"
-#include "gtkglobalmenubar.h"
+#include "menubar.h"
 
 #define LOG(fmt, args...) g_message("<GnomenuQuirk>::" fmt, ## args)
 #define LOG_FUNC_NAME LOG("%s", __func__)

@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/serverhelper.h>
-#include <libgnomenu/gtkglobalmenubar.h>
+#include <libgnomenu/menubar.h>
 #include <libgnomenu/quirks.h>
 
 

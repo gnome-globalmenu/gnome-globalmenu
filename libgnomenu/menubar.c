@@ -27,7 +27,7 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
-#include "gtkglobalmenubar.h"
+#include "menubar.h"
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
