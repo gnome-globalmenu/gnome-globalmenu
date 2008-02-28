@@ -9,7 +9,7 @@
  * 		intended to replace GtkMenuBar
  * 	@see_also: #GtkMenuBar, #gtk_legacy_menu_bar_new
  * 	@stability: Unstable
- * 	@include: libgnomenu/gtkglobalmenubar.h
+ * 	@include: libgnomenu/menubar.h
  *
  * GnomenuMenuBar is the widget providing a global menu bar to 
  * the application. It is intended to (be able to) replace 
