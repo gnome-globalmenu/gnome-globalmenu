@@ -28,6 +28,7 @@
 #include <config.h>
 #include <gtk/gtk.h>
 #include "menubar.h"
+#include "quirks.h"
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
@@ -50,7 +51,8 @@
 enum {
   PROP_0,
   PROP_PACK_DIRECTION,
-  PROP_CHILD_PACK_DIRECTION
+  PROP_CHILD_PACK_DIRECTION,
+  PROP_QUIRK,
 };
 
 typedef struct 
@@ -70,6 +72,7 @@ typedef struct
 	GtkRequisition requisition;
 	gint x;
 	gint y;
+	GnomenuQuirkMask quirk;
 } GnomenuMenuBarPrivate;
 
 /* GObject interface */
@@ -181,6 +184,14 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	container_class->remove = _remove;
 
 	g_type_class_add_private (gobject_class, sizeof (GnomenuMenuBarPrivate));  
+
+	g_object_class_install_property (gobject_class, 
+			PROP_QUIRK,
+			g_param_spec_enum ("quirk",
+						"quirk",
+						"quirk",
+						GNOMENU_TYPE_QUIRK_MASK, GNOMENU_QUIRK_NONE,
+						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 }
 
 static void
@@ -303,6 +314,9 @@ _set_property (GObject      *object,
 		case PROP_CHILD_PACK_DIRECTION:
 			gtk_menu_bar_set_child_pack_direction (self, g_value_get_enum (value));
 		break;
+		case PROP_QUIRK:
+			priv->quirk = g_value_get_enum (value);
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -324,6 +338,9 @@ _get_property (GObject    *object,
 		case PROP_CHILD_PACK_DIRECTION:
 		  g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (self));
 		  break;
+		case PROP_QUIRK:
+			g_value_set_enum (value, priv->quirk);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;

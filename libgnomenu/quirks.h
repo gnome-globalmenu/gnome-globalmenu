@@ -28,5 +28,6 @@ typedef enum { /*< prefix = GNOMENU_QUIRK >*/
 } GnomenuQuirkMask;
 GnomenuQuirkMask gnomenu_get_default_quirk(); 
 GtkMenuBar * gtk_legacy_menu_bar_new();
+#define GNOMENU_TYPE_QUIRK_MASK gnomenu_quirk_mask_get_type()
 G_END_DECLS
 #endif
