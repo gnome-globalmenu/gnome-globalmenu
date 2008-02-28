@@ -1,49 +1,10 @@
-Index: gtk+-aqd/gtk/gtkwidget.c
-===================================================================
---- gtk+-aqd/gtk/gtkwidget.c	(revision 19601)
-+++ gtk+-aqd/gtk/gtkwidget.c	(working copy)
-@@ -2732,6 +2732,9 @@
-   g_return_val_if_fail (g_type_is_a (type, GTK_TYPE_WIDGET), NULL);
-   
-   va_start (var_args, first_property_name);
-+	if(type == gtk_menu_bar_get_type()){
-+		widget = (GtkWidget *)gtk_menu_bar_new_va(first_property_name, var_args);
-+	}
-   widget = (GtkWidget *)g_object_new_valist (type, first_property_name, var_args);
-   va_end (var_args);
- 
 Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,8 +85,15 @@
+@@ -85,8 +85,51 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
- 
-+
-+#undef gtk_menu_bar_get_type
-+#define gtk_menu_bar_get_type _gtk_menu_bar_get_type
- G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
--
-+#undef gtk_menu_bar_get_type
-+#define gtk_menu_bar_get_type IA__gtk_menu_bar_get_type
-+GType gtk_menu_bar_get_type(void){
-+	return _gtk_menu_bar_get_type();
-+}
- static void
- gtk_menu_bar_class_init (GtkMenuBarClass *class)
- {
-@@ -215,6 +222,7 @@
- 						   GTK_PARAM_READWRITE));
- 
-   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
-+
- }
- 
- static void
-@@ -222,10 +230,41 @@
- {
- }
  
 +gpointer _libgnomenu_lookup(gchar * name){
 +	gpointer sym = NULL;
@@ -64,23 +25,49 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +
 +	return sym;
 +}
- GtkWidget*
-+gtk_menu_bar_new_va (gchar* first_name, va_list va_args)
-+{
-+	GtkWidget * (*real_new)(gchar* first, va_list va_args) = NULL;
-+	real_new = _libgnomenu_lookup("gnomenu_menu_bar_new_legacy_va");
-+	if(real_new) {
-+		g_warning("Using Global Menu, might be unstable");
-+		return real_new(first_name, va_args);
++/*fool every other app*/
++#undef gtk_menu_bar_get_type
++#define gtk_menu_bar_get_type _gtk_menu_bar_get_type
+ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
++#undef gtk_menu_bar_get_type
++#define gtk_menu_bar_get_type IA__gtk_menu_bar_get_type
+ 
++#undef GTK_TYPE_MENU_BAR
++/*Dont fool myself*/
++#define GTK_TYPE_MENU_BAR (_gtk_menu_bar_get_type())
++
++GType gtk_menu_bar_get_type(void){
++	static GType * type = NULL;
++	static GType (* get_type)(void) = NULL;
++	if(!type) type = _libgnomenu_lookup("gnomenu_menu_bar_type");
++	if(!get_type) get_type = _libgnomenu_lookup("gnomenu_menu_bar_get_type");
++	if(type && get_type) {
++		if(!(*type)) /*gnomenu_menu_bar not registerd yet*/
++			return _gtk_menu_bar_get_type();
++		else /*gnomenu_menu_bar is registered */{
++			g_warning("use gnomenu");
++			return get_type();
++		}
 +	}
-+	g_warning("Using GtkMenuBar");
-+  return (GtkWidget*)g_object_new_valist (GTK_TYPE_MENU_BAR, first_name, va_args);
++	return _gtk_menu_bar_get_type();
 +}
-+GtkWidget*
+ static void
+ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+ {
+@@ -215,6 +258,7 @@
+ 						   GTK_PARAM_READWRITE));
+ 
+   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
++
+ }
+ 
+ static void
+@@ -225,7 +269,7 @@
+ GtkWidget*
  gtk_menu_bar_new (void)
  {
 -  return g_object_new (GTK_TYPE_MENU_BAR, NULL);
-+	return gtk_menu_bar_new_va(NULL, NULL);
++	return g_object_new(gtk_menu_bar_get_type(), NULL);
  }
  
  static void
