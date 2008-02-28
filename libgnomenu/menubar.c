@@ -238,14 +238,10 @@ static GObject* _constructor(GType type,
 		guint n_construct_properties,
 		GObjectConstructParam *construct_params){
 
-	GObject * object;
-	GnomenuMenuBar * menu_bar;
-	GnomenuMenuBarPrivate * priv;
-	object = (G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->constructor)(
+	GObject * object = (G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->constructor)(
 		type, n_construct_properties, construct_params);
 
-	menu_bar = GNOMENU_MENU_BAR(object);
-	priv = GNOMENU_MENU_BAR_GET_PRIVATE(menu_bar);
+	GET_OBJECT(object, menu_bar, priv);
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
 
