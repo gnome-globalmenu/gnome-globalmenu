@@ -1,12 +1,12 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
-<!ENTITY gdksocket SYSTEM "xml/gdksocket.xml">
+<!ENTITY gdksocket SYSTEM "xml/socket.xml">
 <!ENTITY serverhelper SYSTEM "xml/serverhelper.xml">
 <!ENTITY clienthelper SYSTEM "xml/clienthelper.xml">
 <!ENTITY messages SYSTEM "xml/messages.xml">
 <!ENTITY quirks SYSTEM "xml/quirks.xml">
-<!ENTITY gtkglobalmenubar SYSTEM "xml/gtkglobalmenubar.xml">
+<!ENTITY gtkglobalmenubar SYSTEM "xml/menubar.xml">
 ]>
 
 

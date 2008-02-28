@@ -3,7 +3,9 @@
 AM_CFLAGS = $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
-lib_LTLIBRARIES = libgnomenu.la
+moduledir = $(libdir)/gtk-2.0/modules
+
+module_LTLIBRARIES = libgnomenu.la
 
 BUILT_SOURCES = gnomenu-marshall.h gnomenu-marshall.c gnomenu-enums.c gnomenu-enums.h
 
