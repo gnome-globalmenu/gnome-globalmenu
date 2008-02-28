@@ -65,8 +65,8 @@ G_BEGIN_DECLS
 #define	GNOMENU_TYPE_MENU_BAR               (gnomenu_menu_bar_get_type ())
 #define GNOMENU_MENU_BAR(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBar))
 #define GNOMENU_MENU_BAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
-#define GTK_IS_GLOBAL_MENU_BAR(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_MENU_BAR))
-#define GTK_IS_GLOBAL_MENU_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_MENU_BAR))
+#define GNOMENU_IS_MENU_BAR(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_MENU_BAR))
+#define GNOMENU_IS_MENU_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_MENU_BAR))
 #define GNOMENU_MENU_BAR_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
 
 typedef struct _GnomenuMenuBar       GnomenuMenuBar;
