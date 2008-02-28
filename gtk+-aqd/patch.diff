@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,8 +85,51 @@
+@@ -85,8 +85,50 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
@@ -45,7 +45,6 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +		if(!(*type)) /*gnomenu_menu_bar not registerd yet*/
 +			return _gtk_menu_bar_get_type();
 +		else /*gnomenu_menu_bar is registered */{
-+			g_warning("use gnomenu");
 +			return get_type();
 +		}
 +	}
@@ -54,7 +53,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  static void
  gtk_menu_bar_class_init (GtkMenuBarClass *class)
  {
-@@ -215,6 +258,7 @@
+@@ -215,6 +257,7 @@
  						   GTK_PARAM_READWRITE));
  
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
@@ -62,7 +61,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -225,7 +269,7 @@
+@@ -225,7 +268,7 @@
  GtkWidget*
  gtk_menu_bar_new (void)
  {
