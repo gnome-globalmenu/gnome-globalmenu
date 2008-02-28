@@ -82,7 +82,7 @@ GnomenuQuirkMask gnomenu_get_default_quirk(){
 GtkMenuBar * gtk_legacy_menu_bar_new(){
 	switch(gnomenu_get_default_quirk()){
 		case GNOMENU_QUIRK_NONE:
-			return g_object_new(GTK_TYPE_GLOBAL_MENU_BAR, NULL);
+			return g_object_new(GNOMENU_TYPE_MENU_BAR, NULL);
 		case GNOMENU_QUIRK_IGNORE:
 			LOG("Quirk found, use GtkMenuBar");
 			return g_object_new(GTK_TYPE_MENU_BAR, NULL);

@@ -1,8 +1,8 @@
 /*
- * GtkGlobalMenuBar
+ * GnomenuMenuBar
  * */
-#ifndef __GTK_GLOBAL_MENU_BAR_H__
-#define __GTK_GLOBAL_MENU_BAR_H__
+#ifndef __GNOMENU_MENU_BAR_H__
+#define __GNOMENU_MENU_BAR_H__
 /**
  * SECTION: gtkglobalmenubar
  * 	@short_description: Global Menu Bar widget for GTK, 
@@ -11,14 +11,14 @@
  * 	@stability: Unstable
  * 	@include: libgnomenu/gtkglobalmenubar.h
  *
- * GtkGlobalMenuBar is the widget providing a global menu bar to 
+ * GnomenuMenuBar is the widget providing a global menu bar to 
  * the application. It is intended to (be able to) replace 
  * #GtkMenuBar transparently under most
  * situation. It has to be added as a child widget of a top level window
  * to make its full use. Usually you don't want to simplely use
- * #gtk_global_menu_bar_new. If you want to patch GTK, for the sake of
+ * #gnomenu_menu_bar_new. If you want to patch GTK, for the sake of
  * making every application that are built against 
- * #GtkMenuBar benifit from #GtkGlobalMenuBar, 
+ * #GtkMenuBar benifit from #GnomenuMenuBar, 
  * use #gtk_legacy_menu_bar_new instead. That function deals 
  * with quirks of various
  * hackish GTK applications.
@@ -28,7 +28,7 @@
  * GTK widget embedding solution (i.e #GtkPlug and #GtkSocket), which is 
  * difficult to build widget upon.
  *
- * #GtkGlobalMenuBar plays two roles. 
+ * #GnomenuMenuBar plays two roles. 
  *
  * 1. It allocates an 'widget->window' whose parent
  * 	(or parent of parrent, whatever level) is the toplevel widget.
@@ -62,18 +62,18 @@
 G_BEGIN_DECLS
 
 
-#define	GTK_TYPE_GLOBAL_MENU_BAR               (gtk_global_menu_bar_get_type ())
-#define GTK_GLOBAL_MENU_BAR(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GTK_TYPE_GLOBAL_MENU_BAR, GtkGlobalMenuBar))
-#define GTK_GLOBAL_MENU_BAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), GTK_TYPE_GLOBAL_MENU_BAR, GtkGlobalMenuBarClass))
-#define GTK_IS_GLOBAL_MENU_BAR(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GTK_TYPE_GLOBAL_MENU_BAR))
-#define GTK_IS_GLOBAL_MENU_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GTK_TYPE_GLOBAL_MENU_BAR))
-#define GTK_GLOBAL_MENU_BAR_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_GLOBAL_MENU_BAR, GtkGlobalMenuBarClass))
+#define	GNOMENU_TYPE_MENU_BAR               (gnomenu_menu_bar_get_type ())
+#define GNOMENU_MENU_BAR(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBar))
+#define GNOMENU_MENU_BAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
+#define GTK_IS_GLOBAL_MENU_BAR(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_MENU_BAR))
+#define GTK_IS_GLOBAL_MENU_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_MENU_BAR))
+#define GNOMENU_MENU_BAR_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
 
-typedef struct _GtkGlobalMenuBar       GtkGlobalMenuBar;
-typedef struct _GtkGlobalMenuBarClass  GtkGlobalMenuBarClass;
+typedef struct _GnomenuMenuBar       GnomenuMenuBar;
+typedef struct _GnomenuMenuBarClass  GnomenuMenuBarClass;
 
 /**
- * GtkGlobalMenuBar:
+ * GnomenuMenuBar:
  * 	@parent: the parent object. 
  *	@helper: the helper for it to play the role as a GNOME menu client.
  *		This is actually an interface. However since at the begining I
@@ -103,19 +103,19 @@ typedef struct _GtkGlobalMenuBarClass  GtkGlobalMenuBarClass;
  *  macro in the .c file, referring to a Private variable don't require
  *  much more typings than a public member.
  */
-struct _GtkGlobalMenuBar
+struct _GnomenuMenuBar
 {
 	GtkMenuBar parent;
 };
 
 /**
- * GtkGlobalMenuBarClass:
+ * GnomenuMenuBarClass:
  *
  * This is shameless copied from gtkmenubar.c .
  * Even those _gtk_reserved. and the style of using
  * the asternoid is also the GTK way instead of my way.
  */
-struct _GtkGlobalMenuBarClass
+struct _GnomenuMenuBarClass
 {
   GtkMenuBarClass parent_class;
 
@@ -127,9 +127,9 @@ struct _GtkGlobalMenuBarClass
 };
 
 
-GtkWidget * gtk_global_menu_bar_new             (void);
+GtkWidget * gnomenu_menu_bar_new             (void);
 
 G_END_DECLS
 
 
-#endif /* __GTK_GLOBAL_MENU_BAR_H__ */
+#endif /* __GNOMENU_MENU_BAR_H__ */

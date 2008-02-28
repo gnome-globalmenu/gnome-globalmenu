@@ -32,15 +32,15 @@
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
 
-#define GTK_GLOBAL_MENU_BAR_GET_PRIVATE(o)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), GTK_TYPE_GLOBAL_MENU_BAR, GtkGlobalMenuBarPrivate))
+#define GNOMENU_MENU_BAR_GET_PRIVATE(o)  \
+  (G_TYPE_INSTANCE_GET_PRIVATE ((o), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarPrivate))
 
 #define GET_OBJECT(_s, sgmb, p) \
-	GtkGlobalMenuBar * sgmb = GTK_GLOBAL_MENU_BAR(_s); \
-	GtkGlobalMenuBarPrivate * p = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(_s);
+	GnomenuMenuBar * sgmb = GNOMENU_MENU_BAR(_s); \
+	GnomenuMenuBarPrivate * p = GNOMENU_MENU_BAR_GET_PRIVATE(_s);
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GtkGlobalMenuBar>::" fmt,  ## args)
+#define LOG(fmt, args...) g_message("<GnomenuMenuBar>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -70,7 +70,7 @@ typedef struct
 	GtkRequisition requisition;
 	gint x;
 	gint y;
-} GtkGlobalMenuBarPrivate;
+} GnomenuMenuBarPrivate;
 
 /* GObject interface */
 static GObject * _constructor 		( GType type, guint n_construct_properties, 
@@ -136,14 +136,14 @@ static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisiti
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
 static void 
 	_set_child_parent_window		( GtkWidget * widget, GdkWindow * window);
-static void _sync_remote_state		( GtkGlobalMenuBar * menubar);
-static void _sync_local_state		( GtkGlobalMenuBar * menubar);
+static void _sync_remote_state		( GnomenuMenuBar * menubar);
+static void _sync_local_state		( GnomenuMenuBar * menubar);
 static void _reset_style			( GtkWidget * widget);
 
-G_DEFINE_TYPE (GtkGlobalMenuBar, gtk_global_menu_bar, GTK_TYPE_MENU_BAR)
+G_DEFINE_TYPE (GnomenuMenuBar, gnomenu_menu_bar, GTK_TYPE_MENU_BAR)
 
 static void
-gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
+gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 {
 	GObjectClass *gobject_class;
 	GtkWidgetClass *widget_class;
@@ -180,30 +180,30 @@ gtk_global_menu_bar_class_init (GtkGlobalMenuBarClass *class)
 
 	container_class->remove = _remove;
 
-	g_type_class_add_private (gobject_class, sizeof (GtkGlobalMenuBarPrivate));  
+	g_type_class_add_private (gobject_class, sizeof (GnomenuMenuBarPrivate));  
 }
 
 static void
-gtk_global_menu_bar_init (GtkGlobalMenuBar *object)
+gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
 }
 
 /**
- * gtk_global_menu_bar_new:
+ * gnomenu_menu_bar_new:
  *
  * Oops, this is the only function I exposed to you! Don't be mad,
- * because #GtkGlobalMenuBar is a subclass of #GtkMenuBar,
+ * because #GnomenuMenuBar is a subclass of #GtkMenuBar,
  * and you can (by definition you always can) use any function who
- * work for a #GtkMenuBar on a #GtkGlobalMenuBar.
+ * work for a #GtkMenuBar on a #GnomenuMenuBar.
  *
  * If you are patching GTK to replace #GtkMenuBar with 
- * #GtkGlobalMenuBar completely via #gtk_menu_bar_new, 
+ * #GnomenuMenuBar completely via #gtk_menu_bar_new, 
  * don't use this function. The interface compatibility
  * doesn't means everything. At a first glance the potentially vulnerabilities
  * are:
  *
  * 1 if some GTK client subclassed GtkMenuBar, and you rudely replace
- * #GtkMenuBar with #GtkGlobalMenuBar. The entire #GType inheriting
+ * #GtkMenuBar with #GnomenuMenuBar. The entire #GType inheriting
  * tree will be screwed. Everything will become weird. Your applications
  * might still be able to work, in a very undefined way.
  * 
@@ -217,9 +217,9 @@ gtk_global_menu_bar_init (GtkGlobalMenuBar *object)
  * Returns: the created global menu bar.
  */
 GtkWidget *
-gtk_global_menu_bar_new (void)
+gnomenu_menu_bar_new (void)
 {
-  return g_object_new (GTK_TYPE_GLOBAL_MENU_BAR, NULL);
+  return g_object_new (GNOMENU_TYPE_MENU_BAR, NULL);
 }
 
 
@@ -228,13 +228,13 @@ static GObject* _constructor(GType type,
 		GObjectConstructParam *construct_params){
 
 	GObject * object;
-	GtkGlobalMenuBar * menu_bar;
-	GtkGlobalMenuBarPrivate * priv;
-	object = (G_OBJECT_CLASS(gtk_global_menu_bar_parent_class)->constructor)(
+	GnomenuMenuBar * menu_bar;
+	GnomenuMenuBarPrivate * priv;
+	object = (G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->constructor)(
 		type, n_construct_properties, construct_params);
 
-	menu_bar = GTK_GLOBAL_MENU_BAR(object);
-	priv = GTK_GLOBAL_MENU_BAR_GET_PRIVATE(menu_bar);
+	menu_bar = GNOMENU_MENU_BAR(object);
+	priv = GNOMENU_MENU_BAR_GET_PRIVATE(menu_bar);
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
 
@@ -280,14 +280,14 @@ _dispose (GObject * _object){
 		priv->disposed = TRUE;	
 		g_object_unref(priv->helper);
 	}
-	G_OBJECT_CLASS(gtk_global_menu_bar_parent_class)->dispose(_object);
+	G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->dispose(_object);
 }
 static void
 _finalize(GObject * _object){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_object, menu_bar, priv);	
 	g_list_free(priv->popup_items);
-	G_OBJECT_CLASS(gtk_global_menu_bar_parent_class)->finalize(_object);
+	G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->finalize(_object);
 }
 static void
 _set_property (GObject      *object,
@@ -537,7 +537,7 @@ static gboolean _button_press_event (GtkWidget * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	
-	return GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->button_press_event(widget, event);
+	return GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->button_press_event(widget, event);
 }
 static gboolean _motion_notify_event	( GtkWidget * widget, 
 									  GdkEventMotion * event){
@@ -548,7 +548,7 @@ static gboolean _motion_notify_event	( GtkWidget * widget,
 	if(event && event->is_hint){
 	LOG_FUNC_NAME;
 	}
-	if(func = GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->motion_notify_event)
+	if(func = GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->motion_notify_event)
 	return func(widget, event);
 	return FALSE;
 }
@@ -590,7 +590,7 @@ _expose (GtkWidget      *widget,
 			}
 		} else LOG("event not from container, ignore");
 
-		(* GTK_WIDGET_CLASS (gtk_global_menu_bar_parent_class)->expose_event) (widget, event);
+		(* GTK_WIDGET_CLASS (gnomenu_menu_bar_parent_class)->expose_event) (widget, event);
     }
 
   return FALSE;
@@ -604,7 +604,7 @@ _hierarchy_changed (GtkWidget *widget,
 	GtkWidget *toplevel;  
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
 	toplevel = gtk_widget_get_toplevel(widget);
 	if(GTK_WIDGET_TOPLEVEL(toplevel)){
 		if(GTK_WIDGET_REALIZED(toplevel)){
@@ -626,7 +626,7 @@ _realize (GtkWidget * widget){
 
 /*TODO: remove calling the parent realize function. use our own instead to
  * avoid side effects.*/
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->realize(widget);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->realize(widget);
 
 	attributes.x = 0;
 	attributes.y = 0;
@@ -694,7 +694,7 @@ static void
 _unrealize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->unrealize(widget);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->unrealize(widget);
 	gdk_window_destroy(priv->container);
 	gdk_window_destroy(priv->floater);
 	gnomenu_client_helper_send_unrealize(priv->helper);
@@ -708,7 +708,7 @@ _map (GtkWidget * widget){
 		gdk_window_show(priv->container);
 	}
 	gdk_window_show(widget->window);
-	GTK_WIDGET_CLASS(gtk_global_menu_bar_parent_class)->map(widget);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
 }
 
 static void
@@ -716,7 +716,7 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	LOG_FUNC_NAME;
 	GtkRequisition req;
 	GET_OBJECT(menu_shell, menu_bar, priv);
-	GTK_MENU_SHELL_CLASS(gtk_global_menu_bar_parent_class)->insert(menu_shell, widget, pos);
+	GTK_MENU_SHELL_CLASS(gnomenu_menu_bar_parent_class)->insert(menu_shell, widget, pos);
 	LOG("widget name = %s", gtk_widget_get_name(widget));
 	if(GTK_WIDGET_REALIZED(menu_shell)) {
 		_set_child_parent_window(widget, priv->container);
@@ -735,7 +735,7 @@ _remove (GtkContainer * container, GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GtkRequisition req;
 	GET_OBJECT(container, menu_bar, priv);
-	GTK_CONTAINER_CLASS(gtk_global_menu_bar_parent_class)->remove(container, widget);
+	GTK_CONTAINER_CLASS(gnomenu_menu_bar_parent_class)->remove(container, widget);
 	if(priv->detached){
 /*		we depend on widget signal loop.
  *		calc_size_request(menu_bar, &req);
@@ -743,7 +743,7 @@ _remove (GtkContainer * container, GtkWidget * widget){
 */
 	}
 }
-static void _sync_remote_state				( GtkGlobalMenuBar * _self){
+static void _sync_remote_state				( GnomenuMenuBar * _self){
 	LOG_FUNC_NAME;
 	GtkWidget * toplevel;
 	GET_OBJECT(_self, menu_bar, priv);
@@ -759,7 +759,7 @@ static void _sync_remote_state				( GtkGlobalMenuBar * _self){
 		}
 	}
 }
-static void _sync_local_state				( GtkGlobalMenuBar * _self){
+static void _sync_local_state				( GnomenuMenuBar * _self){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_self, menu_bar, priv);
 	if(priv->detached)
@@ -1015,7 +1015,7 @@ static void _reset_style			( GtkWidget * widget){
 }
 
 static gint
-gtk_global_menu_bar_get_popup_delay (GtkMenuShell *menu_shell)
+gnomenu_menu_bar_get_popup_delay (GtkMenuShell *menu_shell)
 {
   gint popup_delay;
 
@@ -1027,7 +1027,7 @@ gtk_global_menu_bar_get_popup_delay (GtkMenuShell *menu_shell)
 }
 
 static void
-gtk_global_menu_bar_move_current (GtkMenuShell         *menu_shell,
+gnomenu_menu_bar_move_current (GtkMenuShell         *menu_shell,
                GtkMenuDirectionType  direction)
 {
   GtkMenuBar *menubar = GTK_MENU_BAR (menu_shell);
