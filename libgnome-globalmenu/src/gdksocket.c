@@ -1,83 +1,3 @@
-/***************************/
-/*!!! don't edit this file if you are in applet directory */
-/*!!1 edit it in gtk2-aqd directory */
-/*!!! when making the applet, it will cp this file from gtk2-aqd to applet directory */
-/*!!! see applet/src/Makefile.am:
- *!!! gtkmenuembed-x11.h: ......
- *!!! 	cp ... ... */
-/************************
- * !!! Also, part of this file is contained in the patch. If you want to make a new patch
- * after editing this file, cp it to the gtk+-aqd/gtk and make diff */
- /* If your edit is in gtk+-aqd/gtk/gtkmenuembed-x11.h, don't forget to copy it here in order to let the applet know you changes*/
-
-//#define LOG g_message
-#define LOG fake_log
-/**/
-static void fake_log(char *a, ...){
-
-}
-typedef enum {
-	GM_NOTIFY_NOT_GM,
-	GM_NOTIFY_MIN,
-	GM_NOTIFY_NEW,
-	GM_NOTIFY_DESTROY,
-	GM_NOTIFY_SERVER_NEW,
-	GM_NOTIFY_SERVER_DESTROY,
-	GM_NOTIFY_SIZE_ALLOCATE,
-	GM_NOTIFY_SET_VISIBLE,
-	GM_NOTIFY_SET_BACKGROUND,
-	GM_NOTIFY_MAX,
-} GlobalMenuNotifyType;
-#define ATOM_STRING "_GTKMENUBAR_EMBED"
-#define MENU_SERVER_NAME "GTK MENU BAR SERVER"
-#define MENU_CLIENT_NAME "GTK MENU BAR CLIENT"
-
-typedef struct _GlobalMenuNotify {
-	GlobalMenuNotifyType type;
-	union{
-	struct {
-		gulong param1; /*always set to be the source socket's window id*/
-		gulong param2;
-		gulong param3;
-	}; /*general*/
-		struct {
-			Window client_xid;
-			Window float_xid;
-			Window master_xid;
-		} ClientNew;
-		struct {
-			Window client_xid;
-			Window float_xid;
-			Window master_xid;
-		} ClientDestroy;
-		struct {
-			Window server_xid;
-		} ServerNew;
-		struct {
-			Window server_xid;
-		} ServerDestroy;
-		struct {
-			Window server_xid;
-			glong width;
-			glong height;
-		} SizeAllocate;
-		struct {
-			Window server_xid;
-			gboolean visible;
-		} SetVisible;
-		struct {
-			Window server_xid;
-			Atom color_atom;
-			Window pixmap_xid;
-		} SetBackground;
-	};
-} GlobalMenuNotify;
-
-typedef struct _GlobalMenuSocket GlobalMenuSocket;
-
-typedef void (*GlobalMenuCallback)(GlobalMenuSocket* socket, 
-	GlobalMenuNotify * notify, gpointer data);
-
 struct _GlobalMenuSocket {
 	gchar * name;
 	GdkWindow * window;
@@ -86,9 +6,6 @@ struct _GlobalMenuSocket {
 	gpointer userdata;
 	Window dest_xid; // Where to connect to
 };
-
-
-#ifdef INCLUDE_SOURCE
 static const gchar * global_menu_notify_get_name(GlobalMenuNotifyType type){
 #define CASE(x) case x: return # x;
 	switch(type){
@@ -116,7 +33,7 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 
 	notify->type = GM_NOTIFY_NOT_GM;
 	if(xevent->type == ClientMessage){
-		LOG("XClient notify translating");
+		g_message("XClient notify translating");
 
 		display = gdk_x11_lookup_xdisplay(xevent->xclient.display);
 		if(display == NULL){
@@ -129,7 +46,7 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 			notify->param1 = xevent->xclient.data.l[2];
 			notify->param2 = xevent->xclient.data.l[3];
 			notify->param3 = xevent->xclient.data.l[4];
-			LOG("Global Menu Notification: %s, %ld, %ld, %ld\n",
+			g_message("Global Menu Notification: %s, %ld, %ld, %ld\n",
 				global_menu_notify_get_name(notify->type),
 					notify->param1, notify->param2, notify->param3);
 			return TRUE;
@@ -141,7 +58,7 @@ static gboolean global_menu_xevent_to_notify(XEvent * xevent, GlobalMenuNotify *
 static GdkFilterReturn global_menu_socket_dispatcher(XEvent * xevent, GdkEvent * event, GlobalMenuSocket * socket){
 	GlobalMenuNotify notify;
 	GlobalMenuNotifyType type;
-	LOG("XClientMessage received");
+	g_message("XClientMessage received");
 	if(event->any.window == socket->window 
 		&& global_menu_xevent_to_notify(xevent, &notify)){
 		type = notify.type;
@@ -150,7 +67,7 @@ static GdkFilterReturn global_menu_socket_dispatcher(XEvent * xevent, GdkEvent *
 		}
 		return GDK_FILTER_REMOVE;
 	} else{
-	LOG("Pass to futher handlers, not a MenuBar message");
+	g_message("Pass to futher handlers, not a MenuBar message");
 
 	}
 	return GDK_FILTER_CONTINUE;
@@ -200,7 +117,7 @@ static GList * _global_menu_find_windows(GlobalMenuSocket * socket, char * dest_
 	unsigned int nchildren_return;
 	unsigned int i;
 	gboolean connected = FALSE;
-	LOG("%s", __func__);
+g_message("%s", __func__);
 	g_return_val_if_fail( socket ,FALSE);
 	g_return_val_if_fail( dest_name ,FALSE);
 	
@@ -240,7 +157,7 @@ static GList * _global_menu_find_windows(GlobalMenuSocket * socket, char * dest_
 		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
 				if(g_str_equal(dest_name, data)){
-					LOG("Window found, Add to list");
+					g_message("Window found, Add to list");
 	//				socket->dest_xid = children_return[i];
 	//				connected = TRUE;
 					window_list = g_list_append(window_list, (gpointer) children_return[i]);
@@ -276,7 +193,7 @@ static void global_menu_socket_send_to(GlobalMenuSocket * socket, Window xid, Gl
 		  False, NoEventMask, (XEvent *)&xclient);
 	gdk_display_sync (socket->display);
 	gdk_error_trap_pop ();
-	LOG("socket send");
+	g_message("socket send");
 }
 static void global_menu_socket_send(GlobalMenuSocket * socket, GlobalMenuNotify * message){
 	global_menu_socket_send_to(socket, socket->dest_xid, message);
@@ -286,7 +203,7 @@ static gboolean global_menu_socket_broadcast_by_name(GlobalMenuSocket * socket, 
 	GList * node = NULL;
 	window_list = _global_menu_find_windows(socket, dest_name);
 	for(node = g_list_first(window_list); node ; node = g_list_next(node)){
-		LOG("%s: sending to %p", __func__, (gpointer) node->data);
+		g_message("%s: sending to %p", __func__, (gpointer) node->data);
 		global_menu_socket_send_to(socket, (Window)node->data, notify);
 	}
 	g_list_free(window_list);
@@ -306,4 +223,3 @@ static gboolean global_menu_socket_connect_by_name(GlobalMenuSocket * socket, gc
 	}
 	return rt;
 }
-#endif

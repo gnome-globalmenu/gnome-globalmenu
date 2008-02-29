@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl Created by Anjuta application wizard.
 
-AC_INIT(gnome2-globalmenu-applet, 0.3)
+AC_INIT(gnome2-globalmenu-applet, trunk)
 
 SVNVERSION=323
 AC_SUBST(SVNVERSION)
@@ -34,7 +34,7 @@ AM_PROG_LIBTOOL
 
 
 
-PKG_CHECK_MODULES(GNOME2_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.8 libwnck-1.0 libpanelapplet-2.0 gdk-2.0 bonobo-activation-2.0])
+PKG_CHECK_MODULES(GNOME2_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.8 libwnck-1.0 libpanelapplet-2.0 gdk-2.0 bonobo-activation-2.0 libxfce4panel-1.0])
 AC_SUBST(GNOME2_GLOBALMENU_APPLET_CFLAGS)
 AC_SUBST(GNOME2_GLOBALMENU_APPLET_LIBS)
 
@@ -52,7 +52,8 @@ Makefile
 gnome2-globalmenu-applet.spec
 src/Makefile
 po/Makefile.in
-gnome2-globalmenu-applet.schema
+gnome2-globalmenu-applet.schemas
+gnome2-globalmenu-applet.desktop
 ],
 [
 chmod +x bonobo-server.sh

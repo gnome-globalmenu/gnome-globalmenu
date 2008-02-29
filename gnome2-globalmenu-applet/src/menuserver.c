@@ -37,7 +37,7 @@
 #define INCLUDE_SOURCE
 #include "gtkmenuembed-x11.h"
 #undef INCLUDE_SOURCE
-static void menu_server_client_new_cb(GlobalMenuSocket * socket, 
+void menu_server_client_new_cb(GlobalMenuSocket * socket, 
 	GlobalMenuNotify * notify,
 	MenuServer * server){
 	MenuClient client;
