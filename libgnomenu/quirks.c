@@ -23,7 +23,6 @@ static void _add_default_quirks_from_string(gchar * string){
 	lines = g_strsplit(string, "\n", 0);
 	if(lines)
 	for(i = 0; lines[i]; i++){
-		g_warning("%s", lines[i]);
 		words = g_strsplit(lines[i], ":", 0);
 		if(!words) continue;
 		l = g_strv_length(words);
