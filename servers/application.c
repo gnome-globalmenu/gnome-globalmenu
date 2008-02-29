@@ -1,5 +1,4 @@
 #include <gtk/gtk.h>
-#include <panel-applet.h>
 #include "application.h"
 #include "menuserver.h"
 #include "preference-gnome.h"
@@ -37,11 +36,31 @@ static void _load_conf_unimp(Application *app)
 static void 
 _set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
 
+	Application *self = APPLICATION(_self);
+	switch (property_id){
+		case PROP_WINDOW:
+			if(GTK_IS_WIDGET(self->window)) g_object_unref(self->window);
+			self->window = g_value_get_object(value);
+			g_assert(!GTK_WIDGET_NO_WINDOW(self->window));
+			g_object_ref(self->window);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
 }
 
 
 static void 
 _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * pspec){
+
+	Application *self = APPLICATION(_self);
+	switch (property_id){
+		case PROP_WINDOW:
+			g_value_set_object(value, self->window);
+			break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
 
 }
 
@@ -75,19 +94,21 @@ static void application_class_init(ApplicationClass *klass)
 						"window",
 						"applet window",
 						GTK_TYPE_WIDGET,
-						G_PARAM_CONSTRUCT_ONLY));
+						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 }
 
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
 	Application *app;
+	ApplicationClass *app_class;
 
 	GObject * _self = ( *G_OBJECT_CLASS(application_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
 
 	app = APPLICATION(_self);
+	app_class = G_OBJECT_GET_CLASS(app);
 	GtkWidget* box = gtk_hbox_new(FALSE, 0); 
 	/*This thing is ugly, (consider a vertical menu layout), we need a new alignment widget
  * 	which is similiar to GtkMenuBar(respecting directions) */
@@ -105,8 +126,8 @@ _constructor	( GType type, guint n_construct_properties,
 	gtk_container_add(GTK_CONTAINER(app->window), GTK_WIDGET(box));
 	app->server = menu_server_new(GTK_WIDGET(app->menu_bar_area));
 
-	preference_load_conf(app);
-	update_ui(app);
+	(*app_class->load_conf)(app);
+	(*app_class->update_ui)(app);
 
 	g_signal_connect_swapped(G_OBJECT(app->window), 
 		"destroy",
@@ -135,6 +156,7 @@ void application_set_background(Application * app, GdkColor * color, GdkPixmap *
 
 
 static void _s_active_client_changed(Application * app, MenuServer * server){
+	ApplicationClass *app_class = G_OBJECT_GET_CLASS(app);
 	GdkPixbuf *icon_buf;
 	WnckWindow * window = menu_server_get_client_parent(server, server->active);
 	if(!window) window = wnck_screen_get_active_window(wnck_screen_get_default());
@@ -145,12 +167,11 @@ static void _s_active_client_changed(Application * app, MenuServer * server){
 
 	icon_buf = wnck_application_get_icon(application);
 	gtk_image_set_from_pixbuf(app->icon, icon_buf);
-	update_ui(app);
+	(*app_class->update_ui)(app);
 }
 
 static void _s_window_destroy(Application * app, GtkWidget * widget){
 	LOG();
-	
 	g_object_unref(G_OBJECT(app));
 }
 static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap){
@@ -181,24 +202,6 @@ static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pi
 }
 
 
-void update_ui(Application  *app)
-{
-	if(app->show_title) 
-		gtk_widget_show(app->title);
-	else gtk_widget_hide(app->title);
-
-	if(app->show_icon)
-		gtk_widget_show(app->icon);
-	else gtk_widget_hide(app->icon);
-}
-
-
-static void popup_menu_cb(BonoboUIComponent * uic, Application *App, gchar *cname)
-{
-	g_message("%s: cname = %s", __func__, cname);
-	if(g_str_equal(cname, "About")) ui_show_about(NULL, App);
-	if(g_str_equal(cname, "Preference")) preference_show_dialog(NULL, App);
-}
 
 /*
 vim:ts=4:sw=4

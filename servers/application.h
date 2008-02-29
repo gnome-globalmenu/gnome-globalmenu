@@ -17,7 +17,7 @@ typedef struct _ApplicationClass ApplicationClass;
 
 struct _Application
 {
-	GObject *parent;
+	GObject parent;
 	GtkContainer * window;
 	GtkFixed * menu_bar_area;
 	GtkWidget * title;
@@ -28,9 +28,9 @@ struct _Application
 };
 
 struct _ApplicationClass {
-	GObjectClass *parent_class;
-	void (*update_ui)();
-	void (*load_conf)();
+	GObjectClass parent_class;
+	void (*update_ui)(Application *app);
+	void (*load_conf)(Application *app);
 };
 
 GType application_get_type(void);

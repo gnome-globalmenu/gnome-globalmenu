@@ -10,7 +10,7 @@
  * Standard gettext macros.
  */
 
-#include "application.h"
+#include "application-gnome.h"
 
 #include "log.h"
 
@@ -55,7 +55,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
 	panel_applet_set_background_widget(applet, applet);
-	App = application_new(applet);
+	App = application_gnome_new(applet);
 	g_signal_connect(G_OBJECT(applet), "change-background", 
 				_change_background, App);
 	gtk_widget_show_all(applet);
