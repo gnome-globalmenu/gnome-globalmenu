@@ -17,6 +17,7 @@ Application * application_new(GtkContainer * window){
 	app->window = window;
 	app->menu_bar_area = gtk_fixed_new();
 	gtk_fixed_set_has_window(app->menu_bar_area, TRUE);
+	gtk_container_set_border_width(app->menu_bar_area, 0);
 	app->label = gtk_label_new("");
 	app->icon = gtk_image_new();
 
@@ -46,6 +47,7 @@ void application_destroy(Application * app){
 }
 static void _s_active_client_changed(Application * app, MenuServer * server){
 	WnckWindow * window = menu_server_get_client_parent(server, server->active);
+	if(!window) window = wnck_screen_get_active_window(wnck_screen_get_default());
 	WnckApplication * application = wnck_window_get_application(window);
 	gchar * name = wnck_application_get_name(application);
 	gtk_label_set_text(app->label, name);
