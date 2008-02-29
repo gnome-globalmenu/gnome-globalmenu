@@ -612,12 +612,23 @@ _expose (GtkWidget      *widget,
 				
 			}
 		} else LOG("event not from container, ignore");
-
 		{ 
 			GtkMenuShellClass * grandparent_class =
 			g_type_class_peek(GTK_TYPE_MENU_SHELL);
 
 			(* GTK_WIDGET_CLASS(grandparent_class)->expose_event) (widget, event);
+		}
+		if(event->window == widget->window){
+			LOG("event from widget->window");
+			GtkStyle * style = gtk_widget_get_style(gtk_widget_get_parent(widget));
+				gtk_paint_flat_box (style,
+						widget->window,
+						GTK_WIDGET_STATE (widget),
+						GTK_SHADOW_NONE,
+						&event->area, widget, NULL,
+						0, 0,
+						widget->allocation.width,
+						widget->allocation.height);
 		}
     } else {
 			LOG("visible: %d, mapped %d",  GTK_WIDGET_VISIBLE(widget),
@@ -658,7 +669,30 @@ _realize (GtkWidget * widget){
 
 /*TODO: remove calling the parent realize function. use our own instead to
  * avoid side effects.*/
-	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->realize(widget);
+/*	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->realize(widget);*/
+  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+//  GTK_WIDGET_SET_FLAGS (widget, GTK_NO_WINDOW);
+  attributes.x = widget->allocation.x;
+  attributes.y = widget->allocation.y;
+  attributes.width = widget->allocation.width;
+  attributes.height = widget->allocation.height;
+  attributes.window_type = GDK_WINDOW_CHILD;
+  attributes.wclass = GDK_INPUT_OUTPUT;
+  attributes.visual = gtk_widget_get_visual (widget);
+  attributes.colormap = gtk_widget_get_colormap (widget);
+  attributes.event_mask = gtk_widget_get_events (widget);
+  attributes.event_mask |= (GDK_EXPOSURE_MASK |
+                GDK_BUTTON_PRESS_MASK |
+                GDK_BUTTON_RELEASE_MASK |
+                GDK_KEY_PRESS_MASK |
+                GDK_ENTER_NOTIFY_MASK |
+                GDK_LEAVE_NOTIFY_MASK);
+
+  attributes_mask = GDK_WA_X | GDK_WA_Y/* | GDK_WA_VISUAL | GDK_WA_COLORMAP*/;
+  widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
+  gdk_window_set_user_data (widget->window, widget);
+//  widget->style = gtk_style_attach (widget->style, widget->window);
+ // gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
 
 	attributes.x = 0;
 	attributes.y = 0;
@@ -687,8 +721,9 @@ _realize (GtkWidget * widget){
 	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
 
 	priv->container = gdk_window_new (
-		/*gtk_widget_get_parent_window(widget)*/ widget->window, &attributes, attributes_mask);
+		gtk_widget_get_parent_window(widget)/* widget->window*/, &attributes, attributes_mask);
 	//gdk_window_set_user_data (priv->container, widget);
+LOG("window created");
 
 	attributes.x = priv->allocation.x;
 	attributes.y = priv->allocation.y;
@@ -739,7 +774,7 @@ _map (GtkWidget * widget){
 	if(!priv->detached){
 		gdk_window_show(priv->container);
 	}
-	gdk_window_show(widget->window);
+//	gdk_window_show(widget->window);
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
 }
 
