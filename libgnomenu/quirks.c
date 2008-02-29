@@ -19,10 +19,11 @@ static void _add_default_quirks_from_string(gchar * string){
 	gchar ** words;
 	gchar * word;
 	int i, j, l;
+	QuirkEntry * entry ;
 	lines = g_strsplit(string, "\n", 0);
 	if(lines)
 	for(i = 0; lines[i]; i++){
-		QuirkEntry * entry = g_new0(QuirkEntry, 1);
+		g_warning("%s", lines[i]);
 		words = g_strsplit(lines[i], ":", 0);
 		if(!words) continue;
 		l = g_strv_length(words);
@@ -32,12 +33,12 @@ static void _add_default_quirks_from_string(gchar * string){
 			continue;
 		}
 		word = g_strstrip(words[0]);
-		if(word[0] == '#'){
+		if(!word || word[0] == '#'){
 			g_strfreev(words);
-			g_free(word);
 			continue;
 		}
-		entry->match = word;
+		entry = g_new0(QuirkEntry, 1);
+		entry->match = g_strdup(word);
 		word = g_strstrip(words[1]);
 		entry->mask = GNOMENU_QUIRK_NONE;
 		if(g_str_equal(word, "ignore")){
@@ -45,8 +46,7 @@ static void _add_default_quirks_from_string(gchar * string){
 		} else 
 			g_warning("Unknown quirk type: %s", word);
 		g_queue_push_tail(default_quirks, entry);	
-		LOG("new quirk: %s : %s", entry->match, word);
-		g_free(word);
+		LOG("new quirk: %s : %s", entry->match, word); 
 	}
 	g_strfreev(lines);
 }
