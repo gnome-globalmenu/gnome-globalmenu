@@ -1,0 +1,72 @@
+Index: gtk+-aqd/gtk/gtkmenubar.c
+===================================================================
+--- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
++++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
+@@ -85,8 +85,50 @@
+ 
+ static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
+ 
++gpointer _libgnomenu_lookup(gchar * name){
++	gpointer sym = NULL;
++	static GModule * libgnomenu = NULL;
++	if(!libgnomenu)
++		libgnomenu = g_module_open("libgnomenu", 0/*G_MODULE_BIND_LOCAL*/);
++	if(libgnomenu) {
++		if(!g_module_symbol(libgnomenu, 
++				name, 
++				&sym)){
++			g_warning("%s not found", name);
++		}else 
++			g_warning("%s found at %p", 
++				name, sym);
++		
++	} else 
++		g_warning("Global Menu Library not found");
++
++	return sym;
++}
++/*fool every other app*/
++#undef gtk_menu_bar_get_type
++#define gtk_menu_bar_get_type _gtk_menu_bar_get_type
+ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
++#undef gtk_menu_bar_get_type
++#define gtk_menu_bar_get_type IA__gtk_menu_bar_get_type
+ 
++#undef GTK_TYPE_MENU_BAR
++/*Dont fool myself*/
++#define GTK_TYPE_MENU_BAR (_gtk_menu_bar_get_type())
++
++GType gtk_menu_bar_get_type(void){
++	static GType * type = NULL;
++	static GType (* get_type)(void) = NULL;
++	if(!type) type = _libgnomenu_lookup("gnomenu_menu_bar_type");
++	if(!get_type) get_type = _libgnomenu_lookup("gnomenu_menu_bar_get_type");
++	if(type && get_type) {
++		if(!(*type)) /*gnomenu_menu_bar not registerd yet*/
++			return _gtk_menu_bar_get_type();
++		else /*gnomenu_menu_bar is registered */{
++			return get_type();
++		}
++	}
++	return _gtk_menu_bar_get_type();
++}
+ static void
+ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+ {
+@@ -215,6 +257,7 @@
+ 						   GTK_PARAM_READWRITE));
+ 
+   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
++
+ }
+ 
+ static void
+@@ -225,7 +268,7 @@
+ GtkWidget*
+ gtk_menu_bar_new (void)
+ {
+-  return g_object_new (GTK_TYPE_MENU_BAR, NULL);
++	return g_object_new(gtk_menu_bar_get_type(), NULL);
+ }
+ 
+ static void

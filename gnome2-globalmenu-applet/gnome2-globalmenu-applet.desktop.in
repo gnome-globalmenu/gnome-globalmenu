@@ -1,8 +1,0 @@
-[Xfce Panel]
-Type=X-XFCE-PanelPlugin
-Encoding=UTF-8
-Name=Global Menu Plugin
-Comment=Placeholder for GTK+ application menu in XFCE Panel
-Icon=xfce4-settings
-X-XFCE-Exec=@prefix@/libexec/xfce4-globalmenu-plugin
-

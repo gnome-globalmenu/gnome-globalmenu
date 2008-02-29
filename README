@@ -1,0 +1,11 @@
+= Layout =
+contrib: 	
+	gtk2-aqd: contains the gtk-aqd patch along with this release of global menu
+libgnomenu: the library for global menu.
+doc:
+	reference:
+		libgnomenu:	documentation for global menu.
+test: test suite for libgnomenu
+gnome-globalmenu-applet: the panel applet for globalmenu.
+
+

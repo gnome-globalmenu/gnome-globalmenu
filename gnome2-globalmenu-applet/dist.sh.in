@@ -1,8 +1,0 @@
-#! /bin/sh
-svnpackage=@PACKAGE_TARNAME@-@PACKAGE_VERSION@.@SVNVERSION@.tar.gz
-distpackage=@PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar.gz 
-target=distcheck
-[ "$1" == --nocheck ] && target=dist
-make $target
-cp $distpackage $svnpackage
-echo $svnpackage is ready, too.
