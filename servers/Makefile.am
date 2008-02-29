@@ -27,6 +27,7 @@ VAST_SOURCE_CODE = application.h \
 
 gnome_globalmenu_applet_SOURCES = \
 	main-gnome.c \
+	preference-gnome.c \
 	$(VAST_SOURCE_CODE)
 gnome_globalmenu_applet_CFLAGS = \
 	$(GNOME_GLOBALMENU_APPLET_CFLAGS)

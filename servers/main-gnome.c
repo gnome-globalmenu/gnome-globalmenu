@@ -9,24 +9,6 @@
 /*
  * Standard gettext macros.
  */
-#ifdef ENABLE_NLS
-#  include <libintl.h>
-#  undef _
-#  define _(String) dgettext (PACKAGE, String)
-#  ifdef gettext_noop
-#    define N_(String) gettext_noop (String)
-#  else
-#    define N_(String) (String)
-#  endif
-#else
-#  define textdomain(String) (String)
-#  define gettext(String) (String)
-#  define dgettext(Domain,Message) (Message)
-#  define dcgettext(Domain,Message,Type) (Message)
-#  define bindtextdomain(Domain,Directory) (Domain)
-#  define _(String) (String)
-#  define N_(String) (String)
-#endif
 
 #include "application.h"
 
@@ -37,6 +19,13 @@
 
 #define APP_NAME "gnome-globalmenu-applet"
 #define APP_VERSION "4"
+
+
+static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
+	g_message("%s: cname = %s", __func__, cname);
+	if(g_str_equal(cname, "About")) ui_show_about(NULL, App);
+	if(g_str_equal(cname, "Preference")) preference_show_dialog(NULL, App);
+}
 
 static _change_background ( PanelApplet * applet, 
 							PanelAppletBackgroundType bgtp,
