@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn500
+%define svn_version svn550
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -70,17 +70,17 @@ rm -rf %{buildroot}
 %files
 %defattr(-, root, root)
 /etc/libgnomenu.conf
+/usr/lib/gtk-2.0/modules/libgnomenu.a
+/usr/lib/gtk-2.0/modules/libgnomenu.la
+/usr/lib/gtk-2.0/modules/libgnomenu.so
+/usr/lib/gtk-2.0/modules/libgnomenu.so.0
+/usr/lib/gtk-2.0/modules/libgnomenu.so.0.0.0
 /usr/include/libgnomenu/clienthelper.h
-/usr/include/libgnomenu/gdksocket.h
-/usr/include/libgnomenu/gtkglobalmenubar.h
 /usr/include/libgnomenu/messages.h
 /usr/include/libgnomenu/quirks.h
 /usr/include/libgnomenu/serverhelper.h
-/usr/lib/libgnomenu.a
-/usr/lib/libgnomenu.la
-/usr/lib/libgnomenu.so
-/usr/lib/libgnomenu.so.0
-/usr/lib/libgnomenu.so.0.0.0
+/usr/include/libgnomenu/menubar.h
+/usr/include/libgnomenu/socket.h
 /usr/lib/pkgconfig/libgnomenu.pc
 /usr/share/doc/gnome-globalmenu/AUTHORS
 /usr/share/doc/gnome-globalmenu/COPYING

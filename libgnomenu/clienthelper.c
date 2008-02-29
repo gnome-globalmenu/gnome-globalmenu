@@ -236,7 +236,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
  * GnomenuClientHelper::background-set:
  *  @self: self,
  *  @color: color, NOT allocated. You have to call #gdk_colormap_alloc_color yourself, or NULL,
- *  @pixmap: pixmap, or NULL,
+ *  @pixmap: pixmap, or NULL, if you want to keep it, ref it.
  *  @userdata: userdata;
  */
 		g_signal_new("background-set",
@@ -406,14 +406,43 @@ static void _s_data_arrival(GnomenuSocket * _self,
 			{
 				if(message->bgpixmap_set.pixmap){
 				gint width, height;
-				GdkPixmap * pixmap = gdk_pixmap_foreign_new(message->bgpixmap_set.pixmap);
-				gdk_drawable_set_colormap(pixmap, gdk_colormap_get_system()); /*maybe shall GtkGlobalMenuBar oset the colormap*/
-				gdk_drawable_get_size(pixmap, &width, &height);
-				LOG("drawable size = %d, %d", width, height);
-				g_signal_emit(G_OBJECT(self),
-					class_signals[BACKGROUND_SET],
-					0, NULL, pixmap);
+			
+				GdkPixmap * pixmap;
+
+				GdkPixmap * dup;
+				GdkGC * gc;
+				gdk_x11_display_grab(gdk_display_get_default());
+				pixmap = gdk_pixmap_lookup(message->bgpixmap_set.pixmap);
+				if(!pixmap){
+					gdk_error_trap_push();
+					pixmap = gdk_pixmap_foreign_new(message->bgpixmap_set.pixmap);
+					if(pixmap){
+					gdk_drawable_set_colormap(pixmap, gdk_colormap_get_system()); /*maybe shall GtkGlobalMenuBar oset the colormap?*/
+					gdk_drawable_get_size(pixmap, &width, &height);
+					LOG("drawable size = %d, %d", width, height);
+					LOG("drawable depth = %d", gdk_drawable_get_depth(pixmap));
+					}else{
+						LOG("can't find pixmap");
+					}
+					gdk_flush();
+					if(gdk_error_trap_pop()){
+						pixmap = NULL;
+						LOG("meet an x error");
+					}
 				}
+				if(pixmap){
+					dup = gdk_pixmap_new(pixmap, width, height, -1);
+					gc = gdk_gc_new(dup);
+					gdk_draw_drawable(dup, gc, pixmap, 0, 0, 0, 0, width, height);
+					gdk_display_sync(gdk_display_get_default());
+					g_object_unref(pixmap);
+					g_object_unref(gc);
+					g_signal_emit(G_OBJECT(self),
+						class_signals[BACKGROUND_SET],
+						0, NULL, dup);
+					}
+				}
+				gdk_x11_display_ungrab(gdk_display_get_default());
 			}
 		break;
 		default:

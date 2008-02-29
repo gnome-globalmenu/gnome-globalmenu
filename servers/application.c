@@ -37,8 +37,18 @@ Application * application_new(GtkContainer * window){
 	return app;
 }
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
-	g_object_set(app->server, "bg-color", color, "bg-pixmap", pixmap, NULL);
-	_set_background(app->menu_bar_area, color, pixmap);	
+	GdkPixmap * cropped;
+	GdkGC * gc;
+	GtkAllocation * a;
+	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
+	cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
+	gc = gdk_gc_new(pixmap);
+	gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
+
+	g_object_set(app->server, "bg-color", color, "bg-pixmap", cropped, NULL);
+	_set_background(app->menu_bar_area, color, cropped);	
+	g_object_unref(gc);
+	g_object_unref(cropped);
 }
 void application_destroy(Application * app){
 	LOG();

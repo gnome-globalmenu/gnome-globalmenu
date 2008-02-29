@@ -226,7 +226,7 @@ gnomenu_server_helper_new(){
 	LOG_FUNC_NAME;
 	GnomenuServerHelper * _self;
 	GnomenuMessage msg;
-	_self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, NULL);
+	_self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, "timeout", 5, NULL);
 	gnomenu_socket_listen(GNOMENU_SOCKET(_self));
 	msg.any.type = GNOMENU_MSG_SERVER_NEW;
 	msg.server_new.socket_id = gnomenu_socket_get_native(GNOMENU_SOCKET(_self));
@@ -573,8 +573,16 @@ void gnomenu_server_helper_set_background(GnomenuServerHelper * self, GnomenuCli
 		gnomenu_socket_send(ci->service, &msg, sizeof(msg.bgcolor_set));
 	} 
 	if(pixmap){
+		static GdkPixmap * buffer = NULL;
+		gint w, h;
+		GdkGC * gc;
+		if(buffer) g_object_unref(buffer);
+		gdk_drawable_get_size(pixmap, &w, &h);
+		buffer = gdk_pixmap_new(pixmap, w, h, -1);
+		gc = gdk_gc_new(pixmap);
+		gdk_draw_drawable(buffer, gc, pixmap, 0, 0, 0, 0, w, h);
 		msg.any.type = GNOMENU_MSG_BGPIXMAP_SET;
-		msg.bgpixmap_set.pixmap = GDK_PIXMAP_XID(pixmap);
+		msg.bgpixmap_set.pixmap = GDK_PIXMAP_XID(buffer);
 		gnomenu_socket_send(ci->service, &msg, sizeof(msg.bgpixmap_set));
 	}	
 }

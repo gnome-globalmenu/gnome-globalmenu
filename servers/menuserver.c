@@ -194,9 +194,8 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		break;
 		case PROP_BGPIXMAP:
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
-			self->bgpixmap = g_value_get_object(value);
-			if(self->bgpixmap)
-				g_object_ref(self->bgpixmap);
+			self->bgpixmap = g_object_ref(g_value_get_object(value));
+			_update_active_menu_bar(self);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -339,8 +338,8 @@ static void _update_active_menu_bar (MenuServer * _self){
 				if(c->window)
 					gdk_window_reparent(c->window, (_self->window)->window, 0, 0);
 				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
-				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 				gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
+				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 			break;
 			case MENU_CLIENT_KDE:
 				if(c->window)

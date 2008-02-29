@@ -238,10 +238,19 @@ static GObject* _constructor(GType type,
 		guint n_construct_properties,
 		GObjectConstructParam *construct_params){
 
+	GtkStyle * style;
 	GObject * object = (G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->constructor)(
 		type, n_construct_properties, construct_params);
 
 	GET_OBJECT(object, menu_bar, priv);
+
+	gtk_container_set_border_width(object, 0);
+	style = gtk_style_copy (GTK_WIDGET(object)->style);
+	style->xthickness = 0;
+	style->ythickness = 0;
+	gtk_widget_set_style (GTK_WIDGET(object), style);
+	g_object_unref (style);
+
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
 
@@ -578,7 +587,7 @@ _expose (GtkWidget      *widget,
 	if (GTK_WIDGET_DRAWABLE (widget))
     {
 		border = GTK_CONTAINER(widget)->border_width;
-		LOG("Expose from %p", event->window);
+		LOG("Expose from %p, area = %d, %d, %d, %d", event->window, event->area);
 		
 		if(event->window == priv->container){
 			if(!priv->detached){
@@ -591,7 +600,7 @@ _expose (GtkWidget      *widget,
 						priv->allocation.width - border * 2,
 						priv->allocation.height - border * 2);
 			} else {
-				gtk_paint_box (widget->style,
+				gtk_paint_flat_box (widget->style,
 						priv->container,
 						GTK_WIDGET_STATE (widget),
 						GTK_SHADOW_NONE,
@@ -603,7 +612,12 @@ _expose (GtkWidget      *widget,
 			}
 		} else LOG("event not from container, ignore");
 
-		(* GTK_WIDGET_CLASS (gnomenu_menu_bar_parent_class)->expose_event) (widget, event);
+		{ 
+			GtkMenuShellClass * grandparent_class =
+			g_type_class_peek(GTK_TYPE_MENU_SHELL);
+
+			(* GTK_WIDGET_CLASS(grandparent_class)->expose_event) (widget, event);
+		}
     }
 
   return FALSE;
