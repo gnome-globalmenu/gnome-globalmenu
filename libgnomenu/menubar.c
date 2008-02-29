@@ -448,6 +448,9 @@ static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, Gn
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = TRUE;
+	if(!GTK_WIDGET_REALIZED(widget)){
+		gtk_widget_realize(widget);
+	}
 	_sync_remote_state(menu_bar);
 	_sync_local_state(menu_bar);
 }
@@ -487,12 +490,11 @@ static void _s_position_set 		( GtkWidget  * widget,
 	}
 }
 static void
-gtk_container_map_child (GtkWidget *child,
+gtk_container_show_child (GtkWidget *child,
              gpointer   client_data)
 {
-  if (GTK_WIDGET_VISIBLE (child) &&
-      !GTK_WIDGET_MAPPED (child))
-    gtk_widget_map (child);
+	GTK_WIDGET_SET_FLAGS(child, GTK_VISIBLE);
+	gtk_widget_map(child);
 }
 static void _s_visibility_set 		( GtkWidget  * widget, 
 									  gboolean vis,
@@ -500,14 +502,13 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	if(vis){
-		gtk_container_forall (GTK_CONTAINER (widget),
-				gtk_container_map_child,
-				NULL);
 		gdk_window_show(priv->container);
 		gdk_window_show(priv->floater);
+		gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
 	}else {
 		gdk_window_hide(priv->container);
 		gdk_window_hide(priv->floater);
+		gtk_widget_hide_all(widget);
 	}	
 }
 static void _s_background_set	 		( GtkWidget  * widget, 
@@ -618,7 +619,11 @@ _expose (GtkWidget      *widget,
 
 			(* GTK_WIDGET_CLASS(grandparent_class)->expose_event) (widget, event);
 		}
-    }
+    } else {
+			LOG("visible: %d, mapped %d",  GTK_WIDGET_VISIBLE(widget),
+					GTK_WIDGET_MAPPED(widget));
+
+	}
 
   return FALSE;
 }
