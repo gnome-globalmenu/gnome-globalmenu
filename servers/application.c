@@ -11,7 +11,9 @@ enum {
 
 static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_active_client_changed(Application * app, MenuServer * server);
-static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
+static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
+static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
+static void _update_background(Application * app);
 
 static GObject *_constructor( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) ;
@@ -135,21 +137,37 @@ _constructor	( GType type, guint n_construct_properties,
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"active-client-changed",
 		G_CALLBACK(_s_active_client_changed), app);
+	g_signal_connect_swapped(G_OBJECT(app->menu_bar_area),
+		"size-allocate",
+		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 
 	return _self;
 }
 
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
+
+	if(app->bgpixmap) g_object_unref(app->bgpixmap);
+	app->bgpixmap = g_object_ref(pixmap);
+	if(app->bgcolor) g_object_unref(app->bgcolor);
+	app->bgcolor = g_object_ref(color);
+	_update_background(app);
+}
+
+static void _update_background(Application * app){
 	GdkPixmap * cropped;
 	GdkGC * gc;
 	GtkAllocation * a;
+	GdkPixmap * pixmap = app->bgpixmap;
+	GdkColor * color = app->bgcolor;
+
 	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
 	cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
 	gc = gdk_gc_new(pixmap);
 	gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
 
 	g_object_set(app->server, "bg-color", color, "bg-pixmap", cropped, NULL);
-	_set_background(GTK_WIDGET(app->menu_bar_area), color, cropped);	
+	_set_widget_background(app->menu_bar_area, color, cropped);	
+
 	g_object_unref(gc);
 	g_object_unref(cropped);
 }
@@ -174,7 +192,7 @@ static void _s_window_destroy(Application * app, GtkWidget * widget){
 	LOG();
 	g_object_unref(G_OBJECT(app));
 }
-static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap){
+static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap){
 	GtkRcStyle * rc_style;
 	GtkStyle * style;
 	gtk_widget_set_style (widget, NULL);
@@ -200,7 +218,14 @@ static void _set_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pi
 
 	}
 }
-
+static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget){
+	static GtkAllocation old_allo = {0};
+	LOG("+%d,%d,%d,%d", *allocation);
+	LOG("-%d,%d,%d,%d", old_allo);
+	if(memcmp(&old_allo, allocation, sizeof(GtkAllocation)))
+		_update_background(app);	
+	old_allo = *allocation;
+}
 
 
 /*

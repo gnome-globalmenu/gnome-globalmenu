@@ -23,6 +23,8 @@ struct _Application
 	GtkWidget * title;
 	GtkWidget * icon;
 	MenuServer * server;
+	GtkPixmap * bgpixmap;
+	GdkColor * bgcolor;
 	gboolean show_title;
 	gboolean show_icon;
 };
