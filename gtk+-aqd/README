@@ -13,7 +13,9 @@ HOW DOES IT WORK
 
 After several major changes in the framework, we ended up with very little modifications in GTK.
 The patch only does 1 thing:
-	1) invoke gtk_legacy_menu_new when gtk_menu_bar_new is invoked.
+	1) search for gnomenu_menu_bar_type when gtk_menu_bar_get_type is invoked.
+		if found, return it to tell every application to use GnomenuMenuBar,
+		if not found, return GTK_MENU_BAR, to tell them to use GtkMenuBar.
 
 
 HACKING
@@ -27,7 +29,7 @@ make patch
 -----------
 	Patch the downloaded GTK source;
 	After patching the source, you can follow the conventional steps to build GTK.
-	REMEMBER to add the path for libgnomenu.so to your LD_LIBRARY_PATH before testing.
+	REMEMBER to add the path for libgnomenu.so to your LD_LIBRARY_PATH and GTK_MODULES before testing.
 
 make diff
 ----------
