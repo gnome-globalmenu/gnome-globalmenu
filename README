@@ -8,4 +8,4 @@ doc:
 test: test suite for libgnomenu
 gnome-globalmenu-applet: the panel applet for globalmenu.
 
-
+ADD GTK_MODULES=libgnomenu into your .bash_profile
