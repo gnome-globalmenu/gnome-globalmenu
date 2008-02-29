@@ -20,12 +20,13 @@ static void _add_default_quirks_from_string(gchar * string){
 	gchar * word;
 	int i, j, l;
 	lines = g_strsplit(string, "\n", 0);
+	if(lines)
 	for(i = 0; lines[i]; i++){
 		QuirkEntry * entry = g_new0(QuirkEntry, 1);
 		words = g_strsplit(lines[i], ":", 0);
 		if(!words) continue;
 		l = g_strv_length(words);
-		if(l !=2){
+		if(l !=2 ){
 			g_warning("Irregular conf file line(%d):\n%s", l, lines[i]);
 			g_strfreev(words);
 			continue;
