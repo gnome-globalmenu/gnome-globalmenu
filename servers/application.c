@@ -98,7 +98,9 @@ static void application_class_init(ApplicationClass *klass)
 						GTK_TYPE_WIDGET,
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 }
-
+Application * application_new(){
+	return g_object_new(TYPE_APPLICATION, NULL);
+}
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
