@@ -6,7 +6,7 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION: gnomenusocket
+ * SECTION: socket
  * @short_description: Socket Communication for GNOMEU
  * @see_also: #GdkWindow, #GnomenuClientHelper, #GnomenuServerHelper
  * @stability: Unstable

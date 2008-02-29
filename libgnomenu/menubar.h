@@ -4,7 +4,7 @@
 #ifndef __GNOMENU_MENU_BAR_H__
 #define __GNOMENU_MENU_BAR_H__
 /**
- * SECTION: gtkglobalmenubar
+ * SECTION: menubar
  * 	@short_description: Global Menu Bar widget for GTK, 
  * 		intended to replace GtkMenuBar
  * 	@see_also: #GtkMenuBar, #gtk_legacy_menu_bar_new

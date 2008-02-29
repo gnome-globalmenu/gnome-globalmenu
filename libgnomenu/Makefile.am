@@ -3,7 +3,7 @@
 AM_CFLAGS = $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
-moduledir = $(libdir)/gtk-2.0/modules
+moduledir = $(libdir)
 
 module_LTLIBRARIES = libgnomenu.la
 

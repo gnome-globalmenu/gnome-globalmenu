@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn550
+%define svn_version svn556
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -23,20 +23,24 @@ BuildRequires:	xfce4-panel-devel
 %package -n libgnomenu
 Summary: libgnomenu Provides global menu widget GtkGlobalMenuBar 
 Group:		User Interface/Desktops
+Requires: gtk2
 %description -n libgnomenu
 
 %package -n gnome-globalmenu-applet
+Requires: libgnomenu
 Summary: gnome-panel applet for global menu.
 Group:		User Interface/Desktops
 %description -n gnome-globalmenu-applet
 
 %package -n xfce-globalmenu-plugin
 Summary: xfce-panel plugin for global menu.
+Requires: libgnomenu
 Group:		User Interface/Desktops
 %description -n xfce-globalmenu-plugin
 
 %package -n gnomenu-server
 Summary: standalone mene server for global menu.
+Requires: libgnomenu
 Group:		User Interface/Desktops
 %description -n gnomenu-server
 
@@ -67,7 +71,7 @@ rm -rf %{buildroot}
 #gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome2-globalmenu-applet.schema >& /dev/null || :
 
 
-%files
+%files -n libgnomenu
 %defattr(-, root, root)
 /etc/libgnomenu.conf
 /usr/lib/gtk-2.0/modules/libgnomenu.a
@@ -88,17 +92,17 @@ rm -rf %{buildroot}
 /usr/share/doc/gnome-globalmenu/INSTALL
 /usr/share/doc/gnome-globalmenu/NEWS
 /usr/share/doc/gnome-globalmenu/README
-/usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
-/usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 
 %files -n gnomenu-server
 /usr/libexec/globalmenu-server
 
 %files -n gnome-globalmenu-applet
 /usr/libexec/gnome-globalmenu-applet
+/usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 
 %files -n xfce-globalmenu-plugin
 /usr/libexec/xfce-globalmenu-plugin
+/usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
 * Mon Jan 14 2008 Feng Yu <rainwoodman@gmail.com>
