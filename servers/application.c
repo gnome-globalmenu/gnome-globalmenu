@@ -98,8 +98,8 @@ static void application_class_init(ApplicationClass *klass)
 						GTK_TYPE_WIDGET,
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 }
-Application * application_new(){
-	return g_object_new(TYPE_APPLICATION, NULL);
+Application * application_new(GtkContainer * widget){
+	return g_object_new(TYPE_APPLICATION, "window", widget, NULL);
 }
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
@@ -122,8 +122,10 @@ _constructor	( GType type, guint n_construct_properties,
 	gtk_container_set_border_width(GTK_CONTAINER(app->menu_bar_area), 0);
 	app->title = GTK_LABEL(gtk_label_new(""));
 	app->icon = GTK_IMAGE(gtk_image_new());
+	app->bgpixmap = NULL;
+	app->bgcolor = NULL;
 
-	gtk_box_pack_start_defaults(GTK_BOX(box), GTK_WIDGET(app->icon));
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->icon), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->title), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->menu_bar_area), TRUE, TRUE, 0);
 
