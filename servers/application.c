@@ -1,4 +1,6 @@
 #include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "application.h"
 #include "menuserver.h"
 #include "log.h"
@@ -196,8 +198,8 @@ void application_set_background(Application * app, GdkColor * color, GdkPixmap *
 
 	if(app->bgpixmap) g_object_unref(app->bgpixmap);
 	app->bgpixmap = g_object_ref(pixmap);
-	if(app->bgcolor) g_object_unref(app->bgcolor);
-	app->bgcolor = g_object_ref(color);
+	if(app->bgcolor) g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
+	app->bgcolor = g_boxed_copy(GDK_TYPE_COLOR, color);
 	_update_background(app);
 }
 

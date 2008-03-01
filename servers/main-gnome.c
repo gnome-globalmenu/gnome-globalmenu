@@ -50,8 +50,8 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
 	panel_applet_set_background_widget(applet, applet);
 	App = application_gnome_new(applet);
-//	g_signal_connect(G_OBJECT(applet), "change-background", 
-//				_change_background, App);
+	g_signal_connect(G_OBJECT(applet), "change-background", 
+				_change_background, App);
 	gtk_widget_show_all(applet);
     return TRUE;
   } else {
