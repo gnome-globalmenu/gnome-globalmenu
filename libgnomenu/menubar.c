@@ -503,8 +503,6 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	if(vis){
-		gdk_window_show(priv->container);
-		gdk_window_show(priv->floater);
 		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
 			gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
 		} else {
@@ -512,6 +510,8 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 				gtk_container_map_child,
 				NULL);
 		}
+		gdk_window_show(priv->container);
+		gdk_window_show(priv->floater);
 	}else {
 		gdk_window_hide(priv->container);
 		gdk_window_hide(priv->floater);
@@ -601,6 +601,21 @@ _expose (GtkWidget      *widget,
 		border = GTK_CONTAINER(widget)->border_width;
 		LOG("Expose from %p, area = %d, %d, %d, %d", event->window, event->area);
 		
+		if(event->window == widget->window){
+			LOG("event from widget->window");
+			if(priv->detached){
+			/*work around, quirk, to paint widget->window with parent background, since it really has nothing*/
+			GtkStyle * style = gtk_widget_get_style(gtk_widget_get_parent(widget));
+				gtk_paint_flat_box (style,
+						widget->window,
+						GTK_WIDGET_STATE (widget),
+						GTK_SHADOW_NONE,
+						&event->area, widget, NULL,
+						0, 0,
+						widget->allocation.width,
+						widget->allocation.height);
+			}
+		}
 		if(event->window == priv->container){
 			if(!priv->detached){
 				gtk_paint_box (widget->style,
@@ -628,18 +643,6 @@ _expose (GtkWidget      *widget,
 			g_type_class_peek(GTK_TYPE_MENU_SHELL);
 
 			(* GTK_WIDGET_CLASS(grandparent_class)->expose_event) (widget, event);
-		}
-		if(event->window == widget->window){
-			LOG("event from widget->window");
-			GtkStyle * style = gtk_widget_get_style(gtk_widget_get_parent(widget));
-				gtk_paint_flat_box (style,
-						widget->window,
-						GTK_WIDGET_STATE (widget),
-						GTK_SHADOW_NONE,
-						&event->area, widget, NULL,
-						0, 0,
-						widget->allocation.width,
-						widget->allocation.height);
 		}
     } else {
 			LOG("visible: %d, mapped %d",  GTK_WIDGET_VISIBLE(widget),
@@ -699,11 +702,11 @@ _realize (GtkWidget * widget){
                 GDK_ENTER_NOTIFY_MASK |
                 GDK_LEAVE_NOTIFY_MASK);
 
-  attributes_mask = GDK_WA_X | GDK_WA_Y/* | GDK_WA_VISUAL | GDK_WA_COLORMAP*/;
+  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
   widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
   gdk_window_set_user_data (widget->window, widget);
-//  widget->style = gtk_style_attach (widget->style, widget->window);
- // gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+  widget->style = gtk_style_attach (widget->style, widget->window);
+  gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
 
 	attributes.x = 0;
 	attributes.y = 0;
@@ -732,7 +735,7 @@ _realize (GtkWidget * widget){
 	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
 
 	priv->container = gdk_window_new (
-		gtk_widget_get_parent_window(widget)/* widget->window*/, &attributes, attributes_mask);
+		 /*gtk_widget_get_parent_window(widget),*/widget->window, &attributes, attributes_mask);
 	//gdk_window_set_user_data (priv->container, widget);
 LOG("window created");
 
@@ -785,7 +788,7 @@ _map (GtkWidget * widget){
 	if(!priv->detached){
 		gdk_window_show(priv->container);
 	}
-//	gdk_window_show(widget->window);
+	gdk_window_show(widget->window);
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
 }
 
