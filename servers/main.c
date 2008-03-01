@@ -13,13 +13,24 @@ static void window_destroy(GtkWidget * widget, gpointer useless){
 }
 int main (int argc, char * argv []){
 	GtkWindow * window;
-
+	int i;
+	gboolean title_vis = FALSE;
+	gboolean icon_vis = FALSE;
 	gtk_init(&argc, &argv);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(window, 400,20);
 	g_signal_connect(window, "destroy", 
 			window_destroy, NULL);
-	application_new(window);
+	for(i=0; i< argc; i++){
+		if(g_str_equal(argv[i], "-t")) title_vis = TRUE;
+		if(g_str_equal(argv[i], "-i")) icon_vis = TRUE;
+
+	}
+	g_object_new(TYPE_APPLICATION, 
+				"window", window, 
+				"title-visible", title_vis,
+				"icon-visible", icon_vis, 
+				NULL);
 	gtk_widget_show_all(window);
 	gtk_main();
 

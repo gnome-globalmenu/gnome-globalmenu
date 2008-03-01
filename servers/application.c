@@ -131,7 +131,7 @@ static void application_class_init(ApplicationClass *klass)
 						"title-visible",
 						"whether or not display the title",
 						FALSE,
-						G_PARAM_READWRITE));
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
 	g_object_class_install_property (obj_class,
 		PROP_ICON_VISIBLE,
@@ -139,7 +139,7 @@ static void application_class_init(ApplicationClass *klass)
 						"icon-visible",
 						"whether or not display the title",
 						FALSE,
-						G_PARAM_READWRITE));
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
 }
 Application * application_new(GtkContainer * widget){
