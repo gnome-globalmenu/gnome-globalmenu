@@ -219,6 +219,10 @@ static void _update_background(Application * app){
 	GdkColor * color = app->bgcolor;
 
 	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
+	if (color) {
+		g_object_set(app->server, "bg-color", color, NULL);
+		_set_widget_background(app->menu_bar_area, color, NULL);	
+	}
 	if (pixmap) {
 		cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
 		gc = gdk_gc_new(pixmap);
@@ -227,10 +231,6 @@ static void _update_background(Application * app){
 		_set_widget_background(app->menu_bar_area, NULL, cropped);	
 		g_object_unref(gc);
 		g_object_unref(cropped);
-	}
-	if (color) {
-		g_object_set(app->server, "bg-color", color, NULL);
-		_set_widget_background(app->menu_bar_area, color, NULL);	
 	}
 }
 
