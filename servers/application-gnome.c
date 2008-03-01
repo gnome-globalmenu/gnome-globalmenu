@@ -1,4 +1,5 @@
 #include <panel-applet.h>
+#include <panel-applet-gconf.h>
 #include "application-gnome.h"
 
 #define APPLICATION_GNOME_GET_PRIVATE(obj) \
@@ -48,8 +49,8 @@ static void _load_conf(Application *app)
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 
 	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome2-globalmenu-applet", NULL);
-	app->show_title = panel_applet_gconf_get_bool(app->window, "show_title", NULL);
-	app->show_icon = panel_applet_gconf_get_bool(app->window, "show_icon", NULL);
+	app->show_title = panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL);
+	app->show_icon = panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_icon", NULL);
 }
 
 
@@ -87,8 +88,8 @@ static void _dlg_cb(GtkDialog * nouse, gint arg, ApplicationGnome* self){
 			app->show_title = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->show_title));
 			app->show_icon = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->show_icon));
 
-			panel_applet_gconf_set_bool(app->window, "show_title", app->show_title, NULL);
-			panel_applet_gconf_set_bool(app->window, "show_icon", app->show_icon, NULL);
+			panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_title", app->show_title, NULL);
+			panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_icon", app->show_icon, NULL);
 			_update_ui(APPLICATION(self));
 			break;
 		default:
@@ -139,7 +140,8 @@ void _show_about(ApplicationGnome * self){
 				"authors", authors, NULL);
 }
 
-static void _popup_menu(BonoboUIComponent * uic, ApplicationGnome * app_gnome, gchar * cname){
+static void _popup_menu(BonoboUIComponent * uic, gpointer user_data, const gchar * cname){
+	ApplicationGnome* app_gnome = APPLICATION_GNOME(user_data);
 	g_message("%s: cname = %s", __func__, cname);
 	if(g_str_equal(cname, "About")) _show_about(app_gnome);
 	if(g_str_equal(cname, "Preference")) _show_dialog(app_gnome);
@@ -167,8 +169,8 @@ static void _create_popup_menu(ApplicationGnome * self){
 		BONOBO_UI_VERB ("Preference", _popup_menu),
 		BONOBO_UI_VERB_END
 	};
-	BonoboUIComponent* popup_component = 
-		panel_applet_get_popup_component(PANEL_APPLET(app->window));
+//	BonoboUIComponent* popup_component = 
+//		panel_applet_get_popup_component(PANEL_APPLET(app->window));
 	panel_applet_setup_menu(PANEL_APPLET(app->window), 
 			toggle_menu_xml, 
 			toggle_menu_verbs, 
