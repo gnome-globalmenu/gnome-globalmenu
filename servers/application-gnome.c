@@ -120,8 +120,8 @@ void _show_dialog(ApplicationGnome * self){
 
 	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
 	GtkWidget * show = gtk_label_new(_("Display following elements"));
-	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
-	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
+//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
+//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
 	priv->dlg= GTK_DIALOG(gtk_dialog_new());
 	priv->show_title = GTK_CHECK_BUTTON(gtk_check_button_new_with_label (_("Active Window Title")));
 	priv->show_icon = GTK_CHECK_BUTTON(gtk_check_button_new_with_label (_("Active Window Icon")));
@@ -136,8 +136,8 @@ void _show_dialog(ApplicationGnome * self){
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(show));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_title));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_icon));
-	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
+//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
+//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
 	gtk_container_add(GTK_CONTAINER(priv->dlg->vbox), GTK_WIDGET(vbox));
 
 	gtk_dialog_add_button(priv->dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
