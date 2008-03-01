@@ -11,7 +11,7 @@ typedef struct {
 	GtkCheckButton * show_icon;
 }ApplicationGnomePrivate;
 
-void _create_popup_menu(ApplicationGnome * self);
+static void _create_popup_menu(ApplicationGnome * self);
 
 G_DEFINE_TYPE		(ApplicationGnome, application_gnome, TYPE_APPLICATION);
 
@@ -32,6 +32,7 @@ static void _update_ui(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 
+	g_print("app-gnome:_update_ui\n");
 	if(app->show_title) 
 		gtk_widget_show(app->title);
 	else gtk_widget_hide(app->title);
@@ -39,6 +40,7 @@ static void _update_ui(Application *app)
 	if(app->show_icon)
 		gtk_widget_show(app->icon);
 	else gtk_widget_hide(app->icon);
+
 }
 
 static void _load_conf(Application *app)
@@ -61,6 +63,8 @@ static void application_gnome_class_init(ApplicationGnomeClass *klass)
 
 	app_class->update_ui = _update_ui;
 	app_class->load_conf = _load_conf;
+	
+	g_type_class_add_private(obj_class, sizeof(ApplicationGnomePrivate));
 }
 
 static void application_gnome_init(ApplicationGnome *obj)
@@ -130,7 +134,7 @@ void _show_about(ApplicationGnome * self){
 		"Mingxi Wu <fengshenx.@gmail.com>",
 		"And thanks to others for the discussion",
 		NULL
-		}	;
+		};
 	gtk_show_about_dialog(NULL, 
 				"authors", authors, NULL);
 }
@@ -141,9 +145,10 @@ static void _popup_menu(BonoboUIComponent * uic, ApplicationGnome * app_gnome, g
 	if(g_str_equal(cname, "Preference")) _show_dialog(app_gnome);
 }
 
-void _create_popup_menu(ApplicationGnome * self){
+static void _create_popup_menu(ApplicationGnome * self){
 	Application *app = APPLICATION(self);
 
+	g_print("panel-window:%p\n", app->window);
 	static const char toggle_menu_xml [] =
 	"<popup name=\"button3\">\n"
 		"<menuitem name=\"About\" "

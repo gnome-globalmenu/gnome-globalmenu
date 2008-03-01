@@ -21,12 +21,6 @@
 #define APP_VERSION "4"
 
 
-static void popup_menu_cb(BonoboUIComponent * uic, Application * App, gchar * cname){
-	g_message("%s: cname = %s", __func__, cname);
-	if(g_str_equal(cname, "About")) ui_show_about(NULL, App);
-	if(g_str_equal(cname, "Preference")) preference_show_dialog(NULL, App);
-}
-
 static _change_background ( PanelApplet * applet, 
 							PanelAppletBackgroundType bgtp,
 							GdkColor * color,
@@ -56,8 +50,8 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
 	panel_applet_set_background_widget(applet, applet);
 	App = application_gnome_new(applet);
-	g_signal_connect(G_OBJECT(applet), "change-background", 
-				_change_background, App);
+//	g_signal_connect(G_OBJECT(applet), "change-background", 
+//				_change_background, App);
 	gtk_widget_show_all(applet);
     return TRUE;
   } else {

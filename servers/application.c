@@ -1,7 +1,6 @@
 #include <gtk/gtk.h>
 #include "application.h"
 #include "menuserver.h"
-#include "preference-gnome.h"
 #include "log.h"
 
 enum {
