@@ -5,7 +5,9 @@
 
 enum {
 	PROP_0,
-	PROP_WINDOW
+	PROP_WINDOW,
+	PROP_TITLE_VISIBLE,
+	PROP_ICON_VISIBLE
 };
 
 static void _s_window_destroy(Application * app, GtkWidget * widget);
@@ -21,15 +23,25 @@ static GObject *_constructor( GType type, guint n_construct_properties,
 
 G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 
-static void _update_ui_unimp(Application *app)
+static void _update_ui(Application *app)
 {
-	g_warning("Application:: update_ui isn't implemented for %s\n", 
-			g_type_name(G_TYPE_FROM_INSTANCE(app)));
-}
+	LOG();
+	if(app->show_title) 
+		gtk_widget_show(app->title);
+	else gtk_widget_hide(app->title);
 
+	if(app->show_icon)
+		gtk_widget_show(app->icon);
+	else gtk_widget_hide(app->icon);
+}
+static void _save_conf_unimp(Application *app){
+	LOG("Not implemented for %s\n", 
+			g_type_name(G_TYPE_FROM_INSTANCE(app)));
+
+}
 static void _load_conf_unimp(Application *app)
 {
-	g_warning("Application:: _load_conf isn't implemented for %s\n", 
+	LOG("Not implemented for %s\n", 
 			g_type_name(G_TYPE_FROM_INSTANCE(app)));
 }
 
@@ -45,6 +57,16 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			g_assert(!GTK_WIDGET_NO_WINDOW(self->window));
 			g_object_ref(self->window);
 			break;
+		case PROP_TITLE_VISIBLE:
+			self->show_title = g_value_get_boolean(value);
+			application_update_ui(self);
+			application_save_conf(self);
+			break;
+		case PROP_ICON_VISIBLE:
+			self->show_icon = g_value_get_boolean(value);
+			application_update_ui(self);
+			application_save_conf(self);
+			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -58,6 +80,12 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 	switch (property_id){
 		case PROP_WINDOW:
 			g_value_set_object(value, self->window);
+			break;
+		case PROP_TITLE_VISIBLE:
+			g_value_set_boolean(value, self->show_title);
+			break;
+		case PROP_ICON_VISIBLE:
+			g_value_set_boolean(value, self->show_icon);
 			break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -85,9 +113,9 @@ static void application_class_init(ApplicationClass *klass)
 	obj_class->set_property = _set_property;
 	obj_class->get_property = _get_property;
 
-	klass->update_ui = _update_ui_unimp;
+	klass->update_ui = _update_ui;
 	klass->load_conf = _load_conf_unimp;
-
+	klass->save_conf = _save_conf_unimp;
 
 	g_object_class_install_property (obj_class,
 		PROP_WINDOW,
@@ -96,6 +124,23 @@ static void application_class_init(ApplicationClass *klass)
 						"applet window",
 						GTK_TYPE_WIDGET,
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+
+	g_object_class_install_property (obj_class,
+		PROP_TITLE_VISIBLE,
+		g_param_spec_boolean ("title-visible",
+						"title-visible",
+						"whether or not display the title",
+						FALSE,
+						G_PARAM_READWRITE));
+
+	g_object_class_install_property (obj_class,
+		PROP_ICON_VISIBLE,
+		g_param_spec_boolean ("icon-visible",
+						"icon-visible",
+						"whether or not display the title",
+						FALSE,
+						G_PARAM_READWRITE));
+
 }
 Application * application_new(GtkContainer * widget){
 	return g_object_new(TYPE_APPLICATION, "window", widget, NULL);
@@ -131,8 +176,8 @@ _constructor	( GType type, guint n_construct_properties,
 	gtk_container_add(GTK_CONTAINER(app->window), GTK_WIDGET(box));
 	app->server = menu_server_new(GTK_WIDGET(app->menu_bar_area));
 
-	(*app_class->load_conf)(app);
-	(*app_class->update_ui)(app);
+	application_load_conf(app);
+	application_update_ui(app);
 
 	g_signal_connect_swapped(G_OBJECT(app->window), 
 		"destroy",
@@ -188,7 +233,7 @@ static void _s_active_client_changed(Application * app, MenuServer * server){
 
 	icon_buf = wnck_application_get_icon(application);
 	gtk_image_set_from_pixbuf(app->icon, icon_buf);
-	(*app_class->update_ui)(app);
+	application_update_ui(app);
 }
 
 static void _s_window_destroy(Application * app, GtkWidget * widget){
@@ -230,6 +275,27 @@ static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * al
 	old_allo = *allocation;
 }
 
+void application_update_ui(Application *app){
+	if(APPLICATION_GET_CLASS(app)->update_ui){
+		APPLICATION_GET_CLASS(app)->update_ui(app);
+	} else {
+		LOG("not implemented in subclass");
+	}
+}
+void application_load_conf(Application *app){
+	if(APPLICATION_GET_CLASS(app)->load_conf){
+		APPLICATION_GET_CLASS(app)->load_conf(app);
+	} else {
+		LOG("not implemented in subclass");
+	}
+}
+void application_save_conf(Application *app){
+	if(APPLICATION_GET_CLASS(app)->save_conf){
+		APPLICATION_GET_CLASS(app)->save_conf(app);
+	} else {
+		LOG("not implemented in subclass");
+	}
+}
 
 /*
 vim:ts=4:sw=4

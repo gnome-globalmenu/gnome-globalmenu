@@ -1,6 +1,7 @@
 #include <panel-applet.h>
 #include <panel-applet-gconf.h>
 #include "application-gnome.h"
+#include "log.h"
 
 #define APPLICATION_GNOME_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_APPLICATION_GNOME, ApplicationGnomePrivate))
@@ -32,16 +33,8 @@ _constructor	( GType type, guint n_construct_properties,
 static void _update_ui(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
-
-	g_print("app-gnome:_update_ui\n");
-	if(app->show_title) 
-		gtk_widget_show(app->title);
-	else gtk_widget_hide(app->title);
-
-	if(app->show_icon)
-		gtk_widget_show(app->icon);
-	else gtk_widget_hide(app->icon);
-
+	LOG("app-gnome:_update_ui, chain to parent class\n");
+	APPLICATION_CLASS(application_gnome_parent_class)->update_ui(app);
 }
 
 static void _load_conf(Application *app)
@@ -49,8 +42,24 @@ static void _load_conf(Application *app)
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 
 	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome2-globalmenu-applet", NULL);
-	app->show_title = panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL);
-	app->show_icon = panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_icon", NULL);
+	g_object_set(app,
+			"title-visible",
+			 panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL),
+			"icon-visible",
+			panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_icon", NULL),
+			NULL);
+}
+static void _save_conf(Application *app)
+{
+	g_return_if_fail(IS_APPLICATION_GNOME(app));
+	gboolean show_title, show_icon;
+/*	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome2-globalmenu-applet", NULL);
+ *	FIXME: need this?*/
+	g_object_get(app, 
+			"title-visible", &show_title,
+			"icon-visible", &show_icon, NULL);
+	panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_title", show_title, NULL);
+	panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_icon", show_icon, NULL);
 }
 
 
@@ -64,7 +73,8 @@ static void application_gnome_class_init(ApplicationGnomeClass *klass)
 
 	app_class->update_ui = _update_ui;
 	app_class->load_conf = _load_conf;
-	
+	app_class->save_conf = _save_conf;	
+
 	g_type_class_add_private(obj_class, sizeof(ApplicationGnomePrivate));
 }
 
@@ -84,16 +94,20 @@ static void _dlg_cb(GtkDialog * nouse, gint arg, ApplicationGnome* self){
 
 	switch(arg){
 		case GTK_RESPONSE_ACCEPT: 
-			g_message("Preference Accepted");
-			app->show_title = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->show_title));
-			app->show_icon = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(priv->show_icon));
-
-			panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_title", app->show_title, NULL);
-			panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_icon", app->show_icon, NULL);
-			_update_ui(APPLICATION(self));
+			LOG("Preference Accepted");
+		g_object_set(app,
+				"title-visible",
+				gtk_toggle_button_get_active(priv->show_title),
+				"icon-visible",
+				gtk_toggle_button_get_active(priv->show_icon),
+				NULL);
+		
+			application_save_conf(self);
+			application_load_conf(self);
+			application_update_ui(self);
 			break;
 		default:
-			g_message("What Response is it?");
+			LOG("What Response is it?");
 	}
 	gtk_widget_destroy(GTK_WIDGET(priv->dlg));
 }
@@ -102,6 +116,7 @@ static void _dlg_cb(GtkDialog * nouse, gint arg, ApplicationGnome* self){
 void _show_dialog(ApplicationGnome * self){
 	ApplicationGnomePrivate *priv = APPLICATION_GNOME_GET_PRIVATE(self);
 	Application *app = APPLICATION(self);
+	gboolean show_title, show_icon;
 
 	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
 	GtkWidget * show = gtk_label_new(_("Display following elements"));
@@ -112,8 +127,12 @@ void _show_dialog(ApplicationGnome * self){
 	priv->show_icon = GTK_CHECK_BUTTON(gtk_check_button_new_with_label (_("Active Window Icon")));
 
 
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_title), app->show_title);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_icon), app->show_icon);
+	g_object_get(app, 
+			"title-visible", &show_title,
+			"icon-visible", &show_icon, NULL);
+
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_title), show_title);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_icon), show_icon);
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(show));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_title));
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_icon));
@@ -142,7 +161,7 @@ void _show_about(ApplicationGnome * self){
 
 static void _popup_menu(BonoboUIComponent * uic, gpointer user_data, const gchar * cname){
 	ApplicationGnome* app_gnome = APPLICATION_GNOME(user_data);
-	g_message("%s: cname = %s", __func__, cname);
+	LOG("%s: cname = %s", __func__, cname);
 	if(g_str_equal(cname, "About")) _show_about(app_gnome);
 	if(g_str_equal(cname, "Preference")) _show_dialog(app_gnome);
 }
@@ -150,7 +169,7 @@ static void _popup_menu(BonoboUIComponent * uic, gpointer user_data, const gchar
 static void _create_popup_menu(ApplicationGnome * self){
 	Application *app = APPLICATION(self);
 
-	g_print("panel-window:%p\n", app->window);
+	LOG("panel-window:%p\n", app->window);
 	static const char toggle_menu_xml [] =
 	"<popup name=\"button3\">\n"
 		"<menuitem name=\"About\" "
