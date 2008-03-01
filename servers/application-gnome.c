@@ -1,3 +1,4 @@
+#include <config.h>
 #include <panel-applet.h>
 #include <panel-applet-gconf.h>
 #include "application-gnome.h"

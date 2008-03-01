@@ -5,7 +5,12 @@
 #include "quirks.h"
 #include "menubar.h"
 
+#if ENABLE_TRACING >= 3
 #define LOG(fmt, args...) g_message("<GnomenuQuirk>::" fmt, ## args)
+#else
+#define LOG(fmt, args...)
+#endif
+
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 typedef struct {

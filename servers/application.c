@@ -196,10 +196,14 @@ _constructor	( GType type, guint n_construct_properties,
 
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
 
-	if(app->bgpixmap) g_object_unref(app->bgpixmap);
-	app->bgpixmap = g_object_ref(pixmap);
-	if(app->bgcolor) g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
-	app->bgcolor = g_boxed_copy(GDK_TYPE_COLOR, color);
+	if (pixmap) {
+		if(app->bgpixmap) g_object_unref(app->bgpixmap);
+		app->bgpixmap = g_object_ref(pixmap);
+	}
+	if (color) {
+		if(app->bgcolor) g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
+		app->bgcolor = g_boxed_copy(GDK_TYPE_COLOR, color);
+	}
 	_update_background(app);
 }
 
@@ -211,30 +215,40 @@ static void _update_background(Application * app){
 	GdkColor * color = app->bgcolor;
 
 	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
-	cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
-	gc = gdk_gc_new(pixmap);
-	gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
+	if (pixmap) {
+		cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
+		gc = gdk_gc_new(pixmap);
+		gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
 
-	g_object_set(app->server, "bg-color", color, "bg-pixmap", cropped, NULL);
-	_set_widget_background(app->menu_bar_area, color, cropped);	
+		g_object_set(app->server, "bg-color", color, "bg-pixmap", cropped, NULL);
+		_set_widget_background(app->menu_bar_area, color, cropped);	
 
-	g_object_unref(gc);
-	g_object_unref(cropped);
+		g_object_unref(gc);
+		g_object_unref(cropped);
+	}
 }
-
 
 static void _s_active_client_changed(Application * app, MenuServer * server){
 	ApplicationClass *app_class = G_OBJECT_GET_CLASS(app);
-	GdkPixbuf *icon_buf;
+	GdkPixbuf *icon_buf, *resized_icon;
+	gint w, h;
 	WnckWindow * window = menu_server_get_client_parent(server, server->active);
+
 	if(!window) window = wnck_screen_get_active_window(wnck_screen_get_default());
+	if(!window) return;
 	WnckApplication * application = wnck_window_get_application(window);
 
 	const gchar *name = wnck_application_get_name(application);
 	gtk_label_set_text(app->title, name);
 
-	icon_buf = wnck_application_get_icon(application);
-	gtk_image_set_from_pixbuf(app->icon, icon_buf);
+	icon_buf =  wnck_application_get_icon(application);
+	if (icon_buf) {
+		/* FIXME : check the direction fisrt? */
+		w = h = GTK_WIDGET(app->window)->allocation.height ;
+		resized_icon = gdk_pixbuf_scale_simple(icon_buf , w, h, GDK_INTERP_BILINEAR);
+		gtk_image_set_from_pixbuf(app->icon, resized_icon);
+		g_object_unref(resized_icon);
+	}
 	application_update_ui(app);
 }
 
