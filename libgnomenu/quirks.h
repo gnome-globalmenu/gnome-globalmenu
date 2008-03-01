@@ -26,6 +26,7 @@ typedef enum { /*< prefix = GNOMENU_QUIRK >*/
 	GNOMENU_QUIRK_IGNORE = 1<<0, /*< nick=ignore >*/
 	GNOMENU_QUIRK_FORCE_SHOW_ALL = 1<<1, /*< nick=force-show-all >*/
 	GNOMENU_QUIRK_HIDE_ON_QUIT = 1<<2, /*< nick=hide-on-quit >*/
+	GNOMENU_QUIRK_ROAMING	= 1<<3, /*< nick=roaming >*/
 } GnomenuQuirkMask;
 #define GNOMENU_HAS_QUIRK(m, v) ((m) & (GNOMENU_QUIRK_ ## v))
 GnomenuQuirkMask gnomenu_get_default_quirk(); 

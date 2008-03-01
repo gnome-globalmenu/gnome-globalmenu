@@ -373,8 +373,14 @@ _size_request (GtkWidget      *widget,
 		requisition->width = 0;
 		requisition->height = 0;
  	} else {
-		_calc_size_request(widget, requisition);
-		priv->requisition = * requisition;
+		if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+			_calc_size_request(widget, requisition);
+			priv->requisition = * requisition;
+		} else {
+			requisition->width = 0;
+			requisition->height = 0;
+			_calc_size_request(widget, &priv->requisition);
+		}
 	}
 	widget->requisition = *requisition;
 }
@@ -412,7 +418,6 @@ _size_allocate (GtkWidget     *widget,
 		_do_size_allocate(widget, &priv->allocation);
 		
 	} else {
-		priv->allocation = *allocation;	
 		if(GTK_WIDGET_REALIZED(widget)){
 			gdk_window_move_resize(widget->window, 
 				allocation->x,
@@ -420,7 +425,19 @@ _size_allocate (GtkWidget     *widget,
 				allocation->width,
 				allocation->height);
 		}
-		_do_size_allocate(widget, allocation);
+		if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+			priv->allocation = *allocation;	
+			_do_size_allocate(widget, allocation);
+		}else {
+			priv->allocation.width = priv->requisition.width;
+			priv->allocation.height = priv->requisition.height;
+			if(GTK_WIDGET_REALIZED(widget)){
+				gdk_window_resize(priv->floater,
+					priv->allocation.width,
+					priv->allocation.height);
+			}
+			_do_size_allocate(widget, &priv->allocation);
+		}
 	}
 }
 static void
@@ -733,6 +750,31 @@ _realize (GtkWidget * widget){
   widget->style = gtk_style_attach (widget->style, widget->window);
   gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
 
+	attributes.x = priv->allocation.x;
+	attributes.y = priv->allocation.y;
+	attributes.width = priv->allocation.width;
+	attributes.height = priv->allocation.height; 
+/*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
+ * WM's decorations! HOWever child doesn't work very well*/
+
+	if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+		attributes.window_type = GDK_WINDOW_TEMP;
+	} else {
+		attributes.window_type = GDK_WINDOW_TOPLEVEL;
+	}
+	attributes.wclass = GDK_INPUT_OUTPUT;
+	attributes.event_mask = gtk_widget_get_events (widget);
+
+	attributes.visual = gtk_widget_get_visual (widget);
+	attributes.colormap = gtk_widget_get_colormap (widget);
+
+	/* FIXME: I don't think it will need visual and colormap, 
+ 	 * let me try to remove these later*/
+	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+
+	priv->floater = gdk_window_new (
+		gtk_widget_get_root_window(widget), &attributes, attributes_mask);
+
 	attributes.x = 0;
 	attributes.y = 0;
 	attributes.width = MAX(priv->requisition.width, priv->allocation.width);
@@ -759,31 +801,13 @@ _realize (GtkWidget * widget){
  	 * let me try to remove these later*/
 	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
 
-	priv->container = gdk_window_new (
-		 /*gtk_widget_get_parent_window(widget),*/widget->window, &attributes, attributes_mask);
-	//gdk_window_set_user_data (priv->container, widget);
-LOG("window created");
-
-	attributes.x = priv->allocation.x;
-	attributes.y = priv->allocation.y;
-	attributes.width = priv->allocation.width;
-	attributes.height = priv->allocation.height; 
-/*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
- * WM's decorations! HOWever child doesn't work very well*/
-	attributes.window_type = GDK_WINDOW_TEMP;
-
-	attributes.wclass = GDK_INPUT_OUTPUT;
-	attributes.event_mask = gtk_widget_get_events (widget);
-
-	attributes.visual = gtk_widget_get_visual (widget);
-	attributes.colormap = gtk_widget_get_colormap (widget);
-
-	/* FIXME: I don't think it will need visual and colormap, 
- 	 * let me try to remove these later*/
-	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
-
-	priv->floater = gdk_window_new (
-		gtk_widget_get_root_window(widget), &attributes, attributes_mask);
+	if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+		priv->container = gdk_window_new (
+			 widget->window, &attributes, attributes_mask);
+	} else {
+		priv->container = gdk_window_new (
+			 priv->floater, &attributes, attributes_mask);
+	}
 
 	gdk_window_set_user_data (priv->container, widget);
 	gdk_window_set_user_data (priv->floater, widget);
@@ -812,6 +836,9 @@ _map (GtkWidget * widget){
 	g_return_if_fail(GTK_WIDGET_REALIZED(widget));
 	if(!priv->detached){
 		gdk_window_show(priv->container);
+		if(GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+			gdk_window_show(priv->floater);
+		}
 	}
 	gdk_window_show(widget->window);
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
