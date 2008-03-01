@@ -40,6 +40,7 @@ typedef GdkNativeWindow GnomenuSocketNativeID;
  *   @GNOMENU_SOCKET_DISCONNECTED: A newly created GnomenuSocket, the associated GnomenuWindow is created.
  *   @GNOMENU_SOCKET_CONNECTED: The socket is connected to somewhere.
  *   @GNOMENU_SOCKET_LISTEN: The socket is a server and is waiting for CONNECT_REQ
+ * 	@GNOMENU_SOCKET_STATUS_MAX: max value, no meaning.
  *
  * The status of a #GnomenuSocket.
  * TODO: write more about how status changes.
@@ -101,14 +102,14 @@ struct _GnomenuSocketClass {
 GType gnomenu_socket_get_type (void);
 
 GnomenuSocket * gnomenu_socket_new (gchar * name);
-GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * self);
+GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * _self);
 
-gboolean gnomenu_socket_listen(GnomenuSocket * self);
-GnomenuSocket * gnomenu_socket_accept(GnomenuSocket * self, GnomenuSocketNativeID target);
+gboolean gnomenu_socket_listen(GnomenuSocket * _self);
+GnomenuSocket * gnomenu_socket_accept(GnomenuSocket * _self, GnomenuSocketNativeID target);
 
-gboolean gnomenu_socket_send(GnomenuSocket * self, gpointer data, guint bytes);
+gboolean gnomenu_socket_send(GnomenuSocket * _self, gpointer data, guint bytes);
 
-void gnomenu_socket_shutdown(GnomenuSocket * self);
+void gnomenu_socket_shutdown(GnomenuSocket * _self);
 gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * self, gchar * name, gpointer data, guint bytes);
 
 gboolean gnomenu_socket_flush(GnomenuSocket * _self);

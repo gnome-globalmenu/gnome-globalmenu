@@ -30,6 +30,7 @@ typedef struct _GnomenuServerHelperClass GnomenuServerHelperClass;
  *  @clients: A List of all the clients, the node data is
  *  	always a #GnomenuClientInfo struct.
  *
+ * Server helper object.
  */
 typedef struct _GnomenuServerHelper GnomenuServerHelper;
 struct _GnomenuServerHelper{
@@ -39,7 +40,7 @@ struct _GnomenuServerHelper{
 };
 
 /**
- * GnomenuServerHelperClientInfo:
+ * GnomenuClientInfo:
  * 	@service: the #GnomenuSocket used to serve this client.
  * 	@ui_window: the container window which contains 
  * 			all the ui elements of the menu;
@@ -51,7 +52,7 @@ struct _GnomenuServerHelper{
  * 		the changing of the focused window, and takes care of switching 
  * 		the active menu. 
  *	@requisition: the size requisition.
- * 	@allocatoin: the size allocation. both x, y, width, height are defined.
+ * 	@allocation: the size allocation. both x, y, width, height are defined.
  * 	@stage: indicates the most recent state the server knows that the
  * 		client is in.
  * 	@size_stage: a typical sizing chain is defined in #GnomenuMessageSizeQuery.

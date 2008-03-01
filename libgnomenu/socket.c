@@ -251,7 +251,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 	class_signals[SHUTDOWN] =
 /**
  * GnomenuSocket::shutdown
- * @self:
+ * @self: itself
  * 
  * invoked when the socket is shut down. either from this peer or
  * the other peer. the default handler will cleanup the message queue.
@@ -372,6 +372,15 @@ gnomenu_socket_new (char * name){
 				"timeout", 10, NULL);
 }
 
+/**
+ * gnomenu_socket_accept:
+ * 	@_self: self,
+ * 	@target: target socket.
+ *
+ * Accept a connection request.
+ *
+ * Returns: a new socket to talk with the connected socket.
+ */
 GnomenuSocket *
 gnomenu_socket_accept (GnomenuSocket * _self, GnomenuSocketNativeID target){
 	LOG_FUNC_NAME;
@@ -428,7 +437,7 @@ _finalize(GObject * _self){
 
 /**
  * gnomenu_socket_get_native:
- * 	@self: the #GnomenuSocket this method acts on.
+ * 	@_self: the #GnomenuSocket this method acts on.
  *
  * find out the native id of the socket
  *
@@ -483,6 +492,16 @@ gboolean gnomenu_socket_connect_by_name(GnomenuSocket * _self, gchar * name){
 	g_list_free(list);
 	return gnomenu_socket_connect(self, target);
 }
+/**
+ * gnomenu_socket_listen:
+ * 	@_self: socket to be listening
+ *
+ * Set @_self to listening mode. 
+ * A GnomenuSocket::connect-req signal is emitted when
+ * there is a connection request.
+ *
+ * Returns: TRUE.
+ */
 gboolean gnomenu_socket_listen(GnomenuSocket * _self){
 	LOG_FUNC_NAME;
 	_self->status = GNOMENU_SOCKET_LISTEN;
@@ -501,6 +520,12 @@ gboolean gnomenu_socket_listen(GnomenuSocket * _self){
  * @bytes: bytes to send;
  *
  * Send data via a #GnomenuSocket.
+ *
+ * Returns: TRUE if sent/buffered. FALSE if encounters an error.
+ *
+ * If current socket is not valid for sending (ACKs too small), data
+ * will be pushed into a FIFO queue. 
+ * It is impossible to fail a sending in this sense. 
  */
 gboolean gnomenu_socket_send(GnomenuSocket * _self, gpointer data, guint bytes){
 	GnomenuSocketMessage * msg = g_new0(GnomenuSocketMessage, 1);
@@ -553,8 +578,11 @@ gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * _self, gchar * name, g
 }
 /**
  * gnomenu_socket_shutdown:
+ *	@_self: the socket to shutdown.
  *
- * Shutdown a socket connection. Note that this doesn't unref the object.
+ * Shutdown a socket connection. Note that this doesn't unref the object,
+ * unless you have connected GnomenuSocket::shutdown to
+ * gnomenu_socket_destroy_on_shutdown();
  */
 void gnomenu_socket_shutdown(GnomenuSocket * _self) {
 	GnomenuSocketMessage msg;
@@ -572,9 +600,11 @@ void gnomenu_socket_shutdown(GnomenuSocket * _self) {
 }
 /**
  * gnomenu_socket_flush:
+ *	@_self: the socket to flush.
  *
  * Flush the sending queue of a socket to catch up with ACKs.
  *
+ * Returns:
  * If queue is not long enough, flush everything and return TRUE,
  *
  * If queue is too long, flush GnomenuSocket::acks and return TRUE,

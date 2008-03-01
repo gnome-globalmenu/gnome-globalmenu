@@ -220,6 +220,8 @@ gnomenu_server_helper_init(GnomenuServerHelper * self){
  * gnomenu_server_helper_new:
  * 
  * create a new menu server object
+ *
+ * Returns: the created server helper object.
  */
 GnomenuServerHelper * 
 gnomenu_server_helper_new(){
@@ -411,11 +413,6 @@ static gboolean _client_compare_by_parent_window(
 }
 
 /*public methods*/
-/**
- * gnomenu_server_helper_find_client_by_socket_id:
- *
- * Find a client by socket_id
- */
 static GnomenuClientInfo * 
 _find_ci_by_service( GnomenuServerHelper * _self, GnomenuSocket* socket){
 
@@ -430,6 +427,8 @@ _find_ci_by_service( GnomenuServerHelper * _self, GnomenuSocket* socket){
 }
 /**
  * gnomenu_server_helper_find_client_by_parent_window:
+ *	@_self: self
+ *	@parent_window: parent_window
  *
  * Find a client by parent_window
  */
@@ -464,7 +463,7 @@ gboolean gnomenu_server_helper_is_client(GnomenuServerHelper * _self, GnomenuCli
 
 /**
  * gnomenu_server_helper_queue_resize:
- * 	@_self: self,
+ * 	@self: self,
  * 	@ci: the client.
  *
  * 	queue a resize chain to the given client.
@@ -479,6 +478,14 @@ gnomenu_server_helper_queue_resize(GnomenuServerHelper * _self, GnomenuClientInf
 	gnomenu_socket_send(ci->service, &msg, sizeof(msg.size_query));
 }
 
+/**
+ * gnomenu_server_helper_set_orientation:
+ * 	@self: self
+ * 	@ci: client info
+ * 	@ori: orientation
+ *
+ * 	set the orientation of a client
+ */
 void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GtkOrientation ori){
 	GnomenuMessage msg;
@@ -491,9 +498,9 @@ void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuCl
 
 /**
  * gnomenu_server_helper_allocate_size:
- * 	@self:
- * 	@ci:
- * 	@allocation:
+ * 	@self: self,
+ * 	@ci: client info
+ * 	@allocation: allocation
  *
  * set the allocation. only width and height is defined.
  */
@@ -509,14 +516,16 @@ void gnomenu_server_helper_allocate_size(GnomenuServerHelper * self, GnomenuClie
 
 /**
  * gnomenu_server_helper_set_position:
- * 	@self:
- * 	@ci:
- * 	@position:
+ * 	@self: self
+ * 	@ci: client info
+ * 	@position: new position
  *
  * set the position of the menubar within its parent 
  * only width and height is defined.
  * A possible vulnerability note: if the global menu is not 
  * detached it should ignore this message. 
+ *
+ * I don't see any reason to use it on a client.
  */
 void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkPoint * position){
@@ -532,9 +541,9 @@ void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClien
 }
 /**
  * gnomenu_server_helper_set_visibility:
- * 	@self:
- * 	@ci:
- * 	@vis:
+ * 	@self: self 
+ * 	@ci: client info
+ * 	@vis: visibility
  *
  * set the visibility of the menubar
  * A possible vulnerability note: if the global menu is not 
@@ -551,10 +560,10 @@ void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuCli
 }
 /**
  * gnomenu_server_helper_set_background:
- * 	@self:
- * 	@ci:
- * 	@color:
- * 	@pixmap:
+ * 	@self: self,
+ * 	@ci: client info
+ * 	@color: color can be NULL,
+ * 	@pixmap: pixmap can be NULL.
  *
  * set the background of the menubar
  * A possible vulnerability note: if the global menu is not 

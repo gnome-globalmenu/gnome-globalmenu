@@ -32,7 +32,9 @@ typedef struct _GnomenuClientHelper GnomenuClientHelper;
 
 /**
  * GnomenuClientHelper:
+ *	@parent:	parent object.
  *
+ *	Client helper object.
  */
 struct _GnomenuClientHelper {
 	GnomenuSocket parent;

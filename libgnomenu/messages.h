@@ -6,16 +6,18 @@
 G_BEGIN_DECLS
 /**
  * SECTION: messages
- * @title: Messages
- * @short_description: The messages used by libgnomenu for remote widgets.
+ * @title: Message Types
+ * @short_description: Messaging is the way Menu Servers talks to MenuBars.
  * @see_also:	#GnomenuServerHelper, #GnomenuClientHelper, #GnomenuSocket
  * @stablility: Unstable
  * @include:	libgnomenu/messages.h
  *
- * data type for the messages passed around in libgnomenu. Anyway, it is
- * you should not use it in any application other than developing the global
- * menu itself. Use #GnomenuServerHelper and #GnomenuClientHelper
- * to avoid problems.
+ * Here is the declears of the messages passed around in libgnomenu. 
+ * You should not use it in any application other than developing the global
+ * menu itself. They are documented only for clearity. 
+ *
+ * #GnomenuServerHelper and #GnomenuClientHelper encapsulate
+ * these messages, use them.
  */
 
 /**
@@ -98,39 +100,43 @@ typedef struct {
 
 /**
  * GnomenuMessageClientRealize:
- * @type: #GNOMENU_MSG_CLIENT_REALIZE
- * @ui_window:
+ * 	@type: #GNOMENU_MSG_CLIENT_REALIZE
+ * 	@ui_window: window to grab.
  *
- * A client has been realized;
+ * The client has been realized;
  */
 typedef struct {
 	GnomenuMessageType type;
 	GdkNativeWindow ui_window;
 } GnomenuMessageClientRealize;
 
-/** GnomenuMessageClientReparent:
- * @type: #GNOMENU_MSG_CLIENT_REPARENT
- * @parent_window:
+/** 
+ * GnomenuMessageClientReparent:
+ * 	@type: #GNOMENU_MSG_CLIENT_REPARENT
+ * 	@parent_window: new parent window.
  *
- * A client has been reparented
+ * The client has been reparented
  */
 typedef struct {
 	GnomenuMessageType type;
 	GdkNativeWindow parent_window;
 } GnomenuMessageClientReparent;
 
-/** GnomenuMessageClientUnrealize:
- * @type: #GNOMENU_MSG_CLIENT_UNREALIZE
+/** 
+ * GnomenuMessageClientUnrealize:
+ * 	@type: #GNOMENU_MSG_CLIENT_UNREALIZE
  *
- * A client has been realized;
+ * The client has been unrealized;
  */
 typedef struct {
 	GnomenuMessageType type;
 } GnomenuMessageClientUnrealize;
 /**
  * GnomenuMessageClientDestroy:
- * @type: #GNOMENU_MSG_CLIENT_DESTROY
+ * 	@type: #GNOMENU_MSG_CLIENT_DESTROY
  *
+ * A client is destroyed. This message is not used at all. Because
+ * GnomenuSocket handles shutdown.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -192,8 +198,8 @@ typedef struct {
 /**
  * GnomenuMessageSizeAllocate:
  * @type: #GNOMENU_MSG_SIZE_ALLOCATE
- * @width:
- * @height:
+ * @width: width
+ * @height: height
  *
  * See #GnomenuMessageQuerySize for a complete description of a size allocation chain.
  */
@@ -205,9 +211,10 @@ typedef struct {
 
 /**
  * GnomenuMessageOrientationChange:
- * @type: #GNOMENU_MSG_ORIENTATION_CHANGE
- * @orientation: new orientation
+ * 	@type: #GNOMENU_MSG_ORIENTATION_CHANGE
+ * 	@orientation: new orientation
  *
+ *	Server requests the client to change its orientation.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -216,10 +223,11 @@ typedef struct {
 /**
  * GnomenuMessagePositionSet:
  *  @type: #GNOMENU_MSG_POSITION_SET
- *  @x:
- *  @y:
+ *  @x: x
+ *  @y: y
  *
- * To move the menubar.
+ * To move the menubar. This messeage is implemented. 
+ * 	There is no reason use it at all.
  */
 typedef struct {
 	GnomenuMessageType type;
@@ -229,7 +237,7 @@ typedef struct {
 /**
  * GnomenuMessageVisibilitySet:
  *  @type: #GNOMENU_MSG_VISIBILITY_SET
- *  @visibility: 
+ *  @visibility: TRUE=show, FALSE=hide
  *
  *  To show or hide the menu bar.
  */
@@ -240,6 +248,10 @@ typedef struct {
 
 /**
  * GnomenuMessageBgColorSet:
+ *	@type: 
+ *	@red: red component;
+ *	@green: green component;
+ *	@blue: blue component;
  *
  * To set the bg color of the menubar.
  */
@@ -252,6 +264,8 @@ typedef struct {
 
 /**
  * GnomenuMessageBgPixmapSet:
+ * @type: 
+ * @pixmap: XID of the pixmap.
  *
  * To set the bg color of the menubar.
  */

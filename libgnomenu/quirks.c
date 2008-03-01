@@ -13,6 +13,13 @@
 
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
+/**
+ * QuirkEntry:
+ * 	@match: string to match application name(#g_prgname()).
+ *	@detail: string to match detail 
+ *		(role or title of the window that the menubar belongs to);
+ * 	@mask: mask.
+ * */
 typedef struct {
 	gchar * match;
 	gchar * detail;
@@ -134,7 +141,9 @@ static void _match_quirk(QuirkEntry * entry, struct quirk_match_data * data){
 /**
  * gnomenu_get_default_quirk:
  *
- * Returns: the default quirk for current application
+ * Find the default quirk.
+ *
+ * Returns: the default quirk of current application.
  */
 GnomenuQuirkMask gnomenu_get_default_quirk(){
 	static GnomenuQuirkMask default_quirk = GNOMENU_QUIRK_NONE;
@@ -148,12 +157,28 @@ GnomenuQuirkMask gnomenu_get_default_quirk(){
 	}	
 	return default_quirk;	
 }
+/**
+ * gnomenu_get_detail_quirk:
+ *	@detail: detail string of the quirk.
+ *
+ * Find the detail quirk.
+ *
+ * Returns: the quirk for the given detail. 'detail' is usually
+ * the title or the role of the window.
+ */
 GnomenuQuirkMask gnomenu_get_detail_quirk(gchar * detail){
 	struct quirk_match_data data = { g_get_prgname(), detail, GNOMENU_QUIRK_NONE};
 	g_queue_foreach(_get_quirks(), _match_quirk, &data);
 	return data.rt;
 }
+/**
+ * gnomenu_menu_bar_type:
+ *
+ * Zero if GtkMenuBar shall not be replaced by GnomenuMenuBar.
+ * Or else the value of gnomenu_menu_bar_get_type();
+ * */
 GType gnomenu_menu_bar_type = 0;
+
 void gtk_module_init(int * argc, char **argv[]){
 /*initialize */
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
