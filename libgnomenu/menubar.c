@@ -516,7 +516,7 @@ static void
 gtk_container_map_child (GtkWidget *child,
              gpointer   client_data)
 {
-	if(GTK_WIDGET_VISIBLE(child) &&
+	if(GTK_WIDGET_VISIBLE(child) && 	
 		!GTK_WIDGET_MAPPED(child))
 		gtk_widget_map(child);
 }
@@ -525,25 +525,32 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	if(vis){
-		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
-			gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
-		} else {
-			gtk_container_forall(GTK_CONTAINER(widget),
-				gtk_container_map_child,
-				NULL);
-		}
-		gdk_window_show(priv->container);
-		gdk_window_show(priv->floater);
-	}else {
-		gdk_window_hide(priv->container);
-		gdk_window_hide(priv->floater);
-		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
-			gtk_widget_hide_all(widget);
-		}else{
+	LOG("vis=%d", vis);
+	if(!GTK_WIDGET_REALIZED(widget)){
+		return;
+	}
+		if(vis){
+			if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
+				LOG("use force-show-all quirk");
+				gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
+			} else {
+				gtk_container_forall(GTK_CONTAINER(widget),
+					gtk_container_map_child,
+					NULL);
+			}
+			gdk_window_show(priv->container);
+			gdk_window_show(priv->floater);
+		}else {
+			gdk_window_hide(priv->container);
+			gdk_window_hide(priv->floater);
+			if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
+				LOG("use force-show-all quirk");
+				gtk_widget_hide_all(widget);
+			}else{
 
-		}
-	}	
+			}
+		}	
+	LOG("done");
 }
 static void _s_background_set	 		( GtkWidget  * widget, 
 									  GdkColor * color,
