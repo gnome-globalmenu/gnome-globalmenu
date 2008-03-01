@@ -194,7 +194,8 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		break;
 		case PROP_BGPIXMAP:
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
-			self->bgpixmap = g_object_ref(g_value_get_object(value));
+			self->bgpixmap = g_value_get_object(value);
+			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_ref(self->bgpixmap);
 			_update_active_menu_bar(self);
 		break;
 		default:
