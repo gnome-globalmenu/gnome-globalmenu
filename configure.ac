@@ -112,7 +112,7 @@ doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
 libgnomenu/libgnomenu.pc
-servers/gnome2-globalmenu-applet.schemas
+servers/gnome-globalmenu-applet.schemas
 servers/Makefile
 test/Makefile
 )
