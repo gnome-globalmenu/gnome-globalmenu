@@ -42,7 +42,7 @@ static void _load_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome2-globalmenu-applet", NULL);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
 	g_object_set(app,
 			"title-visible",
 			 panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL),
@@ -54,7 +54,7 @@ static void _save_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 	gboolean show_title, show_icon;
-/*	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome2-globalmenu-applet", NULL);
+/*	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
  *	FIXME: need this?*/
 	g_object_get(app, 
 			"title-visible", &show_title,

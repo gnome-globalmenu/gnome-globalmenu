@@ -1,9 +1,9 @@
 <gconfschemafile>
     <schemalist>
         <schema>
-            <key>/schemas/apps/gnome2-globalmenu-applet/show_icon</key>
-            <applyto>/apps/gnome2-globalmenu-applet/show_icon</applyto>
-            <owner>gnome2-globalmenu-applet</owner>
+            <key>/schemas/apps/gnome-globalmenu-applet/show_icon</key>
+            <applyto>/apps/gnome-globalmenu-applet/show_icon</applyto>
+            <owner>gnome-globalmenu-applet</owner>
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
@@ -12,9 +12,9 @@
             </locale>
 		</schema>
         <schema>
-            <key>/schemas/apps/gnome2-globalmenu-applet/show_title</key>
-            <applyto>/apps/gnome2-globalmenu-applet/show_title</applyto>
-            <owner>gnome2-globalmenu-applet</owner>
+            <key>/schemas/apps/gnome-globalmenu-applet/show_title</key>
+            <applyto>/apps/gnome-globalmenu-applet/show_title</applyto>
+            <owner>gnome-globalmenu-applet</owner>
             <type>bool</type>
             <default>TRUE</default>
             <locale name="C">
@@ -23,9 +23,9 @@
             </locale>
 		</schema>
         <schema>
-            <key>/schemas/apps/gnome2-globalmenu-applet/show_arrows</key>
-            <applyto>/apps/gnome2-globalmenu-applet/show_arrows</applyto>
-            <owner>gnome2-globalmenu-applet</owner>
+            <key>/schemas/apps/gnome-globalmenu-applet/show_arrows</key>
+            <applyto>/apps/gnome-globalmenu-applet/show_arrows</applyto>
+            <owner>gnome-globalmenu-applet</owner>
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
@@ -34,9 +34,9 @@
             </locale>
 		</schema>
         <schema>
-            <key>/schemas/apps/gnome2-globalmenu-applet/title_max_width_chars</key>
-            <applyto>/apps/gnome2-globalmenu-applet/title_max_width_chars</applyto>
-            <owner>gnome2-globalmenu-applet</owner>
+            <key>/schemas/apps/gnome-globalmenu-applet/title_max_width_chars</key>
+            <applyto>/apps/gnome-globalmenu-applet/title_max_width_chars</applyto>
+            <owner>gnome-globalmenu-applet</owner>
             <type>int</type>
             <default>20</default>
             <locale name="C">
