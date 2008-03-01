@@ -8,7 +8,7 @@ libexec_PROGRAMS += gnome-globalmenu-applet
 gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
 gnome_file_DATA = GNOME_GlobalMenuApplet.server
 schemadir= $(sysconfdir)/gconf/schemas
-schema_DATA= gnome2-globalmenu-applet.schemas
+schema_DATA= gnome-globalmenu-applet.schemas
 endif
 if ENABLE_XFCE_PLUGIN
 libexec_PROGRAMS += xfce-globalmenu-plugin
@@ -19,6 +19,7 @@ endif
 if ENABLE_STANDALONE
 libexec_PROGRAMS += globalmenu-server
 endif
+
 
 DISTCLEANFILES = 
 VAST_SOURCE_CODE = application.h \
@@ -57,6 +58,7 @@ globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				
 DISTCLEANFILES += $(server_file_DATA)
 EXTRA_DIST = make-gnome-data.sh make-xfce-data.sh
+EXTRA_DIST += gnome-globalmenu-applet.schemas.in
 
 GNOME_GlobalMenuApplet.server:
 	/bin/sh $(srcdir)/make-gnome-data.sh $@ $(libexecdir)
