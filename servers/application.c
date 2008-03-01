@@ -28,13 +28,17 @@ G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 static void _update_ui(Application *app)
 {
 	LOG();
-	if(app->show_title) 
-		gtk_widget_show(app->title);
-	else gtk_widget_hide(app->title);
+	if (app->title) {
+		if(app->show_title) 
+			gtk_widget_show(app->title);
+		else gtk_widget_hide(app->title);
+	}
 
-	if(app->show_icon)
-		gtk_widget_show(app->icon);
-	else gtk_widget_hide(app->icon);
+	if (app->icon) {
+		if(app->show_icon)
+			gtk_widget_show(app->icon);
+		else gtk_widget_hide(app->icon);
+	}
 }
 static void _save_conf_unimp(Application *app){
 	LOG("Not implemented for %s\n", 
@@ -219,12 +223,14 @@ static void _update_background(Application * app){
 		cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
 		gc = gdk_gc_new(pixmap);
 		gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
-
-		g_object_set(app->server, "bg-color", color, "bg-pixmap", cropped, NULL);
-		_set_widget_background(app->menu_bar_area, color, cropped);	
-
+		g_object_set(app->server, "bg-pixmap", cropped, NULL);
+		_set_widget_background(app->menu_bar_area, NULL, cropped);	
 		g_object_unref(gc);
 		g_object_unref(cropped);
+	}
+	if (color) {
+		g_object_set(app->server, "bg-color", color, NULL);
+		_set_widget_background(app->menu_bar_area, color, NULL);	
 	}
 }
 
