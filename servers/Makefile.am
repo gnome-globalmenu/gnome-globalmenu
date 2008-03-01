@@ -9,7 +9,7 @@ gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/serv
 gnome_file_DATA = GNOME_GlobalMenuApplet.server
 endif
 if ENABLE_XFCE_PLUGIN
-#libexec_PROGRAMS += xfce-globalmenu-plugin
+libexec_PROGRAMS += xfce-globalmenu-plugin
 xfce_filedir = `pkg-config --variable=desktopdatadir libxfce4panel-1.0`
 xfce_file_DATA = xfce-globalmenu-plugin.desktop
 endif
