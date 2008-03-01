@@ -191,7 +191,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 						"quirk",
 						"quirk",
 						GNOMENU_TYPE_QUIRK_MASK, gnomenu_get_default_quirk(),
-						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
 static void
@@ -659,7 +659,16 @@ _expose (GtkWidget      *widget,
   return FALSE;
 }
 
-
+static void _s_notify_title (GnomenuMenuBar * menu_bar, GParamSpec * spec, 
+	GtkWindow * toplevel){
+	gchar * detail = gtk_window_get_role(toplevel);
+	if(!detail) detail = gtk_window_get_title(toplevel);
+	g_object_set(menu_bar, 
+			"quirk",
+			gnomenu_get_detail_quirk(detail),
+			NULL
+			);
+}
 static void
 _hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel)
@@ -667,9 +676,19 @@ _hierarchy_changed (GtkWidget *widget,
 	GtkWidget *toplevel;  
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
+	if(old_toplevel){
+		g_signal_handlers_disconnect_by_func(
+			old_toplevel, _s_notify_title, menu_bar);
+	}
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
 	toplevel = gtk_widget_get_toplevel(widget);
 	if(GTK_WIDGET_TOPLEVEL(toplevel)){
+		if(GTK_IS_WINDOW(toplevel)){
+			g_signal_connect_swapped(toplevel, "notify::role", 
+			_s_notify_title, menu_bar);
+			g_signal_connect_swapped(toplevel, "notify::title", 
+			_s_notify_title, menu_bar);
+		}
 		if(GTK_WIDGET_REALIZED(toplevel)){
 /* NOTE: This signal is rarely captured, because usually a menubar is added to a toplevel
  * BEFORE the toplevel is realized. So we need to handle this in _realize. */
