@@ -570,7 +570,7 @@ static void _s_background_set	 		( GtkWidget  * widget,
 		d = gdk_drawable_get_depth(pixmap);
 		dw = gdk_drawable_get_depth(priv->container);
 		LOG("d(pixmap)=%d, d(container)=%d", d, dw);
-		if(d != dw){
+		{
 			GdkGC * gc;
 			GdkPixbuf * pixbuf = gdk_pixbuf_get_from_drawable(NULL,
 							pixmap, gdk_drawable_get_colormap(pixmap) , 
@@ -581,8 +581,7 @@ static void _s_background_set	 		( GtkWidget  * widget,
 							GDK_RGB_DITHER_NONE, 0, 0);
 			g_object_unref(pixbuf);
 			g_object_unref(gc);
-		} else 
-			adjusted = g_object_ref(pixmap);
+		} 
 		style = gtk_style_copy (widget->style);
 		if (style->bg_pixmap[GTK_STATE_NORMAL])
 			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
@@ -764,7 +763,6 @@ _realize (GtkWidget * widget){
   attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
   widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
   gdk_window_set_user_data (widget->window, widget);
-//  widget->style = gtk_style_attach (widget->style, widget->window);
  // gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
 
 	attributes.x = priv->allocation.x;
@@ -828,6 +826,7 @@ _realize (GtkWidget * widget){
 
 	gdk_window_set_user_data (priv->container, widget);
 	gdk_window_set_user_data (priv->floater, widget);
+	widget->style = gtk_style_attach (widget->style, priv->container);
 
 	gtk_container_forall(GTK_CONTAINER(widget), 
            (GtkCallback)(_set_child_parent_window), 
