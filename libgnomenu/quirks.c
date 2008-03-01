@@ -14,10 +14,10 @@ typedef struct {
 	GnomenuQuirkMask mask;
 } QuirkEntry;
 
-static GEnumValue * _get_quirk_value_by_nick(gchar * nick){
+static GFlagsValue * _get_quirk_value_by_nick(gchar * nick){
 	static GTypeClass * type_class = NULL;
 		if(type_class == NULL) type_class = g_type_class_ref(gnomenu_quirk_mask_get_type());
-	return g_enum_get_value_by_nick(type_class, nick);
+	return g_flags_get_value_by_nick(type_class, nick);
 }
 static void _add_default_quirks_from_string(gchar * string){
 	gchar ** lines;
@@ -51,7 +51,7 @@ static void _add_default_quirks_from_string(gchar * string){
 			l = g_strv_length(quirks);
 			for(k = 0; k < l; k++){
 				word = g_strstrip(quirks[k]);
-				GEnumValue * value = _get_quirk_value_by_nick(word);
+				GFlagsValue * value = _get_quirk_value_by_nick(word);
 				if(value){
 					entry->mask |= value->value;
 					LOG("found quirk for %s: %s=%d", entry->match, word, value->value);

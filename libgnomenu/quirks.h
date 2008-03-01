@@ -23,8 +23,9 @@ G_BEGIN_DECLS
  */
 typedef enum { /*< prefix = GNOMENU_QUIRK >*/
 	GNOMENU_QUIRK_NONE = 0, /*< nick=none >*/
-	GNOMENU_QUIRK_IGNORE = 1, /*< nick=ignore >*/
-	GNOMENU_QUIRK_FORCE_SHOW_ALL = 2, /*< nick=force-show-all >*/
+	GNOMENU_QUIRK_IGNORE = 1<<0, /*< nick=ignore >*/
+	GNOMENU_QUIRK_FORCE_SHOW_ALL = 1<<1, /*< nick=force-show-all >*/
+	GNOMENU_QUIRK_HIDE_ON_QUIT = 1<<2, /*< nick=hide-on-quit >*/
 } GnomenuQuirkMask;
 #define GNOMENU_HAS_QUIRK(m, v) ((m) & (GNOMENU_QUIRK_ ## v))
 GnomenuQuirkMask gnomenu_get_default_quirk(); 

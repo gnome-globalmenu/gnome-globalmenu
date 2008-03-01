@@ -187,7 +187,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 
 	g_object_class_install_property (gobject_class, 
 			PROP_QUIRK,
-			g_param_spec_enum ("quirk",
+			g_param_spec_flags ("quirk",
 						"quirk",
 						"quirk",
 						GNOMENU_TYPE_QUIRK_MASK, gnomenu_get_default_quirk(),
@@ -320,7 +320,7 @@ _set_property (GObject      *object,
 			gtk_menu_bar_set_child_pack_direction (self, g_value_get_enum (value));
 		break;
 		case PROP_QUIRK:
-			priv->quirk = g_value_get_enum (value);
+			priv->quirk = g_value_get_flags (value);
 		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -344,7 +344,7 @@ _get_property (GObject    *object,
 		  g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (self));
 		  break;
 		case PROP_QUIRK:
-			g_value_set_enum (value, priv->quirk);
+			g_value_set_flags (value, priv->quirk);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -463,16 +463,22 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	_reset_style(widget);	
 
 	if(GTK_WIDGET_REALIZED(widget)){
+		if(!GNOMENU_HAS_QUIRK(priv->quirk, HIDE_ON_QUIT)){
 	/* TODO: figure out how to detect a sudden death of server */
-		gtk_widget_unrealize(widget);
-		gtk_widget_realize(widget);
-		gtk_widget_unmap(widget);
-		gtk_widget_map(widget);	
+			gtk_widget_unrealize(widget);
+			gtk_widget_realize(widget);
+			gtk_widget_unmap(widget);
+			gtk_widget_map(widget);	
 	/* for a regular shutdown, following is enough 
-		gdk_window_reparent(priv->container, widget->window, 0, 0);
-		gdk_window_show(priv->container);
-		gdk_window_invalidate_rect(priv->container, NULL, TRUE);
+			gdk_window_reparent(priv->container, widget->window, 0, 0);
+			gdk_window_show(priv->container);
+			gdk_window_invalidate_rect(priv->container, NULL, TRUE);
 	*/
+		} else {
+			LOG("use quirk HIDE_ON_QUIT");
+			gtk_widget_unrealize(widget);
+			gtk_widget_hide_all(widget);
+		}
 	}
 }
 static void _s_position_set 		( GtkWidget  * widget, 
