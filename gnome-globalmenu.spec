@@ -1,8 +1,8 @@
 %define base_version 0.4
-%define svn_version svn570
+%define svn_version svn593
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Global menu bar widget and library for GTK/GNOME2
 
 Group:		User Interface/Desktops
@@ -21,10 +21,16 @@ BuildRequires:	xfce4-panel-devel
 
 
 %package -n libgnomenu
-Summary: libgnomenu Provides global menu widget GtkGlobalMenuBar 
+Summary: libgnomenu Provides global menu widget GnomenuMenuBar
 Group:		User Interface/Desktops
 Requires: gtk2
 %description -n libgnomenu
+
+%package -n libgnomenu-devel
+Summary: libgnomenu Provides global menu widget GnomenuMenuBar
+Group:		User Interface/Desktops
+Requires: gtk2
+%description -n libgnomenu-devel
 
 %package -n gnome-globalmenu-applet
 Requires: libgnomenu
@@ -79,6 +85,14 @@ rm -rf %{buildroot}
 /usr/lib/libgnomenu.so
 /usr/lib/libgnomenu.so.0
 /usr/lib/libgnomenu.so.0.0.0
+/usr/share/doc/gnome-globalmenu/AUTHORS
+/usr/share/doc/gnome-globalmenu/COPYING
+/usr/share/doc/gnome-globalmenu/ChangeLog
+/usr/share/doc/gnome-globalmenu/INSTALL
+/usr/share/doc/gnome-globalmenu/NEWS
+
+%files -n libgnomenu-devel
+%defattr(-, root, root)
 /usr/include/libgnomenu/clienthelper.h
 /usr/include/libgnomenu/messages.h
 /usr/include/libgnomenu/quirks.h
@@ -86,25 +100,25 @@ rm -rf %{buildroot}
 /usr/include/libgnomenu/menubar.h
 /usr/include/libgnomenu/socket.h
 /usr/lib/pkgconfig/libgnomenu.pc
-/usr/share/doc/gnome-globalmenu/AUTHORS
-/usr/share/doc/gnome-globalmenu/COPYING
-/usr/share/doc/gnome-globalmenu/ChangeLog
-/usr/share/doc/gnome-globalmenu/INSTALL
-/usr/share/doc/gnome-globalmenu/NEWS
 /usr/share/doc/gnome-globalmenu/README
 
 %files -n gnomenu-server
+%defattr(-, root, root)
 /usr/libexec/globalmenu-server
 
 %files -n gnome-globalmenu-applet
+%defattr(-, root, root)
 /usr/libexec/gnome-globalmenu-applet
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 
 %files -n xfce-globalmenu-plugin
+%defattr(-, root, root)
 /usr/libexec/xfce-globalmenu-plugin
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
+* Fri Feb 29 2008 Feng Yu <rainwoodman@gmail.com>
+- Split into many sub packages.
 * Mon Jan 14 2008 Feng Yu <rainwoodman@gmail.com>
 - Added schema
 * Wed Jan 09 2008 Feng Yu <rainwoodman@gmail.com>

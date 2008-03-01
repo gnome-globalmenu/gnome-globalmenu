@@ -1,6 +1,6 @@
 #! /bin/sh
-libexec_dir=$1
-cat > xfce-globalmenu-plugin.desktop <<EOF
+libexec_dir=$2
+cat > $1 <<EOF
 [Xfce Panel]
 Type=X-XFCE-PanelPlugin
 Encoding=UTF-8
