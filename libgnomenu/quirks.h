@@ -22,9 +22,11 @@ G_BEGIN_DECLS
  *
  */
 typedef enum { /*< prefix = GNOMENU_QUIRK >*/
-	GNOMENU_QUIRK_NONE,
-	GNOMENU_QUIRK_IGNORE,
+	GNOMENU_QUIRK_NONE = 0, /*< nick=none >*/
+	GNOMENU_QUIRK_IGNORE = 1, /*< nick=ignore >*/
+	GNOMENU_QUIRK_FORCE_SHOW_ALL = 2, /*< nick=force-show-all >*/
 } GnomenuQuirkMask;
+#define GNOMENU_HAS_QUIRK(m, v) ((m) & (GNOMENU_QUIRK_ ## v))
 GnomenuQuirkMask gnomenu_get_default_quirk(); 
 GtkMenuBar * gnomenu_menu_bar_new_legacy(const char * first_property, ...);
 #define GNOMENU_TYPE_QUIRK_MASK gnomenu_quirk_mask_get_type()

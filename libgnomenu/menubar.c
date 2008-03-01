@@ -190,7 +190,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 			g_param_spec_enum ("quirk",
 						"quirk",
 						"quirk",
-						GNOMENU_TYPE_QUIRK_MASK, GNOMENU_QUIRK_NONE,
+						GNOMENU_TYPE_QUIRK_MASK, gnomenu_get_default_quirk(),
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 }
 
@@ -490,11 +490,12 @@ static void _s_position_set 		( GtkWidget  * widget,
 	}
 }
 static void
-gtk_container_show_child (GtkWidget *child,
+gtk_container_map_child (GtkWidget *child,
              gpointer   client_data)
 {
-	GTK_WIDGET_SET_FLAGS(child, GTK_VISIBLE);
-	gtk_widget_map(child);
+	if(GTK_WIDGET_VISIBLE(child) &&
+		!GTK_WIDGET_MAPPED(child))
+		gtk_widget_map(child);
 }
 static void _s_visibility_set 		( GtkWidget  * widget, 
 									  gboolean vis,
@@ -504,11 +505,21 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	if(vis){
 		gdk_window_show(priv->container);
 		gdk_window_show(priv->floater);
-		gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
+		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
+			gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
+		} else {
+			gtk_container_forall(GTK_CONTAINER(widget),
+				gtk_container_map_child,
+				NULL);
+		}
 	}else {
 		gdk_window_hide(priv->container);
 		gdk_window_hide(priv->floater);
-		gtk_widget_hide_all(widget);
+		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
+			gtk_widget_hide_all(widget);
+		}else{
+
+		}
 	}	
 }
 static void _s_background_set	 		( GtkWidget  * widget, 

@@ -14,11 +14,17 @@ typedef struct {
 	GnomenuQuirkMask mask;
 } QuirkEntry;
 
+static GEnumValue * _get_quirk_value_by_nick(gchar * nick){
+	static GTypeClass * type_class = NULL;
+		if(type_class == NULL) type_class = g_type_class_ref(gnomenu_quirk_mask_get_type());
+	return g_enum_get_value_by_nick(type_class, nick);
+}
 static void _add_default_quirks_from_string(gchar * string){
 	gchar ** lines;
 	gchar ** words;
 	gchar * word;
-	int i, j, l;
+	gchar ** quirks;
+	int i, j, k, l;
 	QuirkEntry * entry ;
 	lines = g_strsplit(string, "\n", 0);
 	if(lines)
@@ -40,12 +46,22 @@ static void _add_default_quirks_from_string(gchar * string){
 		entry->match = g_strdup(word);
 		word = g_strstrip(words[1]);
 		entry->mask = GNOMENU_QUIRK_NONE;
-		if(g_str_equal(word, "ignore")){
-			entry->mask = GNOMENU_QUIRK_IGNORE;
-		} else 
-			g_warning("Unknown quirk type: %s", word);
+		quirks = g_strsplit(word, ",", 0);
+		if(quirks){
+			l = g_strv_length(quirks);
+			for(k = 0; k < l; k++){
+				word = g_strstrip(quirks[k]);
+				GEnumValue * value = _get_quirk_value_by_nick(word);
+				if(value){
+					entry->mask |= value->value;
+					LOG("found quirk for %s: %s=%d", entry->match, word, value->value);
+				} else {
+					g_warning("unknown quirk type: %s", word);
+				}
+			}
+			g_strfreev(quirks);
+		}
 		g_queue_push_tail(default_quirks, entry);	
-		LOG("new quirk: %s : %s", entry->match, word); 
 	}
 	g_strfreev(lines);
 }
@@ -77,7 +93,7 @@ struct quirk_match_data {
 static void _match_quirk(QuirkEntry * entry, struct quirk_match_data * data){
 	LOG("match %s against %s", data->prgname, entry->match);
 	if(g_pattern_match_simple(entry->match, data->prgname)) {
-		data->rt = GNOMENU_QUIRK_IGNORE;
+		data->rt = entry->mask;
 	}
 }
 /**
@@ -88,19 +104,23 @@ static void _match_quirk(QuirkEntry * entry, struct quirk_match_data * data){
 GnomenuQuirkMask gnomenu_get_default_quirk(){
 	_load_default_quirks();
 	QuirkEntry * entry;
-	struct quirk_match_data data = { g_get_prgname(), GNOMENU_QUIRK_NONE};
-	g_queue_foreach(default_quirks, _match_quirk, &data);
-	
-	return data.rt;	
+	static GnomenuQuirkMask default_quirk = GNOMENU_QUIRK_NONE;
+	static gboolean loaded = FALSE;
+	if(!loaded){
+		struct quirk_match_data data = { g_get_prgname(), GNOMENU_QUIRK_NONE};
+		g_queue_foreach(default_quirks, _match_quirk, &data);
+		default_quirk = data.rt;
+		LOG("default_quirk = %d", default_quirk);
+		loaded = TRUE;
+	}	
+	return default_quirk;	
 }
 GType gnomenu_menu_bar_type = 0;
 void gtk_module_init(int * argc, char **argv[]){
 /*initialize */
-	switch(gnomenu_get_default_quirk()){
-		case GNOMENU_QUIRK_IGNORE:
-		break;
-		case GNOMENU_QUIRK_NONE:
-		default:
-			gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
+	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
+	gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
+	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
+		gnomenu_menu_bar_type = 0; /*disable gtk_menu_bar_get_type hack*/
 	}
 }
