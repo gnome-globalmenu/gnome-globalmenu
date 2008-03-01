@@ -560,18 +560,35 @@ static void _s_background_set	 		( GtkWidget  * widget,
 		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, color);
 	}
 	if(pixmap){
+		GdkPixmap * adjusted;
 		gint w, h;
+		gint d;
+		gint dw;
 		gdk_drawable_get_size(pixmap, &w, &h);
 		LOG("not implemented for pixmap bg yet");
 		LOG("size of pixmap, %d, %d", w, h);
-
+		d = gdk_drawable_get_depth(pixmap);
+		dw = gdk_drawable_get_depth(priv->container);
+		LOG("d(pixmap)=%d, d(container)=%d", d, dw);
+		if(d != dw){
+			GdkGC * gc;
+			GdkPixbuf * pixbuf = gdk_pixbuf_get_from_drawable(NULL,
+							pixmap, gdk_drawable_get_colormap(pixmap) , 
+							0, 0, 0, 0, w, h);
+			adjusted = gdk_pixmap_new(priv->container, w, h, -1);
+			gc = gdk_gc_new(adjusted);
+			gdk_draw_pixbuf(adjusted, gc, pixbuf, 0, 0, 0, 0, w, h, 
+							GDK_RGB_DITHER_NONE, 0, 0);
+			g_object_unref(pixbuf);
+			g_object_unref(gc);
+		} else 
+			adjusted = g_object_ref(pixmap);
 		style = gtk_style_copy (widget->style);
 		if (style->bg_pixmap[GTK_STATE_NORMAL])
 			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
-		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
+		style->bg_pixmap[GTK_STATE_NORMAL] = adjusted;
 		gtk_widget_set_style (widget, style);
 		g_object_unref (style);
-
 	}
 	_sync_local_state(menu_bar);;
 }
@@ -747,8 +764,8 @@ _realize (GtkWidget * widget){
   attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
   widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
   gdk_window_set_user_data (widget->window, widget);
-  widget->style = gtk_style_attach (widget->style, widget->window);
-  gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+//  widget->style = gtk_style_attach (widget->style, widget->window);
+ // gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
 
 	attributes.x = priv->allocation.x;
 	attributes.y = priv->allocation.y;
