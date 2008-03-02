@@ -250,6 +250,8 @@ _constructor	( GType type, guint n_construct_properties,
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 
+	_update_background(app);
+
 	return _self;
 }
 /* ENDS: GObject Interface */
