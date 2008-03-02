@@ -724,6 +724,7 @@ static void _s_notify_title (GnomenuMenuBar * menu_bar, GParamSpec * spec,
 	GtkWindow * toplevel){
 	gchar * detail = gtk_window_get_role(toplevel);
 	if(!detail) detail = gtk_window_get_title(toplevel);
+	LOG("detail = %s", detail);
 	g_object_set(menu_bar, 
 			"quirk",
 			gnomenu_get_detail_quirk(detail),
@@ -749,6 +750,7 @@ _hierarchy_changed (GtkWidget *widget,
 			_s_notify_title, menu_bar);
 			g_signal_connect_swapped(toplevel, "notify::title", 
 			_s_notify_title, menu_bar);
+			_s_notify_title(menu_bar, NULL, toplevel);
 		}
 		if(GTK_WIDGET_REALIZED(toplevel)){
 /* NOTE: This signal is rarely captured, because usually a menubar is added to a toplevel
