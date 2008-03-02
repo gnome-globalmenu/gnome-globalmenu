@@ -3,6 +3,7 @@
 
 #include "application.h"
 #include "menuserver.h"
+#include "utils.h"
 #include "log.h"
 
 enum {
@@ -12,13 +13,23 @@ enum {
 	PROP_ICON_VISIBLE
 };
 
+typedef struct _ApplicationPrivate {
+	gint foo;
+} ApplicationPrivate;
+
+#define APPLICATION_GET_PRIVATE(obj) \
+	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_APPLICATION, ApplicationPrivate))
+
+#define GET_OBJECT(src, obj, priv) \
+	Application * obj = APPLICATION(src); \
+	ApplicationPrivate * priv = APPLICATION_GET_PRIVATE(src);
+
 static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_active_client_changed(Application * app, MenuServer * server);
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
 static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog);
 
 static void _update_background(Application * app);
-static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
 
 static GObject *_constructor( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) ;
@@ -152,6 +163,7 @@ static void application_class_init(ApplicationClass *klass)
 						FALSE,
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
+	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
 Application * application_new(GtkContainer * widget){
 	return g_object_new(TYPE_APPLICATION, "window", widget, NULL);
@@ -285,7 +297,7 @@ static void _update_background(Application * app){
 	g_object_set(app->server, "bg-color", color, 
 							"bg-pixmap", cropped, NULL);
 	g_object_unref(cropped);
-	_set_widget_background(app->menu_bar_area, color, cropped);	
+	utils_set_widget_background(app->menu_bar_area, color, cropped);	
 }
 
 static void _s_active_client_changed(Application * app, MenuServer * server){
@@ -315,32 +327,6 @@ static void _s_active_client_changed(Application * app, MenuServer * server){
 static void _s_window_destroy(Application * app, GtkWidget * widget){
 	LOG();
 	g_object_unref(G_OBJECT(app));
-}
-static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap){
-	GtkRcStyle * rc_style;
-	GtkStyle * style;
-	gtk_widget_set_style (widget, NULL);
-	rc_style = gtk_rc_style_new ();
-	gtk_widget_modify_style (widget, rc_style);
-	gtk_rc_style_unref (rc_style);
-	if(color){
-		LOG("new bg color %d, %d, %d", color->red, color->green, color->blue);
-		gtk_widget_modify_bg (widget, GTK_STATE_NORMAL, color);
-	}
-	if(pixmap){
-		gint w, h;
-		gdk_drawable_get_size(pixmap, &w, &h);
-		LOG("not implemented for pixmap bg yet");
-		LOG("size of pixmap, %d, %d", w, h);
-
-		style = gtk_style_copy (widget->style);
-		if (style->bg_pixmap[GTK_STATE_NORMAL])
-			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
-		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
-		gtk_widget_set_style (widget, style);
-		g_object_unref (style);
-
-	}
 }
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget){
 	static GtkAllocation old_allo = {0};
@@ -377,6 +363,16 @@ void application_show_conf_dialog(Application *app){
 	gtk_widget_show_all(GTK_WIDGET(app->conf_dialog.dlg));
 }
 
+void application_show_about_dialog(Application * app){
+	gchar * authors[] = {
+		"Yu Feng <rainwoodman@gmail.com>",
+		"Mingxi Wu <fengshenx.@gmail.com>",
+		"And thanks to others for the discussion",
+		NULL
+		};
+	gtk_show_about_dialog(NULL, 
+				"authors", authors, NULL);
+}
 static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog){
 	Application * app = APPLICATION(self);
 

@@ -86,28 +86,10 @@ Application *application_gnome_new(GtkWidget *w)
 	return g_object_new(TYPE_APPLICATION_GNOME, "window", w, NULL);
 }
 
-
-
-void _show_dialog(ApplicationGnome * self){
-}
-
-
-void _show_about(ApplicationGnome * self){
-	gchar * authors[] = {
-		"Yu Feng <rainwoodman@gmail.com>",
-		"Mingxi Wu <fengshenx.@gmail.com>",
-		"And thanks to others for the discussion",
-		NULL
-		};
-	gtk_show_about_dialog(NULL, 
-				"authors", authors, NULL);
-}
-
-static void _popup_menu(BonoboUIComponent * uic, gpointer user_data, const gchar * cname){
-	ApplicationGnome* app_gnome = APPLICATION_GNOME(user_data);
+static void _popup_menu(BonoboUIComponent * uic, Application * app, const gchar * cname){
 	LOG("%s: cname = %s", __func__, cname);
-	if(g_str_equal(cname, "About")) _show_about(app_gnome);
-	if(g_str_equal(cname, "Preference")) _show_dialog(app_gnome);
+	if(g_str_equal(cname, "About")) application_show_about_dialog(app);
+	if(g_str_equal(cname, "Preference")) application_show_conf_dialog(app);
 }
 
 static void _create_popup_menu(ApplicationGnome * self){

@@ -26,6 +26,8 @@ VAST_SOURCE_CODE = application.h \
 	application.c \
 	menuserver.h \
 	menuserver.c \
+	utils.c \
+	utils.h \
 	log.h
 
 gnome_globalmenu_applet_SOURCES = \

@@ -1,4 +1,4 @@
-
+#include <config.h>
 #if ENABLE_TRACING >= 1
 #define LOG(fmt, args...) g_message("%s::%s:" fmt, __FILE__, __func__, ## args)
 #else

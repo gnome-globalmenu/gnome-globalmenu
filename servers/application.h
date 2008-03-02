@@ -55,6 +55,7 @@ void application_update_ui(Application *app);
 void application_load_conf(Application *app);
 void application_save_conf(Application *app);
 void application_show_conf_dialog(Application *app);
+void application_show_about_dialog(Application *app);
 
 G_END_DECLS
 #endif
