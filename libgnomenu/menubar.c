@@ -394,6 +394,8 @@ _size_request (GtkWidget      *widget,
 		   'gtk_widget_queue_resize' or whatever on the menu bar
 		*/
 		_calc_size_request(widget, &priv->requisition);
+		LOG("size_request %d, %d", priv->requisition);
+		gnomenu_client_helper_request_size(priv->helper, &priv->requisition); 
 		requisition->width = 0;
 		requisition->height = 0;
  	} else {
