@@ -14,9 +14,11 @@ enum {
 
 static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_active_client_changed(Application * app, MenuServer * server);
-static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
+static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog);
+
 static void _update_background(Application * app);
+static void _set_widget_background(GtkWidget * widget, GdkColor * color, GdkPixmap * pixmap);
 
 static GObject *_constructor( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) ;
@@ -28,17 +30,18 @@ G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 static void _update_ui(Application *app)
 {
 	LOG();
-	if (app->title) {
-		if(app->show_title) 
-			gtk_widget_show(app->title);
-		else gtk_widget_hide(app->title);
-	}
+	if(app->title_visible) 
+		gtk_widget_show(app->title);
+	else 
+		gtk_widget_hide(app->title);
 
-	if (app->icon) {
-		if(app->show_icon)
-			gtk_widget_show(app->icon);
-		else gtk_widget_hide(app->icon);
-	}
+	if(app->icon_visible)
+		gtk_widget_show(app->icon);
+	else 
+		gtk_widget_hide(app->icon);
+
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.title_visible), app->title_visible);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.icon_visible), app->icon_visible);
 }
 static void _save_conf_unimp(Application *app){
 	LOG("Not implemented for %s\n", 
@@ -64,12 +67,12 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			g_object_ref(self->window);
 			break;
 		case PROP_TITLE_VISIBLE:
-			self->show_title = g_value_get_boolean(value);
+			self->title_visible = g_value_get_boolean(value);
 			application_update_ui(self);
 			application_save_conf(self);
 			break;
 		case PROP_ICON_VISIBLE:
-			self->show_icon = g_value_get_boolean(value);
+			self->icon_visible = g_value_get_boolean(value);
 			application_update_ui(self);
 			application_save_conf(self);
 			break;
@@ -88,10 +91,10 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 			g_value_set_object(value, self->window);
 			break;
 		case PROP_TITLE_VISIBLE:
-			g_value_set_boolean(value, self->show_title);
+			g_value_set_boolean(value, self->title_visible);
 			break;
 		case PROP_ICON_VISIBLE:
-			g_value_set_boolean(value, self->show_icon);
+			g_value_set_boolean(value, self->icon_visible);
 			break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -182,11 +185,35 @@ _constructor	( GType type, guint n_construct_properties,
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->menu_bar_area), TRUE, TRUE, 0);
 
 	gtk_container_add(GTK_CONTAINER(app->window), GTK_WIDGET(box));
+
+/* conf dialog */
+	app->conf_dialog.dlg = GTK_DIALOG(gtk_dialog_new());
+	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
+//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
+//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
+	#define NEW_CHECK_BUTTON(n, t) \
+		app->conf_dialog.n = gtk_check_button_new_with_label(t); \
+		gtk_box_pack_start_defaults(vbox, app->conf_dialog.n);
+	NEW_CHECK_BUTTON(title_visible, "Show active application title");
+	NEW_CHECK_BUTTON(icon_visible, "Show active window icon");
+	#undef NEW_CHECK_BUTTON 
+//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
+//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(app->conf_dialog.dlg)->vbox), GTK_WIDGET(vbox));
+
+	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
+	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
+	
+
+/* start server */
 	app->server = menu_server_new(GTK_WIDGET(app->menu_bar_area));
 
 	application_load_conf(app);
 	application_update_ui(app);
 
+	g_signal_connect_swapped(G_OBJECT(app->conf_dialog.dlg), 
+		"response", 
+		G_CALLBACK(_s_conf_dialog_response), app);
 	g_signal_connect_swapped(G_OBJECT(app->window), 
 		"destroy",
         G_CALLBACK(_s_window_destroy), app);
@@ -346,6 +373,31 @@ void application_save_conf(Application *app){
 	}
 }
 
+void application_show_conf_dialog(Application *app){
+	gtk_widget_show_all(GTK_WIDGET(app->conf_dialog.dlg));
+}
+
+static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog){
+	Application * app = APPLICATION(self);
+
+	switch(arg){
+		case GTK_RESPONSE_ACCEPT: 
+			LOG("Preference Accepted");
+			g_object_set(app,
+				"title-visible",
+				gtk_toggle_button_get_active(app->conf_dialog.title_visible),
+				"icon-visible",
+				gtk_toggle_button_get_active(app->conf_dialog.icon_visible),
+				NULL);
+			application_save_conf(self);
+			application_load_conf(self);
+			application_update_ui(self);
+			break;
+		default:
+			LOG("What Response is it?");
+	}
+	gtk_widget_hide(dialog);
+}
 /*
 vim:ts=4:sw=4
 */

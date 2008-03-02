@@ -18,15 +18,26 @@ typedef struct _ApplicationClass ApplicationClass;
 struct _Application
 {
 	GObject parent;
+/* Essential objects*/
 	GtkContainer * window;
+	MenuServer * server;
+/* UI widgets */
 	GtkFixed * menu_bar_area;
 	GtkWidget * title;
 	GtkWidget * icon;
-	MenuServer * server;
+
+/* property value */
 	GtkPixmap * bgpixmap;
 	GdkColor * bgcolor;
-	gboolean show_title;
-	gboolean show_icon;
+
+	gboolean title_visible;
+	gboolean icon_visible;
+/* conf dialog */
+	struct {
+		GtkWidget * dlg;
+		GtkWidget * title_visible;
+		GtkWidget * icon_visible;
+	} conf_dialog;
 };
 
 struct _ApplicationClass {
@@ -43,6 +54,7 @@ void application_set_background(Application * app, GdkColor * color, GdkPixmap *
 void application_update_ui(Application *app);
 void application_load_conf(Application *app);
 void application_save_conf(Application *app);
+void application_show_conf_dialog(Application *app);
 
 G_END_DECLS
 #endif

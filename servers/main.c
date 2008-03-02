@@ -16,6 +16,8 @@ int main (int argc, char * argv []){
 	int i;
 	gboolean title_vis = FALSE;
 	gboolean icon_vis = FALSE;
+	gboolean conf_dlg = FALSE;	
+	Application * app;
 	gtk_init(&argc, &argv);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(window, 400,20);
@@ -24,13 +26,15 @@ int main (int argc, char * argv []){
 	for(i=0; i< argc; i++){
 		if(g_str_equal(argv[i], "-t")) title_vis = TRUE;
 		if(g_str_equal(argv[i], "-i")) icon_vis = TRUE;
-
+		if(g_str_equal(argv[i], "-c")) conf_dlg = TRUE;
 	}
-	g_object_new(TYPE_APPLICATION, 
+	app = g_object_new(TYPE_APPLICATION, 
 				"window", window, 
 				"title-visible", title_vis,
 				"icon-visible", icon_vis, 
 				NULL);
+	if(conf_dlg) application_show_conf_dialog(app);
+
 	gtk_widget_show_all(window);
 	gtk_main();
 

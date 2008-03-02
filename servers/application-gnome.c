@@ -8,10 +8,7 @@
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_APPLICATION_GNOME, ApplicationGnomePrivate))
 
 typedef struct {
-	Application * App;
-	GtkDialog * dlg;
-	GtkCheckButton * show_title;
-	GtkCheckButton * show_icon;
+	gint foo;
 }ApplicationGnomePrivate;
 
 static void _create_popup_menu(ApplicationGnome * self);
@@ -89,63 +86,9 @@ Application *application_gnome_new(GtkWidget *w)
 	return g_object_new(TYPE_APPLICATION_GNOME, "window", w, NULL);
 }
 
-static void _dlg_cb(GtkDialog * nouse, gint arg, ApplicationGnome* self){
-	ApplicationGnomePrivate *priv = APPLICATION_GNOME_GET_PRIVATE(self);
-	Application *app = APPLICATION(self);
-
-	switch(arg){
-		case GTK_RESPONSE_ACCEPT: 
-			LOG("Preference Accepted");
-		g_object_set(app,
-				"title-visible",
-				gtk_toggle_button_get_active(priv->show_title),
-				"icon-visible",
-				gtk_toggle_button_get_active(priv->show_icon),
-				NULL);
-		
-			application_save_conf(self);
-			application_load_conf(self);
-			application_update_ui(self);
-			break;
-		default:
-			LOG("What Response is it?");
-	}
-	gtk_widget_destroy(GTK_WIDGET(priv->dlg));
-}
 
 
 void _show_dialog(ApplicationGnome * self){
-	ApplicationGnomePrivate *priv = APPLICATION_GNOME_GET_PRIVATE(self);
-	Application *app = APPLICATION(self);
-	gboolean show_title, show_icon;
-
-	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
-	GtkWidget * show = gtk_label_new(_("Display following elements"));
-//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
-//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
-	priv->dlg= GTK_DIALOG(gtk_dialog_new());
-	priv->show_title = GTK_CHECK_BUTTON(gtk_check_button_new_with_label (_("Active Window Title")));
-	priv->show_icon = GTK_CHECK_BUTTON(gtk_check_button_new_with_label (_("Active Window Icon")));
-
-
-	g_object_get(app, 
-			"title-visible", &show_title,
-			"icon-visible", &show_icon, NULL);
-
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_title), show_title);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->show_icon), show_icon);
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(show));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_title));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(priv->show_icon));
-//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
-//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
-	gtk_container_add(GTK_CONTAINER(priv->dlg->vbox), GTK_WIDGET(vbox));
-
-	gtk_dialog_add_button(priv->dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button(priv->dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
-	
-	g_signal_connect(G_OBJECT(priv->dlg), "response", G_CALLBACK(_dlg_cb), self);
-	gtk_widget_show_all(GTK_WIDGET(priv->dlg));
 }
 
 
