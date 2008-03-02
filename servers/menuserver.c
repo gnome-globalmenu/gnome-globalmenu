@@ -272,7 +272,7 @@ static void _s_client_new(MenuServer * _self, GnomenuClientInfo * ci, GnomenuSer
 	c->window = NULL;
 	c->parent = NULL;
 	g_hash_table_insert(_self->clients, ci, c);
-
+	gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 }
 static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
@@ -350,7 +350,6 @@ static void _update_active_menu_bar (MenuServer * _self){
 				case MENU_CLIENT_GTK:
 					if(c->window)
 						gdk_window_reparent(c->window, widget->window, 0, 0);
-					gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 					gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
 					gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 				break;
@@ -363,6 +362,7 @@ static void _update_active_menu_bar (MenuServer * _self){
 		_self->active = c;
 		g_signal_emit(_self, class_signals[ACTIVE_CLIENT_CHANGED],
 			0);
+		gtk_widget_queue_resize(_self);
 	}
 }
 static void 
@@ -375,15 +375,23 @@ static void
 }
 static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	GtkWidget * widget = GTK_WIDGET(_self);
-	ci->allocation.width = widget->allocation.width;
-	ci->allocation.height = widget->allocation.height;
+	ci->allocation.width = MAX(ci->requisition.width,
+							widget->allocation.width);
+	ci->allocation.height = MAX(ci->requisition.height,
+							widget->allocation.height);
 }
 static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
 	GList * node;
 	GET_OBJECT(widget, server, priv);
 	GnomenuClientInfo * ci;
-	gint w = 1;
-	gint h = 1;
+	gint w = 10;
+	gint h = 10;
+	if(server->active){
+		ci = server->active->handle;
+		w = MAX(ci->requisition.width , w);
+		h = MAX(ci->requisition.height, h);
+		LOG("%d, %d", w, h);
+	} else
 	for(node = g_list_first( server->gtk_helper->clients);
 		node;
 		node = g_list_next (node)){
@@ -404,7 +412,7 @@ static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 	if(c)
 	switch(c->type){
 		case MENU_CLIENT_GTK:
-				gnomenu_server_helper_queue_resize(self->gtk_helper, c->handle);
+				gnomenu_server_helper_allocate_size(self->gtk_helper, c->handle, allocation);
 		break;
 		case MENU_CLIENT_KDE:
 		LOG("KDE unhandled");
