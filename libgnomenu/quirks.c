@@ -182,10 +182,11 @@ gboolean gnomenu_compatible = TRUE;
 void gtk_module_init(int * argc, char **argv[]){
 /*initialize */
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
-	gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
 	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
 		gnomenu_menu_bar_type = 0; 
 		gnomenu_compatible = FALSE;
 	/*disable gtk_menu_bar_get_type hack*/
+	} else {
+		gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
 	}
 }
