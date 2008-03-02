@@ -125,13 +125,13 @@ static void _match_quirk(QuirkEntry * entry, struct quirk_match_data * data){
 	if(g_pattern_match_simple(entry->match, data->prgname)) {
 		if(data->detail && entry->detail){
 			if(g_pattern_match_simple(entry->detail, data->detail))
-				data->rt = entry->mask;
+				data->rt |= entry->mask;
 		}
 		if(data->detail && !entry->detail){ /*matching against a default*/
-			data->rt = entry->mask;
+			data->rt |= entry->mask;
 		}
 		if(!data->detail && !entry->detail){ /* default against default*/
-			data->rt = entry->mask;
+			data->rt |= entry->mask;
 		}
 		if(!data->detail && entry->detail){
 			/*default againser non-default*/

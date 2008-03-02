@@ -424,13 +424,13 @@ _size_allocate (GtkWidget     *widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	widget->allocation = *allocation;
-	if (priv->detached) {
+	if (priv->detached || GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)) {
 		if(GTK_WIDGET_REALIZED(widget)){
 			gdk_window_move_resize(widget->window, 
-				allocation->x,
-				allocation->y,
-				allocation->width,
-				allocation->height);
+				/*allocation->x*/ -1,
+				/*allocation->y*/ -1,
+				/*allocation->width*/ 1,
+				/*allocation->height*/ 1) ;
 		}
 		/* This is a quirk. Workaround for evolution and other
  		   Applications that changes menu item size and use
@@ -488,9 +488,13 @@ static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, Gn
 	priv->detached = TRUE;
 	if(!GTK_WIDGET_REALIZED(widget)){
 		gtk_widget_realize(widget);
+	} else {
+		gtk_widget_unrealize(widget);
+		gtk_widget_realize(widget);
+		if(GTK_WIDGET_VISIBLE(widget)){
+			gtk_widget_map(widget);
+		}
 	}
-	_sync_remote_state(menu_bar);
-	_sync_local_state(menu_bar);
 }
 static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
@@ -561,6 +565,7 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 			}
 			gdk_window_show(priv->container);
 			gdk_window_show(priv->floater);
+			GTK_WIDGET_SET_FLAGS(widget, GTK_VISIBLE);
 		}else {
 			gdk_window_hide(priv->container);
 			gdk_window_hide(priv->floater);
@@ -570,6 +575,7 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 			}else{
 
 			}
+			GTK_WIDGET_UNSET_FLAGS(widget, GTK_VISIBLE);
 		}	
 	LOG("done");
 }
@@ -774,26 +780,32 @@ _realize (GtkWidget * widget){
 /*	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->realize(widget);*/
   GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
 //  GTK_WIDGET_SET_FLAGS (widget, GTK_NO_WINDOW);
-  attributes.x = widget->allocation.x;
-  attributes.y = widget->allocation.y;
-  attributes.width = widget->allocation.width;
-  attributes.height = widget->allocation.height;
-  attributes.window_type = GDK_WINDOW_CHILD;
-  attributes.wclass = GDK_INPUT_OUTPUT;
-  attributes.visual = gtk_widget_get_visual (widget);
-  attributes.colormap = gtk_widget_get_colormap (widget);
-  attributes.event_mask = gtk_widget_get_events (widget);
-  attributes.event_mask |= (GDK_EXPOSURE_MASK |
-                GDK_BUTTON_PRESS_MASK |
-                GDK_BUTTON_RELEASE_MASK |
-                GDK_KEY_PRESS_MASK |
-                GDK_ENTER_NOTIFY_MASK |
-                GDK_LEAVE_NOTIFY_MASK);
+	if(!priv->detached && !GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+		attributes.x = widget->allocation.x;
+		attributes.y = widget->allocation.y;
+		attributes.width = widget->allocation.width;
+		attributes.height = widget->allocation.height;
+	} else {
+		attributes.x = -1; 
+		attributes.y = -1; 
+		attributes.width = 1;
+		attributes.height = 1;
+	}
+		attributes.window_type = GDK_WINDOW_CHILD;
+		attributes.wclass = GDK_INPUT_OUTPUT;
+		attributes.visual = gtk_widget_get_visual (widget);
+		attributes.colormap = gtk_widget_get_colormap (widget);
+		attributes.event_mask = gtk_widget_get_events (widget);
+		attributes.event_mask |= (GDK_EXPOSURE_MASK |
+					GDK_BUTTON_PRESS_MASK |
+					GDK_BUTTON_RELEASE_MASK |
+					GDK_KEY_PRESS_MASK |
+					GDK_ENTER_NOTIFY_MASK |
+					GDK_LEAVE_NOTIFY_MASK);
 
-  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
-  widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
-  gdk_window_set_user_data (widget->window, widget);
- // gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+		attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+		widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
+		gdk_window_set_user_data (widget->window, widget);
 
 	attributes.x = priv->allocation.x;
 	attributes.y = priv->allocation.y;
@@ -802,7 +814,7 @@ _realize (GtkWidget * widget){
 /*NOTE: if set this to GDK_WINDOW_CHILD, we can put it anywhere we want without
  * WM's decorations! HOWever child doesn't work very well*/
 
-	if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
+	if(priv->detached || !GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
 		attributes.window_type = GDK_WINDOW_TEMP;
 	} else {
 		attributes.window_type = GDK_WINDOW_TOPLEVEL;
