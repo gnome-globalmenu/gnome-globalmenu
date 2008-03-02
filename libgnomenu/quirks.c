@@ -178,12 +178,14 @@ GnomenuQuirkMask gnomenu_get_detail_quirk(gchar * detail){
  * Or else the value of gnomenu_menu_bar_get_type();
  * */
 GType gnomenu_menu_bar_type = 0;
-
+gboolean gnomenu_compatible = TRUE;
 void gtk_module_init(int * argc, char **argv[]){
 /*initialize */
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
 	gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
 	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
-		gnomenu_menu_bar_type = 0; /*disable gtk_menu_bar_get_type hack*/
+		gnomenu_menu_bar_type = 0; 
+		gnomenu_compatible = FALSE;
+	/*disable gtk_menu_bar_get_type hack*/
 	}
 }
