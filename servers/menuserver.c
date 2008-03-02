@@ -44,7 +44,8 @@ static void _get_property 		( GObject * _self,
 								  guint property_id, GValue * value, GParamSpec * pspec );
 /* GtkWidget interface */
 static void _realize			( GtkWidget * widget);
-static void _unrealize			( GtkWidget * widget);
+static void _size_allocate			( GtkWidget * widget, 
+									  GtkAllocation * allocation);
 
 static void 
 	_s_client_new				( MenuServer * _self, 
@@ -70,10 +71,6 @@ static void
 	_s_screen_active_window_changed	( MenuServer * _self, 
 									  WnckWindow * previous, 
 									  WnckScreen * screen);
-static void 
-	_s_window_size_allocate			( MenuServer * _self, 
-									  GtkAllocation * allocation, 
-									  GtkWidget * widget);
 static void 
 	_s_gtk_helper_size_request		( MenuServer * _self, 
 									  GnomenuClientInfo * ci, 
@@ -111,6 +108,7 @@ menu_server_class_init(MenuServerClass * klass){
 	gobject_class->get_property = _get_property;
 
 	widget_class->realize = _realize;
+	widget_class->size_allocate = _size_allocate;
 
 	klass->active_client_changed = _c_active_client_changed;
 
@@ -180,8 +178,6 @@ _constructor	( GType type, guint n_construct_properties,
 
 	g_signal_connect_swapped(server->screen,
 			"active-window-changed", _s_screen_active_window_changed, server);
-	g_signal_connect_swapped(_self,
-			"size-allocate", _s_window_size_allocate, server);
 	g_signal_connect_swapped(server->gtk_helper,
 			"size-request", _s_gtk_helper_size_request, server);
 	return _self;
@@ -375,19 +371,28 @@ static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * c
 	ci->allocation.width = widget->allocation.width;
 	ci->allocation.height = widget->allocation.height;
 }
-static void _s_window_size_allocate(MenuServer * _self, GtkAllocation * allocation, GtkWidget * widget){
+static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 	GtkAllocation a = * allocation;
-	MenuClient * c = _self->active;
+	GET_OBJECT(widget, self, priv);
+	MenuClient * c = self->active;
 	a.x = 0;
 	a.y = 0;
 	if(c)
 	switch(c->type){
 		case MENU_CLIENT_GTK:
-				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
+				gnomenu_server_helper_queue_resize(self->gtk_helper, c->handle);
 		break;
 		case MENU_CLIENT_KDE:
 		LOG("KDE unhandled");
 		break;
+	}
+	widget->allocation = * allocation;
+	if(GTK_WIDGET_REALIZED(widget)){
+		gdk_window_move_resize(widget->window,
+			allocation->x,
+			allocation->y,
+			allocation->width,
+			allocation->height);
 	}
 }
 static void _c_active_client_changed( MenuServer * _self){
