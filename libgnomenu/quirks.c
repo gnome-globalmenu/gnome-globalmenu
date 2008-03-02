@@ -187,6 +187,15 @@ void gtk_module_init(int * argc, char **argv[]){
 		gnomenu_compatible = FALSE;
 	/*disable gtk_menu_bar_get_type hack*/
 	} else {
+/**
+ * register GnomenuMenuBar as "GtkMenuBar" 
+ * register GtkMenuBar as "GtkOldMenuBar"
+ * gtk-aqd assures GTK_TYPE_MENU_BAR's behavior:
+ *	if gnomenu_menu_bar_type is not initialized yet,
+ *		returns GtkOldMenuBar's GType,
+ *	if gnomenu_menu_bar_type is initialized,
+ * 		returns gnomenu_menu_bar_type instead.
+ */
 		gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
 	}
 }

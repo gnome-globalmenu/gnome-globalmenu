@@ -149,22 +149,25 @@ G_DEFINE_TYPE (GnomenuMenuBar, gnomenu_menu_bar, GTK_TYPE_MENU_BAR)
 GType gnomenu_menu_bar_get_type (void){
 	static GType g_define_type_id = 0; 
 	if (G_UNLIKELY (g_define_type_id == 0)) { 
-      static const GTypeInfo g_define_type_info = { 
-        sizeof (GnomenuMenuBarClass), 
-        (GBaseInitFunc) NULL, 
-        (GBaseFinalizeFunc) NULL, 
-        (GClassInitFunc) gnomenu_menu_bar_class_intern_init, 
-        (GClassFinalizeFunc) NULL, 
-        NULL,   /* class_data */ 
-        sizeof (GnomenuMenuBar), 
-        0,      /* n_preallocs */ 
-        (GInstanceInitFunc) gnomenu_menu_bar_init, 
-      }; 
-      g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, "GtkMenuBar", &g_define_type_info, 0); 
-   } 
-  return g_define_type_id; 
-
-
+		static const GTypeInfo g_define_type_info = { 
+			sizeof (GnomenuMenuBarClass), 
+			(GBaseInitFunc) NULL, 
+			(GBaseFinalizeFunc) NULL, 
+			(GClassInitFunc) gnomenu_menu_bar_class_intern_init, 
+			(GClassFinalizeFunc) NULL, 
+			NULL,   /* class_data */ 
+			sizeof (GnomenuMenuBar), 
+			0,      /* n_preallocs */ 
+			(GInstanceInitFunc) gnomenu_menu_bar_init, 
+		}; 
+		if(gnomenu_compatible)
+			g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, 
+									"GtkMenuBar", &g_define_type_info, 0); 
+		else
+			g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, 
+									"GnomenuMenuBar", &g_define_type_info, 0); 
+	} 
+	return g_define_type_id; 
 }
 static void
 gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
