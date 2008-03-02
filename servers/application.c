@@ -201,64 +201,39 @@ _constructor	( GType type, guint n_construct_properties,
 }
 
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
-	gboolean dirty = FALSE;
-/* This piece code is redundant, for the purpose of clearity*/
-/* pixmap */	
-	if(pixmap == NULL){  /* clear the pixmap */
-		if(app->bgpixmap){
-			g_object_unref(app->bgpixmap);
-			app->bgpixmap = NULL;
-			dirty = TRUE;
-		}
-	} else
-	if(app->bgpixmap == pixmap) {
-		/* Do nothing*/
-	} else { /* new pixmap is not current pixmap */
-		if(app->bgpixmap)
-			g_object_unref(app->bgpixmap);
+
+	if (pixmap) {
+		if(app->bgpixmap) g_object_unref(app->bgpixmap);
 		app->bgpixmap = g_object_ref(pixmap);
-		dirty = TRUE;
 	}
-/* color */
-	if(color == NULL){ /* clear the color */
-		if(app->bgcolor){
-			g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
-			app->bgcolor = NULL;
-			dirty = TRUE;
-		}
-	} else 
-	if (app->bgcolor == color) {
-		/* do nothing*/
-	} else { /* set the new color */
-		if(app->bgcolor)
-			g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
+	if (color) {
+		if(app->bgcolor) g_boxed_free(GDK_TYPE_COLOR, app->bgcolor);
 		app->bgcolor = g_boxed_copy(GDK_TYPE_COLOR, color);
-		dirty = TRUE;
 	}
-/* update background*/
-	if(dirty)
-		_update_background(app);
+	_update_background(app);
 }
 
 static void _update_background(Application * app){
-	GdkPixmap * cropped = NULL;  /*clear bg by default*/
+	GdkPixmap * cropped;
 	GdkGC * gc;
 	GtkAllocation * a;
 	GdkPixmap * pixmap = app->bgpixmap;
 	GdkColor * color = app->bgcolor;
+
 	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
-	LOG();
-	if (pixmap) { /* get the cropped pixmap for menu bar area*/
+	if (color) {
+		g_object_set(app->server, "bg-color", color, NULL);
+		_set_widget_background(app->menu_bar_area, color, NULL);	
+	}
+	if (pixmap) {
 		cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
 		gc = gdk_gc_new(pixmap);
 		gdk_draw_drawable(cropped, gc, pixmap, a->x, a->y, 0, 0, a->width, a->height);
+		g_object_set(app->server, "bg-pixmap", cropped, NULL);
+		_set_widget_background(app->menu_bar_area, NULL, cropped);	
 		g_object_unref(gc);
-	} 
-
-	g_object_set(app->server, "bg-color", color, 
-							"bg-pixmap", cropped, NULL);
-	g_object_unref(cropped);
-	_set_widget_background(app->menu_bar_area, color, cropped);	
+		g_object_unref(cropped);
+	}
 }
 
 static void _s_active_client_changed(Application * app, MenuServer * server){
