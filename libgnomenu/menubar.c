@@ -400,7 +400,7 @@ _size_request (GtkWidget      *widget,
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
 			_calc_size_request(widget, requisition);
 			priv->requisition = * requisition;
-		} else {
+		} else { /* ROAMING */
 			requisition->width = 0;
 			requisition->height = 0;
 			_calc_size_request(widget, &priv->requisition);
@@ -452,7 +452,7 @@ _size_allocate (GtkWidget     *widget,
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
 			priv->allocation = *allocation;	
 			_do_size_allocate(widget, allocation);
-		}else {
+		}else { /* ROAMING */
 			priv->allocation.width = priv->requisition.width;
 			priv->allocation.height = priv->requisition.height;
 			if(GTK_WIDGET_REALIZED(widget)){
