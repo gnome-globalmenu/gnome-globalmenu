@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn598
+%define svn_version svn610
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	2%{?dist}
@@ -110,6 +110,7 @@ rm -rf %{buildroot}
 %defattr(-, root, root)
 /usr/libexec/gnome-globalmenu-applet
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
+/etc/gconf/schemas/gnome-globalmenu-applet.schemas
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
