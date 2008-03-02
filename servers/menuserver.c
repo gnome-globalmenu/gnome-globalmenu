@@ -44,11 +44,12 @@ static void _get_property 		( GObject * _self,
 								  guint property_id, GValue * value, GParamSpec * pspec );
 /* GtkWidget interface */
 static void _realize			( GtkWidget * widget);
-static void _size_allocate			( GtkWidget * widget, 
-									  GtkAllocation * allocation);
+static void _size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
+
+static void _size_request		( GtkWidget * widget, GtkRequisition * requisition);
 
 static void 
-	_s_client_new				( MenuServer * _self, 
+	_s_client_new					( MenuServer * _self, 
 									  GnomenuClientInfo * ci, 
 									  GnomenuServerHelper * helper);
 static void 
@@ -109,6 +110,7 @@ menu_server_class_init(MenuServerClass * klass){
 
 	widget_class->realize = _realize;
 	widget_class->size_allocate = _size_allocate;
+	widget_class->size_request = _size_request;
 
 	klass->active_client_changed = _c_active_client_changed;
 
@@ -199,12 +201,15 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			if(self->bgcolor) 
 				g_boxed_free(GDK_TYPE_COLOR, self->bgcolor);
 			self->bgcolor = g_value_dup_boxed(value);
+			if(self->active)
+			gnomenu_server_helper_set_background(self->gtk_helper, self->active->handle, self->bgcolor, self->bgpixmap);
 		break;
 		case PROP_BGPIXMAP:
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
 			self->bgpixmap = g_value_get_object(value);
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_ref(self->bgpixmap);
-			_update_active_menu_bar(self);
+			if(self->active)
+			gnomenu_server_helper_set_background(self->gtk_helper, self->active->handle, self->bgcolor, self->bgpixmap);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -329,34 +334,36 @@ static void _update_active_menu_bar (MenuServer * _self){
 	} else {
 		LOG("active is nil");
 	}
-	if(_self->active){
-		switch(_self->active->type){
-			case MENU_CLIENT_GTK:
-				gnomenu_server_helper_set_visibility(_self->gtk_helper, _self->active->handle, FALSE);
-			break;
-			case MENU_CLIENT_KDE:
-				/*try to hide it*/
-			break;
+	if(c != _self->active){
+		if(_self->active){
+			switch(_self->active->type){
+				case MENU_CLIENT_GTK:
+					gnomenu_server_helper_set_visibility(_self->gtk_helper, _self->active->handle, FALSE);
+				break;
+				case MENU_CLIENT_KDE:
+					/*try to hide it*/
+				break;
+			}
 		}
-	}
-	if(c){
-		switch(c->type){
-			case MENU_CLIENT_GTK:
-				if(c->window)
-					gdk_window_reparent(c->window, widget->window, 0, 0);
-				gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
-				gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
-				gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
-			break;
-			case MENU_CLIENT_KDE:
-				if(c->window)
-					gdk_window_reparent(c->window, widget->window, 0, 0);
-			break;
+		if(c){
+			switch(c->type){
+				case MENU_CLIENT_GTK:
+					if(c->window)
+						gdk_window_reparent(c->window, widget->window, 0, 0);
+					gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
+					gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
+					gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
+				break;
+				case MENU_CLIENT_KDE:
+					if(c->window)
+						gdk_window_reparent(c->window, widget->window, 0, 0);
+				break;
+			}
 		}
+		_self->active = c;
+		g_signal_emit(_self, class_signals[ACTIVE_CLIENT_CHANGED],
+			0);
 	}
-	_self->active = c;
-	g_signal_emit(_self, class_signals[ACTIVE_CLIENT_CHANGED],
-		0);
 }
 static void 
 	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
@@ -370,6 +377,23 @@ static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * c
 	GtkWidget * widget = GTK_WIDGET(_self);
 	ci->allocation.width = widget->allocation.width;
 	ci->allocation.height = widget->allocation.height;
+}
+static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
+	GList * node;
+	GET_OBJECT(widget, server, priv);
+	GnomenuClientInfo * ci;
+	gint w = 1;
+	gint h = 1;
+	for(node = g_list_first( server->gtk_helper->clients);
+		node;
+		node = g_list_next (node)){
+		ci = node->data;
+		w = MAX(ci->requisition.width , w);
+		h = MAX(ci->requisition.height, h);
+	}
+	requisition->width = w;
+	requisition->height = h;
+	widget->requisition = * requisition;
 }
 static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 	GtkAllocation a = * allocation;
