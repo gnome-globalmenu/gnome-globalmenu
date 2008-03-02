@@ -108,6 +108,8 @@ static void _finalize(GObject *obj)
 {
 	Application *app = APPLICATION(obj);
 	menu_server_destroy(app->server);
+	if (app->window)
+		g_object_unref(app->window);
 }
 
 static void application_class_init(ApplicationClass *klass)
