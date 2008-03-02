@@ -22,7 +22,6 @@ struct _Application
 	GtkContainer * window;
 	MenuServer * server;
 /* UI widgets */
-	GtkFixed * menu_bar_area;
 	GtkWidget * title;
 	GtkWidget * icon;
 

@@ -177,7 +177,6 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 static void _finalize(GObject *obj)
 {
 	Application *app = APPLICATION(obj);
-	menu_server_destroy(app->server);
 	if (app->window)
 		g_object_unref(app->window);
 }
@@ -198,9 +197,6 @@ _constructor	( GType type, guint n_construct_properties,
 	/*This thing is ugly, (consider a vertical menu layout), we need a new alignment widget
  * 	which is similiar to GtkMenuBar(respecting directions) */
 
-	app->menu_bar_area = GTK_FIXED(gtk_fixed_new());
-	gtk_fixed_set_has_window(app->menu_bar_area, TRUE);
-	gtk_container_set_border_width(GTK_CONTAINER(app->menu_bar_area), 0);
 	app->title = GTK_LABEL(gtk_label_new(""));
 	app->icon = GTK_IMAGE(gtk_image_new());
 	app->bgpixmap = NULL;
@@ -208,7 +204,6 @@ _constructor	( GType type, guint n_construct_properties,
 
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->icon), FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->title), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->menu_bar_area), TRUE, TRUE, 0);
 
 	gtk_container_add(GTK_CONTAINER(app->window), GTK_WIDGET(box));
 
@@ -232,7 +227,8 @@ _constructor	( GType type, guint n_construct_properties,
 	
 
 /* start server */
-	app->server = menu_server_new(GTK_WIDGET(app->menu_bar_area));
+	app->server = menu_server_new();
+	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->server), TRUE, TRUE, 0);
 
 	application_load_conf(app);
 	application_update_ui(app);
@@ -246,7 +242,7 @@ _constructor	( GType type, guint n_construct_properties,
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"active-client-changed",
 		G_CALLBACK(_s_active_client_changed), app);
-	g_signal_connect_swapped(G_OBJECT(app->menu_bar_area),
+	g_signal_connect_swapped(G_OBJECT(app->server),
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 
@@ -402,7 +398,7 @@ static void _update_background(Application * app){
 	GtkAllocation * a;
 	GdkPixmap * pixmap = app->bgpixmap;
 	GdkColor * color = app->bgcolor;
-	a = &GTK_WIDGET(app->menu_bar_area)->allocation;
+	a = &GTK_WIDGET(app->server)->allocation;
 	LOG();
 	if (pixmap) { /* get the cropped pixmap for menu bar area*/
 		cropped = gdk_pixmap_new(pixmap, a->width, a->height, -1);
@@ -414,7 +410,7 @@ static void _update_background(Application * app){
 	g_object_set(app->server, "bg-color", color, 
 							"bg-pixmap", cropped, NULL);
 	g_object_unref(cropped);
-	utils_set_widget_background(app->menu_bar_area, color, cropped);	
+	utils_set_widget_background(app->server, color, cropped);	
 }
 /* END: tool functions*/
 /*

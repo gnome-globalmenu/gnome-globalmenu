@@ -16,26 +16,25 @@ G_BEGIN_DECLS
 typedef void KDEmenuServerHelper; /* TODO: write this helper*/
 typedef struct _MenuClient MenuClient;
 typedef struct {
-	GObject parent;
+	GtkWidget parent;
 	GnomenuServerHelper * gtk_helper;
 	KDEmenuServerHelper * kde_helper;
 	GHashTable * clients;
-	GtkWidget * window;
 	WnckScreen * screen;
 	MenuClient * active;
 	GdkColor * bgcolor;
 	GdkPixmap * bgpixmap;
 } MenuServer;
 typedef struct {
-	GObjectClass parent;
+	GtkWidgetClass parent;
 	void (*active_client_changed)(MenuServer * server);
 } MenuServerClass;
 GType menu_server_get_type (void);
 
-MenuServer * menu_server_new(GtkWidget * window);
+MenuServer * menu_server_new();
 WnckWindow * menu_server_get_client_parent(MenuServer * server, MenuClient * client);
 void menu_server_set_background(MenuServer * server, GdkColor * color, GdkPixmap * pixmap);
-void menu_server_destroy(MenuServer * server);
+//void menu_server_destroy(MenuServer * server);
 
 G_END_DECLS
 #endif
