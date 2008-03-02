@@ -334,7 +334,6 @@ static void _update_active_menu_bar (MenuServer * _self){
 	} else {
 		LOG("active is nil");
 	}
-	if(c != _self->active){
 		if(_self->active){
 			switch(_self->active->type){
 				case MENU_CLIENT_GTK:
@@ -363,7 +362,6 @@ static void _update_active_menu_bar (MenuServer * _self){
 		g_signal_emit(_self, class_signals[ACTIVE_CLIENT_CHANGED],
 			0);
 		gtk_widget_queue_resize(_self);
-	}
 }
 static void 
 	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
