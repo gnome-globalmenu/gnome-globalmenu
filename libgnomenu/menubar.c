@@ -94,17 +94,17 @@ static void _size_request			( GtkWidget			* widget,
 									  GtkRequisition	* requisition);
 static void _size_allocate			( GtkWidget			* widget,
 									  GtkAllocation		* allocation);
-static void _hierarchy_changed		( GtkWidget 		* widget,
-									  GtkWidget 		* old_toplevel);
 static void _realize 				( GtkWidget * widget);
 static void _unrealize 				( GtkWidget * widget);
 static void _map 					( GtkWidget * widget);
 static gint _expose 				( GtkWidget       *widget,
 									  GdkEventExpose  *event);
-static gboolean _motion_notify_event( GtkWidget * widget, 
-									  GdkEventMotion * event);
-static gboolean _button_press_event ( GtkWidget * widget,
-									  GdkEventButton * event);
+static gboolean _s_motion_notify_event( GtkWidget * widget, 
+									  GdkEventMotion * event,
+									  gpointer userdata);
+static gboolean _s_button_press_event ( GtkWidget * widget,
+									  GdkEventButton * event,
+									  gpointer userdata);
 /* GtkMenuShell Interface */
 static void _insert 				( GtkMenuShell * menu_shell, 
 									  GtkWidget * widget, gint pos);
@@ -137,6 +137,9 @@ static void _s_background_set	 	( GtkWidget  * menubar,
 static gboolean _s_delete_event			( GtkWidget * widget,
 									  GdkEvent * event,
 									  GnomenuClientHelper * helper);
+static void _s_hierarchy_changed		( GtkWidget 		* widget,
+									  GtkWidget 		* old_toplevel,
+									  gpointer data);
 
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
@@ -147,9 +150,19 @@ static void _sync_remote_state		( GnomenuMenuBar * menubar);
 static void _sync_local_state		( GnomenuMenuBar * menubar);
 static void _reset_style			( GtkWidget * widget);
 
-#define gnomenu_menu_bar_get_type _gnomenu_menu_bar_get_type
-G_DEFINE_TYPE (GnomenuMenuBar, gnomenu_menu_bar, GTK_TYPE_MENU_BAR)
-#undef gnomenu_menu_bar_get_type
+//#define gnomenu_menu_bar_get_type _gnomenu_menu_bar_get_type
+//G_DEFINE_TYPE (GnomenuMenuBar, gnomenu_menu_bar, GTK_TYPE_MENU_BAR)
+//#undef gnomenu_menu_bar_get_type
+static void gnomenu_menu_bar_init (GnomenuMenuBar * self);
+static void gnomenu_menu_bar_class_init (GnomenuMenuBarClass * klass);
+static gpointer gnomenu_menu_bar_parent_class = NULL;
+static gpointer gnomenu_menu_bar_menu_shell_class = NULL;
+
+static void gnomenu_menu_bar_class_intern_init (gpointer klass){
+	gnomenu_menu_bar_parent_class = g_type_class_peek_parent(klass);
+	gnomenu_menu_bar_menu_shell_class = g_type_class_peek(GTK_TYPE_MENU_SHELL);
+	gnomenu_menu_bar_class_init ((GnomenuMenuBarClass *)klass);
+}
 GType gnomenu_menu_bar_get_type (void){
 	static GType g_define_type_id = 0; 
 	if (G_UNLIKELY (g_define_type_id == 0)) { 
@@ -198,10 +211,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	widget_class->expose_event = _expose;
 	widget_class->realize = _realize;
 	widget_class->unrealize = _unrealize;
-	widget_class->hierarchy_changed = _hierarchy_changed;
 	widget_class->map = _map;
-	widget_class->motion_notify_event = _motion_notify_event;
-	widget_class->button_press_event = _button_press_event;
 
 	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
@@ -267,7 +277,7 @@ static GObject* _constructor(GType type,
 		GObjectConstructParam *construct_params){
 
 	GtkStyle * style;
-	GObject * object = (G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->constructor)(
+	GObject * object = (G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->constructor)(
 		type, n_construct_properties, construct_params);
 
 	GET_OBJECT(object, menu_bar, priv);
@@ -313,6 +323,12 @@ static GObject* _constructor(GType type,
 	
 	g_signal_connect(G_OBJECT(menu_bar), "delete-event",
 				G_CALLBACK(_s_delete_event), priv->helper);
+	g_signal_connect(G_OBJECT(menu_bar), "hierarchy-changed",
+				G_CALLBACK(_s_hierarchy_changed), priv->helper);
+	g_signal_connect(G_OBJECT(menu_bar), "button-press-event",
+				G_CALLBACK(_s_button_press_event), priv->helper);
+	g_signal_connect(G_OBJECT(menu_bar), "motion-notify-event",
+				G_CALLBACK(_s_motion_notify_event), priv->helper);
 	return object;
 }
 
@@ -324,14 +340,14 @@ _dispose (GObject * _object){
 		priv->disposed = TRUE;	
 		g_object_unref(priv->helper);
 	}
-	G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->dispose(_object);
+	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->dispose(_object);
 }
 static void
 _finalize(GObject * _object){
 	LOG_FUNC_NAME;
 	GET_OBJECT(_object, menu_bar, priv);	
 	g_list_free(priv->popup_items);
-	G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->finalize(_object);
+	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->finalize(_object);
 }
 static void
 _set_property (GObject      *object,
@@ -639,15 +655,14 @@ static gboolean _s_delete_event			( GtkWidget * widget,
 	return FALSE;
 }
 
-static gboolean _button_press_event (GtkWidget * widget,
-								GdkEventButton * event){
+static gboolean _s_button_press_event (GtkWidget * widget,
+								GdkEventButton * event, gpointer userdata){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	
-	return GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->button_press_event(widget, event);
+	return FALSE;	
 }
-static gboolean _motion_notify_event	( GtkWidget * widget, 
-									  GdkEventMotion * event){
+static gboolean _s_motion_notify_event	( GtkWidget * widget, 
+									  GdkEventMotion * event, gpointer userdata){
 
 	gboolean (* func)(GtkWidget * widget, GdkEventMotion * event);
 	GET_OBJECT(widget, menu_bar, priv);
@@ -655,8 +670,6 @@ static gboolean _motion_notify_event	( GtkWidget * widget,
 	if(event && event->is_hint){
 	LOG_FUNC_NAME;
 	}
-	if(func = GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->motion_notify_event)
-	return func(widget, event);
 	return FALSE;
 }
 static gint
@@ -712,10 +725,7 @@ _expose (GtkWidget      *widget,
 			}
 		} else LOG("event not from container, ignore");
 		{ 
-			GtkMenuShellClass * grandparent_class =
-			g_type_class_peek(GTK_TYPE_MENU_SHELL);
-
-			(* GTK_WIDGET_CLASS(grandparent_class)->expose_event) (widget, event);
+			(* GTK_WIDGET_CLASS(gnomenu_menu_bar_menu_shell_class)->expose_event) (widget, event);
 		}
     } else {
 			LOG("visible: %d, mapped %d",  GTK_WIDGET_VISIBLE(widget),
@@ -738,8 +748,8 @@ static void _s_notify_title (GnomenuMenuBar * menu_bar, GParamSpec * spec,
 			);
 }
 static void
-_hierarchy_changed (GtkWidget *widget,
-				GtkWidget *old_toplevel)
+_s_hierarchy_changed (GtkWidget *widget,
+				GtkWidget *old_toplevel, gpointer userdata)
 {
 	GtkWidget *toplevel;  
 	LOG_FUNC_NAME;
@@ -748,7 +758,7 @@ _hierarchy_changed (GtkWidget *widget,
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_notify_title, menu_bar);
 	}
-	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->hierarchy_changed(widget, old_toplevel);
+
 	toplevel = gtk_widget_get_toplevel(widget);
 	if(GTK_WIDGET_TOPLEVEL(toplevel)){
 		if(GTK_IS_WINDOW(toplevel)){
@@ -775,11 +785,8 @@ _realize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 
-/*TODO: remove calling the parent realize function. use our own instead to
- * avoid side effects.*/
-/*	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->realize(widget);*/
-  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
-//  GTK_WIDGET_SET_FLAGS (widget, GTK_NO_WINDOW);
+	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+
 	if(!priv->detached && !GNOMENU_HAS_QUIRK(priv->quirk, ROAMING)){
 		attributes.x = widget->allocation.x;
 		attributes.y = widget->allocation.y;
@@ -882,7 +889,7 @@ static void
 _unrealize (GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->unrealize(widget);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_menu_shell_class)->unrealize(widget);
 	gdk_window_destroy(priv->container);
 	gdk_window_destroy(priv->floater);
 	gnomenu_client_helper_send_unrealize(priv->helper);
@@ -900,7 +907,7 @@ _map (GtkWidget * widget){
 		}
 	}
 	gdk_window_show(widget->window);
-	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
+	GTK_WIDGET_CLASS(gnomenu_menu_bar_menu_shell_class)->map(widget);
 }
 
 static void _notify 				( GObject * object, GParamSpec * pspec){
@@ -910,14 +917,13 @@ static void _notify 				( GObject * object, GParamSpec * pspec){
 		LOG("visible");
 		g_object_get(object, "visible", &priv->widget_visible, NULL);
 	}
-	//G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->notify(object, pspec);
 }
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	LOG_FUNC_NAME;
 	GtkRequisition req;
 	GET_OBJECT(menu_shell, menu_bar, priv);
-	GTK_MENU_SHELL_CLASS(gnomenu_menu_bar_parent_class)->insert(menu_shell, widget, pos);
+	GTK_MENU_SHELL_CLASS(gnomenu_menu_bar_menu_shell_class)->insert(menu_shell, widget, pos);
 	LOG("widget name = %s", gtk_widget_get_name(widget));
 	if(GTK_WIDGET_REALIZED(menu_shell)) {
 		_set_child_parent_window(widget, priv->container);
@@ -936,7 +942,7 @@ _remove (GtkContainer * container, GtkWidget * widget){
 	LOG_FUNC_NAME;
 	GtkRequisition req;
 	GET_OBJECT(container, menu_bar, priv);
-	GTK_CONTAINER_CLASS(gnomenu_menu_bar_parent_class)->remove(container, widget);
+	GTK_CONTAINER_CLASS(gnomenu_menu_bar_menu_shell_class)->remove(container, widget);
 	if(priv->detached){
 /*		we depend on widget signal loop.
  *		calc_size_request(menu_bar, &req);
