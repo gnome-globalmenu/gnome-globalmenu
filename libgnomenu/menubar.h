@@ -122,6 +122,7 @@ struct _GnomenuMenuBarClass
 
 
 GtkWidget * gnomenu_menu_bar_new             (void);
+GType gnomenu_menu_bar_get_type (void);
 
 G_END_DECLS
 

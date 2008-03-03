@@ -32,12 +32,11 @@
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
-
 #define GNOMENU_MENU_BAR_GET_PRIVATE(o)  \
-  (G_TYPE_INSTANCE_GET_PRIVATE ((o), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarPrivate))
+	_get_private(o)
 
 #define GET_OBJECT(_s, sgmb, p) \
-	GnomenuMenuBar * sgmb = GNOMENU_MENU_BAR(_s); \
+	GnomenuMenuBar * sgmb = (GnomenuMenuBar*)_s; \
 	GnomenuMenuBarPrivate * p = GNOMENU_MENU_BAR_GET_PRIVATE(_s);
 
 #if ENABLE_TRACING >= 1
@@ -77,6 +76,15 @@ typedef struct
 	gint y;
 	GnomenuQuirkMask quirk;
 } GnomenuMenuBarPrivate;
+
+static GnomenuMenuBarPrivate * _get_private(gpointer o){
+	if(GNOMENU_IS_MENU_BAR(o)){
+  		return (G_TYPE_INSTANCE_GET_PRIVATE ((o), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarPrivate));
+	} else {
+  		return (G_TYPE_INSTANCE_GET_PRIVATE ((o), GTK_TYPE_MENU_BAR, GnomenuMenuBarPrivate));
+	}
+}
+
 
 /* GObject interface */
 static GObject * _constructor 		( GType type, guint n_construct_properties, 
@@ -155,11 +163,11 @@ static void _reset_style			( GtkWidget * widget);
 //#undef gnomenu_menu_bar_get_type
 static void gnomenu_menu_bar_init (GnomenuMenuBar * self);
 static void gnomenu_menu_bar_class_init (GnomenuMenuBarClass * klass);
-static gpointer gnomenu_menu_bar_parent_class = NULL;
+//static gpointer gnomenu_menu_bar_parent_class = NULL;
 static gpointer gnomenu_menu_bar_menu_shell_class = NULL;
 
-static void gnomenu_menu_bar_class_intern_init (gpointer klass){
-	gnomenu_menu_bar_parent_class = g_type_class_peek_parent(klass);
+void gnomenu_menu_bar_class_intern_init (gpointer klass){
+//	gnomenu_menu_bar_parent_class = g_type_class_peek_parent(klass);
 	gnomenu_menu_bar_menu_shell_class = g_type_class_peek(GTK_TYPE_MENU_SHELL);
 	gnomenu_menu_bar_class_init ((GnomenuMenuBarClass *)klass);
 }
@@ -177,16 +185,13 @@ GType gnomenu_menu_bar_get_type (void){
 			0,      /* n_preallocs */ 
 			(GInstanceInitFunc) gnomenu_menu_bar_init, 
 		}; 
-		if(gnomenu_compatible)
-			g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, 
-									"GtkMenuBar", &g_define_type_info, 0); 
-		else
-			g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, 
-									"GnomenuMenuBar", &g_define_type_info, 0); 
+		g_define_type_id = g_type_register_static (GTK_TYPE_MENU_BAR, 
+								"GnomenuMenuBar", &g_define_type_info, 0); 
 	} 
 	return g_define_type_id; 
 }
-static void
+
+void
 gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 {
 	GObjectClass *gobject_class;
@@ -213,7 +218,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	widget_class->unrealize = _unrealize;
 	widget_class->map = _map;
 
-	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
+//	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
 
 //	menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay; 

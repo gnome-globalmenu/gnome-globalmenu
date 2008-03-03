@@ -87,9 +87,11 @@ static void server_size_request(GnomenuServerHelper * server, GnomenuClientInfo 
 }
 static void server_client_realize(GnomenuServerHelper * server, GnomenuClientInfo * ci, gpointer userdata){
 	GdkWindow * foreign = gdk_window_foreign_new(ci->ui_window);
+	if(foreign){
 	g_assert(foreign);
 	gdk_window_reparent(foreign, GTK_WIDGET(menuwindow)->window, 10, 10);
 	//g_object_unref(foreign);
+	}
 	gnomenu_server_helper_queue_resize(server, ci);
 }
 static void menuwindow_destroy(GtkWidget * widget, GdkEvent * event, gpointer userdata){

@@ -345,6 +345,7 @@ static void _s_service_data_arrival(GnomenuServerHelper * _self,
 				/*FIXME: Shall we Simulate an unrealize signal?*/
 			}
 			ci->ui_window = message->client_realize.ui_window;
+			LOG("ci->ui_window: %p", ci->ui_window);
 			ci->stage = GNOMENU_CI_STAGE_REALIZED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[CLIENT_REALIZE],

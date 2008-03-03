@@ -280,6 +280,8 @@ static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, Gnomen
 	LOG();
 	g_assert(c);
 	c->window = gdk_window_foreign_new(ci->ui_window);
+	LOG("c->window: %p", ci->ui_window);
+	g_assert(c->window);
 	gdk_window_reparent(c->window, widget->window, 0, 0);
 }
 static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){

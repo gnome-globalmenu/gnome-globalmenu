@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,8 +85,82 @@
+@@ -85,6 +85,30 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
@@ -29,59 +29,29 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +
 +	return sym;
 +}
-+/*fool every other app*/
-+#undef gtk_menu_bar_get_type
-+#define gtk_menu_bar_get_type _gtk_menu_bar_get_type
++
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
-+#undef gtk_menu_bar_get_type
-+#define gtk_menu_bar_get_type IA__gtk_menu_bar_get_type
  
-+GType
-+gtk_old_menu_bar_get_type(void){
-+  static GType old_type_id = 0; 
-+  if (G_UNLIKELY (old_type_id == 0)) 
-+	{ 
-+	  static const GTypeInfo g_define_type_info = { 
-+		sizeof (GtkMenuBarClass), 
-+		(GBaseInitFunc) NULL, 
-+		(GBaseFinalizeFunc) NULL, 
-+		(GClassInitFunc) gtk_menu_bar_class_intern_init, 
-+		(GClassFinalizeFunc) NULL, 
-+		NULL,   /* class_data */ 
-+		sizeof (GtkMenuBar), 
-+		0,      /* n_preallocs */ 
-+		(GInstanceInitFunc) gtk_menu_bar_init, 
-+	  }; 
-+	  old_type_id = g_type_register_static (GTK_TYPE_MENU_SHELL, "GtkOldMenuBar", &g_define_type_info, 0); 
-+	} 
-+  return old_type_id; 
-+}
-+
-+GType
-+gtk_menu_bar_get_type (void)
-+{
-+  GType g_define_type_id = 0; 
-+  static gboolean *gnomenu_compatible = NULL;
-+  static gboolean loaded = FALSE;
-+  static GType (*get_type)(void) = NULL;
-+  static GType *type = NULL;
-+  if(G_UNLIKELY(!loaded)){
-+	gnomenu_compatible = _libgnomenu_lookup("gnomenu_compatible");
-+	type = _libgnomenu_lookup("gnomenu_menu_bar_type");
-+	get_type = _libgnomenu_lookup("gnomenu_menu_bar_get_type");
-+	loaded = TRUE;
-+  }
-+  if(gnomenu_compatible && *gnomenu_compatible && type && get_type){ 
-+	if(*type) 
-+      g_define_type_id = get_type();
-+	else 
-+      g_define_type_id = gtk_old_menu_bar_get_type();
-+  } else 
-+	g_define_type_id = _gtk_menu_bar_get_type();
-+
-+  return g_define_type_id; 
-+}
-+
  static void
- gtk_menu_bar_class_init (GtkMenuBarClass *class)
- {
+@@ -96,6 +120,10 @@
+ 
+   GtkBindingSet *binding_set;
+ 
++  gboolean * compatible = _libgnomenu_lookup("gnomenu_compatible");
++  void (*gnomenu_menu_bar_class_init)(gpointer klass)
++			= _libgnomenu_lookup("gnomenu_menu_bar_class_intern_init");
++
+   gobject_class = (GObjectClass*) class;
+   widget_class = (GtkWidgetClass*) class;
+   menu_shell_class = (GtkMenuShellClass*) class;
+@@ -213,7 +241,9 @@
+ 						   G_MAXINT,
+ 						   0,
+ 						   GTK_PARAM_READWRITE));
+-
++	if(compatible && * compatible && gnomenu_menu_bar_class_init) {
++		(*gnomenu_menu_bar_class_init)(class);
++	} else 
+   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
+ }
+ 
