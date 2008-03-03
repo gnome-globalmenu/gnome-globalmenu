@@ -880,13 +880,14 @@ _realize (GtkWidget * widget){
 
 	gdk_window_set_user_data (priv->container, widget);
 	gdk_window_set_user_data (priv->floater, widget);
+
 	widget->style = gtk_style_attach (widget->style, priv->container);
 
 	gtk_container_forall(GTK_CONTAINER(widget), 
            (GtkCallback)(_set_child_parent_window), 
            (gpointer)(priv->container));
 
-
+	_reset_style(menu_bar);	
 	_sync_remote_state(menu_bar);
 	_sync_local_state(menu_bar);
 }
