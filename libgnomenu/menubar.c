@@ -495,9 +495,11 @@ static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, Gn
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = TRUE;
-	if(!GTK_WIDGET_REALIZED(widget)){
+	if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(widget)){
 		gtk_widget_realize(widget);
-	} else {
+		gtk_widget_show_all(widget);
+	}
+	if(GTK_WIDGET_REALIZED(widget)){
 		gtk_widget_unrealize(widget);
 		gtk_widget_realize(widget);
 		if(GTK_WIDGET_VISIBLE(widget)){
@@ -515,7 +517,6 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 
 	if(GTK_WIDGET_REALIZED(widget)){
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, HIDE_ON_QUIT)){
-	/* TODO: figure out how to detect a sudden death of server */
 			gtk_widget_unrealize(widget);
 
 			if(priv->widget_visible){ /* fake to be unvisible, so
@@ -524,11 +525,6 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 				gtk_widget_show(widget);
 			} else /*we were realized*/
 				gtk_widget_realize(widget);
-	/* for a regular shutdown, following is enough 
-			gdk_window_reparent(priv->container, widget->window, 0, 0);
-			gdk_window_show(priv->container);
-			gdk_window_invalidate_rect(priv->container, NULL, TRUE);
-	*/
 		} else {
 			LOG("use quirk HIDE_ON_QUIT");
 			gtk_widget_unrealize(widget);
@@ -564,32 +560,23 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	LOG("vis=%d", vis);
-	if(!GTK_WIDGET_REALIZED(widget)){
+	if(!GTK_WIDGET_REALIZED(widget))
 		return;
-	}
-		if(vis){
-			if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
-				LOG("use force-show-all quirk");
-				gtk_widget_show_all(widget); /*FIXME: replace with what should be done here. show_all will invoke _map, but also something else*/
-			} else {
-				gtk_container_forall(GTK_CONTAINER(widget),
-					gtk_container_map_child,
-					NULL);
-			}
-			gdk_window_show(priv->container);
-			gdk_window_show(priv->floater);
-			GTK_WIDGET_SET_FLAGS(widget, GTK_VISIBLE);
-		}else {
-			gdk_window_hide(priv->container);
-			gdk_window_hide(priv->floater);
-			if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
-				LOG("use force-show-all quirk");
-				gtk_widget_hide_all(widget);
-			}else{
 
-			}
-			GTK_WIDGET_UNSET_FLAGS(widget, GTK_VISIBLE);
-		}	
+	if(vis){
+		gtk_container_forall(GTK_CONTAINER(widget),
+			gtk_container_map_child,
+			NULL);
+		gdk_window_show(priv->container);
+		gdk_window_show(priv->floater);
+
+		GTK_WIDGET_SET_FLAGS(widget, GTK_VISIBLE);
+	}else {
+		gdk_window_hide(priv->container);
+		gdk_window_hide(priv->floater);
+
+		GTK_WIDGET_UNSET_FLAGS(widget, GTK_VISIBLE);
+	}	
 	LOG("done");
 }
 static void _s_background_set	 		( GtkWidget  * widget, 
@@ -1096,6 +1083,7 @@ _do_size_allocate (GtkWidget * widget,
 
 	LOG_FUNC_NAME;
 	LOG("x=%d, y=%d, width=%d, height=%d\n", *allocation);
+
 	g_return_if_fail (GTK_IS_MENU_BAR (widget));
 	g_return_if_fail (allocation != NULL);
 
@@ -1112,8 +1100,7 @@ _do_size_allocate (GtkWidget * widget,
 	direction = gtk_widget_get_direction (widget);
 
 	gtk_widget_style_get (widget, "internal-padding", &ipadding, NULL);
-	LOG("internal-padding = %d", ipadding);
-	LOG("border_widget = %d", GTK_CONTAINER(menu_bar)->border_width);
+
 	pack_direction = gtk_menu_bar_get_pack_direction(menu_bar);
 	child_pack_direction = gtk_menu_bar_get_child_pack_direction(menu_bar);
   
