@@ -517,9 +517,13 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, HIDE_ON_QUIT)){
 	/* TODO: figure out how to detect a sudden death of server */
 			gtk_widget_unrealize(widget);
-			if(priv->widget_visible) {
+
+			if(priv->widget_visible){ /* fake to be unvisible, so
+										that _show will do real show work*/
+				GTK_WIDGET_UNSET_FLAGS(widget, GTK_VISIBLE);
 				gtk_widget_show(widget);
-			}
+			} else /*we were realized*/
+				gtk_widget_realize(widget);
 	/* for a regular shutdown, following is enough 
 			gdk_window_reparent(priv->container, widget->window, 0, 0);
 			gdk_window_show(priv->container);
