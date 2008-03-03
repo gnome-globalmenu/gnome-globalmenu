@@ -345,6 +345,7 @@ static void _s_data_arrival(GnomenuSocket * _self,
 	switch(enumvalue->value){
 		case GNOMENU_MSG_SERVER_NEW:
 			gnomenu_socket_connect(self, message->server_new.socket_id);
+		break;
 		case GNOMENU_MSG_SIZE_ALLOCATE:
 			{
 				GtkAllocation * allocation = g_new0(GtkAllocation, 1);
