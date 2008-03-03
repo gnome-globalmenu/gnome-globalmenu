@@ -63,6 +63,9 @@ typedef struct
 
 	gboolean disposed;
 	gboolean detached;
+
+	gboolean widget_visible;
+
 	GList * popup_items;
 
 	GnomenuClientHelper * helper;
@@ -84,6 +87,7 @@ static void _set_property      		( GObject *object, guint prop_id,
 									  const GValue *value, GParamSpec * pspec );
 static void _get_property			( GObject *object, guint prop_id, 
 									  GValue *value, GParamSpec * pspec );
+static void _notify 					( GObject * object, GParamSpec * pspec);
 
 /* GtkWidget interface */
 static void _size_request			( GtkWidget			* widget,
@@ -185,7 +189,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	gobject_class->get_property = _get_property;
 	gobject_class->set_property = _set_property;
 	gobject_class->dispose = _dispose;
-
+	gobject_class->notify = _notify;
 	gobject_class->finalize = _finalize;
 	gobject_class->constructor = _constructor;
 
@@ -513,9 +517,9 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, HIDE_ON_QUIT)){
 	/* TODO: figure out how to detect a sudden death of server */
 			gtk_widget_unrealize(widget);
-			gtk_widget_realize(widget);
-			gtk_widget_unmap(widget);
-			gtk_widget_map(widget);	
+			if(priv->widget_visible) {
+				gtk_widget_show(widget);
+			}
 	/* for a regular shutdown, following is enough 
 			gdk_window_reparent(priv->container, widget->window, 0, 0);
 			gdk_window_show(priv->container);
@@ -891,6 +895,7 @@ _unrealize (GtkWidget * widget){
 	gdk_window_destroy(priv->container);
 	gdk_window_destroy(priv->floater);
 	gnomenu_client_helper_send_unrealize(priv->helper);
+	GTK_WIDGET_UNSET_FLAGS(widget, GTK_REALIZED);
 }
 static void
 _map (GtkWidget * widget){
@@ -907,6 +912,15 @@ _map (GtkWidget * widget){
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_parent_class)->map(widget);
 }
 
+static void _notify 				( GObject * object, GParamSpec * pspec){
+	GET_OBJECT(object, menu_bar, priv);
+	gchar * name = g_param_spec_get_name(pspec);
+	if(g_str_equal(name, "visible")){
+		LOG("visible");
+		g_object_get(object, "visible", &priv->widget_visible, NULL);
+	}
+	//G_OBJECT_CLASS(gnomenu_menu_bar_parent_class)->notify(object, pspec);
+}
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	LOG_FUNC_NAME;
