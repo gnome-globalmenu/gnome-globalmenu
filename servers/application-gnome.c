@@ -18,14 +18,15 @@ G_DEFINE_TYPE		(ApplicationGnome, application_gnome, TYPE_APPLICATION);
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
-	ApplicationGnome *self;
+	Application * app;
 
-	GObject * _self = ( *G_OBJECT_CLASS(application_gnome_parent_class)->constructor)(type,
+	GObject * obj = ( *G_OBJECT_CLASS(application_gnome_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
-	self = APPLICATION_GNOME(_self);
-	_create_popup_menu(self);
-	return _self;
+	app = APPLICATION(obj);
+	_create_popup_menu(app);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
+	return obj;
 }
 
 static void _update_ui(Application *app)
@@ -39,7 +40,6 @@ static void _load_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
 	g_object_set(app,
 			"title-visible",
 			 panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL),
@@ -51,8 +51,6 @@ static void _save_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 	gboolean show_title, show_icon;
-/*	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
- *	FIXME: need this?*/
 	g_object_get(app, 
 			"title-visible", &show_title,
 			"icon-visible", &show_icon, NULL);
