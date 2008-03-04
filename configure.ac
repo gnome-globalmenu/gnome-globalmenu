@@ -103,6 +103,9 @@ AC_SUBST(GETTEXT_PACKAGE)
 
 AM_GLIB_GNU_GETTEXT
 
+AM_GCONF_SOURCE_2
+
+
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
 if test "$enable_gtk_doc" = "yes" ; then
