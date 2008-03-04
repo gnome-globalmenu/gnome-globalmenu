@@ -24,8 +24,10 @@ _constructor	( GType type, guint n_construct_properties,
 			n_construct_properties,
 			construct_params);
 	app = APPLICATION(obj);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
 	_create_popup_menu(app);
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/app/gnome-globalmenu-applet", NULL);
+	application_load_conf(app);
+	application_update_ui(app);
 	return obj;
 }
 

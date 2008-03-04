@@ -14,7 +14,7 @@
             <key>/schemas/apps/gnome-globalmenu-applet/prefs/show_title</key>
             <owner>gnome-globalmenu-applet</owner>
             <type>bool</type>
-            <default>TRUE</default>
+            <default>FALSE</default>
             <locale name="C">
 				<short> Whether or not show the active window's title</short>
 				<long> Whether or not show the active window's title</long>

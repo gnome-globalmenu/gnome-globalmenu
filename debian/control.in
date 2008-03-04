@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: gnome2-globalmenu-applet
 Architecture: i386
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends:libart-2.0-2 (>= 2.3.18), libatk1.0-0 (>= 1.13.2), libbonobo2-0 (>= 2.15.0), libbonoboui2-0 (>= 2.15.1), libc6 (>= 2.6-1), libcairo2 (>=1.4.0), libfontconfig1 (>= 2.4.0), libgconf2-4 (>= 2.13.5), libglib2.0-0 (>= 2.14.0), libgnome2-0 (>= 2.17.3), libgnomecanvas2-0 (>= 2.11.1), libgnomeui-0 (>= 2.19.1), libgnomevfs2-0 (>= 1:2.17.90), libgtk2.0-0 (>= 2.12.0), libice6 (>= 1:1.0.0), liborbit2 (>= 1:2.14.8), libpanel-applet2-0 (>= 2.19.3), libpango1.0-0 (>= 1.18.3), libpopt0 (>= 1.10), libsm6, libstartup-notification0 (>= 0.8-1), libwnck22 (>= 2.19.5), libx11-6, libxcomposite1 (>= 1:0.3-1), libxcursor1 (>> 1.1.2), libxdamage1 (>= 1:1.1), libxext6, libxfixes3 (>= 1:4.0.1), libxi6, libxinerama1, libxrandr2 (>= 2:1.2.0), libxrender1
 Description: Global menubar applet for Gnome
  The goal of this project is to make it possible 
  for the gnome applications' windows to share one
