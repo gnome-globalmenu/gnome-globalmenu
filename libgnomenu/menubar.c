@@ -161,7 +161,7 @@ static void _reset_style			( GtkWidget * widget);
 //#define gnomenu_menu_bar_get_type _gnomenu_menu_bar_get_type
 //G_DEFINE_TYPE (GnomenuMenuBar, gnomenu_menu_bar, GTK_TYPE_MENU_BAR)
 //#undef gnomenu_menu_bar_get_type
-static void gnomenu_menu_bar_init (GnomenuMenuBar * self);
+void gnomenu_menu_bar_init (GnomenuMenuBar * self);
 static void gnomenu_menu_bar_class_init (GnomenuMenuBarClass * klass);
 //static gpointer gnomenu_menu_bar_parent_class = NULL;
 static gpointer gnomenu_menu_bar_menu_shell_class = NULL;
@@ -191,7 +191,7 @@ GType gnomenu_menu_bar_get_type (void){
 	return g_define_type_id; 
 }
 
-void
+static void
 gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 {
 	GObjectClass *gobject_class;
@@ -237,9 +237,12 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
-static void
+void
 gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
+	LOG_FUNC_NAME;
+	GET_OBJECT(object, menu_bar, priv);
+	priv->helper = gnomenu_client_helper_new();
 }
 
 /**
@@ -299,7 +302,6 @@ static GObject* _constructor(GType type,
 
 	priv->popup_items = NULL;
 
-	priv->helper = gnomenu_client_helper_new();
 	priv->allocation.width = 200;
 	priv->allocation.height = 20;
 	priv->allocation.x = 0;

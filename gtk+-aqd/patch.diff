@@ -44,7 +44,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    gobject_class = (GObjectClass*) class;
    widget_class = (GtkWidgetClass*) class;
    menu_shell_class = (GtkMenuShellClass*) class;
-@@ -213,7 +241,9 @@
+@@ -213,13 +241,22 @@
  						   G_MAXINT,
  						   0,
  						   GTK_PARAM_READWRITE));
@@ -55,3 +55,16 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
  }
  
+ static void
+ gtk_menu_bar_init (GtkMenuBar *object)
+ {
++  gboolean * compatible = _libgnomenu_lookup("gnomenu_compatible");
++  void (*gnomenu_menu_bar_init)(gpointer obj)
++			= _libgnomenu_lookup("gnomenu_menu_bar_init");
++
++	if(compatible && * compatible && gnomenu_menu_bar_init) {
++		(*gnomenu_menu_bar_init)(object);
++	}
+ }
+ 
+ GtkWidget*
