@@ -1,14 +1,33 @@
-AM_CPPFLAGS = -I$(top_srcdir)
+AM_CPPFLAGS = -I$(top_srcdir) \
+				-DGNOMELOCALEDIR=\""$(prefix)/$(DATADIRNAME)/locale"\"	
 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 
 libexec_PROGRAMS =
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
-gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
-gnome_file_DATA = GNOME_GlobalMenuApplet.server
-schemadir= $(sysconfdir)/gconf/schemas
-schema_DATA= gnome-globalmenu-applet.schemas
+#gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
+#gnome_file_DATA = GNOME_GlobalMenuApplet.server
+
+APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
+
+serverdir       = $(libdir)/bonobo/servers
+server_in_files = GNOME_GlobalMenuApplet.server.in
+server_DATA     = $(server_in_files:.server.in=.server)
+
+$(server_in_files): $(server_in_files).in Makefile
+	sed -e "s|\@LOCATION\@|$(APPLET_LOCATION)|" \
+	    $< > $@
+@INTLTOOL_SERVER_RULE@
+
+#schemadir= @GCONF_SCHEMA_FILE_DIR@
+#schema_DATA= gnome-globalmenu-applet.schemas
+
+schemasdir       = $(sysconfdir)/gconf/schemas
+schemas_in_files = gnome-globalmenu-applet.schemas.in
+schemas_DATA     = $(schemas_in_files:.schemas.in=.schemas)
+@INTLTOOL_SCHEMAS_RULE@
+
 endif
 if ENABLE_XFCE_PLUGIN
 libexec_PROGRAMS += xfce-globalmenu-plugin
@@ -59,10 +78,17 @@ globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 
 				
 DISTCLEANFILES += $(server_file_DATA)
-EXTRA_DIST = make-gnome-data.sh make-xfce-data.sh
-EXTRA_DIST += gnome-globalmenu-applet.schemas.in
+EXTRA_DIST = make-xfce-data.sh \
+	gnome-globalmenu-applet.schemas.in \
+	GNOME_GlobalMenuApplet.server.in.in
 
-GNOME_GlobalMenuApplet.server:
-	/bin/sh $(srcdir)/make-gnome-data.sh $@ $(libexecdir)
+#GNOME_GlobalMenuApplet.server:
+#	/bin/sh $(srcdir)/make-gnome-data.sh $@ $(libexecdir)
+
 xfce-globalmenu-plugin.desktop:
 	/bin/sh $(srcdir)/make-xfce-data.sh $@ $(libexecdir)
+
+
+install-data-local:
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
+		gconftool-2 --makefile-install-rule $(schema_DATA)

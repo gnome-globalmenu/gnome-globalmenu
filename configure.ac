@@ -6,6 +6,8 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 GNOME_MAINTAINER_MODE_DEFINES
 
+IT_PROG_INTLTOOL([0.35.0])
+
 LIBGNOMENU_LT_VERSION=0:0:1
 AC_SUBST(LIBGNOMENU_LT_VERSION)
 AC_ISC_POSIX
@@ -95,6 +97,12 @@ AC_SUBST(TEST_SUITE_CFLAGS)
 AC_SUBST(TEST_SUITE_LIBS)
 
 
+GETTEXT_PACKAGE=gnome-globalmenu-applet
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Define the gettext package to be used])
+AC_SUBST(GETTEXT_PACKAGE)
+
+AM_GLIB_GNU_GETTEXT
+
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
 if test "$enable_gtk_doc" = "yes" ; then
@@ -107,12 +115,12 @@ fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
+po/Makefile.in
 gtk+-aqd/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
 libgnomenu/libgnomenu.pc
-servers/gnome-globalmenu-applet.schemas
 servers/Makefile
 test/Makefile
 )
