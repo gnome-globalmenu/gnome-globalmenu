@@ -82,9 +82,6 @@ EXTRA_DIST = make-xfce-data.sh \
 	gnome-globalmenu-applet.schemas.in \
 	GNOME_GlobalMenuApplet.server.in.in
 
-#GNOME_GlobalMenuApplet.server:
-#	/bin/sh $(srcdir)/make-gnome-data.sh $@ $(libexecdir)
-
 xfce-globalmenu-plugin.desktop:
 	/bin/sh $(srcdir)/make-xfce-data.sh $@ $(libexecdir)
 
