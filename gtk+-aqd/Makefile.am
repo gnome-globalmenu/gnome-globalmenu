@@ -6,3 +6,5 @@ patch:
 	patch -p0 < patch.diff
 diff:
 	svn diff gtk+-aqd > patch.diff
+dist:
+	cp patch.diff gtk2-aqd.patch
