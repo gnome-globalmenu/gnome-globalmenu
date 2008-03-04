@@ -13,7 +13,7 @@ gnome_globalmenu_doc_DATA = \
     ChangeLog\
     INSTALL\
     NEWS
-
+EXTRA_DIST = intltool-extract.in intltool-merge.in intltool-update.in
 dist-hook:
 	for specfile in *.spec.in; do \
         if test -f $$specfile; then \
