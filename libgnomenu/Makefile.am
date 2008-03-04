@@ -85,7 +85,6 @@ gnomenu-enums.h: $(gnomenu_enum_headers)
         $(gnomenu_enum_headers) > $@ 
 
 
-CLEANFILES = 
-#$(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES)
 dist-hook:
 	cd $(distdir) ; rm -f $(CLEANFILES)
