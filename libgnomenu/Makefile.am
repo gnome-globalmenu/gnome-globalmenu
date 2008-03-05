@@ -47,9 +47,9 @@ conf_DATA = libgnomenu.conf
 EXTRA_DIST = gnomenu-marshall.list libgnomenu.conf
 
 gnomenu-marshall.c: gnomenu-marshall.list
-	glib-genmarshal --internal --body --prefix=gnomenu_marshall gnomenu-marshall.list > $@
+	glib-genmarshal --internal --body --prefix=gnomenu_marshall $< > $@
 gnomenu-marshall.h: gnomenu-marshall.list
-	glib-genmarshal --internal --header --prefix=gnomenu_marshall gnomenu-marshall.list > $@
+	glib-genmarshal --internal --header --prefix=gnomenu_marshall $< > $@
 
 gnomenu_enum_headers = messages.h socket.h quirks.h
 
@@ -85,7 +85,7 @@ gnomenu-enums.h: $(gnomenu_enum_headers)
              --eprod "GEnumValue * @enum_name@_get_value (gint i);\n" \
         $(gnomenu_enum_headers) > $@ 
 
-
 CLEANFILES = $(BUILT_SOURCES)
+
 dist-hook:
-	cd $(distdir) ; rm -f $(CLEANFILES)
+	cd $(distdir) ;
