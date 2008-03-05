@@ -321,19 +321,26 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
-	GObject * _self;
-	GnomenuSocket * self ;
-	GnomenuSocketPrivate * priv;
+	GObject * _self = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)
+						( type,
+						  n_construct_properties,
+						  construct_params);
+	GET_OBJECT(_self, self, priv);
+	self->queue = g_queue_new();
+	self->acks = 0;
+	self->alives = 0;
+	priv->disposed = FALSE;
+
+	gdk_window_add_filter(self->window, _window_filter_cb, self);
+
+	return _self;
+}
+
+static void
+gnomenu_socket_init (GnomenuSocket * _self){
 	GdkWindowAttr attr;
 	GdkWindowAttributesType mask;
-	gchar *name;
-
-	_self = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)(type,
-			n_construct_properties,
-			construct_params);
-	self =  SELF;
-
-	priv = PRIV;
+	GET_OBJECT(_self, self, priv);
 
 	self->display = gdk_display_get_default();
 	attr.title = self->name;
@@ -342,20 +349,6 @@ _constructor	( GType type, guint n_construct_properties,
 	mask = GDK_WA_TITLE;
 
 	self->window = gdk_window_new(NULL, &attr, mask);
-
-	self->queue = g_queue_new();
-	self->acks = 0;
-	self->alives = 0;
-
-	gdk_window_add_filter(self->window, _window_filter_cb, self);
-	priv->disposed = FALSE;
-
-	return _self;
-}
-
-static void
-gnomenu_socket_init (GnomenuSocket * _self){
-/* Do nothing */
 }
 
 /**
