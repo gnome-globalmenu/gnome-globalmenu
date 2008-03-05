@@ -343,10 +343,11 @@ gnomenu_socket_init (GnomenuSocket * _self){
 	GET_OBJECT(_self, self, priv);
 
 	self->display = gdk_display_get_default();
-	attr.title = self->name;
+	attr.title = "";
 	attr.wclass = GDK_INPUT_ONLY;
 	attr.window_type = GDK_WINDOW_TEMP;
-	mask = GDK_WA_TITLE;
+	mask = 0;
+	//mask = GDK_WA_TITLE;
 
 	self->window = gdk_window_new(NULL, &attr, mask);
 }
@@ -797,6 +798,7 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		case PROP_NAME:
 			g_free(self->name);
 			self->name = g_value_dup_string(value);
+			gdk_window_set_title(self->window, self->name);
 		break;
 		case PROP_TARGET:
 			self->target = g_value_get_uint(value);
