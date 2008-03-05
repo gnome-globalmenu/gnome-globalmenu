@@ -505,6 +505,9 @@ _s_size_allocate (GtkWidget * widget,
 	GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
+
+	if(memcmp(&priv->allocation, allocation, sizeof(GtkAllocation))) return;
+
 	priv->allocation = *allocation;	
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move_resize(priv->floater,
@@ -624,7 +627,6 @@ static void _s_background_set	 		( GtkWidget  * widget,
 		gint d;
 		gint dw;
 		gdk_drawable_get_size(pixmap, &w, &h);
-		LOG("not implemented for pixmap bg yet");
 		LOG("size of pixmap, %d, %d", w, h);
 		d = gdk_drawable_get_depth(pixmap);
 		dw = gdk_drawable_get_depth(priv->container);
