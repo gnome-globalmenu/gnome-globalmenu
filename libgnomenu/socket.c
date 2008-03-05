@@ -889,7 +889,7 @@ static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID ta
  */
 static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 /* The socket has already been destroyed.*/
-	g_return_value_if_fail(!GNOMENU_IS_SOCKET(_self), FALSE);
+	g_return_val_if_fail(!GNOMENU_IS_SOCKET(_self), FALSE);
 	LOG_FUNC_NAME;
 	if(_self->status != GNOMENU_SOCKET_CONNECTED) return FALSE;
 	LOG("alives = %d", _self->alives);
