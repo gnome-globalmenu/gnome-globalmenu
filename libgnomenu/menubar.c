@@ -95,7 +95,8 @@ static void _set_property      		( GObject *object, guint prop_id,
 									  const GValue *value, GParamSpec * pspec );
 static void _get_property			( GObject *object, guint prop_id, 
 									  GValue *value, GParamSpec * pspec );
-static void _notify 					( GObject * object, GParamSpec * pspec);
+static void _s_notify_visible		( GObject * object, GParamSpec * pspec, gpointer data);
+static void _s_notify_quirk		( GObject * object, GParamSpec * pspec, gpointer data);
 
 /* GtkWidget interface */
 static void _size_request			( GtkWidget			* widget,
@@ -107,6 +108,7 @@ static void _unrealize 				( GtkWidget * widget);
 static void _map 					( GtkWidget * widget);
 static gint _expose 				( GtkWidget       *widget,
 									  GdkEventExpose  *event);
+/* GtkWidget interface handlers */
 static gboolean _s_motion_notify_event( GtkWidget * widget, 
 									  GdkEventMotion * event,
 									  gpointer userdata);
@@ -207,7 +209,6 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	gobject_class->get_property = _get_property;
 	gobject_class->set_property = _set_property;
 	gobject_class->dispose = _dispose;
-	gobject_class->notify = _notify;
 	gobject_class->finalize = _finalize;
 	gobject_class->constructor = _constructor;
 
@@ -336,6 +337,11 @@ static GObject* _constructor(GType type,
 				G_CALLBACK(_s_button_press_event), priv->helper);
 	g_signal_connect(G_OBJECT(menu_bar), "motion-notify-event",
 				G_CALLBACK(_s_motion_notify_event), priv->helper);
+
+	g_signal_connect(G_OBJECT(menu_bar), "notify::visible",
+				G_CALLBACK(_s_notify_visible), NULL);
+	g_signal_connect(G_OBJECT(menu_bar), "notify::quirk",
+				G_CALLBACK(_s_notify_quirk), NULL);
 	return object;
 }
 
@@ -518,10 +524,6 @@ static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, Gn
 	GtkWidget * toplevel;
 	GET_OBJECT(widget, menu_bar, priv);
 	priv->detached = TRUE;
-	if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(widget)){
-		gtk_widget_realize(widget);
-		gtk_widget_show_all(widget);
-	}
 	if(GTK_WIDGET_REALIZED(widget)){
 		gtk_widget_unrealize(widget);
 		gtk_widget_realize(widget);
@@ -918,12 +920,17 @@ _map (GtkWidget * widget){
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_menu_shell_class)->map(widget);
 }
 
-static void _notify 				( GObject * object, GParamSpec * pspec){
+static void _s_notify_visible 				( GObject * object, GParamSpec * pspec, gpointer data){
 	GET_OBJECT(object, menu_bar, priv);
-	gchar * name = g_param_spec_get_name(pspec);
-	if(g_str_equal(name, "visible")){
-		LOG("visible");
-		g_object_get(object, "visible", &priv->widget_visible, NULL);
+	g_object_get(object, "visible", &priv->widget_visible, NULL);
+}
+static void _s_notify_quirk 				( GObject * object, GParamSpec * pspec, gpointer data){
+	GET_OBJECT(object, menu_bar, priv);
+	LOG_FUNC_NAME;
+	
+	if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(menu_bar)){
+		gtk_widget_realize(menu_bar);
+		gtk_widget_show_all(menu_bar);
 	}
 }
 static void
