@@ -212,9 +212,6 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 			);
 }
 
-static void
-gnomenu_server_helper_init(GnomenuServerHelper * self){
-}
 
 /**
  * gnomenu_server_helper_new:
@@ -235,22 +232,21 @@ gnomenu_server_helper_new(){
 	gnomenu_socket_broadcast_by_name(GNOMENU_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 	return _self;
 }
+
+static void
+gnomenu_server_helper_init(GnomenuServerHelper * self){
+	self->clients = NULL;
+}
 /**
  * Construtors and Destructors
  */
 static GObject* _constructor(
 		GType type, guint n_construct_properties, GObjectConstructParam *construct_params){
-	GObject *obj;
-	GnomenuServerHelper * self;
-	GnomenuServerHelperPrivate * priv;
-		
-	obj = ( *G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->constructor)(type,
+	GObject *obj = ( *G_OBJECT_CLASS(gnomenu_server_helper_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
-	self = GNOMENU_SERVER_HELPER(obj);
+	GET_OBJECT(obj, self, priv);
 
-	priv = GNOMENU_SERVER_HELPER_GET_PRIVATE(self);
-	self->clients = NULL;
 	priv->disposed = FALSE;
 	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_s_connect_req), NULL);
 

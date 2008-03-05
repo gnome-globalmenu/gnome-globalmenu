@@ -268,21 +268,16 @@ gnomenu_client_helper_new(){
 
 static GObject* _constructor(GType type, guint n_construct_properties,
 		GObjectConstructParam *construct_params){
-	GObject * _self;
-	GnomenuClientHelper * self;
-	GnomenuClientHelperPrivate * priv;
-	
-	_self = (*G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->constructor)(type,
+	GObject * _self = (*G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
 
-	self = SELF;
-	priv = PRIV;
+	GET_OBJECT(_self, self, priv);
 
+	priv->disposed = FALSE;
 	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_s_data_arrival), NULL);
 	g_signal_connect(G_OBJECT(self), "connected", G_CALLBACK(_s_connected), NULL);
 	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_s_shutdown), NULL);
-	priv->disposed = FALSE;
 /* try to connect to the server */
 	gnomenu_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
 
