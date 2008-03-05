@@ -171,33 +171,3 @@ GnomenuQuirkMask gnomenu_get_detail_quirk(gchar * detail){
 	g_queue_foreach(_get_quirks(), _match_quirk, &data);
 	return data.rt;
 }
-/**
- * gnomenu_menu_bar_type:
- *
- * Zero if GtkMenuBar shall not be replaced by GnomenuMenuBar.
- * Or else the value of gnomenu_menu_bar_get_type();
- * */
-GType gnomenu_menu_bar_type = 0;
-/*disable gtk_menu_bar_get_type hack by default*/
-gboolean gnomenu_compatible = FALSE;
-void gtk_module_init(int * argc, char **argv[]){
-/*initialize */
-	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
-	LOG("work as a gtk_module");
-	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
-	/*disable gtk_menu_bar_get_type hack*/
-		gnomenu_menu_bar_type = 0; 
-	} else {
-		gnomenu_compatible = TRUE;
-/**
- * register GnomenuMenuBar as "GtkMenuBar" 
- * register GtkMenuBar as "GtkOldMenuBar"
- * gtk-aqd assures GTK_TYPE_MENU_BAR's behavior:
- *	if gnomenu_menu_bar_type is not initialized yet,
- *		returns GtkOldMenuBar's GType,
- *	if gnomenu_menu_bar_type is initialized,
- * 		returns gnomenu_menu_bar_type instead.
- */
-		gnomenu_menu_bar_type = gnomenu_menu_bar_get_type();
-	}
-}
