@@ -48,6 +48,7 @@ enum {
 typedef struct _GnomenuSocketPrivate GnomenuSocketPrivate;
 struct _GnomenuSocketPrivate {
 	gboolean disposed;
+	guint time_source;
 	int foo;
 };
 /**
@@ -347,6 +348,7 @@ gnomenu_socket_init (GnomenuSocket * _self){
 	attr.wclass = GDK_INPUT_ONLY;
 	attr.window_type = GDK_WINDOW_TEMP;
 	mask = 0;
+	priv->time_source = 0;
 	//mask = GDK_WA_TITLE;
 
 	self->window = gdk_window_new(NULL, &attr, mask);
@@ -409,6 +411,8 @@ _dispose (GObject * _self){
 	GET_OBJECT(_self, self, priv);
 	if(! priv->disposed){
 		gdk_window_remove_filter(self->window, _window_filter_cb, self);
+		if(priv->time_source)
+			g_source_remove(priv->time_source);
 		priv->disposed = TRUE;	
 	}
 	G_OBJECT_CLASS(gnomenu_socket_parent_class)->dispose(_self);
@@ -755,7 +759,9 @@ static void _c_connect_req(GnomenuSocket * _self,
 static void _c_connected(GnomenuSocket * _self,
 	GnomenuSocketNativeID target){
 	LOG_FUNC_NAME;
-	g_timeout_add_seconds(_self->timeout, _gnomenu_socket_is_alive, _self);
+	GET_OBJECT(_self, self, priv);
+	
+	priv->time_source = g_timeout_add_seconds(self->timeout, _gnomenu_socket_is_alive, self);
 }
 static void _c_shutdown (GnomenuSocket * _self){
 	GnomenuSocketMessage * queue_message;
@@ -882,7 +888,8 @@ static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID ta
  * Returns: usually TRUE, unless the connection is dead.
  */
 static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
-	g_return_val_if_fail(GNOMENU_IS_SOCKET(_self), FALSE); /*The socket already is destroyed*/
+/* The socket has already been destroyed.*/
+	g_return_value_if_fail(!GNOMENU_IS_SOCKET(_self), FALSE);
 	LOG_FUNC_NAME;
 	if(_self->status != GNOMENU_SOCKET_CONNECTED) return FALSE;
 	LOG("alives = %d", _self->alives);
