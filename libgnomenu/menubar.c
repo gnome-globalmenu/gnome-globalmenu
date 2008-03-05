@@ -96,7 +96,6 @@ static void _set_property      		( GObject *object, guint prop_id,
 static void _get_property			( GObject *object, guint prop_id, 
 									  GValue *value, GParamSpec * pspec );
 static void _s_notify_visible		( GObject * object, GParamSpec * pspec, gpointer data);
-static void _s_notify_quirk		( GObject * object, GParamSpec * pspec, gpointer data);
 
 /* GtkWidget interface */
 static void _size_request			( GtkWidget			* widget,
@@ -340,8 +339,7 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(G_OBJECT(menu_bar), "notify::visible",
 				G_CALLBACK(_s_notify_visible), NULL);
-	g_signal_connect(G_OBJECT(menu_bar), "notify::quirk",
-				G_CALLBACK(_s_notify_quirk), NULL);
+
 	return object;
 }
 
@@ -377,7 +375,16 @@ _set_property (GObject      *object,
 			gtk_menu_bar_set_child_pack_direction (self, g_value_get_enum (value));
 		break;
 		case PROP_QUIRK:
-			priv->quirk = g_value_get_flags (value);
+			{
+			GnomenuQuirkMask q = g_value_get_flags (value);
+			if(priv->quirk != q){
+				priv->quirk = q;
+				if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(self)){
+					gtk_widget_realize(self);
+					gtk_widget_show_all(self);
+				}
+			}
+			}
 		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -925,15 +932,6 @@ _map (GtkWidget * widget){
 static void _s_notify_visible 				( GObject * object, GParamSpec * pspec, gpointer data){
 	GET_OBJECT(object, menu_bar, priv);
 	g_object_get(object, "visible", &priv->widget_visible, NULL);
-}
-static void _s_notify_quirk 				( GObject * object, GParamSpec * pspec, gpointer data){
-	GET_OBJECT(object, menu_bar, priv);
-	LOG_FUNC_NAME;
-	
-	if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(menu_bar)){
-		gtk_widget_realize(menu_bar);
-		gtk_widget_show_all(menu_bar);
-	}
 }
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
