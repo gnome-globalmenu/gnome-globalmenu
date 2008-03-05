@@ -188,6 +188,7 @@ static void
 _set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
 	LOG("set property");
 	GET_OBJECT(_self, self, priv);
+	gboolean dirty = FALSE;
 	switch (property_id){
 /*
 		case PROP_WINDOW:
@@ -198,21 +199,38 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		break;
 */
 		case PROP_BGCOLOR:
+			{
+			GdkColor * newcolor = g_value_get_boxed(value);
+			if(!gdk_color_equal(newcolor, self->bgcolor)){
+				LOG("BGCOLOR dirty");
+				dirty = TRUE;
+			}
 			if(self->bgcolor) 
 				g_boxed_free(GDK_TYPE_COLOR, self->bgcolor);
 			self->bgcolor = g_value_dup_boxed(value);
-			if(self->active)
-			gnomenu_server_helper_set_background(self->gtk_helper, self->active->handle, self->bgcolor, self->bgpixmap);
+			}
 		break;
 		case PROP_BGPIXMAP:
+			if(self->bgpixmap != NULL && g_value_get_object(value)!= NULL){
+				LOG("BGPIXMAP dirty");
+				dirty = TRUE;
+			}
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
 			self->bgpixmap = g_value_get_object(value);
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_ref(self->bgpixmap);
-			if(self->active)
-			gnomenu_server_helper_set_background(self->gtk_helper, self->active->handle, self->bgcolor, self->bgpixmap);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
+	if(dirty) {
+		GList * node;
+		GnomenuClientInfo * ci;
+		for(node = g_list_first(self->gtk_helper->clients);
+			node;
+			node = g_list_next (node)){
+			ci = node->data;
+			gnomenu_server_helper_set_background(self->gtk_helper, ci, self->bgcolor, self->bgpixmap);
+		}
 	}
 }
 static void 
@@ -283,6 +301,7 @@ static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, Gnomen
 	LOG("c->window: %p", ci->ui_window);
 	g_assert(c->window);
 	gdk_window_reparent(c->window, widget->window, 0, 0);
+	gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
 }
 static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
@@ -351,7 +370,6 @@ static void _update_active_menu_bar (MenuServer * _self){
 				case MENU_CLIENT_GTK:
 					if(c->window)
 						gdk_window_reparent(c->window, widget->window, 0, 0);
-					gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
 					gnomenu_server_helper_set_visibility(_self->gtk_helper, c->handle, TRUE);
 				break;
 				case MENU_CLIENT_KDE:
