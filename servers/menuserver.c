@@ -402,8 +402,9 @@ static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
 	GList * node;
 	GET_OBJECT(widget, server, priv);
 	GnomenuClientInfo * ci;
-	gint w = 10;
-	gint h = 10;
+	gint w = -1;
+	gint h = -1;
+/*
 	if(server->active){
 		ci = server->active->handle;
 		w = MAX(ci->requisition.width , w);
@@ -417,6 +418,7 @@ static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
 		w = MAX(ci->requisition.width , w);
 		h = MAX(ci->requisition.height, h);
 	}
+*/
 	requisition->width = w;
 	requisition->height = h;
 	widget->requisition = * requisition;
@@ -427,6 +429,7 @@ static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 	MenuClient * c = self->active;
 	a.x = 0;
 	a.y = 0;
+	LOG("w = %d, h = %d", allocation->width, allocation->height);
 	if(c)
 	switch(c->type){
 		case MENU_CLIENT_GTK:
