@@ -10,3 +10,5 @@ include /usr/share/gnome-pkg-tools/1/rules/clean-la.mk
 
 makebuilddir::
 	test -r $(CURDIR)/configure || NOCONFIGURE=yes $(CURDIR)/autogen.sh
+
+DEB_CONFIGURE_EXTRA_FLAGS += --enable-tracing=no

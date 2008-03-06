@@ -409,7 +409,8 @@ static void _update_background(Application * app){
 
 	g_object_set(app->server, "bg-color", color, 
 							"bg-pixmap", cropped, NULL);
-	g_object_unref(cropped);
+	if(cropped);
+		g_object_unref(cropped);
 	utils_set_widget_background(app->server, color, cropped);	
 }
 /* END: tool functions*/

@@ -201,7 +201,7 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		case PROP_BGCOLOR:
 			{
 			GdkColor * newcolor = g_value_get_boxed(value);
-			if(!gdk_color_equal(newcolor, self->bgcolor)){
+			if(self->bgcolor && !gdk_color_equal(newcolor, self->bgcolor)){
 				LOG("BGCOLOR dirty");
 				dirty = TRUE;
 			}
@@ -386,7 +386,8 @@ static void _update_active_menu_bar (MenuServer * _self){
 static void 
 	_s_screen_active_window_changed	(MenuServer * _self, WnckWindow * previous, WnckScreen * screen){
 	WnckWindow * active = wnck_screen_get_active_window(_self->screen);
-	if(wnck_window_get_pid(active) == getpid()){
+	if (!active) return;
+	if( wnck_window_get_pid(active) == getpid()){
 		return;
 	}
 	_update_active_menu_bar(_self);
