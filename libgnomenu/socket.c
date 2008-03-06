@@ -881,6 +881,22 @@ static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID ta
 	gdk_flush();
     return gdk_error_trap_pop () == 0;
 }
+static gboolean _socket_exist(GnomenuSocket * self, GnomenuSocketNativeID window){
+	GdkNativeWindow root_return;
+	GdkNativeWindow parent_return;
+	GdkNativeWindow * children_return;
+	guint 	nchildren_return;
+	gdk_error_trap_push();
+	XQueryTree(GDK_DISPLAY_XDISPLAY(self->display),
+			window, 
+			&root_return ,&parent_return, 
+			&children_return, &nchildren_return);
+	if(gdk_error_trap_pop()) return FALSE;
+	else {
+		XFree(children_return);
+	}
+	return TRUE;
+}
 /**
  * _gnomenu_socket_is_alive:
  * @self:
@@ -893,7 +909,8 @@ static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 	LOG_FUNC_NAME;
 	if(_self->status != GNOMENU_SOCKET_CONNECTED) return FALSE;
 	LOG("alives = %d", _self->alives);
-	if(_self->alives >2) /*FIXME: which number is better?*/{
+	if(_self->alives > 2 && ! _socket_exist(_self, _self->target)) /*FIXME: which number is better?*/{
+		
 		LOG("The peer is non responding for too long. shutdown the connection");
 		g_signal_emit(_self,
 				class_signals[SHUTDOWN],
