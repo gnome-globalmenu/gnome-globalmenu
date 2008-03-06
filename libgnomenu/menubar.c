@@ -291,10 +291,12 @@ static GObject* _constructor(GType type,
 	GET_OBJECT(object, menu_bar, priv);
 
 	gtk_container_set_border_width(object, 0);
+/*
 	style = gtk_style_copy (GTK_WIDGET(object)->style);
 	style->xthickness = 0;
 	style->ythickness = 0;
 	gtk_widget_set_style (GTK_WIDGET(object), style);
+*/
 	g_object_unref (style);
 
 	priv->disposed = FALSE;
@@ -513,7 +515,7 @@ _s_size_allocate (GtkWidget * widget,
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 
-	if(memcmp(&priv->allocation, allocation, sizeof(GtkAllocation))) return;
+	if(!memcmp(&priv->allocation, allocation, sizeof(GtkAllocation))) return;
 
 	priv->allocation = *allocation;	
 	if(GTK_WIDGET_REALIZED(widget)){
