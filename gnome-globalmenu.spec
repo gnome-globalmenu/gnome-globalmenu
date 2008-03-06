@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn674
+%define svn_version svn676
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	2%{?dist}
@@ -64,17 +64,17 @@ make DESTDIR=%{buildroot} install
 %clean
 rm -rf %{buildroot}
 
-%pre
-#export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
-#gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome2-globalmenu-applet.schema  >& /dev/null || :
+%pre -n gnome-globalmenu-applet
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas  >& /dev/null || :
 
-%post
-#export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
-#gconftool-2 --makefile-install-rule %{_sysconfdir}/gconf/schemas/gnome2-globalmenu-applet.schema >& /dev/null || :
+%post -n gnome-globalmenu-applet
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-install-rule %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas >& /dev/null || :
 
-%preun
-#export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
-#gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome2-globalmenu-applet.schema >& /dev/null || :
+%preun -n gnome-globalmenu-applet
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas >& /dev/null || :
 
 
 %files -n libgnomenu
@@ -118,6 +118,8 @@ rm -rf %{buildroot}
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
+* Fri Mar 5 2008 Feng Yu <rainwoodman@gmail.com>
+- Enable schemas.
 * Fri Feb 29 2008 Feng Yu <rainwoodman@gmail.com>
 - Split into many sub packages.
 * Mon Jan 14 2008 Feng Yu <rainwoodman@gmail.com>

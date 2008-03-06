@@ -71,6 +71,7 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 	}
 	if(button == sudden){
 		socket1->status = GNOMENU_SOCKET_DISCONNECTED;
+		g_object_unref(socket1);
 	}
 }
 static void broadcast_clicked_cb(GtkButton * button, gpointer user_data){
