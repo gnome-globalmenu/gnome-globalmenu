@@ -383,7 +383,6 @@ _set_property (GObject      *object,
 				priv->quirk = q;
 				if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(self)){
 					gtk_widget_realize(self);
-					gtk_widget_show_all(self);
 				}
 			}
 			}
@@ -564,7 +563,7 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 				gtk_widget_realize(widget);
 		} else {
 			LOG("use quirk HIDE_ON_QUIT");
-			gtk_widget_unrealize(widget);
+		//	gtk_widget_unrealize(widget);
 			gtk_widget_hide_all(widget);
 		}
 	}
@@ -601,6 +600,9 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 		return;
 
 	if(vis){
+		if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL)){
+			gtk_widget_show_all(widget);
+		}
 		gtk_container_forall(GTK_CONTAINER(widget),
 			gtk_container_map_child,
 			NULL);
