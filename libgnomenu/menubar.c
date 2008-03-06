@@ -105,6 +105,7 @@ static void _size_allocate			( GtkWidget			* widget,
 static void _realize 				( GtkWidget * widget);
 static void _unrealize 				( GtkWidget * widget);
 static void _map 					( GtkWidget * widget);
+static void _style_set				( GtkWidget * widget, GtkStyle * previous_style);
 static gint _expose 				( GtkWidget       *widget,
 									  GdkEventExpose  *event);
 /* GtkWidget interface handlers */
@@ -217,7 +218,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	widget_class->realize = _realize;
 	widget_class->unrealize = _unrealize;
 	widget_class->map = _map;
-
+	widget_class->style_set = _style_set;
 //	menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
 	menu_shell_class->insert = _insert;
 
@@ -693,6 +694,11 @@ static gboolean _s_motion_notify_event	( GtkWidget * widget,
 	LOG_FUNC_NAME;
 	}
 	return FALSE;
+}
+static void _style_set				( GtkWidget * widget, GtkStyle * previous_style){
+	GET_OBJECT(widget, menu_bar, priv);
+	if (GTK_WIDGET_REALIZED(widget))
+    gtk_style_set_background (widget->style, priv->container, widget->state);
 }
 static gint
 _expose (GtkWidget      *widget,
