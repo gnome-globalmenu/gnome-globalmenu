@@ -81,7 +81,7 @@ int main (int argc, char * argv []){
 	vbox = gtk_vbox_new(FALSE, 0);
 	hbox = gtk_hbox_new(FALSE, 0);
 
-	container = gtk_handle_box_new();
+	container = gtk_event_box_new();
 	gtk_container_set_border_width(container, 0);
 
 	gtk_box_pack_start(hbox, container, TRUE, TRUE, 0);
