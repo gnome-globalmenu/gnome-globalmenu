@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn706
+%define svn_version svn713
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -103,6 +103,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/share/doc/gnome-globalmenu/ChangeLog
 /usr/share/doc/gnome-globalmenu/INSTALL
 /usr/share/doc/gnome-globalmenu/NEWS
+/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n libgnomenu-devel
 %defattr(-, root, root)
@@ -119,22 +120,26 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 %files -n gtk-globalmenu-server
 %defattr(-, root, root)
 /usr/bin/gtk-globalmenu-server
+/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)
 /usr/libexec/gnome-globalmenu-applet
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 /etc/gconf/schemas/gnome-globalmenu-applet.schemas
+/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
 /usr/libexec/xfce-globalmenu-plugin
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
+/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 
 %changelog 
 * Fri Mar 7 2008 Feng Yu <rainwoodman@gmail.com>
 - Install doc
-- Add depencency
+- Added depencency
+- Added the mo file.
 * Fri Mar 5 2008 Feng Yu <rainwoodman@gmail.com>
 - Enable schemas.
 * Fri Feb 29 2008 Feng Yu <rainwoodman@gmail.com>
