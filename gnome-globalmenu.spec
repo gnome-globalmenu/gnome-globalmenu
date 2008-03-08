@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn676
+%define svn_version svn703
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	2%{?dist}
@@ -30,25 +30,35 @@ Requires: gtk2
 Summary: libgnomenu Provides global menu widget GnomenuMenuBar
 Group:		User Interface/Desktops
 Requires: gtk2
+Requires: libgnomenu
 %description -n libgnomenu-devel
 
 %package -n gnome-globalmenu-applet
-Requires: libgnomenu
 Summary: gnome-panel applet for global menu.
 Group:		User Interface/Desktops
+Requires: libgnomenu
+Requires: libwnck
+Requires: gnome-panel
+
 %description -n gnome-globalmenu-applet
 
 %package -n xfce-globalmenu-plugin
 Summary: xfce-panel plugin for global menu.
 Requires: libgnomenu
+Requires: libwnck
+Requires: xfce4-panel
+
 Group:		User Interface/Desktops
 %description -n xfce-globalmenu-plugin
 
 %package -n gnomenu-server
 Summary: standalone mene server for global menu.
 Requires: libgnomenu
+Requires: libwnck
 Group:		User Interface/Desktops
 %description -n gnomenu-server
+
+
 
 %prep
 %setup -q -n gnome-globalmenu-%{base_version}
@@ -60,6 +70,9 @@ make
 %install
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
+./mkinstalldirs tmpdocs
+./mkinstalldirs tmpdocs/reference
+cp -aR doc/reference/libgnomenu/html tmpdocs/reference/libgnomenu
 
 %clean
 rm -rf %{buildroot}
@@ -101,7 +114,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/include/libgnomenu/socket.h
 /usr/lib/pkgconfig/libgnomenu.pc
 /usr/share/doc/gnome-globalmenu/README
-
+%doc tmpdocs/reference
 %files -n gnomenu-server
 %defattr(-, root, root)
 /usr/libexec/globalmenu-server
@@ -118,6 +131,9 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
+* Fri Mar 7 2008 Feng Yu <rainwoodman@gmail.com>
+- Install doc
+- Add depencency
 * Fri Mar 5 2008 Feng Yu <rainwoodman@gmail.com>
 - Enable schemas.
 * Fri Feb 29 2008 Feng Yu <rainwoodman@gmail.com>
