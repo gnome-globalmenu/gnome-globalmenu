@@ -13,10 +13,7 @@ HOW DOES IT WORK
 
 After several major changes in the framework, we ended up with very little modifications in GTK.
 The patch only does 1 thing:
-	1) search for gnomenu_menu_bar_type when gtk_menu_bar_get_type is invoked.
-		if found, return it to tell every application to use GnomenuMenuBar,
-		if not found, return GTK_MENU_BAR, to tell them to use GtkMenuBar.
-
+	if gnomenu_compatible is defined  and is 1, it will call gnomenu_menu_bar_class_init and gnomenu_menu_bar_init when gtk_menu_bar_xxx is invoked.
 
 HACKING
 ========
