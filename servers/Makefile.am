@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir) \
-				-DGNOMELOCALEDIR=\""$(prefix)/$(DATADIRNAME)/locale"\"	
+				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\"
 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 

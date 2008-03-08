@@ -70,7 +70,14 @@ int main (int argc, char * argv []){
 	int i;
 	Application * app;
 
+#ifdef ENABLE_NLS
+	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
+#endif
+
 	gtk_init(&argc, &argv);
+	
 	context = g_option_context_new("Application parameters");	
 	g_option_context_add_main_entries ( context, entries, GETTEXT_PACKAGE);
 	g_option_context_add_group ( context, gtk_get_option_group (TRUE));
