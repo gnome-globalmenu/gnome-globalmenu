@@ -14,6 +14,7 @@ HOW DOES IT WORK
 After several major changes in the framework, we ended up with very little modifications in GTK.
 The patch only does 1 thing:
 	if gnomenu_compatible is defined  and is 1, it will call gnomenu_menu_bar_class_init and gnomenu_menu_bar_init when gtk_menu_bar_xxx is invoked.
+NOTE: libgnomenu has to be loaded by GTK_MODULES
 
 HACKING
 ========

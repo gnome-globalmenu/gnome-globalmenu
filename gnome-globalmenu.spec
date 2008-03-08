@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn713
+%define svn_version svn720
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -104,6 +104,9 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/share/doc/gnome-globalmenu/INSTALL
 /usr/share/doc/gnome-globalmenu/NEWS
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/doc/gnome-globalmenu/gtk+-aqd/README
+/usr/share/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
+
 
 %files -n libgnomenu-devel
 %defattr(-, root, root)
