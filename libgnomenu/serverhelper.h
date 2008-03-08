@@ -116,5 +116,6 @@ void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuCli
 			gboolean vis);
 void gnomenu_server_helper_set_background(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkColor * color, GdkPixmap * pixmap);
+gboolean gnomenu_server_helper_start(GnomenuServerHelper * self);
 G_END_DECLS
 #endif

@@ -269,9 +269,6 @@ _constructor	( GType type, guint n_construct_properties,
 	app->server = menu_server_new();
 	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->server), TRUE, TRUE, 0);
 
-//	application_load_conf(app);
-//	application_update_ui(app);
-
 	g_signal_connect_swapped(G_OBJECT(app->conf_dialog.dlg), 
 		"response", 
 		G_CALLBACK(_s_conf_dialog_response), app);

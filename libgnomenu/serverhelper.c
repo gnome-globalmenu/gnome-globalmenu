@@ -243,15 +243,16 @@ GnomenuServerHelper *
 gnomenu_server_helper_new(){
 	LOG_FUNC_NAME;
 	GnomenuServerHelper * _self;
-	GnomenuMessage msg;
 	_self = g_object_new(GNOMENU_TYPE_SERVER_HELPER, "name", GNOMENU_SERVER_NAME, "timeout", 5, NULL);
-	gnomenu_socket_listen(GNOMENU_SOCKET(_self));
-	msg.any.type = GNOMENU_MSG_SERVER_NEW;
-	msg.server_new.socket_id = gnomenu_socket_get_native(GNOMENU_SOCKET(_self));
-	gnomenu_socket_broadcast_by_name(GNOMENU_SOCKET(_self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
 	return _self;
 }
-
+gboolean gnomenu_server_helper_start(GnomenuServerHelper * self){
+	GnomenuMessage msg;
+	gnomenu_socket_listen(GNOMENU_SOCKET(self));
+	msg.any.type = GNOMENU_MSG_SERVER_NEW;
+	msg.server_new.socket_id = gnomenu_socket_get_native(GNOMENU_SOCKET(self));
+	gnomenu_socket_broadcast_by_name(GNOMENU_SOCKET(self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+}
 static void
 gnomenu_server_helper_init(GnomenuServerHelper * self){
 	self->clients = NULL;

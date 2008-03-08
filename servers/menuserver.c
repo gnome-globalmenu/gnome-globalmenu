@@ -189,8 +189,12 @@ menu_server_class_init(MenuServerClass * klass){
 						G_PARAM_READWRITE));
 }
 static void
-menu_server_init(MenuServer * _self){
-	GTK_WIDGET_UNSET_FLAGS(_self, GTK_NO_WINDOW);
+menu_server_init(MenuServer * server){
+	GTK_WIDGET_UNSET_FLAGS(server, GTK_NO_WINDOW);
+	server->gtk_helper = gnomenu_server_helper_new();
+	server->kde_helper = NULL;
+	server->clients = g_hash_table_new_full(NULL, NULL, NULL, _free_client);
+	server->screen = wnck_screen_get_default();
 }
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
@@ -200,10 +204,6 @@ _constructor	( GType type, guint n_construct_properties,
 			n_construct_properties,
 			construct_params);
 	GET_OBJECT(_self, server, priv);
-	server->gtk_helper = gnomenu_server_helper_new();
-	server->kde_helper = NULL;
-	server->clients = g_hash_table_new_full(NULL, NULL, NULL, _free_client);
-	server->screen = wnck_screen_get_default();
 	
 	g_signal_connect_swapped(server->gtk_helper,
 			"client-new", _s_client_new, server);
@@ -222,6 +222,7 @@ _constructor	( GType type, guint n_construct_properties,
 			"active-window-changed", _s_screen_active_window_changed, server);
 	g_signal_connect_swapped(server->gtk_helper,
 			"size-request", _s_gtk_helper_size_request, server);
+	gnomenu_server_helper_start(server->gtk_helper);
 	return _self;
 }
 static void 
