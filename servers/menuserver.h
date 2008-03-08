@@ -21,7 +21,7 @@ typedef struct {
 	KDEmenuServerHelper * kde_helper;
 	GHashTable * clients;
 	WnckScreen * screen;
-	MenuClient * active;
+	MenuClient * active_client;
 	GdkColor * bgcolor;
 	GdkPixmap * bgpixmap;
 } MenuServer;

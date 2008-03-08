@@ -52,6 +52,7 @@ G_BEGIN_DECLS
  * @GNOMENU_MSG_ORIENTATION_CHANGE: #GnomenuMessageOrientationChange
  * @GNOMENU_MSG_BGCOLOR_SET:	#GnomenuMessageBgColorSet
  * @GNOMENU_MSG_BGPIXMAP_SET:	#GnomenuMessageBgPixmapSet
+ * @GNOMENU_MSG_PARENT_FOCUS:		#GnomenuMessageToplevelFocus
  * @GNOMENU_MSG_MAX:		no meaning
  *
  * type of a libgnomenu message.
@@ -73,6 +74,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_ORIENTATION_CHANGE,
 	GNOMENU_MSG_BGCOLOR_SET,
 	GNOMENU_MSG_BGPIXMAP_SET,
+	GNOMENU_MSG_PARENT_FOCUS,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
 
@@ -275,6 +277,16 @@ typedef struct {
 } GnomenuMessageBgPixmapSet;
 
 /**
+ * GnomenuMessageParentFocus:
+ * @type: 
+ *
+ * To set the bg color of the menubar.
+ */
+typedef struct {
+	GnomenuMessageType type;
+} GnomenuMessageParentFocus;
+
+/**
  * GnomenuMessage:
  *
  * This structure wraps every kind of gnomenu message into a union.
@@ -298,6 +310,7 @@ struct _GnomenuMessage {
 		GnomenuMessagePositionSet position_set;
 		GnomenuMessageBgColorSet bgcolor_set;
 		GnomenuMessageBgPixmapSet bgpixmap_set;
+		GnomenuMessageParentFocus parent_focus;
 	};
 };
 #define GNOMENU_TYPE_MESSAGE gnomenu_message_get_type()

@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn720
+%define svn_version svn721
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -143,6 +143,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 - Install doc
 - Added depencency
 - Added the mo file.
+- distribute gtk2-aqd patch
 * Fri Mar 5 2008 Feng Yu <rainwoodman@gmail.com>
 - Enable schemas.
 * Fri Feb 29 2008 Feng Yu <rainwoodman@gmail.com>

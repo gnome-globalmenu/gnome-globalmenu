@@ -17,6 +17,7 @@ enum {
 
 typedef struct _ApplicationPrivate {
 	gint foo;
+	gboolean disposed;
 } ApplicationPrivate;
 
 #define APPLICATION_GET_PRIVATE(obj) \
@@ -27,7 +28,7 @@ typedef struct _ApplicationPrivate {
 	ApplicationPrivate * priv = APPLICATION_GET_PRIVATE(src);
 
 static void _s_window_destroy(Application * app, GtkWidget * widget);
-static void _s_active_client_changed(Application * app, MenuServer * server);
+static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuServer * server);
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
 static void _s_conf_dialog_response(Application * app, gint arg, GtkWidget * dialog);
 
@@ -42,6 +43,7 @@ static void _set_property				( GObject * obj, guint property_id,
 static void _get_property				( GObject * obj, guint property_id, 
 										  GValue * value, GParamSpec * pspec);
 static void _finalize					( GObject *obj);
+static void _dispose					( GObject *obj);
 static GObject *_constructor			( GType type, guint n_construct_properties,
 										  GObjectConstructParam * construct_params) ;
 
@@ -60,6 +62,7 @@ static void application_class_init(ApplicationClass *klass)
 	
 	obj_class->constructor = _constructor;
 	obj_class->finalize = _finalize;
+	obj_class->dispose = _dispose;
 	obj_class->set_property = _set_property;
 	obj_class->get_property = _get_property;
 
@@ -176,11 +179,27 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 }
 
 
+static void _dispose					( GObject *obj){
+	GET_OBJECT(obj, app, priv);
+	if(!priv->disposed){
+		priv->disposed = TRUE;
+		g_signal_handlers_disconnect_by_func(G_OBJECT(app->conf_dialog.dlg),
+			G_CALLBACK(_s_conf_dialog_response), app);
+		g_signal_handlers_disconnect_by_func(G_OBJECT(app->window), 
+			G_CALLBACK(_s_window_destroy), app);
+		g_signal_handlers_disconnect_by_func(G_OBJECT(app->server),
+			G_CALLBACK(_s_notify_active_client), app);
+		g_signal_handlers_disconnect_by_func(G_OBJECT(app->server),
+			G_CALLBACK(_s_menu_bar_area_size_allocate), app);
+	}
+	G_OBJECT_CLASS(application_parent_class)->dispose(obj);
+}
 static void _finalize(GObject *obj)
 {
 	Application *app = APPLICATION(obj);
 	if (app->window)
 		g_object_unref(app->window);
+	G_OBJECT_CLASS(application_parent_class)->finalize(obj);
 }
 
 static GObject * 
@@ -242,8 +261,8 @@ _constructor	( GType type, guint n_construct_properties,
 		"destroy",
         G_CALLBACK(_s_window_destroy), app);
 	g_signal_connect_swapped(G_OBJECT(app->server),
-		"active-client-changed",
-		G_CALLBACK(_s_active_client_changed), app);
+		"notify::active-client",
+		G_CALLBACK(_s_notify_active_client), app);
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
@@ -343,11 +362,11 @@ void application_show_about_dialog(Application * app){
 /* END: Public Methods */
 
 /* BEGIN: Signal handlers */
-static void _s_active_client_changed(Application * app, MenuServer * server){
+static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuServer * server){
 	ApplicationClass *app_class = G_OBJECT_GET_CLASS(app);
 	GdkPixbuf *icon_buf, *resized_icon;
 	gint w, h;
-	WnckWindow * window = menu_server_get_client_parent(server, server->active);
+	WnckWindow * window = menu_server_get_client_parent(server, server->active_client);
 
 	if(!window) window = wnck_screen_get_active_window(wnck_screen_get_default());
 	if(!window) return;

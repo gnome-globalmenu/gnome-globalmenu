@@ -33,6 +33,7 @@ enum {
 	CLIENT_UNREALIZE,
 	CLIENT_DESTROY,
 	SIZE_REQUEST,
+	CLIENT_PARENT_FOCUS,
 	SIGNAL_MAX
 };
 
@@ -51,6 +52,7 @@ static void _c_client_reparent 			( GnomenuServerHelper * _self, GnomenuClientIn
 static void _c_client_unrealize 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 static void _c_client_destroy 			( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 static void _c_client_size_request 		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
+static void _c_client_parent_focus		( GnomenuServerHelper * _self, GnomenuClientInfo * ci);
 
 /* signal handlers */
 static void _s_connect_req				( GnomenuServerHelper * _self, GnomenuSocketNativeID target);
@@ -83,6 +85,7 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 	klass->client_unrealize = _c_client_unrealize;
 	klass->client_destroy = _c_client_destroy;
 	klass->client_size_request = _c_client_size_request;
+	klass->client_parent_focus = _c_client_parent_focus;
 
 	class_signals[CLIENT_NEW] = 
 /**
@@ -186,9 +189,6 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
  * GnomenuServerHelper::size-request:
  * @self: the GnomenuServe who emits the signal.
  * @client_info: the client info. #GnomenuClientInfo
- * @requisition: the size requisition. Don't free it. #GtkRequisition
- * @allocation:  the allocation the server want to assign the the client,
- * 		The initial value assigned as the @requisition.
  *
  * #GNOMENU_MSG_SIZE_QUERY, \\
  * #GnomenuClientHelper::size-query, \\
@@ -204,6 +204,24 @@ gnomenu_server_helper_class_init(GnomenuServerHelperClass *klass){
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_size_request),
+			NULL, NULL,
+			gnomenu_marshall_VOID__POINTER,
+			G_TYPE_NONE,
+			1,
+			G_TYPE_POINTER
+			);
+
+	class_signals[CLIENT_PARENT_FOCUS] = 
+/**
+ * GnomenuServerHelper::client-parent-focus:
+ * @self: the GnomenuServe who emits the signal.
+ * @client_info: the client info. #GnomenuClientInfo
+ *
+ */
+		g_signal_new ("client-parent-focus",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (GnomenuServerHelperClass, client_parent_focus),
 			NULL, NULL,
 			gnomenu_marshall_VOID__POINTER,
 			G_TYPE_NONE,
@@ -381,6 +399,11 @@ static void _s_service_data_arrival(GnomenuServerHelper * _self,
 			ci->size_stage = GNOMENU_CI_STAGE_RESPONSED;
 			g_signal_emit(G_OBJECT(self),
 					class_signals[SIZE_REQUEST],
+					0, ci);
+		break;
+		case GNOMENU_MSG_PARENT_FOCUS:
+			g_signal_emit(G_OBJECT(self),
+					class_signals[CLIENT_PARENT_FOCUS],
 					0, ci);
 		break;
 		default:
@@ -624,6 +647,11 @@ static void
 _c_client_size_request(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	_client_do_allocate_size(_self, ci);
+}
+static void 
+_c_client_parent_focus(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
+	LOG_FUNC_NAME;
+	/*Do nothing */
 }
 static void 
 _client_do_allocate_size(GnomenuServerHelper * _self, GnomenuClientInfo * ci){

@@ -150,7 +150,8 @@ static gboolean _s_delete_event			( GtkWidget * widget,
 static void _s_hierarchy_changed		( GtkWidget 		* widget,
 									  GtkWidget 		* old_toplevel,
 									  gpointer data);
-
+static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * self, GParamSpec * pspec, GtkWindow * window);
+										
 /* utility functions*/
 static void _calc_size_request		( GtkWidget * widget, GtkRequisition * requisition);
 static void _do_size_allocate		( GtkWidget * widget, GtkAllocation * allocation);
@@ -775,6 +776,13 @@ static void _s_notify_title (GnomenuMenuBar * menu_bar, GParamSpec * spec,
 			NULL
 			);
 }
+static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * self, GParamSpec * pspec, GtkWindow * window){
+	if(gtk_window_has_toplevel_focus(window)){
+		GET_OBJECT(self, menu_bar, priv);
+		LOG("receive toplevel focus");
+		gnomenu_client_helper_send_parent_focus(priv->helper);
+	}
+}
 static void
 _s_hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel, gpointer userdata)
@@ -785,6 +793,8 @@ _s_hierarchy_changed (GtkWidget *widget,
 	if(old_toplevel){
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_notify_title, menu_bar);
+		g_signal_handlers_disconnect_by_func(
+			old_toplevel, _s_notify_has_toplevel_focus, menu_bar);
 	}
 
 	toplevel = gtk_widget_get_toplevel(widget);
@@ -795,6 +805,8 @@ _s_hierarchy_changed (GtkWidget *widget,
 			g_signal_connect_swapped(toplevel, "notify::title", 
 			_s_notify_title, menu_bar);
 			_s_notify_title(menu_bar, NULL, toplevel);
+			g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
+			_s_notify_has_toplevel_focus, menu_bar);
 		}
 		if(GTK_WIDGET_REALIZED(toplevel)){
 /* NOTE: This signal is rarely captured, because usually a menubar is added to a toplevel

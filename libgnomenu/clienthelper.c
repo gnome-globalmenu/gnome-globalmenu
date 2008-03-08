@@ -558,6 +558,18 @@ void gnomenu_client_helper_request_size(GnomenuClientHelper * _self, GtkRequisit
 	msg.size_request.height = req->height;
 	gnomenu_socket_send(GNOMENU_SOCKET(_self), &msg, sizeof(msg.size_request));
 }
+/**
+ * gnomenu_client_helper_send_parent_focus
+ * @_self: self;
+ *
+ * Parent window has received the focus.
+ */
+void gnomenu_client_helper_send_parent_focus(GnomenuClientHelper * _self){
+	LOG_FUNC_NAME;
+	GnomenuMessage msg;
+	msg.any.type = GNOMENU_MSG_PARENT_FOCUS;
+	gnomenu_socket_send(GNOMENU_SOCKET(_self), &msg, sizeof(msg.parent_focus));
+}
 /*
 vim:ts=4:sw=4
 */

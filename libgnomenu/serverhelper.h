@@ -94,6 +94,7 @@ struct _GnomenuServerHelperClass {
 	void (*client_realize) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_unrealize) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 	void (*client_reparent) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
+	void (*client_parent_focus) (GnomenuServerHelper * self, GnomenuClientInfo * client_info);
 };
 
 GnomenuServerHelper *gnomenu_server_helper_new(void);

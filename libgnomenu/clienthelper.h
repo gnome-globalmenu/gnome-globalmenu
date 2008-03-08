@@ -66,6 +66,6 @@ void gnomenu_client_helper_send_realize(GnomenuClientHelper * _self, GdkWindow *
 void gnomenu_client_helper_send_reparent(GnomenuClientHelper * _self, GdkWindow * parent_window);
 void gnomenu_client_helper_send_unrealize(GnomenuClientHelper * _self); 
 void gnomenu_client_helper_request_size(GnomenuClientHelper * _self, GtkRequisition * req); 
-
+void gnomenu_client_helper_send_parent_focus(GnomenuClientHelper * _self);
 G_END_DECLS
 #endif
