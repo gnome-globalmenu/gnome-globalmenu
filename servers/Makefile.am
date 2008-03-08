@@ -79,7 +79,8 @@ gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 
 
 				
-DISTCLEANFILES += $(server_file_DATA)
+DISTCLEANFILES += $(server_file_DATA) GNOME_GlobalMenuApplet.server.in
+
 EXTRA_DIST = make-xfce-data.sh \
 	gnome-globalmenu-applet.schemas.in \
 	GNOME_GlobalMenuApplet.server.in.in

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-07 23:33-0500\n"
+"POT-Creation-Date: 2008-03-07 23:54-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,19 +42,19 @@ msgstr ""
 #.
 #. vim:ts=4:sw=4
 #.
-#: ../servers/GNOME_GlobalMenuApplet.server.in.h:1
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:1
 msgid "Global Menu Applet"
 msgstr ""
 
-#: ../servers/GNOME_GlobalMenuApplet.server.in.h:2
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:2
 msgid "Global Menu applet Factory"
 msgstr ""
 
-#: ../servers/GNOME_GlobalMenuApplet.server.in.h:3
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:3
 msgid "Global Menu applet factory"
 msgstr ""
 
-#: ../servers/GNOME_GlobalMenuApplet.server.in.h:4
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:4
 msgid "Global Menu applet for GNOME"
 msgstr ""
 
