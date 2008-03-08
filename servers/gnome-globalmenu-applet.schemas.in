@@ -6,8 +6,8 @@
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
-				<short> Whether or not show the active window's icon</short>
-				<long> Whether or not show the active window's icon</long>
+				<short>show the icon of the active window</short>
+				<long> show the icon of the active window</long>
             </locale>
 		</schema>
         <schema>
@@ -16,8 +16,8 @@
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
-				<short> Whether or not show the active window's title</short>
-				<long> Whether or not show the active window's title</long>
+				<short> show the title of active application</short>
+				<long> show the title of active application</long>
             </locale>
 		</schema>
 	</schemalist>
