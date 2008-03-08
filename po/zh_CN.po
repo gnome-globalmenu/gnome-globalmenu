@@ -1,0 +1,75 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-03-07 23:33-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../servers/main.c:60
+msgid "Show fancy control buttons for menu bars"
+msgstr "阿"
+
+#: ../servers/main.c:61
+msgid "No Stick to the workspace"
+msgstr ""
+
+#: ../servers/main.c:62
+msgid "No Always on top"
+msgstr ""
+
+#: ../servers/application.c:220
+msgid "Show active application title"
+msgstr ""
+
+#: ../servers/application.c:221
+msgid "Show active window icon"
+msgstr ""
+
+#: ../servers/application.c:331
+msgid "translator_credits"
+msgstr ""
+
+#: ../servers/application.c:338
+msgid "GNOME panel applet for Global Menu"
+msgstr ""
+
+#.
+#. vim:ts=4:sw=4
+#.
+#: ../servers/GNOME_GlobalMenuApplet.server.in.h:1
+msgid "Global Menu Applet"
+msgstr ""
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.h:2
+msgid "Global Menu applet Factory"
+msgstr ""
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.h:3
+msgid "Global Menu applet factory"
+msgstr ""
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.h:4
+msgid "Global Menu applet for GNOME"
+msgstr ""
+
+#: ../servers/application-gnome.c:115
+msgid "_About"
+msgstr ""
+
+#: ../servers/application-gnome.c:116
+msgid "_Preferences"
+msgstr ""
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:1
+msgid "show the icon of the active window"
+msgstr ""
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:2
+msgid "show the title of active application"
+msgstr ""

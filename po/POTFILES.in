@@ -3,3 +3,6 @@ servers/main.c
 servers/main-gnome.c
 servers/application.c
 servers/menuserver.c
+servers/GNOME_GlobalMenuApplet.server.in
+servers/application-gnome.c
+servers/gnome-globalmenu-applet.schemas.in
