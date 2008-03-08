@@ -217,8 +217,8 @@ _constructor	( GType type, guint n_construct_properties,
 	#define NEW_CHECK_BUTTON(n, t) \
 		app->conf_dialog.n = gtk_check_button_new_with_label(t); \
 		gtk_box_pack_start_defaults(vbox, app->conf_dialog.n);
-	NEW_CHECK_BUTTON(title_visible, "Show active application title");
-	NEW_CHECK_BUTTON(icon_visible, "Show active window icon");
+	NEW_CHECK_BUTTON(title_visible, _("Show active application title"));
+	NEW_CHECK_BUTTON(icon_visible, _("Show active window icon"));
 	#undef NEW_CHECK_BUTTON 
 //	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
 //	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
@@ -324,12 +324,21 @@ void application_show_conf_dialog(Application *app){
 void application_show_about_dialog(Application * app){
 	gchar * authors[] = {
 		"Yu Feng <rainwoodman@gmail.com>",
-		"Mingxi Wu <fengshenx.@gmail.com>",
-		"And thanks to others for the discussion",
+		"Mingxi Wu <fengshenx@gmail.com>",
+		"And many help from others",
 		NULL
 		};
+	gchar * translator_credits = _("translator_credits");
+	
+	if(g_str_equal(translator_credits, "translator_credits"))
+		translator_credits = NULL;
 	gtk_show_about_dialog(NULL, 
-				"authors", authors, NULL);
+				"authors", authors, 
+				"translator_credits", translator_credits, 
+				"comments", _("GNOME panel applet for Global Menu"), 
+				"version", "0.4",
+				"website", "http://gnome2-globalmenu.googlecode.com/",
+				NULL);
 }
 /* END: Public Methods */
 

@@ -98,19 +98,22 @@ static void _create_popup_menu(ApplicationGnome * self){
 	Application *app = APPLICATION(self);
 
 	LOG("panel-window:%p\n", app->window);
-	static const char toggle_menu_xml [] =
+	static const char t_toggle_menu_xml [] =
 	"<popup name=\"button3\">\n"
 		"<menuitem name=\"About\" "
 		"          verb=\"About\" "
-		"          _label=\"_About\" "
+		"          _label=\"%s\: "
 		"          pixtype=\"stock\" "
 		"          pixname=\"gtk-about\"/>\n"
 		"<menuitem name=\"Preference\" "
 		"          verb=\"Preference\" "
-		"          _label=\"_Preference\" "
+		"          _label=\"%s\" "
 		"          pixtype=\"stock\" "
 		"          pixname=\"gtk-preferences\"/>\n"
    "</popup>\n";
+	gchar * toggle_menu_xml = g_strdup_printf(t_toggle_menu_xml,
+						_("_About"),
+						_("_Preferences"));
 	BonoboUIVerb toggle_menu_verbs[] = {
 		BONOBO_UI_VERB ("About", _popup_menu),
 		BONOBO_UI_VERB ("Preference", _popup_menu),
@@ -122,4 +125,5 @@ static void _create_popup_menu(ApplicationGnome * self){
 			toggle_menu_xml, 
 			toggle_menu_verbs, 
 			app);
+	g_free(toggle_menu_xml);
 }
