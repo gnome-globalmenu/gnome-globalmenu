@@ -32,7 +32,21 @@ struct _MenuClient {
 		GdkNativeWindow parent;  /* for GTK I use parent, for KDE I use transient*/
 	};
 	GdkWindow * window; /*the window for the menu bar*/
+	gboolean grabbed;
 };
+
+#define FOR_EACH_CLIENT(cs, c, job) \
+	{ \
+		GList * node; \
+		GList * list = g_hash_table_get_values(cs); \
+		for(node = g_list_first(list); \
+			node; \
+			node = g_list_next(node)){ \
+			MenuClient * c = node->data; \
+			job; \
+		} \
+		g_list_free(list); \
+	}
 
 static MenuClient * _add_client		( MenuServer * _self);
 /* GObject interface */
@@ -338,6 +352,7 @@ static void _s_client_new(MenuServer * _self, GnomenuClientInfo * ci, GnomenuSer
 	c->handle = ci;
 	c->window = NULL;
 	c->parent = NULL;
+	c->grabbed = FALSE;
 	g_hash_table_insert(_self->clients, ci, c);
 	gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 }
@@ -349,7 +364,12 @@ static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, Gnomen
 	c->window = gdk_window_foreign_new(ci->ui_window);
 	LOG("c->window: %p", ci->ui_window);
 	g_assert(c->window);
-	gdk_window_reparent(c->window, widget->window, 0, 0);
+
+	c->grabbed = TRUE;	
+
+	if(GTK_WIDGET_REALIZED(_self))
+		gdk_window_reparent(c->window, widget->window, 0, 0);
+	
 	gnomenu_server_helper_set_background(_self->gtk_helper, c->handle, _self->bgcolor, _self->bgpixmap);
 }
 static void _s_client_reparent(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
@@ -363,6 +383,7 @@ static void _s_client_unrealize(MenuServer * _self, GnomenuClientInfo * ci, Gnom
 	MenuClient * c = g_hash_table_lookup(_self->clients, ci);
 	LOG();
 	g_assert(c);
+	c->grabbed = FALSE;
 	gdk_window_destroy(c->window);
 	c->window = NULL;
 }
@@ -457,19 +478,9 @@ static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
 static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 	GtkAllocation a = * allocation;
 	GET_OBJECT(widget, self, priv);
-	MenuClient * c = self->active_client;
 	a.x = 0;
 	a.y = 0;
 	LOG("w = %d, h = %d", allocation->width, allocation->height);
-	if(c)
-	switch(c->type){
-		case MENU_CLIENT_GTK:
-				gnomenu_server_helper_allocate_size(self->gtk_helper, c->handle, allocation);
-		break;
-		case MENU_CLIENT_KDE:
-		LOG("KDE unhandled");
-		break;
-	}
 	widget->allocation = * allocation;
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move_resize(widget->window,
@@ -478,6 +489,16 @@ static void _size_allocate(GtkWidget * widget, GtkAllocation * allocation){
 			allocation->width,
 			allocation->height);
 	}
+	FOR_EACH_CLIENT(self->clients, c, 
+		switch(c->type){
+			case MENU_CLIENT_GTK:
+				gnomenu_server_helper_allocate_size(self->gtk_helper, c->handle, allocation);
+			break;
+			case MENU_CLIENT_KDE:
+				LOG("KDE unhandled");
+			break;
+		}
+	);
 }
 
 static gboolean _is_client(MenuServer * server, MenuClient * client){
@@ -500,29 +521,35 @@ WnckWindow * menu_server_get_client_parent(MenuServer  * server, MenuClient * cl
 		return NULL;
 }
 static void _realize			( GtkWidget * widget){
-  GdkWindowAttr attributes;
-  gint attributes_mask;
+	GdkWindowAttr attributes;
+	gint attributes_mask;
 
-  GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
+	GET_OBJECT(widget, menuserver, priv);
 
-  attributes.x = widget->allocation.x;
-  attributes.y = widget->allocation.y;
-  attributes.width = widget->allocation.width;
-  attributes.height = widget->allocation.height;
-  attributes.window_type = GDK_WINDOW_CHILD;
-  attributes.wclass = GDK_INPUT_OUTPUT;
-  attributes.visual = gtk_widget_get_visual (widget);
-  attributes.colormap = gtk_widget_get_colormap (widget);
-  attributes.event_mask = gtk_widget_get_events (widget);
-  attributes.event_mask |= (GDK_EXPOSURE_MASK );
+	GTK_WIDGET_SET_FLAGS (widget, GTK_REALIZED);
 
-  attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
-  widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
-  gdk_window_set_user_data (widget->window, widget);
+	attributes.x = widget->allocation.x;
+	attributes.y = widget->allocation.y;
+	attributes.width = widget->allocation.width;
+	attributes.height = widget->allocation.height;
+	attributes.window_type = GDK_WINDOW_CHILD;
+	attributes.wclass = GDK_INPUT_OUTPUT;
+	attributes.visual = gtk_widget_get_visual (widget);
+	attributes.colormap = gtk_widget_get_colormap (widget);
+	attributes.event_mask = gtk_widget_get_events (widget);
+	attributes.event_mask |= (GDK_EXPOSURE_MASK );
 
-  widget->style = gtk_style_attach (widget->style, widget->window);
-  gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+	attributes_mask = GDK_WA_X | GDK_WA_Y | GDK_WA_VISUAL | GDK_WA_COLORMAP;
+	widget->window = gdk_window_new (gtk_widget_get_parent_window (widget), &attributes, attributes_mask);
+	gdk_window_set_user_data (widget->window, widget);
 
+	widget->style = gtk_style_attach (widget->style, widget->window);
+	gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
+	FOR_EACH_CLIENT(menuserver->clients, c,
+		if(c->grabbed) {
+			gdk_window_reparent(c->window, widget->window, 0, 0);
+		}
+	);
 }
 /*
  vim:ts=4:sw=4
