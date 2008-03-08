@@ -222,8 +222,10 @@ _constructor	( GType type, guint n_construct_properties,
 			"active-window-changed", _s_screen_active_window_changed, server);
 	g_signal_connect_swapped(server->gtk_helper,
 			"size-request", _s_gtk_helper_size_request, server);
-	gnomenu_server_helper_start(server->gtk_helper);
 	return _self;
+}
+gboolean * menu_server_start(MenuServer * server){
+	gnomenu_server_helper_start(server->gtk_helper);
 }
 static void 
 _set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){

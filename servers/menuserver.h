@@ -36,7 +36,7 @@ MenuServer * menu_server_new();
 WnckWindow * menu_server_get_client_parent(MenuServer * server, MenuClient * client);
 void menu_server_set_background(MenuServer * server, GdkColor * color, GdkPixmap * pixmap);
 //void menu_server_destroy(MenuServer * server);
-
+gboolean * menu_server_start(MenuServer * server);
 G_END_DECLS
 #endif
 /*

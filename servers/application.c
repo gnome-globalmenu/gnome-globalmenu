@@ -56,6 +56,34 @@ G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 
 static void application_init(Application *app)
 {
+	GET_OBJECT(app, self, priv);
+	self->orientation = -1;
+	app->hbox = gtk_hbox_new(FALSE, 0); 
+	app->vbox = gtk_vbox_new(FALSE, 0); 
+	app->title = GTK_LABEL(gtk_label_new(""));
+	app->icon = GTK_IMAGE(gtk_image_new());
+	app->server = menu_server_new();
+	app->bgpixmap = NULL;
+	app->bgcolor = NULL;
+
+/* conf dialog */
+	app->conf_dialog.dlg = GTK_DIALOG(gtk_dialog_new());
+	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
+//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
+//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
+	#define NEW_CHECK_BUTTON(n, t) \
+		app->conf_dialog.n = gtk_check_button_new_with_label(t); \
+		gtk_box_pack_start_defaults(vbox, app->conf_dialog.n);
+	NEW_CHECK_BUTTON(title_visible, _("Show active application title"));
+	NEW_CHECK_BUTTON(icon_visible, _("Show active window icon"));
+	#undef NEW_CHECK_BUTTON 
+//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
+//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(app->conf_dialog.dlg)->vbox), GTK_WIDGET(vbox));
+
+	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
+	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
+
 }
 static void application_class_init(ApplicationClass *klass)
 {
@@ -102,7 +130,7 @@ static void application_class_init(ApplicationClass *klass)
 						"",
 						GTK_TYPE_ORIENTATION,
 						GTK_ORIENTATION_HORIZONTAL,
-						G_PARAM_READWRITE));
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
 	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
@@ -142,9 +170,9 @@ static void _load_conf_unimp(Application *app)
 
 /* BEGINS: GObject Interface */
 static void 
-_set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
+_set_property( GObject * object, guint property_id, const GValue * value, GParamSpec * pspec){
 
-	Application *self = APPLICATION(_self);
+	GET_OBJECT(object, self, priv);
 	switch (property_id){
 		case PROP_WINDOW:
 			if(GTK_IS_WIDGET(self->window)) g_object_unref(self->window);
@@ -163,9 +191,35 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 //			application_save_conf(self);
 			break;
 		case PROP_ORIENTATION:
-			self->orientation = g_value_get_enum(value);
+			{
+			GtkOrientation o = g_value_get_enum(value);
 		/*FIXME: tune widget layout to fit the new orientation*/
-			g_object_set(self->server, "orientation", self->orientation, NULL);
+			if(self->orientation !=o){
+				GtkBox * oldbox = self->box;
+				self->orientation = o;
+				switch (o){
+				case GTK_ORIENTATION_HORIZONTAL:
+					self->box = self->hbox;
+				break;
+				case GTK_ORIENTATION_VERTICAL:
+					self->box = self->vbox;
+				break;
+				}
+				if(oldbox){
+					gtk_container_remove(oldbox, self->icon);
+					gtk_container_remove(oldbox, self->title);
+					gtk_container_remove(oldbox, self->server);
+					gtk_container_remove(self->window, oldbox);
+				}
+				g_object_set(self->server, "orientation", self->orientation, NULL);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->icon), FALSE, FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->title), FALSE, FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->server), TRUE, TRUE, 0);
+
+				gtk_widget_show(self->box);
+				gtk_container_add(GTK_CONTAINER(self->window), GTK_WIDGET(self->box));
+			}
+		}
 		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -209,6 +263,11 @@ static void _dispose					( GObject *obj){
 			G_CALLBACK(_s_notify_active_client), app);
 		g_signal_handlers_disconnect_by_func(G_OBJECT(app->server),
 			G_CALLBACK(_s_menu_bar_area_size_allocate), app);
+		g_object_unref(app->hbox);
+		g_object_unref(app->vbox);
+		g_object_unref(app->icon);
+		g_object_unref(app->title);
+		g_object_unref(app->server);
 	}
 	G_OBJECT_CLASS(application_parent_class)->dispose(obj);
 }
@@ -232,42 +291,14 @@ _constructor	( GType type, guint n_construct_properties,
 
 	app = APPLICATION(_self);
 	app_class = G_OBJECT_GET_CLASS(app);
-	GtkWidget* box = gtk_hbox_new(FALSE, 0); 
 	/*This thing is ugly, (consider a vertical menu layout), we need a new alignment widget
  * 	which is similiar to GtkMenuBar(respecting directions) */
-
-	app->title = GTK_LABEL(gtk_label_new(""));
-	app->icon = GTK_IMAGE(gtk_image_new());
-	app->bgpixmap = NULL;
-	app->bgcolor = NULL;
-
-	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->icon), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->title), FALSE, FALSE, 0);
-
-	gtk_container_add(GTK_CONTAINER(app->window), GTK_WIDGET(box));
-
-/* conf dialog */
-	app->conf_dialog.dlg = GTK_DIALOG(gtk_dialog_new());
-	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
-//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
-//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
-	#define NEW_CHECK_BUTTON(n, t) \
-		app->conf_dialog.n = gtk_check_button_new_with_label(t); \
-		gtk_box_pack_start_defaults(vbox, app->conf_dialog.n);
-	NEW_CHECK_BUTTON(title_visible, _("Show active application title"));
-	NEW_CHECK_BUTTON(icon_visible, _("Show active window icon"));
-	#undef NEW_CHECK_BUTTON 
-//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
-//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(app->conf_dialog.dlg)->vbox), GTK_WIDGET(vbox));
-
-	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
-	
-
-/* start server */
-	app->server = menu_server_new();
-	gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(app->server), TRUE, TRUE, 0);
+/*so that reparenting won't destroy it*/
+	g_object_ref(app->hbox);
+	g_object_ref(app->vbox);
+	g_object_ref(app->icon);
+	g_object_ref(app->title);
+	g_object_ref(app->server);
 
 	g_signal_connect_swapped(G_OBJECT(app->conf_dialog.dlg), 
 		"response", 
@@ -283,7 +314,8 @@ _constructor	( GType type, guint n_construct_properties,
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 
 	_update_background(app);
-
+/* start server */
+	menu_server_start(app->server);
 	return _self;
 }
 /* ENDS: GObject Interface */
@@ -393,7 +425,9 @@ static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuS
 	icon_buf =  wnck_application_get_icon(application);
 	if (icon_buf) {
 		/* FIXME : check the direction fisrt? */
-		w = h = GTK_WIDGET(app->window)->allocation.height ;
+		w = h = MIN(
+			GTK_WIDGET(app->window)->allocation.height,
+			GTK_WIDGET(app->window)->allocation.width) ;
 		resized_icon = gdk_pixbuf_scale_simple(icon_buf , w, h, GDK_INTERP_BILINEAR);
 		gtk_image_set_from_pixbuf(app->icon, resized_icon);
 		g_object_unref(resized_icon);

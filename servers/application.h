@@ -20,11 +20,14 @@ struct _Application
 	GObject parent;
 /* Essential objects*/
 	GtkContainer * window;
-	MenuServer * server;
 /* UI widgets */
+	MenuServer * server;
 	GtkWidget * title;
 	GtkWidget * icon;
-
+	GtkBox * box; /*either point to vbox or hbox*/
+	GtkBox * vbox; 
+	GtkBox * hbox;
+	
 /* property value */
 	GtkPixmap * bgpixmap;
 	GdkColor * bgcolor;
