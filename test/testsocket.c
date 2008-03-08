@@ -20,6 +20,7 @@ static void socket_connect_req_cb(GnomenuSocket * socket,
 	service = gnomenu_socket_accept(socket, target);
 	g_signal_connect(G_OBJECT(service), "data-arrival",
 			G_CALLBACK(socket_data_arrival_cb), NULL);
+	gnomenu_socket_start(service);
 }
 	
 static void create_clicked_cb(GtkButton * button, gpointer user_data){
