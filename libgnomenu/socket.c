@@ -8,6 +8,7 @@
 #include "socket.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
+#undef PING_ECHO_ALIVE
 
 #ifndef GDK_WINDOWING_X11
 #error ONLY X11 is supported. other targets are not yet supported.
@@ -643,8 +644,7 @@ static GdkFilterReturn
 					if(self->status == GNOMENU_SOCKET_CONNECTED){
 						LOG("msg->source =%d , self->target = %d\n", msg->header.source, self->target);
 						if(msg->header.source == self->target){ 
-							guint bytes = msg->header.bytes; /*on x11 we always round off to 12 bytes*/
-							/*FIXME: bytes should be squeezed in to GnomenuSocketMessage.*/
+							guint bytes = msg->header.bytes; 
 							GnomenuSocketMessage ack;
 							FILL_HEADER(&ack, GNOMENU_SOCKET_ACK, self, 0, 0);
 							_raw_send(self, self->target, &ack, sizeof(ack));
@@ -698,6 +698,9 @@ static GdkFilterReturn
 					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_ISALIVE:
+#ifndef PING_ECHO_ALIVE
+					g_warning("keep alive ping -echo is disabled");
+#endif
 					if(self->status == GNOMENU_SOCKET_CONNECTED
 						&& self->target == msg->header.source)
 					{
@@ -708,6 +711,9 @@ static GdkFilterReturn
 					return GDK_FILTER_REMOVE;
 				break;
 				case GNOMENU_SOCKET_ALIVE:
+#ifndef PING_ECHO_ALIVE
+					g_warning("keep alive ping -echo is disabled");
+#endif
 					if(self->status == GNOMENU_SOCKET_CONNECTED
 						&& self->target == msg->header.source){
 						if(self->alives > 0) self->alives--;
@@ -903,7 +909,6 @@ static gboolean _socket_exist(GnomenuSocket * self, GnomenuSocketNativeID window
  *
  * Returns: usually TRUE, unless the connection is dead.
  */
-#undef PING_ECHO_ALIVE
 static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 /* The socket has already been destroyed.*/
 	g_return_val_if_fail(GNOMENU_IS_SOCKET(_self), FALSE);
