@@ -49,18 +49,35 @@ static void button_clicked(Application * app, GtkWidget * button){
 		gtk_widget_destroy(file_chooser);
 	}
 }
+static gboolean fancy = FALSE;
+static gboolean stick = TRUE;
+static gboolean topmost = TRUE;
+
+static GOptionEntry entries [] = {
+	{ "fancy", 'f', 0, G_OPTION_ARG_NONE, &fancy, "Show fancy control buttons for menu bars", NULL },
+	{ "no-stick", 's', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &stick, "No Stick to the workspace", NULL},
+	{ "no-topmost", 't', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &topmost, "No Always on top", NULL },
+	{ NULL }
+};
 int main (int argc, char * argv []){
 	GtkWindow * window;
 	GtkBox  * vbox, /*for buttons*/
 			* hbox;
 	GtkContainer * container;
+	GError * error = NULL;
+	GOptionContext * context;
+
 	int i;
 	Application * app;
+
 	gtk_init(&argc, &argv);
+	context = g_option_context_new("Application parameters");	
+	g_option_context_add_main_entries ( context, entries, GETTEXT_PACKAGE);
+	g_option_context_add_group ( context, gtk_get_option_group (TRUE));
+	g_option_context_parse(context, &argc, &argv, &error);
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(window, 400,20);
-
 	vbox = gtk_vbox_new(FALSE, 0);
 	hbox = gtk_hbox_new(FALSE, 0);
 
@@ -68,7 +85,7 @@ int main (int argc, char * argv []){
 	gtk_container_set_border_width(container, 0);
 
 	gtk_box_pack_start(hbox, container, TRUE, TRUE, 0);
-	gtk_box_pack_start_defaults(hbox, vbox);
+	gtk_box_pack_start(hbox, vbox, FALSE, FALSE, 0);
 
 	gtk_container_add(window, hbox);
 	g_signal_connect(window, "destroy", 
@@ -82,9 +99,14 @@ int main (int argc, char * argv []){
 	gtk_box_pack_start_defaults(vbox, b); \
 	g_signal_connect_swapped(b, "clicked", button_clicked, app);
 
-	NEW_BUTTON(show_about_dialog);
-	NEW_BUTTON(show_conf_dialog);
-	NEW_BUTTON(set_bg);
+	if(fancy){
+		NEW_BUTTON(show_about_dialog);
+		NEW_BUTTON(show_conf_dialog);
+		NEW_BUTTON(set_bg);
+	}
+
+	gtk_window_set_keep_above(window, topmost);
+	if(stick) gtk_window_stick(window);
 
 	gtk_widget_show_all(window);
 	gtk_main();
