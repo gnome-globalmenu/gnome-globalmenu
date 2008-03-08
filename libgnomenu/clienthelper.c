@@ -263,7 +263,7 @@ gnomenu_client_helper_init(GnomenuClientHelper * _self){
  **/ 
 GnomenuClientHelper * 
 gnomenu_client_helper_new(){
-	return g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME, "timeout", 4, NULL);
+	return g_object_new(GNOMENU_TYPE_CLIENT_HELPER, "name", GNOMENU_CLIENT_NAME, "timeout", 5, NULL);
 }
 
 static GObject* _constructor(GType type, guint n_construct_properties,

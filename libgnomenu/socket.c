@@ -903,26 +903,35 @@ static gboolean _socket_exist(GnomenuSocket * self, GnomenuSocketNativeID window
  *
  * Returns: usually TRUE, unless the connection is dead.
  */
+#undef PING_ECHO_ALIVE
 static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 /* The socket has already been destroyed.*/
 	g_return_val_if_fail(GNOMENU_IS_SOCKET(_self), FALSE);
 	LOG_FUNC_NAME;
 	if(_self->status != GNOMENU_SOCKET_CONNECTED) return FALSE;
 	LOG("alives = %d", _self->alives);
-	if(_self->alives > 2 && ! _socket_exist(_self, _self->target)) /*FIXME: which number is better?*/{
+	if(
+#ifdef PING_ECHO_ALIVE
+			_self->alives > 2 && 
+#endif
+			! _socket_exist(_self, _self->target)) /*FIXME: which number is better?*/{
 		
 		LOG("The peer is non responding for too long. shutdown the connection");
 		g_signal_emit(_self,
 				class_signals[SHUTDOWN],
 				0);
+#ifdef PING_ECHO_ALIVE
 		/*Last obligation to the other peer, hope it will receive this SHUTDOWN message*/
 		{
 			GnomenuSocketMessage msg;
 			FILL_HEADER(&msg, GNOMENU_SOCKET_SHUTDOWN, _self, 0, 0);
 			_raw_send(_self, _self->target, &msg, sizeof(msg));
 		}
+#endif
 		return FALSE;
-	} else {
+	} 
+#ifdef PING_ECHO_ALIVE
+	else {
 		LOG("Send keep alive query");
 		GnomenuSocketMessage msg;
 		FILL_HEADER(&msg, GNOMENU_SOCKET_ISALIVE, _self, 0, 0);
@@ -930,6 +939,7 @@ static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 		_self->alives ++;
 		LOG("done");
 	}
+#endif
 	return TRUE;
 }
 /**
