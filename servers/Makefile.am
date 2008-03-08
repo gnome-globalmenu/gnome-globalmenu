@@ -4,6 +4,7 @@ AM_CPPFLAGS = -I$(top_srcdir) \
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 
 libexec_PROGRAMS =
+bin_PROGRAMS = 
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
 #gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
@@ -36,7 +37,7 @@ xfce_file_DATA = xfce-globalmenu-plugin.desktop
 endif
 
 if ENABLE_STANDALONE
-libexec_PROGRAMS += globalmenu-server
+bin_PROGRAMS += gtk_globalmenu-server
 endif
 
 
@@ -67,12 +68,12 @@ xfce_globalmenu_plugin_CFLAGS =\
 xfce_globalmenu_plugin_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				$(XFCE_GLOBALMENU_PLUGIN_LIBS)
 
-globalmenu_server_SOURCES = \
+gtk_globalmenu_server_SOURCES = \
 	main.c \
 	$(VAST_SOURCE_CODE)
-globalmenu_server_CFLAGS =\
+gtk_globalmenu_server_CFLAGS =\
 	$(GLOBALMENU_SERVER_CFLAGS)
-globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
+gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				$(GLOBALMENU_SERVER_LIBS)
 
 
