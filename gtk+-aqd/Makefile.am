@@ -1,4 +1,7 @@
-EXTRA_DIST = README
+EXTRA_DIST = README patch.diff
+patchdir = ${docdir}/gtk+-aqd
+patch_files = patch.diff
+patch_DATA = README gtk2-aqd.patch
 
 prepare:
 	svn checkout http://svn.gnome.org/svn/gtk+/tags/GTK_2_12_5 gtk+-aqd
@@ -6,6 +9,5 @@ patch:
 	patch -p0 < patch.diff
 diff:
 	svn diff gtk+-aqd > patch.diff
-gtk2-aqd.patch: patch.diff
-	cp patch.diff gtk2-aqd.patch
-EXTRA_DIST = gtk2-aqd.patch
+gtk2-aqd.patch: $(srcdir)/$(patch_files)
+	cp $< $@
