@@ -14,7 +14,8 @@ enum {
 	PROP_0,
 	PROP_BGPIXMAP,
 	PROP_BGCOLOR,
-	PROP_ACTIVE_CLIENT
+	PROP_ACTIVE_CLIENT,
+	PROP_ORIENTATION
 };
 
 typedef struct {
@@ -177,6 +178,15 @@ menu_server_class_init(MenuServerClass * klass){
 						"active-client",
 						"",
 						G_PARAM_READWRITE));
+
+	g_object_class_install_property (gobject_class,
+		PROP_ORIENTATION,
+		g_param_spec_enum ("orientation",
+						"orientation",
+						"",
+						GTK_TYPE_ORIENTATION,
+						GTK_ORIENTATION_HORIZONTAL,
+						G_PARAM_READWRITE));
 }
 static void
 menu_server_init(MenuServer * _self){
@@ -218,7 +228,7 @@ static void
 _set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
 	LOG("set property");
 	GET_OBJECT(_self, self, priv);
-	gboolean dirty = FALSE;
+	gboolean bg_dirty = FALSE;
 	switch (property_id){
 /*
 		case PROP_WINDOW:
@@ -233,7 +243,7 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			GdkColor * newcolor = g_value_get_boxed(value);
 			if(self->bgcolor && !gdk_color_equal(newcolor, self->bgcolor)){
 				LOG("BGCOLOR dirty");
-				dirty = TRUE;
+				bg_dirty = TRUE;
 			}
 			if(self->bgcolor) 
 				g_boxed_free(GDK_TYPE_COLOR, self->bgcolor);
@@ -243,46 +253,54 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 		case PROP_BGPIXMAP:
 			if(self->bgpixmap != NULL && g_value_get_object(value)!= NULL){
 				LOG("BGPIXMAP dirty");
-				dirty = TRUE;
+				bg_dirty = TRUE;
 			}
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_unref(self->bgpixmap);
 			self->bgpixmap = g_value_get_object(value);
 			if(GDK_IS_PIXMAP(self->bgpixmap)) g_object_ref(self->bgpixmap);
 		break;
-		case PROP_ACTIVE_CLIENT:
-			{
-				MenuClient * c = g_value_get_pointer(value);
-				if(self->active_client)
-					switch(self->active_client->type){
-						case MENU_CLIENT_GTK:
-							gnomenu_server_helper_set_visibility(self->gtk_helper, self->active_client->handle, FALSE);
-						break;
-					case MENU_CLIENT_KDE:
-						/*try to hide it*/
+		case PROP_ACTIVE_CLIENT: {
+			MenuClient * c = g_value_get_pointer(value);
+			if(self->active_client)
+				switch(self->active_client->type){
+					case MENU_CLIENT_GTK:
+						gnomenu_server_helper_set_visibility(self->gtk_helper, self->active_client->handle, FALSE);
 					break;
-				}
-				if(c)
-					switch(c->type){
-						case MENU_CLIENT_GTK:
-							if(c->window)
-								//gdk_window_reparent(c->window, widget->window, 0, 0);
-								gnomenu_server_helper_set_visibility(self->gtk_helper, c->handle, TRUE);
-					break;
-					case MENU_CLIENT_KDE:
-					/*
-					if(c->window)
-							gdk_window_reparent(c->window, widget->window, 0, 0);
-					*/
-					break;
-					}
-				self->active_client = c;
+				case MENU_CLIENT_KDE:
+					/*try to hide it*/
+				break;
 			}
+			if(c)
+				switch(c->type){
+					case MENU_CLIENT_GTK:
+						if(c->window)
+							//gdk_window_reparent(c->window, widget->window, 0, 0);
+							gnomenu_server_helper_set_visibility(self->gtk_helper, c->handle, TRUE);
+				break;
+				case MENU_CLIENT_KDE:
+				/*
+				if(c->window)
+						gdk_window_reparent(c->window, widget->window, 0, 0);
+				*/
+				break;
+				} 
+			self->active_client = c;
+		}
 			/*gtk_widget_queue_resize(self);*/
 		break;		
+		case PROP_ORIENTATION:
+			self->orientation = g_value_get_enum(value);
+			FOR_EACH_CLIENT(self->clients, c,
+				gnomenu_server_helper_set_orientation(
+					self->gtk_helper,
+					c->handle,
+					self->orientation);
+				);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
-	if(dirty) {
+	if(bg_dirty) {
 		GList * node;
 		GnomenuClientInfo * ci;
 		for(node = g_list_first(self->gtk_helper->clients);
@@ -311,6 +329,9 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 		case PROP_ACTIVE_CLIENT:
 			g_value_set_pointer(value, self->active_client);
 		break;		
+		case PROP_ORIENTATION:
+			g_value_set_enum(value, self->orientation);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -354,6 +375,10 @@ static void _s_client_new(MenuServer * _self, GnomenuClientInfo * ci, GnomenuSer
 	c->parent = NULL;
 	c->grabbed = FALSE;
 	g_hash_table_insert(_self->clients, ci, c);
+	gnomenu_server_helper_set_orientation(
+					_self->gtk_helper,
+					c->handle,
+					_self->orientation);
 	gnomenu_server_helper_queue_resize(_self->gtk_helper, c->handle);
 }
 static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){

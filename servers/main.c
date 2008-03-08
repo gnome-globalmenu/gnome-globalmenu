@@ -15,12 +15,18 @@ static void window_destroy(GtkWidget * widget, gpointer useless){
 }
 GtkWidget * show_about_dialog, * show_conf_dialog;
 GtkWidget * set_bg;
+GtkWidget * switch_orientation;
+static GtkOrientation orientation = GTK_ORIENTATION_HORIZONTAL;
 static void button_clicked(Application * app, GtkWidget * button){
 	if(button == show_about_dialog){
 		application_show_about_dialog(app);
 	}
 	if(button == show_conf_dialog){
 		application_show_conf_dialog(app);
+	}
+	if(button == switch_orientation){
+		g_object_set(app, "orientation", orientation, NULL);
+		orientation = (orientation + 1) % 2;
 	}
 	if(button == set_bg){
 		GtkWidget * file_chooser 
@@ -111,6 +117,7 @@ GOptionEntry entries [] = {
 	if(fancy){
 		NEW_BUTTON(show_about_dialog);
 		NEW_BUTTON(show_conf_dialog);
+		NEW_BUTTON(switch_orientation);
 		NEW_BUTTON(set_bg);
 	}
 

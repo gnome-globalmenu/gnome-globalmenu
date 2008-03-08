@@ -31,6 +31,7 @@ struct _Application
 
 	gboolean title_visible;
 	gboolean icon_visible;
+	GtkOrientation orientation;
 /* conf dialog */
 	struct {
 		GtkWidget * dlg;

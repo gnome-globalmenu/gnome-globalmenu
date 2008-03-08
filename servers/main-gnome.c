@@ -37,6 +37,20 @@ static _change_background ( PanelApplet * applet,
 		break;
 	}
 }
+static void _change_orient(PanelApplet * applet,
+						PanelAppletOrient ori,
+						Application * app){
+	switch(ori){
+		case PANEL_APPLET_ORIENT_UP:
+		case PANEL_APPLET_ORIENT_DOWN:
+			g_object_set(app, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
+		break;
+		case PANEL_APPLET_ORIENT_LEFT:
+		case PANEL_APPLET_ORIENT_RIGHT:
+			g_object_set(app, "orientation", GTK_ORIENTATION_VERTICAL, NULL);
+		break;
+	}
+}
 static gboolean globalmenu_applet_factory (PanelApplet *applet,
                                         const gchar *iid,
                                         gpointer data){
@@ -49,6 +63,8 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	App = application_gnome_new(applet);
 	g_signal_connect(G_OBJECT(applet), "change-background", 
 				_change_background, App);
+	g_signal_connect(G_OBJECT(applet), "change-orient", 
+				_change_orient, App);
 	gtk_widget_show_all(applet);
     return TRUE;
   } else {

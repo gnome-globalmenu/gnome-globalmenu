@@ -12,7 +12,8 @@ enum {
 	PROP_0,
 	PROP_WINDOW,
 	PROP_TITLE_VISIBLE,
-	PROP_ICON_VISIBLE
+	PROP_ICON_VISIBLE,
+	PROP_ORIENTATION
 };
 
 typedef struct _ApplicationPrivate {
@@ -94,6 +95,15 @@ static void application_class_init(ApplicationClass *klass)
 						FALSE,
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
+	g_object_class_install_property (obj_class,
+		PROP_ORIENTATION,
+		g_param_spec_enum ("orientation",
+						"orientation",
+						"",
+						GTK_TYPE_ORIENTATION,
+						GTK_ORIENTATION_HORIZONTAL,
+						G_PARAM_READWRITE));
+
 	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
 
@@ -152,6 +162,11 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 //			application_update_ui(self);
 //			application_save_conf(self);
 			break;
+		case PROP_ORIENTATION:
+			self->orientation = g_value_get_enum(value);
+		/*FIXME: tune widget layout to fit the new orientation*/
+			g_object_set(self->server, "orientation", self->orientation, NULL);
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -172,6 +187,9 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 		case PROP_ICON_VISIBLE:
 			g_value_set_boolean(value, self->icon_visible);
 			break;
+		case PROP_ORIENTATION:
+			g_value_set_enum(value, self->orientation);
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}

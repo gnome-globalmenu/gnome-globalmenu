@@ -24,6 +24,7 @@ typedef struct {
 	MenuClient * active_client;
 	GdkColor * bgcolor;
 	GdkPixmap * bgpixmap;
+	GtkOrientation orientation;
 } MenuServer;
 typedef struct {
 	GtkWidgetClass parent;
