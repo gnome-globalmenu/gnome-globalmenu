@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn704
+%define svn_version svn705
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -51,12 +51,12 @@ Requires: xfce4-panel
 Group:		User Interface/Desktops
 %description -n xfce-globalmenu-plugin
 
-%package -n gnomenu-server
-Summary: standalone mene server for global menu.
+%package -n gtk-globalmenu-server
+Summary: standalone global menu server.
 Requires: libgnomenu
 Requires: libwnck
 Group:		User Interface/Desktops
-%description -n gnomenu-server
+%description -n gtk-globalmenu-server
 
 
 
@@ -115,9 +115,10 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/lib/pkgconfig/libgnomenu.pc
 /usr/share/doc/gnome-globalmenu/README
 %doc tmpdocs/reference
-%files -n gnomenu-server
+
+%files -n gtk-globalmenu-server
 %defattr(-, root, root)
-/usr/libexec/globalmenu-server
+/usr/bin/gtk-globalmenu-server
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)

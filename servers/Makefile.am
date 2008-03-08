@@ -37,7 +37,7 @@ xfce_file_DATA = xfce-globalmenu-plugin.desktop
 endif
 
 if ENABLE_STANDALONE
-bin_PROGRAMS += gtk_globalmenu-server
+bin_PROGRAMS += gtk-globalmenu-server
 endif
 
 
