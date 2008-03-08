@@ -46,6 +46,7 @@ VAST_SOURCE_CODE = application.h \
 	application.c \
 	menuserver.h \
 	menuserver.c \
+	intl.h \
 	utils.c \
 	utils.h \
 	log.h

@@ -4,6 +4,8 @@
 #include "application-gnome.h"
 #include "log.h"
 
+#include "intl.h"
+
 #define APPLICATION_GNOME_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_APPLICATION_GNOME, ApplicationGnomePrivate))
 

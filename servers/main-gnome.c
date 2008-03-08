@@ -5,14 +5,11 @@
 
 #include <panel-applet.h>
 #include "libgnomenu/serverhelper.h"
-
-/*
- * Standard gettext macros.
- */
-
 #include "application-gnome.h"
 
 #include "log.h"
+
+#include "intl.h"
 
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet"

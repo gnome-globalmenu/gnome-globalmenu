@@ -1,2 +1,5 @@
 [encoding: UTF-8]
-server/main.c
+servers/main.c
+servers/main-gnome.c
+servers/application.c
+servers/menuserver.c

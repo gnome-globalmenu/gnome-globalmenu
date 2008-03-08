@@ -6,6 +6,8 @@
 #include "utils.h"
 #include "log.h"
 
+#include "intl.h"
+
 enum {
 	PROP_0,
 	PROP_WINDOW,

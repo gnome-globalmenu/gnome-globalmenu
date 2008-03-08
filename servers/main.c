@@ -8,6 +8,8 @@
 
 #include "log.h"
 
+#include "intl.h"
+
 static void window_destroy(GtkWidget * widget, gpointer useless){
 	gtk_main_quit();
 }
@@ -53,13 +55,13 @@ static gboolean fancy = FALSE;
 static gboolean stick = TRUE;
 static gboolean topmost = TRUE;
 
-static GOptionEntry entries [] = {
-	{ "fancy", 'f', 0, G_OPTION_ARG_NONE, &fancy, "Show fancy control buttons for menu bars", NULL },
-	{ "no-stick", 's', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &stick, "No Stick to the workspace", NULL},
-	{ "no-topmost", 't', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &topmost, "No Always on top", NULL },
+int main (int argc, char * argv []){
+GOptionEntry entries [] = {
+	{ "fancy", 'f', 0, G_OPTION_ARG_NONE, &fancy, _("Show fancy control buttons for menu bars"), NULL },
+	{ "no-stick", 's', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &stick, _("No Stick to the workspace"), NULL},
+	{ "no-topmost", 't', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &topmost, _("No Always on top"), NULL },
 	{ NULL }
 };
-int main (int argc, char * argv []){
 	GtkWindow * window;
 	GtkBox  * vbox, /*for buttons*/
 			* hbox;

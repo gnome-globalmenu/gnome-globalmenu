@@ -2,6 +2,8 @@
 #include "menuserver.h"
 
 #include "log.h"
+#include "intl.h"
+
 #define MENU_SERVER_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, TYPE_MENU_SERVER, MenuServerPrivate))
 #define GET_OBJECT(_s, s, p) \
