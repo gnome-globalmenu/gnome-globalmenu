@@ -113,6 +113,7 @@ void gnomenu_socket_shutdown(GnomenuSocket * _self);
 gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * self, gchar * name, gpointer data, guint bytes);
 
 gboolean gnomenu_socket_flush(GnomenuSocket * _self);
+gboolean gnomenu_socket_start(GnomenuSocket * socket);
 
 G_END_DECLS
 #endif

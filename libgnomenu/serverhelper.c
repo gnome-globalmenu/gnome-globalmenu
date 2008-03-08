@@ -60,6 +60,7 @@ static void _s_connect_req				( GnomenuServerHelper * _self, GnomenuSocketNative
 static void _s_service_shutdown			( GnomenuServerHelper * _self, GnomenuSocket * service);
 static void _s_service_data_arrival		( GnomenuServerHelper * _self, gpointer data, gint bytes, 
 										  GnomenuSocket * service);
+static void _s_service_connected		( GnomenuServerHelper * self, GnomenuSocketNativeID target, GnomenuSocket * service);
 /* utilities */
 
 static GnomenuClientInfo * 
@@ -308,15 +309,23 @@ static void _s_connect_req(GnomenuServerHelper * _self,
 	ci = g_new0(GnomenuClientInfo, 1);
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
+/*FIXME: signal not setup when data diagram is built. Might lose signals.*/
 	ci->service = gnomenu_socket_accept(GNOMENU_SOCKET(self), target);
+	self->clients = g_list_prepend(self->clients, ci);
+	LOG("clients length = %d", g_list_length(self->clients));
 	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
 	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_s_service_data_arrival), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "connected", G_CALLBACK(_s_service_connected), self);
 
+	gnomenu_socket_start(ci->service);		
+}
+static void _s_service_connected(GnomenuServerHelper * self, GnomenuSocketNativeID target, GnomenuSocket * service){
+	GnomenuClientInfo * ci = _find_ci_by_service(self, service);
+	g_return_if_fail(ci);
 	g_signal_emit(G_OBJECT(self), 
 			class_signals[CLIENT_NEW],
 			0,
 			ci);
-		
 }
 static void _s_service_shutdown(GnomenuServerHelper * _self, GnomenuSocket * service){
 	LOG_FUNC_NAME;
@@ -419,6 +428,7 @@ static void _s_service_data_arrival(GnomenuServerHelper * _self,
 static gboolean _client_compare_by_socket(
 	const GnomenuClientInfo * p1,
 	const GnomenuClientInfo * p2){
+	LOG("p1.socket ==%p .vs. p2.socket=%p", p1->service, p2->service);
 	return !( p1 && p2 && p1->service == p2->service);
 }
 /**
@@ -621,7 +631,6 @@ _c_client_new(GnomenuServerHelper * _self, GnomenuClientInfo * ci){
 	LOG_FUNC_NAME;
 	GnomenuMessage msg;
 
-	_self->clients = g_list_prepend(_self->clients, ci);
 }
 static void 
 _c_client_realize(GnomenuServerHelper * _self, GnomenuClientInfo * ci){

@@ -384,21 +384,23 @@ gnomenu_socket_accept (GnomenuSocket * _self, GnomenuSocketNativeID target){
 	GnomenuSocket * rt;
 	GET_OBJECT(_self, self, priv);
 	if(self->status == GNOMENU_SOCKET_LISTEN){
-		GnomenuSocketMessage ack;
 		gchar * newname = g_strconcat(self->name, "_SERVICE", NULL);
 		rt = g_object_new(GNOMENU_TYPE_SOCKET, "name", newname, "timeout", self->timeout,NULL);
 		g_free(newname);
 		rt->target = target;
 		g_signal_connect(G_OBJECT(rt), "shutdown", G_CALLBACK(_destroy_on_shutdown), NULL);
-/*Issue the first ACK message.*/
-		FILL_HEADER(&ack, GNOMENU_SOCKET_CONNECT_ACK, rt, 0, 0);
-		_raw_send(rt, rt->target, &ack, sizeof(ack));
 		return rt;
 	} else{
 		g_error("the socket is not listening, how can you ACCEPT?");
 		return NULL;
 	}
 
+}
+gboolean gnomenu_socket_start(GnomenuSocket * socket) {
+/*Issue the first ACK message.*/
+	GnomenuSocketMessage ack;
+	FILL_HEADER(&ack, GNOMENU_SOCKET_CONNECT_ACK, socket, 0, 0);
+	return _raw_send(socket, socket->target, &ack, sizeof(ack));
 }
 /**
  * _dispose:

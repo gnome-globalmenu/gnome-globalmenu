@@ -64,6 +64,8 @@ typedef struct
 	gboolean detached;
 
 	gboolean widget_visible;
+	gboolean widget_pack_direction;
+	gboolean widget_child_pack_direction;
 
 	GList * popup_items;
 
@@ -95,7 +97,7 @@ static void _set_property      		( GObject *object, guint prop_id,
 									  const GValue *value, GParamSpec * pspec );
 static void _get_property			( GObject *object, guint prop_id, 
 									  GValue *value, GParamSpec * pspec );
-static void _s_notify_visible		( GObject * object, GParamSpec * pspec, gpointer data);
+static void _s_notify		( GObject * object, GParamSpec * pspec, gpointer data);
 
 /* GtkWidget interface */
 static void _size_request			( GtkWidget			* widget,
@@ -138,6 +140,9 @@ static void _s_position_set 		( GtkWidget  * menubar,
 									  GnomenuClientHelper * helper); 
 static void _s_visibility_set 		( GtkWidget  * menubar, 
 									  gboolean vis,
+									  GnomenuClientHelper * helper); 
+static void _s_orientation_set 		( GtkWidget  * menubar, 
+									  GtkOrientation orientation,
 									  GnomenuClientHelper * helper); 
 static void _s_background_set	 	( GtkWidget  * menubar, 
 									  GdkColor * bgcolor,
@@ -286,7 +291,6 @@ static GObject* _constructor(GType type,
 		guint n_construct_properties,
 		GObjectConstructParam *construct_params){
 
-	GtkStyle * style;
 	GObject * object = (G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->constructor)(
 		type, n_construct_properties, construct_params);
 
@@ -294,12 +298,13 @@ static GObject* _constructor(GType type,
 
 	gtk_container_set_border_width(object, 0);
 /*
+	GtkStyle * style;
 	style = gtk_style_copy (GTK_WIDGET(object)->style);
 	style->xthickness = 0;
 	style->ythickness = 0;
 	gtk_widget_set_style (GTK_WIDGET(object), style);
-*/
 	g_object_unref (style);
+*/
 
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
@@ -315,6 +320,9 @@ static GObject* _constructor(GType type,
 	priv->x = 0;
 	priv->y = 0;
 
+	priv->widget_pack_direction = GTK_PACK_DIRECTION_LTR;
+	priv->widget_child_pack_direction = GTK_PACK_DIRECTION_LTR;
+
 	g_signal_connect_swapped(G_OBJECT(priv->helper), "size-allocate",
 				G_CALLBACK(_s_size_allocate), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(priv->helper), "size-query",
@@ -326,6 +334,8 @@ static GObject* _constructor(GType type,
 				G_CALLBACK(_s_background_set), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(priv->helper), "visibility-set",
 				G_CALLBACK(_s_visibility_set), menu_bar);
+	g_signal_connect_swapped(G_OBJECT(priv->helper), "orientation-set",
+				G_CALLBACK(_s_orientation_set), menu_bar);
 
 	g_signal_connect_swapped(G_OBJECT(priv->helper), "connected",
 				G_CALLBACK(_s_connected), menu_bar);
@@ -341,9 +351,10 @@ static GObject* _constructor(GType type,
 	g_signal_connect(G_OBJECT(menu_bar), "motion-notify-event",
 				G_CALLBACK(_s_motion_notify_event), priv->helper);
 
-	g_signal_connect(G_OBJECT(menu_bar), "notify::visible",
-				G_CALLBACK(_s_notify_visible), NULL);
+	g_signal_connect(G_OBJECT(menu_bar), "notify",
+				G_CALLBACK(_s_notify), NULL);
 
+	gnomenu_client_helper_start(priv->helper);
 	return object;
 }
 
@@ -548,7 +559,7 @@ static void _s_connected ( GtkWidget  * widget, GnomenuSocketNativeID target, Gn
 static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
-
+	GList * l;
 	priv->detached = FALSE;	
 
 	_reset_style(widget);	
@@ -556,6 +567,12 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	if(GTK_WIDGET_REALIZED(widget)){
 		if(!GNOMENU_HAS_QUIRK(priv->quirk, HIDE_ON_QUIT)){
 			gtk_widget_unrealize(widget);
+
+			priv->pack_direction = priv->widget_pack_direction;
+			priv->child_pack_direction = priv->widget_child_pack_direction;
+			gtk_widget_queue_resize(widget);
+			for (l = GTK_MENU_SHELL (menu_bar)->children; l; l = l->next)
+				gtk_widget_queue_resize (GTK_WIDGET (l->data));
 
 			if(priv->widget_visible){ /* fake to be unvisible, so
 										that _show will do real show work*/
@@ -619,6 +636,26 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 		GTK_WIDGET_UNSET_FLAGS(widget, GTK_VISIBLE);
 	}	
 	LOG("done");
+}
+static void _s_orientation_set 		( GtkWidget  * widget, 
+									  GtkOrientation orientation,
+									  GnomenuClientHelper * helper){
+	LOG_FUNC_NAME;
+	GET_OBJECT(widget, menu_bar, priv);
+	GList * l;
+	switch(orientation){
+		case GTK_ORIENTATION_HORIZONTAL:
+			priv->pack_direction = GTK_PACK_DIRECTION_LTR;
+			priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
+		break;
+		case GTK_ORIENTATION_VERTICAL:
+			priv->pack_direction = GTK_PACK_DIRECTION_TTB;
+			priv->child_pack_direction = GTK_PACK_DIRECTION_TTB;
+		break;
+	}
+	gtk_widget_queue_resize(widget);
+	for (l = GTK_MENU_SHELL (menu_bar)->children; l; l = l->next)
+		gtk_widget_queue_resize (GTK_WIDGET (l->data));
 }
 static void _s_background_set	 		( GtkWidget  * widget, 
 									  GdkColor * color,
@@ -951,9 +988,29 @@ _map (GtkWidget * widget){
 	GTK_WIDGET_CLASS(gnomenu_menu_bar_menu_shell_class)->map(widget);
 }
 
-static void _s_notify_visible 				( GObject * object, GParamSpec * pspec, gpointer data){
+static void _s_notify 				( GObject * object, GParamSpec * pspec, gpointer data){
 	GET_OBJECT(object, menu_bar, priv);
-	g_object_get(object, "visible", &priv->widget_visible, NULL);
+	gchar * name = g_param_spec_get_name(pspec);
+	struct {
+		gchar * name;
+		gpointer value;
+	} * p, li [] = {
+		{"visible", &priv->widget_visible},
+		{"pack-direction", &priv->widget_pack_direction},
+		{"child-pack-direction", &priv->widget_child_pack_direction},
+		{NULL, NULL}
+	};
+	for(p = li; p->name; p++){
+		if(g_str_equal(p->name, name)){
+			LOG("widget property %s is modified. back it up",
+				name);
+			g_object_get(object, p->name, p->value, NULL);
+			break;
+		}
+	}
+	if(!p->name){
+			LOG("other property %s", name);
+	}
 }
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
