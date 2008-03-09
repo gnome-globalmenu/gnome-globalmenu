@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn729
+%define svn_version svn733
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -101,6 +101,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/share/doc/gnome-globalmenu/INSTALL
 /usr/share/doc/gnome-globalmenu/NEWS
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 /usr/share/doc/gnome-globalmenu/gtk+-aqd/README
 /usr/share/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
 
@@ -121,6 +122,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 %defattr(-, root, root)
 /usr/bin/gtk-globalmenu-server
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)
@@ -128,16 +130,19 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 /etc/gconf/schemas/gnome-globalmenu-applet.schemas
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
 /usr/libexec/xfce-globalmenu-plugin
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 
 %changelog 
-* Fri Mar 9 2008 Feng Yu <rainwoodman@gmail.com>
+* Sun Mar 9 2008 Feng Yu <rainwoodman@gmail.com>
 - Properly install doc.
+- Added French locale 
 * Fri Mar 7 2008 Feng Yu <rainwoodman@gmail.com>
 - Install doc
 - Added depencency
