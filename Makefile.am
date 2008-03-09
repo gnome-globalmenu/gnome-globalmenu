@@ -2,9 +2,9 @@
 
 SUBDIRS = libgnomenu servers test gtk+-aqd po
 
-if ENABLE_GTK_DOC
+#if ENABLE_GTK_DOC
 SUBDIRS += doc
-endif
+#endif
 gnome_globalmenu_docdir = ${docdir}
 gnome_globalmenu_doc_DATA = \
     README\

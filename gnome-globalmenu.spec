@@ -1,5 +1,5 @@
 %define base_version 0.4
-%define svn_version svn724
+%define svn_version svn729
 Name: 		gnome-globalmenu
 Version: 	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -64,15 +64,12 @@ Group:		User Interface/Desktops
 %setup -q -n gnome-globalmenu-%{base_version}
 
 %build
-%configure
+%configure --disable-gtk-doc --disable-rebuilds --enable-tracing=no
 make
 
 %install
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
-./mkinstalldirs tmpdocs
-./mkinstalldirs tmpdocs/reference
-cp -aR doc/reference/libgnomenu/html tmpdocs/reference/libgnomenu
 
 %clean
 rm -rf %{buildroot}
@@ -118,7 +115,7 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/include/libgnomenu/socket.h
 /usr/lib/pkgconfig/libgnomenu.pc
 /usr/share/doc/gnome-globalmenu/README
-%doc tmpdocs/reference
+/usr/share/gtk-doc/html/libgnomenu/*
 
 %files -n gtk-globalmenu-server
 %defattr(-, root, root)
@@ -139,6 +136,8 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 
 %changelog 
+* Fri Mar 9 2008 Feng Yu <rainwoodman@gmail.com>
+- Properly install doc.
 * Fri Mar 7 2008 Feng Yu <rainwoodman@gmail.com>
 - Install doc
 - Added depencency
