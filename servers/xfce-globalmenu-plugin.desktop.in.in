@@ -4,4 +4,4 @@ Encoding=UTF-8
 _Name=Global Menu Plugin
 _Comment=Placeholder for GTK+ application menu in XFCE Panel
 Icon=xfce4-settings
-X-XFCE-Exec=@LOCALTION@
+X-XFCE-Exec=@LOCATION@
