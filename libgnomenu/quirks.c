@@ -45,13 +45,14 @@ static void _add_quirks_from_string(GQueue * quirks, gchar * string){
 		words = g_strsplit(lines[i], ":", 0);
 		if(!words) continue;
 		l = g_strv_length(words);
-		if(l !=2 ){
-			g_warning("Irregular conf file line(%d):\n%s", l, lines[i]);
+		if(l == 0) continue;
+		word = g_strstrip(words[0]);
+		if(!word || word[0] == '#'){
 			g_strfreev(words);
 			continue;
 		}
-		word = g_strstrip(words[0]);
-		if(!word || word[0] == '#'){
+		if(l !=2 ){
+			g_warning("Irregular conf file line(%d):\n%s", l, lines[i]);
 			g_strfreev(words);
 			continue;
 		}
