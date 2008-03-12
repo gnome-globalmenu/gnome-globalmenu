@@ -77,11 +77,11 @@ include $(top_srcdir)/gtk-doc.make
 # e.g. EXTRA_DIST += version.xml.in
 EXTRA_DIST += ClassDiagram.dia LifeTimeDiagram.dia
 
-imagedir = .
-image_DATA = ClassDiagram.png LifeTimeDiagram.png
+#imagedir = .
+#image_DATA = ClassDiagram.png LifeTimeDiagram.png
 #image_SOURCES = ClassDiagram.dia LifeTimeDiagram.dia
 
-SUFFIXES = .dia .png
+#SUFFIXES = .dia .png
 
-.dia.png:
+#.dia.png:
 	dia -e $@ -t png $<

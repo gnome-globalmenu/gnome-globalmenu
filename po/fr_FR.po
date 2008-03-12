@@ -33,7 +33,7 @@ msgstr "Afficher l'icône de la fenêtre active"
 
 #: ../servers/application.c:331
 msgid "translator_credits"
-msgstr ""
+msgstr "pierre.slamich"
 
 #: ../servers/application.c:338
 msgid "GNOME panel applet for Global Menu"
