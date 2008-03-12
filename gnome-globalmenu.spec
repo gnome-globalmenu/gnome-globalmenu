@@ -1,73 +1,72 @@
-%define base_version 0.4
-%define svn_version svn746
-Name: 		gnome-globalmenu
-Version: 	%{base_version}.%{svn_version}
-Release:	1%{?dist}
-Summary:	Global menu bar widget and library for GTK/GNOME2
-
-Group:		User Interface/Desktops
-License:	GPLv2+
-URL:		http://code.google.com/p/gnome2-globalmenu/
-
-Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{base_version}-%{release}-root-%(%{__id_u} -n)
-
+%define 	base_version 	0.4
+%define 	svn_version 	svn749
+Name: 			gnome-globalmenu
+Version: 		%{base_version}.%{svn_version}
+Release:		1%{?dist}
+Summary:		Global menu bar widget and library for GTK/GNOME2
+Group:			User Interface/Desktops
+License:		GPLv2+
+URL:			http://code.google.com/p/gnome2-globalmenu/
+Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.gz
+BuildRoot:		%{_tmppath}/%{name}-%{base_version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	gtk2
 BuildRequires:	libwnck
 BuildRequires:	gnome-panel-devel
 BuildRequires:	bonobo-activation
 BuildRequires:	xfce4-panel-devel
+
 %description
 GNOME Global Menu project aims to improve GNOME toward a Document Centric Desktop Environment. Global Menu is a menu bar shared with every window in this screen/session. This package is the meta package.
 
-%package -n libgnomenu
-Summary: libgnomenu Provides global menu widget GnomenuMenuBar
-Group:		User Interface/Desktops
-Requires: gtk2
-%description -n libgnomenu
+%package -n 	libgnomenu
+Summary: 		libgnomenu Provides global menu widget GnomenuMenuBar
+Group:			User Interface/Desktops
+Requires: 		gtk2
+%description -n	libgnomenu
 libgnomenu is part of GNOME Global Menu project. libgnomenu provides several GObject for 
-(1) Simple Interprocess communicate: GnomenuSocket
-(2) Global Menu management: GnomenuServerHelper, GnomenuClientHelper
-(3) Global Menu widget: GnomenuMenuBar.
+	(1) Simple Interprocess communicate: GnomenuSocket
+	(2) Global Menu management: GnomenuServerHelper, GnomenuClientHelper
+	(3) Global Menu widget: GnomenuMenuBar.
 libgnomenu can also be loaded as a gtk module by adding it into GTK_MODULES, which will cause it to work in a GtkMenuBar-compatible mode, and can work with patched gtk: gtk2-aqd to provide Global Menu for legacy gtk applications, which were build with GtkMenuBar.
 
-%package -n libgnomenu-devel
-Summary: libgnomenu Provides global menu widget GnomenuMenuBar
-Group:		User Interface/Desktops
-Requires: gtk2
-Requires: libgnomenu
-%description -n libgnomenu-devel
+%package -n 	libgnomenu-devel
+Summary: 		libgnomenu Provides global menu widget GnomenuMenuBar
+Group:			User Interface/Desktops
+Requires: 		gtk2
+Requires: 		libgnomenu
+%description -n	libgnomenu-devel
 Headers and documentation for libgnomenu
 
-%package -n gnome-globalmenu-applet
-Summary: gnome-panel applet for global menu.
-Group:		User Interface/Desktops
-Requires: libgnomenu
-Requires: libwnck
-Requires: gnome-panel
-%description -n gnome-globalmenu-applet
+%package -n 	gnome-globalmenu-applet
+Summary: 		gnome-panel applet for global menu.
+Group:			User Interface/Desktops
+Requires: 		libgnomenu
+Requires: 		libwnck
+Requires: 		gnome-panel
+%description -n	gnome-globalmenu-applet
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
-%package -n xfce-globalmenu-plugin
-Summary: xfce-panel plugin for global menu.
-Requires: libgnomenu
-Requires: libwnck
-Requires: xfce4-panel
-Group:		User Interface/Desktops
-%description -n xfce-globalmenu-plugin
+%package -n 	xfce-globalmenu-plugin
+Summary: 		xfce-panel plugin for global menu.
+Requires: 		libgnomenu
+Requires: 		libwnck
+Requires: 		xfce4-panel
+Group:			User Interface/Desktops
+%description -n	xfce-globalmenu-plugin
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
-%package -n gtk-globalmenu-server
-Summary: standalone global menu server.
-Requires: libgnomenu
-Requires: libwnck
-Group:		User Interface/Desktops
-%description -n gtk-globalmenu-server
+%package -n 	gtk-globalmenu-server
+Summary: 		standalone global menu server.
+Requires: 		libgnomenu
+Requires: 		libwnck
+Group:			User Interface/Desktops
+%description -n	gtk-globalmenu-server
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
-%package language-packs
-Summary: Translations for gnome-globalmenu 
-%description language-packs
+%package 		language-packs
+Summary: 		Translations for gnome-globalmenu 
+Group:			User Interface/Desktops
+%description 	language-packs
 Localization files for gnome-globalmenu.
 
 %prep
@@ -166,3 +165,5 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 - Added schema
 * Wed Jan 09 2008 Feng Yu <rainwoodman@gmail.com>
 - Added description
+
+# vim:ts=4:sw=4
