@@ -15,7 +15,7 @@ serverdir = $(BONOBO_SERVER_FILES_PATH)
 server_in_files = GNOME_GlobalMenuApplet.server.in
 server_DATA     = $(server_in_files:.server.in=.server)
 
-$(server_in_files): $(server_in_files:.server.in=.server.in.in)
+$(server_in_files): $(server_in_files:.server.in=.server.in.in) Makefile
 	sed -e "s|\@LOCATION\@|$(APPLET_LOCATION)|" \
 	    $< > $@
 @INTLTOOL_SERVER_RULE@
@@ -36,7 +36,7 @@ PLUGIN_LOCATION = $(libexecdir)/xfce-globalmenu-plugin
 desktopdir = $(XFCE_DESKTOP_FILES_PATH)
 desktop_in_files = xfce-globalmenu-plugin.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
-$(desktop_in_files): $(desktop_in_files:.desktop.in=.desktop.in.in)
+$(desktop_in_files): $(desktop_in_files:.desktop.in=.desktop.in.in) Makefile
 	sed -e "s|\@LOCATION\@|$(PLUGIN_LOCATION)|" \
 	    $< > $@
 @INTLTOOL_DESKTOP_RULE@
@@ -89,14 +89,10 @@ gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				
 DISTCLEANFILES += $(server_file_DATA) GNOME_GlobalMenuApplet.server.in xfce-globalmenu-plugin.desktop.in xfce-globalmenu-plugin.desktop gnome-globalmenu-applet.schemas
 
-EXTRA_DIST = make-xfce-data.sh \
+EXTRA_DIST = \
 	gnome-globalmenu-applet.schemas.in \
 	GNOME_GlobalMenuApplet.server.in.in \
 	xfce-globalmenu-plugin.desktop.in.in
-
-#xfce-globalmenu-plugin.desktop:
-#	/bin/sh $(srcdir)/make-xfce-data.sh $@ $(libexecdir)
-
 
 install-data-local:
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
