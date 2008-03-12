@@ -7,12 +7,11 @@ libexec_PROGRAMS =
 bin_PROGRAMS = 
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
-#gnome_filedir = `pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
-#gnome_file_DATA = GNOME_GlobalMenuApplet.server
 
 APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
 
-serverdir       = $(libdir)/bonobo/servers
+#serverdir       = $(libdir)/bonobo/servers
+serverdir = $(BONOBO_SERVER_FILES_PATH)
 server_in_files = GNOME_GlobalMenuApplet.server.in
 server_DATA     = $(server_in_files:.server.in=.server)
 
@@ -33,7 +32,8 @@ endif
 if ENABLE_XFCE_PLUGIN
 libexec_PROGRAMS += xfce-globalmenu-plugin
 PLUGIN_LOCATION = $(libexecdir)/xfce-globalmenu-plugin
-desktopdir = $(datadir)/xfce4/panel-plugins
+#desktopdir = $(datadir)/xfce4/panel-plugins
+desktopdir = $(XFCE_DESKTOP_FILES_PATH)
 desktop_in_files = xfce-globalmenu-plugin.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 $(desktop_in_files): $(desktop_in_files:.desktop.in=.desktop.in.in)
