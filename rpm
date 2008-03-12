@@ -1,20 +1,30 @@
 #! /bin/sh
 RPMDEVROOT=~/sources/
+if [ ! -d $RPMDEVROOT ]; then
+	echo edit this file to update RPMDEVROOT
+	exit 1;
+fi;
+
 echo svn version is `svnversion`, press enter to edit .spec
 echo type the svn number you want for this build
 read version
-echo type the dist number you want for this build(empty for 1)
+if [ x$version == x ]; then 
+	echo input version
+	exit 1;
+fi;
+
+echo type the dist number you want for this build '('empty for 1')'
 read dist
 [ x$dist == x ] && dist=1
+
 cat gnome-globalmenu.spec.tmpl | \
 sed 's/@SVNVERSION@/'$version'/' | \
 sed 's/@RELEASE@/'$dist'/' >  gnome-globalmenu.spec
 
 cp *.tar.gz $RPMDEVROOT/SOURCES/
-rpmbuild -ba *.spec && ( \ 
+rpmbuild -ba *.spec && \
 (
 cd $RPMDEVROOT/RPMS/i386/; 
 tar -cjvf - *global*$version-$dist*.rpm *gnomenu*$version-$dist*.rpm
 ) > fedora-packages-0.4.svn$version-$dist.tar.bz2
-)
 
