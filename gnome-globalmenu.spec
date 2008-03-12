@@ -1,8 +1,8 @@
 %define 	base_version 	0.4
-%define 	svn_version 	svn749
+%define 	svn_version 	svn751
 Name: 			gnome-globalmenu
 Version: 		%{base_version}.%{svn_version}
-Release:		1%{?dist}
+Release:		2%{?dist}
 Summary:		Global menu bar widget and library for GTK/GNOME2
 Group:			User Interface/Desktops
 License:		GPLv2+
