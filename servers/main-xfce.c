@@ -5,7 +5,7 @@
 #include <libxfcegui4/libxfcegui4.h>
 #include <libxfce4panel/xfce-panel-plugin.h>
 
-#include "application.h"
+#include "application-xfce.h"
 //workaround a weird bug in xfce4 includes
 #undef _
 #undef Q_
@@ -25,7 +25,7 @@ xfce_applet_construct(XfcePanelPlugin *plugin)
 	g_print("constructing plugin\n");
 	g_signal_connect(G_OBJECT(plugin), "size-changed", 
 		G_CALLBACK(size_changed), NULL);
-	application_new(GTK_CONTAINER(plugin));
+	application_xfce_new(GTK_WIDGET(plugin));
 }
 
 XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL(xfce_applet_construct)

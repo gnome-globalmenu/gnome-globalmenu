@@ -70,6 +70,7 @@ gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
 
 xfce_globalmenu_plugin_SOURCES = \
 	main-xfce.c \
+	application-xfce.c \
 	$(VAST_SOURCE_CODE)
 xfce_globalmenu_plugin_CFLAGS =\
 	$(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
