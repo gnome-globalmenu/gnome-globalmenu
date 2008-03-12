@@ -110,13 +110,13 @@ AM_GCONF_SOURCE_2
 
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
-if test "$enable_gtk_doc" = "yes" ; then
-	AC_SUBST(DIA)
-	AC_CHECK_PROGS(DIA, dia)
-	if test x$DIA = "x" ; then
-		AC_MSG_ERROR([dia is needed to build the doc])
-	fi
-fi
+dnl if test "$enable_gtk_doc" = "yes" ; then
+dnl	AC_SUBST(DIA)
+dnl	AC_CHECK_PROGS(DIA, dia)
+dnl	if test x$DIA = "x" ; then
+dnl		AC_MSG_ERROR([dia is needed to build the doc])
+dnl	fi
+dnl fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
