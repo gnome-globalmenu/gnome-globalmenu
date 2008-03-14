@@ -26,6 +26,8 @@ _constructor	( GType type, guint n_construct_properties,
 			n_construct_properties,
 			construct_params);
 	app = APPLICATION(obj);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
+	_create_popup_menu(app);
 	return obj;
 }
 
@@ -39,23 +41,40 @@ static void _update_ui(Application *app)
 static void _load_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
-
+	PangoFontDescription * font;
+	gchar * font_name;
+	font_name = panel_applet_gconf_get_string(PANEL_APPLET(app->window), "title_font", NULL);
+	font = pango_font_description_from_string(font_name);
+	g_free(font_name);
 	g_object_set(app,
 			"title-visible",
 			 panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_title", NULL),
 			"icon-visible",
 			panel_applet_gconf_get_bool(PANEL_APPLET(app->window), "show_icon", NULL),
+			"title_font",
+			font,
 			NULL);
+	g_boxed_free(PANGO_TYPE_FONT_DESCRIPTION, font);
 }
 static void _save_conf(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 	gboolean show_title, show_icon;
+	PangoFontDescription * font= NULL;
+	gchar * font_name;
 	g_object_get(app, 
 			"title-visible", &show_title,
-			"icon-visible", &show_icon, NULL);
+			"icon-visible", &show_icon, 
+			"title-font", &font, 
+			NULL);
 	panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_title", show_title, NULL);
 	panel_applet_gconf_set_bool(PANEL_APPLET(app->window), "show_icon", show_icon, NULL);
+	font_name = pango_font_description_to_string(font);
+	panel_applet_gconf_set_string(PANEL_APPLET(app->window), "title_font", font_name, NULL);
+	if(font)
+		g_boxed_free(PANGO_TYPE_FONT_DESCRIPTION, font);
+	if(font_name)
+		g_free(font_name);
 }
 
 
@@ -76,9 +95,6 @@ static void application_gnome_class_init(ApplicationGnomeClass *klass)
 
 static void application_gnome_init(ApplicationGnome *app_gnome)
 {
-	Application * app = APPLICATION(app_gnome);
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
-	_create_popup_menu(app);
 }
 
 

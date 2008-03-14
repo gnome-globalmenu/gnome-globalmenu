@@ -55,6 +55,7 @@ struct _ApplicationClass {
 
 GType application_get_type(void);
 
+void application_start(Application * app);
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap);
 void application_update_ui(Application *app);
 void application_load_conf(Application *app);

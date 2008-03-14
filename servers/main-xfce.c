@@ -22,10 +22,12 @@ static gboolean size_changed(GtkWidget* plugin, gint size) {
 static void
 xfce_applet_construct(XfcePanelPlugin *plugin)
 {
+	Application * app;
 	g_print("constructing plugin\n");
 	g_signal_connect(G_OBJECT(plugin), "size-changed", 
 		G_CALLBACK(size_changed), NULL);
-	application_xfce_new(GTK_WIDGET(plugin));
+	app = application_xfce_new(GTK_WIDGET(plugin));
+	application_start(app);
 }
 
 XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL(xfce_applet_construct)

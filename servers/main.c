@@ -125,6 +125,7 @@ GOptionEntry entries [] = {
 	if(stick) gtk_window_stick(window);
 
 	gtk_widget_show_all(window);
+	application_start(app);
 	gtk_main();
 
 	return 0;

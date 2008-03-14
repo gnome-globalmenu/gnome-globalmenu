@@ -66,6 +66,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	g_signal_connect(G_OBJECT(applet), "change-orient", 
 				_change_orient, App);
 	gtk_widget_show_all(applet);
+	application_start(App);
     return TRUE;
   } else {
 	return FALSE;

@@ -338,17 +338,19 @@ _constructor	( GType type, guint n_construct_properties,
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 
+	return _self;
+}
+/* ENDS: GObject Interface */
+
+/* Public methods */
+void application_start(Application * app){
 	application_load_conf(app);
 	application_update_ui(app);
 
 	_update_background(app);
 /* start server */
 	menu_server_start(app->server);
-	return _self;
 }
-/* ENDS: GObject Interface */
-
-/* Public methods */
 void application_set_background(Application * app, GdkColor * color, GdkPixmap * pixmap){
 	gboolean dirty = FALSE;
 /* This piece code is redundant, for the purpose of clearity*/
