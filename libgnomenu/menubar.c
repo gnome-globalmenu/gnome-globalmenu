@@ -158,7 +158,7 @@ static void _s_visibility_set 		( GtkWidget  * menubar,
 									  gboolean vis,
 									  GnomenuClientHelper * helper); 
 static void _s_orientation_set 		( GtkWidget  * menubar, 
-									  GtkOrientation orientation,
+									  gint orientation,
 									  GnomenuClientHelper * helper); 
 static void _s_background_set	 	( GtkWidget  * menubar, 
 									  GdkColor * bgcolor,
@@ -689,7 +689,7 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	LOG("done");
 }
 static void _s_orientation_set 		( GtkWidget  * widget, 
-									  GtkOrientation orientation,
+									  gint orientation,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
@@ -1299,35 +1299,7 @@ _do_size_allocate (GtkWidget * widget,
 	arrow_allocation.width = arrow_requisition.width;
 	arrow_allocation.height = arrow_requisition.height;
 	priv->show_arrow = FALSE;
-	switch(pack_direction){
-		case GTK_PACK_DIRECTION_LTR:
-			if(allocation->width < priv->requisition.width){
-				adjusted.width -= arrow_requisition.width;
-				priv->show_arrow = TRUE;
-			}
-		break;
-		case GTK_PACK_DIRECTION_RTL:
-			if(allocation->width < priv->requisition.width){
-				adjusted.x = arrow_requisition.width;
-				priv->show_arrow = TRUE;
-			}
-		break;
-		case GTK_PACK_DIRECTION_BTT:
-			if(allocation->height < priv->requisition.height){
-				adjusted.y = arrow_requisition.height;
-				priv->show_arrow = TRUE;
-			}
-		break;
-		case GTK_PACK_DIRECTION_TTB:
-			if(allocation->height < priv->requisition.height){
-				adjusted.height -= arrow_requisition.height;
-				priv->show_arrow = TRUE;
-			}
-		break;
-	}
-	LOG("requisition = %d, %d", priv->requisition);
-	LOG("show_arrow = %d", priv->show_arrow);
-	LOG("adjusted = %d %d %d %d", adjusted);
+
 
 	if(GTK_WIDGET_REALIZED(widget)){
 		gdk_window_move_resize(priv->container,
@@ -1340,28 +1312,37 @@ _do_size_allocate (GtkWidget * widget,
 	if (menu_shell->children) {
 		child_allocation.x = (GTK_CONTAINER (menu_bar)->border_width +
 				ipadding + 
-				BORDER_SPACING + adjusted.x);
+				BORDER_SPACING);
 		child_allocation.y = (GTK_CONTAINER (menu_bar)->border_width +
-				BORDER_SPACING + adjusted.y);
+				BORDER_SPACING);
       
 		if (pack_direction == GTK_PACK_DIRECTION_LTR ||
 			pack_direction == GTK_PACK_DIRECTION_RTL) {
-			child_allocation.height = MAX (1, (gint)adjusted.height - child_allocation.y * 2);
 
 			offset = child_allocation.x; 	/* Window edge to menubar start */
 			ltr_x = child_allocation.x;
 
-			children = menu_shell->children;
-			if(priv->show_arrow) {
-				arrow_allocation.height = adjusted.height;
-				if(pack_direction == GTK_PACK_DIRECTION_LTR){
+			if(allocation->width < priv->requisition.width){
+				if((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_LTR)){
+					priv->show_arrow = TRUE;
+					adjusted.width -= arrow_requisition.width;
+					arrow_allocation.height = adjusted.height;
 					arrow_allocation.x = adjusted.width;
 					arrow_allocation.y = 0;
-				} else { /*RTL*/
+				} else {
+					priv->show_arrow = TRUE;
+					adjusted.x = arrow_requisition.width;
+					adjusted.width -= arrow_requisition.width;
+					arrow_allocation.height = adjusted.height;
 					arrow_allocation.x = 0;
 					arrow_allocation.y = 0;
 				}
 			}
+			
+			child_allocation.height = MAX (1, (gint)adjusted.height - child_allocation.y * 2);
+
+			children = menu_shell->children;
+
 			while (children) {
 				gint toggle_size;          
 				MenuItemInfo * menu_info;
@@ -1390,20 +1371,24 @@ _do_size_allocate (GtkWidget * widget,
 					child_requisition.width - offset;
 				}
 				if (GTK_WIDGET_VISIBLE (child)) {
-					if ((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_LTR))
-						child_allocation.x = ltr_x;
-					else
-						child_allocation.x = adjusted.width
-											- child_requisition.width - ltr_x; 
 
 					if(menu_info->overflowed){ /*move it away & clip it.*/
 						child_allocation.width = 0;
 						child_allocation.x = allocation->width;
+
 					} else { /*use remaining width if there isn't enought*/
 						child_allocation.width = MIN(
 							child_requisition.width,
-							adjusted.width - ltr_x);
+							(int)adjusted.width - (int)ltr_x);
+						if ((direction == GTK_TEXT_DIR_LTR) 
+							== (pack_direction == GTK_PACK_DIRECTION_LTR))
+							child_allocation.x = ltr_x;
+						else
+							child_allocation.x = adjusted.width
+											- child_allocation.width - ltr_x; 
+						child_allocation.x += adjusted.x;
 					}
+
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 									toggle_size);
 					gtk_widget_size_allocate (child, &child_allocation);
@@ -1413,22 +1398,30 @@ _do_size_allocate (GtkWidget * widget,
 				}
 			}
 		} else {
-			child_allocation.width = MAX (1, (gint)adjusted.width - child_allocation.x * 2);
-
 			offset = child_allocation.y; 	/* Window edge to menubar start */
 			ltr_y = child_allocation.y;
 
-			children = menu_shell->children;
-			if(priv->show_arrow) {
-				arrow_allocation.width = adjusted.width;
-				if(pack_direction == GTK_PACK_DIRECTION_TTB){
-					arrow_allocation.x = 0;
+			if(allocation->height < priv->requisition.height){
+				if((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_TTB)){
+					priv->show_arrow = TRUE;
+					adjusted.height -= arrow_requisition.height;
+					arrow_allocation.width = adjusted.width;
 					arrow_allocation.y = adjusted.height;
-				} else { /*BTT*/
 					arrow_allocation.x = 0;
+				} else {
+					priv->show_arrow = TRUE;
+					adjusted.y = arrow_requisition.height;
+					adjusted.height -= arrow_requisition.height;
+					arrow_allocation.width = adjusted.width;
 					arrow_allocation.y = 0;
+					arrow_allocation.x = 0;
 				}
 			}
+			
+			child_allocation.width = MAX (1, (gint)adjusted.width - child_allocation.x * 2);
+
+			children = menu_shell->children;
+
 			while (children) {
 				gint toggle_size;          
 				MenuItemInfo * menu_info;
@@ -1439,44 +1432,52 @@ _do_size_allocate (GtkWidget * widget,
 				menu_info = g_hash_table_lookup(priv->menu_items, child);
 
 				gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
-						&toggle_size);
+										&toggle_size);
 				gtk_widget_get_child_requisition (child, &child_requisition);
-				menu_info->overflowed = (ltr_y + child_requisition.height/2 > adjusted.height);
+				menu_info->overflowed = (ltr_y + child_requisition.height/2
+										> adjusted.height);
 
-				if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
-					child_pack_direction == GTK_PACK_DIRECTION_RTL)
-					child_requisition.width += toggle_size;
-				else
+				if (child_pack_direction == GTK_PACK_DIRECTION_TTB ||
+					child_pack_direction == GTK_PACK_DIRECTION_BTT)
 					child_requisition.height += toggle_size;
+				else
+					child_requisition.width += toggle_size;
 
 				/* Support for the right justified help menu */
 				if ((children == NULL) && (GTK_IS_MENU_ITEM(child))
-					&& (GTK_MENU_ITEM(child)->right_justify)) {
+				&& (GTK_MENU_ITEM(child)->right_justify)) {
 					ltr_y = adjusted.height -
 					child_requisition.height - offset;
 				}
 				if (GTK_WIDGET_VISIBLE (child)) {
-					if ((direction == GTK_TEXT_DIR_LTR) ==
-						(pack_direction == GTK_PACK_DIRECTION_TTB)) 
-						child_allocation.y = ltr_y;
-					else
-					child_allocation.y = adjusted.height
-										- child_requisition.height - ltr_y; 
 
-					if(menu_info->overflowed){ /*move it away & clip it.*/
+					if(menu_info->overflowed){ /*move it aw.x & clip it.*/
 						child_allocation.height = 0;
-						child_allocation.x = allocation->height;
-					} else { /*use remaining width if there isn't enought*/
+						child_allocation.y = allocation->height;
+
+					} else { /*use remaining height if there isn't enough*/
 						child_allocation.height = MIN(
 							child_requisition.height,
-							adjusted.height - ltr_y);
+							(int)adjusted.height - (int)ltr_y);
+						if ((direction == GTK_TEXT_DIR_LTR) 
+							== (pack_direction == GTK_PACK_DIRECTION_TTB))
+							child_allocation.y = ltr_y;
+						else {
+							child_allocation.y = adjusted.height
+											- child_allocation.height - ltr_y; 
+						}
+						child_allocation.y += adjusted.y;
+						LOG("a %d %d %d %d", child_allocation);
+						LOG("r %d %d ", child_requisition);
+						LOG("l %d ", ltr_y);
 					}
 
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
-					toggle_size);
+									toggle_size);
 					gtk_widget_size_allocate (child, &child_allocation);
 
 					ltr_y += child_requisition.height;
+
 				}
 			}
 		}
