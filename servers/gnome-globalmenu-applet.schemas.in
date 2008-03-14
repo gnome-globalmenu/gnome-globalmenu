@@ -27,6 +27,15 @@
 				<short>The font used to display the title of the active application</short>
 			</locale>
 		</schema>
+		<schema>
+			<key>/schemas/apps/gnome-globalmenu-applet/prefs/title_max_width</key>
+			<owner>gnome-globalmenu-applet</owner>
+			<type>int</type>
+			<default>-1</default>
+			<locale name="C">
+				<short>The Maximum length of title of the active application</short>
+			</locale>
+		</schema>
 	</schemalist>
 </gconfschemafile>
 
