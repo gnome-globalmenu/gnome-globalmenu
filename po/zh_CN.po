@@ -3,39 +3,39 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-07 23:54-0500\n"
-"PO-Revision-Date: 2008-03-12 13:33-0500\n"
+"POT-Creation-Date: 2008-03-13 22:05-0400\n"
+"PO-Revision-Date: 2008-03-13 22:05-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../servers/main.c:60
+#: ../servers/main.c:66
 msgid "Show fancy control buttons for menu bars"
 msgstr "显示高级控制按钮"
 
-#: ../servers/main.c:61
+#: ../servers/main.c:67
 msgid "No Stick to the workspace"
 msgstr "不悬浮于活动工作区"
 
-#: ../servers/main.c:62
+#: ../servers/main.c:68
 msgid "No Always on top"
 msgstr "不置顶"
 
-#: ../servers/application.c:220
+#: ../servers/application.c:78
 msgid "Show active application title"
 msgstr "显示活动应用程序标题栏"
 
-#: ../servers/application.c:221
+#: ../servers/application.c:82
 msgid "Show active window icon"
 msgstr "显示活动窗口图标"
 
-#: ../servers/application.c:331
+#: ../servers/application.c:427
 msgid "translator_credits"
 msgstr "冯雨"
 
-#: ../servers/application.c:338
+#: ../servers/application.c:434
 msgid "GNOME panel applet for Global Menu"
 msgstr "GNOME 公用菜单小程序"
 
@@ -58,18 +58,31 @@ msgstr "公用菜单小程序工厂"
 msgid "Global Menu applet for GNOME"
 msgstr "GNOME公用菜单小程序"
 
-#: ../servers/application-gnome.c:115
+#: ../servers/xfce-globalmenu-plugin.desktop.in.in.h:1
+#, fuzzy
+msgid "Global Menu Plugin"
+msgstr "公用菜单插件"
+
+#: ../servers/xfce-globalmenu-plugin.desktop.in.in.h:2
+msgid "Placeholder for GTK+ application menu in XFCE Panel"
+msgstr ""
+
+#: ../servers/application-gnome.c:130
 msgid "_About"
 msgstr "关于(_A)"
 
-#: ../servers/application-gnome.c:116
+#: ../servers/application-gnome.c:131
 msgid "_Preferences"
 msgstr "偏好设定(_P)"
 
 #: ../servers/gnome-globalmenu-applet.schemas.in.h:1
-msgid "show the icon of the active window"
+msgid "Show/Hide the icon of the active window"
 msgstr "显示活动窗口的图标"
 
 #: ../servers/gnome-globalmenu-applet.schemas.in.h:2
-msgid "show the title of active application"
+msgid "Show/Hide the title of the active application"
 msgstr "显示活动应用程序的标题"
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:3
+msgid "The font used to display the title of the active application"
+msgstr "显示活动应用程序标题字体"
