@@ -1463,12 +1463,12 @@ GtkMenuItem * _get_proxy_for_item( GtkMenuItem * item){
 	gchar * text = gtk_widget_get_name(item);
 	LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
 	if(GTK_IS_LABEL(child)){
-		text = gtk_label_get_text(GTK_LABEL(child));
+		text = gtk_label_get_label(GTK_LABEL(child));
 	} else {
 		LOG("unkown child:%s", G_OBJECT_TYPE_NAME(child));
 	}
 	LOG("proxy created, text = %s", text);
-	proxy = gtk_menu_item_new_with_label(text);
+	proxy = gtk_menu_item_new_with_mnemonic(text);
 	submenu = gtk_menu_item_get_submenu(item);
 	if(submenu){
 	//	g_object_ref(submenu);
@@ -1505,6 +1505,8 @@ static void _s_arrow_button_clicked		( GtkWidget * self,
 		gtk_widget_show_all(priv->popup_menu);
 		gtk_menu_popup(priv->popup_menu, NULL, NULL, 
 			NULL, NULL, 0, gtk_get_current_event_time());
+		gtk_menu_shell_select_first (GTK_MENU_SHELL (priv->popup_menu), FALSE);
+	
 	}
 }
 static void _s_popup_menu_deactivated	( GtkWidget * menubar,
