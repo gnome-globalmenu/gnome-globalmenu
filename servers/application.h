@@ -45,7 +45,7 @@ struct _Application
 	gboolean title_visible;
 	gboolean icon_visible;
 	PangoFontDescription * title_font;
-	gint title_max_width_chars;
+	gint title_max_width;
 	GtkOrientation orientation;
 /* conf dialog */
 	ApplicationConfDlg conf_dialog;

@@ -15,6 +15,7 @@ enum {
 	PROP_ICON_VISIBLE,
 	PROP_ORIENTATION,
 	PROP_TITLE_FONT,
+	PROP_TITLE_MAX_WIDTH,
 };
 
 typedef struct _ApplicationPrivate {
@@ -140,6 +141,14 @@ static void application_class_init(ApplicationClass *klass)
 						PANGO_TYPE_FONT_DESCRIPTION,
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
+	g_object_class_install_property (obj_class,
+		PROP_TITLE_MAX_WIDTH,
+		g_param_spec_int ( "title-max-width",
+						"title-max-width",
+						"",
+						-1, 100, -1, 
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
+						
 
 	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
@@ -175,6 +184,8 @@ static void _update_ui(Application *app)
 	title_font_name = pango_font_description_to_string(app->title_font);
 	gtk_font_button_set_font_name(GTK_FONT_BUTTON(cfd->ftbtn_title_font), 
 			title_font_name);
+
+	gtk_label_set_max_width_chars(GTK_LABEL(app->title), app->title_max_width);
 	g_free(title_font_name);
 }
 static void _save_conf_unimp(Application *app){
@@ -253,6 +264,9 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 			}
 		}
 		break;
+		case PROP_TITLE_MAX_WIDTH:
+			self->title_max_width = g_value_get_int(value);
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -278,6 +292,9 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 		break;
 		case PROP_TITLE_FONT:
 			g_value_set_boxed(value, self->title_font);
+		break;
+		case PROP_TITLE_MAX_WIDTH:
+			g_value_set_int(value, self->title_max_width);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -493,6 +510,7 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 	ApplicationConfDlg * cfd = &app->conf_dialog;
 	PangoFontDescription * font;
 	const gchar * font_name;
+	gint max_width;
 	switch(arg){
 		case GTK_RESPONSE_CANCEL:
 			application_update_ui(self);
@@ -505,6 +523,7 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 			font_name = gtk_font_button_get_font_name(cfd->ftbtn_title_font);
 			font = pango_font_description_from_string(font_name);
 			LOG("font name = %s, font = %p", font_name, font);
+			max_width = gtk_spin_button_get_value(cfd->spnbtn_title_max_width);
 			g_object_set(app,
 				"title-visible",
 				gtk_toggle_button_get_active(cfd->tgbtn_title_visible),
@@ -512,6 +531,8 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 				gtk_toggle_button_get_active(cfd->tgbtn_icon_visible),
 				"title-font",
 				font,
+				"title-max-width",
+				max_width,
 				NULL);
 			application_save_conf(self);
 			application_load_conf(self);
