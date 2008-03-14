@@ -7,6 +7,7 @@
             <default>FALSE</default>
             <locale name="C">
 				<short>Show/Hide the icon of the active window</short>
+				<long></long>
             </locale>
 		</schema>
         <schema>
@@ -16,6 +17,7 @@
             <default>FALSE</default>
             <locale name="C">
 				<short>Show/Hide the title of the active application</short>
+				<long></long>
             </locale>
 		</schema>
 		<schema>
@@ -25,6 +27,7 @@
 			<default>Sans Bold</default>
 			<locale name="C">
 				<short>The font used to display the title of the active application</short>
+				<long></long>
 			</locale>
 		</schema>
 		<schema>
@@ -34,6 +37,7 @@
 			<default>-1</default>
 			<locale name="C">
 				<short>The Maximum length of title of the active application</short>
+				<long></long>
 			</locale>
 		</schema>
 	</schemalist>
