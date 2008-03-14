@@ -27,8 +27,7 @@ _constructor	( GType type, guint n_construct_properties,
 			construct_params);
 	app = APPLICATION(obj);
 	_init_plugin(app);
-	application_load_conf(app);
-	application_update_ui(app);
+
 	return obj;
 }
 
