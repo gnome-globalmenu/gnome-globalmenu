@@ -56,6 +56,7 @@ enum {
 typedef struct {
 	gboolean overflowed;
 	GtkMenuItem * menu_item;
+	GtkMenuItem * proxy;
 } MenuItemInfo;
 
 typedef struct 
@@ -274,8 +275,8 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	GtkWidget * arrow;
 	priv->helper = gnomenu_client_helper_new();
 	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, g_free);
-	priv->popup_menu = gtk_menu_new();
-	priv->arrow_button = gtk_toggle_button_new();
+	priv->popup_menu = GTK_MENU(gtk_menu_new());
+	priv->arrow_button = GTK_WIDGET(gtk_toggle_button_new());
 	priv->arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
 	priv->show_arrow = FALSE;
 	priv->disposed = FALSE;
@@ -339,12 +340,12 @@ static GObject* _constructor(GType type,
 
 	GET_OBJECT(object, menu_bar, priv);
 
-	gtk_container_set_border_width(object, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(object), 0);
 
 	gtk_widget_show(priv->arrow);
 	gtk_container_add(GTK_CONTAINER(priv->arrow_button), priv->arrow);
-	gtk_button_set_relief(priv->arrow_button, GTK_RELIEF_NONE);
-	gtk_widget_set_parent(priv->arrow_button, GTK_CONTAINER(menu_bar));
+	gtk_button_set_relief(GTK_BUTTON(priv->arrow_button), GTK_RELIEF_NONE);
+	gtk_widget_set_parent(priv->arrow_button, GTK_WIDGET(menu_bar));
 
 	g_signal_connect_swapped(G_OBJECT(priv->helper), "size-allocate",
 				G_CALLBACK(_s_size_allocate), menu_bar);
@@ -404,7 +405,7 @@ _finalize(GObject * _object){
 	GET_OBJECT(_object, menu_bar, priv);	
 	gtk_widget_unparent(priv->arrow_button);
 	g_hash_table_destroy(priv->menu_items);
-	gtk_widget_destroy(priv->popup_menu);
+	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
 	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->finalize(_object);
 }
 static void
@@ -416,10 +417,10 @@ _set_property (GObject      *object,
 	GET_OBJECT(object, self, priv); 
 	switch (prop_id) {
 		case PROP_PACK_DIRECTION:
-			gtk_menu_bar_set_pack_direction (self, g_value_get_enum (value));
+			gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(self), g_value_get_enum (value));
 		break;
 		case PROP_CHILD_PACK_DIRECTION:
-			gtk_menu_bar_set_child_pack_direction (self, g_value_get_enum (value));
+			gtk_menu_bar_set_child_pack_direction (GTK_MENU_BAR(self), g_value_get_enum (value));
 		break;
 		case PROP_QUIRK:
 			{
@@ -427,7 +428,7 @@ _set_property (GObject      *object,
 			if(priv->quirk != q){
 				priv->quirk = q;
 				if(GNOMENU_HAS_QUIRK(priv->quirk, FORCE_SHOW_ALL) &&!GTK_WIDGET_REALIZED(self)){
-					gtk_widget_realize(self);
+					gtk_widget_realize(GTK_WIDGET(self));
 				}
 			}
 			}
@@ -448,10 +449,10 @@ _get_property (GObject    *object,
   
 	switch (prop_id) {
 		case PROP_PACK_DIRECTION:
-		  g_value_set_enum (value, gtk_menu_bar_get_pack_direction (self));
+		  g_value_set_enum (value, gtk_menu_bar_get_pack_direction (GTK_MENU_BAR(self)));
 		  break;
 		case PROP_CHILD_PACK_DIRECTION:
-		  g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (self));
+		  g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (GTK_MENU_BAR(self)));
 		  break;
 		case PROP_QUIRK:
 			g_value_set_flags (value, priv->quirk);
@@ -495,7 +496,7 @@ _size_request (GtkWidget      *widget,
 			_calc_size_request(widget, &priv->requisition);
 		}
 	}
-	pack_direction = gtk_menu_bar_get_pack_direction(widget);	
+	pack_direction = gtk_menu_bar_get_pack_direction(GTK_MENU_BAR(widget));	
 	switch(pack_direction){
 		case GTK_PACK_DIRECTION_LTR:
 		case GTK_PACK_DIRECTION_RTL:
@@ -778,7 +779,7 @@ static gboolean _s_configure_event	( GtkWidget * widget,
 			/* it is user resizing.*/
 			GtkAllocation allocation = {event->x, event->y, event->width, event->height};
 			priv->allocation = allocation;
-			_do_size_allocate(menu_bar, &allocation);
+			_do_size_allocate(widget, &allocation);
 		}
 	}
 	return FALSE;
@@ -1483,59 +1484,91 @@ static void _remove_child ( GtkWidget * widget, GtkContainer * container){
 	gtk_container_remove(container, widget);
 }
 
-GtkMenuItem * _get_proxy_for_item( GtkMenuItem * item){
-	GtkMenuItem * proxy = NULL;
-	GtkWidget * child = gtk_bin_get_child(GTK_BIN(item));
-	GtkMenu * submenu;
-	GtkWidget * label;
-	const gchar * text = gtk_widget_get_name(GTK_WIDGET(item));
-	LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
-	if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
-	&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
-/* Can't handle any other subclass of GtkMenuItem */
-		return NULL;
+static GtkMenuItem * _get_item_for_proxy(GnomenuMenuBar * self, GtkMenuItem * proxy){
+	GET_OBJECT(self, menu_bar, priv);
+	GList * list = GTK_MENU_SHELL(self)->children;
+	GList * node;
+	for(node = g_list_first(list); node; node = g_list_next(node)){
+		GtkMenuItem * item = node->data;
+		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
+		if(info && info->proxy == proxy){
+			return item;
+		}
 	}
-	if(GTK_IS_LABEL(child)){
-		text = gtk_label_get_label(GTK_LABEL(child));
-	} else {
-		LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
-	}
-	LOG("proxy created, text = %s", text);
+}
+GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
+	GET_OBJECT(self, menu_bar, priv);
+
+	MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
+	if(!info->proxy) {
+		GtkWidget * label;
+		GtkWidget * child = gtk_bin_get_child(GTK_BIN(item));
+		const gchar * text = gtk_widget_get_name(GTK_WIDGET(item));
+		LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
+		if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
+		&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
+	/* Can't handle any other subclass of GtkMenuItem */
+			return NULL;
+		}
+		if(GTK_IS_LABEL(child)){
+			text = gtk_label_get_label(GTK_LABEL(child));
+		} else {
+			LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
+		}
+		LOG("proxy created, text = %s", text);
+		
+		label = gtk_label_new_with_mnemonic(text);
+	/* The image is then lost.*/
+		info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
+		gtk_container_add(GTK_CONTAINER(info->proxy), label);
+	}	
 	
-	label = gtk_label_new_with_mnemonic(text);
-/* The image is then lost.*/
-	proxy = GTK_MENU_ITEM(gtk_menu_item_new());
-	gtk_container_add(GTK_CONTAINER(proxy), label);
 	
-	submenu = GTK_MENU(gtk_menu_item_get_submenu(item));
-	if(submenu){
-/*This is buggy. one menu can't be submenu of two menu items.*/
-		gtk_menu_item_set_submenu(proxy, GTK_WIDGET(submenu));	
-	}
-	return proxy;	
+	return info->proxy;	
 }
 static void _build_popup_menu 	(GnomenuMenuBar * self){
 	GET_OBJECT(self, menu_bar, priv);
 	GList * list;
 	GList * node;
 	gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_remove_child, priv->popup_menu);
-	list = g_hash_table_get_values(priv->menu_items);
+	
+	list = GTK_MENU_SHELL(self)->children;
 	for(node = g_list_first(list); node; node = g_list_next(node)){
-		MenuItemInfo * info = node->data;
+		GtkWidget * child = node->data;
+		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, child);
 		if(info->overflowed) {
-			GtkMenuItem * proxy = _get_proxy_for_item(info->menu_item);
+			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
 			if(proxy) gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
 		}
 	}
-	g_list_free(list);
 }
-
+static void _steal_submenu(GtkMenuItem * proxy, GnomenuMenuBar * self){
+	GtkMenuItem * item = _get_item_for_proxy(self, proxy);
+	GtkMenu * submenu = GTK_MENU(gtk_menu_item_get_submenu(item));
+	if(submenu){
+		g_object_ref(submenu);
+		gtk_menu_detach(submenu);
+		gtk_menu_item_set_submenu(proxy, GTK_WIDGET(submenu));	
+		g_object_unref(submenu);
+	}
+}
+static void _return_submenu(GtkMenuItem * proxy, GnomenuMenuBar * self){
+	GtkMenuItem * item = _get_item_for_proxy(self, proxy);
+	GtkMenu * submenu = GTK_MENU(gtk_menu_item_get_submenu(proxy));
+	if(submenu){
+		g_object_ref(submenu);
+		gtk_menu_detach(submenu);
+		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));	
+		g_object_unref(submenu);
+	}
+}
 static void _s_arrow_button_clicked		( GtkWidget * self,
 									  GtkWidget * arrow_button){
 	GET_OBJECT(self, menu_bar, priv);
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->arrow_button)) &&
      !GTK_WIDGET_VISIBLE (priv->popup_menu)) {
 		_build_popup_menu(menu_bar);
+		gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_steal_submenu, menu_bar);
 		gtk_widget_show_all(GTK_WIDGET(priv->popup_menu));
 		gtk_menu_popup(priv->popup_menu, NULL, NULL, 
 			NULL, NULL, 0, gtk_get_current_event_time());
@@ -1546,7 +1579,7 @@ static void _s_arrow_button_clicked		( GtkWidget * self,
 static void _s_popup_menu_deactivated	( GtkWidget * menubar,
 									  GtkWidget * popup_menu){
 	GET_OBJECT(menubar, menu_bar, priv);
-	gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_remove_child, priv->popup_menu);
+	gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_return_submenu, menu_bar);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->arrow_button), FALSE);
 }
 /*
