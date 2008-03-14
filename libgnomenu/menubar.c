@@ -1547,7 +1547,33 @@ GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
 		LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
 		
 	/* The image is then lost.*/
-		info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
+		if(GTK_IS_IMAGE_MENU_ITEM(item)){
+			GtkImage * image = gtk_image_menu_item_get_image(item);
+			GtkImage * dup = NULL;
+			switch(gtk_image_get_storage_type(image)){
+				case GTK_IMAGE_EMPTY:
+				case GTK_IMAGE_PIXMAP:
+				case GTK_IMAGE_IMAGE:
+				case GTK_IMAGE_PIXBUF:
+				break;
+				case GTK_IMAGE_STOCK: {
+					gchar * stock_id;
+					GtkIconSize size;
+					gtk_image_get_stock (
+						image, &stock_id, &size);
+					dup = gtk_image_new_from_stock(
+						stock_id, size);
+				}
+				break;
+				case GTK_IMAGE_ICON_SET:
+				case GTK_IMAGE_ANIMATION:
+				case GTK_IMAGE_ICON_NAME:
+				break;
+			}
+			info->proxy = GTK_MENU_ITEM(gtk_image_menu_item_new());
+			gtk_image_menu_item_set_image(info->proxy, dup);
+		} else 
+			info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
 		g_object_ref(info->proxy);
 	} else {
 		gtk_container_remove(GTK_CONTAINER(info->proxy),
