@@ -1374,7 +1374,7 @@ _do_size_allocate (GtkWidget * widget,
 				gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
 										&toggle_size);
 				gtk_widget_get_child_requisition (child, &child_requisition);
-				menu_info->overflowed = (ltr_x + child_requisition.width 
+				menu_info->overflowed = (ltr_x + child_requisition.width/2
 										> adjusted.width);
 
 				if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
@@ -1396,8 +1396,14 @@ _do_size_allocate (GtkWidget * widget,
 						child_allocation.x = adjusted.width
 											- child_requisition.width - ltr_x; 
 
-					child_allocation.width = !menu_info->overflowed?child_requisition.width:0;
-
+					if(menu_info->overflowed){ /*move it away & clip it.*/
+						child_allocation.width = 0;
+						child_allocation.x = allocation->width;
+					} else { /*use remaining width if there isn't enought*/
+						child_allocation.width = MIN(
+							child_requisition.width,
+							adjusted.width - ltr_x);
+					}
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 									toggle_size);
 					gtk_widget_size_allocate (child, &child_allocation);
@@ -1435,7 +1441,7 @@ _do_size_allocate (GtkWidget * widget,
 				gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
 						&toggle_size);
 				gtk_widget_get_child_requisition (child, &child_requisition);
-				menu_info->overflowed = (ltr_y + child_requisition.height > adjusted.height);
+				menu_info->overflowed = (ltr_y + child_requisition.height/2 > adjusted.height);
 
 				if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
 					child_pack_direction == GTK_PACK_DIRECTION_RTL)
@@ -1457,7 +1463,14 @@ _do_size_allocate (GtkWidget * widget,
 					child_allocation.y = adjusted.height
 										- child_requisition.height - ltr_y; 
 
-					child_allocation.height = !menu_info->overflowed?child_requisition.height:0;
+					if(menu_info->overflowed){ /*move it away & clip it.*/
+						child_allocation.height = 0;
+						child_allocation.x = allocation->height;
+					} else { /*use remaining width if there isn't enought*/
+						child_allocation.height = MIN(
+							child_requisition.height,
+							adjusted.height - ltr_y);
+					}
 
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 					toggle_size);
