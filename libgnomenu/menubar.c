@@ -1460,9 +1460,12 @@ GtkMenuItem * _get_proxy_for_item( GtkMenuItem * item){
 	GtkMenuItem * proxy = NULL;
 	GtkWidget * child = gtk_bin_get_child(item);
 	GtkMenu * submenu;
-	gchar * text = NULL;
+	gchar * text = gtk_widget_get_name(item);
+	LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
 	if(GTK_IS_LABEL(child)){
 		text = gtk_label_get_text(GTK_LABEL(child));
+	} else {
+		LOG("unkown child:%s", G_OBJECT_TYPE_NAME(child));
 	}
 	LOG("proxy created, text = %s", text);
 	proxy = gtk_menu_item_new_with_label(text);
