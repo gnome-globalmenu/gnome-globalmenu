@@ -26,12 +26,12 @@ typedef struct {
 	GnomenuQuirkMask mask;
 } QuirkEntry;
 
-static GFlagsValue * _get_quirk_value_by_nick(gchar * nick){
+static GFlagsValue * _get_quirk_value_by_nick(const gchar * nick){
 	static GTypeClass * type_class = NULL;
 		if(type_class == NULL) type_class = g_type_class_ref(gnomenu_quirk_mask_get_type());
 	return g_flags_get_value_by_nick(type_class, nick);
 }
-static void _add_quirks_from_string(GQueue * quirks, gchar * string){
+static void _add_quirks_from_string(GQueue * quirks, const gchar * string){
 	gchar ** lines;
 	gchar ** words;
 	gchar * word;
@@ -90,7 +90,7 @@ static void _add_quirks_from_string(GQueue * quirks, gchar * string){
 	}
 	g_strfreev(lines);
 }
-static void _add_quirks_from_file(GQueue * quirks, gchar * file){
+static void _add_quirks_from_file(GQueue * quirks, const gchar * file){
 	gchar * contents;
 	gint length;
 	GError * error = NULL;
@@ -167,7 +167,7 @@ GnomenuQuirkMask gnomenu_get_default_quirk(){
  * Returns: the quirk for the given detail. 'detail' is usually
  * the title or the role of the window.
  */
-GnomenuQuirkMask gnomenu_get_detail_quirk(gchar * detail){
+GnomenuQuirkMask gnomenu_get_detail_quirk(const gchar * detail){
 	struct quirk_match_data data = { g_get_prgname(), detail, GNOMENU_QUIRK_NONE};
 	g_queue_foreach(_get_quirks(), _match_quirk, &data);
 	return data.rt;

@@ -55,7 +55,7 @@ typedef enum { /*< prefix = GNOMENU_QUIRK >*/
  */
 #define GNOMENU_HAS_QUIRK(m, v) ((m) & (GNOMENU_QUIRK_ ## v))
 GnomenuQuirkMask gnomenu_get_default_quirk(); 
-GnomenuQuirkMask gnomenu_get_detail_quirk(gchar * detail);
+GnomenuQuirkMask gnomenu_get_detail_quirk(const gchar * detail);
 
 /*< private: >*/
 #define GNOMENU_TYPE_QUIRK_MASK gnomenu_quirk_mask_get_type()
