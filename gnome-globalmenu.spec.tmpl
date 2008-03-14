@@ -129,17 +129,20 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 %files -n gtk-globalmenu-server
 %defattr(-, root, root)
 /usr/bin/gtk-globalmenu-server
+/usr/share/gnome-globalmenu/application.glade
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)
 /usr/libexec/gnome-globalmenu-applet
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 /etc/gconf/schemas/gnome-globalmenu-applet.schemas
+/usr/share/gnome-globalmenu/application.glade
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
 /usr/libexec/xfce-globalmenu-plugin
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
+/usr/share/gnome-globalmenu/application.glade
 
 %files language-packs
 %defattr(-, root, root)

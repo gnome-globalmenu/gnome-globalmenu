@@ -25,9 +25,6 @@ $(server_in_files): $(server_in_files:.server.in=.server.in.in) Makefile
 	    $< > $@
 @INTLTOOL_SERVER_RULE@
 
-#schemadir= @GCONF_SCHEMA_FILE_DIR@
-#schema_DATA= gnome-globalmenu-applet.schemas
-
 schemasdir       = $(sysconfdir)/gconf/schemas
 schemas_in_files = gnome-globalmenu-applet.schemas.in
 schemas_DATA     = $(schemas_in_files:.schemas.in=.schemas)
@@ -99,7 +96,7 @@ EXTRA_DIST = \
 	gnome-globalmenu-applet.schemas.in \
 	GNOME_GlobalMenuApplet.server.in.in \
 	xfce-globalmenu-plugin.desktop.in.in \
-	application.glade.in	
+	application.glade 
 
 install-data-local:
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
