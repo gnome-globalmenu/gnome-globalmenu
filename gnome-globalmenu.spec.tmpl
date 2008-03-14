@@ -13,6 +13,7 @@ BuildRoot:		%{_tmppath}/%{name}-%{base_version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	gtk2
 BuildRequires:	libwnck
 BuildRequires:	gnome-panel-devel
+BuildRequires:	libglade2-devel
 BuildRequires:	bonobo-activation
 BuildRequires:	xfce4-panel-devel
 
@@ -44,6 +45,7 @@ Group:			User Interface/Desktops
 Requires: 		libgnomenu
 Requires: 		libwnck
 Requires: 		gnome-panel
+Requires: 		libglade2
 %description -n	gnome-globalmenu-applet
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
@@ -52,6 +54,7 @@ Summary: 		xfce-panel plugin for global menu.
 Requires: 		libgnomenu
 Requires: 		libwnck
 Requires: 		xfce4-panel
+Requires: 		libglade2
 Group:			User Interface/Desktops
 %description -n	xfce-globalmenu-plugin
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
@@ -60,6 +63,7 @@ A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServe
 Summary: 		standalone global menu server.
 Requires: 		libgnomenu
 Requires: 		libwnck
+Requires: 		libglade2
 Group:			User Interface/Desktops
 %description -n	gtk-globalmenu-server
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
