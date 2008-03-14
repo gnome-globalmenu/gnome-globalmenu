@@ -13,7 +13,8 @@ enum {
 	PROP_WINDOW,
 	PROP_TITLE_VISIBLE,
 	PROP_ICON_VISIBLE,
-	PROP_ORIENTATION
+	PROP_ORIENTATION,
+	PROP_TITLE_FONT,
 };
 
 typedef struct _ApplicationPrivate {
@@ -66,24 +67,24 @@ static void application_init(Application *app)
 	app->bgpixmap = NULL;
 	app->bgcolor = NULL;
 
+	app->title_font = NULL;
+	app->title_visible = FALSE;
+	app->icon_visible = FALSE;
+
 /* conf dialog */
 	app->conf_dialog.dlg = GTK_DIALOG(gtk_dialog_new());
 	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
-//	GtkWidget * title_label = gtk_label_new(_("Maximium Title Label Width(in chars)"));
-//	GtkBox * title_box = GTK_BOX(gtk_hbox_new(TRUE, 0));
-	#define NEW_CHECK_BUTTON(n, t) \
-		app->conf_dialog.n = gtk_check_button_new_with_label(t); \
-		gtk_box_pack_start_defaults(vbox, app->conf_dialog.n);
-	NEW_CHECK_BUTTON(title_visible, _("Show active application title"));
-	NEW_CHECK_BUTTON(icon_visible, _("Show active window icon"));
-	#undef NEW_CHECK_BUTTON 
-//	gtk_box_pack_start_defaults(title_box, GTK_WIDGET(title_label));
-//	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(title_box));
+
+	app->conf_dialog.title_visible = gtk_check_button_new_with_label(_("Show active application title"));
+	gtk_box_pack_start_defaults(vbox, app->conf_dialog.title_visible);
+	app->conf_dialog.title_font = gtk_font_button_new();
+	gtk_box_pack_start_defaults(vbox, app->conf_dialog.title_font);
+	app->conf_dialog.icon_visible = gtk_check_button_new_with_label(_("Show active window icon"));
+	gtk_box_pack_start_defaults(vbox, app->conf_dialog.icon_visible);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(app->conf_dialog.dlg)->vbox), GTK_WIDGET(vbox));
 
 	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
 	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
-
 }
 static void application_class_init(ApplicationClass *klass)
 {
@@ -132,6 +133,15 @@ static void application_class_init(ApplicationClass *klass)
 						GTK_ORIENTATION_HORIZONTAL,
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
+	g_object_class_install_property (obj_class,
+		PROP_TITLE_FONT,
+		g_param_spec_boxed ("title-font",
+						"title-font",
+						"",
+						PANGO_TYPE_FONT_DESCRIPTION,
+						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
+
+
 	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
 
@@ -143,6 +153,7 @@ Application * application_new(GtkContainer * widget){
 static void _update_ui(Application *app)
 {
 	LOG();
+	gchar * title_font_name;
 	if(app->title_visible) 
 		gtk_widget_show(app->title);
 	else 
@@ -153,8 +164,12 @@ static void _update_ui(Application *app)
 	else 
 		gtk_widget_hide(app->icon);
 
+	pango_layout_set_font_description(gtk_label_get_layout(app->title), app->title_font);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.title_visible), app->title_visible);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.icon_visible), app->icon_visible);
+	title_font_name = pango_font_description_to_string(app->title_font);
+	gtk_font_button_set_font_name(GTK_FONT_BUTTON(app->conf_dialog.title_font), title_font_name);
+	g_free(title_font_name);
 }
 static void _save_conf_unimp(Application *app){
 	LOG("Not implemented for %s\n", 
@@ -182,13 +197,9 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 			break;
 		case PROP_TITLE_VISIBLE:
 			self->title_visible = g_value_get_boolean(value);
-//			application_update_ui(self);
-//			application_save_conf(self);
 			break;
 		case PROP_ICON_VISIBLE:
 			self->icon_visible = g_value_get_boolean(value);
-//			application_update_ui(self);
-//			application_save_conf(self);
 			break;
 		case PROP_ORIENTATION:
 			{
@@ -221,6 +232,17 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 			}
 		}
 		break;
+		case PROP_TITLE_FONT:
+		{
+			PangoFontDescription * new_title_font
+				= g_value_get_boxed(value);
+			if(!pango_font_description_equal(new_title_font, self->title_font)){
+				if(self->title_font)
+					g_boxed_free(PANGO_TYPE_FONT_DESCRIPTION, self->title_font);
+				self->title_font = g_value_dup_boxed(value);
+			}
+		}
+		break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
@@ -243,6 +265,9 @@ _get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * 
 			break;
 		case PROP_ORIENTATION:
 			g_value_set_enum(value, self->orientation);
+		break;
+		case PROP_TITLE_FONT:
+			g_value_set_boxed(value, self->title_font);
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
@@ -312,6 +337,9 @@ _constructor	( GType type, guint n_construct_properties,
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
+
+	application_load_conf(app);
+	application_update_ui(app);
 
 	_update_background(app);
 /* start server */
@@ -449,15 +477,21 @@ static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * al
 }
 static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog){
 	Application * app = APPLICATION(self);
-
+	PangoFontDescription * font;
+	gchar * font_name;
 	switch(arg){
 		case GTK_RESPONSE_ACCEPT: 
 			LOG("Preference Accepted");
+			font_name = gtk_font_button_get_font_name(app->conf_dialog.title_font);
+			font = pango_font_description_from_string(font_name);
+			LOG("font name = %s, font = %p", font_name, font);
 			g_object_set(app,
 				"title-visible",
 				gtk_toggle_button_get_active(app->conf_dialog.title_visible),
 				"icon-visible",
 				gtk_toggle_button_get_active(app->conf_dialog.icon_visible),
+				"title-font",
+				font,
 				NULL);
 			application_save_conf(self);
 			application_load_conf(self);

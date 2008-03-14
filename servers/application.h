@@ -34,12 +34,14 @@ struct _Application
 
 	gboolean title_visible;
 	gboolean icon_visible;
+	PangoFontDescription * title_font;
 	GtkOrientation orientation;
 /* conf dialog */
 	struct {
 		GtkWidget * dlg;
 		GtkWidget * title_visible;
 		GtkWidget * icon_visible;
+		GtkWidget * title_font;
 	} conf_dialog;
 };
 

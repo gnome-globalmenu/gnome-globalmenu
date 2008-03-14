@@ -26,10 +26,6 @@ _constructor	( GType type, guint n_construct_properties,
 			n_construct_properties,
 			construct_params);
 	app = APPLICATION(obj);
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
-	_create_popup_menu(app);
-	application_load_conf(app);
-	application_update_ui(app);
 	return obj;
 }
 
@@ -78,8 +74,11 @@ static void application_gnome_class_init(ApplicationGnomeClass *klass)
 	g_type_class_add_private(obj_class, sizeof(ApplicationGnomePrivate));
 }
 
-static void application_gnome_init(ApplicationGnome *obj)
+static void application_gnome_init(ApplicationGnome *app_gnome)
 {
+	Application * app = APPLICATION(app_gnome);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
+	_create_popup_menu(app);
 }
 
 
