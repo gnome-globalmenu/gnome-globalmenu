@@ -1572,9 +1572,13 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, child);
 		if(info->overflowed) {
 			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
-			if(proxy) gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
-			if(proxy && GTK_WIDGET_VISIBLE(info->menu_item)) 
-				gtk_widget_show_all(proxy);
+			if(proxy) {
+				gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
+				if(GTK_WIDGET_VISIBLE(info->menu_item)) 
+					gtk_widget_show_all(proxy);
+				else
+					gtk_widget_hide_all(proxy);
+			}
 		}
 	}
 }
