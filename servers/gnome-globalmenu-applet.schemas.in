@@ -6,8 +6,7 @@
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
-				<short>show the icon of the active window</short>
-				<long> show the icon of the active window</long>
+				<short>Show/Hide the icon of the active window</short>
             </locale>
 		</schema>
         <schema>
@@ -16,10 +15,17 @@
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
-				<short> show the title of active application</short>
-				<long> show the title of active application</long>
+				<short>Show/Hide the title of the active application</short>
             </locale>
 		</schema>
+		<schema>
+			<key>/schemas/apps/gnome-globalmenu-applet/prefs/title_font</key>
+			<owner>gnome-globalmenu-applet</owner>
+			<type>string</type>
+			<default>Sans Bold</default>
+			<locale name="C">
+				<short>The font used to display the title of the active application</short>
+			</locale>
 	</schemalist>
 </gconfschemafile>
 
