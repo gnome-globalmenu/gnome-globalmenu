@@ -541,7 +541,7 @@ gboolean gnomenu_socket_send(GnomenuSocket * _self, gpointer data, guint bytes){
 		return FALSE;
 	}
 	if(self->status != GNOMENU_SOCKET_CONNECTED){
-		g_warning("Not connected, can not send");
+		LOG("Not connected, can not send");
 		return FALSE;
 	}
 	FILL_HEADER(msg, GNOMENU_SOCKET_DATA, self, bytes, 0);

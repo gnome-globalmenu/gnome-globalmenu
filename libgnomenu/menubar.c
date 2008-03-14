@@ -892,7 +892,8 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * self, GParamSpec * p
 	if(gtk_window_has_toplevel_focus(window)){
 		GET_OBJECT(self, menu_bar, priv);
 		LOG("receive toplevel focus");
-		gnomenu_client_helper_send_parent_focus(priv->helper);
+		if(priv->detached)
+			gnomenu_client_helper_send_parent_focus(priv->helper);
 	}
 }
 static void
