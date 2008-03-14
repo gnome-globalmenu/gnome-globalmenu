@@ -1456,26 +1456,35 @@ static void _reset_style			( GtkWidget * widget){
 static void _remove_child ( GtkWidget * widget, GtkContainer * container){
 	gtk_container_remove(container, widget);
 }
+
 GtkMenuItem * _get_proxy_for_item( GtkMenuItem * item){
 	GtkMenuItem * proxy = NULL;
 	GtkWidget * child = gtk_bin_get_child(item);
 	GtkMenu * submenu;
+	GtkWidget * label;
 	gchar * text = gtk_widget_get_name(item);
 	LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
+	if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
+	&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
+/* Can't handle any other subclass of GtkMenuItem */
+		return NULL;
+	}
 	if(GTK_IS_LABEL(child)){
 		text = gtk_label_get_label(GTK_LABEL(child));
 	} else {
-		LOG("unkown child:%s", G_OBJECT_TYPE_NAME(child));
+		LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
 	}
 	LOG("proxy created, text = %s", text);
-	proxy = gtk_menu_item_new_with_mnemonic(text);
+	
+	label = gtk_label_new_with_mnemonic(text);
+/* The image is then lost.*/
+	proxy = gtk_menu_item_new();
+	gtk_container_add(GTK_CONTAINER(proxy), label);
+	
 	submenu = gtk_menu_item_get_submenu(item);
 	if(submenu){
-	//	g_object_ref(submenu);
-	//	gtk_menu_detach(submenu);
 /*This is buggy. one menu can't be submenu of two menu items.*/
 		gtk_menu_item_set_submenu(proxy, submenu);	
-	//	g_object_unref(submenu);
 	}
 	return proxy;	
 }
@@ -1489,8 +1498,7 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 		MenuItemInfo * info = node->data;
 		if(info->overflowed) {
 			GtkMenuItem * proxy = _get_proxy_for_item(info->menu_item);
-			gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu),
-					proxy);
+			if(proxy) gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), proxy);
 		}
 	}
 	g_list_free(list);
