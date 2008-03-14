@@ -518,7 +518,7 @@ gnomenu_server_helper_queue_resize(GnomenuServerHelper * _self, GnomenuClientInf
  * 	set the orientation of a client
  */
 void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
-			GtkOrientation ori){
+			GnomenuOrientation ori){
 	GnomenuMessage msg;
 	LOG_FUNC_NAME;
 	g_return_if_fail(gnomenu_server_helper_is_client(self, ci));

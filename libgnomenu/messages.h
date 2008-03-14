@@ -211,6 +211,12 @@ typedef struct {
 	gint height;
 } GnomenuMessageSizeAllocate;
 
+typedef enum {
+	GNOMENU_ORIENT_TOP,
+	GNOMENU_ORIENT_LEFT,
+	GNOMENU_ORIENT_RIGHT,
+	GNOMENU_ORIENT_BOTTOM,
+} GnomenuOrientation;
 /**
  * GnomenuMessageOrientationChange:
  * 	@type: #GNOMENU_MSG_ORIENTATION_CHANGE
@@ -220,7 +226,7 @@ typedef struct {
  */
 typedef struct {
 	GnomenuMessageType type;
-	GtkOrientation orientation;
+	GnomenuOrientation orientation;
 } GnomenuMessageOrientationChange;
 /**
  * GnomenuMessagePositionSet:

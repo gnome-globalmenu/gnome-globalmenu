@@ -181,11 +181,10 @@ menu_server_class_init(MenuServerClass * klass){
 
 	g_object_class_install_property (gobject_class,
 		PROP_ORIENTATION,
-		g_param_spec_enum ("orientation",
+		g_param_spec_uint ("orientation",
 						"orientation",
 						"",
-						GTK_TYPE_ORIENTATION,
-						GTK_ORIENTATION_HORIZONTAL,
+						0, 4, 0,
 						G_PARAM_READWRITE));
 }
 static void

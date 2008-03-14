@@ -41,7 +41,7 @@ static void _c_server_new 			( GnomenuClientHelper * _self );
 static void _c_server_destroy 		( GnomenuClientHelper * _self );
 static void _c_size_allocate			( GnomenuClientHelper * _self, GtkAllocation * allocation );
 static void _c_size_query 			( GnomenuClientHelper * _self, GtkRequisition * req );
-static void _c_orientation_set 	( GnomenuClientHelper * _self, GtkOrientation ori );
+static void _c_orientation_set 	( GnomenuClientHelper * _self, GnomenuOrientation ori );
 static void _c_position_set 			( GnomenuClientHelper * _self, GdkPoint * pos );
 static void _c_visibility_set			( GnomenuClientHelper * _self, gboolean vis );
 static void _c_background_set				( GnomenuClientHelper * _self, 
@@ -183,7 +183,7 @@ gnomenu_client_helper_class_init(GnomenuClientHelperClass *klass){
 /**
  * GnomenuClientHelper::orientation-set:
  *	@self: self
- *	@orientation: the new orientation. #GtkOrientation
+ *	@orientation: the new orientation. #GnomenuOrientation
  *
  * Implemented but the bahavior is not defined. 
 */
@@ -366,7 +366,7 @@ static void _s_data_arrival(GnomenuSocket * _self,
 		break;
 		case GNOMENU_MSG_ORIENTATION_CHANGE:
 			{
-				GtkOrientation ori = message->orientation_change.orientation;
+				GnomenuOrientation ori = message->orientation_change.orientation;
 				g_signal_emit(G_OBJECT(self),
 					class_signals[ORIENTATION_SET],
 					0,
@@ -473,7 +473,7 @@ _c_size_query(GnomenuClientHelper * _self, GtkRequisition * req){
 
 static void 
 _c_orientation_set
-			(GnomenuClientHelper * _self, GtkOrientation ori){
+			(GnomenuClientHelper * _self, GnomenuOrientation ori){
 	LOG_FUNC_NAME;
 }
 static void 

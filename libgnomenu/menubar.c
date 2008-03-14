@@ -27,6 +27,7 @@
 
 #include <config.h>
 #include <gtk/gtk.h>
+#include "messages.h"
 #include "menubar.h"
 #include "quirks.h"
 
@@ -158,7 +159,7 @@ static void _s_visibility_set 		( GtkWidget  * menubar,
 									  gboolean vis,
 									  GnomenuClientHelper * helper); 
 static void _s_orientation_set 		( GtkWidget  * menubar, 
-									  gint orientation,
+									  GnomenuOrientation orientation,
 									  GnomenuClientHelper * helper); 
 static void _s_background_set	 	( GtkWidget  * menubar, 
 									  GdkColor * bgcolor,
@@ -689,19 +690,27 @@ static void _s_visibility_set 		( GtkWidget  * widget,
 	LOG("done");
 }
 static void _s_orientation_set 		( GtkWidget  * widget, 
-									  gint orientation,
+									  GnomenuOrientation orientation,
 									  GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	GList * l;
 	switch(orientation){
-		case GTK_ORIENTATION_HORIZONTAL:
+		case GNOMENU_ORIENT_TOP:
 			priv->pack_direction = GTK_PACK_DIRECTION_LTR;
 			priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
 		break;
-		case GTK_ORIENTATION_VERTICAL:
+		case GNOMENU_ORIENT_LEFT:
 			priv->pack_direction = GTK_PACK_DIRECTION_TTB;
 			priv->child_pack_direction = GTK_PACK_DIRECTION_TTB;
+		break;
+		case GNOMENU_ORIENT_RIGHT:
+			priv->pack_direction = GTK_PACK_DIRECTION_TTB;
+			priv->child_pack_direction = GTK_PACK_DIRECTION_TTB;
+		break;
+		case GNOMENU_ORIENT_BOTTOM:
+			priv->pack_direction = GTK_PACK_DIRECTION_LTR;
+			priv->child_pack_direction = GTK_PACK_DIRECTION_LTR;
 		break;
 	}
 	gtk_widget_queue_resize(widget);

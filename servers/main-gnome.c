@@ -42,12 +42,16 @@ static void _change_orient(PanelApplet * applet,
 						Application * app){
 	switch(ori){
 		case PANEL_APPLET_ORIENT_UP:
+			g_object_set(app, "orientation", GNOMENU_ORIENT_TOP, NULL);
+		break;
 		case PANEL_APPLET_ORIENT_DOWN:
-			g_object_set(app, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
+			g_object_set(app, "orientation", GNOMENU_ORIENT_BOTTOM, NULL);
 		break;
 		case PANEL_APPLET_ORIENT_LEFT:
+			g_object_set(app, "orientation", GNOMENU_ORIENT_LEFT, NULL);
+		break;
 		case PANEL_APPLET_ORIENT_RIGHT:
-			g_object_set(app, "orientation", GTK_ORIENTATION_VERTICAL, NULL);
+			g_object_set(app, "orientation", GNOMENU_ORIENT_RIGHT, NULL);
 		break;
 	}
 }

@@ -2,7 +2,7 @@
 #define GNOMENU_SERVER_H
 
 #include "socket.h"
-
+#include "messages.h"
 G_BEGIN_DECLS
 /**
  * SECTION: serverhelper
@@ -109,7 +109,7 @@ void gnomenu_server_helper_queue_resize(GnomenuServerHelper * self, GnomenuClien
 void gnomenu_server_helper_allocate_size(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GtkAllocation * allocation);
 void gnomenu_server_helper_set_orientation(GnomenuServerHelper * self, GnomenuClientInfo * ci,
-			GtkOrientation ori);
+			GnomenuOrientation ori);
 void gnomenu_server_helper_set_position(GnomenuServerHelper * self, GnomenuClientInfo * ci,
 			GdkPoint * position);
 void gnomenu_server_helper_set_visibility(GnomenuServerHelper * self, GnomenuClientInfo * ci,

@@ -5,7 +5,7 @@
 #include "menuserver.h"
 #include "utils.h"
 #include "log.h"
-
+#include <libgnomenu/messages.h>
 #include "intl.h"
 
 enum {
@@ -126,11 +126,12 @@ static void application_class_init(ApplicationClass *klass)
 
 	g_object_class_install_property (obj_class,
 		PROP_ORIENTATION,
-		g_param_spec_enum ("orientation",
+		g_param_spec_uint ("orientation",
 						"orientation",
 						"",
-						GTK_TYPE_ORIENTATION,
-						GTK_ORIENTATION_HORIZONTAL,
+						0,
+						4,
+						0, 
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 
 	g_object_class_install_property (obj_class,
@@ -220,16 +221,18 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 			break;
 		case PROP_ORIENTATION:
 			{
-			GtkOrientation o = g_value_get_enum(value);
+			GnomenuOrientation o = g_value_get_uint(value);
 		/*FIXME: tune widget layout to fit the new orientation*/
 			if(self->orientation !=o){
 				GtkBox * oldbox = self->box;
 				self->orientation = o;
 				switch (o){
-				case GTK_ORIENTATION_HORIZONTAL:
+				case GNOMENU_ORIENT_TOP:
+				case GNOMENU_ORIENT_BOTTOM:
 					self->box = self->hbox;
 				break;
-				case GTK_ORIENTATION_VERTICAL:
+				case GNOMENU_ORIENT_LEFT:
+				case GNOMENU_ORIENT_RIGHT:
 					self->box = self->vbox;
 				break;
 				}
