@@ -1573,6 +1573,8 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 		if(info->overflowed) {
 			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
 			if(proxy) gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
+			if(proxy && GTK_WIDGET_VISIBLE(info->menu_item)) 
+				gtk_widget_show_all(proxy);
 		}
 	}
 }
@@ -1602,8 +1604,8 @@ static void _s_arrow_button_clicked		( GtkWidget * self,
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->arrow_button)) &&
      !GTK_WIDGET_VISIBLE (priv->popup_menu)) {
 		_build_popup_menu(menu_bar);
+		//gtk_widget_show(GTK_WIDGET(priv->popup_menu));
 		gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_steal_submenu, menu_bar);
-		gtk_widget_show_all(GTK_WIDGET(priv->popup_menu));
 		gtk_menu_popup(priv->popup_menu, NULL, NULL, 
 			NULL, NULL, 0, gtk_get_current_event_time());
 		gtk_menu_shell_select_first (GTK_MENU_SHELL (priv->popup_menu), FALSE);
