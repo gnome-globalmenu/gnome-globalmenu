@@ -80,11 +80,8 @@ static void application_init(Application *app)
 	app->title_font = NULL;
 	app->title_visible = FALSE;
 	app->icon_visible = FALSE;
-	app->glade_factory = glade_xml_new("application.glade",
-						NULL, NULL);
-	if(!app->glade_factory){
-		app->glade_factory = glade_xml_new(GLADEDIR"/""application.glade", NULL, NULL);
-	}
+
+	app->glade_factory = glade_xml_new(GLADEDIR"/""application.glade", NULL, NULL);
 	g_assert(app->glade_factory);
 	_create_conf_dialog(app);
 }
@@ -499,6 +496,7 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 	switch(arg){
 		case GTK_RESPONSE_CANCEL:
 			application_update_ui(self);
+			gtk_widget_hide(dialog);
 		break;
 		case GTK_RESPONSE_OK: 
 			gtk_widget_hide(dialog);

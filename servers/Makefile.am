@@ -1,7 +1,10 @@
 AM_CPPFLAGS = -I$(top_srcdir) \
-				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\" \
-				-DGLADEDIR=\"$(pkgdatadir)\"
-
+				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\" 
+if MAINTAINER_MODE
+AM_CPPFLAGS += -DGLADEDIR=\".\"
+else
+AM_CPPFLAGS += -DGLADEDIR=\"$(pkgdatadir)\"
+endif 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 
 libexec_PROGRAMS =
