@@ -27,4 +27,4 @@ rpmbuild -ba *.spec && \
 cd $RPMDEVROOT/RPMS/i386/; 
 tar -cjvf - *global*$version-$dist*.rpm *gnomenu*$version-$dist*.rpm
 ) > fedora-packages-0.4.svn$version-$dist.tar.bz2
-
+rm gnome-globalmenu.spec

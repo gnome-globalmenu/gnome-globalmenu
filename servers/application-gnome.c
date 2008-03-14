@@ -21,12 +21,15 @@ static GObject *
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
 	Application * app;
-
+	GError * error = NULL;
 	GObject * obj = ( *G_OBJECT_CLASS(application_gnome_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
 	app = APPLICATION(obj);
-	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", NULL);
+	panel_applet_add_preferences(PANEL_APPLET(app->window), "/schemas/apps/gnome-globalmenu-applet/prefs", &error);
+	if(error != NULL){
+		g_error("%s", error->message);
+	}
 	_create_popup_menu(app);
 	return obj;
 }
