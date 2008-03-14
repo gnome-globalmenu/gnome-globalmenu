@@ -1,10 +1,15 @@
 AM_CPPFLAGS = -I$(top_srcdir) \
-				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\"
+				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\" \
+				-DGLADEDIR=\"$(pkgdatadir)\"
 
 #if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
 
 libexec_PROGRAMS =
 bin_PROGRAMS = 
+
+gladedir = $(pkgdatadir)
+glade_DATA = application.glade
+
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
 
@@ -93,7 +98,8 @@ DISTCLEANFILES += $(server_file_DATA) GNOME_GlobalMenuApplet.server.in xfce-glob
 EXTRA_DIST = \
 	gnome-globalmenu-applet.schemas.in \
 	GNOME_GlobalMenuApplet.server.in.in \
-	xfce-globalmenu-plugin.desktop.in.in
+	xfce-globalmenu-plugin.desktop.in.in \
+	application.glade.in	
 
 install-data-local:
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \

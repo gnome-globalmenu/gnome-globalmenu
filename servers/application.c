@@ -57,31 +57,13 @@ G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 
 static void _create_conf_dialog(Application * app){
 	ApplicationConfDlg * cfd = &app->conf_dialog;
-	cfd->dlg = GTK_DIALOG(gtk_dialog_new());
-	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
-	GtkBox * title_max_width_box = GTK_BOX(gtk_hbox_new(FALSE, 0));
-	GtkWidget * title_max_width_prompt = GTK_WIDGET(
-			gtk_label_new(_("The Maximum width of application title, in chars")));
+	GladeXML * xml = app->glade_factory;
+	cfd->dlg = glade_xml_get_widget(xml, "ConfDialog");
 
-	cfd->tgbtn_title_visible = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Show active application title")));
-	cfd->ftbtn_title_font = GTK_FONT_BUTTON(gtk_font_button_new());
-	cfd->tgbtn_icon_visible = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Show active window icon")));
-	cfd->spnbtn_title_max_width = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range( -1, 100, 1));
-
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->tgbtn_title_visible));
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->ftbtn_title_font));
-#if 0
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->spnbtn_title_max_with));
-#endif
-	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->tgbtn_icon_visible));
-
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(cfd->dlg)->vbox), GTK_WIDGET(vbox));
-
-	gtk_dialog_add_button(GTK_DIALOG(cfd->dlg), 
-				GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button(GTK_DIALOG(cfd->dlg), 
-				GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
-
+	cfd->tgbtn_title_visible = glade_xml_get_widget(xml, "chkbtn_title_visible");
+	cfd->ftbtn_title_font = glade_xml_get_widget(xml, "fntbtn_title_font");
+	cfd->tgbtn_icon_visible = glade_xml_get_widget(xml, "chkbtn_icon_visible");
+	cfd->spnbtn_title_max_width = glade_xml_get_widget(xml, "spnbtn_title_max_width");
 }
 static void application_init(Application *app)
 {
@@ -98,6 +80,12 @@ static void application_init(Application *app)
 	app->title_font = NULL;
 	app->title_visible = FALSE;
 	app->icon_visible = FALSE;
+	app->glade_factory = glade_xml_new("application.glade",
+						NULL, NULL);
+	if(!app->glade_factory){
+		app->glade_factory = glade_xml_new(GLADEDIR"/""application.glade", NULL, NULL);
+	}
+	g_assert(app->glade_factory);
 	_create_conf_dialog(app);
 }
 static void application_class_init(ApplicationClass *klass)
@@ -182,6 +170,7 @@ static void _update_ui(Application *app)
 
 	pango_layout_set_font_description(layout,
 			app->title_font);
+	gtk_widget_queue_draw(GTK_WIDGET(app->title));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_title_visible), 
 				app->title_visible);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_icon_visible), 
@@ -325,6 +314,7 @@ static void _finalize(GObject *obj)
 	Application *app = APPLICATION(obj);
 	if (app->window)
 		g_object_unref(app->window);
+	g_object_unref(app->glade_factory);
 	G_OBJECT_CLASS(application_parent_class)->finalize(obj);
 }
 
@@ -507,7 +497,12 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 	PangoFontDescription * font;
 	const gchar * font_name;
 	switch(arg){
-		case GTK_RESPONSE_ACCEPT: 
+		case GTK_RESPONSE_CANCEL:
+			application_update_ui(self);
+		break;
+		case GTK_RESPONSE_OK: 
+			gtk_widget_hide(dialog);
+		case GTK_RESPONSE_APPLY: 
 			LOG("Preference Accepted");
 			font_name = gtk_font_button_get_font_name(cfd->ftbtn_title_font);
 			font = pango_font_description_from_string(font_name);
@@ -524,10 +519,10 @@ static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * di
 			application_load_conf(self);
 			application_update_ui(self);
 			break;
+		break;
 		default:
 			LOG("What Response is it?");
 	}
-	gtk_widget_hide(dialog);
 }
 /* END: Signal handlers */
 

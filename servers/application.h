@@ -1,5 +1,6 @@
 #ifndef __APPLICATION_H_
 #define __APPLICATION_H_
+#include <glade/glade.h>
 #include "menuserver.h"
 
 G_BEGIN_DECLS
@@ -25,6 +26,8 @@ typedef struct _ApplicationConfDlg {
 struct _Application
 {
 	GObject parent;
+/* factory */
+	GladeXML * glade_factory;
 /* Essential objects*/
 	GtkContainer * window;
 /* UI widgets */

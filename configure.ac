@@ -117,6 +117,8 @@ dnl end:gettext
 
 AM_GCONF_SOURCE_2
 
+dnl begin: glade
+dnl end: glade
 
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT

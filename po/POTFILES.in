@@ -7,3 +7,4 @@ servers/GNOME_GlobalMenuApplet.server.in.in
 servers/xfce-globalmenu-plugin.desktop.in.in
 servers/application-gnome.c
 servers/gnome-globalmenu-applet.schemas.in
+servers/application.glade

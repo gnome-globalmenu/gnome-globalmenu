@@ -1,13 +1,9 @@
 #include <config.h>
-
 #include <gtk/gtk.h>
 
 #include "libgnomenu/serverhelper.h"
-
 #include "application.h"
-
 #include "log.h"
-
 #include "intl.h"
 
 static void window_destroy(GtkWidget * widget, gpointer useless){
