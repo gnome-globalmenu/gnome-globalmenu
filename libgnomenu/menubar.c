@@ -267,6 +267,10 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
+static void _menu_item_info_free(MenuItemInfo * info){
+	if(info->proxy) g_object_unref(info->proxy);
+	g_free(info);
+}
 void
 gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
@@ -274,7 +278,7 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	GET_OBJECT(object, menu_bar, priv);
 	GtkWidget * arrow;
 	priv->helper = gnomenu_client_helper_new();
-	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, g_free);
+	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, _menu_item_info_free);
 	priv->popup_menu = GTK_MENU(gtk_menu_new());
 	priv->arrow_button = GTK_WIDGET(gtk_toggle_button_new());
 	priv->arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
@@ -1366,11 +1370,12 @@ _do_size_allocate (GtkWidget * widget,
 				children = children->next;
 
 				menu_info = g_hash_table_lookup(priv->menu_items, child);
-				menu_info->overflowed = (ltr_x > adjusted.width);
 
 				gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
 										&toggle_size);
 				gtk_widget_get_child_requisition (child, &child_requisition);
+				menu_info->overflowed = (ltr_x + child_requisition.width 
+										> adjusted.width);
 
 				if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
 					child_pack_direction == GTK_PACK_DIRECTION_RTL)
@@ -1391,7 +1396,7 @@ _do_size_allocate (GtkWidget * widget,
 						child_allocation.x = adjusted.width
 											- child_requisition.width - ltr_x; 
 
-					child_allocation.width = MAX(MIN(child_requisition.width, adjusted.width - ltr_x), 0);
+					child_allocation.width = !menu_info->overflowed?child_requisition.width:0;
 
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 									toggle_size);
@@ -1426,11 +1431,11 @@ _do_size_allocate (GtkWidget * widget,
 				children = children->next;
 
 				menu_info = g_hash_table_lookup(priv->menu_items, child);
-				menu_info->overflowed = (ltr_y > adjusted.height);
 
 				gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
 						&toggle_size);
 				gtk_widget_get_child_requisition (child, &child_requisition);
+				menu_info->overflowed = (ltr_y + child_requisition.height > adjusted.height);
 
 				if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
 					child_pack_direction == GTK_PACK_DIRECTION_RTL)
@@ -1452,8 +1457,7 @@ _do_size_allocate (GtkWidget * widget,
 					child_allocation.y = adjusted.height
 										- child_requisition.height - ltr_y; 
 
-					child_allocation.height = MAX(MIN(child_requisition.height,
-									adjusted.height - ltr_y), 0);
+					child_allocation.height = !menu_info->overflowed?child_requisition.height:0;
 
 					gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 					toggle_size);
@@ -1499,30 +1503,36 @@ static GtkMenuItem * _get_item_for_proxy(GnomenuMenuBar * self, GtkMenuItem * pr
 GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
 	GET_OBJECT(self, menu_bar, priv);
 
+	GtkWidget * label;
 	MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
+	const gchar * text = gtk_widget_get_name(GTK_WIDGET(item));
+	GtkWidget * child = gtk_bin_get_child(GTK_BIN(item));
+
+	if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
+	&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
+/* Can't handle any other subclass of GtkMenuItem */
+		return NULL;
+	}
+	if(GTK_IS_LABEL(child)){
+		text = gtk_label_get_label(GTK_LABEL(child));
+	} else {
+		LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
+	}
+
 	if(!info->proxy) {
-		GtkWidget * label;
-		GtkWidget * child = gtk_bin_get_child(GTK_BIN(item));
-		const gchar * text = gtk_widget_get_name(GTK_WIDGET(item));
 		LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
-		if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
-		&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
-	/* Can't handle any other subclass of GtkMenuItem */
-			return NULL;
-		}
-		if(GTK_IS_LABEL(child)){
-			text = gtk_label_get_label(GTK_LABEL(child));
-		} else {
-			LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
-		}
-		LOG("proxy created, text = %s", text);
 		
-		label = gtk_label_new_with_mnemonic(text);
 	/* The image is then lost.*/
 		info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
-		gtk_container_add(GTK_CONTAINER(info->proxy), label);
-	}	
-	
+		g_object_ref(info->proxy);
+	} else {
+		gtk_container_remove(GTK_CONTAINER(info->proxy),
+				gtk_bin_get_child(GTK_BIN(info->proxy)));
+	} 
+
+	LOG("text = %s", text);
+	label = gtk_label_new_with_mnemonic(text);
+	gtk_container_add(GTK_CONTAINER(info->proxy), label);
 	
 	return info->proxy;	
 }
