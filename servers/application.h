@@ -15,6 +15,13 @@ typedef struct _ApplicationClass ApplicationClass;
 #define APPLICATION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), TYPE_APPLICATION, ApplicationClass))
 
 
+typedef struct _ApplicationConfDlg {
+	GtkWidget * dlg;
+	GtkToggleButton * tgbtn_title_visible;
+	GtkToggleButton * tgbtn_icon_visible;
+	GtkFontButton * ftbtn_title_font;
+	GtkSpinButton * spnbtn_title_max_width;
+} ApplicationConfDlg;
 struct _Application
 {
 	GObject parent;
@@ -29,20 +36,16 @@ struct _Application
 	GtkBox * hbox;
 	
 /* property value */
-	GtkPixmap * bgpixmap;
+	GdkPixmap * bgpixmap;
 	GdkColor * bgcolor;
 
 	gboolean title_visible;
 	gboolean icon_visible;
 	PangoFontDescription * title_font;
+	gint title_max_width_chars;
 	GtkOrientation orientation;
 /* conf dialog */
-	struct {
-		GtkWidget * dlg;
-		GtkWidget * title_visible;
-		GtkWidget * icon_visible;
-		GtkWidget * title_font;
-	} conf_dialog;
+	ApplicationConfDlg conf_dialog;
 };
 
 struct _ApplicationClass {

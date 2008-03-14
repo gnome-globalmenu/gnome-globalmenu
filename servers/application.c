@@ -55,14 +55,42 @@ static void _update_background			(Application * app);
 
 G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 
+static void _create_conf_dialog(Application * app){
+	ApplicationConfDlg * cfd = &app->conf_dialog;
+	cfd->dlg = GTK_DIALOG(gtk_dialog_new());
+	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
+	GtkBox * title_max_width_box = GTK_BOX(gtk_hbox_new(FALSE, 0));
+	GtkWidget * title_max_width_prompt = GTK_WIDGET(
+			gtk_label_new(_("The Maximum width of application title, in chars")));
+
+	cfd->tgbtn_title_visible = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Show active application title")));
+	cfd->ftbtn_title_font = GTK_FONT_BUTTON(gtk_font_button_new());
+	cfd->tgbtn_icon_visible = GTK_TOGGLE_BUTTON(gtk_check_button_new_with_label(_("Show active window icon")));
+	cfd->spnbtn_title_max_width = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range( -1, 100, 1));
+
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->tgbtn_title_visible));
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->ftbtn_title_font));
+#if 0
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->spnbtn_title_max_with));
+#endif
+	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(cfd->tgbtn_icon_visible));
+
+	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(cfd->dlg)->vbox), GTK_WIDGET(vbox));
+
+	gtk_dialog_add_button(GTK_DIALOG(cfd->dlg), 
+				GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
+	gtk_dialog_add_button(GTK_DIALOG(cfd->dlg), 
+				GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
+
+}
 static void application_init(Application *app)
 {
 	GET_OBJECT(app, self, priv);
 	self->orientation = -1;
-	app->hbox = gtk_hbox_new(FALSE, 0); 
-	app->vbox = gtk_vbox_new(FALSE, 0); 
-	app->title = GTK_LABEL(gtk_label_new(""));
-	app->icon = GTK_IMAGE(gtk_image_new());
+	app->hbox = GTK_BOX(gtk_hbox_new(FALSE, 0)); 
+	app->vbox = GTK_BOX(gtk_vbox_new(FALSE, 0)); 
+	app->title = gtk_label_new("");
+	app->icon = gtk_image_new();
 	app->server = menu_server_new();
 	app->bgpixmap = NULL;
 	app->bgcolor = NULL;
@@ -70,21 +98,7 @@ static void application_init(Application *app)
 	app->title_font = NULL;
 	app->title_visible = FALSE;
 	app->icon_visible = FALSE;
-
-/* conf dialog */
-	app->conf_dialog.dlg = GTK_DIALOG(gtk_dialog_new());
-	GtkBox * vbox = GTK_BOX(gtk_vbox_new(TRUE, 0));
-
-	app->conf_dialog.title_visible = gtk_check_button_new_with_label(_("Show active application title"));
-	gtk_box_pack_start_defaults(vbox, app->conf_dialog.title_visible);
-	app->conf_dialog.title_font = gtk_font_button_new();
-	gtk_box_pack_start_defaults(vbox, app->conf_dialog.title_font);
-	app->conf_dialog.icon_visible = gtk_check_button_new_with_label(_("Show active window icon"));
-	gtk_box_pack_start_defaults(vbox, app->conf_dialog.icon_visible);
-	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(app->conf_dialog.dlg)->vbox), GTK_WIDGET(vbox));
-
-	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_APPLY, GTK_RESPONSE_ACCEPT);
-	gtk_dialog_add_button(app->conf_dialog.dlg, GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT);
+	_create_conf_dialog(app);
 }
 static void application_class_init(ApplicationClass *klass)
 {
@@ -154,6 +168,8 @@ static void _update_ui(Application *app)
 {
 	LOG();
 	gchar * title_font_name;
+	ApplicationConfDlg * cfd = &app->conf_dialog;
+	PangoLayout * layout = gtk_label_get_layout(GTK_LABEL(app->title));
 	if(app->title_visible) 
 		gtk_widget_show(app->title);
 	else 
@@ -164,11 +180,15 @@ static void _update_ui(Application *app)
 	else 
 		gtk_widget_hide(app->icon);
 
-	pango_layout_set_font_description(gtk_label_get_layout(app->title), app->title_font);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.title_visible), app->title_visible);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(app->conf_dialog.icon_visible), app->icon_visible);
+	pango_layout_set_font_description(layout,
+			app->title_font);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_title_visible), 
+				app->title_visible);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_icon_visible), 
+				app->icon_visible);
 	title_font_name = pango_font_description_to_string(app->title_font);
-	gtk_font_button_set_font_name(GTK_FONT_BUTTON(app->conf_dialog.title_font), title_font_name);
+	gtk_font_button_set_font_name(GTK_FONT_BUTTON(cfd->ftbtn_title_font), 
+			title_font_name);
 	g_free(title_font_name);
 }
 static void _save_conf_unimp(Application *app){
@@ -217,17 +237,21 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 				break;
 				}
 				if(oldbox){
-					gtk_container_remove(oldbox, self->icon);
-					gtk_container_remove(oldbox, self->title);
-					gtk_container_remove(oldbox, self->server);
-					gtk_container_remove(self->window, oldbox);
+					gtk_container_remove(GTK_CONTAINER(oldbox), 
+									GTK_WIDGET(self->icon));
+					gtk_container_remove(GTK_CONTAINER(oldbox), 
+									GTK_WIDGET(self->title));
+					gtk_container_remove(GTK_CONTAINER(oldbox), 
+									GTK_WIDGET(self->server));
+					gtk_container_remove(GTK_CONTAINER(self->window), 
+									GTK_WIDGET(oldbox));
 				}
 				g_object_set(self->server, "orientation", self->orientation, NULL);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->icon), FALSE, FALSE, 0);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->title), FALSE, FALSE, 0);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->server), TRUE, TRUE, 0);
 
-				gtk_widget_show(self->box);
+				gtk_widget_show(GTK_WIDGET(self->box));
 				gtk_container_add(GTK_CONTAINER(self->window), GTK_WIDGET(self->box));
 			}
 		}
@@ -450,7 +474,7 @@ static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuS
 	WnckApplication * application = wnck_window_get_application(window);
 
 	const gchar *name = wnck_application_get_name(application);
-	gtk_label_set_text(app->title, name);
+	gtk_label_set_text(GTK_LABEL(app->title), name);
 
 	icon_buf =  wnck_application_get_icon(application);
 	if (icon_buf) {
@@ -459,7 +483,7 @@ static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuS
 			GTK_WIDGET(app->window)->allocation.height,
 			GTK_WIDGET(app->window)->allocation.width) ;
 		resized_icon = gdk_pixbuf_scale_simple(icon_buf , w, h, GDK_INTERP_BILINEAR);
-		gtk_image_set_from_pixbuf(app->icon, resized_icon);
+		gtk_image_set_from_pixbuf(GTK_IMAGE(app->icon), resized_icon);
 		g_object_unref(resized_icon);
 	}
 	application_update_ui(app);
@@ -479,19 +503,20 @@ static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * al
 }
 static void _s_conf_dialog_response(Application * self, gint arg, GtkWidget * dialog){
 	Application * app = APPLICATION(self);
+	ApplicationConfDlg * cfd = &app->conf_dialog;
 	PangoFontDescription * font;
-	gchar * font_name;
+	const gchar * font_name;
 	switch(arg){
 		case GTK_RESPONSE_ACCEPT: 
 			LOG("Preference Accepted");
-			font_name = gtk_font_button_get_font_name(app->conf_dialog.title_font);
+			font_name = gtk_font_button_get_font_name(cfd->ftbtn_title_font);
 			font = pango_font_description_from_string(font_name);
 			LOG("font name = %s, font = %p", font_name, font);
 			g_object_set(app,
 				"title-visible",
-				gtk_toggle_button_get_active(app->conf_dialog.title_visible),
+				gtk_toggle_button_get_active(cfd->tgbtn_title_visible),
 				"icon-visible",
-				gtk_toggle_button_get_active(app->conf_dialog.icon_visible),
+				gtk_toggle_button_get_active(cfd->tgbtn_icon_visible),
 				"title-font",
 				font,
 				NULL);
@@ -526,7 +551,7 @@ static void _update_background(Application * app){
 							"bg-pixmap", cropped, NULL);
 	if(cropped);
 		g_object_unref(cropped);
-	utils_set_widget_background(app->server, color, cropped);	
+	utils_set_widget_background(GTK_WIDGET(app->server), color, cropped);	
 }
 /* END: tool functions*/
 /*
