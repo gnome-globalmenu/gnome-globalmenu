@@ -23,6 +23,7 @@ GNOME Global Menu project aims to improve GNOME toward a Document Centric Deskto
 %package -n 	libgnomenu
 Summary: 		libgnomenu Provides global menu widget GnomenuMenuBar
 Group:			User Interface/Desktops
+Requires:		gnome-globalmenu
 Requires: 		gtk2
 %description -n	libgnomenu
 libgnomenu is part of GNOME Global Menu project. libgnomenu provides several GObject for 
@@ -34,6 +35,7 @@ libgnomenu can also be loaded as a gtk module by adding it into GTK_MODULES, whi
 %package -n 	libgnomenu-devel
 Summary: 		libgnomenu Provides global menu widget GnomenuMenuBar
 Group:			User Interface/Desktops
+Requires:		gnome-globalmenu
 Requires: 		gtk2
 Requires: 		libgnomenu
 %description -n	libgnomenu-devel
@@ -42,6 +44,7 @@ Headers and documentation for libgnomenu
 %package -n 	gnome-globalmenu-applet
 Summary: 		gnome-panel applet for global menu.
 Group:			User Interface/Desktops
+Requires:		gnome-globalmenu
 Requires: 		libgnomenu
 Requires: 		libwnck
 Requires: 		gnome-panel
@@ -51,6 +54,7 @@ A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServe
 
 %package -n 	xfce-globalmenu-plugin
 Summary: 		xfce-panel plugin for global menu.
+Requires:		gnome-globalmenu
 Requires: 		libgnomenu
 Requires: 		libwnck
 Requires: 		xfce4-panel
@@ -61,18 +65,13 @@ A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServe
 
 %package -n 	gtk-globalmenu-server
 Summary: 		standalone global menu server.
+Requires:		gnome-globalmenu
 Requires: 		libgnomenu
 Requires: 		libwnck
 Requires: 		libglade2
 Group:			User Interface/Desktops
 %description -n	gtk-globalmenu-server
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
-
-%package 		language-packs
-Summary: 		Translations for gnome-globalmenu 
-Group:			User Interface/Desktops
-%description 	language-packs
-Localization files for gnome-globalmenu.
 
 %prep
 %setup -q -n gnome-globalmenu-%{base_version}
@@ -101,6 +100,20 @@ export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas >& /dev/null || :
 
 
+%files
+%defattr(-, root, root)
+/usr/share/doc/gnome-globalmenu/gtk+-aqd/README
+/usr/share/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
+/usr/share/doc/gnome-globalmenu/AUTHORS
+/usr/share/doc/gnome-globalmenu/COPYING
+/usr/share/doc/gnome-globalmenu/ChangeLog
+/usr/share/doc/gnome-globalmenu/INSTALL
+/usr/share/doc/gnome-globalmenu/NEWS
+/usr/share/doc/gnome-globalmenu/README
+/usr/share/gnome-globalmenu/application.glade
+/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
+
 %files -n libgnomenu
 %defattr(-, root, root)
 /etc/libgnomenu.conf
@@ -109,14 +122,6 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/lib/libgnomenu.so
 /usr/lib/libgnomenu.so.0
 /usr/lib/libgnomenu.so.0.0.0
-/usr/share/doc/gnome-globalmenu/AUTHORS
-/usr/share/doc/gnome-globalmenu/COPYING
-/usr/share/doc/gnome-globalmenu/ChangeLog
-/usr/share/doc/gnome-globalmenu/INSTALL
-/usr/share/doc/gnome-globalmenu/NEWS
-/usr/share/doc/gnome-globalmenu/gtk+-aqd/README
-/usr/share/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
-
 
 %files -n libgnomenu-devel
 %defattr(-, root, root)
@@ -127,33 +132,27 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 /usr/include/libgnomenu/menubar.h
 /usr/include/libgnomenu/socket.h
 /usr/lib/pkgconfig/libgnomenu.pc
-/usr/share/doc/gnome-globalmenu/README
 /usr/share/gtk-doc/html/libgnomenu/*
 
 %files -n gtk-globalmenu-server
 %defattr(-, root, root)
 /usr/bin/gtk-globalmenu-server
-/usr/share/gnome-globalmenu/application.glade
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)
 /usr/libexec/gnome-globalmenu-applet
 /usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
 /etc/gconf/schemas/gnome-globalmenu-applet.schemas
-/usr/share/gnome-globalmenu/application.glade
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
 /usr/libexec/xfce-globalmenu-plugin
 /usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
-/usr/share/gnome-globalmenu/application.glade
-
-%files language-packs
-%defattr(-, root, root)
-/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
-/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 
 %changelog 
+* Fri Mar 14 2008 Feng Yu <rainwoodman@gmail.com>
+- remove language pack
+- move shared files to gnome-globalmenu
 * Wed Mar 12 2008 Feng Yu <rainwoodman@gmail.com>
 - Separated .gmo files
 - Added description for packages.
