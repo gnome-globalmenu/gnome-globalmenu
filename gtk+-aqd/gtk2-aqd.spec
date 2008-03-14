@@ -25,7 +25,7 @@ Source1: update-gdk-pixbuf-loaders
 Source2: update-gtk-immodules 
 
 Provides: gtk2 = %{base_version}-%{release}
-Obsoletes: gtk2 = %{base_version}-%{release}
+Obsoletes: gtk2 <= %{base_version}-%{release}
 # Biarch changes
 Patch0: gtk+-2.4.1-lib64.patch
 # Fedora patch
@@ -107,7 +107,7 @@ Requires: automake
 # for /usr/share/gtk-doc/html
 Requires: gtk-doc
 Provides: gtk2-devel = %{base_version}-%{release}
-Obsoletes: gtk2-devel = %{base_version}-%{release}
+Obsoletes: gtk2-devel <= %{base_version}-%{release}
 %description devel
 The gtk+-devel package contains the header files and developer
 docs for the GTK+ widget toolkit.  
