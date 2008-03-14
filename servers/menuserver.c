@@ -473,10 +473,8 @@ static void
 }
 static void _s_gtk_helper_size_request(MenuServer * _self, GnomenuClientInfo * ci, GnomenuServerHelper * helper){
 	GtkWidget * widget = GTK_WIDGET(_self);
-	ci->allocation.width = MAX(ci->requisition.width,
-							widget->allocation.width);
-	ci->allocation.height = MAX(ci->requisition.height,
-							widget->allocation.height);
+	ci->allocation.width = widget->allocation.width;
+	ci->allocation.height = widget->allocation.height;
 }
 static void _size_request(GtkWidget * widget, GtkRequisition * requisition){
 	GList * node;
