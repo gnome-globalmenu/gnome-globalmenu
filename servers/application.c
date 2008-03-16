@@ -61,11 +61,12 @@ static void _create_conf_dialog(Application * app){
 	GladeXML * xml = app->glade_factory;
 	cfd->dlg = glade_xml_get_widget(xml, "ConfDialog");
 
-	cfd->tgbtn_title_visible = glade_xml_get_widget(xml, "chkbtn_title_visible");
-	cfd->ftbtn_title_font = glade_xml_get_widget(xml, "fntbtn_title_font");
-	cfd->tgbtn_icon_visible = glade_xml_get_widget(xml, "chkbtn_icon_visible");
-	cfd->spnbtn_title_max_width = glade_xml_get_widget(xml, "spnbtn_title_max_width");
+	cfd->tgbtn_title_visible = GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "chkbtn_title_visible"));
+	cfd->ftbtn_title_font = GTK_FONT_BUTTON(glade_xml_get_widget(xml, "fntbtn_title_font"));
+	cfd->tgbtn_icon_visible = GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "chkbtn_icon_visible"));
+	cfd->spnbtn_title_max_width = GTK_SPIN_BUTTON(glade_xml_get_widget(xml, "spnbtn_title_max_width"));
 }
+
 static void application_init(Application *app)
 {
 	GET_OBJECT(app, self, priv);
@@ -346,7 +347,7 @@ _constructor	( GType type, guint n_construct_properties,
 			construct_params);
 
 	app = APPLICATION(_self);
-	app_class = G_OBJECT_GET_CLASS(app);
+	app_class = APPLICATION_CLASS(G_OBJECT_GET_CLASS(app));
 	/*This thing is ugly, (consider a vertical menu layout), we need a new alignment widget
  * 	which is similiar to GtkMenuBar(respecting directions) */
 /*so that reparenting won't destroy it*/
@@ -471,7 +472,7 @@ void application_show_about_dialog(Application * app){
 
 /* BEGIN: Signal handlers */
 static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuServer * server){
-	ApplicationClass *app_class = G_OBJECT_GET_CLASS(app);
+	ApplicationClass *app_class = APPLICATION_CLASS(G_OBJECT_GET_CLASS(app));
 	GdkPixbuf *icon_buf, *resized_icon;
 	gint w, h;
 	WnckWindow * window = menu_server_get_client_parent(server, server->active_client);
