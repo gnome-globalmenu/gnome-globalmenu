@@ -15,18 +15,14 @@
  */
 #include "intl.h"
 
-static gboolean size_changed(GtkWidget* plugin, gint size) {
-	return TRUE;
-}
 
 static void
 xfce_applet_construct(XfcePanelPlugin *plugin)
 {
 	Application * app;
 	g_print("constructing plugin\n");
-	g_signal_connect(G_OBJECT(plugin), "size-changed", 
-		G_CALLBACK(size_changed), NULL);
 	app = application_xfce_new(GTK_WIDGET(plugin));
+	gtk_widget_show_all(GTK_WIDGET(plugin));
 	application_start(app);
 }
 

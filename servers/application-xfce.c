@@ -31,19 +31,53 @@ _constructor	( GType type, guint n_construct_properties,
 	return obj;
 }
 
+static void _plugin_show_about(void *plugin, Application *app)
+{
+	application_show_about_dialog(app);
+}
+static void _plugin_show_configuration(void *plugin, Application *app)
+{
+	application_show_conf_dialog(app);
+}
+
+static gboolean _plugin_size_changed(GtkWidget* plugin, gint size, Application *app) {
+	return TRUE;
+}
+
+static void _plugin_orientation_changed(GtkWidget *plugin, GtkOrientation *orientation, Application *app) {
+	if (orientation) {
+		g_object_set(app, 
+			"orientation", *orientation == GTK_ORIENTATION_HORIZONTAL ? GNOMENU_ORIENT_TOP : GNOMENU_ORIENT_LEFT, 
+			NULL);
+	}
+}
+
 static void _init_plugin(Application *app)
 {
+	GtkOrientation orientation = xfce_panel_plugin_get_orientation(XFCE_PANEL_PLUGIN(app->window));
+	_plugin_orientation_changed(GTK_WIDGET(app->window), &orientation, app);
+
 	xfce_panel_plugin_menu_show_about(XFCE_PANEL_PLUGIN(app->window));
 	xfce_panel_plugin_menu_show_configure(XFCE_PANEL_PLUGIN(app->window));
+	xfce_panel_plugin_add_action_widget(XFCE_PANEL_PLUGIN(app->window), app->title);
+
+	g_signal_connect(G_OBJECT(app->window), "size-changed", 
+		G_CALLBACK(_plugin_size_changed), app);
 	g_signal_connect(G_OBJECT(app->window), "about",
-			G_CALLBACK(application_show_about_dialog), app);
+			G_CALLBACK(_plugin_show_about), app);
 	g_signal_connect(G_OBJECT(app->window), "configure-plugin",
-			G_CALLBACK(application_show_conf_dialog), app);
+			G_CALLBACK(_plugin_show_configuration), app);
+	g_signal_connect(G_OBJECT(app->window), "orientation-changed",
+			G_CALLBACK(_plugin_orientation_changed), app);
+	/* defaults for settings */
+	app->title_font = pango_font_description_from_string("Verdana Bold 9");
+	app->title_max_width = 12;
 }
 
 static void _update_ui(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_XFCE(app));
+	gtk_widget_set_size_request(GTK_WIDGET(app->window), 512, 16);
 	LOG("app-xfce:_update_ui, chain to parent class\n");
 	APPLICATION_CLASS(application_xfce_parent_class)->update_ui(app);
 }
