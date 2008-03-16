@@ -18,6 +18,7 @@ typedef struct _ApplicationXfceClass ApplicationXfceClass;
 
 struct _ApplicationXfce{
 	Application parent;
+	GtkWidget *event_box;
 };
 
 struct _ApplicationXfceClass{

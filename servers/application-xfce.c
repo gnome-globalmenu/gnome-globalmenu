@@ -59,7 +59,7 @@ static void _init_plugin(Application *app)
 
 	xfce_panel_plugin_menu_show_about(XFCE_PANEL_PLUGIN(app->window));
 	xfce_panel_plugin_menu_show_configure(XFCE_PANEL_PLUGIN(app->window));
-	xfce_panel_plugin_add_action_widget(XFCE_PANEL_PLUGIN(app->window), app->title);
+	xfce_panel_plugin_add_action_widget(XFCE_PANEL_PLUGIN(app->window), APPLICATION_XFCE(app)->event_box);
 
 	g_signal_connect(G_OBJECT(app->window), "size-changed", 
 		G_CALLBACK(_plugin_size_changed), app);
@@ -76,6 +76,15 @@ static void _init_plugin(Application *app)
 
 static void _update_ui(Application *app)
 {
+  ApplicationXfce* xapp = APPLICATION_XFCE(app);
+	if (gtk_widget_get_parent(GTK_WIDGET(app->box)) == GTK_WIDGET(app->window)) {
+		gtk_container_remove(GTK_CONTAINER(app->window), GTK_WIDGET(app->box));
+		if (!gtk_widget_get_parent(xapp->event_box)) {
+			gtk_container_add(GTK_CONTAINER(app->window), xapp->event_box);
+			gtk_widget_show(xapp->event_box);
+		}
+		gtk_container_add(GTK_CONTAINER(xapp->event_box), GTK_WIDGET(app->box));
+	}
 	g_return_if_fail(IS_APPLICATION_XFCE(app));
 	gtk_widget_set_size_request(GTK_WIDGET(app->window), 512, 16);
 	LOG("app-xfce:_update_ui, chain to parent class\n");
@@ -137,8 +146,9 @@ static void application_xfce_class_init(ApplicationXfceClass *klass)
 	g_type_class_add_private(obj_class, sizeof(ApplicationXfcePrivate));
 }
 
-static void application_xfce_init(ApplicationXfce *obj)
+static void application_xfce_init(ApplicationXfce *app)
 {
+	app->event_box = gtk_event_box_new();
 }
 
 Application *application_xfce_new(GtkWidget *w)
