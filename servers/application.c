@@ -453,6 +453,7 @@ void application_show_about_dialog(Application * app){
 	gchar * authors[] = {
 		"Yu Feng <rainwoodman@gmail.com>",
 		"Mingxi Wu <fengshenx@gmail.com>",
+		"Dmitry Kostenko <bis0n.lives@gmail.com>",
 		"And many help from others",
 		NULL
 		};
