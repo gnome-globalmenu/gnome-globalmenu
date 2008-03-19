@@ -74,14 +74,8 @@ struct _GnomenuSocket {
 	GObject parent;
 /*< public >*/
 	gchar * name;
-	GdkWindow * window;
-	GdkDisplay * display;
 	GnomenuSocketStatus status;
-	GnomenuSocketNativeID target;
-	GQueue * queue;
-	gint acks;
 	gint timeout;
-	gint alives;
 };
 
 /**
@@ -92,29 +86,48 @@ struct _GnomenuSocket {
 struct _GnomenuSocketClass {
 	GObjectClass parent;
 /* < private >*/
-	void (*data_arrival) (GnomenuSocket * self, gpointer data, guint length);
-	void (*connect_req) (GnomenuSocket * self, GnomenuSocketNativeID target);
-	void (*shutdown) (GnomenuSocket * self);
-	void (*connected) (GnomenuSocket * self, GnomenuSocketNativeID target);
+/* closures*/
+	void (*c_data) (GnomenuSocket * socket, gpointer data, guint length);
+	void (*c_request) (GnomenuSocket * socket, GnomenuSocketNativeID target);
+	void (*c_shutdown) (GnomenuSocket * socket);
+	void (*c_connected) (GnomenuSocket * socket, GnomenuSocketNativeID target);
+
+/* methods */
+	gboolean (*connect) (GnomenuSocket * socket, GnomenuSocketNativeID target);
+	gboolean (*listen) (GnomenuSocket * socket);
+	gboolean (*accept) (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target);
+	gboolean (*send) (GnomenuSocket * socket, gpointer data, guint bytes);
+	gboolean (*broadcast) (GnomenuSocket * socket, gpointer data, guint bytes);
+	void (*shutdown) (GnomenuSocket * socket);	
+	gboolean (*flush) (GnomenuSocket * socket);	
+
+	gpointer reserved1;
+	gpointer reserved2;
+	gpointer reserved3;
+	gpointer reserved4;
+	gpointer reserved5;
+	gpointer reserved6;
+	gpointer reserved7;
+	gpointer reserved8;
+	gpointer reserved9;
+	gpointer reserved10;
 };
 
 
 GType gnomenu_socket_get_type (void);
 
-GnomenuSocket * gnomenu_socket_new (gchar * name);
-GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * _self);
+GnomenuSocket * gnomenu_socket_new (gchar * name, gint timeout);
+GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * socket);
 
-gboolean gnomenu_socket_listen(GnomenuSocket * _self);
-GnomenuSocket * gnomenu_socket_accept(GnomenuSocket * _self, GnomenuSocketNativeID target);
+gboolean gnomenu_socket_listen(GnomenuSocket * socket);
+gboolean gnomenu_socket_accept(GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target);
 
-gboolean gnomenu_socket_send(GnomenuSocket * _self, gpointer data, guint bytes);
+gboolean gnomenu_socket_send(GnomenuSocket * socket, gpointer data, guint bytes);
 
-void gnomenu_socket_shutdown(GnomenuSocket * _self);
-gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * self, gchar * name, gpointer data, guint bytes);
-
-gboolean gnomenu_socket_flush(GnomenuSocket * _self);
-gboolean gnomenu_socket_start(GnomenuSocket * socket);
-
+void gnomenu_socket_shutdown(GnomenuSocket * socket);
+gboolean gnomenu_socket_flush(GnomenuSocket * socket);
+gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * socket, gchar * name, gpointer data, guint bytes);
+GnomenuSocketNativeID gnomenu_socket_lookup(gchar * name);
 G_END_DECLS
 #endif
 
