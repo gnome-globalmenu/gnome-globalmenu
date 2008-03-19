@@ -839,10 +839,19 @@ static GdkFilterReturn
 				/* Obtain the data, invoke ::data::peer */
 				/* send ACK*/
 					MessageHeader ack;
+					gpointer data;
+					gint bytes;
 					ack.type = MSG_ACK;
 					ack.source = gnomenu_socket_get_native(self);	
 					_send_xclient_message(priv->target, &ack, sizeof(ack));
+					data = _get_native_buffer(gnomenu_socket_get_native(self), 
+							_GNOMENU_DATA_BUFFER, 
+							&bytes);
+					g_assert(bytes == msg->bytes);
+					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
+						g_quark_from_string("peer"), data, msg->bytes);
 				}
+				
 			break;
 			case MSG_ACK:
 				LOG("MSG_ACK");
