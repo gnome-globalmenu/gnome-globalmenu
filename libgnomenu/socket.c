@@ -160,6 +160,8 @@ gboolean _real_listen (GnomenuSocket * socket);
 gboolean _real_broadcast (GnomenuSocket * socket, gpointer data, guint bytes);
 void _real_shutdown (GnomenuSocket * socket);	
 
+static gboolean _test_connection		( GnomenuSocket * socket );
+
 static gulong 
 class_signals[SIGNAL_MAX] 		= {0};
 
@@ -204,7 +206,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 	klass->accept = _real_accept;
 	klass->send = _real_send;
 //	klass->broadcast = _real_broadcast;
-//	klass->shutdown = _real_shutdown;
+	klass->shutdown = _real_shutdown;
 	klass->flush = _real_flush;
 
 	class_signals[DATA_ARRIVAL] =
@@ -748,6 +750,10 @@ gboolean _real_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
 	msg.source = gnomenu_socket_get_native(self);	
 	msg.type = MSG_CONNECT_REQ;
 	msg.bytes = 0;
+	if(priv->time_source){
+		g_source_remove(priv->time_source);
+	}
+	priv->time_source = g_timeout_add_seconds(self->timeout, _test_connection, self);
 	return _send_xclient_message(target, &msg, sizeof(msg));
 }
 /**
@@ -778,6 +784,10 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 		ack.type = MSG_CONNECT_ACK;
 		ack.source = gnomenu_socket_get_native(self);
 		ack.service = gnomenu_socket_get_native(service);
+		if(s_priv->time_source){
+			g_source_remove(priv->time_source);
+		}
+		s_priv->time_source = g_timeout_add_seconds(service->timeout, _test_connection, service);
 		return _send_xclient_message(target, &ack, sizeof(ack));
 	} else{
 		g_error("the socket is not listening, how can you ACCEPT?");
@@ -786,6 +796,45 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 
 }
 
+static gboolean _test_connection		( GnomenuSocket * socket ) {
+	GET_OBJECT(socket, self, priv);
+	if(_peek_xwindow(priv->target))
+		return TRUE;
+	else {
+		priv->time_source = 0;
+		gnomenu_socket_shutdown(socket);
+		return FALSE;
+	}
+}
+/**
+ * gnomenu_socket_shutdown:
+ *	@_self: the socket to shutdown.
+ *
+ * Shutdown a socket connection. Note that this doesn't unref the object,
+ * unless you have connected GnomenuSocket::shutdown to
+ * gnomenu_socket_destroy_on_shutdown();
+ */
+void gnomenu_socket_shutdown(GnomenuSocket * socket) {
+	GNOMENU_SOCKET_GET_CLASS(socket)->shutdown(socket);
+}
+void _real_shutdown (GnomenuSocket * socket) {
+	GET_OBJECT(socket, self, priv);
+	MessageHeader msg;
+	if(self->status == GNOMENU_SOCKET_CONNECTED){
+		self->status = GNOMENU_SOCKET_DISCONNECTED;
+		msg.type = MSG_SHUTDOWN;
+		msg.source = gnomenu_socket_get_native(socket);
+		_send_xclient_message(priv->target, &msg, sizeof(msg));
+		/*then tells myself the connection is lost.*/
+		g_signal_emit(G_OBJECT(self),
+			class_signals[SHUTDOWN], 0);	
+		if(priv->time_source)
+			g_source_remove(priv->time_source);
+		priv->time_source = 0;
+	} else{
+		g_warning("Not connected, can not shutdown");
+	}
+}
 static GdkFilterReturn 
 	_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer pointer){
 
@@ -835,7 +884,6 @@ static GdkFilterReturn
 		switch (msg->type){
 			case MSG_DATA:
 				LOG("MSG_DATA");
-				if(self->status == GNOMENU_SOCKET_CONNECTED){
 				/* Obtain the data, invoke ::data::peer */
 				/* send ACK*/
 					MessageHeader ack;
@@ -850,8 +898,6 @@ static GdkFilterReturn
 					g_assert(bytes == msg->bytes);
 					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
 						g_quark_from_string("peer"), data, msg->bytes);
-				}
-				
 			break;
 			case MSG_ACK:
 				LOG("MSG_ACK");
