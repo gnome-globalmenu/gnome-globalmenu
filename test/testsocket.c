@@ -15,16 +15,21 @@ static void socket_data_arrival_cb(GnomenuSocket * socket,
 	g_message("%s(%p)::data_arrival event, bytes = %d", socket->name, socket, bytes);
 	g_message("Message is %*s", bytes, data);
 }
+static void service_shutdown(GnomenuSocket * socket,
+	gpointer data){
+	service = NULL;
+}	
 static void socket_connect_req_cb(GnomenuSocket * socket,
 	GnomenuSocketNativeID target){
-	service = gnomenu_socket_new("service", 10);
+	service = gnomenu_socket_new("service", 1);
 
 	g_signal_connect(G_OBJECT(service), "data",
 			G_CALLBACK(socket_data_arrival_cb), NULL);
+	g_signal_connect(G_OBJECT(service), "shutdown",
+			G_CALLBACK(service_shutdown), NULL);
 
 	gnomenu_socket_accept(socket, service, target);
 }
-	
 static void create_clicked_cb(GtkButton * button, gpointer user_data){
 	g_message("button pressed");
 
@@ -44,13 +49,13 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 		}
 	}
 	if(button == create){
-		server = gnomenu_socket_new("server", 10);
+		server = gnomenu_socket_new("server", 1);
 		server->timeout = 1;
 		gnomenu_socket_listen(server);
 
-		socket1 = gnomenu_socket_new("test socket", 10);
-		socket2 = gnomenu_socket_new("test socket", 10);
-		socket1->timeout = 10;
+		socket1 = gnomenu_socket_new("test socket 1", 1);
+		socket2 = gnomenu_socket_new("test socket 2", 1);
+		socket1->timeout = 1;
 		g_signal_connect(G_OBJECT(server), "data",
 				G_CALLBACK(socket_data_arrival_cb), NULL);
 		g_signal_connect(G_OBJECT(socket1), "data::peer",
@@ -61,7 +66,7 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 				G_CALLBACK(socket_connect_req_cb), NULL);
 	}
 	if(button == broadcast){
-//		gnomenu_socket_broadcast_by_name(server, "test socket", MSG1, sizeof(MSG1));
+		gnomenu_socket_broadcast(server, MSG1, sizeof(MSG1));
 	}
 	if(button == connect){
 		gnomenu_socket_connect(socket1, gnomenu_socket_get_native(server));
@@ -70,7 +75,8 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 	gtk_widget_destroy(GTK_WIDGET(window));
 	}
 	if(button == shutdown){
-//		gnomenu_socket_shutdown(socket1);
+		gnomenu_socket_shutdown(socket1);
+		
 	}
 	if(button == sudden){
 		socket1->status = GNOMENU_SOCKET_DISCONNECTED;

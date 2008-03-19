@@ -205,7 +205,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 	klass->listen = _real_listen;
 	klass->accept = _real_accept;
 	klass->send = _real_send;
-//	klass->broadcast = _real_broadcast;
+	klass->broadcast = _real_broadcast;
 	klass->shutdown = _real_shutdown;
 	klass->flush = _real_flush;
 
@@ -750,10 +750,6 @@ gboolean _real_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
 	msg.source = gnomenu_socket_get_native(self);	
 	msg.type = MSG_CONNECT_REQ;
 	msg.bytes = 0;
-	if(priv->time_source){
-		g_source_remove(priv->time_source);
-	}
-	priv->time_source = g_timeout_add_seconds(self->timeout, _test_connection, self);
 	return _send_xclient_message(target, &msg, sizeof(msg));
 }
 /**
@@ -784,10 +780,7 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 		ack.type = MSG_CONNECT_ACK;
 		ack.source = gnomenu_socket_get_native(self);
 		ack.service = gnomenu_socket_get_native(service);
-		if(s_priv->time_source){
-			g_source_remove(priv->time_source);
-		}
-		s_priv->time_source = g_timeout_add_seconds(service->timeout, _test_connection, service);
+		g_signal_emit(G_OBJECT(service), class_signals[CONNECTED], 0, target);
 		return _send_xclient_message(target, &ack, sizeof(ack));
 	} else{
 		g_error("the socket is not listening, how can you ACCEPT?");
@@ -806,6 +799,29 @@ static gboolean _test_connection		( GnomenuSocket * socket ) {
 		return FALSE;
 	}
 }
+
+gboolean gnomenu_socket_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
+	return GNOMENU_SOCKET_GET_CLASS(socket)->broadcast(socket, data, bytes);
+}
+gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
+	GET_OBJECT(socket, self, priv);
+	GList * list = _find_native_by_name(NULL);
+	GList * node;	
+	GnomenuSocketNativeID native;
+	MessageHeader msg;
+	msg.source = gnomenu_socket_get_native(self);
+	msg.type = MSG_BROADCAST;
+	msg.bytes = bytes;
+	for(node = g_list_first(list); node; node = g_list_next(node)){
+		native = node->data;
+		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data, bytes);
+		_send_xclient_message (native, &msg, sizeof(msg));
+	}
+
+	g_list_free(list);
+	return TRUE;
+}
+
 /**
  * gnomenu_socket_shutdown:
  *	@_self: the socket to shutdown.
@@ -828,9 +844,6 @@ void _real_shutdown (GnomenuSocket * socket) {
 		/*then tells myself the connection is lost.*/
 		g_signal_emit(G_OBJECT(self),
 			class_signals[SHUTDOWN], 0);	
-		if(priv->time_source)
-			g_source_remove(priv->time_source);
-		priv->time_source = 0;
 	} else{
 		g_warning("Not connected, can not shutdown");
 	}
@@ -849,8 +862,17 @@ static GdkFilterReturn
 	MessageHeader * msg =(MessageHeader*) xevent->xclient.data.l;
 	switch(msg->type){
 		case MSG_BROADCAST:
+			LOG("MSG_BROADCAST");
 			/* obtain data */
+			{ gint bytes;
+			  gpointer data = _get_native_buffer(gnomenu_socket_get_native(self),
+										_GNOMENU_BC_BUFFER,
+										&bytes);
+			  g_assert(bytes == msg->bytes);
 			/* emit signal ::data::broadcast*/
+			  g_signal_emit(G_OBJECT(self), class_signals[DATA_ARRIVAL],
+						g_quark_from_string("broadcast"), data, bytes);
+			}
 			return GDK_FILTER_REMOVE;
 		case MSG_CONNECT_REQ:
 			LOG("MSG_CONNECT_REQ");
@@ -873,6 +895,7 @@ static GdkFilterReturn
 			  ack.source = gnomenu_socket_get_native(self);
 			  _send_xclient_message(priv->target, &ack, sizeof(ack));
 			}
+			g_signal_emit(G_OBJECT(self), class_signals[CONNECTED], 0, priv->target);
 			msg->type = MSG_ACK;
 			msg->source = msg->service;
 	}
@@ -934,8 +957,15 @@ static void _c_request 		( GnomenuSocket * socket, GnomenuSocketNativeID target 
 	
 }
 static void _c_connected 			( GnomenuSocket * socket, GnomenuSocketNativeID target ) {
-
+	GET_OBJECT(socket, self, priv);
+	priv->time_source = g_timeout_add_seconds(self->timeout, _test_connection, self);
 }
 static void _c_shutdown 			( GnomenuSocket * socket ) {
-
+	GET_OBJECT(socket, self, priv);
+	if(priv->time_source)
+		g_source_remove(priv->time_source);
+	priv->time_source = 0;
+	g_queue_for(priv->data_queue, DataMessage * msg, g_free(msg));
+	priv->acks = 0;
+	self->status = GNOMENU_SOCKET_DISCONNECTED;
 }
