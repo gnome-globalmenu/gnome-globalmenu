@@ -360,12 +360,13 @@ gnomenu_socket_init (GnomenuSocket * socket){
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
+	static const char string[] = "GnomenuSocket";
 	GObject * object = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)
 						( type,
 						  n_construct_properties,
 						  construct_params);
 	GET_OBJECT(object, self, priv);
-
+	_set_native_buffer(GDK_WINDOW_XID(priv->window), _GNOMENU_MESSAGE_TYPE, string, sizeof(string));
 	gdk_window_add_filter(priv->window, _window_filter_cb, self);
 
 	return object;
@@ -495,7 +496,7 @@ static GList * _find_native_by_name		( gchar * name ){
     Window * children_return;
     unsigned int nchildren_return;
     unsigned int i;
-
+	gchar * gnomenu_type;
 	screen = gdk_screen_get_default();
 	g_return_val_if_fail(screen, NULL);
 
@@ -533,7 +534,10 @@ static GList * _find_native_by_name		( gchar * name ){
 		gdk_flush();
 		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
-			if(!name || g_str_equal(name, wm_name)){
+			gint bytes;
+			gnomenu_type = _get_native_buffer(children_return[i], _GNOMENU_MESSAGE_TYPE, &bytes);
+			if(gnomenu_type && (!name || g_str_equal(name, wm_name))){
+				g_free(gnomenu_type);
 				window_list = g_list_append(window_list, (gpointer) children_return[i]);
 			}
 		}
