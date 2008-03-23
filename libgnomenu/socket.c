@@ -19,6 +19,9 @@
 #define GET_OBJECT(_s, s, p) \
 	GnomenuSocket * s = GNOMENU_SOCKET(_s); \
 	GnomenuSocketPrivate * p = GNOMENU_SOCKET_GET_PRIVATE(_s); \
+
+#define GET_OBJECT_LOG(_s, s, p) \
+	GET_OBJECT(_s, s, p) \
 	LOG("<%s>", s->name);
 
 #if ENABLE_TRACING >= 3
@@ -590,6 +593,7 @@ static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffe
 	} else {
 		*bytes = nitems_return;
 		gpointer data = g_memdup(property_return, nitems_return);
+		LOG("%10s", data);
 		XFree(property_return);		
 		return data;	
 	}
@@ -885,6 +889,7 @@ static GdkFilterReturn
 			  gpointer data = _get_native_buffer(gnomenu_socket_get_native(self),
 										_GNOMENU_BC_BUFFER,
 										&bytes);
+			  g_assert(data);
 			  g_assert(bytes == msg->bytes);
 			/* emit signal ::data::broadcast*/
 			  g_signal_emit(G_OBJECT(self), class_signals[DATA_ARRIVAL],
@@ -933,10 +938,11 @@ static GdkFilterReturn
 					gint bytes;
 					ack.type = MSG_ACK;
 					ack.source = gnomenu_socket_get_native(self);	
-					_send_xclient_message(priv->target, &ack, sizeof(ack));
 					data = _get_native_buffer(gnomenu_socket_get_native(self), 
 							_GNOMENU_DATA_BUFFER, 
 							&bytes);
+					_send_xclient_message(priv->target, &ack, sizeof(ack));
+				g_assert(data);
 				LOG("should %d == (true) %d ?", msg->bytes, bytes);
 					g_assert(bytes == msg->bytes);
 					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
