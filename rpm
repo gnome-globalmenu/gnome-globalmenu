@@ -1,5 +1,5 @@
 #! /bin/sh
-RPMDEVROOT=~/sources/
+RPMDEVROOT=~/rpmbuild
 if [ ! -d $RPMDEVROOT ]; then
 	echo edit this file to update RPMDEVROOT
 	exit 1;
@@ -24,7 +24,7 @@ sed 's/@RELEASE@/'$dist'/' >  gnome-globalmenu.spec
 cp *.tar.gz $RPMDEVROOT/SOURCES/
 rpmbuild -ba *.spec && \
 (
-cd $RPMDEVROOT/RPMS/i386/; 
+cd $RPMDEVROOT/RPMS/`uname -i`/; 
 tar -cjvf - *global*$version-$dist*.rpm *gnomenu*$version-$dist*.rpm
 ) > fedora-packages-0.4.svn$version-$dist.tar.bz2
 rm gnome-globalmenu.spec

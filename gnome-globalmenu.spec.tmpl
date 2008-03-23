@@ -102,54 +102,56 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 
 %files
 %defattr(-, root, root)
-/usr/share/doc/gnome-globalmenu/gtk+-aqd/README
-/usr/share/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
-/usr/share/doc/gnome-globalmenu/AUTHORS
-/usr/share/doc/gnome-globalmenu/COPYING
-/usr/share/doc/gnome-globalmenu/ChangeLog
-/usr/share/doc/gnome-globalmenu/INSTALL
-/usr/share/doc/gnome-globalmenu/NEWS
-/usr/share/doc/gnome-globalmenu/README
-/usr/share/gnome-globalmenu/application.glade
-/usr/share/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
-/usr/share/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
+%{_datadir}/doc/gnome-globalmenu/gtk+-aqd/README
+%{_datadir}/doc/gnome-globalmenu/gtk+-aqd/gtk2-aqd.patch
+%{_datadir}/doc/gnome-globalmenu/AUTHORS
+%{_datadir}/doc/gnome-globalmenu/COPYING
+%{_datadir}/doc/gnome-globalmenu/ChangeLog
+%{_datadir}/doc/gnome-globalmenu/INSTALL
+%{_datadir}/doc/gnome-globalmenu/NEWS
+%{_datadir}/doc/gnome-globalmenu/README
+%{_datadir}/gnome-globalmenu/application.glade
+%{_datadir}/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+%{_datadir}/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 
 %files -n libgnomenu
 %defattr(-, root, root)
-/etc/libgnomenu.conf
-/usr/lib/libgnomenu.a
-/usr/lib/libgnomenu.la
-/usr/lib/libgnomenu.so
-/usr/lib/libgnomenu.so.0
-/usr/lib/libgnomenu.so.0.0.0
+%{_sysconfdir}/libgnomenu.conf
+%{_libdir}/libgnomenu.a
+%{_libdir}/libgnomenu.la
+%{_libdir}/libgnomenu.so
+%{_libdir}/libgnomenu.so.0
+%{_libdir}/libgnomenu.so.0.0.0
 
 %files -n libgnomenu-devel
 %defattr(-, root, root)
-/usr/include/libgnomenu/clienthelper.h
-/usr/include/libgnomenu/messages.h
-/usr/include/libgnomenu/quirks.h
-/usr/include/libgnomenu/serverhelper.h
-/usr/include/libgnomenu/menubar.h
-/usr/include/libgnomenu/socket.h
-/usr/lib/pkgconfig/libgnomenu.pc
-/usr/share/gtk-doc/html/libgnomenu/*
+%{_includedir}/libgnomenu/clienthelper.h
+%{_includedir}/libgnomenu/messages.h
+%{_includedir}/libgnomenu/quirks.h
+%{_includedir}/libgnomenu/serverhelper.h
+%{_includedir}/libgnomenu/menubar.h
+%{_includedir}/libgnomenu/socket.h
+%{_libdir}/pkgconfig/libgnomenu.pc
+%{_datadir}/gtk-doc/html/libgnomenu/*
 
 %files -n gtk-globalmenu-server
 %defattr(-, root, root)
-/usr/bin/gtk-globalmenu-server
+%{_bindir}/gtk-globalmenu-server
 
 %files -n gnome-globalmenu-applet
 %defattr(-, root, root)
-/usr/libexec/gnome-globalmenu-applet
-/usr/lib/bonobo/servers/GNOME_GlobalMenuApplet.server
-/etc/gconf/schemas/gnome-globalmenu-applet.schemas
+%{_libexecdir}/gnome-globalmenu-applet
+%{_libdir}/bonobo/servers/GNOME_GlobalMenuApplet.server
+%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas
 
 %files -n xfce-globalmenu-plugin
 %defattr(-, root, root)
-/usr/libexec/xfce-globalmenu-plugin
-/usr/share/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
+%{_libexecdir}/xfce-globalmenu-plugin
+%{_datadir}/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
+* Sun Mar 23 2008 Feng Yu <rainwoodman@gmail.com>
+- change to macros for building x86-64 rpms
 * Fri Mar 14 2008 Feng Yu <rainwoodman@gmail.com>
 - remove language pack
 - move shared files to gnome-globalmenu
