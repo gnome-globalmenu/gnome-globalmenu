@@ -15,19 +15,20 @@ static void service_data_arrival(GnomenuSocket * socket, gpointer data, gint byt
 	g_message("ding: %d", *(gint*)data);
 }
 static void server_connect_req(GnomenuSocket * socket, GnomenuSocketNativeID target, gpointer userdata){
-	service = gnomenu_socket_accept(socket, target);
-	g_signal_connect(G_OBJECT(service), "data-arrival", service_data_arrival, 0);	
+	service = gnomenu_socket_new("service", 5);
+	gnomenu_socket_accept(socket, service, target);
+	g_signal_connect(G_OBJECT(service), "data", service_data_arrival, 0);	
 }
 static void button_clicked(GtkButton * button, gpointer usrdata){
 	if(button == create){
 		GnomenuMessage msg;
-		server = gnomenu_socket_new(GNOMENU_SERVER_NAME);
-		g_signal_connect(G_OBJECT(server), "connect-request",
+		server = gnomenu_socket_new(GNOMENU_SERVER_NAME, 10);
+		g_signal_connect(G_OBJECT(server), "request",
 				G_CALLBACK(server_connect_req), NULL);
 		gnomenu_socket_listen(server);
 		msg.any.type = GNOMENU_MSG_SERVER_NEW;
 		msg.server_new.socket_id = gnomenu_socket_get_native(server);
-		gnomenu_socket_broadcast_by_name(server, GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+		gnomenu_socket_broadcast(server, &msg, sizeof(msg));
 	}
 	if(button == size){
 		GnomenuMessage msg;

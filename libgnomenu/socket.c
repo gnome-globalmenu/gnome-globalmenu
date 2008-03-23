@@ -367,7 +367,7 @@ _constructor	( GType type, guint n_construct_properties,
 						  construct_params);
 	GET_OBJECT(object, self, priv);
 	_set_native_buffer(GDK_WINDOW_XID(priv->window), _GNOMENU_MESSAGE_TYPE, string, sizeof(string));
-	gdk_window_add_filter(priv->window, _window_filter_cb, self);
+	gdk_window_add_filter(/*priv->window*/NULL, _window_filter_cb, self);
 
 	return object;
 }
@@ -423,7 +423,7 @@ static void
 _dispose (GObject * object){
 	GET_OBJECT(object, self, priv);
 	if(!priv->disposed){
-		gdk_window_remove_filter(priv->window, _window_filter_cb, self);
+		gdk_window_remove_filter(/*priv->window*/ NULL, _window_filter_cb, self);
 		if(priv->time_source)
 			g_source_remove(priv->time_source);
 		priv->disposed = TRUE;	
@@ -709,20 +709,18 @@ gboolean _real_flush(GnomenuSocket * socket) {
 	GET_OBJECT(socket, self, priv);
 	LOG("acks = %d", priv->acks);
 	g_assert(priv->acks <=1);
-	while(priv->acks && !g_queue_is_empty(priv->data_queue)){
+	if(priv->acks == 1 && !g_queue_is_empty(priv->data_queue)){
 		DataMessage * data_msg = g_queue_peek_head(priv->data_queue);
-		_set_native_buffer(priv->target, _GNOMENU_DATA_BUFFER, data_msg->data, data_msg->header.bytes);
-		if( _send_xclient_message(priv->target, &data_msg->header, sizeof(MessageHeader))){
-			data_msg = g_queue_pop_head(priv->data_queue);
-			g_free(data_msg);
-			priv->acks--;
-		} else {
+		LOG("data size = %d", data_msg->header.bytes);
+		priv->acks = 0;
+		if(!_set_native_buffer(priv->target, _GNOMENU_DATA_BUFFER, data_msg->data, data_msg->header.bytes)) {
+		/*then we send the notify message in PropertyNotify event handler.*/
 		LOG("flushing queue failed");
 		/*check if the connection is lost.*/
 		return FALSE;
 		}
 	}
-	LOG("queue flushed: length = %d", g_queue_get_length(priv->data_queue));
+	LOG("queue flushed: new length = %d", g_queue_get_length(priv->data_queue));
 	return TRUE;
 	
 }
@@ -784,6 +782,7 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 		ack.type = MSG_CONNECT_ACK;
 		ack.source = gnomenu_socket_get_native(self);
 		ack.service = gnomenu_socket_get_native(service);
+		XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), target, PropertyChangeMask);
 		g_signal_emit(G_OBJECT(service), class_signals[CONNECTED], 0, target);
 		return _send_xclient_message(target, &ack, sizeof(ack));
 	} else{
@@ -856,13 +855,27 @@ static GdkFilterReturn
 	_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer pointer){
 
 	XEvent * xevent = gdkxevent;
+	if( xevent->type == PropertyNotify &&
+		(xevent->xproperty.atom == gdk_x11_atom_to_xatom(_GNOMENU_DATA_BUFFER))){
+		GET_OBJECT(pointer, self, priv);
+		if( xevent->xproperty.window == priv->target
+			&& xevent->xproperty.state == PropertyNewValue) {
+			DataMessage * data_msg = g_queue_pop_head(priv->data_queue);
+			_send_xclient_message(priv->target, &data_msg->header, sizeof(MessageHeader));
+			g_free(data_msg);
+			LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
+			return GDK_FILTER_CONTINUE;
+		}
+	}
 	if( xevent->type != ClientMessage ||
 		xevent->xclient.message_type !=
 		gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE)){
 		return GDK_FILTER_CONTINUE;
 	}
 	GET_OBJECT(pointer, self, priv);
-
+	if(xevent->xclient.window != gnomenu_socket_get_native(self)){
+		return GDK_FILTER_CONTINUE;
+	}
 	MessageHeader * msg =(MessageHeader*) xevent->xclient.data.l;
 	switch(msg->type){
 		case MSG_BROADCAST:
@@ -894,6 +907,8 @@ static GdkFilterReturn
 			/* set state to GNOMENU_SOCKET_CONNECTED*/
 			self->status = GNOMENU_SOCKET_CONNECTED;
 			priv->target = msg->service;
+			XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), msg->service, 
+				PropertyChangeMask);
 			{ MessageHeader ack;
 			  ack.type = MSG_ACK;
 			  ack.source = gnomenu_socket_get_native(self);
@@ -922,6 +937,7 @@ static GdkFilterReturn
 					data = _get_native_buffer(gnomenu_socket_get_native(self), 
 							_GNOMENU_DATA_BUFFER, 
 							&bytes);
+				LOG("should %d == (true) %d ?", msg->bytes, bytes);
 					g_assert(bytes == msg->bytes);
 					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
 						g_quark_from_string("peer"), data, msg->bytes);
@@ -969,6 +985,7 @@ static void _c_shutdown 			( GnomenuSocket * socket ) {
 	if(priv->time_source)
 		g_source_remove(priv->time_source);
 	priv->time_source = 0;
+	g_assert(priv->data_queue);
 	g_queue_for(priv->data_queue, DataMessage * msg, g_free(msg));
 	priv->acks = 0;
 	self->status = GNOMENU_SOCKET_DISCONNECTED;

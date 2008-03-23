@@ -17,13 +17,13 @@ libgnomenu_la_SOURCES = \
 	socket.h \
 	socket.c \
 	quirks.h \
-	quirks.c
-#	serverhelper.c \
-#	serverhelper.h \
-#	clienthelper.c \
-#	clienthelper.h \
-#    menubar.h \
-#	menubar.c 
+	quirks.c \
+	serverhelper.c \
+	serverhelper.h \
+	clienthelper.c \
+	clienthelper.h \
+    menubar.h \
+	menubar.c 
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
