@@ -251,7 +251,7 @@ gboolean gnomenu_server_helper_start(GnomenuServerHelper * self){
 	gnomenu_socket_listen(GNOMENU_SOCKET(self));
 	msg.any.type = GNOMENU_MSG_SERVER_NEW;
 	msg.server_new.socket_id = gnomenu_socket_get_native(GNOMENU_SOCKET(self));
-	gnomenu_socket_broadcast_by_name(GNOMENU_SOCKET(self), GNOMENU_CLIENT_NAME, &msg, sizeof(msg));
+	gnomenu_socket_broadcast(GNOMENU_SOCKET(self), &msg, sizeof(msg));
 }
 static void
 gnomenu_server_helper_init(GnomenuServerHelper * self){
@@ -268,7 +268,7 @@ static GObject* _constructor(
 	GET_OBJECT(obj, self, priv);
 
 	priv->disposed = FALSE;
-	g_signal_connect(G_OBJECT(self), "connect-request", G_CALLBACK(_s_connect_req), NULL);
+	g_signal_connect(G_OBJECT(self), "request", G_CALLBACK(_s_connect_req), NULL);
 
 	return obj;
 }
@@ -311,14 +311,15 @@ static void _s_connect_req(GnomenuServerHelper * _self,
 	ci->stage = GNOMENU_CI_STAGE_NEW;
 	ci->size_stage = GNOMENU_CI_STAGE_RESOLVED;
 /*FIXME: signal not setup when data diagram is built. Might lose signals.*/
-	ci->service = gnomenu_socket_accept(GNOMENU_SOCKET(self), target);
+	ci->service = gnomenu_socket_new("Service", 5);
 	self->clients = g_list_prepend(self->clients, ci);
 	LOG("clients length = %d", g_list_length(self->clients));
-	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
-	g_signal_connect_swapped(G_OBJECT(ci->service), "data-arrival", G_CALLBACK(_s_service_data_arrival), self);
-	g_signal_connect_swapped(G_OBJECT(ci->service), "connected", G_CALLBACK(_s_service_connected), self);
 
-	gnomenu_socket_start(ci->service);		
+	g_signal_connect_swapped(G_OBJECT(ci->service), "shutdown", G_CALLBACK(_s_service_shutdown), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "data", G_CALLBACK(_s_service_data_arrival), self);
+	g_signal_connect_swapped(G_OBJECT(ci->service), "connected", G_CALLBACK(_s_service_connected), self);
+	gnomenu_socket_accept(GNOMENU_SOCKET(self), ci->service, target);
+
 }
 static void _s_service_connected(GnomenuServerHelper * self, GnomenuSocketNativeID target, GnomenuSocket * service){
 	GnomenuClientInfo * ci = _find_ci_by_service(self, service);

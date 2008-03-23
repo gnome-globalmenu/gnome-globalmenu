@@ -8,7 +8,6 @@
 #include "socket.h"
 #include "gnomenu-marshall.h"
 #include "gnomenu-enums.h"
-#undef PING_ECHO_ALIVE
 
 #ifndef GDK_WINDOWING_X11
 #error ONLY X11 is supported. other targets are not yet supported.
@@ -17,21 +16,32 @@
 #define GNOMENU_SOCKET_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_SOCKET, GnomenuSocketPrivate))
 
-#define SELF (GNOMENU_SOCKET(_self))
-#define PRIV (GNOMENU_SOCKET_GET_PRIVATE(_self))
-
 #define GET_OBJECT(_s, s, p) \
 	GnomenuSocket * s = GNOMENU_SOCKET(_s); \
-	GnomenuSocketPrivate * p = GNOMENU_SOCKET_GET_PRIVATE(_s);
+	GnomenuSocketPrivate * p = GNOMENU_SOCKET_GET_PRIVATE(_s); \
+
+#define GET_OBJECT_LOG(_s, s, p) \
+	GET_OBJECT(_s, s, p) \
+	LOG("<%s>", s->name);
 
 #if ENABLE_TRACING >= 3
-#define LOG(fmt, args...) g_message("%s<GnomenuSocket>::" fmt, SELF->name, ## args)
+#define LOG(fmt, args...) g_message("<GnomenuSocket>::%s:" fmt, __func__, ## args)
 #else
 #define LOG(fmt, args...)
 #endif 
-#define LOG_FUNC_NAME LOG("%s", __func__)
-#define GNOMENU_SOCKET_ATOM_STRING "GNOMENU_SOCKET_MESSAGE"
 
+#define g_queue_for(queue, ele, job) \
+		{ GList * _list = g_queue_peek_head_link(queue);\
+		  GList * _node; \
+		  for(_node = g_list_first(_list); _node; _node=g_list_next(_node)){ \
+			ele = _node->data; \
+		  	job; \
+		  } \
+		}
+#define _GNOMENU_DATA_BUFFER gdk_atom_intern("_GNOMENU_SENT_DATA", FALSE) /*For p2p send*/
+#define _GNOMENU_BC_BUFFER gdk_atom_intern("_GNOMENU_RECV_DATA", FALSE) /*For receiving broadcasting */
+#define _GNOMENU_MESSAGE_TYPE gdk_atom_intern("_GNOMENU_MESSAGE_TYPE", FALSE) /*message*/
+/* Properties */
 enum {
 	PROP_0,
 	PROP_NAME,
@@ -39,6 +49,7 @@ enum {
 	PROP_STATUS,
 	PROP_TIMEOUT
 };
+/* Signals */
 enum {
 	DATA_ARRIVAL,
 	CONNECT_REQ,
@@ -46,14 +57,20 @@ enum {
 	SHUTDOWN,
 	SIGNAL_MAX,
 };
+
 typedef struct _GnomenuSocketPrivate GnomenuSocketPrivate;
 struct _GnomenuSocketPrivate {
 	gboolean disposed;
 	guint time_source;
-	int foo;
+	GQueue * data_queue;
+	GdkDisplay * display;
+	GdkWindow * window;
+	GnomenuSocketNativeID target;
+	gint acks;
 };
+
 /**
- * GnomenuSocketHeaderType:
+ * MessageType:
  * @GNOMENU_SOCKET_BROADCAST: a broadcast (connectionless) mesage;
  * @GNOMENU_SOCKET_CONNECT_REQ: a connect request;
  * @GNOMENU_SOCKET_ACK: ready to accept a new data;
@@ -65,97 +82,105 @@ struct _GnomenuSocketPrivate {
  * @GNOMENU_SOCKET_ECHO: yes I am. NOT DONE
  **/
 typedef enum {
-	GNOMENU_SOCKET_BROADCAST = 0,
-	GNOMENU_SOCKET_CONNECT_REQ = 1,
-	GNOMENU_SOCKET_CONNECT_ACK = 2,
-	GNOMENU_SOCKET_ACK = 3 ,
-	GNOMENU_SOCKET_DATA = 4,
-	GNOMENU_SOCKET_SHUTDOWN = 5,
-	GNOMENU_SOCKET_ISALIVE = 6,
-	GNOMENU_SOCKET_ALIVE = 7 ,
-	GNOMENU_SOCKET_PING = 8,
-	GNOMENU_SOCKET_ECHO = 9
-} GnomenuSocketHeaderType;
+	MSG_BROADCAST = 0,
+	MSG_CONNECT_REQ = 1,
+	MSG_CONNECT_ACK = 2,
+	MSG_ACK = 4 ,
+	MSG_DATA = 5,
+	MSG_SHUTDOWN = 6,
+	MSG_ISALIVE = 7,
+	MSG_ALIVE = 8 ,
+	MSG_PING = 9,
+	MSG_ECHO = 10
+} MessageType;
 
 /**
- * GnomenuSocketHeader:
- *	@header_type: type of the header
+ * MessageHeader:
+ *	@type: type of the header
  *	@bytes: length of the data(the size of the header is excluded!
- *	@seq: seq id of this package. unused.
  *	@source: source socket of this msg
  *
- *  Provides enough information to make possible the data diagram.
+ *  This struct is passed via XClientMessage.  Limit it to less than 20 bytes.
+ *  On 64bit platform sizeof(GnomenuSocketNativeID) == 8
  */
 typedef struct {
-	guint8 type;
-	guint8 bytes;
-	gushort seq;
 	GnomenuSocketNativeID source;
-} GnomenuSocketHeader;
-
-
-typedef struct _GnomenuSocketMessage {
-	GnomenuSocketHeader header;
 	union {
-		guint32 l[3];
-		guint16 s[6];
-		guint8  b[12];
-	} data;
-} GnomenuSocketMessage;
+	guint8 bytes;	
+	GnomenuSocketNativeID service;
+	};
+	/*MessageType */ guint8 type;
+} MessageHeader;
 
-#define FILL_HEADER(msg, t, src, b, s) \
-{	GnomenuSocketHeader * header = (GnomenuSocketHeader*)msg; \
-	header->type = (t); \
-	header->bytes = (b);  \
-	header->seq = (s);  \
-	header->source = gnomenu_socket_get_native(src);}
-
-
+/**
+ * DataMessage:
+ * 	@header: header of the message, initialized.
+ * 	@content: a copy of data buffer of the message content.
+ *
+ *	When a ::send method is invoked, a message header is intialized, and the data content is
+ *	copied to data; This data is send to the receiver when a ACK message is received.
+ */
+typedef struct {
+	MessageHeader header;
+	gchar data[];
+} DataMessage;
 
 /* GObject interface */
 static GObject * _constructor 	( GType type, 
 								  guint n_construct_properties, 
 								  GObjectConstructParam *construct_params );
-static void _dispose 			( GObject * _self );
-static void _finalize			( GObject * _self );
-static void _set_property 		( GObject * _self, 
+static void _dispose 			( GObject * object );
+static void _finalize			( GObject * object );
+static void _set_property 		( GObject * object, 
 								  guint property_id, const GValue * value, GParamSpec * pspec );
-static void _get_property 		( GObject * _self, 
+static void _get_property 		( GObject * object, 
 								  guint property_id, GValue * value, GParamSpec * pspec );
 
 /* Default signal closures */
-static void _c_data_arrival 		( GnomenuSocket * _self, gpointer data, guint size );
-static void _c_connect_req 		( GnomenuSocket * _self, GnomenuSocketNativeID target );
-static void _c_connected 			( GnomenuSocket * _self, GnomenuSocketNativeID target );
-static void _c_shutdown 			( GnomenuSocket * _self );
+static void _c_data 		( GnomenuSocket * socket, gpointer data, guint size );
+static void _c_request 		( GnomenuSocket * socket, GnomenuSocketNativeID target );
+static void _c_connected 			( GnomenuSocket * socket, GnomenuSocketNativeID target );
+static void _c_shutdown 			( GnomenuSocket * socket );
 
-/* Raw data sending */
-static gboolean _raw_send 		( GnomenuSocket * _self, 
-								  GdkNativeWindow target, gpointer data, guint bytes );
-static gboolean 
-_raw_send_nosync				( GnomenuSocket * _self, 
-								  GdkNativeWindow target, gpointer data, guint bytes );
-static gboolean 
-_raw_broadcast_by_name
-								( GnomenuSocket * _self, gchar * name, gpointer data, guint bytes );
-/* utility functions */
-static void 
-_destroy_on_shutdown			( GnomenuSocket * _self, gpointer userdata);
-static GList * 
-_gnomenu_socket_find_targets		( GnomenuSocket * _self, gchar * name);
-static gboolean 
-/*send the ISALIVE message, invoked every _self->timeout*/
-_gnomenu_socket_is_alive			(GnomenuSocket * _self); 
+/* helper functions  */
+static gboolean _send_xclient_message 	( GdkNativeWindow target, gpointer data, guint bytes );
+static gboolean _peek_xwindow 			( GdkNativeWindow target );
+static GList * _find_native_by_name		( gchar * name );
 
-/* Wrap XClientMessage */
+static gboolean _set_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gpointer data, gint bytes);
+static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes, gboolean remove);
+
 static GdkFilterReturn 
 _window_filter_cb				(GdkXEvent* xevent, GdkEvent * event, gpointer data);
+
+/* implementations */
+gboolean _real_connect (GnomenuSocket * socket, GnomenuSocketNativeID target);
+gboolean _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target);
+gboolean _real_send (GnomenuSocket * socket, gpointer data, guint bytes);
+gboolean _real_flush (GnomenuSocket * socket);
+gboolean _real_listen (GnomenuSocket * socket);
+
+gboolean _real_broadcast (GnomenuSocket * socket, gpointer data, guint bytes);
+void _real_shutdown (GnomenuSocket * socket);	
+
+static gboolean _test_connection		( GnomenuSocket * socket );
 
 static gulong 
 class_signals[SIGNAL_MAX] 		= {0};
 
 G_DEFINE_TYPE 					(GnomenuSocket, gnomenu_socket, G_TYPE_OBJECT)
-
+#define TYPE_DATA_MESSAGE (_data_message_get_type())
+static DataMessage * _data_message_copy(DataMessage * src){
+	return g_memdup(src, sizeof(DataMessage) + src->header.bytes);
+}
+static GType _data_message_get_type(){
+	static GType type = 0;
+	if(G_UNLIKELY(type ==0)){
+		type = g_boxed_type_register_static("GnomenuSocketDataMessage",
+				(GBoxedCopyFunc) _data_message_copy,
+				g_free);
+	}
+}
 /**
  * gnomenu_socket_class_init:
  *
@@ -174,14 +199,22 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 	gobject_class->get_property = _get_property;
 	gobject_class->set_property = _set_property;
 
-	klass->data_arrival = _c_data_arrival;
-	klass->connect_req = _c_connect_req;
-	klass->connected = _c_connected;
-	klass->shutdown = _c_shutdown;
+	klass->c_data = _c_data;
+	klass->c_request = _c_request;
+	klass->c_connected = _c_connected;
+	klass->c_shutdown = _c_shutdown;
+
+	klass->connect = _real_connect;
+	klass->listen = _real_listen;
+	klass->accept = _real_accept;
+	klass->send = _real_send;
+	klass->broadcast = _real_broadcast;
+	klass->shutdown = _real_shutdown;
+	klass->flush = _real_flush;
 
 	class_signals[DATA_ARRIVAL] =
 /**
- * GnomenuSocket::data-arrival:
+ * GnomenuSocket::data:
  * @self: the #GnomenuSocket that receives this signal.
  * @data: the received data. It is owned by @self and the signal handler 
  * 		should not free it.  
@@ -193,10 +226,10 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
  * ::peer stands for data arrives from the other peer of the connection.
  * ::broadcast stands for data arrives from a broadcasting source.
  */
-		g_signal_new ("data-arrival",
+		g_signal_new ("data",
 			G_TYPE_FROM_CLASS (klass),
 			G_SIGNAL_DETAILED | G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuSocketClass, data_arrival),
+			G_STRUCT_OFFSET (GnomenuSocketClass, c_data),
 			NULL /* accumulator */,
 			NULL /* accu_data */,
 			gnomenu_marshall_VOID__POINTER_UINT,
@@ -208,19 +241,15 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 
 	class_signals[CONNECT_REQ] =
 /**
- * GnomenuSocket::connect-request:
+ * GnomenuSocket::request:
  * @self: the #GnomenuSocket that receives this signal.
- * @data: the received data. It is owned by @self and the signal handler 
- * 		should not free it.
- * @bytes: the length of received data.
  *
- * The ::data-arrival signal is emitted each time a message arrives to
- * the socket.
+ * The ::request signal is emitted when a connection request arrives.
  */
-		g_signal_new ("connect-request",
+		g_signal_new ("request",
 			G_TYPE_FROM_CLASS (klass),
 			G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuSocketClass, connect_req),
+			G_STRUCT_OFFSET (GnomenuSocketClass, c_request),
 			NULL /* accumulator */,
 			NULL /* accu_data */,
 			gnomenu_marshall_VOID__UINT,
@@ -241,7 +270,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 		g_signal_new ("connected",
 			G_TYPE_FROM_CLASS (klass),
 			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuSocketClass, connected),
+			G_STRUCT_OFFSET (GnomenuSocketClass, c_connected),
 			NULL /* accumulator */,
 			NULL /* accu_data */,
 			gnomenu_marshall_VOID__UINT,
@@ -261,7 +290,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 		g_signal_new ("shutdown",
 			G_TYPE_FROM_CLASS (klass),
 			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
-			G_STRUCT_OFFSET (GnomenuSocketClass, shutdown),
+			G_STRUCT_OFFSET (GnomenuSocketClass, c_shutdown),
 			NULL,
 			NULL,
 			gnomenu_marshall_VOID__VOID,
@@ -282,18 +311,6 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 						G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE));
 			
 /**
- * GnomenuSocket:target:
- *
- * the target to connect. #GnomenuSocketNativeID
- */
-	g_object_class_install_property (gobject_class, 
-			PROP_TARGET,
-			g_param_spec_uint ("target",
-						"GnomenuSocket target prop",
-						"Set GnomenuSocket's target",
-						0, G_MAXUINT, 0, 
-						G_PARAM_READWRITE));
-/**
  * GnomenuSocket::status
  *
  * the status of the socket. #GnomenuSocketNativeID
@@ -305,11 +322,11 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 						"Set GnomenuSocket's status",
 						gnomenu_socket_status_get_type(),
 						GNOMENU_SOCKET_DISCONNECTED,
-						G_PARAM_READWRITE));
+						G_PARAM_READABLE));
 /**
  * GnomenuSocket::timeout
  *
- * number of seconds for the socket to shutdown without other peers response
+ * number of idle seconds before the socket try to detect if the connection is lost.
  */
 	g_object_class_install_property (gobject_class,
 			PROP_TIMEOUT,
@@ -320,39 +337,42 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 }
 
+static void
+gnomenu_socket_init (GnomenuSocket * socket){
+	GET_OBJECT(socket, self, priv);
+
+	GdkWindowAttr attr;
+	GdkWindowAttributesType mask;
+
+	priv->display = gdk_display_get_default();
+	priv->time_source = 0;
+	priv->disposed = FALSE;
+	priv->data_queue = g_queue_new();
+	priv->target = 0;
+	priv->acks = 0;
+	self->timeout = 10000;
+	self->name = g_strdup("Anonymous Socket");
+
+	attr.title = self->name;
+	attr.wclass = GDK_INPUT_ONLY;
+	attr.window_type = GDK_WINDOW_TEMP;
+	mask = GDK_WA_TITLE;
+
+	priv->window = gdk_window_new(NULL, &attr, mask);
+}
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
-	GObject * _self = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)
+	static const char string[] = "GnomenuSocket";
+	GObject * object = ( *G_OBJECT_CLASS(gnomenu_socket_parent_class)->constructor)
 						( type,
 						  n_construct_properties,
 						  construct_params);
-	GET_OBJECT(_self, self, priv);
-	self->queue = g_queue_new();
-	self->acks = 0;
-	self->alives = 0;
-	priv->disposed = FALSE;
+	GET_OBJECT(object, self, priv);
+	_set_native_buffer(GDK_WINDOW_XID(priv->window), _GNOMENU_MESSAGE_TYPE, string, sizeof(string));
+	gdk_window_add_filter(/*priv->window*/NULL, _window_filter_cb, self);
 
-	gdk_window_add_filter(self->window, _window_filter_cb, self);
-
-	return _self;
-}
-
-static void
-gnomenu_socket_init (GnomenuSocket * _self){
-	GdkWindowAttr attr;
-	GdkWindowAttributesType mask;
-	GET_OBJECT(_self, self, priv);
-
-	self->display = gdk_display_get_default();
-	attr.title = "";
-	attr.wclass = GDK_INPUT_ONLY;
-	attr.window_type = GDK_WINDOW_TEMP;
-	mask = 0;
-	priv->time_source = 0;
-	//mask = GDK_WA_TITLE;
-
-	self->window = gdk_window_new(NULL, &attr, mask);
+	return object;
 }
 
 /**
@@ -364,78 +384,222 @@ gnomenu_socket_init (GnomenuSocket * _self){
  * Returns: a newly created the #GnomenuSocket in #GNOMENU_SOCKET_NEW state.
  */
 GnomenuSocket *
-gnomenu_socket_new (char * name){
+gnomenu_socket_new (char * name, gint timeout){
 	return g_object_new(GNOMENU_TYPE_SOCKET, "name", name,
-				"timeout", 10, NULL);
+				"timeout", timeout, NULL);
 }
 
-/**
- * gnomenu_socket_accept:
- * 	@_self: self,
- * 	@target: target socket.
- *
- * Accept a connection request.
- *
- * Returns: a new socket to talk with the connected socket.
- */
-GnomenuSocket *
-gnomenu_socket_accept (GnomenuSocket * _self, GnomenuSocketNativeID target){
-	LOG_FUNC_NAME;
-	GnomenuSocket * rt;
-	GET_OBJECT(_self, self, priv);
-	if(self->status == GNOMENU_SOCKET_LISTEN){
-		gchar * newname = g_strconcat(self->name, "_SERVICE", NULL);
-		rt = g_object_new(GNOMENU_TYPE_SOCKET, "name", newname, "timeout", self->timeout,NULL);
-		g_free(newname);
-		rt->target = target;
-		g_signal_connect(G_OBJECT(rt), "shutdown", G_CALLBACK(_destroy_on_shutdown), NULL);
-		return rt;
-	} else{
-		g_error("the socket is not listening, how can you ACCEPT?");
-		return NULL;
+static void 
+_set_property( GObject * object, guint property_id, const GValue * value, GParamSpec * pspec){
+	GET_OBJECT(object, self, priv);
+	switch (property_id){
+		case PROP_NAME:
+			g_free(self->name);
+			self->name = g_value_dup_string(value);
+			gdk_window_set_title(priv->window, self->name);
+		break;
+		case PROP_TIMEOUT:
+			self->timeout = g_value_get_int(value);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
 	}
-
 }
-gboolean gnomenu_socket_start(GnomenuSocket * socket) {
-/*Issue the first ACK message.*/
-	GnomenuSocketMessage ack;
-	FILL_HEADER(&ack, GNOMENU_SOCKET_CONNECT_ACK, socket, 0, 0);
-	return _raw_send(socket, socket->target, &ack, sizeof(ack));
+static void 
+_get_property( GObject * object, guint property_id, GValue * value, GParamSpec * pspec){
+	GET_OBJECT(object, self, priv);
+	switch (property_id){
+		case PROP_NAME:
+			g_value_set_string(value, self->name);
+		break;
+		case PROP_STATUS:
+			g_value_set_enum(value, self->status);
+		break;
+		case PROP_TIMEOUT:
+			g_value_set_int(value, self->timeout);
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
+	}
 }
-/**
- * _dispose:
- * 	@object: The #GnomenuSocket to be disposed.
- *
- * Disposer. Note that it don't shutdown any existed connections.
- */
 static void
-_dispose (GObject * _self){
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	if(! priv->disposed){
-		gdk_window_remove_filter(self->window, _window_filter_cb, self);
+_dispose (GObject * object){
+	GET_OBJECT(object, self, priv);
+	if(!priv->disposed){
+		gdk_window_remove_filter(/*priv->window*/ NULL, _window_filter_cb, self);
 		if(priv->time_source)
 			g_source_remove(priv->time_source);
 		priv->disposed = TRUE;	
 	}
-	G_OBJECT_CLASS(gnomenu_socket_parent_class)->dispose(_self);
-}
-/**
- * _finalize:
- * @object: the #GnomenuSocket to be finalized.
- *
- *  free all the resoursed occupied by @object
- **/
-static void
-_finalize(GObject * _self){
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	gdk_window_destroy(self->window);
-	g_free(self->name);
-	g_queue_free(self->queue);
-	G_OBJECT_CLASS(gnomenu_socket_parent_class)->finalize(_self);
+	G_OBJECT_CLASS(gnomenu_socket_parent_class)->dispose(object);
 }
 
+static void
+_finalize(GObject * object){
+	GET_OBJECT(object, self, priv);
+	GList * list, * node;
+	gdk_window_destroy(priv->window);
+	g_free(self->name);
+	g_queue_for(priv->data_queue, DataMessage * ele, g_free(ele));
+	g_queue_free(priv->data_queue);
+	G_OBJECT_CLASS(gnomenu_socket_parent_class)->finalize(object);
+}
+/* helper functions */
+static gboolean _send_xclient_message 	( GdkNativeWindow target, gpointer data, guint bytes ){
+	gboolean rt;
+    XClientMessageEvent xclient;
+	if(bytes > 20){
+		g_error("GnomenuSocket: Can not send raw data for more than 20 bytes");
+		return FALSE; /*X can not send more information*/
+	}
+
+    memset (&xclient, 0, sizeof (xclient));
+    xclient.window = target; /*Though X11 places no interpretation of this field, GNOMENU interpretes this field at the target window.*/
+    xclient.type = ClientMessage;
+    xclient.message_type = gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE);
+    xclient.format = 8;
+	memcpy(&xclient.data.l, data, bytes);
+    gdk_error_trap_push ();
+    XSendEvent (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
+          target,
+          False, NoEventMask, (XEvent *)&xclient);
+	gdk_flush();
+    gdk_display_sync (gdk_display_get_default()); /*resolve the message, sync the state*/
+    return gdk_error_trap_pop () == 0;
+
+}
+static gboolean _peek_xwindow 			( GdkNativeWindow target ) {
+	GdkNativeWindow root_return;
+	GdkNativeWindow parent_return;
+	GdkNativeWindow * children_return;
+	guint 	nchildren_return;
+	gdk_error_trap_push();
+	XQueryTree(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
+			target, 
+			&root_return, &parent_return, 
+			&children_return, &nchildren_return);
+	if(gdk_error_trap_pop()) return FALSE;
+	else {
+		XFree(children_return);
+	}
+	return TRUE;
+}
+/**
+ * _find_native_by_name:
+ * 	
+ * If name == NULL, return all windows.
+ */
+static GList * _find_native_by_name		( gchar * name ){
+	GList * window_list = NULL;
+	GdkScreen * screen;
+	GdkWindow * root_window;
+
+    Window root_return;
+    Window parent_return;
+    Window * children_return;
+    unsigned int nchildren_return;
+    unsigned int i;
+	gchar * gnomenu_type;
+	screen = gdk_screen_get_default();
+	g_return_val_if_fail(screen, NULL);
+
+	root_window = gdk_screen_get_root_window(screen);
+	g_return_val_if_fail(root_window, NULL);
+
+    gdk_error_trap_push();
+    XQueryTree(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
+        GDK_WINDOW_XWINDOW(root_window),
+        &root_return,
+        &parent_return,
+        &children_return,
+        &nchildren_return);
+	gdk_flush();
+    if(gdk_error_trap_pop()){
+        g_warning("%s: XQueryTree Failed", __func__);
+        return NULL;
+    }
+	g_return_val_if_fail(nchildren_return != 0, NULL);
+		
+	for(i = 0; i < nchildren_return; i++){
+        Atom type_return;
+        Atom type_req = gdk_x11_atom_to_xatom (gdk_atom_intern("UTF8_STRING", FALSE));
+        gint format_return;
+        gulong nitems_return;
+        gulong bytes_after_return;
+        guchar * wm_name;
+        gint rt;
+        gdk_error_trap_push();
+        rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (gdk_display_get_default()), children_return[i],
+                          gdk_x11_atom_to_xatom (gdk_atom_intern("_NET_WM_NAME", FALSE)),
+                          0, G_MAXLONG, False, type_req, &type_return,
+                          &format_return, &nitems_return, &bytes_after_return,
+                          &wm_name);
+		gdk_flush();
+		if(!gdk_error_trap_pop()){
+			if(rt == Success && type_return == type_req){
+			gint bytes;
+			gnomenu_type = _get_native_buffer(children_return[i], _GNOMENU_MESSAGE_TYPE, &bytes, FALSE);
+			if(gnomenu_type && (!name || g_str_equal(name, wm_name))){
+				g_free(gnomenu_type);
+				window_list = g_list_append(window_list, (gpointer) children_return[i]);
+			}
+		}
+		}else{
+			g_warning("%s:XGetWindowProperty Failed",__func__);
+		}
+	}
+	XFree(children_return);
+	return window_list;
+
+}
+
+static gboolean _set_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gpointer data, gint bytes){
+	gdk_error_trap_push();	
+	XChangeProperty(
+			GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 
+			native,
+			gdk_x11_atom_to_xatom(buffer), 
+			gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE), 
+			8, 
+			PropModeReplace, 
+			data, bytes);
+	if(gdk_error_trap_pop()){
+		return FALSE;
+	}
+	return TRUE;
+}
+static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes, gboolean remove){
+	Atom actual_type_return;
+	gulong actual_format_return;
+	gulong bytes_after_return;
+	gulong nitems_return;
+	gchar * property_return;	
+
+	gdk_error_trap_push();
+	XGetWindowProperty(
+			GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 
+			native, 
+			gdk_x11_atom_to_xatom(buffer), 
+/*FIXME: max size is 2048 bytes*/
+			0, 2048, 
+			remove,
+			gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE), 
+			&actual_type_return,
+			&actual_format_return,
+			&nitems_return,
+			&bytes_after_return,
+			&property_return);
+	if(gdk_error_trap_pop()){
+		return NULL;
+	} else {
+		*bytes = nitems_return;
+		gpointer data = g_memdup(property_return, nitems_return);
+		LOG("%10s", data);
+		XFree(property_return);		
+		return data;	
+	}
+}
+/* public methods */
 /**
  * gnomenu_socket_get_native:
  * 	@_self: the #GnomenuSocket this method acts on.
@@ -443,55 +607,25 @@ _finalize(GObject * _self){
  * find out the native id of the socket
  *
  * Returns: the native id of this socket. It happens to be the Window ID of the
- * 	@GnomenuWindow the GnomenuSocket wraps, in current implement.
+ * 	Window wrapped by #GnomenuSocket.
  */
-GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * _self){
-	return GDK_WINDOW_XWINDOW(_self->window);
+GnomenuSocketNativeID gnomenu_socket_get_native(GnomenuSocket * socket) {
+	GET_OBJECT(socket, self, priv);
+	return GDK_WINDOW_XWINDOW(priv->window);
 }
 /**
- * gnomenu_socket_connect:
- * @self: self
- * @target: the native id of the target socket.
+ * gnomenu_socket_lookup:
+ * 	@name: name of the socket
  *
- * Connect to a remote socket. Don't check if the target socket is in listening
- * state.
- *
- * If the target socket is listening, a GnomenuSocket::connect-request signal
- * will be emitted. Then it is up to the user  whether to accept this request.
- * in the signal handler.
+ * look up for the first socket with the given name.
  */
-gboolean gnomenu_socket_connect(GnomenuSocket * _self, GnomenuSocketNativeID target){
-	GnomenuSocketMessage msg;
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	if(self->status != GNOMENU_SOCKET_DISCONNECTED){
-		g_warning("Can not change to CONNECTED state from other than DISCONNECTED state: %s", 
-			gnomenu_socket_status_get_value(self->status)->value_name);
-		return FALSE;
-	}
-	FILL_HEADER(&msg, GNOMENU_SOCKET_CONNECT_REQ, self, 0, 0);
-	return _raw_send(self, target, &msg, sizeof(msg));
-}
-/** 
- * gnomenu_socket_connect_by_name:
- * @_self: self
- * @name: the name of the remote socket to connect to. It has to be listening.
- *
- * connect to a remote socket by name. If multiple socket has the same name,
- * only one of them will receive the connecting request. It is possible that
- * the one that receives the request is not the listening one.
- * */
-gboolean gnomenu_socket_connect_by_name(GnomenuSocket * _self, gchar * name){
-	GnomenuSocketNativeID target;
-	GET_OBJECT(_self, self, priv);
+GnomenuSocketNativeID gnomenu_socket_lookup(gchar * name) {
 	GList * list;
-	LOG_FUNC_NAME;
-
-	list = _gnomenu_socket_find_targets(self, name);
-	if(!list) return FALSE;
-	target = (GnomenuSocketNativeID)list->data;
+	GnomenuSocketNativeID rt = 0;
+	list = _find_native_by_name(name);
+	if(list) rt = list->data;
 	g_list_free(list);
-	return gnomenu_socket_connect(self, target);
+	return rt;
 }
 /**
  * gnomenu_socket_listen:
@@ -503,8 +637,10 @@ gboolean gnomenu_socket_connect_by_name(GnomenuSocket * _self, gchar * name){
  *
  * Returns: TRUE.
  */
-gboolean gnomenu_socket_listen(GnomenuSocket * _self){
-	LOG_FUNC_NAME;
+gboolean gnomenu_socket_listen(GnomenuSocket * socket) {
+	return GNOMENU_SOCKET_GET_CLASS(socket)->listen(socket);
+}
+gboolean _real_listen(GnomenuSocket * _self){
 	_self->status = GNOMENU_SOCKET_LISTEN;
 /* FIXME: should I broadcast some message here or invoke a signal?*/
 /* NOTE: don't broadcast any message here. maybe a signal will
@@ -528,79 +664,36 @@ gboolean gnomenu_socket_listen(GnomenuSocket * _self){
  * will be pushed into a FIFO queue. 
  * It is impossible to fail a sending in this sense. 
  */
-gboolean gnomenu_socket_send(GnomenuSocket * _self, gpointer data, guint bytes){
-	GnomenuSocketMessage * msg = g_new0(GnomenuSocketMessage, 1);
-	LOG_FUNC_NAME;
-	g_return_val_if_fail(GNOMENU_IS_SOCKET(_self), FALSE);
-	GET_OBJECT(_self, self, priv);
+gboolean gnomenu_socket_send(GnomenuSocket * socket, gpointer data, guint bytes) {
+	return GNOMENU_SOCKET_GET_CLASS(socket)->send(socket, data, bytes);
+}
+gboolean _real_send(GnomenuSocket * socket, gpointer data, guint bytes){
+	GET_OBJECT(socket, self, priv);
+	DataMessage * msg = g_malloc(sizeof(DataMessage) + bytes);
 	gchar buffer[1024];
 	gint i;
 	gint j;
-	if(bytes >12){
-		g_error("Can not send more than 12 byte");
-		return FALSE;
-	}
 	if(self->status != GNOMENU_SOCKET_CONNECTED){
 		LOG("Not connected, can not send");
 		return FALSE;
 	}
-	FILL_HEADER(msg, GNOMENU_SOCKET_DATA, self, bytes, 0);
-	g_memmove(msg->data.l, data, bytes);
-	LOG("status = %s, ACKS=%d", gnomenu_socket_status_get_value(self->status)->value_name, self->acks);
+	g_memmove(msg->data, data, bytes);
+	msg->header.type = MSG_DATA;
+	msg->header.bytes = bytes;
+	msg->header.source = gnomenu_socket_get_native(self);
+
+	LOG("status = %s, ACKS=%d", gnomenu_socket_status_get_value(self->status)->value_name, priv->acks);
 	for(i = 0, j=0; i< bytes && j< sizeof(buffer); i++){
 		j+=g_sprintf(&buffer[j], "%02hhX ", ((gchar * ) data) [i]);
 	}
 	LOG("data = %s", buffer);
-	g_queue_push_tail(self->queue, 	msg);
+	g_queue_push_tail(priv->data_queue, msg);
 	gnomenu_socket_flush(self);
-	LOG("send queue length = %d\n", g_queue_get_length(self->queue));
+	LOG("send queue length = %d\n", g_queue_get_length(priv->data_queue));
 	return TRUE;
 }
-/**
- * gnomenu_socket_broadcast_by_name:
- * 	@self:
- * 	@name:
- * 	@data:
- * 	@bytes:
- * 
- * broadcast a message to every socket with a given name.
- */
-gboolean gnomenu_socket_broadcast_by_name(GnomenuSocket * _self, gchar * name, gpointer data, guint bytes){
-	GnomenuSocketMessage msg;
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	if(bytes >12) {
-		g_error("%s: Can not send more than 12 bytes", __func__);
-		return FALSE;
-	}
-	FILL_HEADER(&msg, GNOMENU_SOCKET_BROADCAST, self, bytes, 0);
-	g_memmove(msg.data.l, data, bytes);
-	return _raw_broadcast_by_name(self, name, &msg, sizeof(msg));	
-}
-/**
- * gnomenu_socket_shutdown:
- *	@_self: the socket to shutdown.
- *
- * Shutdown a socket connection. Note that this doesn't unref the object,
- * unless you have connected GnomenuSocket::shutdown to
- * gnomenu_socket_destroy_on_shutdown();
- */
-void gnomenu_socket_shutdown(GnomenuSocket * _self) {
-	GnomenuSocketMessage msg;
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	if(self->status == GNOMENU_SOCKET_CONNECTED){
-		self->status = GNOMENU_SOCKET_DISCONNECTED;
-		FILL_HEADER(&msg, GNOMENU_SOCKET_SHUTDOWN, self, 0, 0);
-		_raw_send(self, self->target, &msg, sizeof(msg));
-		g_signal_emit(G_OBJECT(self),
-			class_signals[SHUTDOWN], 0);	
-	} else{
-		g_warning("Not connected, can not shutdown");
-	}
-}
-/**
- * gnomenu_socket_flush:
+
+/** gnomenu_socket_flush:
  *	@_self: the socket to flush.
  *
  * Flush the sending queue of a socket to catch up with ACKs.
@@ -611,485 +704,303 @@ void gnomenu_socket_shutdown(GnomenuSocket * _self) {
  * If queue is too long, flush GnomenuSocket::acks and return TRUE,
  *
  * If one of the send operation fails, return FALSE.
- *
- */
-gboolean gnomenu_socket_flush(GnomenuSocket * _self){
-	while(_self->acks && !g_queue_is_empty(_self->queue)){
-		GnomenuSocketMessage * data_msg = g_queue_peek_head(_self->queue);
-		if( _raw_send(_self, _self->target, data_msg, sizeof(GnomenuSocketMessage))){
-			data_msg = g_queue_pop_head(_self->queue);
-			g_free(data_msg);
-			_self->acks--;
-		} else {
+ * 
+ * NOTE: acks <= 1
+*/
+gboolean gnomenu_socket_flush(GnomenuSocket * socket) {
+	return GNOMENU_SOCKET_GET_CLASS(socket)->flush(socket);
+}
+gboolean _real_flush(GnomenuSocket * socket) {
+	GET_OBJECT(socket, self, priv);
+	LOG("acks = %d", priv->acks);
+	g_assert(priv->acks <=1);
+	if(priv->acks == 1 && !g_queue_is_empty(priv->data_queue)){
+		DataMessage * data_msg = g_queue_peek_head(priv->data_queue);
+		LOG("data size = %d", data_msg->header.bytes);
+		priv->acks = 0;
+		if(!_set_native_buffer(priv->target, _GNOMENU_DATA_BUFFER, data_msg, data_msg->header.bytes + sizeof(DataMessage))) {
+		/*then we send the notify message in PropertyNotify event handler.*/
 		LOG("flushing queue failed");
+		/*check if the connection is lost.*/
 		return FALSE;
 		}
 	}
+	LOG("queue flushed: new length = %d", g_queue_get_length(priv->data_queue));
 	return TRUE;
+	
 }
 /**
- * gnomenu_socket_window_filter_cb
+ * gnomenu_socket_connect:
+ * @self: self
+ * @target: the native id of the target socket.
  *
- * internal filter function related to this X11 implement of #GnomenuSocket
+ * Connect to a remote socket. Don't check if the target socket is in listening
+ * state. To make sure the connection is establish, listen to ::connected signal.
+ *
+ * If the target socket is listening, a GnomenuSocket::request signal
+ * will be emitted on it. 
+ *
+ * Wait for a CONNECT_ACK to set the state to CONNECTED.
  */
+gboolean gnomenu_socket_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
+	return GNOMENU_SOCKET_GET_CLASS(socket)->connect(socket, target);
+}
+
+gboolean _real_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
+	GET_OBJECT(socket, self, priv);
+	MessageHeader msg;
+	if(self->status != GNOMENU_SOCKET_DISCONNECTED){
+		g_warning("Can not change to CONNECTED state from other than DISCONNECTED state: %s", 
+			gnomenu_socket_status_get_value(self->status)->value_name);
+		return FALSE;
+	}
+	msg.source = gnomenu_socket_get_native(self);	
+	msg.type = MSG_CONNECT_REQ;
+	msg.bytes = 0;
+	return _send_xclient_message(target, &msg, sizeof(msg));
+}
+/**
+ * gnomenu_socket_accept:
+ * 	@_self: self,
+ * 	@target: target socket.
+ *
+ * Accept a connection request.
+ *
+ * Returns: a new socket to talk with the connected socket.
+ */
+gboolean
+gnomenu_socket_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target){
+	return GNOMENU_SOCKET_GET_CLASS(socket)->accept(socket, service, target);
+}
+void _destroy_on_shutdown(GnomenuSocket * socket, gpointer data){
+	g_object_unref(socket);
+}
+gboolean 
+_real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target){
+	GET_OBJECT(socket, self, priv);
+	GnomenuSocketPrivate * s_priv = GNOMENU_SOCKET_GET_PRIVATE(service);
+	if(self->status == GNOMENU_SOCKET_LISTEN){
+		MessageHeader ack;
+		s_priv->target = target;
+		service->status = GNOMENU_SOCKET_CONNECTED;
+		g_signal_connect(G_OBJECT(service), "shutdown", G_CALLBACK(_destroy_on_shutdown), NULL);
+		ack.type = MSG_CONNECT_ACK;
+		ack.source = gnomenu_socket_get_native(self);
+		ack.service = gnomenu_socket_get_native(service);
+		XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), target, PropertyChangeMask);
+		g_signal_emit(G_OBJECT(service), class_signals[CONNECTED], 0, target);
+		return _send_xclient_message(target, &ack, sizeof(ack));
+	} else{
+		g_error("the socket is not listening, how can you ACCEPT?");
+		return NULL;
+	}
+
+}
+
+static gboolean _test_connection		( GnomenuSocket * socket ) {
+	GET_OBJECT(socket, self, priv);
+	if(_peek_xwindow(priv->target))
+		return TRUE;
+	else {
+		priv->time_source = 0;
+		gnomenu_socket_shutdown(socket);
+		return FALSE;
+	}
+}
+
+gboolean gnomenu_socket_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
+	return GNOMENU_SOCKET_GET_CLASS(socket)->broadcast(socket, data, bytes);
+}
+gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
+	GET_OBJECT(socket, self, priv);
+	GList * list = _find_native_by_name(NULL);
+	GList * node;	
+	GnomenuSocketNativeID native;
+	DataMessage * data_msg = g_malloc(sizeof(DataMessage) + bytes);
+	data_msg->header.source = gnomenu_socket_get_native(self);
+	data_msg->header.type = MSG_BROADCAST;
+	data_msg->header.bytes = bytes;
+	g_memmove(data_msg->data, data, bytes);
+	for(node = g_list_first(list); node; node = g_list_next(node)){
+		native = node->data;
+		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
+		_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
+	}
+
+	g_list_free(list);
+	return TRUE;
+}
+
+/**
+ * gnomenu_socket_shutdown:
+ *	@_self: the socket to shutdown.
+ *
+ * Shutdown a socket connection. Note that this doesn't unref the object,
+ * unless you have connected GnomenuSocket::shutdown to
+ * gnomenu_socket_destroy_on_shutdown();
+ */
+void gnomenu_socket_shutdown(GnomenuSocket * socket) {
+	GNOMENU_SOCKET_GET_CLASS(socket)->shutdown(socket);
+}
+void _real_shutdown (GnomenuSocket * socket) {
+	GET_OBJECT(socket, self, priv);
+	MessageHeader msg;
+	if(self->status == GNOMENU_SOCKET_CONNECTED){
+		self->status = GNOMENU_SOCKET_DISCONNECTED;
+		msg.type = MSG_SHUTDOWN;
+		msg.source = gnomenu_socket_get_native(socket);
+		_send_xclient_message(priv->target, &msg, sizeof(msg));
+		/*then tells myself the connection is lost.*/
+		g_signal_emit(G_OBJECT(self),
+			class_signals[SHUTDOWN], 0);	
+	} else{
+		g_warning("Not connected, can not shutdown");
+	}
+}
 static GdkFilterReturn 
-	_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer _self){
-	GET_OBJECT(_self, self, priv);
+	_window_filter_cb(GdkXEvent* gdkxevent, GdkEvent * event, gpointer pointer){
+
 	XEvent * xevent = gdkxevent;
-	if(xevent->type == ClientMessage){
-		if(xevent->xclient.message_type ==
-            gdk_x11_get_xatom_by_name_for_display(self->display, GNOMENU_SOCKET_ATOM_STRING)){
-
-			GnomenuSocketMessage * msg =(GnomenuSocketMessage*) xevent->xclient.data.l;
-			switch (msg->header.type){
-				case GNOMENU_SOCKET_DATA:
-					if(self->status == GNOMENU_SOCKET_CONNECTED){
-						LOG("msg->source =%d , self->target = %d\n", msg->header.source, self->target);
-						if(msg->header.source == self->target){ 
-							guint bytes = msg->header.bytes; 
-							GnomenuSocketMessage ack;
-							FILL_HEADER(&ack, GNOMENU_SOCKET_ACK, self, 0, 0);
-							_raw_send(self, self->target, &ack, sizeof(ack));
-							{
-							gpointer data = g_memdup(msg->data.l, bytes); 
-							g_signal_emit(G_OBJECT(self), 
-								class_signals[DATA_ARRIVAL],
-								g_quark_from_string("peer"),
-								data,
-								bytes);
-							}
-						}
-					} else
-					g_warning("Wrong socket status, ignore DATA");
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_CONNECT_ACK:
-					if(self->status == GNOMENU_SOCKET_DISCONNECTED){
-					/*These two simple lines is essential, we establish a connection here.*/
-						self->status = GNOMENU_SOCKET_CONNECTED;
-						self->target = msg->header.source;
-						self->alives = 0;
-						self->acks = 0;
-						{
-					/*Then we send an CONNECT_ACK to the other peer to allow it begin data transfer*/
-							GnomenuSocketMessage ack;
-							FILL_HEADER(&ack, GNOMENU_SOCKET_CONNECT_ACK, self, 0, 0);
-							_raw_send(self, self->target, &ack, sizeof(ack));
-						}
-						g_signal_emit(self, class_signals[CONNECTED], 0, msg->header.source);
-					}
-				/*No break here*/
-				case GNOMENU_SOCKET_ACK:
-					if(self->status == GNOMENU_SOCKET_CONNECTED){
-						if(msg->header.source == self->target){
-							self->acks++;
-							gnomenu_socket_flush(self);
-						}
-					} else
-					g_warning("Wrong socket status(%d), ignore ACK", self->status);
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_CONNECT_REQ:
-					if(self->status == GNOMENU_SOCKET_LISTEN){
-						g_signal_emit(self, 
-								class_signals[CONNECT_REQ], 
-								0,
-								msg->header.source);
-					}else
-						g_warning("Wrong socket status, ignore CONNECT_REQ");
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_ISALIVE:
-#ifndef PING_ECHO_ALIVE
-					g_warning("keep alive ping -echo is disabled");
-#endif
-					if(self->status == GNOMENU_SOCKET_CONNECTED
-						&& self->target == msg->header.source)
-					{
-						GnomenuSocketMessage alive;
-						FILL_HEADER(&alive, GNOMENU_SOCKET_ALIVE, self, 0, 0);
-						_raw_send(self, self->target, &alive, sizeof(alive));
-					}
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_ALIVE:
-#ifndef PING_ECHO_ALIVE
-					g_warning("keep alive ping -echo is disabled");
-#endif
-					if(self->status == GNOMENU_SOCKET_CONNECTED
-						&& self->target == msg->header.source){
-						if(self->alives > 0) self->alives--;
-						gnomenu_socket_flush(self);
-					}
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_BROADCAST:
-					{
-
-						guint bytes = msg->header.bytes; /*on x11 we always round off to 12 bytes*/
-						/*FIXME: bytes should be squeezed in to GnomenuSocketMessage.*/
-						gpointer data = g_memdup(msg->data.l, bytes); 
-						g_signal_emit(G_OBJECT(self), 
-							class_signals[DATA_ARRIVAL],
-							g_quark_from_string("broadcast"),
-							data,
-							bytes);
-					}
-					return GDK_FILTER_REMOVE;
-				break;
-				case GNOMENU_SOCKET_SHUTDOWN:
-					if(self->status != GNOMENU_SOCKET_CONNECTED){
-						g_warning("SHUTDOWN a non connected socket");
-					} else{
-						g_signal_emit(self,
-								class_signals[SHUTDOWN],
-								0);
-					}
-					return GDK_FILTER_REMOVE;
-				break;
-				default:
-					g_error("Should never reach here!");
-			}
+	if( xevent->type == PropertyNotify &&
+		(xevent->xproperty.atom == gdk_x11_atom_to_xatom(_GNOMENU_DATA_BUFFER))){
+		GET_OBJECT(pointer, self, priv);
+		if( xevent->xproperty.window == priv->target
+			&& xevent->xproperty.state == PropertyNewValue) {
+			DataMessage * data_msg = g_queue_pop_head(priv->data_queue);
+			_send_xclient_message(priv->target, &data_msg->header, sizeof(MessageHeader));
+			g_free(data_msg);
+			LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
+			return GDK_FILTER_CONTINUE;
 		}
-	} 
+	}
+	if( xevent->type != ClientMessage ||
+		xevent->xclient.message_type !=
+		gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE)){
+		return GDK_FILTER_CONTINUE;
+	}
+	GET_OBJECT(pointer, self, priv);
+	if(xevent->xclient.window != gnomenu_socket_get_native(self)){
+		return GDK_FILTER_CONTINUE;
+	}
+	MessageHeader * msg =(MessageHeader*) xevent->xclient.data.l;
+	switch(msg->type){
+		case MSG_BROADCAST:
+			LOG("MSG_BROADCAST");
+			/* obtain data */
+			{ gint bytes;
+			  DataMessage * buffer = _get_native_buffer(gnomenu_socket_get_native(self),
+										_GNOMENU_BC_BUFFER,
+										&bytes, TRUE);
+			  g_assert(buffer);
+			  if(bytes!= msg->bytes + sizeof(DataMessage)){
+				g_warning("broadcast message doesn't fit, ignore it");
+			  } else {
+			/* emit signal ::data::broadcast*/
+			  g_signal_emit(G_OBJECT(self), class_signals[DATA_ARRIVAL],
+						g_quark_from_string("broadcast"), buffer->data, bytes);
+			  }
+			}
+			return GDK_FILTER_REMOVE;
+		case MSG_CONNECT_REQ:
+			LOG("MSG_CONNECT_REQ");
+			/* if not listening, warn and ignore */
+			/* emit signal ::request*/
+			if(self->status != GNOMENU_SOCKET_LISTEN){
+				LOG("not listening. ");
+				break;
+			}
+			g_signal_emit(G_OBJECT(self), class_signals[CONNECT_REQ],
+						0, msg->source);
+			return GDK_FILTER_REMOVE;
+		case MSG_CONNECT_ACK:
+			LOG("MSG_CONNECT_ACK");
+			/* set state to GNOMENU_SOCKET_CONNECTED*/
+			self->status = GNOMENU_SOCKET_CONNECTED;
+			priv->target = msg->service;
+			XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), msg->service, 
+				PropertyChangeMask);
+			{ MessageHeader ack;
+			  ack.type = MSG_ACK;
+			  ack.source = gnomenu_socket_get_native(self);
+			  _send_xclient_message(priv->target, &ack, sizeof(ack));
+			}
+			g_signal_emit(G_OBJECT(self), class_signals[CONNECTED], 0, priv->target);
+			msg->type = MSG_ACK;
+			msg->source = msg->service;
+	}
+	if(msg->source != priv->target){
+			g_warning("received a message from a different peer.");
+			/* test if the connection is lost */
+			return GDK_FILTER_REMOVE;
+	} else {
+		switch (msg->type){
+			case MSG_DATA:
+				LOG("MSG_DATA");
+				/* Obtain the data, invoke ::data::peer */
+				/* send ACK*/
+					MessageHeader ack;
+					DataMessage * buffer;
+					gint bytes;
+					ack.type = MSG_ACK;
+					ack.source = gnomenu_socket_get_native(self);	
+					buffer = _get_native_buffer(gnomenu_socket_get_native(self), 
+							_GNOMENU_DATA_BUFFER, 
+							&bytes, TRUE);
+					_send_xclient_message(priv->target, &ack, sizeof(ack));
+					g_assert(buffer);
+					g_assert(bytes == msg->bytes + sizeof(DataMessage));
+					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
+						g_quark_from_string("peer"), buffer->data, msg->bytes);
+			break;
+			case MSG_ACK:
+				LOG("MSG_ACK");
+				/* if priv->acks ==1 panic/test connection*/
+				/* by definition there should not be more than 1 acks. */
+				if(priv->acks >= 1) {
+					g_error("protocal fails. priv->ack >=1.(=%d)", priv->acks);
+				}
+				/* priv->acks++*/
+				priv->acks ++;
+				/* resolve the ack*/
+				gnomenu_socket_flush(self);
+			break;
+			case MSG_SHUTDOWN:
+				LOG("MSG_SHUTDOWN");
+				/* if not connected, warn and ignore */
+				g_signal_emit(self,
+						class_signals[SHUTDOWN],
+						0);
+			break;
+			default:
+				g_error("Unhandled GnomenuSocket message type.");
+		}
+		return GDK_FILTER_REMOVE;
+	}
 	return GDK_FILTER_CONTINUE;
 }
 
-static void _c_data_arrival(GnomenuSocket * _self,
-	gpointer data, guint size){
-	LOG_FUNC_NAME;
-	g_free(data);
+/* Default signal closures */
+static void _c_data 		( GnomenuSocket * socket, gpointer data, guint size ) {
+	if(data)
+	g_free( ((gchar*)data)- G_STRUCT_OFFSET(DataMessage, data));
 }
-static void _c_connect_req(GnomenuSocket * _self,
-	GnomenuSocketNativeID target){
-	LOG_FUNC_NAME;
-}
-static void _c_connected(GnomenuSocket * _self,
-	GnomenuSocketNativeID target){
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
+static void _c_request 		( GnomenuSocket * socket, GnomenuSocketNativeID target ) {
 	
-	priv->time_source = g_timeout_add_seconds(self->timeout, _gnomenu_socket_is_alive, self);
 }
-static void _c_shutdown (GnomenuSocket * _self){
-	GnomenuSocketMessage * queue_message;
-	GET_OBJECT(_self, self, priv);
-	LOG_FUNC_NAME;
-	while(queue_message = g_queue_pop_head(self->queue)){
-/*FIXME: maybe sending all these message will be better than freeing them*/
-		g_free(queue_message);
-	}
-	self->acks = 0;
+static void _c_connected 			( GnomenuSocket * socket, GnomenuSocketNativeID target ) {
+	GET_OBJECT(socket, self, priv);
+	priv->time_source = g_timeout_add_seconds(self->timeout, _test_connection, self);
+}
+static void _c_shutdown 			( GnomenuSocket * socket ) {
+	GET_OBJECT(socket, self, priv);
+	if(priv->time_source)
+		g_source_remove(priv->time_source);
+	priv->time_source = 0;
+	g_assert(priv->data_queue);
+	g_queue_for(priv->data_queue, DataMessage * msg, g_free(msg));
+	priv->acks = 0;
 	self->status = GNOMENU_SOCKET_DISCONNECTED;
 }
-static void 
-_get_property( GObject * _self, guint property_id, GValue * value, GParamSpec * pspec){
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	switch (property_id){
-		case PROP_NAME:
-			g_value_set_string(value, self->name);
-		break;
-		case PROP_TARGET:
-			g_value_set_uint(value, self->target);
-		break;
-		case PROP_STATUS:
-			g_value_set_enum(value, self->status);
-		break;
-		case PROP_TIMEOUT:
-			g_value_set_int(value, self->timeout);
-		break;
-		default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
-	}
-}
-
-static void 
-_set_property( GObject * _self, guint property_id, const GValue * value, GParamSpec * pspec){
-	LOG_FUNC_NAME;
-	GET_OBJECT(_self, self, priv);
-	switch (property_id){
-		case PROP_NAME:
-			g_free(self->name);
-			self->name = g_value_dup_string(value);
-			gdk_window_set_title(self->window, self->name);
-		break;
-		case PROP_TARGET:
-			self->target = g_value_get_uint(value);
-		break;
-		case PROP_STATUS:
-			self->status = g_value_get_enum(value);
-		break;
-		case PROP_TIMEOUT:
-			self->timeout = g_value_get_int(value);
-		break;
-		default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID(self, property_id, pspec);
-	}
-}
-
-
-
-/**
- * gnomenu_socket_raw_send:
- * @self: the #GnomenuSocket this method acts on.
- * @target: the native window id of target socket. In current implement, this
- * 		identifies the native window id of #GnomenuSocket::window.
- * @data: the data buffer. After calling this function, the buffer can be freed.
- * @bytes: the length of data wanted to send.
- *
- * This method of #GnomenuSocket sends a messange to the target socket whose id 
- * is @target. Whether or not the target is a GnomenuSocket is not checked
- * (and impossible to check). The length of data has is limited by XClientMessage
- * to be 20 bytes. (or even fewer if in the future the socket adds a header to the
- * message. Note: this is a raw message that is not reliable and do not use it directly!
- *
- * Returns: if successful, return TRUE else return FALSE.
- * SeeAlso: #gnomenu_socket_send_nosync
- */
-static gboolean _raw_send(GnomenuSocket * _self, 
-		GnomenuSocketNativeID target, 
-		gpointer data, 
-		guint bytes){
-
-	gboolean rt;
-	rt = _raw_send_nosync(_self, target, data, bytes);
-    gdk_display_sync (_self->display); /*resolve the message, sync the state*/
-	return rt;
-}
-/**
- * gnomenu_socket_raw_send_nosync:
- * @self: the #GnomenuSocket this method acts on.
- * @target: the native window id of target socket. In current implement, this
- * 		identifies the native window id of #GnomenuSocket::window.
- * @data: the data buffer. After calling this function, the buffer can be freed.
- * @bytes: the length of data wanted to send.
- *
- * This function don't call #gdk_display_sync at the end. See #gdk_socket_send. 
- *
- * Returns: if sucessful, TRUE; else FALSE.
- */
-static gboolean _raw_send_nosync(GnomenuSocket * _self, GnomenuSocketNativeID target, gpointer data, guint bytes){
-    XClientMessageEvent xclient;
-	if(bytes > 20){
-		g_error("GnomenuSocket: Can not send raw data for more than 20 bytes");
-		return FALSE; /*X can not send more information*/
-	}
-
-    memset (&xclient, 0, sizeof (xclient));
-    xclient.window = target; /*Though X11 places no interpretation of this field, GNOMENU interpretes this field at the target window.*/
-    xclient.type = ClientMessage;
-    xclient.message_type = gdk_x11_get_xatom_by_name_for_display (_self->display, GNOMENU_SOCKET_ATOM_STRING);
-    xclient.format = 32;
-	memcpy(&xclient.data.l, data, bytes);
-    gdk_error_trap_push ();
-    XSendEvent (GDK_DISPLAY_XDISPLAY(_self->display),
-          target,
-          False, NoEventMask, (XEvent *)&xclient);
-	gdk_flush();
-    return gdk_error_trap_pop () == 0;
-}
-static gboolean _socket_exist(GnomenuSocket * self, GnomenuSocketNativeID window){
-	GdkNativeWindow root_return;
-	GdkNativeWindow parent_return;
-	GdkNativeWindow * children_return;
-	guint 	nchildren_return;
-	gdk_error_trap_push();
-	XQueryTree(GDK_DISPLAY_XDISPLAY(self->display),
-			window, 
-			&root_return ,&parent_return, 
-			&children_return, &nchildren_return);
-	if(gdk_error_trap_pop()) return FALSE;
-	else {
-		XFree(children_return);
-	}
-	return TRUE;
-}
-/**
- * _gnomenu_socket_is_alive:
- * @self:
- *
- * Returns: usually TRUE, unless the connection is dead.
- */
-static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
-/* The socket has already been destroyed.*/
-	g_return_val_if_fail(GNOMENU_IS_SOCKET(_self), FALSE);
-	LOG_FUNC_NAME;
-	if(_self->status != GNOMENU_SOCKET_CONNECTED) return FALSE;
-	LOG("alives = %d", _self->alives);
-	if(
-#ifdef PING_ECHO_ALIVE
-			_self->alives > 2 && 
-#endif
-			! _socket_exist(_self, _self->target)) /*FIXME: which number is better?*/{
-		
-		LOG("The peer is non responding for too long. shutdown the connection");
-		g_signal_emit(_self,
-				class_signals[SHUTDOWN],
-				0);
-#ifdef PING_ECHO_ALIVE
-		/*Last obligation to the other peer, hope it will receive this SHUTDOWN message*/
-		{
-			GnomenuSocketMessage msg;
-			FILL_HEADER(&msg, GNOMENU_SOCKET_SHUTDOWN, _self, 0, 0);
-			_raw_send(_self, _self->target, &msg, sizeof(msg));
-		}
-#endif
-		return FALSE;
-	} 
-#ifdef PING_ECHO_ALIVE
-	else {
-		LOG("Send keep alive query");
-		GnomenuSocketMessage msg;
-		FILL_HEADER(&msg, GNOMENU_SOCKET_ISALIVE, _self, 0, 0);
-		_raw_send(_self, _self->target, &msg, sizeof(msg));
-		_self->alives ++;
-		LOG("done");
-	}
-#endif
-	return TRUE;
-}
-/**
- * _gnomenu_socket_find_targets:
- * @self: self
- * @name: the name for the targets
- * 
- * Find every possible @GnomenuSocket on this display with the name @name.
- *
- * Returns: a GList contains the list of those sockets' native ID. 
- * It is the caller's obligation to free the list.
- */
-static GList * _gnomenu_socket_find_targets(GnomenuSocket * _self, gchar * name){
-	GList * window_list = NULL;
-	GET_OBJECT(_self, self, priv);
-	GdkScreen * screen;
-	GdkWindow * root_window;
-
-    Window root_return;
-    Window parent_return;
-    Window * children_return;
-    unsigned int nchildren_return;
-    unsigned int i;
-
-	screen = gdk_drawable_get_screen(self->window);
-	g_return_val_if_fail(screen != NULL, NULL);
-
-	root_window = gdk_screen_get_root_window(screen);
-	g_return_val_if_fail(root_window != NULL, NULL);
-
-    gdk_error_trap_push();
-    XQueryTree(GDK_DISPLAY_XDISPLAY(self->display),
-        GDK_WINDOW_XWINDOW(root_window),
-        &root_return,
-        &parent_return,
-        &children_return,
-        &nchildren_return);
-	gdk_flush();
-    if(gdk_error_trap_pop()){
-        g_warning("%s: XQueryTree Failed", __func__);
-        return NULL;
-    }
-	g_return_val_if_fail(nchildren_return != 0, NULL);
-		
-	for(i = 0; i < nchildren_return; i++){
-        Atom type_return;
-        Atom type_req = gdk_x11_get_xatom_by_name_for_display (self->display, "UTF8_STRING");
-        gint format_return;
-        gulong nitems_return;
-        gulong bytes_after_return;
-        guchar * wm_name;
-        gint rt;
-        gdk_error_trap_push();
-        rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (self->display), children_return[i],
-                          gdk_x11_get_xatom_by_name_for_display (self->display, "_NET_WM_NAME"),
-                          0, G_MAXLONG, False, type_req, &type_return,
-                          &format_return, &nitems_return, &bytes_after_return,
-                          &wm_name);
-		gdk_flush();
-		if(!gdk_error_trap_pop()){
-			if(rt == Success && type_return == type_req){
-			if(g_str_equal(name, wm_name)){
-				window_list = g_list_append(window_list, (gpointer) children_return[i]);
-			}
-		}
-		}else{
-			g_warning("%s:XGetWindowProperty Failed",__func__);
-		}
-	}
-	XFree(children_return);
-	return window_list;
-}
-
-/**
- * gnomenu_socket_send_by_name:
- * @self: you understand.
- * @name: the target socket's name.
- * @data: the data buffer. After calling this function, the buffer can be freed.
- * @bytes: the length of data wanted to send.
- *
- * this method find out the all the #GnomenuSocket with name @name and calls 
- * #gnomenu_socket_send_nosync to the * first (successfully sended) target
- *
- * Returns:  TRUE if the message is successfully sent to a target.
- * 	FALSE if the message is not sent to anywhere.
- */
-static gboolean 
-	_raw_send_by_name(GnomenuSocket * _self, gchar * name, gpointer data, guint bytes){
-	GList * window_list = _gnomenu_socket_find_targets(_self, name);
-	GList * node;
-	gboolean rt = FALSE;
-	for(node = g_list_first(window_list); node; node = g_list_next(node)){
-		if(gnomenu_socket_send_nosync(_self, (GdkNativeWindow)node->data, data, bytes)){
-			rt = TRUE;
-			break;
-		}
-	}
-    gdk_display_sync (_self->display); /*resolve the message, sync the state*/
-	g_list_free(window_list);
-	return rt;
-}
-
-/**
- * gnomenu_socket_raw_broadcast_by_name:
- * @self: you understand.
- * @name: the target socket's name.
- * @data: the data buffer. After calling this function, the buffer can be freed.
- * @bytes: the length of data wanted to send.
- *
- * this method find out the all the #GnomenuSocket with name @name and calls #gnomenu_socket_send_nosync
- * on first target.
- *
- * Returns:  TRUE if the message is successfully sent to at least one target.
- * 	FALSE if the message is not sent to anywhere.
- *
- * FIXME: 
- *    seems won't work properly if I don't trace the g_message. 
- *    Messages are sent but except for the first socket, #gnomenu_socket_window_filter 
- *    don't receive them. Perhaps this means we need to get rid of the GnomenuWindow.
- *
- * TODO:
- *    Figure out why. 
- */
-static gboolean
-_raw_broadcast_by_name(GnomenuSocket * _self, gchar * name, gpointer data, guint bytes){
-	GList * window_list = _gnomenu_socket_find_targets(_self, name);
-	GList * node;
-	gboolean rt = FALSE;
-	gboolean rt1;
-	int n;
-	for(n = 0, node = g_list_first(window_list); node; n++, node = g_list_next(node)){
-		rt1 =  _raw_send_nosync(_self, (GnomenuSocketNativeID)node->data, data, bytes);
-		gdk_display_sync (_self->display); /* Hope fully it will fix some random X BadWindow errors*/
-		rt = rt || rt1;
-	}
-    gdk_display_sync (_self->display); /*resolve the message, sync the state*/
-	LOG("Broadcasted to %d target", n);
-	g_list_free(window_list);
-	return rt;
-}
-static void _destroy_on_shutdown( GnomenuSocket * _self, gpointer userdata){
-	g_object_unref(_self);
-}
 /*
-vim:ts=4:sw=4
-*/
+ * vim:ts=4:sw=4
+ * */

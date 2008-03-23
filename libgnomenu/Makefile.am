@@ -16,14 +16,14 @@ libgnomenu_la_SOURCES = \
 	messages.c \
 	socket.h \
 	socket.c \
+	quirks.h \
+	quirks.c \
 	serverhelper.c \
 	serverhelper.h \
 	clienthelper.c \
 	clienthelper.h \
     menubar.h \
-	menubar.c \
-	quirks.h	\
-	quirks.c
+	menubar.c 
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
@@ -46,7 +46,9 @@ conf_DATA = libgnomenu.conf
 EXTRA_DIST = gnomenu-marshall.list libgnomenu.conf
 
 gnomenu-marshall.c: gnomenu-marshall.list
-	glib-genmarshal --internal --body --prefix=gnomenu_marshall $< > $@
+	echo "#include \"gnomenu-marshall.h\"" > $@ && \
+	glib-genmarshal --internal --body --prefix=gnomenu_marshall $< >> $@
+
 gnomenu-marshall.h: gnomenu-marshall.list
 	glib-genmarshal --internal --header --prefix=gnomenu_marshall $< > $@
 

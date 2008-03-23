@@ -77,7 +77,7 @@ typedef enum { /*< prefix=GNOMENU >*/
 	GNOMENU_MSG_PARENT_FOCUS,
 	GNOMENU_MSG_MAX,
 } GnomenuMessageType;
-#define GnomenuMessageType gchar
+
 /**
  * GnomenuMessageAny:
  * @type:	#GNOMENU_MSG_ANY
@@ -224,12 +224,11 @@ typedef enum {
  *
  *	Server requests the client to change its orientation.
  */
-#define GnomenuOrientation gchar
 typedef struct {
 	GnomenuMessageType type;
 	GnomenuOrientation orientation;
 } GnomenuMessageOrientationChange;
-#undef GnomenuOrientation 
+
 /**
  * GnomenuMessagePositionSet:
  *  @type: #GNOMENU_MSG_POSITION_SET
@@ -294,7 +293,6 @@ typedef struct {
 	GnomenuMessageType type;
 } GnomenuMessageParentFocus;
 
-#undef GnomenuMessageType
 /**
  * GnomenuMessage:
  *

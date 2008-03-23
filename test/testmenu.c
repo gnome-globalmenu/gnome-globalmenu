@@ -130,6 +130,7 @@ static void button_clicked(GtkButton * button, gpointer ddddd){
 			g_signal_connect(G_OBJECT(menuwindow), "destroy", G_CALLBACK(menuwindow_destroy), NULL);
 			g_signal_connect(G_OBJECT(menuwindow), "size-allocate", G_CALLBACK(menuwindow_size_allocate), NULL);
 			gtk_widget_show_all(GTK_WIDGET(menuwindow));
+			gnomenu_server_helper_start(server);
 		break;
 		case DESTROY_SERVER:
 			gtk_widget_destroy(GTK_WIDGET(menuwindow));

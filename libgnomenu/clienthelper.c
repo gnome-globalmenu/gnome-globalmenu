@@ -279,12 +279,14 @@ static GObject* _constructor(GType type, guint n_construct_properties,
 	return _self;
 }
 void gnomenu_client_helper_start(GnomenuClientHelper * self){
-	g_signal_connect(G_OBJECT(self), "data-arrival", G_CALLBACK(_s_data_arrival), NULL);
+	GnomenuSocketNativeID server;
+	g_signal_connect(G_OBJECT(self), "data", G_CALLBACK(_s_data_arrival), NULL);
 	g_signal_connect(G_OBJECT(self), "connected", G_CALLBACK(_s_connected), NULL);
 	g_signal_connect(G_OBJECT(self), "shutdown", G_CALLBACK(_s_shutdown), NULL);
 /* try to connect to the server */
-	gnomenu_socket_connect_by_name(self, GNOMENU_SERVER_NAME);
-
+	server = gnomenu_socket_lookup(GNOMENU_SERVER_NAME);
+	if(server) 
+		gnomenu_socket_connect(self, server);
 }
 /**
  * _dispose:

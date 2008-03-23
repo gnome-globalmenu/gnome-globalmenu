@@ -17,7 +17,8 @@ static void socket_data_arrival_cb(GnomenuSocket * socket, gpointer data, gint b
 static void button_clicked(GtkButton * button, GnomenuSocket * client){
 	GnomenuMessage msg;
 	if(button == create){
-		gnomenu_socket_connect_by_name(client, GNOMENU_SERVER_NAME);
+		GnomenuSocketNativeID server = gnomenu_socket_lookup(GNOMENU_SERVER_NAME);
+		gnomenu_socket_connect(client, server);
 	}
 	if(button == destroy){
 		gnomenu_socket_shutdown(client);
@@ -51,7 +52,7 @@ int main(int argc, char* argv[]){
 
 	gtk_init(&argc, &argv);
 
-	client = gnomenu_socket_new(GNOMENU_CLIENT_NAME);
+	client = gnomenu_socket_new(GNOMENU_CLIENT_NAME, 10);
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	server = gnomenu_server_helper_new();
 
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]){
 	g_signal_connect(G_OBJECT(window), "destroy",
 			G_CALLBACK(window_destroy_event_cb), NULL);
 
-	g_signal_connect(G_OBJECT(client), "data-arrival",
+	g_signal_connect(G_OBJECT(client), "data",
 			G_CALLBACK(socket_data_arrival_cb), NULL);
 
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
