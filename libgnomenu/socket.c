@@ -31,7 +31,7 @@
 #endif 
 
 #define g_queue_for(queue, ele, job) \
-		{ GList * _list = g_queue_peek_head(queue);\
+		{ GList * _list = g_queue_peek_head_link(queue);\
 		  GList * _node; \
 		  for(_node = g_list_first(_list); _node; _node=g_list_next(_node)){ \
 			ele = _node->data; \
