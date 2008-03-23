@@ -26,13 +26,34 @@ GType gnomenu_menu_bar_type = 0;
  * FASLE: disable gtk_menu_bar_get_type hack by default
  * */
 gboolean gnomenu_compatible = FALSE;
-void gtk_module_init(int * argc, char **argv[]){
+const char * g_module_check_init(GModule * module){
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
-	LOG("work as a gtk_module");
+	gchar *flags[] = {
+					"GTK_MENUBAR_NO_MAC", 		"GTK_MENU_BAR_NO_MAC",
+					"GTK_MENUBAR_NO_GLOBALMENU","GTK_MENU_BAR_NO_GLOBALMENU",
+					"GTK_MENUBAR_NO_GLOBAL", 	"GTK_MENU_BAR_NO_GLOBAL",
+					"GTK_MENUBAR_NO_GNOMENU", 	"GTK_MENU_BAR_NO_GNOMENU", NULL
+			};
+	gchar * p;
+	LOG("libgnomenu is loaded. ");
 
 	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
 		gnomenu_compatible = FALSE;
-	} else {
-		gnomenu_compatible = TRUE;
+		LOG("application is ignored by quirk");
+		return NULL;
 	}
+	for(p = flags[0]; p; p++)
+		if(getenv(p)){
+			gnomenu_compatible = FALSE;
+			LOG("application is ignored by env %s flag", p);
+			return NULL;
+		}
+	gnomenu_compatible = TRUE;
+	return NULL;
 }
+void gtk_module_init(int * argc, char **argv[]){
+	/*Do nothing*/
+}
+/*
+ * vim: ts=4:sw=4
+ * */
