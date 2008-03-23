@@ -148,7 +148,7 @@ static gboolean _peek_xwindow 			( GdkNativeWindow target );
 static GList * _find_native_by_name		( gchar * name );
 
 static gboolean _set_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gpointer data, gint bytes);
-static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes);
+static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes, gboolean remove);
 
 static GdkFilterReturn 
 _window_filter_cb				(GdkXEvent* xevent, GdkEvent * event, gpointer data);
@@ -538,7 +538,7 @@ static GList * _find_native_by_name		( gchar * name ){
 		if(!gdk_error_trap_pop()){
 			if(rt == Success && type_return == type_req){
 			gint bytes;
-			gnomenu_type = _get_native_buffer(children_return[i], _GNOMENU_MESSAGE_TYPE, &bytes);
+			gnomenu_type = _get_native_buffer(children_return[i], _GNOMENU_MESSAGE_TYPE, &bytes, FALSE);
 			if(gnomenu_type && (!name || g_str_equal(name, wm_name))){
 				g_free(gnomenu_type);
 				window_list = g_list_append(window_list, (gpointer) children_return[i]);
@@ -568,7 +568,7 @@ static gboolean _set_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffe
 	}
 	return TRUE;
 }
-static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes){
+static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffer, gint * bytes, gboolean remove){
 	Atom actual_type_return;
 	gulong actual_format_return;
 	gulong bytes_after_return;
@@ -580,8 +580,9 @@ static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffe
 			GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 
 			native, 
 			gdk_x11_atom_to_xatom(buffer), 
+/*FIXME: max size is 2048 bytes*/
 			0, 2048, 
-			FALSE,
+			remove,
 			gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE), 
 			&actual_type_return,
 			&actual_format_return,
@@ -717,7 +718,7 @@ gboolean _real_flush(GnomenuSocket * socket) {
 		DataMessage * data_msg = g_queue_peek_head(priv->data_queue);
 		LOG("data size = %d", data_msg->header.bytes);
 		priv->acks = 0;
-		if(!_set_native_buffer(priv->target, _GNOMENU_DATA_BUFFER, data_msg->data, data_msg->header.bytes)) {
+		if(!_set_native_buffer(priv->target, _GNOMENU_DATA_BUFFER, data_msg, data_msg->header.bytes + sizeof(DataMessage))) {
 		/*then we send the notify message in PropertyNotify event handler.*/
 		LOG("flushing queue failed");
 		/*check if the connection is lost.*/
@@ -815,14 +816,15 @@ gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
 	GList * list = _find_native_by_name(NULL);
 	GList * node;	
 	GnomenuSocketNativeID native;
-	MessageHeader msg;
-	msg.source = gnomenu_socket_get_native(self);
-	msg.type = MSG_BROADCAST;
-	msg.bytes = bytes;
+	DataMessage * data_msg = g_malloc(sizeof(DataMessage) + bytes);
+	data_msg->header.source = gnomenu_socket_get_native(self);
+	data_msg->header.type = MSG_BROADCAST;
+	data_msg->header.bytes = bytes;
+	g_memmove(data_msg->data, data, bytes);
 	for(node = g_list_first(list); node; node = g_list_next(node)){
 		native = node->data;
-		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data, bytes);
-		_send_xclient_message (native, &msg, sizeof(msg));
+		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
+		_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
 	}
 
 	g_list_free(list);
@@ -886,14 +888,17 @@ static GdkFilterReturn
 			LOG("MSG_BROADCAST");
 			/* obtain data */
 			{ gint bytes;
-			  gpointer data = _get_native_buffer(gnomenu_socket_get_native(self),
+			  DataMessage * buffer = _get_native_buffer(gnomenu_socket_get_native(self),
 										_GNOMENU_BC_BUFFER,
-										&bytes);
-			  g_assert(data);
-			  g_assert(bytes == msg->bytes);
+										&bytes, TRUE);
+			  g_assert(buffer);
+			  if(bytes!= msg->bytes + sizeof(DataMessage)){
+				g_warning("broadcast message doesn't fit, ignore it");
+			  } else {
 			/* emit signal ::data::broadcast*/
 			  g_signal_emit(G_OBJECT(self), class_signals[DATA_ARRIVAL],
-						g_quark_from_string("broadcast"), data, bytes);
+						g_quark_from_string("broadcast"), buffer->data, bytes);
+			  }
 			}
 			return GDK_FILTER_REMOVE;
 		case MSG_CONNECT_REQ:
@@ -934,19 +939,18 @@ static GdkFilterReturn
 				/* Obtain the data, invoke ::data::peer */
 				/* send ACK*/
 					MessageHeader ack;
-					gpointer data;
+					DataMessage * buffer;
 					gint bytes;
 					ack.type = MSG_ACK;
 					ack.source = gnomenu_socket_get_native(self);	
-					data = _get_native_buffer(gnomenu_socket_get_native(self), 
+					buffer = _get_native_buffer(gnomenu_socket_get_native(self), 
 							_GNOMENU_DATA_BUFFER, 
-							&bytes);
+							&bytes, TRUE);
 					_send_xclient_message(priv->target, &ack, sizeof(ack));
-				g_assert(data);
-				LOG("should %d == (true) %d ?", msg->bytes, bytes);
-					g_assert(bytes == msg->bytes);
+					g_assert(buffer);
+					g_assert(bytes == msg->bytes + sizeof(DataMessage));
 					g_signal_emit(self, class_signals[DATA_ARRIVAL], 
-						g_quark_from_string("peer"), data, msg->bytes);
+						g_quark_from_string("peer"), buffer->data, msg->bytes);
 			break;
 			case MSG_ACK:
 				LOG("MSG_ACK");
@@ -977,7 +981,8 @@ static GdkFilterReturn
 
 /* Default signal closures */
 static void _c_data 		( GnomenuSocket * socket, gpointer data, guint size ) {
-	g_free(data);
+	if(data)
+	g_free( ((gchar*)data)- G_STRUCT_OFFSET(DataMessage, data));
 }
 static void _c_request 		( GnomenuSocket * socket, GnomenuSocketNativeID target ) {
 	
@@ -996,3 +1001,6 @@ static void _c_shutdown 			( GnomenuSocket * socket ) {
 	priv->acks = 0;
 	self->status = GNOMENU_SOCKET_DISCONNECTED;
 }
+/*
+ * vim:ts=4:sw=4
+ * */
