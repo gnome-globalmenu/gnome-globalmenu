@@ -29,7 +29,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +					"You are potentially using an incompatible libgnomenu. "
 +					"Fall back to GTK code for menu bar/ or core dump later. ", 
 +					name);
-+		} 
++		} else sym = NULL;
 +		
 +	}
 +
