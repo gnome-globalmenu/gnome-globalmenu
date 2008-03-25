@@ -300,10 +300,13 @@ static void _dispose(GObject * _self){
 	LOG_FUNC_NAME;
 	if(! priv->disposed){
 		priv->disposed = TRUE;
+		g_signal_handlers_disconnect_by_func(G_OBJECT(self),  G_CALLBACK(_s_data_arrival), NULL);
+		g_signal_handlers_disconnect_by_func(G_OBJECT(self),  G_CALLBACK(_s_connected), NULL);
+		g_signal_handlers_disconnect_by_func(G_OBJECT(self),  G_CALLBACK(_s_shutdown), NULL);
 		if(socket->status == GNOMENU_SOCKET_CONNECTED){
 			gnomenu_socket_shutdown(socket);
 		}
-	}
+		}
 	G_OBJECT_CLASS(gnomenu_client_helper_parent_class)->dispose(_self);
 }
 

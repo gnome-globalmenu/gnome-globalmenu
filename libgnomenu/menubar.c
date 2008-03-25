@@ -400,6 +400,42 @@ _dispose (GObject * _object){
 	GET_OBJECT(_object, menu_bar, priv);
 	if(!priv->disposed){
 		priv->disposed = TRUE;	
+		g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper),
+				G_CALLBACK(_s_size_allocate), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_size_request), menu_bar);
+
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_position_set), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_background_set), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_visibility_set), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_orientation_set), menu_bar);
+
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_connected), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->helper), 
+				G_CALLBACK(_s_shutdown), menu_bar);
+
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->arrow_button), 
+				G_CALLBACK(_s_arrow_button_clicked), menu_bar);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(priv->popup_menu), 
+				G_CALLBACK(_s_popup_menu_deactivated), menu_bar);
+	
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_delete_event), priv->helper);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_hierarchy_changed), priv->helper);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_button_press_event), priv->helper);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_configure_event), priv->helper);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_motion_notify_event), priv->helper);
+	g_signal_handlers_disconnect_by_func(G_OBJECT(menu_bar), 
+				G_CALLBACK(_s_notify), NULL);
 	}
 	g_hash_table_remove_all(priv->menu_items);
 	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->dispose(_object);

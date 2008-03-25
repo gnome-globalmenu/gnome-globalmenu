@@ -31,7 +31,7 @@
 #endif 
 
 #define g_queue_for(queue, ele, job) \
-		{ GList * _list = g_queue_peek_head_link(queue);\
+		{ GList * _list = (queue)?g_queue_peek_head_link(queue):NULL;\
 		  GList * _node; \
 		  for(_node = g_list_first(_list); _node; _node=g_list_next(_node)){ \
 			ele = _node->data; \
@@ -431,6 +431,8 @@ _dispose (GObject * object){
 		if(priv->time_source)
 			g_source_remove(priv->time_source);
 		priv->disposed = TRUE;	
+		g_queue_for(priv->data_queue, DataMessage * ele, g_free(ele));
+		g_queue_clear(priv->data_queue);
 	}
 	G_OBJECT_CLASS(gnomenu_socket_parent_class)->dispose(object);
 }
@@ -441,8 +443,8 @@ _finalize(GObject * object){
 	GList * list, * node;
 	gdk_window_destroy(priv->window);
 	g_free(self->name);
-	g_queue_for(priv->data_queue, DataMessage * ele, g_free(ele));
 	g_queue_free(priv->data_queue);
+	priv->data_queue = NULL;
 	G_OBJECT_CLASS(gnomenu_socket_parent_class)->finalize(object);
 }
 /* helper functions */
@@ -995,11 +997,12 @@ static void _c_shutdown 			( GnomenuSocket * socket ) {
 	if(priv->time_source)
 		g_source_remove(priv->time_source);
 	priv->time_source = 0;
-	g_assert(priv->data_queue);
 	g_queue_for(priv->data_queue, DataMessage * msg, g_free(msg));
+	g_queue_clear(priv->data_queue);
 	priv->acks = 0;
 	self->status = GNOMENU_SOCKET_DISCONNECTED;
 	if(priv->destroy_on_shutdown) g_object_unref(self);
+	LOG("_c_shutdown done");
 }
 /*
  * vim:ts=4:sw=4
