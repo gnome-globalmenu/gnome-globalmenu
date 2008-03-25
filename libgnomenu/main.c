@@ -34,7 +34,7 @@ const char * g_module_check_init(GModule * module){
 					"GTK_MENUBAR_NO_GLOBAL", 	"GTK_MENU_BAR_NO_GLOBAL",
 					"GTK_MENUBAR_NO_GNOMENU", 	"GTK_MENU_BAR_NO_GNOMENU", NULL
 			};
-	gchar * p;
+	int i;
 	LOG("libgnomenu is loaded. ");
 
 	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
@@ -42,10 +42,10 @@ const char * g_module_check_init(GModule * module){
 		LOG("application is ignored by quirk");
 		return NULL;
 	}
-	for(p = flags[0]; p; p++)
-		if(getenv(p)){
+	for(i = 0;flags[i];i++)
+		if(getenv(flags[i])){
 			gnomenu_compatible = FALSE;
-			LOG("application is ignored by env %s flag", p);
+			LOG("application is ignored by env %s flag", flags[i]);
 			return NULL;
 		}
 	gnomenu_compatible = TRUE;
