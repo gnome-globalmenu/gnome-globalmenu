@@ -1,2 +1,2 @@
 #!/bin/sh
-env GTK_MODULES=libgnomenu LD_LIBRARY_PATH=../libgnomenu/.libs:gtk+-aqd/gtk/.libs $*
+env LD_LIBRARY_PATH=../libgnomenu/.libs:gtk+-aqd/gtk/.libs $*

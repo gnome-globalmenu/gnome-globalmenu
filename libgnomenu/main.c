@@ -25,7 +25,7 @@ GType gnomenu_menu_bar_type = 0;
  * TRUE if works in compatible mode.
  * FASLE: disable gtk_menu_bar_get_type hack by default
  * */
-gboolean gnomenu_compatible = FALSE;
+G_MODULE_EXPORT gboolean gnomenu_compatible = FALSE;
 const char * g_module_check_init(GModule * module){
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
 	gchar *flags[] = {
@@ -51,9 +51,9 @@ const char * g_module_check_init(GModule * module){
 	gnomenu_compatible = TRUE;
 	return NULL;
 }
-void gtk_module_init(int * argc, char **argv[]){
+//void gtk_module_init(int * argc, char **argv[]){
 	/*Do nothing*/
-}
+//}
 /*
  * vim: ts=4:sw=4
  * */

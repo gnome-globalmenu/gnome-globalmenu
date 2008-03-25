@@ -390,6 +390,7 @@ static GObject* _constructor(GType type,
 				G_CALLBACK(_s_notify), NULL);
 
 	gnomenu_client_helper_start(priv->helper);
+	LOG("constructor");
 	return object;
 }
 
@@ -399,7 +400,6 @@ _dispose (GObject * _object){
 	GET_OBJECT(_object, menu_bar, priv);
 	if(!priv->disposed){
 		priv->disposed = TRUE;	
-		g_object_unref(priv->helper);
 	}
 	g_hash_table_remove_all(priv->menu_items);
 	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->dispose(_object);
@@ -412,6 +412,7 @@ _finalize(GObject * _object){
 	g_hash_table_destroy(priv->menu_items);
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
 	G_OBJECT_CLASS(gnomenu_menu_bar_menu_shell_class)->finalize(_object);
+	g_object_unref(priv->helper);
 }
 static void
 _set_property (GObject      *object,
@@ -612,6 +613,9 @@ static void _s_shutdown ( GtkWidget * widget, GnomenuClientHelper * helper){
 	LOG_FUNC_NAME;
 	GET_OBJECT(widget, menu_bar, priv);
 	GList * l;
+	if(priv->disposed) {
+		return;
+	}
 	priv->detached = FALSE;	
 
 	_reset_style(widget);	

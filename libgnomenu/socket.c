@@ -67,6 +67,7 @@ struct _GnomenuSocketPrivate {
 	GdkWindow * window;
 	GnomenuSocketNativeID target;
 	gint acks;
+	gboolean destroy_on_shutdown;
 };
 
 /**
@@ -289,7 +290,7 @@ gnomenu_socket_class_init(GnomenuSocketClass * klass){
  */
 		g_signal_new ("shutdown",
 			G_TYPE_FROM_CLASS (klass),
-			G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (GnomenuSocketClass, c_shutdown),
 			NULL,
 			NULL,
@@ -352,7 +353,7 @@ gnomenu_socket_init (GnomenuSocket * socket){
 	priv->acks = 0;
 	self->timeout = 10000;
 	self->name = g_strdup("Anonymous Socket");
-
+	priv->destroy_on_shutdown = FALSE;
 	attr.title = self->name;
 	attr.wclass = GDK_INPUT_ONLY;
 	attr.window_type = GDK_WINDOW_TEMP;
@@ -668,7 +669,7 @@ gboolean gnomenu_socket_send(GnomenuSocket * socket, gpointer data, guint bytes)
 	return GNOMENU_SOCKET_GET_CLASS(socket)->send(socket, data, bytes);
 }
 gboolean _real_send(GnomenuSocket * socket, gpointer data, guint bytes){
-	GET_OBJECT(socket, self, priv);
+	GET_OBJECT_LOG(socket, self, priv);
 	DataMessage * msg = g_malloc(sizeof(DataMessage) + bytes);
 	gchar buffer[1024];
 	gint i;
@@ -772,9 +773,7 @@ gboolean
 gnomenu_socket_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target){
 	return GNOMENU_SOCKET_GET_CLASS(socket)->accept(socket, service, target);
 }
-void _destroy_on_shutdown(GnomenuSocket * socket, gpointer data){
-	g_object_unref(socket);
-}
+
 gboolean 
 _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNativeID target){
 	GET_OBJECT(socket, self, priv);
@@ -783,7 +782,7 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 		MessageHeader ack;
 		s_priv->target = target;
 		service->status = GNOMENU_SOCKET_CONNECTED;
-		g_signal_connect(G_OBJECT(service), "shutdown", G_CALLBACK(_destroy_on_shutdown), NULL);
+		s_priv->destroy_on_shutdown = TRUE;
 		ack.type = MSG_CONNECT_ACK;
 		ack.source = gnomenu_socket_get_native(self);
 		ack.service = gnomenu_socket_get_native(service);
@@ -992,7 +991,7 @@ static void _c_connected 			( GnomenuSocket * socket, GnomenuSocketNativeID targ
 	priv->time_source = g_timeout_add_seconds(self->timeout, _test_connection, self);
 }
 static void _c_shutdown 			( GnomenuSocket * socket ) {
-	GET_OBJECT(socket, self, priv);
+	GET_OBJECT_LOG(socket, self, priv);
 	if(priv->time_source)
 		g_source_remove(priv->time_source);
 	priv->time_source = 0;
@@ -1000,6 +999,7 @@ static void _c_shutdown 			( GnomenuSocket * socket ) {
 	g_queue_for(priv->data_queue, DataMessage * msg, g_free(msg));
 	priv->acks = 0;
 	self->status = GNOMENU_SOCKET_DISCONNECTED;
+	if(priv->destroy_on_shutdown) g_object_unref(self);
 }
 /*
  * vim:ts=4:sw=4
