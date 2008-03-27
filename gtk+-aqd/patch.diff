@@ -23,7 +23,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +		if(libgnomenu) 
 +			if(!g_module_symbol(libgnomenu,
 +				"gnomenu_version", 
-+				&version) || *version != 4){
++				&version) || (*version >>16) != 4){
 +				libgnomenu = NULL;
 +			g_warning("Global Menu Library(libgnomenu) found, "
 +					"but the version doesn't match. "
