@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,6 +85,36 @@
+@@ -85,6 +85,46 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
@@ -10,8 +10,9 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	gpointer sym = NULL;
 +	static gboolean loaded = FALSE;
 +	static GModule * libgnomenu = NULL;
++	static gint * version = NULL;
 +	if(!loaded) {
-+		libgnomenu = g_module_open("libgnomenu", G_MODULE_BIND_LOCAL);
++		libgnomenu = g_module_open("libgnomenu", 0 /*G_MODULE_BIND_LOCAL*/);
 +		if(!libgnomenu)
 +			g_warning("Global Menu Library(libgnomenu) not found. "
 +					"Fall back to GTK code for handling menu bar. "
@@ -19,6 +20,15 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +					"support from legacy GTK applications. "
 +					);
 +		loaded = TRUE;
++		if(libgnomenu) 
++			if(!g_module_symbol(libgnomenu,
++				"gnomenu_version", 
++				&version) || *version != 4){
++				libgnomenu = NULL;
++			g_warning("Global Menu Library(libgnomenu) found, "
++					"but the version doesn't match. "
++					"This patch works with libgnomenu == 0.4");
++		}
 +	}
 +	if(libgnomenu) {
 +		if(!g_module_symbol(libgnomenu, 
@@ -39,7 +49,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  
  static void
-@@ -96,6 +126,10 @@
+@@ -96,6 +136,10 @@
  
    GtkBindingSet *binding_set;
  
@@ -50,7 +60,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    gobject_class = (GObjectClass*) class;
    widget_class = (GtkWidgetClass*) class;
    menu_shell_class = (GtkMenuShellClass*) class;
-@@ -213,13 +247,23 @@
+@@ -213,13 +257,23 @@
  						   G_MAXINT,
  						   0,
  						   GTK_PARAM_READWRITE));
