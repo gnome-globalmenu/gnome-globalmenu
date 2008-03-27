@@ -765,7 +765,6 @@ gboolean _real_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
 	msg.source = gnomenu_socket_get_native(self);	
 	msg.type = MSG_CONNECT_REQ;
 	msg.version = LIBGNOMENU_VERSION;
-	msg.bytes = 0;
 	return _send_xclient_message(target, &msg, sizeof(msg));
 }
 /**
