@@ -121,7 +121,7 @@ docs for the GTK+ widget toolkit.
 %patch2 -p1 -b .workaround
 %patch3 -p1 -b .system-log-crash
 
-%patch998 -p1 -b .menubar-overflow
+#%patch998 -p1 -b .menubar-overflow
 %patch999 -F3 -p1 -b .aqd
 for i in config.guess config.sub ; do
   test -f %{_datadir}/libtool/$i && cp %{_datadir}/libtool/$i .
