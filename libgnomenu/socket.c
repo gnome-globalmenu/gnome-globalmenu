@@ -829,7 +829,8 @@ gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
 	for(node = g_list_first(list); node; node = g_list_next(node)){
 		native = node->data;
 		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
-		_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
+	//	_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
+	/*above is handled in the filter, when the property is acutally set*/
 	}
 
 	g_list_free(list);
@@ -885,6 +886,23 @@ static GdkFilterReturn
 				_send_xclient_message(priv->target, &matched_msg->header, sizeof(MessageHeader));
 				g_free(matched_msg);
 				LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
+				g_free(buffer);
+			}
+			return GDK_FILTER_CONTINUE;
+		}
+	}
+	if( xevent->type == PropertyNotify &&
+		(xevent->xproperty.atom == gdk_x11_atom_to_xatom(_GNOMENU_BC_BUFFER))){
+		GET_OBJECT(pointer, self, priv);
+		if(xevent->xproperty.state == PropertyNewValue) {
+			gint bytes;
+			DataMessage * buffer = _get_native_buffer(
+										xevent->xproperty.window,
+										_GNOMENU_BC_BUFFER,
+										&bytes, FALSE);
+			if(buffer){
+				_send_xclient_message(priv->target, &buffer->header, sizeof(MessageHeader));
+				g_free(buffer);
 			}
 			return GDK_FILTER_CONTINUE;
 		}
