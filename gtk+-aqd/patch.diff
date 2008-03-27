@@ -11,7 +11,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	static gboolean loaded = FALSE;
 +	static GModule * libgnomenu = NULL;
 +	if(!loaded) {
-+		libgnomenu = g_module_open("libgnomenu", 0);
++		libgnomenu = g_module_open("libgnomenu", G_MODULE_BIND_LOCAL);
 +		if(!libgnomenu)
 +			g_warning("Global Menu Library(libgnomenu) not found. "
 +					"Fall back to GTK code for handling menu bar. "
@@ -29,10 +29,10 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +					"You are potentially using an incompatible libgnomenu. "
 +					"Fall back to GTK code for menu bar/ or core dump later. ", 
 +					name);
-+		} else sym = NULL;
++			sym = NULL;
++		};
 +		
 +	}
-+
 +	return sym;
 +}
 +
@@ -50,12 +50,13 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    gobject_class = (GObjectClass*) class;
    widget_class = (GtkWidgetClass*) class;
    menu_shell_class = (GtkMenuShellClass*) class;
-@@ -213,13 +247,22 @@
+@@ -213,13 +247,23 @@
  						   G_MAXINT,
  						   0,
  						   GTK_PARAM_READWRITE));
 -
 +	if(compatible && * compatible && gnomenu_menu_bar_class_init) {
++		g_message("Using Global Menu");
 +		(*gnomenu_menu_bar_class_init)(class);
 +	} else 
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  

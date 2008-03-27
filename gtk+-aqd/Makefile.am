@@ -8,6 +8,6 @@ prepare:
 patch:
 	patch -p0 < patch.diff
 diff:
-	svn diff gtk+-aqd > patch.diff
+	svn diff gtk+-aqd/gtk/gtkmenubar.c > patch.diff
 gtk2-aqd.patch: $(srcdir)/$(patch_files)
 	cp $< $@
