@@ -38,6 +38,7 @@ Patch2: workaround.patch
 Patch3: system-log-crash.patch
 
 # gtk-aqd patch
+Patch998: gtk2-menubar-overflow.patch 
 Patch999: gtk2-aqd.patch 
 
 BuildRequires: atk-devel >= %{atk_version}
@@ -120,6 +121,7 @@ docs for the GTK+ widget toolkit.
 %patch2 -p1 -b .workaround
 %patch3 -p1 -b .system-log-crash
 
+%patch998 -p1 -b .menubar-overflow
 %patch999 -p1 -b .aqd
 for i in config.guess config.sub ; do
   test -f %{_datadir}/libtool/$i && cp %{_datadir}/libtool/$i .

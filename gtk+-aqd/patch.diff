@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
 +++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,6 +85,46 @@
+@@ -85,11 +85,55 @@
  
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
@@ -49,26 +49,24 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  
  static void
-@@ -96,6 +136,10 @@
- 
-   GtkBindingSet *binding_set;
- 
+ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+ {
 +  gboolean * compatible = _libgnomenu_lookup("gnomenu_compatible");
 +  void (*gnomenu_menu_bar_class_init)(gpointer klass)
 +			= _libgnomenu_lookup("gnomenu_menu_bar_class_intern_init");
 +
-   gobject_class = (GObjectClass*) class;
-   widget_class = (GtkWidgetClass*) class;
-   menu_shell_class = (GtkMenuShellClass*) class;
-@@ -213,13 +257,23 @@
- 						   G_MAXINT,
+   GObjectClass *gobject_class;
+   GtkWidgetClass *widget_class;
+   GtkMenuShellClass *menu_shell_class;
+@@ -214,12 +258,25 @@
  						   0,
  						   GTK_PARAM_READWRITE));
--
+ 
 +	if(compatible && * compatible && gnomenu_menu_bar_class_init) {
 +		g_message("Using Global Menu");
 +		(*gnomenu_menu_bar_class_init)(class);
 +	} else 
++
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
  }
  
@@ -81,6 +79,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +
 +	if(compatible && * compatible && gnomenu_menu_bar_init) {
 +		(*gnomenu_menu_bar_init)(object);
++		return;
 +	}
  }
  
