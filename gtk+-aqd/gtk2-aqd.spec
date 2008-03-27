@@ -12,7 +12,7 @@
 
 %define base_version 2.12.5
 %define bin_version 2.10.0
-%define svn_version 0.4.svn833
+%define svn_version 0.4.svn848
 
 Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
 Name: gtk2-aqd
@@ -122,7 +122,7 @@ docs for the GTK+ widget toolkit.
 %patch3 -p1 -b .system-log-crash
 
 %patch998 -p1 -b .menubar-overflow
-%patch999 -p1 -b .aqd
+%patch999 -F3 -p1 -b .aqd
 for i in config.guess config.sub ; do
   test -f %{_datadir}/libtool/$i && cp %{_datadir}/libtool/$i .
 done

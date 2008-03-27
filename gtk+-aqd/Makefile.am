@@ -1,4 +1,4 @@
-EXTRA_DIST = README patch.diff
+EXTRA_DIST = README patch.diff overflow.diff
 patchdir = ${docdir}/gtk+-aqd
 patch_files = patch.diff overflow.diff
 patch_DATA = README gtk2-aqd.patch gtk2-menubar-overflow.patch
