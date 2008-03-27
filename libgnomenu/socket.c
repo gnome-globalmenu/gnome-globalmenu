@@ -606,6 +606,10 @@ static gpointer _get_native_buffer ( GnomenuSocketNativeID native, GdkAtom buffe
 		return data;	
 	}
 }
+void _monitor_native_buffers(GnomenuSocketNativeID native, gboolean sw) {
+		XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()),
+				native, sw?PropertyChangeMask:0);
+}
 /* public methods */
 /**
  * gnomenu_socket_get_native:
@@ -793,7 +797,7 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 		ack.type = MSG_CONNECT_ACK;
 		ack.source = gnomenu_socket_get_native(self);
 		ack.service = gnomenu_socket_get_native(service);
-		XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), target, PropertyChangeMask);
+		_monitor_native_buffers(target, TRUE);
 		g_signal_emit(G_OBJECT(service), class_signals[CONNECTED], 0, target);
 		return _send_xclient_message(target, &ack, sizeof(ack));
 	} else{
@@ -830,10 +834,12 @@ gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
 	for(node = g_list_first(list); node; node = g_list_next(node)){
 		native = node->data;
 		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
+		_monitor_native_buffers(native, TRUE);
 	//	_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
 	/*above is handled in the filter, when the property is acutally set*/
 	}
 
+	g_free(data_msg);
 	g_list_free(list);
 	return TRUE;
 }
@@ -902,7 +908,9 @@ static GdkFilterReturn
 										_GNOMENU_BC_BUFFER,
 										&bytes, FALSE);
 			if(buffer){
-				_send_xclient_message(priv->target, &buffer->header, sizeof(MessageHeader));
+				_send_xclient_message(xevent->xproperty.window, &buffer->header, sizeof(MessageHeader));
+				
+				_monitor_native_buffers(xevent->xproperty.window, FALSE);
 				g_free(buffer);
 			}
 			return GDK_FILTER_CONTINUE;
@@ -956,8 +964,7 @@ static GdkFilterReturn
 			/* set state to GNOMENU_SOCKET_CONNECTED*/
 			self->status = GNOMENU_SOCKET_CONNECTED;
 			priv->target = msg->service;
-			XSelectInput(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), msg->service, 
-				PropertyChangeMask);
+			_monitor_native_buffers(msg->service, TRUE);
 			{ MessageHeader ack;
 			  ack.type = MSG_ACK;
 			  ack.source = gnomenu_socket_get_native(self);

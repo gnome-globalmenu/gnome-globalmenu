@@ -21,7 +21,7 @@ read dist
 cat gnome-globalmenu.spec.tmpl | \
 sed 's/@SVNVERSION@/'$version'/' | \
 sed 's/@RELEASE@/'$dist'/' >  gnome-globalmenu.spec
-
+make dist
 cp *.tar.gz $RPMDEVROOT/SOURCES/
 rpmbuild -ba *.spec && \
 (
