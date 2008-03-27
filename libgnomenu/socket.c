@@ -68,6 +68,7 @@ struct _GnomenuSocketPrivate {
 	GnomenuSocketNativeID target;
 	gint acks;
 	gboolean destroy_on_shutdown;
+	guint16 seq;
 };
 
 /**
@@ -123,6 +124,7 @@ typedef struct {
  */
 typedef struct {
 	MessageHeader header;
+	guint16 seq;
 	gchar data[];
 } DataMessage;
 
@@ -351,6 +353,7 @@ gnomenu_socket_init (GnomenuSocket * socket){
 	priv->data_queue = g_queue_new();
 	priv->target = 0;
 	priv->acks = 0;
+	priv->seq = 0;
 	self->timeout = 10000;
 	self->name = g_strdup("Anonymous Socket");
 	priv->destroy_on_shutdown = FALSE;
@@ -684,8 +687,9 @@ gboolean _real_send(GnomenuSocket * socket, gpointer data, guint bytes){
 	msg->header.type = MSG_DATA;
 	msg->header.bytes = bytes;
 	msg->header.source = gnomenu_socket_get_native(self);
-
-	LOG("status = %s, ACKS=%d", gnomenu_socket_status_get_value(self->status)->value_name, priv->acks);
+	msg->seq = priv->seq;
+	LOG("status = %s, ACKS=%d, seq = %d", gnomenu_socket_status_get_value(self->status)->value_name, priv->acks, priv->seq);
+	priv->seq ++;
 	for(i = 0, j=0; i< bytes && j< sizeof(buffer); i++){
 		j+=g_sprintf(&buffer[j], "%02hhX ", ((gchar * ) data) [i]);
 	}
@@ -867,10 +871,21 @@ static GdkFilterReturn
 		GET_OBJECT(pointer, self, priv);
 		if( xevent->xproperty.window == priv->target
 			&& xevent->xproperty.state == PropertyNewValue) {
-			DataMessage * data_msg = g_queue_pop_head(priv->data_queue);
-			_send_xclient_message(priv->target, &data_msg->header, sizeof(MessageHeader));
-			g_free(data_msg);
-			LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
+			gint bytes;
+			DataMessage * buffer = _get_native_buffer(priv->target,
+										_GNOMENU_DATA_BUFFER,
+										&bytes, FALSE);
+			DataMessage * matched_msg = NULL;
+			g_queue_for(priv->data_queue, DataMessage * data_msg,
+				if(data_msg->seq == buffer->seq){ /*The right msg*/
+					matched_msg = data_msg; break;}
+				);
+			if(matched_msg) {
+				g_queue_remove(priv->data_queue, matched_msg);
+				_send_xclient_message(priv->target, &matched_msg->header, sizeof(MessageHeader));
+				g_free(matched_msg);
+				LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
+			}
 			return GDK_FILTER_CONTINUE;
 		}
 	}
