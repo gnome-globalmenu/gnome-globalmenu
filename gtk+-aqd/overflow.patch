@@ -51,7 +51,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -82,7 +112,35 @@
+@@ -82,7 +112,41 @@
  static gint gtk_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
  static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
                                              GtkMenuDirectionType direction);
@@ -82,28 +82,35 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	GtkMenuItem * menu_item;
 +	GtkMenuItem * proxy;
 +} MenuItemInfo;
++
++static void _menu_item_info_free(MenuItemInfo * info){
++	if(info->proxy) g_object_unref(info->proxy);
++	g_free(info);
++}
++
 +#endif
 +
  static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
  
  G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
-@@ -93,16 +151,23 @@
-   GObjectClass *gobject_class;
+@@ -94,15 +158,24 @@
    GtkWidgetClass *widget_class;
    GtkMenuShellClass *menu_shell_class;
+ 
 +#ifdef OVERFLOWED_ITEMS
 +	GtkContainerClass *container_class;
 +#endif
- 
++
    GtkBindingSet *binding_set;
  
    gobject_class = (GObjectClass*) class;
    widget_class = (GtkWidgetClass*) class;
    menu_shell_class = (GtkMenuShellClass*) class;
+ 
 +#ifdef OVERFLOWED_ITEMS
 +	container_class = (GtkContainerClass*) class;
 +#endif
- 
++
    gobject_class->get_property = gtk_menu_bar_get_property;
    gobject_class->set_property = gtk_menu_bar_set_property;
  
@@ -111,9 +118,9 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    widget_class->size_request = gtk_menu_bar_size_request;
    widget_class->size_allocate = gtk_menu_bar_size_allocate;
    widget_class->expose_event = gtk_menu_bar_expose;
-@@ -214,12 +279,36 @@
- 						   0,
- 						   GTK_PARAM_READWRITE));
+@@ -112,6 +185,14 @@
+   menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
+   menu_shell_class->move_current = gtk_menu_bar_move_current;
  
 +#ifdef OVERFLOWED_ITEMS
 +	gobject_class->finalize = _finalize;
@@ -122,16 +129,11 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
 +	container_class->remove = _remove;
 +	container_class->forall = _forall;
 +#endif
-   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
- }
- 
-+#ifdef OVERFLOWED_ITEMS
-+static void _menu_item_info_free(MenuItemInfo * info){
-+	if(info->proxy) g_object_unref(info->proxy);
-+	g_free(info);
-+}
-+#endif
 +
+   binding_set = gtk_binding_set_by_class (class);
+   gtk_binding_entry_add_signal (binding_set,
+ 				GDK_Left, 0,
+@@ -220,6 +301,16 @@
  static void
  gtk_menu_bar_init (GtkMenuBar *object)
  {
@@ -148,7 +150,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  GtkWidget*
-@@ -350,6 +439,24 @@
+@@ -350,6 +441,24 @@
  	  requisition->height += widget->style->ythickness * 2;
  	}
      }
@@ -173,7 +175,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -368,6 +475,14 @@
+@@ -368,6 +477,14 @@
    gint ltr_x, ltr_y;
    gint ipadding;
  
@@ -188,7 +190,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    g_return_if_fail (GTK_IS_MENU_BAR (widget));
    g_return_if_fail (allocation != NULL);
  
-@@ -375,6 +490,19 @@
+@@ -375,6 +492,19 @@
    menu_shell = GTK_MENU_SHELL (widget);
    priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
  
@@ -208,7 +210,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
    direction = gtk_widget_get_direction (widget);
  
    widget->allocation = *allocation;
-@@ -407,6 +535,24 @@
+@@ -407,6 +537,24 @@
  	  offset = child_allocation.x; 	/* Window edge to menubar start */
  	  ltr_x = child_allocation.x;
  	  
@@ -233,7 +235,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  	  children = menu_shell->children;
  	  while (children)
  	    {
-@@ -418,6 +564,12 @@
+@@ -418,6 +566,12 @@
  	      gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
  						 &toggle_size);
  	      gtk_widget_get_child_requisition (child, &child_requisition);
@@ -246,7 +248,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  	    
  	      if (priv->child_pack_direction == GTK_PACK_DIRECTION_LTR ||
  		  priv->child_pack_direction == GTK_PACK_DIRECTION_RTL)
-@@ -434,13 +586,31 @@
+@@ -434,13 +588,31 @@
  		}
  	      if (GTK_WIDGET_VISIBLE (child))
  		{
@@ -279,7 +281,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  		  
  		  gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
  						      toggle_size);
-@@ -456,7 +626,24 @@
+@@ -456,7 +628,24 @@
  	  
  	  offset = child_allocation.y; 	/* Window edge to menubar start */
  	  ltr_y = child_allocation.y;
@@ -305,7 +307,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  	  children = menu_shell->children;
  	  while (children)
  	    {
-@@ -464,7 +651,11 @@
+@@ -464,7 +653,11 @@
  	      
  	      child = children->data;
  	      children = children->next;
@@ -318,7 +320,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  	      gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
  						 &toggle_size);
  	      gtk_widget_get_child_requisition (child, &child_requisition);
-@@ -484,6 +675,25 @@
+@@ -484,6 +677,25 @@
  		}
  	      if (GTK_WIDGET_VISIBLE (child))
  		{
@@ -344,7 +346,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  		  if ((direction == GTK_TEXT_DIR_LTR) ==
  		      (priv->pack_direction == GTK_PACK_DIRECTION_TTB))
  		    child_allocation.y = ltr_y;
-@@ -491,7 +701,7 @@
+@@ -491,7 +703,7 @@
  		    child_allocation.y = allocation->height -
  		      child_requisition.height - ltr_y; 
  		  child_allocation.height = child_requisition.height;
@@ -353,7 +355,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  		  gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
  						      toggle_size);
  		  gtk_widget_size_allocate (child, &child_allocation);
-@@ -501,6 +711,17 @@
+@@ -501,6 +713,17 @@
  	    }
  	}
      }
@@ -371,7 +373,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -937,6 +1158,218 @@
+@@ -937,6 +1160,218 @@
        g_object_notify (G_OBJECT (menubar), "child-pack-direction");
      }
  }
