@@ -26,7 +26,7 @@ GType gnomenu_menu_bar_type = 0;
  * FASLE: disable gtk_menu_bar_get_type hack by default
  * */
 G_MODULE_EXPORT gboolean gnomenu_compatible = FALSE;
-gint gnomenu_version = 4;
+guint gnomenu_version = LIBGNOMENU_VERSION;
 const char * g_module_check_init(GModule * module){
 	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
 	gchar *flags[] = {

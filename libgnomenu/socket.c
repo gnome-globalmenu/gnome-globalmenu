@@ -110,6 +110,7 @@ typedef struct {
 	union {
 	guint8 bytes;	
 	GnomenuSocketNativeID service;
+	guint32 version;
 	};
 	/*MessageType */ guint8 type;
 } MessageHeader;
@@ -763,6 +764,7 @@ gboolean _real_connect(GnomenuSocket * socket, GnomenuSocketNativeID target){
 	}
 	msg.source = gnomenu_socket_get_native(self);	
 	msg.type = MSG_CONNECT_REQ;
+	msg.version = LIBGNOMENU_VERSION;
 	msg.bytes = 0;
 	return _send_xclient_message(target, &msg, sizeof(msg));
 }
@@ -941,6 +943,10 @@ static GdkFilterReturn
 			/* emit signal ::request*/
 			if(self->status != GNOMENU_SOCKET_LISTEN){
 				LOG("not listening. ");
+				break;
+			}
+			if(msg->version != LIBGNOMENU_VERSION) {
+				LOG("wrong version, don't connect! my=%d, client=%d", LIBGNOMENU_VERSION, msg->version);
 				break;
 			}
 			g_signal_emit(G_OBJECT(self), class_signals[CONNECT_REQ],
