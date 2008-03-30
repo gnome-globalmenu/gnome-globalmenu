@@ -900,7 +900,7 @@ static GdkFilterReturn
 				LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
 				g_free(buffer);
 			}
-			return GDK_FILTER_CONTINUE;
+			return GDK_FILTER_REMOVE;
 		}
 	}
 	if( xevent->type == PropertyNotify &&
@@ -918,7 +918,7 @@ static GdkFilterReturn
 				_monitor_native_buffers(xevent->xproperty.window, FALSE);
 				g_free(buffer);
 			}
-			return GDK_FILTER_CONTINUE;
+			return GDK_FILTER_REMOVE;
 		}
 	}
 	if( xevent->type != ClientMessage ||
