@@ -108,9 +108,11 @@ typedef enum {
 typedef struct {
 	GnomenuSocketNativeID source;
 	union {
-	guint8 bytes;	
 	GnomenuSocketNativeID service;
-	guint32 version;
+	struct {
+		guint8 bytes;	
+		guint32 version;
+	};
 	};
 	/*MessageType */ guint8 type;
 } MessageHeader;
@@ -831,6 +833,7 @@ gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
 	data_msg->header.source = gnomenu_socket_get_native(self);
 	data_msg->header.type = MSG_BROADCAST;
 	data_msg->header.bytes = bytes;
+	data_msg->header.version = LIBGNOMENU_VERSION;
 	g_memmove(data_msg->data, data, bytes);
 	for(node = g_list_first(list); node; node = g_list_next(node)){
 		native = node->data;
@@ -932,6 +935,10 @@ static GdkFilterReturn
 		case MSG_BROADCAST:
 			LOG("MSG_BROADCAST");
 			/* obtain data */
+			if(msg->version != LIBGNOMENU_VERSION) {
+				LOG("wrong version, ignore the message my=%d, client=%d", LIBGNOMENU_VERSION, msg->version);
+				break;
+			}
 			{ gint bytes;
 			  DataMessage * buffer = _get_native_buffer(gnomenu_socket_get_native(self),
 										_GNOMENU_BC_BUFFER,
