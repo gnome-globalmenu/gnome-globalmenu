@@ -833,8 +833,8 @@ gboolean _real_broadcast(GnomenuSocket * socket, gpointer data, guint bytes){
 	g_memmove(data_msg->data, data, bytes);
 	for(node = g_list_first(list); node; node = g_list_next(node)){
 		native = node->data;
-		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
 		_monitor_native_buffers(native, TRUE);
+		_set_native_buffer(native, _GNOMENU_BC_BUFFER, data_msg, sizeof(DataMessage) + bytes);
 	//	_send_xclient_message (native, &data_msg->header, sizeof(MessageHeader));
 	/*above is handled in the filter, when the property is acutally set*/
 	}
@@ -933,7 +933,7 @@ static GdkFilterReturn
 			{ gint bytes;
 			  DataMessage * buffer = _get_native_buffer(gnomenu_socket_get_native(self),
 										_GNOMENU_BC_BUFFER,
-										&bytes, TRUE);
+										&bytes, FALSE);
 			  g_assert(buffer);
 			  if(bytes!= msg->bytes + sizeof(DataMessage)){
 				g_warning("broadcast message doesn't fit, ignore it");
