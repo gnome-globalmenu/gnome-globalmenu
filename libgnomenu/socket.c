@@ -808,6 +808,7 @@ _real_accept (GnomenuSocket * socket, GnomenuSocket * service, GnomenuSocketNati
 }
 
 static gboolean _test_connection		( GnomenuSocket * socket ) {
+	return_val_if_fail(GNOMENU_IS_SOCKET(socket), FALSE);
 	GET_OBJECT(socket, self, priv);
 	if(_peek_xwindow(priv->target))
 		return TRUE;
