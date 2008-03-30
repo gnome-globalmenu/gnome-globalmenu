@@ -900,7 +900,7 @@ static GdkFilterReturn
 				LOG("data buffer is set, send notify. queue length is %d", g_queue_get_length(priv->data_queue));
 				g_free(buffer);
 			}
-			return GDK_FILTER_CONTINUE;
+			return GDK_FILTER_REMOVE;
 		}
 	}
 	if( xevent->type == PropertyNotify &&
@@ -918,7 +918,7 @@ static GdkFilterReturn
 				_monitor_native_buffers(xevent->xproperty.window, FALSE);
 				g_free(buffer);
 			}
-			return GDK_FILTER_CONTINUE;
+			return GDK_FILTER_REMOVE;
 		}
 	}
 	if( xevent->type != ClientMessage ||
@@ -1000,7 +1000,7 @@ static GdkFilterReturn
 					ack.source = gnomenu_socket_get_native(self);	
 					buffer = _get_native_buffer(gnomenu_socket_get_native(self), 
 							_GNOMENU_DATA_BUFFER, 
-							&bytes, TRUE);
+							&bytes, FALSE);
 					_send_xclient_message(priv->target, &ack, sizeof(ack));
 					g_assert(buffer);
 					g_assert(bytes == msg->bytes + sizeof(DataMessage));
