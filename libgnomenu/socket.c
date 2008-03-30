@@ -1000,7 +1000,7 @@ static GdkFilterReturn
 					ack.source = gnomenu_socket_get_native(self);	
 					buffer = _get_native_buffer(gnomenu_socket_get_native(self), 
 							_GNOMENU_DATA_BUFFER, 
-							&bytes, TRUE);
+							&bytes, FALSE);
 					_send_xclient_message(priv->target, &ack, sizeof(ack));
 					g_assert(buffer);
 					g_assert(bytes == msg->bytes + sizeof(DataMessage));
