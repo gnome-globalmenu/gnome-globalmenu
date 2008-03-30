@@ -389,8 +389,11 @@ static void _s_client_realize(MenuServer * _self, GnomenuClientInfo * ci, Gnomen
 	LOG();
 	g_assert(c);
 	c->window = gdk_window_foreign_new(ci->ui_window);
-	LOG("c->window: %p", ci->ui_window);
-	g_assert(c->window);
+	LOG("c->window: %p", c->window);
+	if(!c->window) {
+		g_warning("can't obtain the client window");
+		return;
+	}
 
 	c->grabbed = TRUE;	
 
