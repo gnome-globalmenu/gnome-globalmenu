@@ -884,6 +884,7 @@ static GdkFilterReturn
 										_GNOMENU_DATA_BUFFER,
 										&bytes, FALSE);
 			DataMessage * matched_msg = NULL;
+			if(buffer) 
 			g_queue_for(priv->data_queue, DataMessage * data_msg,
 				if(data_msg->seq == buffer->seq){ /*The right msg*/
 					matched_msg = data_msg; break;}
