@@ -176,19 +176,22 @@ static void _update_ui(Application *app)
 	else 
 		gtk_widget_hide(app->icon);
 
-	pango_layout_set_font_description(layout,
-			app->title_font);
+	if (app->title_font) 
+		pango_layout_set_font_description(layout,
+				app->title_font);
 	gtk_widget_queue_draw(GTK_WIDGET(app->title));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_title_visible), 
 				app->title_visible);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_icon_visible), 
 				app->icon_visible);
-	title_font_name = pango_font_description_to_string(app->title_font);
-	gtk_font_button_set_font_name(GTK_FONT_BUTTON(cfd->ftbtn_title_font), 
-			title_font_name);
+	if (app->title_font) {
+		title_font_name = pango_font_description_to_string(app->title_font);
+		gtk_font_button_set_font_name(GTK_FONT_BUTTON(cfd->ftbtn_title_font), 
+				title_font_name);
+		g_free(title_font_name);
+	}
 
 	gtk_label_set_max_width_chars(GTK_LABEL(app->title), app->title_max_width);
-	g_free(title_font_name);
 }
 static void _save_conf_unimp(Application *app){
 	LOG("Not implemented for %s\n", 
@@ -261,9 +264,12 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 		{
 			PangoFontDescription * new_title_font
 				= g_value_get_boxed(value);
+			if (!self->title_font) {
+				self->title_font = g_value_dup_boxed(value);
+				break;
+			}
 			if(!pango_font_description_equal(new_title_font, self->title_font)){
-				if(self->title_font)
-					g_boxed_free(PANGO_TYPE_FONT_DESCRIPTION, self->title_font);
+				g_boxed_free(PANGO_TYPE_FONT_DESCRIPTION, self->title_font);
 				self->title_font = g_value_dup_boxed(value);
 			}
 		}
