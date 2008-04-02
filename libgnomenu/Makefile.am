@@ -11,10 +11,12 @@ BUILT_SOURCES = gnomenu-marshall.h gnomenu-marshall.c gnomenu-enums.c gnomenu-en
 
 libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
-	socket.h \
-	socket.c \
 	proxy.h \
-	proxy.c
+	proxy.c \
+	object.h \
+	object.c \
+	x11.h \
+	x11.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
@@ -27,7 +29,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = socket.h 
+libgnomenuinclude_HEADERS = proxy.h object.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
@@ -43,7 +45,7 @@ gnomenu-marshall.c: gnomenu-marshall.list
 gnomenu-marshall.h: gnomenu-marshall.list
 	glib-genmarshal --internal --header --prefix=gnomenu_marshall $< > $@
 
-gnomenu_enum_headers = socket.h
+gnomenu_enum_headers = proxy.h object.h 
 
 gnomenu-enums.c: $(gnomenu_enum_headers) 
 	glib-mkenums --fhead "#include <glib-object.h>\n" \
