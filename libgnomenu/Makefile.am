@@ -12,7 +12,9 @@ BUILT_SOURCES = gnomenu-marshall.h gnomenu-marshall.c gnomenu-enums.c gnomenu-en
 libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	socket.h \
-	socket.c
+	socket.c \
+	proxy.h \
+	proxy.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
