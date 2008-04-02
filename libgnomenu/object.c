@@ -3,7 +3,15 @@
 #include "object.h"
 #include "x11.h"
 #include "gnomenu-marshall.h"
-
+/*************
+ * TODO:
+ * 1 write message filter for obj_win
+ * 2 define ProxyInfo
+ * 3 write message filter for prx_win
+ * 4 accept a bind request
+ * 4 implement 'query' method.
+ * 5 emit signals
+ **************/
 #define GNOMENU_OBJECT_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_OBJECT, GnomenuObjectPrivate))
 
@@ -24,7 +32,7 @@
 typedef struct {
 	gboolean disposed;
 	GdkWindow * obj_win;
-	GHashTable * method_table;
+	GList * proxies;
 } GnomenuObjectPrivate;
 
 /* Properties */
@@ -46,7 +54,13 @@ static void
 _set_property( GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 
 static void _invoke ( GnomenuObject * object, const gchar * name, gchar * args, gchar * rt);
+static void _query ( GnomenuObject * object, const gchar * name, gchar * args, gchar * rt);
 static gulong class_signals[SIGNAL_MAX] 		= {0};
+
+guint gnomenu_object_class_install_method(GnomenuObjectClass * klass, const gchar * name, GnomenuObjectMethod method){
+	g_hash_table_insert(klass->method_table, name, method);
+	return method;
+}
 
 static void
 gnomenu_object_class_init(GnomenuObjectClass * klass){
@@ -59,6 +73,7 @@ gnomenu_object_class_init(GnomenuObjectClass * klass){
 	gobject_class->set_property = _set_property;
 
 	klass->invoke = _invoke;	
+	klass->method_table = g_hash_table_new(g_str_hash, g_direct_equal);
 
 	g_object_class_install_property (gobject_class,
 			PROP_PATH,
@@ -68,13 +83,14 @@ gnomenu_object_class_init(GnomenuObjectClass * klass){
 						"",
 						G_PARAM_CONSTRUCT_ONLY| G_PARAM_WRITABLE)
 			);
+	gnmenu_object_class_install_method(klass, 
+			"query", _query);
 }
 static void
 gnomenu_object_init(GnomenuObject * object) {
 	GET_OBJECT(object, self, priv);
 	priv->disposed = FALSE;
 	self->path = NULL;
-	priv->method_table = g_hash_table_new(g_str_hash, g_direct_equal);
 }
 GnomenuObject *
 gnomenu_object_new(gchar * path){
@@ -118,19 +134,15 @@ void gnomenu_object_emit(GnomenuObject * object, const gchar * name, const gchar
 }
 
 void _invoke(GnomenuObject * object, const gchar * name, gchar * args, gchar * rt){
-	GET_OBJECT(object, self, priv);
+	GnomenuObjectClass * klass = G_OBJECT_GET_CLASS(object);
 	GnomenuObjectMethod method;
-	method = g_hash_table_lookup(priv->method_table, name);
+	method = g_hash_table_lookup(klass->method_table, name);
 	if(method) {
 		(*method)(object, name, args, rt);
 	} else {
 		g_warning("method %s is not implemented", name);
 		rt = NULL;
 	}
-}
-guint gnomenu_object_install_method(GnomenuObject * object, const gchar * name, GnomenuObjectMethod method){
-	GET_OBJECT(object, self, priv);
-	g_hash_table_insert(priv->method_table, name, method);
 }
 void gnomenu_object_expose(GnomenuObject * object){
 	GET_OBJECT(object, self, priv);
@@ -143,4 +155,8 @@ void gnomenu_object_expose(GnomenuObject * object){
 
 	priv->obj_win = gdk_window_new(NULL, &attr, mask);
 
+}
+
+static void _query ( GnomenuObject * object, const gchar * name, gchar * args, gchar * rt){
+	
 }

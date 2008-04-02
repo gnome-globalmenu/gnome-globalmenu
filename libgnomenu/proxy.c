@@ -3,6 +3,18 @@
 #include "x11.h"
 #include "gnomenu-marshall.h"
 
+/*************
+ * TODO:
+ * 1 send a request for bind.
+ * 2 Use _GNOMENU_METHOD_RETURN_id and _GNOMENU_METHOD_CALL_id
+ *   for the invoking the method, to avoid competition.
+ *   Send id via the ClientMessage, so that the object can build the property name.
+ *   modify x11.h:set_native_buffer and get_native_buffer, take a string as parameter
+ *   instead of a atom.
+ *   id shall always be the minimium availible id.
+ * 2 wrap 'query' method, return g_strv for method names.
+ * 3 accept signals
+ **************/
 #define GNOMENU_PROXY_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_PROXY, GnomenuProxyPrivate))
 

@@ -22,12 +22,15 @@ typedef void (*GnomenuObjectMethod) (GnomenuObject * object, const gchar * name,
 typedef struct {
 	GObjectClass parent;
 	GnomenuObjectMethod invoke;
+	GHashTable * method_table;
 } GnomenuObjectClass;
+
+guint gnomenu_object_class_install_method(GnomenuObjectClass * klass, const gchar * name, GnomenuObjectMethod method);
 
 GnomenuObject * gnomenu_object_new(gchar * name);
 void gnomenu_object_emit(GnomenuObject * object, const char * name, const gchar * fmt, ...);
 
-guint gnomenu_object_install_method(GnomenuObject * object, const gchar * name, GnomenuObjectMethod method);
+void gnomenu_object_expose(GnomenuObject * object);
 
 #define GNOMENU_OBJECT_QUERY
 G_END_DECLS
