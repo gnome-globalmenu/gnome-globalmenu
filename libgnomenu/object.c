@@ -83,7 +83,7 @@ gnomenu_object_class_init(GnomenuObjectClass * klass){
 						"",
 						G_PARAM_CONSTRUCT_ONLY| G_PARAM_WRITABLE)
 			);
-	gnmenu_object_class_install_method(klass, 
+	gnomenu_object_class_install_method(klass, 
 			"query", _query);
 }
 static void
