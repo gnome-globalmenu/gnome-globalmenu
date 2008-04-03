@@ -20,7 +20,7 @@ typedef struct {
 	void (*signal)(GnomenuProxy * proxy, const char * name, gchar * arg);
 } GnomenuProxyClass;
 
-void gnomenu_proxy_invoke(GnomenuProxy * proxy, const char * name, const char * fmt,...);
+gchar * gnomenu_proxy_invoke(GnomenuProxy * proxy, const char * name, const char * fmt,...);
 GnomenuProxy * gnomenu_proxy_new(gchar * path);
 
 G_END_DECLS

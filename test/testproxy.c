@@ -11,7 +11,7 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 		}
 	}
 	if(button == invoke){
-		gnomenu_proxy_invoke(proxy, "query", "%s", "all");
+		g_print(gnomenu_proxy_invoke(proxy, "query", NULL));
 	}
 }
 int main(int argc, char * argv){

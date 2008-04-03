@@ -5,15 +5,8 @@
 
 /*************
  * TODO:
- * 1 send a request for bind.
- * 2 Use _GNOMENU_METHOD_RETURN_id and _GNOMENU_METHOD_CALL_id
- *   for the invoking the method, to avoid competition.
- *   Send id via the ClientMessage, so that the object can build the property name.
- *   modify x11.h:set_native_buffer and get_native_buffer, take a string as parameter
- *   instead of a atom.
- *   id shall always be the minimium availible id.
- * 2 wrap 'query' method, return g_strv for method names.
- * 3 accept signals
+ * 1 accept signals
+ * 2 signal:: destroy. Shall be emulated by a keep-alive detection;
  **************/
 #define GNOMENU_PROXY_GET_PRIVATE(obj) \
 	(G_TYPE_INSTANCE_GET_PRIVATE(obj, GNOMENU_TYPE_PROXY, GnomenuProxyPrivate))
@@ -37,14 +30,16 @@ typedef struct {
 	GMainLoop * ret_loop;
 	gchar * buffer;
 	gboolean done;
+	gboolean returned;
+	gboolean is_void;
 	guint timeout_func;
-} RequestInfo;
+} CallInfo;
 
 typedef struct {
 	gboolean disposed;
 	GdkWindow * pxy_win;
 	GdkWindow * obj_win;
-	GQueue call_stack; /*RequestInfo*/
+	GQueue call_stack; /*CallInfo*/
 } GnomenuProxyPrivate;
 
 /* Properties */
@@ -147,46 +142,83 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
  * pointer: bytes,
  * NULL
  * */
-static gboolean _request_timeout(RequestInfo * ri){
+static gboolean _request_timeout(CallInfo * ri){
 	g_main_loop_quit(ri->call_loop);
 	g_main_loop_quit(ri->ret_loop);
 	ri->timeout_func = 0;
 	return FALSE;
 }
-void gnomenu_proxy_invoke(GnomenuProxy * proxy, const gchar * name, const gchar * fmt,...){
+static guint find_available_id(GnomenuProxy * proxy){
 	GET_OBJECT(proxy, self, priv);
-	static guint id = 0;
+	guint id = 0;
+	gboolean found = FALSE;
+	while(!found) {
+		found = TRUE;
+		g_queue_for(&priv->call_stack, CallInfo * ri, 
+			if(id == ri->id) { id++; found = FALSE; break; } );
+	}
+	return id;
+}
+gchar * gnomenu_proxy_invoke(GnomenuProxy * proxy, const gchar * name, const gchar * fmt,...){
+	GET_OBJECT(proxy, self, priv);
+	va_list va;
 	gchar *  arg = NULL;
 	gchar * req = NULL;
-	RequestInfo * ri = g_new0(RequestInfo, 1);
-	va_list va;
-	va_start(va, fmt);
-	arg = g_strdup_vprintf(fmt, va);
-	va_end(va);
-	req = g_strdup_printf("%s\t%d\t%s", name, id, arg);
+	gchar * rt = NULL;
+	guint id = find_available_id(proxy);
+	CallInfo * ri = g_new0(CallInfo, 1);
+
+	if(fmt){
+		va_start(va, fmt);
+		arg = g_strdup_vprintf(fmt, va);
+		va_end(va);
+	} else arg = g_strdup("");
+	
+	req = g_strdup_printf("%s %d %s", name, id, arg);
 	g_free(arg);
 /*Then invoke the method via IPC*/
 	LOG("req = '%s'", req);
 	ri->buffer = req;
-	ri->id = id++;
+	ri->id = id;
 	ri->call_loop = g_main_loop_new(NULL, TRUE);
 	ri->ret_loop = g_main_loop_new(NULL, TRUE);
 	ri->done = FALSE;
+	ri->returned = FALSE;
+	ri->is_void = TRUE;
 	g_queue_push_tail(&priv->call_stack, ri);
 	ri->timeout_func = g_timeout_add_seconds(10, _request_timeout, ri);
-	_set_native_buffer(GDK_WINDOW_XWINDOW(priv->pxy_win), _GNOMENU_METHOD_CALL, req, strlen(req)+1);
+	
+	_set_native_buffer(GDK_WINDOW_XWINDOW(priv->pxy_win), _GNOMENU_METHOD_CALL, id, req, strlen(req)+1);
 	if(g_main_loop_is_running(ri->call_loop)){
 		GDK_THREADS_LEAVE();
 		g_main_loop_run(ri->call_loop);
 		GDK_THREADS_ENTER();
 	}
-	LOG("method resolved");
+	LOG("method-call buffer set");
+	GnomenuXMessage msg;
+	msg.id = id;
+	msg.type = _XMESSAGE_TYPE_CALL;
+	msg.source = GDK_WINDOW_XWINDOW(priv->pxy_win);
+	_send_xclient_message ( GDK_WINDOW_XWINDOW(priv->obj_win), &msg, sizeof(msg));
+	if(g_main_loop_is_running(ri->ret_loop)){
+		GDK_THREADS_LEAVE();
+		g_main_loop_run(ri->ret_loop);
+		GDK_THREADS_ENTER();
+	}
+	LOG("method returns");
+	if(!ri->is_void){
+		/* fetch the return value! */
+		rt = _get_native_buffer(GDK_WINDOW_XWINDOW(priv->pxy_win), _GNOMENU_METHOD_RETURN, id, NULL, FALSE);
+	} else {
+		rt = NULL;
+	}
 	ri = g_queue_pop_tail(&priv->call_stack);
 	if(ri->timeout_func) g_source_remove(ri->timeout_func);
 	g_main_loop_unref(ri->call_loop);
 	g_main_loop_unref(ri->ret_loop);
 	g_free(ri);
 	g_free(req);
+	return rt;
 }
 
 void _signal(GnomenuProxy * proxy, const gchar * name, gchar * arg){
@@ -215,13 +247,13 @@ gboolean gnomenu_proxy_bind(GnomenuProxy * proxy){
 		g_assert(priv->pxy_win);
 		gdk_window_add_filter(priv->obj_win, _obj_win_filter, self);
 		gdk_window_add_filter(priv->pxy_win, _pxy_win_filter, self);
+		gnomenu_proxy_invoke(self, "bind", "%d", GDK_WINDOW_XWINDOW(priv->pxy_win)); 
 	} else {
 		LOG("target window not found");
 	}
-	LOG("binded");
+	/*64BIT: use %lld instead!*/
 	return priv->obj_win != NULL;
 }
-
 static GdkFilterReturn 
 	_obj_win_filter (GdkXEvent* gdkxevent, GdkEvent * event, GnomenuProxy * proxy){
 	XEvent * xevent = gdkxevent;
@@ -229,7 +261,7 @@ static GdkFilterReturn
 		case PropertyNotify:
 		break;
 		case ClientMessage:
-			if(xevent->xclient.message_type != gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE))
+			if(xevent->xclient.message_type != gdk_x11_atom_to_xatom(gdk_atom_intern(_GNOMENU_MESSAGE_TYPE, FALSE)))
 				return GDK_FILTER_CONTINUE;
 		break;
 		default:
@@ -241,26 +273,55 @@ static GdkFilterReturn
 	XEvent * xevent = gdkxevent;
 	switch(xevent->type){
 		case PropertyNotify:
-			if(xevent->xproperty.atom == gdk_x11_atom_to_xatom(_GNOMENU_METHOD_CALL)){
-				if(xevent->xproperty.state == PropertyNewValue){
+			if(xevent->xproperty.state == PropertyNewValue){
+				const gchar * property_name = gdk_x11_get_xatom_name(xevent->xproperty.atom);
+				guint id;
+				gchar * buffer_name;
+				if( x_prop_name_decode(property_name, &buffer_name, &id)
+				 && g_str_equal(buffer_name, _GNOMENU_METHOD_CALL)){
 					GET_OBJECT(proxy, self, priv);
+					LOG("decoded name = %s:%d", buffer_name, id);
 					guint bytes;
 					gchar * buffer = _get_native_buffer(GDK_WINDOW_XWINDOW(priv->pxy_win),
-						_GNOMENU_METHOD_CALL, &bytes, FALSE);
-					g_queue_for(&priv->call_stack, RequestInfo * ri, 
-						if(g_str_equal(ri->buffer, buffer)){
+						_GNOMENU_METHOD_CALL, id, &bytes, FALSE);
+					g_queue_for(&priv->call_stack, CallInfo * ri, 
+						if(ri->id == id && g_str_equal(ri->buffer, buffer)){
 							ri->done = TRUE;
 							g_main_loop_quit(ri->call_loop);
-							LOG("method done: %s", ri->buffer);
+							LOG("method-call buffer set: %s", ri->buffer);
 						}
 					);
 				}
+				g_free(buffer_name);
+				/*no need to free property_name as indicated in gdk-doc*/
 			}
 			return GDK_FILTER_CONTINUE;
 		break;
 		case ClientMessage:
-			if(xevent->xclient.message_type != gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE))
+			if(xevent->xclient.message_type 
+				!= gdk_x11_atom_to_xatom(gdk_atom_intern(_GNOMENU_MESSAGE_TYPE, FALSE)))
 				return GDK_FILTER_CONTINUE;
+			GnomenuXMessage msg = * (GnomenuXMessage *)&xevent->xclient.data;
+			GnomenuXMessage msg_r;
+			GET_OBJECT(proxy, self, priv);
+			switch(msg.type){
+				case _XMESSAGE_TYPE_RETURN:
+				case _XMESSAGE_TYPE_RETURN_VOID:
+					/*TODO: invoke the method call _invoke*/
+					/*TODO: set result buffer and monitor, move this return msg to _invoke*/
+					LOG("received a return");
+					g_queue_for(&priv->call_stack, CallInfo * ri, 
+						if(ri->id == msg.id ){
+							ri->returned = TRUE;
+							if(msg.type == _XMESSAGE_TYPE_RETURN) ri->is_void = FALSE;
+							else ri->is_void = TRUE;
+							g_main_loop_quit(ri->ret_loop);
+							LOG("method-call returned: %d", ri->id);
+						}
+					);
+				break;
+			}
+		return GDK_FILTER_REMOVE;
 		break;
 		default:
 		return GDK_FILTER_CONTINUE;

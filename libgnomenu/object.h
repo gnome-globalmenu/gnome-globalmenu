@@ -16,8 +16,8 @@ typedef struct {
 	gchar * path;
 } GnomenuObject;
 
-typedef void (*GnomenuObjectMethod) (GnomenuObject * object, const gchar * name, 
-					gchar * args, gchar * rt);
+typedef gchar * (*GnomenuObjectMethod) (GnomenuObject * object, const gchar * name, 
+					gchar * args);
 
 typedef struct {
 	GObjectClass parent;
@@ -25,7 +25,7 @@ typedef struct {
 	GHashTable * method_table;
 } GnomenuObjectClass;
 
-guint gnomenu_object_class_install_method(GnomenuObjectClass * klass, const gchar * name, GnomenuObjectMethod method);
+guint gnomenu_object_class_install_method(GnomenuObjectClass * klass, const gchar * name, GnomenuObjectMethod method, const gchar * fmt);
 
 GnomenuObject * gnomenu_object_new(gchar * name);
 void gnomenu_object_emit(GnomenuObject * object, const char * name, const gchar * fmt, ...);

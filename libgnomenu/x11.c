@@ -25,7 +25,7 @@ gboolean _send_xclient_message 	( GdkNativeWindow target, gpointer data, guint b
     memset (&xclient, 0, sizeof (xclient));
     xclient.window = target; /*Though X11 places no interpretation of this field, GNOMENU interpretes this field at the target window.*/
     xclient.type = ClientMessage;
-    xclient.message_type = gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE);
+    xclient.message_type = gdk_x11_atom_to_xatom(gdk_atom_intern(_GNOMENU_MESSAGE_TYPE, FALSE));
     xclient.format = 8;
 	memcpy(&xclient.data.l, data, bytes);
     gdk_error_trap_push ();
@@ -37,6 +37,7 @@ gboolean _send_xclient_message 	( GdkNativeWindow target, gpointer data, guint b
     return gdk_error_trap_pop () == 0;
 
 }
+
 gboolean _peek_xwindow 			( GdkNativeWindow target ) {
 	GdkNativeWindow root_return;
 	GdkNativeWindow parent_return;
@@ -119,23 +120,41 @@ GList * _find_native_by_name		( gchar * name ){
 	return window_list;
 
 }
-
-gboolean _set_native_buffer ( GdkNativeWindow native, GdkAtom buffer, gpointer data, gint bytes){
+gchar * x_prop_name_encode(const char * name, guint id){
+	gchar * full_name = g_strdup_printf("%s:%d", name, id);
+	return full_name;
+}
+gboolean x_prop_name_decode(const char * xpropname, gchar ** name, guint * id){
+	gchar ** splitted = g_strsplit(xpropname, ":", 0);
+	if(g_strv_length(splitted) !=2) {
+		g_strfreev(splitted);
+		*name = NULL;
+		return FALSE;
+	}
+	if(name) *name = g_strdup(splitted[0]);
+	if(id) *id = (guint) g_ascii_strtoull(splitted[1], NULL, 10);
+	g_strfreev(splitted);
+	return TRUE;
+}
+gboolean _set_native_buffer ( GdkNativeWindow native, const gchar *  buffer_name, guint id, gpointer data, gint bytes){
+	gchar * full_name = x_prop_name_encode(buffer_name, id);
 	gdk_error_trap_push();	
 	XChangeProperty(
 			GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 
 			native,
-			gdk_x11_atom_to_xatom(buffer), 
-			gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE), 
+			gdk_x11_atom_to_xatom(gdk_atom_intern(full_name, FALSE)), 
+			gdk_x11_atom_to_xatom(gdk_atom_intern(_GNOMENU_MESSAGE_TYPE, FALSE)), 
 			8, 
 			PropModeReplace, 
 			data, bytes);
+	g_free(full_name);
 	if(gdk_error_trap_pop()){
 		return FALSE;
 	}
 	return TRUE;
 }
-gpointer _get_native_buffer ( GdkNativeWindow native, GdkAtom buffer, gint * bytes, gboolean remove){
+gpointer _get_native_buffer ( GdkNativeWindow native, const gchar * buffer_name, guint id, gint * bytes, gboolean remove){
+	gchar * full_name = x_prop_name_encode(buffer_name, id);
 	Atom actual_type_return;
 	gulong actual_format_return;
 	gulong bytes_after_return;
@@ -146,20 +165,21 @@ gpointer _get_native_buffer ( GdkNativeWindow native, GdkAtom buffer, gint * byt
 	XGetWindowProperty(
 			GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), 
 			native, 
-			gdk_x11_atom_to_xatom(buffer), 
+			gdk_x11_atom_to_xatom(gdk_atom_intern(full_name, FALSE)), 
 /*FIXME: max size is 2048 bytes*/
 			0, 2048, 
 			remove,
-			gdk_x11_atom_to_xatom(_GNOMENU_MESSAGE_TYPE), 
+			gdk_x11_atom_to_xatom(gdk_atom_intern(_GNOMENU_MESSAGE_TYPE, FALSE)), 
 			&actual_type_return,
 			&actual_format_return,
 			&nitems_return,
 			&bytes_after_return,
 			&property_return);
+	g_free(full_name);
 	if(gdk_error_trap_pop()){
 		return NULL;
 	} else {
-		*bytes = nitems_return;
+		if(bytes) *bytes = nitems_return;
 		gpointer data = g_memdup(property_return, nitems_return);
 		LOG("%10s", data);
 		XFree(property_return);		
