@@ -948,9 +948,12 @@ static gboolean _gnomenu_socket_is_alive(GnomenuSocket * _self){
 }
 GnomenuSocketNativeID gnomenu_socket_lookup(GnomenuSocket * _self, gchar * name){
 	GList * l = _gnomenu_socket_find_targets(_self, name);
-	GnomenuSocketNativeID n = l->data;
-	g_list_free(l);
-	return n;
+	if(l) {
+		GnomenuSocketNativeID n = l->data;
+		g_list_free(l);
+		return n;
+	}
+	return 0;
 }
 /**
  * _gnomenu_socket_find_targets:
