@@ -224,6 +224,7 @@ _constructor	( GType type, guint n_construct_properties,
 	return _self;
 }
 gboolean * menu_server_start(MenuServer * server){
+	usleep(100000);
 	gnomenu_server_helper_start(server->gtk_helper);
 }
 static void 
