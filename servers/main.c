@@ -5,6 +5,7 @@
 #include "application.h"
 #include "log.h"
 #include "intl.h"
+#include "appmenu.h"
 
 static void window_destroy(GtkWidget * widget, gpointer useless){
 	gtk_main_quit();
@@ -12,6 +13,7 @@ static void window_destroy(GtkWidget * widget, gpointer useless){
 GtkWidget * show_about_dialog, * show_conf_dialog;
 GtkWidget * set_bg;
 GtkWidget * switch_orientation;
+GtkWidget * app_menu;
 static GtkOrientation orientation = GTK_ORIENTATION_HORIZONTAL;
 static void button_clicked(Application * app, GtkWidget * button){
 	if(button == show_about_dialog){
@@ -53,6 +55,9 @@ static void button_clicked(Application * app, GtkWidget * button){
 		gtk_widget_destroy(file_chooser);
 	}
 }
+static title_clicked(Application * app, gpointer data){
+	gtk_menu_popup(app_menu, NULL, NULL, NULL, NULL, NULL, NULL);
+}
 static gboolean fancy = FALSE;
 static gboolean stick = TRUE;
 static gboolean topmost = TRUE;
@@ -93,6 +98,8 @@ GOptionEntry entries [] = {
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	container = gtk_event_box_new();
+	app_menu = app_menu_new();
+	gtk_menu_attach_to_widget(app_menu, container, NULL);
 	gtk_container_set_border_width(container, 0);
 
 	gtk_box_pack_start(hbox, container, TRUE, TRUE, 0);
@@ -119,7 +126,7 @@ GOptionEntry entries [] = {
 
 	gtk_window_set_keep_above(window, topmost);
 	if(stick) gtk_window_stick(window);
-
+	g_signal_connect(app, "title-clicked", title_clicked, NULL);
 	gtk_widget_show_all(window);
 	application_start(app);
 	gtk_main();

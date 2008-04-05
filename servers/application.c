@@ -17,6 +17,10 @@ enum {
 	PROP_TITLE_FONT,
 	PROP_TITLE_MAX_WIDTH,
 };
+enum {
+	TITLE_CLICKED,
+	SIGNAL_MAX,
+};
 
 typedef struct _ApplicationPrivate {
 	gint foo;
@@ -34,6 +38,7 @@ static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuServer * server);
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
 static void _s_conf_dialog_response(Application * app, gint arg, GtkWidget * dialog);
+static void _s_title_clicked(Application * app, gpointer * data);
 
 /* Application Interface */
 static void _update_ui					(Application *app);
@@ -50,10 +55,11 @@ static void _dispose					( GObject *obj);
 static GObject *_constructor			( GType type, guint n_construct_properties,
 										  GObjectConstructParam * construct_params) ;
 
+
 /* tool function*/
 static void _update_background			(Application * app);
 
-
+static guint class_signals[SIGNAL_MAX] = {0};
 G_DEFINE_TYPE		(Application, application, G_TYPE_OBJECT);
 
 static void _create_conf_dialog(Application * app){
@@ -75,17 +81,21 @@ static void application_init(Application *app)
 	app->vbox = GTK_BOX(gtk_vbox_new(FALSE, 0)); 
 	app->title = gtk_label_new("");
 	app->icon = gtk_image_new();
+	app->eventbox = gtk_event_box_new();
 	app->server = menu_server_new();
 	app->bgpixmap = NULL;
 	app->bgcolor = NULL;
-
+	gtk_event_box_set_above_child(app->eventbox, TRUE);
+	gtk_container_add(app->eventbox, app->title);
 	app->title_font = NULL;
 	app->title_visible = FALSE;
 	app->icon_visible = FALSE;
-
 	app->glade_factory = glade_xml_new(GLADEDIR"/""application.glade", NULL, NULL);
 	g_assert(app->glade_factory);
 	_create_conf_dialog(app);
+}
+static void _title_clicked(ApplicationClass * klass){
+	g_warning("title _clicked");
 }
 static void application_class_init(ApplicationClass *klass)
 {
@@ -100,6 +110,8 @@ static void application_class_init(ApplicationClass *klass)
 	klass->update_ui = _update_ui;
 	klass->load_conf = _load_conf_unimp;
 	klass->save_conf = _save_conf_unimp;
+
+	klass->title_clicked = _title_clicked;
 
 	g_object_class_install_property (obj_class,
 		PROP_WINDOW,
@@ -151,7 +163,17 @@ static void application_class_init(ApplicationClass *klass)
 						-1, 100, -1, 
 						G_PARAM_CONSTRUCT | G_PARAM_READWRITE));
 						
-
+	class_signals[TITLE_CLICKED] =
+		g_signal_new("title-clicked",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (ApplicationClass, title_clicked),
+			NULL,
+			NULL,
+			g_cclosure_marshal_VOID__VOID,
+			G_TYPE_NONE,
+			0);
+			
 	g_type_class_add_private(obj_class, sizeof(ApplicationPrivate));
 }
 
@@ -244,7 +266,7 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
 									GTK_WIDGET(self->icon));
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
-									GTK_WIDGET(self->title));
+									GTK_WIDGET(self->eventbox));
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
 									GTK_WIDGET(self->server));
 					gtk_container_remove(GTK_CONTAINER(self->window), 
@@ -252,7 +274,7 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 				}
 				g_object_set(self->server, "orientation", self->orientation, NULL);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->icon), FALSE, FALSE, 0);
-				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->title), FALSE, FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->eventbox), FALSE, FALSE, 0);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->server), TRUE, TRUE, 0);
 
 				gtk_widget_show(GTK_WIDGET(self->box));
@@ -330,6 +352,7 @@ static void _dispose					( GObject *obj){
 		g_object_unref(app->icon);
 		g_object_unref(app->title);
 		g_object_unref(app->server);
+		g_object_ref(app->eventbox);
 	}
 	G_OBJECT_CLASS(application_parent_class)->dispose(obj);
 }
@@ -341,7 +364,6 @@ static void _finalize(GObject *obj)
 	g_object_unref(app->glade_factory);
 	G_OBJECT_CLASS(application_parent_class)->finalize(obj);
 }
-
 static GObject * 
 _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
@@ -361,6 +383,7 @@ _constructor	( GType type, guint n_construct_properties,
 	g_object_ref(app->vbox);
 	g_object_ref(app->icon);
 	g_object_ref(app->title);
+	g_object_ref(app->eventbox);
 	g_object_ref(app->server);
 
 	g_signal_connect_swapped(G_OBJECT(app->conf_dialog.dlg), 
@@ -375,7 +398,8 @@ _constructor	( GType type, guint n_construct_properties,
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
-
+	g_signal_connect_swapped(G_OBJECT(app->eventbox), 
+		"button-press-event", G_CALLBACK(_s_title_clicked), app);
 	return _self;
 }
 /* ENDS: GObject Interface */
@@ -577,6 +601,10 @@ static void _update_background(Application * app){
 	if(cropped);
 		g_object_unref(cropped);
 	utils_set_widget_background(GTK_WIDGET(app->server), color, cropped);	
+}
+static void _s_title_clicked(Application * app, gpointer * data){
+	g_warning("s_title_clicked");
+	g_signal_emit(app, class_signals[TITLE_CLICKED], 0);
 }
 /* END: tool functions*/
 /*

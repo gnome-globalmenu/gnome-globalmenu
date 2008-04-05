@@ -61,12 +61,14 @@ VAST_SOURCE_CODE = application.h \
 	intl.h \
 	utils.c \
 	utils.h \
-	log.h
+	log.h 
 
 gnome_globalmenu_applet_SOURCES = \
 	main-gnome.c \
 	application-gnome.c \
 	application-gnome.h \
+	appmenu.c \
+	appmenu.h \
 	$(VAST_SOURCE_CODE)
 gnome_globalmenu_applet_CFLAGS = \
 	$(GNOME_GLOBALMENU_APPLET_CFLAGS)
@@ -85,6 +87,8 @@ xfce_globalmenu_plugin_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 
 gtk_globalmenu_server_SOURCES = \
 	main.c \
+	appmenu.c \
+	appmenu.h \
 	$(VAST_SOURCE_CODE)
 gtk_globalmenu_server_CFLAGS =\
 	$(GLOBALMENU_SERVER_CFLAGS)

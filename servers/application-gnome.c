@@ -3,6 +3,7 @@
 #include <panel-applet-gconf.h>
 #include "application-gnome.h"
 #include "log.h"
+#include "appmenu.h"
 
 #include "intl.h"
 
@@ -11,9 +12,11 @@
 
 typedef struct {
 	gint foo;
+	GtkMenu * appmenu;
 }ApplicationGnomePrivate;
 
 static void _create_popup_menu(ApplicationGnome * self);
+static void _title_clicked(ApplicationGnome * self, gpointer data);
 
 G_DEFINE_TYPE		(ApplicationGnome, application_gnome, TYPE_APPLICATION);
 
@@ -22,6 +25,8 @@ _constructor	( GType type, guint n_construct_properties,
 				  GObjectConstructParam * construct_params) {
 	Application * app;
 	GError * error = NULL;
+	ApplicationGnomePrivate * priv;
+
 	GObject * obj = ( *G_OBJECT_CLASS(application_gnome_parent_class)->constructor)(type,
 			n_construct_properties,
 			construct_params);
@@ -30,8 +35,16 @@ _constructor	( GType type, guint n_construct_properties,
 	if(error != NULL){
 		g_error("%s", error->message);
 	}
+ 	priv = APPLICATION_GNOME_GET_PRIVATE(obj);
+	priv->appmenu = app_menu_new();
+	g_signal_connect(G_OBJECT(obj), "title-clicked", _title_clicked, NULL);
 	_create_popup_menu(app);
 	return obj;
+}
+static void _title_clicked(ApplicationGnome * self, gpointer data){
+	ApplicationGnomePrivate * priv;
+ 	priv = APPLICATION_GNOME_GET_PRIVATE(self);
+	gtk_menu_popup(priv->appmenu, NULL, NULL, NULL, NULL, NULL, NULL);
 }
 
 static void _update_ui(Application *app)
@@ -97,7 +110,6 @@ static void application_gnome_class_init(ApplicationGnomeClass *klass)
 	app_class->update_ui = _update_ui;
 	app_class->load_conf = _load_conf;
 	app_class->save_conf = _save_conf;	
-
 	g_type_class_add_private(obj_class, sizeof(ApplicationGnomePrivate));
 }
 

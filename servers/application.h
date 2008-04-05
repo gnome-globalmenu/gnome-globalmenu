@@ -34,10 +34,10 @@ struct _Application
 	MenuServer * server;
 	GtkWidget * title;
 	GtkWidget * icon;
+	GtkEventBox * eventbox;	
 	GtkBox * box; /*either point to vbox or hbox*/
 	GtkBox * vbox; 
 	GtkBox * hbox;
-	
 /* property value */
 	GdkPixmap * bgpixmap;
 	GdkColor * bgcolor;
@@ -56,6 +56,7 @@ struct _ApplicationClass {
 	void (*update_ui)(Application *app);
 	void (*load_conf)(Application *app);
 	void (*save_conf)(Application *app);
+	void (*title_clicked)(Application * app);
 	void (*conf_changed)(Application *app); /*emited if configure is changed. not implemented yet*/
 };
 
