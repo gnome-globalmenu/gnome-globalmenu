@@ -165,8 +165,11 @@ void gnomenu_object_emit(GnomenuObject * object, const gchar * name, const gchar
 }
 gchar * _invoke_parse(GnomenuObject * object, gchar * command){
 	gchar ** splitted = g_strsplit_set(command, " ", 3);
-	return _invoke(object, splitted[0], splitted[2]);
+	gchar *ret;
 
+	ret = _invoke(object, splitted[0], splitted[2]);
+	g_strfreev(splitted);
+	return ret;
 }
 gchar * _invoke(GnomenuObject * object, const gchar * name, gchar * args){
 	GnomenuObjectClass * klass = G_OBJECT_GET_CLASS(object);
