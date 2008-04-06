@@ -3,6 +3,19 @@
 #include <gnome-desktop-2.0/libgnome/gnome-desktop-item.h>
 #define GMENU_I_KNOW_THIS_IS_UNSTABLE
 #include <gnome-menus/gmenu-tree.h>
+GtkWidget * create_menu_icon(gchar * icon_name){
+	GdkPixbuf * pixbuf;
+	GError * error = NULL;
+	gint width = 0, height = 0;
+	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+
+	pixbuf = gdk_pixbuf_new_from_file_at_size(icon_name, width, height, &error);
+	if(error) {
+		g_error_free(error);
+	}
+	if(!pixbuf) return gtk_image_new_from_icon_name(icon_name, GTK_ICON_SIZE_MENU);
+	return gtk_image_new_from_pixbuf(pixbuf);
+}
 static void
 activate_app_def (GtkWidget      *menuitem,
 		  GMenuTreeEntry *entry)
@@ -23,9 +36,15 @@ create_menuitem (GtkWidget          *menu,
 		 GMenuTreeDirectory *alias_directory)
 {
 	GtkWidget  *menuitem;
+	GtkWidget * menuicon;
 	gchar * menu_label = 	 gmenu_tree_entry_get_name(entry);
+	gchar * menu_icon_name = gmenu_tree_entry_get_icon(entry);
+	
 	menuitem = gtk_image_menu_item_new_with_mnemonic (menu_label);
-	g_print("new app menu item %s", menu_label);
+	menuicon = create_menu_icon(menu_icon_name);
+	gtk_image_menu_item_set_image(menuitem, menuicon);
+
+	g_message("new app menu item %s: icon=%s", menu_label, menu_icon_name);
 	g_object_set_data_full (G_OBJECT (menuitem),
 				"panel-menu-tree-entry",
 				gmenu_tree_item_ref (entry),
@@ -110,6 +129,7 @@ create_submenu_entry (GtkWidget          *menu,
 		      GMenuTreeDirectory *directory)
 {
 	GtkWidget *menuitem;
+	GtkWidget *menuicon;
 
 	menuitem = gtk_image_menu_item_new ();
 /*
@@ -125,7 +145,11 @@ create_submenu_entry (GtkWidget          *menu,
 			gmenu_tree_directory_get_name (directory));
 */
 	gchar * menu_label = 	 gmenu_tree_directory_get_name(directory);
+	gchar * menu_icon_name = gmenu_tree_directory_get_icon(directory);
+
 	menuitem = gtk_image_menu_item_new_with_mnemonic (menu_label);
+	menuicon = create_menu_icon(menu_icon_name);
+	if(menuicon) gtk_image_menu_item_set_image(menuitem, menuicon);
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
 	gtk_widget_show (menuitem);
