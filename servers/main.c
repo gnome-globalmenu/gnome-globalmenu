@@ -98,7 +98,7 @@ GOptionEntry entries [] = {
 	hbox = gtk_hbox_new(FALSE, 0);
 
 	container = gtk_event_box_new();
-	app_menu = app_menu_new();
+	app_menu = app_menu_new("applications.menu");
 	gtk_menu_attach_to_widget(app_menu, container, NULL);
 	gtk_container_set_border_width(container, 0);
 

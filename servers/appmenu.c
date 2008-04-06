@@ -211,8 +211,8 @@ void app_menu_setup_from_directory(GtkMenu * menu, GMenuTreeDirectory * director
 	g_slist_free(items);
 }
 
-GtkWidget * app_menu_new(){
-	GMenuTree * tree = gmenu_tree_lookup("applications.menu", GMENU_TREE_FLAGS_NONE);
+GtkWidget * app_menu_new(gchar * menu_file){
+	GMenuTree * tree = gmenu_tree_lookup(menu_file/*"applications.menu"*/, GMENU_TREE_FLAGS_NONE);
 	GMenuTreeDirectory * directory = gmenu_tree_get_root_directory (tree);
 	GtkWidget * menu = gtk_menu_new();
 	app_menu_setup_from_directory(menu, directory);

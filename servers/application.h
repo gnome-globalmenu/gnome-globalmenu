@@ -34,7 +34,8 @@ struct _Application
 	MenuServer * server;
 	GtkWidget * title;
 	GtkWidget * icon;
-	GtkEventBox * eventbox;	
+	GtkEventBox * titlebox;	
+	GtkEventBox * iconbox;	
 	GtkBox * box; /*either point to vbox or hbox*/
 	GtkBox * vbox; 
 	GtkBox * hbox;
@@ -57,6 +58,7 @@ struct _ApplicationClass {
 	void (*load_conf)(Application *app);
 	void (*save_conf)(Application *app);
 	void (*title_clicked)(Application * app);
+	void (*icon_clicked)(Application * app);
 	void (*conf_changed)(Application *app); /*emited if configure is changed. not implemented yet*/
 };
 

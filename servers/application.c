@@ -19,6 +19,7 @@ enum {
 };
 enum {
 	TITLE_CLICKED,
+	ICON_CLICKED,
 	SIGNAL_MAX,
 };
 
@@ -38,7 +39,8 @@ static void _s_window_destroy(Application * app, GtkWidget * widget);
 static void _s_notify_active_client(Application * app, GParamSpec * pspec, MenuServer * server);
 static void _s_menu_bar_area_size_allocate(Application * app, GtkAllocation * allocation, GtkWidget * widget);
 static void _s_conf_dialog_response(Application * app, gint arg, GtkWidget * dialog);
-static void _s_title_clicked(Application * app, gpointer * data);
+static gboolean _s_title_clicked(Application * app, GdkEventButton * event, gpointer * data);
+static gboolean _s_icon_clicked(Application * app, GdkEventButton * event, gpointer * data);
 
 /* Application Interface */
 static void _update_ui					(Application *app);
@@ -81,12 +83,17 @@ static void application_init(Application *app)
 	app->vbox = GTK_BOX(gtk_vbox_new(FALSE, 0)); 
 	app->title = gtk_label_new("");
 	app->icon = gtk_image_new();
-	app->eventbox = gtk_event_box_new();
+	app->titlebox = gtk_event_box_new();
+	app->iconbox = gtk_event_box_new();
 	app->server = menu_server_new();
 	app->bgpixmap = NULL;
 	app->bgcolor = NULL;
-	gtk_event_box_set_above_child(app->eventbox, TRUE);
-	gtk_container_add(app->eventbox, app->title);
+
+	gtk_event_box_set_above_child(app->titlebox, TRUE);
+	gtk_container_add(app->titlebox, app->title);
+	gtk_event_box_set_above_child(app->iconbox, TRUE);
+	gtk_container_add(app->iconbox, app->icon);
+
 	app->title_font = NULL;
 	app->title_visible = FALSE;
 	app->icon_visible = FALSE;
@@ -94,8 +101,11 @@ static void application_init(Application *app)
 	g_assert(app->glade_factory);
 	_create_conf_dialog(app);
 }
-static void _title_clicked(ApplicationClass * klass){
-	g_warning("title _clicked");
+static void _title_clicked(Application* app){
+	g_message("title _clicked");
+}
+static void _icon_clicked(Application * app){
+	g_message("icon _clicked");
 }
 static void application_class_init(ApplicationClass *klass)
 {
@@ -112,6 +122,7 @@ static void application_class_init(ApplicationClass *klass)
 	klass->save_conf = _save_conf_unimp;
 
 	klass->title_clicked = _title_clicked;
+	klass->icon_clicked = _icon_clicked;
 
 	g_object_class_install_property (obj_class,
 		PROP_WINDOW,
@@ -168,6 +179,16 @@ static void application_class_init(ApplicationClass *klass)
 			G_TYPE_FROM_CLASS(klass),
 			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
 			G_STRUCT_OFFSET (ApplicationClass, title_clicked),
+			NULL,
+			NULL,
+			g_cclosure_marshal_VOID__VOID,
+			G_TYPE_NONE,
+			0);
+	class_signals[ICON_CLICKED] =
+		g_signal_new("icon-clicked",
+			G_TYPE_FROM_CLASS(klass),
+			G_SIGNAL_RUN_CLEANUP | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+			G_STRUCT_OFFSET (ApplicationClass, icon_clicked),
 			NULL,
 			NULL,
 			g_cclosure_marshal_VOID__VOID,
@@ -264,17 +285,17 @@ _set_property( GObject * object, guint property_id, const GValue * value, GParam
 				}
 				if(oldbox){
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
-									GTK_WIDGET(self->icon));
+									GTK_WIDGET(self->iconbox));
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
-									GTK_WIDGET(self->eventbox));
+									GTK_WIDGET(self->titlebox));
 					gtk_container_remove(GTK_CONTAINER(oldbox), 
 									GTK_WIDGET(self->server));
 					gtk_container_remove(GTK_CONTAINER(self->window), 
 									GTK_WIDGET(oldbox));
 				}
 				g_object_set(self->server, "orientation", self->orientation, NULL);
-				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->icon), FALSE, FALSE, 0);
-				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->eventbox), FALSE, FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->iconbox), FALSE, FALSE, 0);
+				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->titlebox), FALSE, FALSE, 0);
 				gtk_box_pack_start(GTK_BOX(self->box), GTK_WIDGET(self->server), TRUE, TRUE, 0);
 
 				gtk_widget_show(GTK_WIDGET(self->box));
@@ -349,10 +370,9 @@ static void _dispose					( GObject *obj){
 			G_CALLBACK(_s_menu_bar_area_size_allocate), app);
 		g_object_unref(app->hbox);
 		g_object_unref(app->vbox);
-		g_object_unref(app->icon);
-		g_object_unref(app->title);
+		g_object_unref(app->iconbox);
+		g_object_unref(app->titlebox);
 		g_object_unref(app->server);
-		g_object_ref(app->eventbox);
 	}
 	G_OBJECT_CLASS(application_parent_class)->dispose(obj);
 }
@@ -381,9 +401,8 @@ _constructor	( GType type, guint n_construct_properties,
 /*so that reparenting won't destroy it*/
 	g_object_ref(app->hbox);
 	g_object_ref(app->vbox);
-	g_object_ref(app->icon);
-	g_object_ref(app->title);
-	g_object_ref(app->eventbox);
+	g_object_ref(app->iconbox);
+	g_object_ref(app->titlebox);
 	g_object_ref(app->server);
 
 	g_signal_connect_swapped(G_OBJECT(app->conf_dialog.dlg), 
@@ -398,8 +417,10 @@ _constructor	( GType type, guint n_construct_properties,
 	g_signal_connect_swapped(G_OBJECT(app->server),
 		"size-allocate",
 		G_CALLBACK(_s_menu_bar_area_size_allocate), app);
-	g_signal_connect_swapped(G_OBJECT(app->eventbox), 
+	g_signal_connect_swapped(G_OBJECT(app->titlebox), 
 		"button-press-event", G_CALLBACK(_s_title_clicked), app);
+	g_signal_connect_swapped(G_OBJECT(app->iconbox), 
+		"button-press-event", G_CALLBACK(_s_icon_clicked), app);
 	return _self;
 }
 /* ENDS: GObject Interface */
@@ -602,9 +623,21 @@ static void _update_background(Application * app){
 		g_object_unref(cropped);
 	utils_set_widget_background(GTK_WIDGET(app->server), color, cropped);	
 }
-static void _s_title_clicked(Application * app, gpointer * data){
+static gboolean _s_title_clicked(Application * app, GdkEventButton * event, gpointer * data){
 	g_warning("s_title_clicked");
-	g_signal_emit(app, class_signals[TITLE_CLICKED], 0);
+	if(event->button == 1) {
+		g_signal_emit(app, class_signals[TITLE_CLICKED], 0);
+		return TRUE;
+	}
+	return FALSE;
+}
+static gboolean _s_icon_clicked(Application * app, GdkEventButton * event, gpointer * data){
+	g_warning("s_icon_clicked");
+	if(event->button == 1) {
+		g_signal_emit(app, class_signals[ICON_CLICKED], 0);
+		return TRUE;
+	}
+	return FALSE;
 }
 /* END: tool functions*/
 /*

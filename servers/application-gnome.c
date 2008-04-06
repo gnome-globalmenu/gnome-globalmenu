@@ -13,6 +13,7 @@
 typedef struct {
 	gint foo;
 	GtkMenu * appmenu;
+	GtkMenu * sysmenu;
 }ApplicationGnomePrivate;
 
 static void _create_popup_menu(ApplicationGnome * self);
@@ -36,7 +37,8 @@ _constructor	( GType type, guint n_construct_properties,
 		g_error("%s", error->message);
 	}
  	priv = APPLICATION_GNOME_GET_PRIVATE(obj);
-	priv->appmenu = app_menu_new();
+	priv->appmenu = app_menu_new("applications.menu");
+	priv->sysmenu = app_menu_new("applications.menu");
 	g_signal_connect(G_OBJECT(obj), "title-clicked", _title_clicked, NULL);
 	_create_popup_menu(app);
 	return obj;
@@ -51,6 +53,12 @@ static void _update_ui(Application *app)
 {
 	g_return_if_fail(IS_APPLICATION_GNOME(app));
 	LOG("app-gnome:_update_ui, chain to parent class\n");
+	if(app->title_visible || app->icon_visible) {
+		panel_applet_set_flags(app->window, panel_applet_get_flags(app->window) & ~PANEL_APPLET_HAS_HANDLE);
+	} else {
+		panel_applet_set_flags(app->window, panel_applet_get_flags(app->window) | PANEL_APPLET_HAS_HANDLE);
+
+	}
 	APPLICATION_CLASS(application_gnome_parent_class)->update_ui(app);
 }
 
