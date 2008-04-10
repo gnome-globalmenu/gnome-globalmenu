@@ -90,8 +90,10 @@ static void application_init(Application *app)
 	app->bgcolor = NULL;
 
 	gtk_event_box_set_above_child(app->titlebox, TRUE);
+	gtk_event_box_set_visible_window(app->titlebox, FALSE);
 	gtk_container_add(app->titlebox, app->title);
 	gtk_event_box_set_above_child(app->iconbox, TRUE);
+	gtk_event_box_set_visible_window(app->iconbox, FALSE);
 	gtk_container_add(app->iconbox, app->icon);
 
 	app->title_font = NULL;
