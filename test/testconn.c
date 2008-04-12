@@ -3,7 +3,7 @@
 
 #include <libgnomenu/connection.h>
 GnomenuConnection * connection;
-GtkButton * Connect, * QueryMethods;
+GtkButton * Connect, * QueryMethods, * QueryObjects, * Disconnect;
 static void button_clicked_cb(GtkButton * button, gpointer user_data){
 	if(button == Connect){
 		if(!gnomenu_connection_connect(connection)){
@@ -11,7 +11,7 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 		}
 	}
 	if(button == QueryMethods){
-		g_print(gnomenu_connection_invoke(connection, "QueryMethods", NULL, NULL));
+		g_print(gnomenu_connection_invoke(connection, NULL, "QueryMethods", NULL));
 		GList * list = gnomenu_connection_query_methods(connection );
 		GList * node;
 		for(node = list; node; node=node->next){
@@ -19,6 +19,12 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 			g_print("%s( %s )\n", mi->name, mi->fmt);
 		}
 		g_list_free(list);
+	}
+	if(button == QueryObjects){
+		g_print(gnomenu_connection_invoke(connection, NULL, "QueryObjects", NULL));
+	}
+	if(button == Disconnect){
+		gnomenu_connection_disconnect(connection);
 	}
 }
 int main(int argc, char * argv){
@@ -36,6 +42,8 @@ int main(int argc, char * argv){
 	gtk_box_pack_start_defaults(vbox, GTK_WIDGET(buttonname));
 	ADD_BUTTON(Connect);
 	ADD_BUTTON(QueryMethods);
+	ADD_BUTTON(QueryObjects);
+	ADD_BUTTON(Disconnect);
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(vbox));
 	gtk_widget_show_all(GTK_WIDGET(window));
 	gtk_main();

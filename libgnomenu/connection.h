@@ -13,6 +13,7 @@ G_BEGIN_DECLS
 typedef struct {
 	GObject parent;
 	gchar * path;
+	gboolean connected;
 } GnomenuConnection;
 typedef struct {
 	gchar * name;
@@ -28,6 +29,7 @@ gchar * gnomenu_connection_invoke(GnomenuConnection * connection, const gchar * 
 GnomenuConnection * gnomenu_connection_new(gchar * path);
 
 gboolean gnomenu_connection_connect(GnomenuConnection * connection);
+void gnomenu_connection_disconnect(GnomenuConnection * connection);
 GList * gnomenu_connection_query_methods(GnomenuConnection * connection);
 
 G_END_DECLS

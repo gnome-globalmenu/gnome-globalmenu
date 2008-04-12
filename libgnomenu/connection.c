@@ -41,6 +41,7 @@ typedef struct {
 	GdkWindow * pxy_win;
 	GdkWindow * obj_win;
 	GQueue call_stack; /*CallInfo*/
+	guint dead_service_detection;
 } GnomenuConnectionPrivate;
 
 /* Properties */
@@ -195,6 +196,11 @@ gchar * gnomenu_connection_invoke(GnomenuConnection * connection, const gchar * 
 		g_main_loop_run(ri->call_loop);
 		GDK_THREADS_ENTER();
 	}
+	if(!ri->done) {
+		rt = NULL;
+		LOG("method-call failed when setting buffer");
+		goto e;
+	}
 	LOG("method-call buffer set");
 	GnomenuXMessage msg;
 	msg.id = id;
@@ -206,6 +212,11 @@ gchar * gnomenu_connection_invoke(GnomenuConnection * connection, const gchar * 
 		g_main_loop_run(ri->ret_loop);
 		GDK_THREADS_ENTER();
 	}
+	if(!ri->returned) {
+		rt = NULL;
+		LOG("waiting for method return failed.");
+		goto e;
+	}
 	LOG("method returns");
 	if(!ri->is_void){
 		/* fetch the return value! */
@@ -213,6 +224,7 @@ gchar * gnomenu_connection_invoke(GnomenuConnection * connection, const gchar * 
 	} else {
 		rt = NULL;
 	}
+e:
 	ri = g_queue_pop_tail(&priv->call_stack);
 	if(ri->timeout_func) g_source_remove(ri->timeout_func);
 	g_main_loop_unref(ri->call_loop);
@@ -226,10 +238,15 @@ void _signal(GnomenuConnection * connection, const gchar * name, gchar * arg){
 	g_free(arg);
 }
 
+static gboolean _dead_service_detect(GnomenuConnection * connection){
+	gnomenu_connection_invoke(connection, NULL, "Touch", "%s", "with a finger"); 
+	return TRUE;
+}
 gboolean gnomenu_connection_connect(GnomenuConnection * connection){
 	GET_OBJECT(connection, self, priv);
 	GList * list_obj_win = _find_native_by_name (self->path);
-	if(priv->obj_win) {
+	if(self->connected) {
+		LOG("Already connected. Do nothing and return");
 		return TRUE;
 	}
 	if(list_obj_win){
@@ -248,12 +265,31 @@ gboolean gnomenu_connection_connect(GnomenuConnection * connection){
 		g_assert(priv->pxy_win);
 		gdk_window_add_filter(priv->obj_win, _obj_win_filter, self);
 		gdk_window_add_filter(priv->pxy_win, _pxy_win_filter, self);
+	/*64BIT: use %lld instead!*/
 		gnomenu_connection_invoke(self, NULL, "Accept", "%d", GDK_WINDOW_XWINDOW(priv->pxy_win)); 
+		priv->dead_service_detection = g_timeout_add_seconds(5, _dead_service_detect, self);
+		self->connected = TRUE;
 	} else {
 		LOG("target window not found");
+		self->connected = FALSE;
 	}
-	/*64BIT: use %lld instead!*/
-	return priv->obj_win != NULL;
+	return self->connected;
+}
+void gnomenu_connection_disconnect(GnomenuConnection * connection){
+	GET_OBJECT(connection, self, priv);
+	CallInfo * ri;
+	int i;
+	if(self->connected) {
+		g_source_remove(priv->dead_service_detection);
+		gdk_window_destroy(priv->obj_win);
+		gdk_window_destroy(priv->pxy_win); 
+		for(i = 0; i< g_queue_get_length(&priv->call_stack); i++){
+			ri = g_queue_peek_nth(&priv->call_stack, i);
+			g_main_loop_quit(ri->call_loop);
+			g_main_loop_quit(ri->ret_loop);
+		}
+		self->connected = FALSE;
+	}
 }
 static GdkFilterReturn 
 	_obj_win_filter (GdkXEvent* gdkxevent, GdkEvent * event, GnomenuConnection * connection){

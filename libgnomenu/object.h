@@ -10,10 +10,9 @@ G_BEGIN_DECLS
 #define GNOMENU_IS_OBJECT(obj)	(G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_OBJECT))
 #define GNOMENU_IS_OBJECT_CLASS(klass)	(G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_OBJECT))
 #define GNOMENU_OBJECT_GET_CLASS(obj)	(G_TYPE_INSTANCE_GET_CLASS((obj), GNOMENU_TYPE_OBJECT, GnomenuObjectClass))
-
 typedef struct {
 	GObject parent;
-	gchar * path;
+	gchar * name;
 } GnomenuObject;
 
 typedef gchar * (*GnomenuObjectMethod) (GnomenuObject * object, const gchar * name, 
@@ -21,17 +20,13 @@ typedef gchar * (*GnomenuObjectMethod) (GnomenuObject * object, const gchar * na
 
 typedef struct {
 	GObjectClass parent;
-	GnomenuObjectMethod invoke;
 	GHashTable * method_table;
 } GnomenuObjectClass;
 
 guint gnomenu_object_class_install_method(GnomenuObjectClass * klass, const gchar * name, GnomenuObjectMethod method, const gchar * fmt);
 
 GnomenuObject * gnomenu_object_new(gchar * name);
-void gnomenu_object_emit(GnomenuObject * object, const char * name, const gchar * fmt, ...);
+//void gnomenu_object_emit(GnomenuObject * object, const char * name, const gchar * fmt, ...);
 
-void gnomenu_object_expose(GnomenuObject * object);
-
-#define GNOMENU_OBJECT_QUERY
 G_END_DECLS
 #endif

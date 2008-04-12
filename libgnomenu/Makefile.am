@@ -15,6 +15,8 @@ libgnomenu_la_SOURCES = \
 	connection.c \
 	service.h \
 	service.c \
+	object.h \
+	object.c \
 	x11.h \
 	x11.c
 
@@ -29,7 +31,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = service.h connection.h
+libgnomenuinclude_HEADERS = service.h connection.h object.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
