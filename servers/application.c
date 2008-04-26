@@ -210,7 +210,7 @@ static void _update_ui(Application *app)
 	LOG();
 	gchar * title_font_name;
 	ApplicationConfDlg * cfd = &app->conf_dialog;
-	PangoLayout * layout = gtk_label_get_layout(GTK_LABEL(app->title));
+	PangoLayout * layout;
 	if(app->title_visible) 
 		gtk_widget_show(app->title);
 	else 
@@ -221,9 +221,11 @@ static void _update_ui(Application *app)
 	else 
 		gtk_widget_hide(app->icon);
 
-	if (app->title_font) 
+	if (app->title_font) {
+		layout = gtk_label_get_layout(GTK_LABEL(app->title));
 		pango_layout_set_font_description(layout,
 				app->title_font);
+	}
 	gtk_widget_queue_draw(GTK_WIDGET(app->title));
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cfd->tgbtn_title_visible), 
 				app->title_visible);

@@ -292,7 +292,7 @@ _set_property( GObject * _self, guint property_id, const GValue * value, GParamS
 			/*gtk_widget_queue_resize(self);*/
 		break;		
 		case PROP_ORIENTATION:
-			self->orientation = g_value_get_enum(value);
+			self->orientation = g_value_get_uint(value);
 			FOR_EACH_CLIENT(self->clients, c,
 				gnomenu_server_helper_set_orientation(
 					self->gtk_helper,
