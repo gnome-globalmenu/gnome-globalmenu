@@ -1,7 +1,7 @@
-Index: valaccodeclassbinding.vala
+Index: gobject/valaccodeclassbinding.vala
 ===================================================================
---- valaccodeclassbinding.vala	(revision 1321)
-+++ valaccodeclassbinding.vala	(working copy)
+--- gobject/valaccodeclassbinding.vala	(revision 1321)
++++ gobject/valaccodeclassbinding.vala	(working copy)
 @@ -844,6 +844,16 @@
  
  		dbus_methods.append ("}\n");
