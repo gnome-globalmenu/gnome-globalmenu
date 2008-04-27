@@ -2,7 +2,7 @@ VALAC_PATH=$(abspath $(dir valac))/vala-trunk
 
 all: valac
 vala-trunk.stamp:
-	svn co http://svn.gnome.org/svn/vala/trunk vala-trunk
+	svn co http://svn.gnome.org/svn/vala/tags/VALA_0_3_1 vala-trunk
 	touch vala-trunk/NO-AUTO-GEN
 	touch vala-trunk.stamp
 patch.stamp: vala-trunk.stamp
