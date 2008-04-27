@@ -1,5 +1,5 @@
 using GLib;
-
+namespace Gnomenu {
 [DBus (name = "org.gnomenu.Factory")]
 [CCode (type_signature = "o")]
 public class Factory: Object {
@@ -108,4 +108,5 @@ public class MenuItem: Object {
 	public string getTitle() {
 		return title;
 	}
+}
 }

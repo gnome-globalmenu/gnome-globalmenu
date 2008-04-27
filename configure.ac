@@ -44,9 +44,25 @@ dnl begin:gnomenu-service
 PKG_CHECK_MODULES(GNOMENU_SERVICE, [glib-2.0 dbus-glib-1])
 AC_SUBST(GNOMENU_SERVICE_CFLAGS)
 AC_SUBST(GNOMENU_SERVICE_LIBS)
-GNOMENU_SERVICE_VALA_PKGS=--pkg dbus-glib-1
+GNOMENU_SERVICE_VALA_PKGS="--pkg dbus-glib-1"
 AC_SUBST(GNOMENU_SERVICE_VALA_PKGS)
 dnl end:gnomenu-service
+
+dnl begin:libgnomenu
+PKG_CHECK_MODULES(LIBGNOMENU, [glib-2.0 dbus-glib-1])
+AC_SUBST(LIBGNOMENU_CFLAGS)
+AC_SUBST(LIBGNOMENU_LIBS)
+LIBGNOMENU_VALA_PKGS="--pkg dbus-glib-1"
+AC_SUBST(LIBGNOMENU_VALA_PKGS)
+dnl end:libgnomenu
+
+dnl begin:tests
+PKG_CHECK_MODULES(TESTS, [glib-2.0 dbus-glib-1])
+AC_SUBST(TESTS_CFLAGS)
+AC_SUBST(TESTS_LIBS)
+TESTS_VALA_PKGS="--pkg dbus-glib-1"
+AC_SUBST(TESTS_VALA_PKGS)
+dnl end:libgnomenu
 
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
@@ -76,6 +92,7 @@ dnl fi
 AC_OUTPUT(
 Makefile
 service/Makefile
+libgnomenu/Makefile
 tests/Makefile
 po/Makefile.in
 )

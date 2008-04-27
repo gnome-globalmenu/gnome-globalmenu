@@ -9,8 +9,6 @@ sbin_PROGRAMS = gnomenu-service
 
 gnomenu_service_VALASOURCES = \
 		main.vala \
-		menu.vala \
-		menuitem.vala \
 		$(NULL)
 
 gnomenu_service_SOURCES = \

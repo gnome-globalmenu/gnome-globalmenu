@@ -10,7 +10,7 @@ patch.stamp: vala-trunk.stamp
 	(cd vala-trunk; for i in *.patch ; do patch -p0 < $$i; done)
 	touch patch.stamp	
 autogen.stamp: patch.stamp
-	(cd vala-trunk; ./autogen.sh)
+	(cd vala-trunk; ./autogen.sh --enable-vapigen)
 	touch autogen.stamp
 valac: vala-trunk.stamp patch.stamp autogen.stamp
 	(cd vala-trunk; make)

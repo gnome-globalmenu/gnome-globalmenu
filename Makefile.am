@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = service tests po
+SUBDIRS = libgnomenu service tests po
 
 AM_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \
@@ -19,4 +19,4 @@ DISTCLEANFILES = \
 	$(NULL)
 
 any:
-	echo $(VALAC)
+	echo $(VALAC) $(GNOMENU_SERVICE_VALA_PKGS)
