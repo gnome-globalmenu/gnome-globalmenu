@@ -44,7 +44,9 @@ dnl begin:gnomenu-service
 PKG_CHECK_MODULES(GNOMENU_SERVICE, [glib-2.0 dbus-glib-1])
 AC_SUBST(GNOMENU_SERVICE_CFLAGS)
 AC_SUBST(GNOMENU_SERVICE_LIBS)
-dnl end:libgnomenu
+GNOMENU_SERVICE_VALA_PKGS=--pkg dbus-glib-1
+AC_SUBST(GNOMENU_SERVICE_VALA_PKGS)
+dnl end:gnomenu-service
 
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
