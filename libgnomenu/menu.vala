@@ -1,109 +1,143 @@
 using GLib;
+public errordomain GnomenuError {
+	GNOMENU_SERVER_EXISTS
+}
 namespace Gnomenu {
-[DBus (name = "org.gnomenu.Factory")]
-[CCode (type_signature = "o")]
-public class Factory: Object {
-	private HashTable<string, MenuItem> menu_items_;
-	private HashTable<string, Menu> menus_;
-	public DBus.Connection conn {get; construct;}
-	static int64 seq = 0;
+public DBus.Connection conn;
+public string app_name;
 
-	public Factory(DBus.Connection conn){
-		this.conn = conn;
-	}
-	construct {
-		conn.register_object ("/org/gnomenu/Factory", this);
-	}
-	public HashTable<string, MenuItem> menu_items {
-		get {
-			if(menu_items_ == null) 
-				menu_items_ = new HashTable.full<string, MenuItem>(str_hash, str_equal, g_free, g_object_unref);
-			return menu_items_;
-		}
-	}
-	public HashTable<string, Menu> menus {
-		get {
-			if(menus_ == null) 
-				menus_ = new HashTable.full<string, MenuItem>(str_hash, str_equal, g_free, g_object_unref);
-			return menus_;
-		}
-	}
-	private string gen_path(){
-		seq ++;
-		return "/org/gnomenu/Pool/ANONOBJ_" + seq.to_string();
-	}
-	public string createMenu(){
-		string path = gen_path();
-		menus.insert(path, new Menu(this));
-		conn.register_object(path, menus.lookup(path));
-		return path;
-	}
-	public string createMenuItem(){
-		string path = gen_path();
-		var item = new MenuItem(this);
-		menu_items.insert(path, item);
-		conn.register_object(path, menu_items.lookup(path));
-		return path;
-	}
-	public int destroyMenu(string path){
-		menus.remove(path);
-		return 0;
-	}
-	public int destroyMenuItem(string path){
-		menu_items.remove(path);
-		return 0;
+public void init (string name) throws GnomenuError {
+	conn = DBus.Bus.get (DBus.BusType. SESSION);
+	app_name = name;
+	dynamic DBus.Object bus = conn.get_object ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+	uint request_name_result = bus.RequestName ("org.gnomenu.apps." + name, (uint) 0);
+	if(request_name_result != DBus.RequestNameReply.PRIMARY_OWNER) {
+		throw new GnomenuError.GNOMENU_SERVER_EXISTS("Old server already exsits");
 	}
 }
 
-[DBus (name = "org.gnomenu.Menu")]
-[CCode (type_signature = "o")]
-public class Menu: Object {
-	private List<string> children;
-	public weak Factory factory{get; construct;}
-	private string title;
+public class BusObject:Object {
+	public string path {get; construct;}
+	public string name {get; construct;}
 
-	public Menu(weak Factory factory) {
-		this.factory = factory;
+	public virtual void expose() {
+		Object o = conn.lookup_object(path);
+		if( o is Object) {
+			if( o == this ) {
+				message("%s is already exposed at: %s", name, path);
+				return;
+			} else {
+				message("remove the old object at:%s", path);
+				o.unref();
+			}
+		}
+		conn.register_object(path, this);
 	}
-	public int insert(string path, int pos){
-		children.insert(path, pos);
-		return 0;
+}
+public class MenuOwner: BusObject {
+	public Menu menu {get; set;}
+	public override void expose() {
+		base.expose();
+		if(menu is Menu) menu.expose();
 	}
-	public int setTitle(string title_) {
-		title = title_;
-		return 0;
+}
+
+[DBus (name = "org.gnomenu.Application")]
+public class Application: MenuOwner {
+	public HashTable<string, Document> docs;
+
+	public Application () {
+		path = "/org/gnomenu/Application";
+		name = "";
+	}
+	construct {
+		docs = new HashTable.full<string, Document>(str_hash, str_equal, null, g_object_unref);
+	}
+	public string getMenu() {
+		if(menu is Menu) return menu.path;
+		else return "";
+	}
+	public string getDocument(uint64 id) {
+		Document m = docs.lookup(id);
+		if(m is Document) return m.path;
+		else return "";
+	}
+	public override void expose() {
+		base.expose();
+		docs.for_each((k,v,d) => {
+			((Document) v).expose();
+		}, null);
+	}
+}
+
+[DBus (name = "org.gnomenu.Document")]
+public class Document: MenuOwner {
+	public weak Application app { get; construct;}
+
+	public Document(weak Application app, string name){
+		this.app = app;
+		this.name = name;
+		this.path = app.path + "/" + name;
+	}
+	construct {
+		app.docs.insert(name, this);
+	}
+	public string getMenu() {
+		if(menu is Menu) return menu.path;
+		else return "";
+	}
+}
+
+[DBus (name = "org.gnomenu.Menu", signals="notify")]
+public class Menu: BusObject {
+	public weak MenuOwner parent {get; construct;}
+	public List<Menu> children;
+	public string title {get; set;}
+
+	public Menu(weak MenuOwner parent, string name) {
+		this.name = name;
+		this.path = parent.path + "/" + name;
+		this.parent = parent;
+		this.title = name;
+	}
+	construct {
+		children = null;
+		parent.menu = this;
 	}
 	public string getTitle() {
 		return title;
 	}
+	public override void expose() {
+		base.expose();
+		foreach (Menu m in children){
+			m.expose();
+		}
+	}
 }
 
-[DBus (name = "org.gnomenu.MenuItem")]
-[CCode (type_signature = "o")]
-public class MenuItem: Object {
-	private string submenu {get; set;}
-	public weak Factory factory{get; construct;}
-	private string title;
+[DBus (name = "org.gnomenu.MenuItem", signals ="notify")]
+public class MenuItem: MenuOwner {
+	public weak Menu parent {get; construct;}
+	public int pos {get; construct;}
+	public string title {get; set;}
+
+	public int activate(){
+		activated();
+		return 0;
+	}
 
 	public signal void activated();
-	public void activate(){
-		activated();
+
+	public MenuItem(weak Menu parent, string name, int pos) {
+		this.name = name;
+		this.title = name;
+		this.path = parent.path + "/" + name;
+		this.pos = pos; 
+		this.parent = parent;
 	}
-	public MenuItem(weak Factory factory) {
-		this.factory = factory;
-	}
-	public int setSubmenu(string path){
-		submenu = path;
-		Menu m = (Menu) factory.conn.lookup_object(path);
-		message(m.getTitle());
-		return 0;
-	}
-	public string getSubmenu(){
-		return submenu;
-	}
-	public int setTitle(string title_) {
-		title = title_;
-		return 0;
+	
+	construct {
+		this.parent.children.insert(this, pos);
 	}
 	public string getTitle() {
 		return title;

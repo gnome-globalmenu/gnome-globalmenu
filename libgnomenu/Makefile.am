@@ -1,5 +1,6 @@
 
 AM_CPPFLAGS = \
+	-g \
 	$(GNOMENU_SERVICE_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	$(NULL)
