@@ -1,0 +1,14 @@
+Index: vapi/glib-2.0.vapi
+===================================================================
+--- vapi/glib-2.0.vapi	(revision 1325)
++++ vapi/glib-2.0.vapi	(working copy)
+@@ -729,7 +729,8 @@
+ 		public virtual void constructed ();
+ 
+ 		public signal void notify (ParamSpec pspec);
+-
++		[CCode (cname = "g_object_notify")]
++		public void notify_property (string propname);
+ 		public weak Object connect (string signal_spec, ...);
+ 	}
+ 
