@@ -18,6 +18,9 @@ public class Menu: BusObject {
 		children = null;
 		parent.menu = this;
 	}
+	public void insert(MenuItem child, int pos){
+		this.children.insert(child, pos);
+	}
 	public string getTitle() {
 		return title;
 	}

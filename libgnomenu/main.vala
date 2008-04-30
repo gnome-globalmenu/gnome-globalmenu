@@ -13,7 +13,9 @@ public void init (string name) throws GnomenuError {
 	}
 }
 public string [] decode_paths(string paths){
-	return paths.split("\n");
+	string[] rt = paths.split("\n");
+	rt.length = string.lengthv(rt); /*work around NoArray length*/
+	return rt;
 }
 public string encode_paths(string[] paths){
 	StringBuilder bluh = new StringBuilder();
@@ -25,25 +27,6 @@ public string encode_paths(string[] paths){
 	return bluh.str;
 }
 
-public class BusAgent:Object {
-    public DBus.Connection conn {get; construct;}
-    public string appname {get; construct;}
-    public BusAgent(DBus.Connection conn, string appname) {
-        this.conn = conn;
-		this.appname = appname;
-    }   
-    public dynamic DBus.Object get_object(string path, string ifname){
-		string full_path;
-		if(path != null && path.size() >0 ) {
-			if(path[0] != '/') {
-				full_path = "/org/gnomenu/Application/" + path;
-			} else {
-				full_path = path;
-			}
-		} else full_path = "/org/gnomenu/Application";
-        return conn.get_object ("org.gnomenu.apps." + appname, full_path, "org.gnomenu." + ifname);
-    }   
-}
 
 public class BusObject:Object {
 	public string path {get; construct;}

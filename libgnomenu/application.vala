@@ -1,7 +1,7 @@
 using GLib;
 namespace Gnomenu {
 
-[DBus (name = "org.gnomenu.Application", signals="")]
+[DBus (name = "org.gnomenu.Application", signals="propChanged")]
 public class Application: MenuOwner {
 	public HashTable<string, Document> docs;
 	public string title {get; set;}

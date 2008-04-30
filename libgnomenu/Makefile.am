@@ -1,7 +1,7 @@
 
 AM_CPPFLAGS = \
 	-g \
-	$(GNOMENU_SERVICE_CFLAGS) \
+	$(LIBGNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	$(NULL)
 
@@ -15,6 +15,7 @@ libgnomenu_la_VALASOURCES = \
 		main.vala \
 		menu.vala \
 		application.vala \
+		agent.vala \
 		document.vala \
 		menuitem.vala \
 		$(NULL)

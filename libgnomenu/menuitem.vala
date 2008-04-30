@@ -23,10 +23,13 @@ public class MenuItem: MenuOwner {
 	}
 	
 	construct {
-		this.parent.children.insert(this, pos);
+		parent.insert(this, pos);
 	}
 	public string getTitle() {
 		return title;
+	}
+	public string getMenu() {
+		return menu.path;
 	}
 }
 
