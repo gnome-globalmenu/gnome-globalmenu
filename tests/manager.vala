@@ -26,10 +26,10 @@ public class MainWindow : Window {
 		docmenu = new MenuBar();
 		apptitle = new Label("");
 		doctitle = new Label("");
-		vbox.pack_start_defaults(appmenu);
 		vbox.pack_start_defaults(apptitle);
-		vbox.pack_start_defaults(docmenu);
+		vbox.pack_start_defaults(appmenu);
 		vbox.pack_start_defaults(doctitle);
+		vbox.pack_start_defaults(docmenu);
 		appmenu.show();
 		docmenu.show();
 		apptitle.show();
@@ -37,6 +37,9 @@ public class MainWindow : Window {
 
 		conn = DBus.Bus.get (DBus.BusType. SESSION);
 		agent = new BusAgent(conn, "FakeAppInterface"); /*app.vala */
+	}
+	public void run() {
+		show();
 		app = agent.get_object("", "Application");
 		string[] paths = decode_paths(app.getDocuments());
 		apptitle.set_label(app.getTitle());
@@ -49,11 +52,14 @@ public class MainWindow : Window {
 			string title = i.getTitle();
 			var item = new Gtk.MenuItem.with_label(title);
 			item.show();
+			item.set_data_full("remote-item", i.ref(), g_object_unref);
 			appmenu.append(item);
+			item.activate += (sender) => {
+				message("clicked");
+				dynamic DBus.Object i = (dynamic DBus.Object)sender.get_data("remote-item");
+				i.activate();
+			};
 		}
-	}
-	public void run() {
-		show();
 		Gtk.main();
 	}
 	static int main(string[] args){
