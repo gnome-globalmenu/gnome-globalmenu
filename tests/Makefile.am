@@ -5,17 +5,18 @@ AM_CPPFLAGS = \
 	-I../libgnomenu  \
 	$(NULL)
 
-LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la $(TEST_LIBS)
+LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la $(TESTS_LIBS)
 
 BUILT_SOURCES = tests.vala.stamp \
 		$(gnomenu_service_VALASOURCES:.vala=.c) \
 		$(gnomenu_service_VALASOURCES:.vala=.h) \
 		$(NULL)
 
-noinst_PROGRAMS = app
+noinst_PROGRAMS = app manager
 
 gnomenu_service_VALASOURCES = \
 		app.vala \
+		manager.vala \
 		$(NULL)
 
 tests.vala.stamp: $(gnomenu_service_VALASOURCES)
@@ -26,4 +27,6 @@ sanity_LDADD = $(LDADDS)
 sanity_SOURCES = sanity.c sanity.h
 app_LDADD = $(LDADDS)
 app_SOURCES = app.c app.h
+manager_LDADD = $(LDADDS)
+manager_SOURCES = manager.c manager.h
 EXTRA_DIST = tests.vala.stamp	

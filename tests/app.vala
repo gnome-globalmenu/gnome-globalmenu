@@ -1,27 +1,42 @@
 using GLib;
 using Gnomenu;
-int main(string[] argv) {
+class App: Object {
+		Application app; 
+		Document doc1; 
+		Menu app_menu; 
+		MenuItem app_menu_quit; 
+		Menu doc1_menu; 
+		MenuItem doc1_menu_close; 
+	void run(){
 		MainLoop loop = new MainLoop (null, false);
 		try {
-			Gnomenu.init("FakeApp");
+			Gnomenu.init("FakeAppInterface");
 		} catch (Error e){
 			message("error: %s", e.message);
-			return 1;
+			return ;
 		}
-
-		Application app = new Application();
-		message(app.path);
-		Document doc1 = new Document(app, "1");
-		Menu app_menu = new Menu(app, "Menu");
-		MenuItem app_menu_quit = new MenuItem(app_menu, "Quit", -1);
-		Menu doc1_menu = new Menu(doc1, "Menu");
-		MenuItem doc1_menu_close = new MenuItem(doc1_menu, "Close", -1);
+		app = new Application("FakeApp");
+		doc1 = new Document(app, "1");
+		app_menu = new Menu(app, "Menu");
+		app_menu_quit = new MenuItem(app_menu, "Quit", -1);
+		doc1_menu = new Menu(doc1, "Menu");
+		doc1_menu_close = new MenuItem(doc1_menu, "Close", -1);
 		app.expose();
-		app.expose();
-		app_menu_quit.activated += (o) => {
-			message("app_menu_quit clicked");
-		};
+		app_menu_quit.activated += on_app_menu_quit;
 		loop.run ();
+	}
+	void on_app_menu_quit(Object sender){
+		message("app_menu_quit clicked");
+		doc1_menu.title = "Changed Menu Title";
+		doc1_menu.notify("title");
+		message("new title %s ", doc1_menu.title);
+		//doc1_menu.test = "fuck";
+	}
+	static int main(string[] argv) {
+
+		App a = new App();
+		a.run();
 	return 0;
+	}
 }
 
