@@ -10,7 +10,6 @@ public class MainWindow : Window {
 	private Label apptitle;
 	private Label doctitle;
 
-	public DBus.Connection conn;
 	dynamic DBus.Object app;
 	dynamic DBus.Object doc;
 	public BusAgentGtk agent;
@@ -33,9 +32,7 @@ public class MainWindow : Window {
 		docmenu.show();
 		apptitle.show();
 		doctitle.show();
-
-		conn = DBus.Bus.get (DBus.BusType. SESSION);
-		agent = new BusAgentGtk(conn, "FakeAppInterface"); /*app.vala */
+		agent = new BusAgentGtk(); /*app.vala */
 	}
 	public void bind_objects(GLib.Object local, GLib.Object remote){
 		local.set_data_full("remote-item", remote.ref(), g_object_unref);
@@ -62,6 +59,7 @@ public class MainWindow : Window {
 	}
 	static int main(string[] args){
 		Gtk.init(ref args);
+		Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.MANAGER);
 		
 		var window = new MainWindow();
 		window.run();

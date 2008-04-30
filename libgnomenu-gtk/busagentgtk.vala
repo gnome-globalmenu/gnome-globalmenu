@@ -8,9 +8,7 @@ public class BusAgentGtk: BusAgent {
 		Gtk.MenuShell shell = (Gtk.MenuShell) (widget.get_parent());
 		shell.remove(widget);
 	}
-	public BusAgentGtk (DBus.Connection conn, string appname){
-		this.conn = conn;
-		this.appname = appname;
+	public BusAgentGtk (){
 	}
 	public void setup_menu_shell(MenuShell menu_shell, string path){
 		dynamic DBus.Object menu_r = this.get_object(path, "Menu");

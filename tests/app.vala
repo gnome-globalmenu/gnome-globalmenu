@@ -43,7 +43,7 @@ class App: Object {
 	void run(){
 		MainLoop loop = new MainLoop (null, false);
 		try {
-			Gnomenu.init("FakeAppInterface");
+			Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.APPLICATION);
 		} catch (Error e){
 			message("error: %s", e.message);
 			return ;
