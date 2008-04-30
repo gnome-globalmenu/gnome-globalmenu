@@ -12,7 +12,7 @@ libgnomenu_gtk_LTLIBRARIES = \
 		libgnomenu-gtk.la
 
 libgnomenu_gtk_la_VALASOURCES = \
-		main.vala \
+		agentgtk.vala \
 		$(NULL)
 
 libgnomenu_gtk_la_SOURCES = \
