@@ -3,9 +3,10 @@ AM_CPPFLAGS = \
 	-g \
 	-include $(CONFIG_HEADER) \
 	-I../libgnomenu  \
+	-I../libgnomenu-gtk  \
 	$(NULL)
 
-LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la $(TESTS_LIBS)
+LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la $(top_builddir)/libgnomenu-gtk/libgnomenu-gtk.la $(TESTS_LIBS)
 
 BUILT_SOURCES = tests.vala.stamp \
 		$(gnomenu_service_VALASOURCES:.vala=.c) \
@@ -20,7 +21,7 @@ gnomenu_service_VALASOURCES = \
 		$(NULL)
 
 tests.vala.stamp: $(gnomenu_service_VALASOURCES)
-	$(VALAC) -C $(TESTS_VALA_PKGS) --vapidir=../libgnomenu --pkg gnomenu $^
+	$(VALAC) -C $(TESTS_VALA_PKGS) --vapidir=../libgnomenu --vapidir=../libgnomenu-gtk --pkg gnomenu --pkg gnomenu-gtk $^
 	touch $@
 
 sanity_LDADD = $(LDADDS)

@@ -12,10 +12,10 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		main.vala \
+		libgnomenu.vala \
 		menu.vala \
 		application.vala \
-		agent.vala \
+		busagent.vala \
 		document.vala \
 		menuitem.vala \
 		menuowner.vala \

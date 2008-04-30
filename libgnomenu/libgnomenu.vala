@@ -23,7 +23,8 @@ public string encode_paths(string[] paths){
 		bluh.append(s);
 		bluh.append("\n");
 	}
-	bluh.erase(bluh.len-1, 1);
+	if(bluh.len>0)
+		bluh.erase(bluh.len-1, 1);
 	return bluh.str;
 }
 

@@ -1,6 +1,7 @@
 using GLib;
 using Gtk;
 using Gnomenu;
+using GnomenuGtk;
 
 
 public class MainWindow : Window {
@@ -12,9 +13,7 @@ public class MainWindow : Window {
 	public DBus.Connection conn;
 	dynamic DBus.Object app;
 	dynamic DBus.Object doc;
-	dynamic DBus.Object appmenu_r;
-	dynamic DBus.Object docmenu_r;
-	public BusAgent agent;
+	public BusAgentGtk agent;
 	public MainWindow () {
 		title = "manager";
 	}
@@ -36,7 +35,7 @@ public class MainWindow : Window {
 		doctitle.show();
 
 		conn = DBus.Bus.get (DBus.BusType. SESSION);
-		agent = new BusAgent(conn, "FakeAppInterface"); /*app.vala */
+		agent = new BusAgentGtk(conn, "FakeAppInterface"); /*app.vala */
 	}
 	public void bind_objects(GLib.Object local, GLib.Object remote){
 		local.set_data_full("remote-item", remote.ref(), g_object_unref);
@@ -50,21 +49,8 @@ public class MainWindow : Window {
 		apptitle.set_label(app.getTitle());
 		string path;
 		app.propChanged += prop_changed;
-		appmenu_r = agent.get_object(path = app.getMenu(), "Menu");
-		dynamic DBus.Object[] items = agent.get_objects(appmenu_r.getMenuItems(), "MenuItem");
-		foreach(dynamic DBus.Object i in items) {
-			message("found menu item at %s", i.get_path());
-			string title = i.getTitle();
-			var item = new Gtk.MenuItem.with_label(title);
-			item.show();
-			bind_objects(item, i);
-			appmenu.append(item);
-			item.activate += (sender) => {
-				message("clicked");
-				dynamic DBus.Object i = (dynamic DBus.Object)sender.get_data("remote-item");
-				i.activate();
-			};
-		}
+		path = app.getMenu();
+		agent.setup_menu_shell(appmenu, path);
 		Gtk.main();
 	}
 	public void prop_changed(dynamic DBus.Object sender, string prop_name){

@@ -3,24 +3,15 @@ using GLib;
 namespace Gnomenu {
 [DBus (name = "org.gnomenu.Document", signals="propChanged") ]
 public class Document: MenuOwner {
-	public weak Application app { get; construct;}
-	public string title {get; set;}
 
-	public Document(weak Application app, string name){
-		this.app = app;
+	public Document(string name){
 		this.name = name;
-		this.path = app.path + "/" + name;
-		this.title = name;
 	}
-	construct {
-		app.docs.insert(name, this);
+	public override string getTitle() {
+		return base.getTitle();
 	}
-	public string getTitle() {
-		return title;
-	}
-	public string getMenu() {
-		if(menu is Menu) return menu.path;
-		else return "";
+	public override string getMenu() {
+		return base.getMenu();
 	}
 }
 }

@@ -4,21 +4,16 @@ namespace Gnomenu {
 [DBus (name = "org.gnomenu.Application", signals="propChanged")]
 public class Application: MenuOwner {
 	public HashTable<string, Document> docs;
-	public string title {get; set;}
 	public Application (string name) {
-		this.path = "/org/gnomenu/Application";
 		this.name = name;
-		this.title = name;
 	}
 	construct {
 		docs = new HashTable.full<string, Document>(str_hash, str_equal, null, g_object_unref);
+		_path = "/org/gnomenu/Application";
 	}
-	public string getTitle() {
-		return title;
-	}
-	public string getMenu() {
-		if(menu is Menu) return menu.path;
-		else return "";
+	public void insert(string key, Document doc){
+		docs.insert(key, doc);
+		doc.parent = this;
 	}
 	public string getDocument(string key) {
 		Document m = docs.lookup(key);
@@ -40,6 +35,18 @@ public class Application: MenuOwner {
 		docs.for_each((k,v,d) => {
 			((Document) v).expose();
 		}, null);
+	}
+	public override void reset_path() {
+		base.reset_path();
+		docs.for_each((k,v,d) => {
+			((Document) v).reset_path();
+		}, null);
+	}
+	public override string getTitle() {
+		return base.getTitle();
+	}
+	public override string getMenu() {
+		return base.getMenu();
 	}
 }
 }
