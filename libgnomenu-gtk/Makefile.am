@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_GTK_CFLAGS) \
 	-include $(CONFIG_HEADER) \
+	-I../libgnomenu  \
 	$(NULL)
 
 BUILT_SOURCES = libgnomenu-gtk.vala.stamp
@@ -20,7 +21,7 @@ libgnomenu_gtk_la_SOURCES = \
 		$(NULL)
 
 libgnomenu-gtk.vala.stamp: $(libgnomenu_gtk_la_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_GTK_VALA_PKGS) --library gnomenu-gtk $^
+	$(VALAC) -C $(LIBGNOMENU_GTK_VALA_PKGS) --vapidir=../libgnomenu --pkg gnomenu --library gnomenu-gtk $^
 	touch $@
 
 libgnomenu_gtk_la_LIBADD = \
