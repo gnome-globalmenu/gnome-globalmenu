@@ -42,6 +42,7 @@ public class MainWindow : Window {
 		local.set_data_full("remote-item", remote.ref(), g_object_unref);
 		remote.set_data("local-item", local);
 	}
+	
 	public void run() {
 		show();
 		app = agent.get_object("", "Application");
@@ -50,10 +51,9 @@ public class MainWindow : Window {
 		string path;
 		app.propChanged += prop_changed;
 		appmenu_r = agent.get_object(path = app.getMenu(), "Menu");
-		paths = decode_paths(appmenu_r.getMenuItems());
-		foreach(string p in paths) {
-			message("found menu item at %s", p);
-			dynamic DBus.Object i = agent.get_object(p, "MenuItem");
+		dynamic DBus.Object[] items = agent.get_objects(appmenu_r.getMenuItems(), "MenuItem");
+		foreach(dynamic DBus.Object i in items) {
+			message("found menu item at %s", i.get_path());
 			string title = i.getTitle();
 			var item = new Gtk.MenuItem.with_label(title);
 			item.show();
