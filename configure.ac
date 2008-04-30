@@ -56,11 +56,19 @@ LIBGNOMENU_VALA_PKGS="--pkg dbus-glib-1"
 AC_SUBST(LIBGNOMENU_VALA_PKGS)
 dnl end:libgnomenu
 
+dnl begin:libgnomenu-gtk
+PKG_CHECK_MODULES(LIBGNOMENU_GTK, [glib-2.0 dbus-glib-1 gtk+-2.0])
+AC_SUBST(LIBGNOMENU_GTK_CFLAGS)
+AC_SUBST(LIBGNOMENU_GTK_LIBS)
+LIBGNOMENU_GTK_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
+AC_SUBST(LIBGNOMENU_GTK_VALA_PKGS)
+dnl end:libgnomenu-gtk
+
 dnl begin:tests
-PKG_CHECK_MODULES(TESTS, [glib-2.0 dbus-glib-1])
+PKG_CHECK_MODULES(TESTS, [glib-2.0 dbus-glib-1 gtk+-2.0])
 AC_SUBST(TESTS_CFLAGS)
 AC_SUBST(TESTS_LIBS)
-TESTS_VALA_PKGS="--pkg dbus-glib-1"
+TESTS_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
 AC_SUBST(TESTS_VALA_PKGS)
 dnl end:libgnomenu
 
@@ -93,6 +101,7 @@ AC_OUTPUT(
 Makefile
 service/Makefile
 libgnomenu/Makefile
+libgnomenu-gtk/Makefile
 tests/Makefile
 po/Makefile.in
 )
