@@ -4,10 +4,8 @@ public errordomain GnomenuError {
 }
 namespace Gnomenu {
 public DBus.Connection conn;
-public string app_name;
 public void init (string name) throws GnomenuError {
 	conn = DBus.Bus.get (DBus.BusType. SESSION);
-	app_name = name;
 	dynamic DBus.Object bus = conn.get_object ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 	uint request_name_result = bus.RequestName ("org.gnomenu.apps." + name, (uint) 0);
 	if(request_name_result != DBus.RequestNameReply.PRIMARY_OWNER) {
@@ -37,7 +35,7 @@ public class BusAgent:Object {
     public dynamic DBus.Object get_object(string path, string ifname){
 		string full_path;
 		if(path != null && path.size() >0 ) {
-			if(full_path[0] != '/') {
+			if(path[0] != '/') {
 				full_path = "/org/gnomenu/Application/" + path;
 			} else {
 				full_path = path;
