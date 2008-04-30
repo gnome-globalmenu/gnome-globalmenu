@@ -12,7 +12,10 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
+		main.vala \
 		menu.vala \
+		application.vala \
+		document.vala \
 		menuitem.vala \
 		$(NULL)
 
