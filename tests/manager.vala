@@ -38,12 +38,17 @@ public class MainWindow : Window {
 		conn = DBus.Bus.get (DBus.BusType. SESSION);
 		agent = new BusAgent(conn, "FakeAppInterface"); /*app.vala */
 	}
+	public void bind_objects(GLib.Object local, GLib.Object remote){
+		local.set_data_full("remote-item", remote.ref(), g_object_unref);
+		remote.set_data("local-item", local);
+	}
 	public void run() {
 		show();
 		app = agent.get_object("", "Application");
 		string[] paths = decode_paths(app.getDocuments());
 		apptitle.set_label(app.getTitle());
 		string path;
+		app.propChanged += prop_changed;
 		appmenu_r = agent.get_object(path = app.getMenu(), "Menu");
 		paths = decode_paths(appmenu_r.getMenuItems());
 		foreach(string p in paths) {
@@ -52,7 +57,7 @@ public class MainWindow : Window {
 			string title = i.getTitle();
 			var item = new Gtk.MenuItem.with_label(title);
 			item.show();
-			item.set_data_full("remote-item", i.ref(), g_object_unref);
+			bind_objects(item, i);
 			appmenu.append(item);
 			item.activate += (sender) => {
 				message("clicked");
@@ -61,6 +66,13 @@ public class MainWindow : Window {
 			};
 		}
 		Gtk.main();
+	}
+	public void prop_changed(dynamic DBus.Object sender, string prop_name){
+		
+		if(prop_name == "title"){
+			message("title has changed");
+			apptitle.set_label(app.getTitle());
+		}
 	}
 	static int main(string[] args){
 		Gtk.init(ref args);

@@ -27,10 +27,9 @@ class App: Object {
 	}
 	void on_app_menu_quit(Object sender){
 		message("app_menu_quit clicked");
-		doc1_menu.title = "Changed Menu Title";
-		doc1_menu.notify("title");
-		message("new title %s ", doc1_menu.title);
-		//doc1_menu.test = "fuck";
+		app.title = "NewApplication";
+		app.notify("title");
+		message("new title %s ", app.title);
 	}
 	static int main(string[] argv) {
 
