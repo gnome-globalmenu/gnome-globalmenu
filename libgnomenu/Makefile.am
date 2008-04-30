@@ -18,6 +18,8 @@ libgnomenu_la_VALASOURCES = \
 		agent.vala \
 		document.vala \
 		menuitem.vala \
+		menuowner.vala \
+		busobject.vala \
 		$(NULL)
 
 libgnomenu_la_SOURCES = \

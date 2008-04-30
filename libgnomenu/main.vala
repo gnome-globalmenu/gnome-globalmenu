@@ -28,36 +28,5 @@ public string encode_paths(string[] paths){
 }
 
 
-public class BusObject:Object {
-	public string path {get; construct;}
-	public string name {get; construct;}
-	public string test {get; set;}
-	public signal void prop_changed(string prop);
-
-	public void notify(string prop){
-			prop_changed(prop);
-	}
-	public virtual void expose() {
-		Object o = conn.lookup_object(path);
-		if( o is Object) {
-			if( o == this ) {
-				message("%s is already exposed at: %s", name, path);
-				return;
-			} else {
-				message("remove the old object at:%s", path);
-				o.unref();
-			}
-		}
-		conn.register_object(path, this);
-	}
-}
-public class MenuOwner: BusObject {
-	public Menu menu {get; set;}
-	public override void expose() {
-		base.expose();
-		if(menu is Menu) menu.expose();
-	}
-}
-
 
 }
