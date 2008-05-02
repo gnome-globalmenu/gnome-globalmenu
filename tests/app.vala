@@ -1,14 +1,15 @@
 using GLib;
 using Gnomenu;
+
 struct MenuItemInfo {
 	public string name;
 	[NoArrayLength]
 	public MenuItemInfo[]? submenu_info;
 }
-
 const MenuItemInfo [] app_menu_main_item_info = {
 	{"Spawn", null},
-	{"quit", null},
+	{"Quit", null},
+	{"ChangeName", null},
 	{null, null}
 };
 const MenuItemInfo [] app_menu_item_info = {
@@ -21,6 +22,13 @@ class App: Object {
 		Menu app_menu; 
 		Menu app_menu_main; 
 		Menu doc1_menu; 
+	void on_activated(MenuItem item) {
+		switch(item.name) {
+			case "ChangeName":
+				app.title = "ChangedTitle";
+			break;
+		}
+	}
 	[NoArrayLength]
 	void setup_menu(Menu menu, MenuItemInfo[] infos){
 		message("setting up menu %s", menu.name);
@@ -34,6 +42,8 @@ class App: Object {
 				item.menu = submenu;
 				setup_menu(submenu, info.submenu_info);
 				submenu.visible = true;
+			} else {
+				item.activated += on_activated;
 			}
 			menu.insert(item, -1);
 			item.visible = true;
@@ -56,12 +66,6 @@ class App: Object {
 
 		app.expose();
 		loop.run ();
-	}
-	void on_app_menu_quit(Object sender){
-		message("app_menu_quit clicked");
-		app.title = "NewApplication";
-		app.notify("title");
-		message("new title %s ", app.title);
 	}
 	static int main(string[] argv) {
 
