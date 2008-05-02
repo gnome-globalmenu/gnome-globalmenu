@@ -38,6 +38,12 @@ public string get_app_bus_name(){
 	return "org.gnomenu.apps." + app_name;
 
 }
+public string encode_name(string name){
+	return name;	
+}
+public string decode_name(string name){
+	return name;	
+}
 public string [] decode_paths(string paths){
 	string[] rt = paths.split("\n");
 	rt.length = string.lengthv(rt); /*work around NoArray length*/
