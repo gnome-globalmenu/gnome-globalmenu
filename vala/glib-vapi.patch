@@ -12,13 +12,3 @@ Index: vapi/glib-2.0.vapi
  
  	[CCode (cname = "g_utf8_next_char")]
  	public weak string next_char ();
-@@ -729,7 +732,8 @@
- 		public virtual void constructed ();
- 
- 		public signal void notify (ParamSpec pspec);
--
-+		[CCode (cname = "g_object_notify")]
-+		public void notify_property (string propname);
- 		public weak Object connect (string signal_spec, ...);
- 	}
- 
