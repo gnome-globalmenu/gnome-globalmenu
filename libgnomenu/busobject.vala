@@ -8,6 +8,7 @@ public class BusObject:Object {
 	protected string _path;
 	private bool _exposed;
 	private bool _visible;
+	[Notify]
 	public weak BusObject parent {
 		get {
 			return _parent;
@@ -18,13 +19,15 @@ public class BusObject:Object {
 			reset_path();
 			if(_parent is BusObject)
 				if(_parent._exposed) this.expose();
-			notify("parent");
+	//		notify("parent");
 		}
 	}
-	public string title {get{return _title;} set{_title=value;notify("title");}}
+	[Notify]
+	public string title {get{return _title;} set{_title=value;/*notify("title");*/}}
 	public string path {get{return _path;}}
 	public string name {get; construct;} /*read-only, unique*/
-	public bool visible {get{return _visible;} set{_visible=value;notify("visible");}}
+	[Notify]
+	public bool visible {get{return _visible;} set{_visible=value;/*notify("visible");*/}}
 	public signal void prop_changed(string prop);
 	construct {
 		_title = name;
@@ -32,10 +35,13 @@ public class BusObject:Object {
 		_path = name;
 		_exposed = false;
 		_visible = false;
+		base.notify += (sender, ps) => {
+			prop_changed(ps.name);
+		};
 	}
-	public void notify(string prop){
+/*	public void notify(string prop){
 			prop_changed(prop);
-	}
+	}*/
 	public virtual void expose() {
 		message("path = %s", path);
 		if(conn == null) {
