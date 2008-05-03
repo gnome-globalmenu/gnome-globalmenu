@@ -27,6 +27,19 @@ public class Menu: BusObject {
 		}
 		return encode_paths(paths);
 	}
+	[NoArrayLength]
+	public string[] getMenuItems2() {
+		string [] paths = new string[children.length()+1];
+		var i = 0;
+		foreach(MenuItem m in children){
+			paths[i] = m.path;
+			message("%s", m.path);
+			i++;
+		}	
+		paths[i] = null;
+		message("length = %d", i);
+		return paths;
+	}
 	public override void expose() {
 		base.expose();
 		foreach (MenuItem m in children){
