@@ -47,6 +47,9 @@ public class MainWindow : Window {
 		string path;
 		app.propChanged += prop_changed;
 		path = app.getMenu();
+		dynamic DBus.Object menu = agent.get_object(path, "Menu");
+		string[] paths2 = menu.getMenuItems2();
+		message("%d", paths2.length);
 		agent.setup_menu_shell(appmenu, path);
 		Gtk.main();
 	}
