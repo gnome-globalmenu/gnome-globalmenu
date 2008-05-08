@@ -1,6 +1,7 @@
-=== modified file 'gobject/valaccodegeneratorsignal.vala'
---- gobject/valaccodegeneratorsignal.vala	2008-05-02 20:58:58 +0000
-+++ gobject/valaccodegeneratorsignal.vala	2008-05-06 22:49:35 +0000
+Index: gobject/valaccodegeneratorsignal.vala
+===================================================================
+--- gobject/valaccodegeneratorsignal.vala	(revision 1349)
++++ gobject/valaccodegeneratorsignal.vala	(working copy)
 @@ -30,7 +30,7 @@
  		} else if (t is ErrorType) {
  			return ("POINTER");
@@ -35,4 +36,3 @@
  				set_fc = new CCodeFunctionCall (new CCodeIdentifier ("g_value_set_pointer"));
  			} else if (return_type is ErrorType) {
  				set_fc = new CCodeFunctionCall (new CCodeIdentifier ("g_value_set_pointer"));
-

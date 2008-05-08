@@ -7,7 +7,7 @@ vala-trunk.stamp:
 	touch vala-trunk.stamp
 patch.stamp: vala-trunk.stamp
 	cp *.patch vala-trunk/
-	(cd vala-trunk; for i in *.patch ; do patch -p0 < $$i; done)
+	(cd vala-trunk; for i in *.patch ; do echo applying $$i; patch -p0 < $$i; done)
 	touch patch.stamp	
 autogen.stamp: patch.stamp
 	(cd vala-trunk; ./autogen.sh --enable-vapigen)
