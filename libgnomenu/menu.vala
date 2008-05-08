@@ -16,19 +16,18 @@ public class Menu: BusObject {
 	public void insert(MenuItem child, int pos){
 		this.children.insert(child, pos);
 		child.parent = this;
+		prop_changed("children");
+	}
+	public void remove(MenuItem child){
+		if(this.children.find(child) != null){
+			child.parent = null;
+			this.children.remove_all(child);
+			prop_changed("children");
+		}
 	}
 
-	public string getMenuItems(){
-		string [] paths = new string[children.length()];
-		int i = 0;
-		foreach (MenuItem m in children){
-			paths[i] = m.path;
-			i++;
-		}
-		return encode_paths(paths);
-	}
 	[NoArrayLength]
-	public string[] getMenuItems2() {
+	public string[] getMenuItems() {
 		string [] paths = new string[children.length()+1];
 		var i = 0;
 		foreach(MenuItem m in children){

@@ -17,9 +17,7 @@ public class BusObject:Object {
 			message("set parent");
 			_parent = value;
 			reset_path();
-			if(_parent is BusObject)
-				if(_parent._exposed) this.expose();
-	//		notify("parent");
+			if(_parent is BusObject && _parent._exposed) this.expose();
 		}
 	}
 	[Notify]
@@ -32,40 +30,51 @@ public class BusObject:Object {
 	construct {
 		_title = name;
 		_parent = null;
-		_path = name;
+		_path = encode_name(name);
 		_exposed = false;
 		_visible = false;
 		base.notify += (sender, ps) => {
 			prop_changed(ps.name);
 		};
 	}
-/*	public void notify(string prop){
-			prop_changed(prop);
-	}*/
+
 	public virtual void expose() {
+		if(_exposed){
+			message("already exposed");
+			return;
+		}
 		message("path = %s", path);
+		bool ok = false;
+		var test_path = path;
+		int id = 0;
 		if(conn == null) {
 			message("connection fails, do not expose");
 			return;
 		}
-		Object o = conn.lookup_object(path);
-		if( o is Object) {
-			if( o == this ) {
-				message("%s is already exposed at: %s", name, path);
-				return;
-			} else {
-				message("remove the old object at:%s", path);
-				o.unref();
+		while (!ok){
+			Object o = conn.lookup_object(test_path);
+			if( o is Object) {
+				if( o == this ) {
+					message("%s is already exposed at: %s", name, test_path);
+					return;
+				}
+			}  
+			if( o  == null){
+				ok = true;
+				break;
 			}
+			test_path = "%s%d".printf(path, id++);
+			message("test path = %s", test_path);
 		}
-		conn.register_object(path, this);
+		conn.register_object(test_path, this);
 		_exposed = true;
 	}
 	public virtual void reset_path(){
 		if(_parent is BusObject) {
-			_path = _parent.path + "/" + name;
+			_path = _parent.path + "/" + encode_name(name);
 		} else {
 			message("parent is not a BusObject??");
+			_path = encode_name(name);
 		}
 
 	}

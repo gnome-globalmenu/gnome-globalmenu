@@ -36,17 +36,19 @@ public void init (string name, StartMode mode) throws GnomenuError {
 }
 public string get_app_bus_name(){
 	return "org.gnomenu.apps." + app_name;
-
 }
 public string encode_name(string name){
-	return name;	
+	string rt = name.escape("");
+	rt = rt.delimit(":./<>_ |", '_');
+	return rt;	
 }
 public string decode_name(string name){
 	return name;	
 }
+/*
 public string [] decode_paths(string paths){
 	string[] rt = paths.split("\n");
-	rt.length = string.lengthv(rt); /*work around NoArray length*/
+	rt.length = string.lengthv(rt); //work around NoArray length
 	return rt;
 }
 public string encode_paths(string[] paths){
@@ -59,7 +61,5 @@ public string encode_paths(string[] paths){
 		bluh.erase(bluh.len-1, 1);
 	return bluh.str;
 }
-
-
-
+*/
 }

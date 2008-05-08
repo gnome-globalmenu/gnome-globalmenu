@@ -14,8 +14,8 @@ namespace Gnomenu {
 			} else full_path = "/org/gnomenu/Application";
 			return conn.get_object (get_app_bus_name(), full_path, "org.gnomenu." + ifname);
 		}   
-		public dynamic DBus.Object [] get_objects(string s_paths, string ifname){
-			string [] paths = decode_paths(s_paths);
+		public dynamic DBus.Object [] get_objects(string [] paths, string ifname){
+//			string [] paths = decode_paths(s_paths);
 			dynamic DBus.Object [] rt = new DBus.Object [paths.length];
 			int i = 0;
 			foreach(string p in paths){

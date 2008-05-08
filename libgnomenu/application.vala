@@ -8,7 +8,7 @@ public class Application: MenuOwner {
 		this.name = name;
 	}
 	construct {
-		docs = new HashTable.full<string, Document>(str_hash, str_equal, null, g_object_unref);
+		docs = new HashTable<string, Document>.full(str_hash, str_equal, null,g_object_unref);
 		_path = "/org/gnomenu/Application";
 	}
 	public void insert(string key, Document doc){
@@ -20,6 +20,7 @@ public class Application: MenuOwner {
 		if(m is Document) return m.path;
 		else return "";
 	}
+/*
 	public string getDocuments() {
 		List<Document> l = docs.get_values();
 		string [] paths = new string[l.length()];
@@ -29,6 +30,18 @@ public class Application: MenuOwner {
 			i++;
 		}	
 		return encode_paths(paths);
+	}
+*/
+	[NoArrayLength]
+	public string[] getDocuments() {
+		List<Document> l = docs.get_values();
+		string [] paths = new string[l.length()];
+		var i = 0;
+		foreach(Document d in l){
+			paths[i] = d.path;
+			i++;
+		}	
+		return paths;
 	}
 	public override void expose() {
 		base.expose();
