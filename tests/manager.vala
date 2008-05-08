@@ -42,14 +42,13 @@ public class MainWindow : Window {
 	public void run() {
 		show();
 		app = agent.get_object("", "Application");
-		string[] paths = decode_paths(app.getDocuments());
+		string[] paths = app.getDocuments();
 		apptitle.set_label(app.getTitle());
 		string path;
 		app.propChanged += prop_changed;
 		path = app.getMenu();
 		dynamic DBus.Object menu = agent.get_object(path, "Menu");
-		string[] paths2 = menu.getMenuItems2();
-		message("%d", paths2.length);
+
 		agent.setup_menu_shell(appmenu, path);
 		Gtk.main();
 	}

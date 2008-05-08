@@ -12,20 +12,34 @@ const MenuItemInfo [] app_menu_main_item_info = {
 	{"ChangeName", null},
 	{null, null}
 };
+const MenuItemInfo [] app_menu_menu_item_info = {
+	{"Add", null},
+	{"Remove", null},
+	{"Hide", null},
+	{"Show", null},
+	{null, null}
+};
+
 const MenuItemInfo [] app_menu_item_info = {
 		{"AppMenuMain",  app_menu_main_item_info },
+		{"AppMenuMenu", app_menu_menu_item_info },
 		{null, null}
 	};
 class App: Object {
 		Application app; 
-		Document doc1; 
 		Menu app_menu; 
-		Menu app_menu_main; 
-		Menu doc1_menu; 
+		MenuItem test_item;
 	void on_activated(MenuItem item) {
 		switch(item.name) {
 			case "ChangeName":
 				app.title = "ChangedTitle";
+			break;
+			case "Add":
+				test_item = new MenuItem("TestItem");
+				app_menu.insert(test_item, -1);
+			break;
+			case "Remove":
+				app_menu.remove(test_item);
 			break;
 		}
 	}
@@ -59,7 +73,6 @@ class App: Object {
 			return ;
 		}
 		app = new Application("FakeApp");
-		doc1 = new Document( "1");
 		app_menu = new Menu("AppMenu");
 		app.menu = app_menu;
 		setup_menu(app_menu, app_menu_item_info);
