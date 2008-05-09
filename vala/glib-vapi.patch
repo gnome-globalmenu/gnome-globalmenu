@@ -1,6 +1,6 @@
-Index: glib-2.0.vapi
+Index: vapi/glib-2.0.vapi
 ===================================================================
---- vapi/glib-2.0.vapi	(revision 1345)
+--- vapi/glib-2.0.vapi	(revision 1349)
 +++ vapi/glib-2.0.vapi	(working copy)
 @@ -514,6 +514,8 @@
  	public string escape (string exceptions);
