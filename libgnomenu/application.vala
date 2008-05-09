@@ -8,12 +8,15 @@ public class Application: MenuOwner {
 		this.name = name;
 	}
 	construct {
-		docs = new HashTable<string, Document>.full(str_hash, str_equal, null,g_object_unref);
+		docs = new HashTable<string, Document>.full(str_hash, str_equal, g_free, g_object_unref);
 		_path = "/org/gnomenu/Application";
 	}
-	public void insert(string key, Document doc){
-		docs.insert(key, doc);
+	public void insert(string #key, Document #doc){
 		doc.parent = this;
+		docs.insert(#key, #doc);
+	}
+	public void remove(string key){
+		docs.remove(key);
 	}
 	public string getDocument(string key) {
 		Document m = docs.lookup(key);

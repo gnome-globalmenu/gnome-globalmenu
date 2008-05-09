@@ -13,8 +13,9 @@ public class Menu: BusObject {
 	construct {
 		children = null;
 	}
-	public void insert(MenuItem child, int pos){
+	public void insert(MenuItem # child, int pos){ /*Takes the ownership*/
 		this.children.insert(child, pos);
+		child.ref(); /*work around vala in-consistence in ownership transfer*/
 		child.parent = this;
 		prop_changed("children");
 	}
@@ -22,10 +23,15 @@ public class Menu: BusObject {
 		if(this.children.find(child) != null){
 			child.parent = null;
 			this.children.remove_all(child);
+			child.unref();
 			prop_changed("children");
 		}
 	}
-
+	~Menu(){
+		foreach(MenuItem item in this.children){
+			item.unref();
+		}
+	}
 	[NoArrayLength]
 	public string[] getMenuItems() {
 		string [] paths = new string[children.length()+1];

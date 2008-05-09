@@ -35,12 +35,23 @@ class App: Object {
 				app.title = "ChangedTitle";
 			break;
 			case "Add":
-				test_item = new MenuItem("TestItem");
 				test_item.visible = true;
 				app_menu.insert(test_item, -1);
 			break;
 			case "Remove":
-				app_menu.remove(test_item);
+				if(test_item is MenuItem){
+					app_menu.remove(test_item);
+				}
+			break;
+			case "Hide":
+				if(test_item is MenuItem){
+					test_item.visible = false;
+				}
+			break;
+			case "Hide":
+				if(test_item is MenuItem){
+					test_item.visible = true;
+				}
 			break;
 		}
 	}
@@ -76,6 +87,9 @@ class App: Object {
 		app = new Application("FakeApp");
 		app_menu = new Menu("AppMenu");
 		app.menu = app_menu;
+
+		test_item = new MenuItem("TestItem");
+
 		setup_menu(app_menu, app_menu_item_info);
 
 		app.expose();
