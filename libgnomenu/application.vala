@@ -42,7 +42,7 @@ public class Application: MenuOwner {
 */
 	[NoArrayLength]
 	public string[] getDocuments() {
-		List<Document> l = docs.get_values();
+		List<weak Document> l = docs.get_values();
 		string [] paths = new string[l.length()];
 		var i = 0;
 		foreach(Document d in l){

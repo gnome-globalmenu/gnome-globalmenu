@@ -35,8 +35,16 @@ const MenuItemInfo [] test_menu_item_info = {
 	{"Line2", null},
 	{null, null}
 };
+const MenuItemInfo [] doc_menu_item_info = {
+	{"_File", null},
+	{"_Edit", null},
+	{"_Help", null},
+	{null, null}
+};
+
 class App: Object {
 		Application app; 
+		Document [] docs;
 		Menu app_menu; 
 		MenuItem test_item;
 		Menu test_menu;
@@ -112,7 +120,14 @@ class App: Object {
 		app = new Application("FakeApp");
 		app_menu = new Menu("AppMenu");
 		app.menu = app_menu;
-
+		docs = new Document[2];
+		for(int i=0; i<2; i++){
+			string docname = "Doc%d".printf(i);
+			docs[i]= new Document(docname);
+			app.insert(docname, docs[i]);
+			docs[i].menu = new Menu("DocMenu");
+			setup_menu(docs[i].menu, doc_menu_item_info);
+		}
 		test_item = new MenuItem("TestItem");
 		test_menu = new Menu("TestMenu");
 

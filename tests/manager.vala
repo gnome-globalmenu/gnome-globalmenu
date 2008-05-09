@@ -8,10 +8,9 @@ public class MainWindow : Window {
 	private MenuBar appmenu;
 	private MenuBar docmenu;
 	private Label apptitle;
-	private Label doctitle;
-
+	private Notebook notebook;
+	dynamic DBus.Object []  docs;
 	dynamic DBus.Object app;
-	dynamic DBus.Object doc;
 	public BusAgentGtk agent;
 	public MainWindow () {
 		title = "manager";
@@ -21,17 +20,14 @@ public class MainWindow : Window {
 		add (vbox);
 		vbox.show();
 		appmenu = new MenuBar();
-		docmenu = new MenuBar();
 		apptitle = new Label("");
-		doctitle = new Label("");
+		notebook = new Notebook();
 		vbox.pack_start_defaults(apptitle);
 		vbox.pack_start_defaults(appmenu);
-		vbox.pack_start_defaults(doctitle);
-		vbox.pack_start_defaults(docmenu);
+		vbox.pack_start_defaults(notebook);
 		appmenu.show();
-		docmenu.show();
 		apptitle.show();
-		doctitle.show();
+		notebook.show();
 		agent = new BusAgentGtk(); /*app.vala */
 	}
 	public void bind_objects(GLib.Object local, GLib.Object remote){
@@ -42,15 +38,22 @@ public class MainWindow : Window {
 	public void run() {
 		show();
 		app = agent.get_object("", "Application");
+		string [] paths = app.getDocuments();
+		docs = agent.get_objects(paths, "Document");
+		foreach (dynamic DBus.Object d in docs){
+			MenuBar menubar = new MenuBar();
+			Label label = new Label("");
+			menubar.show();
+			string menu_path = d.getMenu();
+			string doc_title = d.getTitle();
+			agent.setup_menu_shell(menubar, menu_path);
+			label.set_markup_with_mnemonic(doc_title);
+			notebook.append_page(menubar, label);
+		}
 		app.quit += on_app_quit;
-		string[] paths = app.getDocuments();
 		apptitle.set_label(app.getTitle());
-		string path;
 		app.propChanged += prop_changed;
-		path = app.getMenu();
-		dynamic DBus.Object menu = agent.get_object(path, "Menu");
-
-		agent.setup_menu_shell(appmenu, path);
+		agent.setup_menu_shell(appmenu, app.getMenu());
 		Gtk.main();
 	}
 	public void prop_changed(dynamic DBus.Object sender, string prop_name){
