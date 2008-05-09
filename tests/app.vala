@@ -36,6 +36,7 @@ class App: Object {
 			break;
 			case "Add":
 				test_item = new MenuItem("TestItem");
+				test_item.visible = true;
 				app_menu.insert(test_item, -1);
 			break;
 			case "Remove":

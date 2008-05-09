@@ -10,14 +10,18 @@ public class BusAgentGtk: BusAgent {
 	}
 	public BusAgentGtk (){
 	}
-	public void setup_menu_shell(MenuShell menu_shell, string path){
+	public void rebuild_menu_shell(MenuShell menu_shell){
 		bool visible; // for type casting the dynamic objs
-		dynamic DBus.Object menu_r = this.get_object(path, "Menu");
-		menu_shell.set_data_full("dbus-obj", menu_r.ref(), g_object_unref);
-		menu_r.propChanged += menu_prop_changed;
 
 		/*clear the menu*/
 		menu_shell.foreach((Gtk.Callback)clear_menu_shell_callback);
+
+		string path = (string) menu_shell.get_data("path");
+		if(path == null) return;
+
+		dynamic DBus.Object menu_r = this.get_object(path, "Menu");
+		bind_objects(menu_shell, menu_r);
+		menu_r.propChanged += menu_prop_changed;
 
 		if(visible = menu_r.getVisible()) menu_shell.show();
 
@@ -25,8 +29,7 @@ public class BusAgentGtk: BusAgent {
 		dynamic DBus.Object[] items = this.get_objects(item_paths, "MenuItem");
 		foreach(dynamic DBus.Object item in items){
 			Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label(item.getTitle());
-			menu_item.set_data_full("dbus-obj", item.ref(), g_object_unref);
-
+			bind_objects(menu_item, item);
 			if(visible = item.getVisible()) menu_item.show();
 			item.propChanged += item_prop_changed;
 
@@ -44,6 +47,10 @@ public class BusAgentGtk: BusAgent {
 			}
 		}
 	}
+	public void setup_menu_shell(MenuShell menu_shell, string path){
+		menu_shell.set_data("path", path);
+		rebuild_menu_shell(menu_shell);
+	}
 	void item_prop_changed(dynamic DBus.Object sender, string prop_name){
 		string sender_path = sender.get_path();
 		message("%s.%s is changed", sender_path, prop_name);
@@ -51,6 +58,13 @@ public class BusAgentGtk: BusAgent {
 	void menu_prop_changed(dynamic DBus.Object sender, string prop_name){
 		string sender_path = sender.get_path();
 		message("%s.%s is changed", sender_path, prop_name);
+		switch(prop_name){
+			case "children":
+				var local = get_local(sender);
+				if(local is MenuShell)
+				rebuild_menu_shell((MenuShell)local);
+			break;
+		}
 	}
 
 }

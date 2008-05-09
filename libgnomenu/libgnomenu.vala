@@ -45,6 +45,16 @@ public string encode_name(string name){
 public string decode_name(string name){
 	return name;	
 }
+public void bind_objects(Object local, DBus.Object remote){
+	local.set_data_full("dbus-obj", remote.ref(), g_object_unref);
+	remote.set_data("local-obj", local);
+}
+public weak GLib.Object get_local(Object remote){
+	return (GLib.Object) remote.get_data("local-obj");
+}
+public weak DBus.Object get_remote(Object local){
+	return (DBus.Object) local.get_data("dbus-obj");
+}
 /*
 public string [] decode_paths(string paths){
 	string[] rt = paths.split("\n");
