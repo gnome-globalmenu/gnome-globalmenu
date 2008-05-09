@@ -8,6 +8,8 @@ public class BusObject:Object {
 	protected string _path;
 	private bool _exposed;
 	private bool _visible;
+	private bool _enabled;
+
 	[Notify]
 	public weak BusObject parent {
 		get {
@@ -26,6 +28,8 @@ public class BusObject:Object {
 	public string name {get; construct;} /*read-only, unique*/
 	[Notify]
 	public bool visible {get{return _visible;} set{_visible=value;/*notify("visible");*/}}
+	[Notify]
+	public bool enabled {get{return _enabled;} set{_enabled=value;}}
 	public signal void prop_changed(string prop);
 	construct {
 		_title = name;
@@ -33,6 +37,7 @@ public class BusObject:Object {
 		_path = encode_name(name);
 		_exposed = false;
 		_visible = false;
+		_enabled = true;
 		base.notify += (sender, ps) => {
 			prop_changed(ps.name);
 		};
@@ -83,6 +88,9 @@ public class BusObject:Object {
 	}
 	public virtual string getTitle(){
 		return _title;
+	}
+	public virtual bool getEnabled(){
+		return _enabled;
 	}
 }
 }

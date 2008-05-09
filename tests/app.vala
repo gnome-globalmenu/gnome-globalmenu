@@ -18,6 +18,8 @@ const MenuItemInfo [] app_menu_menu_item_info = {
 	{"_Hide", null},
 	{"_Show", null},
 	{"_Modify", null},
+	{"_Enable", null},
+	{"_Disable", null},
 	{"Add SubMenu", null},
 	{"Remove SubMenu", null},
 	{null, null}
@@ -29,7 +31,7 @@ const MenuItemInfo [] app_menu_item_info = {
 	{null, null}
 };
 const MenuItemInfo [] test_menu_item_info = {
-	{"Line1", null},
+	{"<em>Line1</em>", null},
 	{"Line2", null},
 	{null, null}
 };
@@ -63,6 +65,12 @@ class App: Object {
 			break;
 			case "_Show":
 				test_item.visible = true;
+			break;
+			case "_Enable":
+				test_item.enabled = true;
+			break;
+			case "_Disable":
+				test_item.enabled = false;
 			break;
 			case "_Modify":
 				test_item.title = "_Modified Title";

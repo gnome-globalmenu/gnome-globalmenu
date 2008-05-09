@@ -22,6 +22,9 @@ public class MenuItem: MenuOwner {
 	public override string getTitle() {
 		return base.getTitle();
 	}
+	public override bool getEnabled() {
+		return base.getEnabled();
+	}
 	public override string getMenu() {
 		return base.getMenu();
 	}

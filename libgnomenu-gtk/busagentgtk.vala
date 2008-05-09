@@ -93,6 +93,10 @@ public class BusAgentGtk: BusAgent {
 					local.show();
 				else local.hide();
 			break;
+			case "enabled":
+				bool enabled = sender.getEnabled();
+				local.set_sensitive(enabled);
+			break;
 			case "menu":
 			case "title":
 				rebuild_menu_item(local);
