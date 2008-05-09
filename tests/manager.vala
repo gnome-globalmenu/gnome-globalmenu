@@ -42,10 +42,11 @@ public class MainWindow : Window {
 	public void run() {
 		show();
 		app = agent.get_object("", "Application");
+		app.quit += on_app_quit;
 		string[] paths = app.getDocuments();
 		apptitle.set_label(app.getTitle());
 		string path;
-	//	app.propChanged += prop_changed;
+		app.propChanged += prop_changed;
 		path = app.getMenu();
 		dynamic DBus.Object menu = agent.get_object(path, "Menu");
 
@@ -58,6 +59,9 @@ public class MainWindow : Window {
 			message("title has changed");
 			apptitle.set_label(app.getTitle());
 		}*/
+	}
+	public void on_app_quit(dynamic DBus.Object sender) {
+		message("on_app_quit();");
 	}
 	static int main(string[] args){
 		Gtk.init(ref args);

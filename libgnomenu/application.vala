@@ -1,11 +1,16 @@
 using GLib;
 namespace Gnomenu {
 
-[DBus (name = "org.gnomenu.Application", signals="propChanged")]
+[DBus (name = "org.gnomenu.Application", signals="propChanged, quit")]
 public class Application: MenuOwner {
 	public HashTable<string, Document> docs;
+
+	public signal void quit();
 	public Application (string name) {
 		this.name = name;
+	}
+	~Application (){
+		quit();
 	}
 	construct {
 		docs = new HashTable<string, Document>.full(str_hash, str_equal, g_free, g_object_unref);
