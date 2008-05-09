@@ -4,7 +4,7 @@ namespace Gnomenu {
 
 [DBus (name = "org.gnomenu.Menu", signals="propChanged")]
 public class Menu: BusObject {
-	public List<MenuItem> children;
+	public List<weak MenuItem> children;
 	public string title {get; set;}
 
 	public Menu(string name) {

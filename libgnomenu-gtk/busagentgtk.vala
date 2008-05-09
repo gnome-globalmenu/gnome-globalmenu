@@ -16,7 +16,7 @@ public class BusAgentGtk: BusAgent {
 		/*clear the menu*/
 		menu_shell.foreach((Gtk.Callback)clear_menu_shell_callback);
 
-		string path = (string) menu_shell.get_data("path");
+		weak string path = (string) menu_shell.get_data("path");
 		if(path == null) return;
 
 		dynamic DBus.Object menu_r = this.get_object(path, "Menu");
@@ -26,34 +26,65 @@ public class BusAgentGtk: BusAgent {
 		if(visible = menu_r.getVisible()) menu_shell.show();
 
 		string [] item_paths = menu_r.getMenuItems();
-		dynamic DBus.Object[] items = this.get_objects(item_paths, "MenuItem");
-		foreach(dynamic DBus.Object item in items){
-			Gtk.MenuItem menu_item = new Gtk.MenuItem.with_label(item.getTitle());
-			bind_objects(menu_item, item);
-			if(visible = item.getVisible()) menu_item.show();
-			item.propChanged += item_prop_changed;
-
-			menu_shell.append(menu_item);
-			string submenu_path = item.getMenu();
-			if(submenu_path != null && submenu_path.size() >0) {
-				Gtk.Menu submenu = new Gtk.Menu();
-				this.setup_menu_shell(submenu, submenu_path);
-				menu_item.set_submenu(submenu);
-			} else {
-				menu_item.activate += (sender) =>{
-					dynamic DBus.Object item = (DBus.Object)sender.get_data("dbus-obj");
-					item.activate();
-				};
-			}
+//		dynamic DBus.Object[] items = this.get_objects(item_paths, "MenuItem");
+		foreach(string path in item_paths) {
+			Gtk.MenuItem item = new Gtk.MenuItem();
+			setup_menu_item(item, path);
+			menu_shell.append(item);
 		}
 	}
+	public void rebuild_menu_item(Gtk.MenuItem item){
+		bool visible; // for type casting the dynamic objs
+
+		weak string path = (string) item.get_data("path");
+		message("rebuild path=%s", path);
+		if(path == null) return;
+
+		dynamic DBus.Object item_r = this.get_object(path ,"MenuItem");
+		bind_objects(item, item_r);
+		if(visible = item_r.getVisible()) item.show();
+		else item.hide();
+		string title = item_r.getTitle();
+		Gtk.Label label = (Gtk.Label) item.get_child();
+		if(label == null) {
+			label = new Gtk.Label("");
+			item.add(label);
+		} 
+
+		label.set_markup_with_mnemonic(title);
+		label.show();
+		item_r.propChanged += item_prop_changed;
+
+		string submenu_path = item_r.getMenu();
+		if(submenu_path != null && submenu_path.size() >0) {
+			Gtk.Menu submenu = new Gtk.Menu();
+			this.setup_menu_shell(submenu, submenu_path);
+			item.set_submenu(submenu);
+		} else {
+			item.set_submenu(null);
+			item.activate += (sender) =>{
+				dynamic DBus.Object item_r = get_remote(sender);
+				if(sender.submenu == null) 
+				/* working around: if submenu is attached after connecting signal, 
+				::activate signal is emitted every time the item is clicked*/
+					item_r.activate();
+			};
+		}
+
+	}
 	public void setup_menu_shell(MenuShell menu_shell, string path){
-		menu_shell.set_data("path", path);
+		menu_shell.set_data_full("path", path.ref(), g_free);
+		message("MenuShell %s", path);
 		rebuild_menu_shell(menu_shell);
+	}
+	public void setup_menu_item(Gtk.MenuItem item, string path){
+		item.set_data_full("path", path.ref(), g_free);
+		message("MenuItem %s", path);
+		rebuild_menu_item(item);
 	}
 	void item_prop_changed(dynamic DBus.Object sender, string prop_name){
 		string sender_path = sender.get_path();
-		Widget local = (Widget) get_local(sender);
+		Gtk.MenuItem local = (Gtk.MenuItem) get_local(sender);
 		message("%s.%s is changed", sender_path, prop_name);
 		switch(prop_name){
 			case "visible":
@@ -61,6 +92,10 @@ public class BusAgentGtk: BusAgent {
 				if(visible)
 					local.show();
 				else local.hide();
+			break;
+			case "menu":
+			case "title":
+				rebuild_menu_item(local);
 			break;
 		}
 	}

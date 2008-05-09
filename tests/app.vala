@@ -8,50 +8,67 @@ struct MenuItemInfo {
 }
 const MenuItemInfo [] app_menu_main_item_info = {
 	{"Spawn", null},
-	{"Quit", null},
+	{"_Quit", null},
 	{"ChangeName", null},
 	{null, null}
 };
 const MenuItemInfo [] app_menu_menu_item_info = {
-	{"Add", null},
-	{"Remove", null},
-	{"Hide", null},
-	{"Show", null},
+	{"_Add", null},
+	{"_Remove", null},
+	{"_Hide", null},
+	{"_Show", null},
+	{"_Modify", null},
+	{"Add SubMenu", null},
+	{"Remove SubMenu", null},
 	{null, null}
 };
 
 const MenuItemInfo [] app_menu_item_info = {
-		{"AppMenuMain",  app_menu_main_item_info },
-		{"AppMenuMenu", app_menu_menu_item_info },
-		{null, null}
-	};
+	{"AppMenuMain",  app_menu_main_item_info },
+	{"AppMenuMenu", app_menu_menu_item_info },
+	{null, null}
+};
+const MenuItemInfo [] test_menu_item_info = {
+	{"Line1", null},
+	{"Line2", null},
+	{null, null}
+};
 class App: Object {
 		Application app; 
 		Menu app_menu; 
 		MenuItem test_item;
+		Menu test_menu;
+		MainLoop loop;
+
 	void on_activated(MenuItem item) {
 		switch(item.name) {
 			case "ChangeName":
 				app.title = "ChangedTitle";
 			break;
-			case "Add":
+			case "_Add":
 				test_item.visible = true;
 				app_menu.insert(test_item, -1);
 			break;
-			case "Remove":
-				if(test_item is MenuItem){
-					app_menu.remove(test_item);
-				}
+			case "_Remove":
+				app_menu.remove(test_item);
 			break;
-			case "Hide":
-				if(test_item is MenuItem){
-					test_item.visible = false;
-				}
+			case "Add SubMenu":
+				test_item.menu = test_menu;
 			break;
-			case "Show":
-				if(test_item is MenuItem){
-					test_item.visible = true;
-				}
+			case "Remove SubMenu":
+				test_item.menu = null;
+			break;
+			case "_Hide":
+				test_item.visible = false;
+			break;
+			case "_Show":
+				test_item.visible = true;
+			break;
+			case "_Modify":
+				test_item.title = "_Modified Title";
+			break;
+			case "_Quit":
+				quit();
 			break;
 		}
 	}
@@ -77,7 +94,7 @@ class App: Object {
 		menu.visible = true;
 	}
 	void run(){
-		MainLoop loop = new MainLoop (null, false);
+		loop = new MainLoop (null, false);
 		try {
 			Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.APPLICATION);
 		} catch (Error e){
@@ -89,11 +106,17 @@ class App: Object {
 		app.menu = app_menu;
 
 		test_item = new MenuItem("TestItem");
+		test_menu = new Menu("TestMenu");
+
+		setup_menu(test_menu, test_menu_item_info);
 
 		setup_menu(app_menu, app_menu_item_info);
 
 		app.expose();
 		loop.run ();
+	}
+	void quit(){
+		loop.quit();
 	}
 	static int main(string[] argv) {
 

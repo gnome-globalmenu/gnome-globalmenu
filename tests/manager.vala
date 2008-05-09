@@ -45,7 +45,7 @@ public class MainWindow : Window {
 		string[] paths = app.getDocuments();
 		apptitle.set_label(app.getTitle());
 		string path;
-		app.propChanged += prop_changed;
+	//	app.propChanged += prop_changed;
 		path = app.getMenu();
 		dynamic DBus.Object menu = agent.get_object(path, "Menu");
 
@@ -53,11 +53,11 @@ public class MainWindow : Window {
 		Gtk.main();
 	}
 	public void prop_changed(dynamic DBus.Object sender, string prop_name){
-		
+	/*	
 		if(prop_name == "title"){
 			message("title has changed");
 			apptitle.set_label(app.getTitle());
-		}
+		}*/
 	}
 	static int main(string[] args){
 		Gtk.init(ref args);

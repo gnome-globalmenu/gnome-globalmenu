@@ -9,9 +9,10 @@ public class MenuOwner: BusObject {
 		}
 		set {
 			_menu = value;
+			message("%d", value);
 			if(_menu is BusObject)
 				_menu.parent = this;
-			message("set menu");
+			prop_changed("menu");
 		}
 	}
 	public override void expose() {
