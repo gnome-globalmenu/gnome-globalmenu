@@ -48,7 +48,7 @@ class App: Object {
 					test_item.visible = false;
 				}
 			break;
-			case "Hide":
+			case "Show":
 				if(test_item is MenuItem){
 					test_item.visible = true;
 				}

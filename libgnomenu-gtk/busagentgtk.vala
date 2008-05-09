@@ -53,14 +53,23 @@ public class BusAgentGtk: BusAgent {
 	}
 	void item_prop_changed(dynamic DBus.Object sender, string prop_name){
 		string sender_path = sender.get_path();
+		Widget local = (Widget) get_local(sender);
 		message("%s.%s is changed", sender_path, prop_name);
+		switch(prop_name){
+			case "visible":
+				bool visible = sender.getVisible();
+				if(visible)
+					local.show();
+				else local.hide();
+			break;
+		}
 	}
 	void menu_prop_changed(dynamic DBus.Object sender, string prop_name){
 		string sender_path = sender.get_path();
+		var local = get_local(sender);
 		message("%s.%s is changed", sender_path, prop_name);
 		switch(prop_name){
 			case "children":
-				var local = get_local(sender);
 				if(local is MenuShell)
 				rebuild_menu_shell((MenuShell)local);
 			break;
