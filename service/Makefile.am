@@ -1,6 +1,7 @@
 AM_CPPFLAGS = \
 	$(GNOMENU_SERVICE_CFLAGS) \
 	-include $(CONFIG_HEADER) \
+	-I../libgnomenu  \
 	$(NULL)
 
 BUILT_SOURCES = service.vala.stamp
@@ -17,10 +18,11 @@ gnomenu_service_SOURCES = \
 		$(NULL)
 
 service.vala.stamp: $(gnomenu_service_VALASOURCES)
-	$(VALAC) -C $(GNOMENU_SERVICE_VALA_PKGS) $^
+	$(VALAC) -C $(GNOMENU_SERVICE_VALA_PKGS) --vapidir=../libgnomenu --pkg gnomenu $^
 	touch $@
 
 gnomenu_service_LDADD = \
+		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(GNOMENU_SERVICE_LIBS) \
 		$(NULL)
 
