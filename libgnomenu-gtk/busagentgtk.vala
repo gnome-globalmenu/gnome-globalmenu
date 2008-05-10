@@ -27,7 +27,7 @@ public class BusAgentGtk: BusAgent {
 		if(visible = menu_r.getVisible()) menu_shell.show();
 
 		string [] item_paths = menu_r.getMenuItems();
-//		dynamic DBus.Object[] items = this.get_objects(item_paths, "MenuItem");
+
 		foreach(string path in item_paths) {
 			Gtk.MenuItem item = new Gtk.MenuItem();
 			setup_menu_item(item, path);
