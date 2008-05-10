@@ -1,11 +1,12 @@
 using GLib;
 namespace Gnomenu {
 
-[DBus (name = "org.gnomenu.Application", signals="propChanged, quit")]
+[DBus (name = "org.gnomenu.Application", signals="propChanged, newDocument, quit")]
 public class Application: MenuOwner {
 	public HashTable<string, Document> docs;
 
 	public signal void quit();
+	public signal void new_document(string path);
 	public Application (string name) {
 		this.name = name;
 	}
@@ -18,10 +19,20 @@ public class Application: MenuOwner {
 	}
 	public void insert(string #key, Document #doc){
 		doc.parent = this;
+		doc.key = key;
+		var path = doc.path;
+		message("ref count = %d", doc.ref_count);
 		docs.insert(#key, #doc);
+		prop_changed("children");
+		new_document(path);
 	}
 	public void remove(string key){
+		message("an object is removed, key = %s", key);
+		var doc = docs.lookup(key);
+		message("ref count = %d", doc.ref_count);
 		docs.remove(key);
+		message("ref count = %d", doc.ref_count);
+		prop_changed("children");
 	}
 	public string getDocument(string key) {
 		Document m = docs.lookup(key);

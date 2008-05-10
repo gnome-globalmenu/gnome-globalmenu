@@ -7,7 +7,7 @@ struct MenuItemInfo {
 	public MenuItemInfo[]? submenu_info;
 }
 const MenuItemInfo [] app_menu_main_item_info = {
-	{"Spawn", null},
+	{"_New", null},
 	{"_Quit", null},
 	{"ChangeName", null},
 	{null, null}
@@ -35,8 +35,13 @@ const MenuItemInfo [] test_menu_item_info = {
 	{"Line2", null},
 	{null, null}
 };
+const MenuItemInfo [] doc_menu_file_item_info = {
+	{"_Save", null},
+	{"_Close", null},
+	{null, null}
+};
 const MenuItemInfo [] doc_menu_item_info = {
-	{"_File", null},
+	{"_File", doc_menu_file_item_info},
 	{"_Edit", null},
 	{"_Help", null},
 	{null, null}
@@ -44,12 +49,11 @@ const MenuItemInfo [] doc_menu_item_info = {
 
 class App: Object {
 		Application app; 
-		Document [] docs;
 		Menu app_menu; 
 		MenuItem test_item;
 		Menu test_menu;
 		MainLoop loop;
-
+	static int number;
 	void on_activated(MenuItem item) {
 		switch(item.name) {
 			case "ChangeName":
@@ -83,8 +87,23 @@ class App: Object {
 			case "_Modify":
 				test_item.title = "_Modified Title";
 			break;
+			case "_New":
+				Document doc = new Document("NewDoc");
+				doc.menu = new Menu("DocMenu");
+				setup_menu(doc.menu, doc_menu_item_info);
+				app.insert((number++).to_string(), #doc);
+			break;
 			case "_Quit":
 				quit();
+			break;
+			case "_Close":
+				weak BusObject o = item;
+				while(o != null && !(o is Document)){
+					o = o.parent;
+				}
+				if(o is Document){
+					app.remove(((Document)o).key);
+				}
 			break;
 		}
 	}
@@ -120,13 +139,15 @@ class App: Object {
 		app = new Application("FakeApp");
 		app_menu = new Menu("AppMenu");
 		app.menu = app_menu;
-		docs = new Document[2];
-		for(int i=0; i<2; i++){
-			string docname = "Doc%d".printf(i);
-			docs[i]= new Document(docname);
-			app.insert(docname, docs[i]);
-			docs[i].menu = new Menu("DocMenu");
-			setup_menu(docs[i].menu, doc_menu_item_info);
+		{
+			Document [] docs = new Document[2];
+			for(int i=0; i<2; i++){
+				string docname = "Doc%d".printf(i);
+				docs[i]= new Document(docname);
+				app.insert(docname, docs[i]);
+				docs[i].menu = new Menu("DocMenu");
+				setup_menu(docs[i].menu, doc_menu_item_info);
+			}
 		}
 		test_item = new MenuItem("TestItem");
 		test_menu = new Menu("TestMenu");
