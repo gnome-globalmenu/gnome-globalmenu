@@ -8,7 +8,8 @@ public class BusAgentGtk: BusAgent {
 		Gtk.MenuShell shell = (Gtk.MenuShell) (widget.get_parent());
 		shell.remove(widget);
 	}
-	public BusAgentGtk (){
+	public BusAgentGtk (string name){
+		this.name = name;
 	}
 	public void rebuild_menu_shell(MenuShell menu_shell){
 		bool visible; // for type casting the dynamic objs

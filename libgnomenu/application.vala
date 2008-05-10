@@ -26,6 +26,23 @@ public class Application: MenuOwner {
 		prop_changed("children");
 		new_document(path);
 	}
+	protected override void @foreach(BusObject.Func func){
+		List<weak BusObject> l = docs.get_values();
+		foreach(BusObject doc in l){
+			func(doc);
+		}
+		base.@foreach(func);
+	}
+	protected override void reexpose(){
+		if(!_exposed) return;
+		message("app.reexpose");
+		dynamic DBus.Object bus = conn.get_object ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+		uint request_name_result = bus.RequestName (get_app_bus_name(name), (uint) 0);
+		if(request_name_result != DBus.RequestNameReply.PRIMARY_OWNER) {
+			throw new GnomenuError.GNOMENU_APPLICATION_EXISTS("Old application already exsits");
+		}
+		base.reexpose();
+	}
 	public void remove(string key){
 		message("an object is removed, key = %s", key);
 		var doc = docs.lookup(key);
@@ -61,18 +78,6 @@ public class Application: MenuOwner {
 			i++;
 		}	
 		return paths;
-	}
-	public override void expose() {
-		base.expose();
-		docs.for_each((k,v,d) => {
-			((Document) v).expose();
-		}, null);
-	}
-	public override void reset_path() {
-		base.reset_path();
-		docs.for_each((k,v,d) => {
-			((Document) v).reset_path();
-		}, null);
 	}
 	public override string getTitle() {
 		return base.getTitle();

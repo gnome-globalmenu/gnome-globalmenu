@@ -1,7 +1,18 @@
 using GLib;
 namespace Gnomenu {
 	public class BusAgent:Object {
-		public BusAgent() {
+		public string name {get; construct;}
+		private DBus.Connection _conn;
+		public DBus.Connection conn {
+			get {
+				return _conn;
+			}
+			set {
+				_conn = value;
+			}
+		}
+		public BusAgent(string name) {
+			this.name = name;
 		}   
 		public dynamic DBus.Object get_object(string path, string ifname){
 			string full_path;
@@ -12,7 +23,7 @@ namespace Gnomenu {
 					full_path = path;
 				}
 			} else full_path = "/org/gnomenu/Application";
-			return conn.get_object (get_app_bus_name(), full_path, "org.gnomenu." + ifname);
+			return conn.get_object (get_app_bus_name(name), full_path, "org.gnomenu." + ifname);
 		}   
 		public dynamic DBus.Object [] get_objects(string [] paths, string ifname){
 //			string [] paths = decode_paths(s_paths);

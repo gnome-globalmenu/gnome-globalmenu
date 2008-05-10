@@ -6,10 +6,20 @@ public class BusObject:Object {
 	private weak BusObject _parent;
 	private string _title;
 	protected string _path;
-	private bool _exposed;
+	protected bool _exposed; /*application.vala*/
 	private bool _visible;
 	private bool _enabled;
-
+	private DBus.Connection _conn;
+	public DBus.Connection conn {
+		set {
+			DBus.Connection __conn = _conn;
+			_conn = value;
+			if(_exposed && __conn != _conn) {
+				reexpose();
+			}
+		}
+		get { return _conn; }
+	}
 	[Notify]
 	public weak BusObject parent {
 		get {
@@ -22,14 +32,16 @@ public class BusObject:Object {
 			if(_parent is BusObject && _parent._exposed) this.expose();
 		}
 	}
+	public string path {get{return _path;}} /*read-only unique*/
+	public string name {get; construct;} /*read-only, not unique*/
+
 	[Notify]
 	public string title {get{return _title;} set{_title=value;/*notify("title");*/}}
-	public string path {get{return _path;}}
-	public string name {get; construct;} /*read-only, unique*/
 	[Notify]
 	public bool visible {get{return _visible;} set{_visible=value;/*notify("visible");*/}}
 	[Notify]
 	public bool enabled {get{return _enabled;} set{_enabled=value;}}
+
 	public signal void prop_changed(string prop);
 	construct {
 		_title = name;
@@ -43,11 +55,23 @@ public class BusObject:Object {
 		};
 	}
 
-	public virtual void expose() {
+	public void expose() {
+		if(_parent != null)
+			this.conn = _parent.conn;
 		if(_exposed){
 			message("already exposed");
 			return;
 		}
+		_exposed = true;
+		reexpose();
+		@foreach(expose);
+	}
+	public static delegate void Func(BusObject obj);
+	protected virtual void @foreach(BusObject.Func cb) {
+	}
+	protected virtual void reexpose() {
+		if(!_exposed) return;
+		message("reexpose");
 		message("path = %s", path);
 		bool ok = false;
 		var test_path = path;
@@ -72,16 +96,15 @@ public class BusObject:Object {
 			message("test path = %s", test_path);
 		}
 		conn.register_object(test_path, this);
-		_exposed = true;
 	}
-	public virtual void reset_path(){
+	private virtual void reset_path(){
 		if(_parent is BusObject) {
 			_path = _parent.path + "/" + encode_name(name);
 		} else {
 			message("parent is not a BusObject??");
 			_path = encode_name(name);
 		}
-
+		@foreach(reset_path);
 	}
 	public virtual bool getVisible(){
 		return _visible;

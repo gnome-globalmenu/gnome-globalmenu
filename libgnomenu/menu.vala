@@ -32,6 +32,12 @@ public class Menu: BusObject {
 			item.unref();
 		}
 	}
+	protected override void @foreach(BusObject.Func func){
+		foreach(BusObject item in this.children){
+			func(item);
+		}
+		base.@foreach(func);
+	}
 	[NoArrayLength]
 	public string[] getMenuItems() {
 		string [] paths = new string[children.length()+1];
@@ -44,18 +50,6 @@ public class Menu: BusObject {
 		paths[i] = null;
 		message("length = %d", i);
 		return paths;
-	}
-	public override void expose() {
-		base.expose();
-		foreach (MenuItem m in children){
-			m.expose();
-		}
-	}
-	public override void reset_path() {
-		base.reset_path();
-		foreach (MenuItem m in children){
-			m.reset_path();
-		}
 	}
 	public override bool getVisible() {
 		return base.getVisible();

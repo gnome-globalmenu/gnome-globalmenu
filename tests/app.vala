@@ -130,31 +130,33 @@ class App: Object {
 	}
 	void run(){
 		loop = new MainLoop (null, false);
+		app = new Application("FakeApp");
 		try {
-			Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.APPLICATION);
+		//	Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.APPLICATION);
+			app.conn =  DBus.Bus.get (DBus.BusType.SESSION);
 		} catch (Error e){
 			message("error: %s", e.message);
 			return ;
 		}
-		app = new Application("FakeApp");
 		app_menu = new Menu("AppMenu");
 		app.menu = app_menu;
+		test_item = new MenuItem("TestItem");
+		test_menu = new Menu("TestMenu");
+
+
+		setup_menu(app_menu, app_menu_item_info);
+		setup_menu(test_menu, test_menu_item_info);
+
 		{
 			Document [] docs = new Document[2];
 			for(int i=0; i<2; i++){
 				string docname = "Doc%d".printf(i);
 				docs[i]= new Document(docname);
-				app.insert(docname, docs[i]);
 				docs[i].menu = new Menu("DocMenu");
 				setup_menu(docs[i].menu, doc_menu_item_info);
+				app.insert(docname, docs[i]);
 			}
 		}
-		test_item = new MenuItem("TestItem");
-		test_menu = new Menu("TestMenu");
-
-		setup_menu(test_menu, test_menu_item_info);
-
-		setup_menu(app_menu, app_menu_item_info);
 
 		app.expose();
 		loop.run ();

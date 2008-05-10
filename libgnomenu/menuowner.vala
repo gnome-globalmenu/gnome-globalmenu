@@ -15,13 +15,10 @@ public class MenuOwner: BusObject {
 			prop_changed("menu");
 		}
 	}
-	public override void expose() {
-		base.expose();
-		if(menu is Menu) menu.expose();
-	}
-	public override void reset_path() {
-		base.reset_path();
-		if(menu is Menu) menu.reset_path();
+	protected override void @foreach(BusObject.Func func){
+		if(_menu != null) {
+			func(_menu);
+		}
 	}
 	public virtual string getMenu(){
 		if(menu is Menu) return menu.path;

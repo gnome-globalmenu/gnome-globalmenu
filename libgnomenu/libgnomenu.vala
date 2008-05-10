@@ -19,10 +19,11 @@ public void init (string name, StartMode mode) throws GnomenuError {
 	if(conn != null ) {
 		dynamic DBus.Object bus = conn.get_object ("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 		if(mode == StartMode.APPLICATION){
+		/*
 			uint request_name_result = bus.RequestName (get_app_bus_name(), (uint) 0);
 			if(request_name_result != DBus.RequestNameReply.PRIMARY_OWNER) {
 				throw new GnomenuError.GNOMENU_APPLICATION_EXISTS("Old application already exsits");
-			}
+			}*/
 		}
 		if(mode == StartMode.SERVER){
 			uint request_name_result = bus.RequestName ("org.gnomenu.server", (uint) 0);
@@ -34,10 +35,11 @@ public void init (string name, StartMode mode) throws GnomenuError {
 		throw new GnomenuError.GNOMENU_CONNECTION_FAILS("can't establish a connection with the DBus");
 	}
 }
-public string get_app_bus_name(){
+public string get_app_bus_name(string app_name){
 	return "org.gnomenu.apps." + app_name;
 }
 public string encode_name(string name){
+	if(name == null) name = "";
 	string rt = name.escape("");
 	rt = rt.delimit(":./<>_ |", '_');
 	return rt;	

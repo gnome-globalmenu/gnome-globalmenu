@@ -28,7 +28,8 @@ public class MainWindow : Window {
 		appmenu.show();
 		apptitle.show();
 		notebook.show();
-		agent = new BusAgentGtk(); /*app.vala */
+		agent = new BusAgentGtk("FakeApp"); /*app.vala */
+		agent.conn = DBus.Bus.get(DBus.BusType.SESSION);
 	}
 	public void bind_objects(GLib.Object local, GLib.Object remote){
 		local.set_data_full("remote-item", remote.ref(), g_object_unref);
@@ -84,7 +85,6 @@ public class MainWindow : Window {
 	}
 	static int main(string[] args){
 		Gtk.init(ref args);
-		Gnomenu.init("FakeAppInterface", Gnomenu.StartMode.MANAGER);
 		
 		var window = new MainWindow();
 		window.run();

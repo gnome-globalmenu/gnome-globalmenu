@@ -15,4 +15,5 @@ autogen.stamp: patch.stamp
 valac: vala-trunk.stamp patch.stamp autogen.stamp
 	(cd vala-trunk; make)
 	echo exec $(VALAC_PATH)/compiler/valac --vapidir=$(VALAC_PATH)/vapi '$$*' > valac
+	echo "#" exec libtool gdb --args $(VALAC_PATH)/compiler/valac --vapidir=$(VALAC_PATH)/vapi '$$*' >> valac
 	chmod +x valac
