@@ -49,7 +49,7 @@ public class MainWindow : Window {
 		apptitle.set_label(app.getTitle());
 		app.propChanged += on_prop_changed;
 		string app_menu_path = app.getMenu();
-		agent.setup_menu_shell(appmenu, #app_menu_path);
+		agent.setup_menu_shell(appmenu, app_menu_path);
 		Gtk.main();
 	}
 	public void new_document(string path){
@@ -62,7 +62,8 @@ public class MainWindow : Window {
 		string menu_path = d.getMenu();
 		string doc_title = d.getTitle();
 		d.set_data("menubar", menubar);
-		agent.setup_menu_shell(menubar, #menu_path);
+		message("menu_path %s", menu_path);
+		agent.setup_menu_shell(menubar, menu_path);
 		label.set_markup_with_mnemonic(doc_title);
 		notebook.append_page(menubar, label);
 	}

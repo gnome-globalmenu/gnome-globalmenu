@@ -18,6 +18,7 @@ public class BusAgentGtk: BusAgent {
 		menu_shell.foreach((Gtk.Callback)clear_menu_shell_callback);
 
 		weak string path = (string) menu_shell.get_data("path");
+		message("menu path: %s", path);
 		if(path == null) return;
 
 		dynamic DBus.Object menu_r = this.get_object(path, "Menu");
@@ -30,7 +31,7 @@ public class BusAgentGtk: BusAgent {
 
 		foreach(string path in item_paths) {
 			Gtk.MenuItem item = new Gtk.MenuItem();
-			setup_menu_item(item, #path);
+			setup_menu_item(item, path);
 			menu_shell.append(item);
 		}
 	}
@@ -59,7 +60,7 @@ public class BusAgentGtk: BusAgent {
 		string submenu_path = item_r.getMenu();
 		if(submenu_path != null && submenu_path.size() >0) {
 			Gtk.Menu submenu = new Gtk.Menu();
-			this.setup_menu_shell(submenu, #submenu_path);
+			this.setup_menu_shell(submenu, submenu_path);
 			item.set_submenu(submenu);
 		} else {
 			item.set_submenu(null);
@@ -73,14 +74,14 @@ public class BusAgentGtk: BusAgent {
 		}
 
 	}
-	public void setup_menu_shell(MenuShell menu_shell, string #path){
+	public void setup_menu_shell(MenuShell menu_shell, string path){
 		message("MenuShell %s", path);
-		menu_shell.set_data_full("path", #path, g_free);
+		menu_shell.set_data_full("path", path.dup_and_give(), g_free);
 		rebuild_menu_shell(menu_shell);
 	}
-	public void setup_menu_item(Gtk.MenuItem item, string #path){
+	public void setup_menu_item(Gtk.MenuItem item, string path){
 		message("MenuItem %s", path);
-		item.set_data_full("path", #path, g_free);
+		item.set_data_full("path", path.dup_and_give(), g_free);
 		rebuild_menu_item(item);
 	}
 	void item_prop_changed(dynamic DBus.Object sender, string prop_name){
