@@ -6,6 +6,7 @@ vala-trunk.stamp:
 	touch vala-trunk/NO-AUTO-GEN
 	touch vala-trunk.stamp
 patch.stamp: vala-trunk.stamp
+	rm -f vala-trunk/*.patch
 	cp *.patch vala-trunk/
 	(cd vala-trunk; for i in *.patch ; do echo applying $$i; patch -p0 < $$i; done)
 	touch patch.stamp	
