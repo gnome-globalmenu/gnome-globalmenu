@@ -11,13 +11,3 @@ Index: vapi/glib-2.0.vapi
  	[CCode (cname = "g_strsplit")]
  	[NoArrayLength]
  	public string[] split (string delimiter, int max_tokens = 0);
-@@ -525,6 +527,9 @@
- 	public static string joinv (string separator, string[] str_array);
- 	[CCode (cname = "g_strnfill")]
- 	public static string nfill (ulong length, char fill_char);
-+	[CCode (cname = "g_strv_length")]
-+	[NoArrayLength]
-+	public static int lengthv (string[] str_array);
- 
- 	[CCode (cname = "g_utf8_next_char")]
- 	public weak string next_char ();
