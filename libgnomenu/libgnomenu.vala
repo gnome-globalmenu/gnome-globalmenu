@@ -57,21 +57,4 @@ public weak GLib.Object get_local(Object remote){
 public weak DBus.Object get_remote(Object local){
 	return (DBus.Object) local.get_data("dbus-obj");
 }
-/*
-public string [] decode_paths(string paths){
-	string[] rt = paths.split("\n");
-	rt.length = string.lengthv(rt); //work around NoArray length
-	return rt;
-}
-public string encode_paths(string[] paths){
-	StringBuilder bluh = new StringBuilder();
-	foreach(string s in paths) {
-		bluh.append(s);
-		bluh.append("\n");
-	}
-	if(bluh.len>0)
-		bluh.erase(bluh.len-1, 1);
-	return bluh.str;
-}
-*/
 }
