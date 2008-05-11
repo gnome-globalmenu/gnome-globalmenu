@@ -1,0 +1,12 @@
+Index: vapi/glib-2.0.vapi
+===================================================================
+--- vapi/glib-2.0.vapi	(revision 1359)
++++ vapi/glib-2.0.vapi	(working copy)
+@@ -731,6 +740,7 @@
+ 		public signal void notify (ParamSpec pspec);
+ 
+ 		public weak Object connect (string signal_spec, ...);
++		public int ref_count;
+ 	}
+ 
+ 	public struct Parameter {
