@@ -56,18 +56,7 @@ public class Application: MenuOwner {
 		if(m is Document) return m.path;
 		else return "";
 	}
-/*
-	public string getDocuments() {
-		List<Document> l = docs.get_values();
-		string [] paths = new string[l.length()];
-		var i = 0;
-		foreach(Document d in l){
-			paths[i] = d.path;
-			i++;
-		}	
-		return encode_paths(paths);
-	}
-*/
+
 	[NoArrayLength]
 	public string[] getDocuments() {
 		List<weak Document> l = docs.get_values();
