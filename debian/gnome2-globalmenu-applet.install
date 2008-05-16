@@ -4,3 +4,4 @@ debian/tmp/usr/share/doc/gnome-globalmenu
 debian/tmp/usr/lib/libgnomenu.so*
 debian/tmp/etc/
 debian/tmp/usr/share/locale
+debian/tmp/usr/share/gnome-globalmenu
