@@ -15,7 +15,7 @@ BuildRequires:	libwnck
 BuildRequires:	gnome-panel-devel
 BuildRequires:	libglade2-devel
 BuildRequires:	bonobo-activation
-BuildRequires:	xfce4-panel-devel
+#BuildRequires:	xfce4-panel-devel
 
 %description
 GNOME Global Menu project aims to improve GNOME toward a Document Centric Desktop Environment. Global Menu is a menu bar shared with every window in this screen/session. This package is the meta package.
@@ -52,16 +52,16 @@ Requires: 		libglade2
 %description -n	gnome-globalmenu-applet
 A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
-%package -n 	xfce-globalmenu-plugin
-Summary: 		xfce-panel plugin for global menu.
-Requires:		gnome-globalmenu
-Requires: 		libgnomenu
-Requires: 		libwnck
-Requires: 		xfce4-panel
-Requires: 		libglade2
-Group:			User Interface/Desktops
-%description -n	xfce-globalmenu-plugin
-A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
+#%package -n 	xfce-globalmenu-plugin
+#Summary: 		xfce-panel plugin for global menu.
+#Requires:		gnome-globalmenu
+#Requires: 		libgnomenu
+#Requires: 		libwnck
+#Requires: 		xfce4-panel
+#Requires: 		libglade2
+#Group:			User Interface/Desktops
+#%description -n	xfce-globalmenu-plugin
+#A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServerHelper object, it manages applications' GnomenuMenuBars. 
 
 %package -n 	gtk-globalmenu-server
 Summary: 		standalone global menu server.
@@ -77,7 +77,7 @@ A menu server for GNOME GlobalMenu project. Built upon libgnomenu's GnomenuServe
 %setup -q -n gnome-globalmenu-%{base_version}
 
 %build
-%configure --disable-gtk-doc --disable-rebuilds --enable-tracing=no
+%configure --disable-gtk-doc --disable-rebuilds --enable-tracing=no --disable-xfce-plugin
 make
 
 %install
@@ -145,10 +145,10 @@ gconftool-2 --makefile-uninstall-rule %{_sysconfdir}/gconf/schemas/gnome-globalm
 %{_libdir}/bonobo/servers/GNOME_GlobalMenuApplet.server
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas
 
-%files -n xfce-globalmenu-plugin
-%defattr(-, root, root)
-%{_libexecdir}/xfce-globalmenu-plugin
-%{_datadir}/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
+#%files -n xfce-globalmenu-plugin
+#%defattr(-, root, root)
+#%{_libexecdir}/xfce-globalmenu-plugin
+#%{_datadir}/xfce4/panel-plugins/xfce-globalmenu-plugin.desktop
 
 %changelog 
 * Sun Mar 23 2008 Feng Yu <rainwoodman@gmail.com>

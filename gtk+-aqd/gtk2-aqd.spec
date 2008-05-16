@@ -10,14 +10,14 @@
 %define cairo_version %{cairo_base_version}-1
 %define libpng_version 2:1.2.2-16
 
-%define base_version 2.12.5
+%define base_version 2.12.9
 %define bin_version 2.10.0
-%define svn_version 0.4.svn851
+%define svn_version 0.4.svn917
 
 Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
 Name: gtk2-aqd
 Version: %{svn_version}.%{base_version}
-Release: 1%{?dist}
+Release: 5%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 Source: http://download.gnome.org/sources/gtk+/2.12/gtk+-%{base_version}.tar.bz2
@@ -36,6 +36,24 @@ Patch2: workaround.patch
 
 # http://bugzilla.gnome.org/show_bug.cgi?id=488119
 Patch3: system-log-crash.patch
+
+# backport from svn trunk
+Patch4: im-setting.patch
+
+# fixed upstream
+Patch5: foreign-cmap.patch
+
+# fixed upstream
+Patch6: implicit-g_fopen.patch
+
+# fixed upstream
+Patch7: filechooser-iconsize.patch
+
+# http://bugzilla.gnome.org/show_bug.cgi?id=521032
+Patch8: filechooser-auth.patch
+
+# http://bugzilla.gnome.org/show_bug.cgi?id=467698
+Patch9: tab-drag-crash.patch
 
 # gtk-aqd patch
 Patch998: gtk2-menubar-overflow.patch 
@@ -100,7 +118,7 @@ Requires: glib2-devel >= %{glib2_version}
 Requires: cairo-devel >= %{cairo_version}
 Requires: libX11-devel, libXcursor-devel, libXinerama-devel
 Requires: libXext-devel, libXi-devel, libXrandr-devel
-Requires: libXfixes-devel
+Requires: libXfixes-devel, libXcomposite-devel
 Requires: libpng-devel
 Requires: pkgconfig
 # for /usr/share/aclocal
@@ -120,6 +138,12 @@ docs for the GTK+ widget toolkit.
 %patch1 -p1 -b .set-invisible-char-to-bullet
 %patch2 -p1 -b .workaround
 %patch3 -p1 -b .system-log-crash
+%patch4 -p1 -b .im-setting
+%patch5 -p1 -b .foreign-cmap
+%patch6 -p1 -b .implicit-g_fopen
+%patch7 -p1 -b .filechooser-iconsize
+%patch8 -p1 -b .filechooser-auth
+%patch9 -p1 -b .tab-drag-crash
 
 #%patch998 -p1 -b .menubar-overflow
 %patch999 -F3 -p1 -b .aqd
@@ -141,7 +165,7 @@ if ! pkg-config --exists pangoxft ; then
         exit 1
 fi
 
-%configure --with-xinput=xfree --disable-gtk-doc --disable-rebuilds --with-included-loaders=png --enable-debug
+%configure --with-xinput=xfree --disable-gtk-doc --disable-rebuilds --with-included-loaders=png 
 
 ## smp_mflags doesn't work for now due to gdk-pixbuf.loaders, may be fixed 
 ## past gtk 2.1.2
@@ -157,7 +181,6 @@ gcc -Os relocation-tag.c -o .relocation-tag
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
 # Deriving /etc/gtk-2.0/$host location
 # NOTE: Duplicated below
 #
