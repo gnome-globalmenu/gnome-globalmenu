@@ -13,10 +13,12 @@ BUILT_SOURCES = tests.vala.stamp \
 		$(gnomenu_service_VALASOURCES:.vala=.h) \
 		$(NULL)
 
-noinst_PROGRAMS = app manager
+noinst_PROGRAMS = app manager test keybinding
 
 gnomenu_service_VALASOURCES = \
-		app.vala \
+		test.vala \
+		keybinding.vala \
+		app.vala  \
 		manager.vala \
 		$(NULL)
 
@@ -24,10 +26,12 @@ tests.vala.stamp: $(gnomenu_service_VALASOURCES)
 	$(VALAC) -C $(TESTS_VALA_PKGS) --vapidir=../libgnomenu --vapidir=../libgnomenu-gtk --pkg gnomenu --pkg gnomenu-gtk $^
 	touch $@
 
-sanity_LDADD = $(LDADDS)
-sanity_SOURCES = sanity.c sanity.h
+test_LDADD = $(LDADDS)
+test_SOURCES = test.c test.h
 app_LDADD = $(LDADDS)
 app_SOURCES = app.c app.h
 manager_LDADD = $(LDADDS)
 manager_SOURCES = manager.c manager.h
+keybinding_LDADD = $(LDADDS)
+keybinding_SOURCES = keybinding.c keybinding.h
 EXTRA_DIST = tests.vala.stamp	
