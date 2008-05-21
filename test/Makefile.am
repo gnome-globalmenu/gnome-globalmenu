@@ -4,10 +4,12 @@ AM_CFLAGS = -I$(top_srcdir) \
 
 LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la
 
-noinst_PROGRAMS = testsocket testserver testclient testboth testmenu testmenubars
+noinst_PROGRAMS = testsocket testserver testclient testboth testmenu testmenubars testtools
 
 testsocket_SOURCES = testsocket.c
 testsocket_LDADD = $(LDADDS)
+testtools_SOURCES = testtools.c
+testtools_LDADD = $(LDADDS)
 testserver_SOURCES = testserver.c
 testserver_LDADD = $(LDADDS)
 testclient_SOURCES = testclient.c

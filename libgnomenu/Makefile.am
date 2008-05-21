@@ -23,7 +23,9 @@ libgnomenu_la_SOURCES = \
 	clienthelper.c \
 	clienthelper.h \
     menubar.h \
-	menubar.c 
+	menubar.c \
+	tools.h \
+	tools.c
 
 libgnomenu_la_LDFLAGS = \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
