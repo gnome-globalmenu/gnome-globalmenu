@@ -7,21 +7,13 @@ moduledir = $(libdir)
 
 module_LTLIBRARIES = libgnomenu.la
 
-BUILT_SOURCES = gnomenu-marshall.h gnomenu-marshall.c gnomenu-enums.c gnomenu-enums.h
+BUILT_SOURCES = gnomenu-enums.c gnomenu-enums.h
 
 libgnomenu_la_SOURCES = \
 	$(BUILT_SOURCES) \
 	main.c \
-	messages.h \
-	messages.c \
-	socket.h \
-	socket.c \
 	quirks.h \
 	quirks.c \
-	serverhelper.c \
-	serverhelper.h \
-	clienthelper.c \
-	clienthelper.h \
     menubar.h \
 	menubar.c \
 	tools.h \
@@ -38,23 +30,14 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = socket.h serverhelper.h messages.h clienthelper.h quirks.h menubar.h
+libgnomenuinclude_HEADERS = quirks.h menubar.h tools.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
 confdir = $(sysconfdir)
 conf_DATA = libgnomenu.conf
 
-EXTRA_DIST = gnomenu-marshall.list libgnomenu.conf
-
-gnomenu-marshall.c: gnomenu-marshall.list
-	echo "#include \"gnomenu-marshall.h\"" > $@ && \
-	glib-genmarshal --internal --body --prefix=gnomenu_marshall $< >> $@
-
-gnomenu-marshall.h: gnomenu-marshall.list
-	glib-genmarshal --internal --header --prefix=gnomenu_marshall $< > $@
-
-gnomenu_enum_headers = messages.h socket.h quirks.h
+gnomenu_enum_headers = quirks.h
 
 gnomenu-enums.c: $(gnomenu_enum_headers) 
 	glib-mkenums --fhead "#include <glib-object.h>\n" \
