@@ -26,9 +26,8 @@
 
 #include <config.h>
 #define OVERFLOWED_ITEMS
-
 #define GET_OBJECT(_s, sgmb, p) \
-	GnomenuMenuBar * sgmb = GNOMENU_MENU_BAR(_s); \
+	GnomenuMenuBar * sgmb = (GnomenuMenuBar*)_s; \
 	GnomenuMenuBarPrivate * p = GNOMENU_MENU_BAR_GET_PRIVATE(_s);
 
 #define GNOMENU_MENU_BAR_GET_PRIVATE(o)  \
@@ -239,7 +238,7 @@ gnomenu_menu_bar_set_property (GObject      *object,
 			   const GValue *value,
 			   GParamSpec   *pspec)
 {
-  GnomenuMenuBar *menubar = GNOMENU_MENU_BAR (object);
+  GnomenuMenuBar *menubar = GTK_MENU_BAR (object);
   
   switch (prop_id)
     {
@@ -261,7 +260,7 @@ gnomenu_menu_bar_get_property (GObject    *object,
 			   GValue     *value,
 			   GParamSpec *pspec)
 {
-  GnomenuMenuBar *menubar = GNOMENU_MENU_BAR (object);
+  GnomenuMenuBar *menubar = GTK_MENU_BAR (object);
   
   switch (prop_id)
     {
@@ -292,7 +291,7 @@ gnomenu_menu_bar_size_request (GtkWidget      *widget,
   GtkPackDirection child_pack_direction;
   GtkPackDirection pack_direction;
 
-  g_return_if_fail (GNOMENU_IS_MENU_BAR (widget));
+  g_return_if_fail (GTK_IS_MENU_BAR (widget));
   g_return_if_fail (requisition != NULL);
 
   requisition->width = 0;
@@ -300,7 +299,7 @@ gnomenu_menu_bar_size_request (GtkWidget      *widget,
 
   if (GTK_WIDGET_VISIBLE (widget))
     {
-      menu_bar = GNOMENU_MENU_BAR (widget);
+      menu_bar = GTK_MENU_BAR (widget);
       menu_shell = GTK_MENU_SHELL (widget);
 	  child_pack_direction = gnomenu_menu_bar_get_child_pack_direction(menu_bar); 
 	  pack_direction = gnomenu_menu_bar_get_pack_direction(menu_bar); 
@@ -362,7 +361,7 @@ gnomenu_menu_bar_size_request (GtkWidget      *widget,
     priv->true_requisition = *requisition;
 	{
 	GtkPackDirection pack_direction;
-	pack_direction = gnomenu_menu_bar_get_pack_direction(GNOMENU_MENU_BAR(widget));	
+	pack_direction = gnomenu_menu_bar_get_pack_direction(GTK_MENU_BAR(widget));	
 	switch(pack_direction){
 		case GTK_PACK_DIRECTION_LTR:
 		case GTK_PACK_DIRECTION_RTL:
@@ -402,10 +401,10 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	GtkAllocation arrow_allocation;
 #endif
 
-  g_return_if_fail (GNOMENU_IS_MENU_BAR (widget));
+  g_return_if_fail (GTK_IS_MENU_BAR (widget));
   g_return_if_fail (allocation != NULL);
 
-  menu_bar = GNOMENU_MENU_BAR (widget);
+  menu_bar = GTK_MENU_BAR (widget);
   menu_shell = GTK_MENU_SHELL (widget);
   priv = GNOMENU_MENU_BAR_GET_PRIVATE (menu_bar);
 
@@ -648,7 +647,7 @@ static void
 gnomenu_menu_bar_paint (GtkWidget    *widget,
                     GdkRectangle *area)
 {
-  g_return_if_fail (GNOMENU_IS_MENU_BAR (widget));
+  g_return_if_fail (GTK_IS_MENU_BAR (widget));
 
   if (GTK_WIDGET_DRAWABLE (widget))
     {
@@ -659,7 +658,7 @@ gnomenu_menu_bar_paint (GtkWidget    *widget,
       gtk_paint_box (widget->style,
 		     widget->window,
                      GTK_WIDGET_STATE (widget),
-                     get_shadow_type (GNOMENU_MENU_BAR (widget)),
+                     get_shadow_type (GTK_MENU_BAR (widget)),
 		     area, widget, "menubar",
 		     border, border,
 		     widget->allocation.width - border * 2,
@@ -671,7 +670,7 @@ static gint
 gnomenu_menu_bar_expose (GtkWidget      *widget,
 		     GdkEventExpose *event)
 {
-  g_return_val_if_fail (GNOMENU_IS_MENU_BAR (widget), FALSE);
+  g_return_val_if_fail (GTK_IS_MENU_BAR (widget), FALSE);
   g_return_val_if_fail (event != NULL, FALSE);
 
   if (GTK_WIDGET_DRAWABLE (widget))
@@ -692,7 +691,7 @@ gnomenu_menu_bar_hierarchy_changed (GtkWidget *widget,
   GtkWidget *toplevel;  
   GnomenuMenuBar *menubar;
 
-  menubar = GNOMENU_MENU_BAR (widget);
+  menubar = GTK_MENU_BAR (widget);
 
   toplevel = gtk_widget_get_toplevel (widget);
 
@@ -747,7 +746,7 @@ gnomenu_menu_bar_get_pack_direction (GnomenuMenuBar *menubar)
 {
   GnomenuMenuBarPrivate *priv;
 
-  g_return_val_if_fail (GNOMENU_IS_MENU_BAR (menubar), 
+  g_return_val_if_fail (GTK_IS_MENU_BAR (menubar), 
 			GTK_PACK_DIRECTION_LTR);
   
   return gtk_menu_bar_get_pack_direction(GTK_MENU_BAR(menubar));
@@ -769,7 +768,7 @@ gnomenu_menu_bar_set_pack_direction (GnomenuMenuBar       *menubar,
   GnomenuMenuBarPrivate *priv;
   GList *l;
 
-  g_return_if_fail (GNOMENU_IS_MENU_BAR (menubar));
+  g_return_if_fail (GTK_IS_MENU_BAR (menubar));
 
   gtk_menu_bar_set_pack_direction(GTK_MENU_BAR(menubar), pack_dir);
 }
@@ -790,7 +789,7 @@ gnomenu_menu_bar_get_child_pack_direction (GnomenuMenuBar *menubar)
 {
   GnomenuMenuBarPrivate *priv;
 
-  g_return_val_if_fail (GNOMENU_IS_MENU_BAR (menubar), 
+  g_return_val_if_fail (GTK_IS_MENU_BAR (menubar), 
 			GTK_PACK_DIRECTION_LTR);
   
   priv = GNOMENU_MENU_BAR_GET_PRIVATE (menubar);
@@ -814,7 +813,7 @@ gnomenu_menu_bar_set_child_pack_direction (GnomenuMenuBar       *menubar,
   GnomenuMenuBarPrivate *priv;
   GList *l;
 
-  g_return_if_fail (GNOMENU_IS_MENU_BAR (menubar));
+  g_return_if_fail (GTK_IS_MENU_BAR (menubar));
 
   priv = GNOMENU_MENU_BAR_GET_PRIVATE (menubar);
 

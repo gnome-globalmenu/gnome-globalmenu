@@ -1,6 +1,6 @@
 #include <config.h>
 #include <gtk/gtk.h>
-#include "introspect.h"
+#include "introspector.h"
 
 #if ENABLE_TRACING >= 2
 #define LOG(fmt, args...) g_message("<Introspect>::" fmt,  ## args)
@@ -118,17 +118,18 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 
 		g_value_unset(&prop_value);
 		if(prop_value_content){
-			g_string_append_printf(spector->blob, "<property type=\"%s\" name=\"%s\">\n", g_type_name(prop_type), prop_name);
-			g_string_append(spector->blob, prop_value_content);
-			g_string_append(spector->blob, "</property>\n");
+			g_string_append_printf(spector->blob, "  <property type=\"%s\" name=\"%s\">\n", g_type_name(prop_type), prop_name);
+			g_string_append_printf(spector->blob, "    %s", prop_value_content);
+			g_string_append(spector->blob, "  </property>\n");
 			g_free(prop_value_content);
 		}
 	}
 	g_free(prop_params);
 }
 
-static void _introspector_gtk_container_visit_child(GtkWidget * child, gpointer data){
-	introspector_queue_widget(data, child);
+static void _introspector_gtk_container_visit_child(GtkWidget * child, Introspector * spector){
+	introspector_queue_widget(spector, child);
+	g_string_append_printf(spector->blob, "  <child id=\"%s\"/>\n", gtk_widget_get_id(child));
 }
 static void _introspector_visit_widget(Introspector * spector, GtkWidget * widget){
 	gchar * class_name = G_OBJECT_TYPE_NAME(widget);
