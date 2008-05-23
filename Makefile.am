@@ -1,6 +1,7 @@
 #
 
-SUBDIRS = libgnomenu servers test gtk+-aqd po
+SUBDIRS = libgnomenu test gtk+-aqd po 
+#servers
 if MAINTAINER_MODE
 NO_INSTALL=1
 endif

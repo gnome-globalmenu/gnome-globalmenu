@@ -1,7 +1,7 @@
 
 AM_CFLAGS = -I$(top_srcdir) \
-	$(TEST_SUITE_CFLAGS)
-
+	$(TEST_SUITE_CFLAGS) -g
+AM_LDFLAGS = -g
 LDADDS = $(TEST_SUITE_LIBS) $(top_builddir)/libgnomenu/libgnomenu.la
 
 noinst_PROGRAMS = testmenubars testintro

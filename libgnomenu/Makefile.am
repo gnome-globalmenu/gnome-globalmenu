@@ -1,6 +1,6 @@
 #
 
-AM_CFLAGS = $(LIBGNOMENU_CFLAGS)
+AM_CFLAGS = -g $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
 moduledir = $(libdir)
@@ -20,10 +20,13 @@ libgnomenu_la_SOURCES = \
 	introspector.c \
 	builder.h \
 	builder.c \
+	widget.h \
+	widget.c \
 	tools.h \
 	tools.c
 
 libgnomenu_la_LDFLAGS = \
+	-g \
 	-version-info=$(LIBGNOMENU_LT_VERSION) \
 	-no-undefined \
 	-export-dynamics

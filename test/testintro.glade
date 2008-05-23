@@ -2,8 +2,6 @@
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
 <!--Generated with glade3 3.4.4 on Fri May 23 12:56:12 2008 -->
 <glade-interface>
-  <widget class="GtkWindow" id="window1">
-    <child>
       <widget class="GtkMenuBar" id="menubar1">
         <property name="visible">True</property>
         <child>
@@ -135,6 +133,4 @@
           </widget>
         </child>
       </widget>
-    </child>
-  </widget>
 </glade-interface>

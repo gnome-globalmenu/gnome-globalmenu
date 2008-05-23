@@ -639,7 +639,6 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	} else {
 		gtk_widget_hide(priv->arrow_button);
 	}
-	LOG("show arrow = %d", priv->show_arrow);
 #endif
 }
 
@@ -1017,9 +1016,6 @@ static void _return_submenu(GtkMenuItem * proxy, GnomenuMenuBar * self){
 static void _s_arrow_button_clicked		( GtkWidget * self,
 									  GtkWidget * arrow_button){
 	GET_OBJECT(self, menu_bar, priv);
-	gchar * intro = gtk_widget_introspect(self);
-	LOG("introspect: %s", intro);
-	g_free(intro);
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->arrow_button)) &&
      !GTK_WIDGET_VISIBLE (priv->popup_menu)) {
 		_build_popup_menu(menu_bar);
