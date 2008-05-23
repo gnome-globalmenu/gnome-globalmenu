@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, 0.5)
+AC_INIT(gnome-globalmenu, 0.4)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 GNOME_COMMON_INIT
@@ -10,7 +10,7 @@ IT_PROG_INTLTOOL([0.35.0])
 
 LIBGNOMENU_LT_VERSION=0:0:1
 AC_SUBST(LIBGNOMENU_LT_VERSION)
-LIBGNOMENU_VERSION=0x00050001
+LIBGNOMENU_VERSION=0x00040001
 
 AC_DEFINE_UNQUOTED([LIBGNOMENU_VERSION], $LIBGNOMENU_VERSION, [Version])
 AC_SUBST(LIBGNOMENU_VERSION)
@@ -54,6 +54,62 @@ AC_SUBST(TEST_SUITE_CFLAGS)
 AC_SUBST(TEST_SUITE_LIBS)
 dnl end:libgnomenu
 
+dnl begin:gtk-globalmenu-server
+AC_MSG_CHECKING(--enable-standalone argument)
+AC_ARG_ENABLE(standalone,
+	[	--enable-standalone	Include standalone menu server ],
+	[	enable_standalone=$enableval ],
+	[	enable_standalone="yes" ])
+AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
+AM_CONDITIONAL([ENABLE_STANDALONE], [test "$enable_standalone" = "yes" ])
+AC_MSG_RESULT($enable_standalone)
+if test "$enable_standalone" = "yes"; then
+	PKG_CHECK_MODULES(GLOBALMENU_SERVER, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libglade-2.0, libgnome-menu, libgnomeui-2.0 gnome-desktop-2.0] )
+	AC_SUBST(GLOBALMENU_SERVER_CFLAGS)
+	AC_SUBST(GLOBALMENU_SERVER_LIBS)
+	AC_DEFINE(ENABLE_STANDALONE)
+fi
+dnl end: gtk-globalmenu-applet
+
+dnl begin: gnome-globalmenu-applet
+AC_MSG_CHECKING(--enable-gnome-applet argument)
+AC_ARG_ENABLE(gnome-applet,
+	[	--enable-gnome-applet	Include gnome-applet interface ],
+	[	enable_gnome_applet=$enableval ],
+	[	enable_gnome_applet="yes" ])
+AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
+AM_CONDITIONAL([ENABLE_GNOME_APPLET], [test "$enable_gnome_applet" = "yes" ])
+AC_MSG_RESULT($enable_gnome_applet)
+if test "$enable_gnome_applet" = "yes"; then
+	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0, libglade-2.0, libgnome-menu, libgnomeui-2.0, gnome-desktop-2.0])
+	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
+	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
+	AC_DEFINE(ENABLE_GNOME_APPLET)
+	BONOBO_SERVER_FILES_PATH=`pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
+	AC_SUBST(BONOBO_SERVER_FILES_PATH)
+fi
+dnl end:gnome-globalemnu-applet
+
+dnl begin:xfce-globalmenu-plugin
+AC_MSG_CHECKING(--enable-xfce-plugin argument)
+AC_ARG_ENABLE(xfce-plugin,
+	[	--enable-xfce-plugin	Include xfce-plugin interface ],
+	[	enable_xfce_plugin=$enableval ],
+	[	enable_xfce_plugin="yes" ])
+AC_DEFINE([ENABLE_XFCE_PLUGIN], [], [enable xfce plugin])
+AM_CONDITIONAL([ENABLE_XFCE_PLUGIN], [test "$enable_xfce_plugin" = "yes" ])
+AC_MSG_RESULT($enable_xfce_plugin)
+if test "$enable_xfce_plugin" = "yes"; then
+	PKG_CHECK_MODULES(XFCE_GLOBALMENU_PLUGIN, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libglade-2.0, libxfce4panel-1.0])
+	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
+	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_LIBS)
+	AC_DEFINE(ENABLE_XFCE_PLUGIN)
+	XFCE_DESKTOP_FILES_PATH=`pkg-config --variable=desktopdatadir libxfce4panel-1.0`
+	AC_SUBST(XFCE_DESKTOP_FILES_PATH)
+	AC_MSG_RESULT(XFCE_DESKTOP_FILES_PATH);
+fi
+dnl end:xfce-globalmenu-plugin
+
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
 AC_SUBST(GETTEXT_PACKAGE)
@@ -82,13 +138,12 @@ dnl fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
-service/Makefile
-manager/Makefile
-gtk+-aqd/Makefile
 po/Makefile.in
+gtk+-aqd/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
 libgnomenu/libgnomenu.pc
+servers/Makefile
 test/Makefile
 )

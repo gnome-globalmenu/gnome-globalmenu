@@ -4,13 +4,19 @@ AM_CFLAGS = -I$(top_srcdir) \
 
 LDADDS = $(top_builddir)/libgnomenu/libgnomenu.la
 
-noinst_PROGRAMS = testconn testserv
+noinst_PROGRAMS = testsocket testserver testclient testboth testmenu testmenubars testtools
 
-testproxy_SOURCES = testproxy.c
-testproxy_LDADD = $(LDADDS)
-testobject_SOURCES = testobject.c
-testobject_LDADD = $(LDADDS)
-testconn_SOURCES = testconn.c
-testconn_LDADD = $(LDADDS)
-testserv_SOURCES = testserv.c
-testserv_LDADD = $(LDADDS)
+testsocket_SOURCES = testsocket.c
+testsocket_LDADD = $(LDADDS)
+testtools_SOURCES = testtools.c
+testtools_LDADD = $(LDADDS)
+testserver_SOURCES = testserver.c
+testserver_LDADD = $(LDADDS)
+testclient_SOURCES = testclient.c
+testclient_LDADD = $(LDADDS)
+testboth_SOURCES = testboth.c
+testboth_LDADD = $(LDADDS)
+testmenu_SOURCES = testmenu.c
+testmenu_LDADD = $(LDADDS)
+testmenubars_SOURCES = testmenubars.c
+testmenubars_LDADD = $(LDADDS)

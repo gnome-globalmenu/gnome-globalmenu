@@ -1,0 +1,54 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY gdksocket SYSTEM "xml/socket.xml">
+<!ENTITY serverhelper SYSTEM "xml/serverhelper.xml">
+<!ENTITY clienthelper SYSTEM "xml/clienthelper.xml">
+<!ENTITY messages SYSTEM "xml/messages.xml">
+<!ENTITY quirks SYSTEM "xml/quirks.xml">
+<!ENTITY gtkglobalmenubar SYSTEM "xml/menubar.xml">
+]>
+
+
+<book id="libgnomenu">
+	<bookinfo>
+		<title> libgnomenu Reference Book</title>
+	<authorgroup>
+		<author>
+			<firstname>Yu</firstname>
+			<surname>Feng</surname>
+			<affiliation>
+				<address>
+					<email>rainwoodman@gmail.com</email>
+				</address>
+			</affiliation>
+		</author>
+	</authorgroup>
+	
+	<copyright>
+		<year>2008</year>
+		<holder>Nowhere</holder>
+	</copyright>
+
+	<abstract>
+		This is the Reference Book for 
+		writing Global menu application under GNOME enviornment with GTK and
+		libgnomenu.
+	</abstract>
+
+	</bookinfo>
+	<chapter id="figures">
+		<title> Design Figures </title>
+		<inlinegraphic fileref="ClassDiagram.png" format="PNG">Class Diagram</inlinegraphic>
+		<inlinegraphic fileref="LifeTimeDiagram.png" format="PNG">Life Time Diagram</inlinegraphic>
+	</chapter>
+	<chapter id="reference">
+		<title>The Gnome Global Menu library Reference</title>
+		&gdksocket;
+		&messages;
+		&serverhelper;
+		&clienthelper;
+		&quirks;
+		&gtkglobalmenubar;
+	</chapter>
+</book>

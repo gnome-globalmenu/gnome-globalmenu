@@ -1,0 +1,6 @@
+
+gnomenu_socket_get_type
+gnomenu_menu_bar_get_type
+gnomenu_server_helper_get_type
+gnomenu_client_helper_get_type
+gnomenu_message_get_type

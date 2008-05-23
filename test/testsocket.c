@@ -67,11 +67,11 @@ static void button_clicked_cb(GtkButton * button, gpointer user_data){
 				G_CALLBACK(socket_data_arrival_cb), NULL);
 	}
 	if(button == broadcast){
-		gnomenu_socket_broadcast(server, "broad", sizeof("broad"));
+		gnomenu_socket_broadcast_by_name(server, NULL, "broad", sizeof("broad"));
 	}
 	if(button == connect){
 		GnomenuSocketNativeID server;
-		server = gnomenu_socket_lookup("server");
+		server = gnomenu_socket_lookup(socket1, "server");
 		gnomenu_socket_connect(socket1, server);
 	}
 	if(button == quit){
