@@ -16,8 +16,10 @@ libgnomenu_la_SOURCES = \
 	quirks.c \
     menubar.h \
 	menubar.c \
-	introspect.h \
-	introspect.c \
+	introspector.h \
+	introspector.c \
+	builder.h \
+	builder.c \
 	tools.h \
 	tools.c
 
