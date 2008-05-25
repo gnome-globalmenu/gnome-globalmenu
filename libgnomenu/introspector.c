@@ -14,6 +14,7 @@ struct _Introspector {
 	GQueue queue;
 	GHashTable * ids;
 	GString * prefix;
+	IntrospectFlags flags;
 };
 static void _introspector_visit_widget_properties(Introspector * spector, GtkWidget * widget);
 static void _introspector_visit_widget(Introspector * spector, GtkWidget * widget);
@@ -63,6 +64,9 @@ Introspector * introspector_new(){
 	spector->prefix = g_string_new("");
 	g_queue_init(&spector->queue);
 	return  spector;
+}
+void introspector_set_flags(Introspector * spector, IntrospectFlags flags){
+	spector->flags = flags;
 }
 gchar * introspector_destroy(Introspector * spector, gboolean free_blob_string){
 	char * rt = NULL;
@@ -171,6 +175,7 @@ static void _introspector_gtk_container_visit_child(GtkWidget * child, Introspec
 static void _introspector_visit_widget(Introspector * spector, GtkWidget * widget){
 	gchar * class_name = G_OBJECT_TYPE_NAME(widget);
 	gchar * widget_id = _ensure_widget_id(spector, widget);
+	gchar * template;
 	if(!GTK_IS_MENU_SHELL(widget) && !GTK_IS_MENU_ITEM(widget)
 		&& !GTK_IS_LABEL(widget) && !GTK_IS_IMAGE(widget)
 			){
@@ -178,10 +183,16 @@ static void _introspector_visit_widget(Introspector * spector, GtkWidget * widge
 		return NULL;
 	}
 	_inc_level(spector);
+	if(spector->flags & INTROSPECT_HANDLE)
+		template = "%s<object type = \"%s\" id = \"%s\" handle = \"%p\">\n";
+	else
+		template = "%s<object type = \"%s\" id = \"%s\">\n";
+
 	g_string_append_printf(spector->blob, 
-				"%s<object type = \"%s\" id = \"%s\">\n",
+				template,
 				spector->prefix->str,
-				class_name, widget_id);
+				class_name, widget_id, widget);
+
 	_introspector_visit_widget_properties(spector, widget);
 	if(GTK_IS_CONTAINER(widget)) {
 		gtk_container_foreach(widget, _introspector_gtk_container_visit_child, spector);

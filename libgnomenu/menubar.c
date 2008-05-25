@@ -716,7 +716,7 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec 
 
 		buffer = g_strdup_printf("%p", GDK_WINDOW_XWINDOW(gdkwindow));
 		gtk_widget_set_id(menubar, buffer);
-	    introspection= gtk_widget_introspect(menubar);
+	    introspection= gtk_widget_introspect_with_handle(menubar);
 
 		gdkx_tools_set_window_prop_blocked(gdkwindow , gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), introspection, strlen(introspection)+1);
 		gdkx_tools_send_sms(buffer, strlen(buffer) + 1);

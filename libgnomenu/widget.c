@@ -15,3 +15,12 @@ gchar * gtk_widget_introspect(GtkWidget * widget){
 	introspector_visit_all(spector);
 	return introspector_destroy(spector, FALSE);
 }
+gchar * gtk_widget_introspect_with_handle(GtkWidget * widget){
+	gchar * rt;
+	Introspector * spector = introspector_new();
+	introspector_set_flags(spector, INTROSPECT_HANDLE);
+	introspector_queue_widget(spector, widget);
+	introspector_visit_all(spector);
+	return introspector_destroy(spector, FALSE);
+
+}
