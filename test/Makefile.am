@@ -4,7 +4,7 @@ AM_CFLAGS = -I$(top_srcdir) \
 AM_LDFLAGS = -g
 LDADDS = $(TEST_SUITE_LIBS) $(top_builddir)/libgnomenu/libgnomenu.la
 
-noinst_PROGRAMS = testmenubars testintro
+noinst_PROGRAMS = testmenubars testintro testtools
 #testsocket testserver testclient testboth testmenu testmenubars testtools
 
 testsocket_SOURCES = testsocket.c

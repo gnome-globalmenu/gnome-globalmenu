@@ -3,6 +3,7 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 
+#include "tools.h"
 
 /**
  * _gdkx_tools_set_window_prop_blocked:
@@ -16,7 +17,7 @@ typedef struct _GdkXToolsFilterData{
 	int state;
 } GdkXToolsFilterData;
 
-GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * event, GdkXToolsFilterData * data){
+static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * event, GdkXToolsFilterData * data){
 	XEvent * xevent = gdkxevent;
 	switch(xevent->type){
 		case PropertyNotify:
@@ -27,7 +28,7 @@ GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * event, GdkX
 	}
 	return GDK_FILTER_CONTINUE;
 }
-gboolean _gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_name, gchar * buffer, gint size){
+gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_name, gchar * buffer, gint size){
 	GdkXToolsFilterData * filter_data = g_new0(GdkXToolsFilterData,1);
 	gboolean rt = TRUE;
 	Display *display = GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window));
@@ -60,7 +61,7 @@ ex:
 	g_free(filter_data);
 	return rt;
 }
-gchar * _gdkx_tools_get_window_prop(GdkWindow * window, GdkAtom prop_name, gint * bytes_return){
+gchar * gdkx_tools_get_window_prop(GdkWindow * window, GdkAtom prop_name, gint * bytes_return){
 	Display *display = GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window));
 	Window w = GDK_WINDOW_XWINDOW(window);
 	Atom property = gdk_x11_atom_to_xatom(prop_name);
@@ -86,4 +87,63 @@ gchar * _gdkx_tools_get_window_prop(GdkWindow * window, GdkAtom prop_name, gint 
 	XFree(prop_return);
 ex:
 	return rt;
+}
+
+gboolean gdkx_tools_send_sms(gchar * sms, int size){
+	GdkEventClient event;
+	int i;
+	event.type = GDK_CLIENT_EVENT;
+	event.window = gdk_get_default_root_window();
+	event.send_event = TRUE;
+	event.message_type = gdk_atom_intern("GNOMENU_SMS", FALSE);
+	event.data_format = 8;
+
+	for(i=0; i< size && i<20; i++){
+		event.data.b[i] = sms[i];
+	}
+	gdk_event_send_clientmessage_toall(&event);
+	return TRUE;
+}
+
+struct _GdkXToolsSMSFilterData {
+	GdkXToolsSMSFilterFunc func;
+	gpointer data;
+	gboolean frozen;
+	GdkWindow * window;
+};
+typedef struct _GdkXToolsSMSFilterData GdkXToolsSMSFilterData;
+static GdkFilterReturn _gdkx_tools_client_message_filter(GdkXEvent * xevent, GdkEvent * event, GdkXToolsSMSFilterData * filter_data){
+	XClientMessageEvent * x_client_message = xevent;
+	if(!filter_data->frozen && event->any.window == filter_data->window)
+		filter_data->func(filter_data->data, x_client_message->data.b, 20);
+	return GDK_FILTER_REMOVE;
+}
+void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
+	GdkXToolsSMSFilterData * filter_data;
+	GdkWindowAttr attr = {0};
+	/*FIXME: THREAD SAFETY! protect the list!*/
+	GDK_THREADS_ENTER();
+	static GList * list = NULL;
+	GList * node;
+	for(node = list; node ; node = node->next){
+		filter_data = node->data;
+		if(filter_data->data == data &&
+			filter_data->func == func){
+			g_warning("filter already exist, returning..");
+			return;
+		}
+	}
+   	filter_data = g_new0(GdkXToolsSMSFilterData, 1);
+	filter_data->func = func;
+	filter_data->data = data;
+	filter_data->frozen = FALSE;
+	attr.wclass = GDK_INPUT_ONLY;
+
+	filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
+
+	/*FIXME: THREAD SAFETY!*/
+	list = g_list_append(list, filter_data);
+
+	gdk_add_client_message_filter(gdk_atom_intern("GNOMENU_SMS", FALSE), _gdkx_tools_client_message_filter, filter_data);
+	GDK_THREADS_LEAVE();
 }
