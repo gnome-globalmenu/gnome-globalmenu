@@ -21,7 +21,7 @@ static void button_clicked(GtkWidget * button, GtkWidget * window){
 			char prop_value[] = "this is a test";
 			char *prop_value_got;
 			int i;
-			for(i=0; i< 100; i++){
+			for(i=0; i< 10000; i++){
 				gdkx_tools_set_window_prop_blocked(window->window, gdk_atom_intern("TEST_PROP", FALSE), prop_value, sizeof(prop_value));
 				prop_value_got = gdkx_tools_get_window_prop(window->window, gdk_atom_intern("TEST_PROP", FALSE), NULL);
 				g_message("value got: %s", prop_value_got);
@@ -33,9 +33,12 @@ static void button_clicked(GtkWidget * button, GtkWidget * window){
 		case SEND_SMS:
 		{
 			char sms_data[] = "this is a sms";
+			int i;
+			for(i=0; i<100; i++){
 			gdkx_tools_add_sms_filter(filter, NULL);
 			if(!gdkx_tools_send_sms(sms_data, sizeof(sms_data))){
 				g_message("failure sending sms");
+			}
 			}
 		}
 		break;
