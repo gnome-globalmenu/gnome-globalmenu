@@ -31,12 +31,16 @@ void sms_filter(gpointer no_use, gchar * sms, gint size){
 	if(window){
 		Builder * builder;
 		GtkMenuBar * built_menubar;
+		gchar * built_menubar_name ;
 		builder = builder_new();
 		gchar * introspection = gdkx_tools_get_window_prop(window, gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), NULL);
 		g_print("%s", introspection);
 		builder_parse(builder, introspection);
-		built_menubar = builder_get_object(builder, sms);
+		built_menubar_name = g_strdup_printf("%p", xwindow);
+		built_menubar = builder_get_object(builder, built_menubar_name);
+		g_free(built_menubar_name);
 		builder_foreach(builder, setup_handler, NULL);
+
 		gtk_container_add(notebook, built_menubar);
 		g_free(introspection);
 		builder_destroy(builder);
@@ -48,7 +52,6 @@ int main (int argc, char **argv){
 	GtkWidget * window;
 	gtk_init(&argc, &argv);
 
-	gdkx_tools_add_sms_filter(sms_filter, NULL);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_accept_focus (window, FALSE);
 	notebook = gtk_notebook_new();
@@ -56,6 +59,7 @@ int main (int argc, char **argv){
 	gtk_container_add(window, box);
 	gtk_container_add(box, notebook);
 	gtk_widget_show_all(window);
+	gdkx_tools_add_sms_filter(sms_filter, NULL);
 	gtk_main();
 	return 0;
 }

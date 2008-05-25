@@ -100,6 +100,8 @@ static gint gnomenu_menu_bar_expose            (GtkWidget       *widget,
 					    GdkEventExpose  *event);
 static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
+static void _s_realize ( GtkWidget       *widget,
+					    gpointer data);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
 static void gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu);
 static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint sizs);
@@ -775,7 +777,15 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec 
 		}
 	}
 }
+static void _update_widget_id(GnomenuMenuBar * menubar){
+  GtkWidget *toplevel;  
+  toplevel = gtk_widget_get_toplevel (menubar);
 
+	gchar * buffer = g_strdup_printf("%p", GDK_WINDOW_XWINDOW(toplevel->window));
+	gtk_widget_set_id(menubar, buffer);
+	g_free(buffer);
+	_invalidate_introspection(menubar);
+}
 static void
 _s_hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel, gpointer data)
@@ -791,15 +801,18 @@ _s_hierarchy_changed (GtkWidget *widget,
   }
   
   if (GTK_WIDGET_TOPLEVEL (toplevel)) {
-	gchar * buffer = g_strdup_printf("%p", toplevel->window);
-	gtk_widget_set_id(menubar, buffer);
-	g_free(buffer);
-	_invalidate_introspection(menubar);
+	if(GTK_WIDGET_REALIZED(toplevel)){
+		_update_widget_id(menubar);
+	}
 	g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
 		G_CALLBACK(_s_notify_has_toplevel_focus), menubar);
   
   }
 	
+}
+static void
+_s_realize (GtkWidget * widget, gpointer data){
+	_update_widget_id(widget);
 }
 static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint size) {
 	LOG("received sms: %s", sms);
@@ -943,6 +956,8 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(object, "hierarchy-changed",
 				G_CALLBACK(_s_hierarchy_changed), NULL);
+	g_signal_connect(object, "realize",
+				G_CALLBACK(_s_realize), NULL);
 	gdkx_tools_add_sms_filter_frozen(_sms_filter, menu_bar);
 	return object;
 }
