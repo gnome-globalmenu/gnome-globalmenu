@@ -175,6 +175,7 @@ static void _start_element2  (GMarkupParseContext *context,
 				gtype = G_PARAM_SPEC_VALUE_TYPE(pspec);
 				if(gtype == g_type_from_name(type)){
 					if(g_type_is_a(gtype, GTK_TYPE_WIDGET)){
+						/* if the property widget is not yet resolved, set it to NULL*/
 						g_object_set(builder->current_widget, name, 
 								g_hash_table_lookup(builder->widgets, value), NULL);
 					} else {

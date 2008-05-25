@@ -24,3 +24,4 @@ gchar * gtk_widget_introspect_with_handle(GtkWidget * widget){
 	return introspector_destroy(spector, FALSE);
 
 }
+
