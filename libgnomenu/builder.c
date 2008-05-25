@@ -1,5 +1,6 @@
 #include <config.h>
 #include <gtk/gtk.h>
+#include <gmodule.h>
 #include "menubar.h"
 #include "builder.h"
 #include "widget.h"
@@ -15,6 +16,42 @@ struct _Builder {
 #define CASE_STR(value)  } else if(g_str_equal(_str_, value)) {
 #define DEFAULT_STR  } else {
 #define END_SWITCH_STR }}
+static GType
+_gtk_builder_resolve_type_lazily (const gchar *name)
+{
+  static GModule *module = NULL;
+  GType (*func)();
+  GString *symbol_name = g_string_new ("");
+  char c, *symbol;
+  int i;
+  GType gtype = G_TYPE_INVALID;
+
+  if (!module)
+    module = g_module_open (NULL, 0);
+  
+  for (i = 0; name[i] != '\0'; i++)
+    {
+      c = name[i];
+      /* skip if uppercase, first or previous is uppercase */
+      if ((c == g_ascii_toupper (c) &&
+           i > 0 && name[i-1] != g_ascii_toupper (name[i-1])) ||
+          (i > 2 && name[i]   == g_ascii_toupper (name[i]) &&
+           name[i-1] == g_ascii_toupper (name[i-1]) &&
+           name[i-2] == g_ascii_toupper (name[i-2])))
+        g_string_append_c (symbol_name, '_');
+      g_string_append_c (symbol_name, g_ascii_tolower (c));
+    }
+  g_string_append (symbol_name, "_get_type");
+  
+  symbol = g_string_free (symbol_name, FALSE);
+
+  if (g_module_symbol (module, symbol, (gpointer)&func))
+    gtype = func ();
+  
+  g_free (symbol);
+
+  return gtype;
+}
   /* Called for open tags <foo bar="baz"> */
 static void _start_element1  (GMarkupParseContext *context,
                           const gchar         *element_name,
@@ -35,11 +72,12 @@ static void _start_element1  (GMarkupParseContext *context,
 					CASE_STR("id") id = attribute_values[i];
 				END_SWITCH_STR;
 			}
-			gtype = g_type_from_name(type);
+			gtype = _gtk_builder_resolve_type_lazily(type);
 			if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
 				new_widget = g_object_new(gtype, "is-global-menu", FALSE, NULL);
 			} else
 				new_widget = g_object_new(gtype, NULL);
+
 			gtk_widget_set_id(new_widget, id);
 
 			if(builder->current_widget) {
@@ -206,7 +244,7 @@ Builder * builder_new (){
 	builder->parser2.passthrough = _passthrough;
 	builder->parser2.error = _error;
 
-	builder->widgets = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_object_unref);
+	builder->widgets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_object_unref);
 	return builder;
 }
 void builder_parse(Builder * builder, const gchar * string){
