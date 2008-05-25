@@ -66,6 +66,7 @@ static void _start_element1  (GMarkupParseContext *context,
 		CASE_STR("object") {
 			const char * type = NULL;
 			const char * id = NULL;
+			const char * handle = NULL;
 			GtkWidget * new_widget;
 			GtkWidget * current_widget;
 			GType gtype = 0;
@@ -73,6 +74,7 @@ static void _start_element1  (GMarkupParseContext *context,
 				SWITCH_STR(attribute_names[i])
 					CASE_STR("type") type = attribute_values[i];
 					CASE_STR("id") id = attribute_values[i];
+					CASE_STR("handle") handle = attribute_values[i];
 				END_SWITCH_STR;
 			}
 			gtype = _gtk_builder_resolve_type_lazily(type);
@@ -82,11 +84,12 @@ static void _start_element1  (GMarkupParseContext *context,
 				new_widget = g_object_new(gtype, NULL);
 
 			gtk_widget_set_id(new_widget, id);
+			g_object_set_data_full(new_widget, "introspect-handle", g_strdup(handle), g_free);
+			g_object_ref_sink(new_widget); /*builder always hold the ref*/
 			current_widget = builder->current_node->data;
 			if(current_widget) {
 				gtk_container_add(current_widget, new_widget);
-			} else
-				g_object_ref_sink(new_widget); /*this widget is a toplevel node*/
+			}
 
 			builder->current_node = g_node_append_data(builder->current_node, new_widget);
 		}
@@ -136,10 +139,12 @@ static void _start_element2  (GMarkupParseContext *context,
 		CASE_STR("object") {
 			const char * type = NULL;
 			const char * id = NULL;
+			const char * handle = NULL;
 			for(i=0; attribute_names[i]; i++){
 				SWITCH_STR(attribute_names[i])
 					CASE_STR("type") type = attribute_values[i];
 					CASE_STR("id") id = attribute_values[i];
+					CASE_STR("handle") handle = attribute_values[i];
 				END_SWITCH_STR;
 			}
 			builder->current_widget = g_hash_table_lookup(builder->widgets, id);
@@ -286,6 +291,9 @@ error:
 }
 GtkWidget * builder_get_object(Builder * builder, const gchar * id){
 	return g_hash_table_lookup(builder->widgets, id);
+}
+void builder_foreach(Builder * builder, GHFunc callback, gpointer data){
+	g_hash_table_foreach(builder->widgets, callback, data);
 }
 Builder * builder_destroy(Builder * builder) {
 	g_hash_table_destroy(builder->widgets);

@@ -5,11 +5,23 @@
 #include <libgnomenu/tools.h>
 
 GtkWidget * notebook;
-
+void _s_activate(GtkMenuItem * menu_item, gpointer data){
+	char * handle = g_object_get_data(menu_item, "introspect-handle");
+	g_message("menu item activated, handle = %s", handle);
+}
+void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
+	if(GTK_IS_MENU_ITEM(widget)){
+		g_signal_connect(widget,
+				"activate",
+				_s_activate, data);
+	}
+}
 void sms_filter(gpointer no_use, gchar * sms, gint size){
 	Window xwindow;
 	GdkWindow * window;
-	sscanf(sms, "%p", &xwindow);
+	gchar action[20];
+	sscanf(sms, "%s %p", action, &xwindow);
+	if(!g_str_equal(action, "menu")) return;
 	window = gdk_window_lookup(xwindow);
 	if(!window) window = gdk_window_foreign_new(xwindow);
 	if(window){
@@ -20,9 +32,10 @@ void sms_filter(gpointer no_use, gchar * sms, gint size){
 		g_print("%s", introspection);
 		builder_parse(builder, introspection);
 		built_menubar = builder_get_object(builder, sms);
+		builder_foreach(builder, setup_handler, NULL);
 		gtk_container_add(notebook, built_menubar);
 		g_free(introspection);
-		//builder_destroy(builder);
+		builder_destroy(builder);
 	}
 }
 int main (int argc, char **argv){ 

@@ -714,7 +714,7 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec 
 		gchar * buffer;
 		gchar * introspection;
 
-		buffer = g_strdup_printf("%p", GDK_WINDOW_XWINDOW(gdkwindow));
+		buffer = g_strdup_printf("menu %p", GDK_WINDOW_XWINDOW(gdkwindow));
 		gtk_widget_set_id(menubar, buffer);
 	    introspection= gtk_widget_introspect_with_handle(menubar);
 
