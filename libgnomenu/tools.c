@@ -141,14 +141,14 @@ gboolean gdkx_tools_send_sms(gchar * sms, int size){
 	return TRUE;
 }
 
+static GList * sms_filter_list = NULL;
 void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
 	GdkWindowAttr attr = {0};
 	/*FIXME: THREAD SAFETY! protect the list!*/
 	GDK_THREADS_ENTER();
-	static GList * list = NULL;
 	GList * node;
-	for(node = list; node ; node = node->next){
+	for(node = sms_filter_list; node ; node = node->next){
 		filter_data = node->data;
 		if(filter_data->data == data &&
 			filter_data->func == func){
@@ -165,7 +165,39 @@ void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 
 	filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
 	/*FIXME: THREAD SAFETY!*/
-	list = g_list_append(list, filter_data);
+	sms_filter_list = g_list_append(sms_filter_list, filter_data);
 	gdk_window_add_filter(filter_data->window, _gdkx_tools_filter, filter_data);
+	GDK_THREADS_LEAVE();
+}
+void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
+	GdkXToolsSMSFilterData * filter_data;
+	GDK_THREADS_ENTER();
+	GList * node;
+	for(node = sms_filter_list; node ; node = node->next){
+		filter_data = node->data;
+		if(filter_data->data == data &&
+			filter_data->func == func){
+			break;
+		}
+	}
+	if(node){
+		filter_data->frozen = TRUE;
+	}
+	GDK_THREADS_LEAVE();
+}
+void gdkx_tools_thaw_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
+	GdkXToolsSMSFilterData * filter_data;
+	GDK_THREADS_ENTER();
+	GList * node;
+	for(node = sms_filter_list; node ; node = node->next){
+		filter_data = node->data;
+		if(filter_data->data == data &&
+			filter_data->func == func){
+			break;
+		}
+	}
+	if(node){
+		filter_data->frozen = FALSE;
+	}
 	GDK_THREADS_LEAVE();
 }

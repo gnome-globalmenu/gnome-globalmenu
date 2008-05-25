@@ -3,3 +3,5 @@ gchar * gdkx_tools_get_window_prop(GdkWindow * window, GdkAtom prop_name, gint *
 typedef void (* GdkXToolsSMSFilterFunc)(gpointer data, gchar * sms, int size);
 gboolean gdkx_tools_send_sms(gchar * sms, int size);
 void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);
+void gdkx_tools_thaw_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);
+void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);

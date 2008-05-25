@@ -7,7 +7,11 @@
 GtkWidget * notebook;
 void _s_activate(GtkMenuItem * menu_item, gpointer data){
 	char * handle = g_object_get_data(menu_item, "introspect-handle");
+	char * sms;
 	g_message("menu item activated, handle = %s", handle);
+	sms = g_strdup_printf("item%s", handle);
+	gdkx_tools_send_sms(sms, strlen(sms)+1);
+	g_free(sms);
 }
 void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){

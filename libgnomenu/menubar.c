@@ -708,21 +708,27 @@ gnomenu_menu_bar_expose (GtkWidget      *widget,
 }
 
 static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
-	if(gnomenu_menu_bar_get_is_global_menu(menubar) && gtk_window_has_toplevel_focus(window)){
-		GdkWindow * gdkwindow = GTK_WIDGET(window)->window;
-		LOG("received top level focus %p", menubar);
-		gchar * buffer;
-		gchar * introspection;
+	if(gnomenu_menu_bar_get_is_global_menu(menubar)){
+		if(gtk_window_has_toplevel_focus(window)){
+			GdkWindow * gdkwindow = GTK_WIDGET(window)->window;
+			LOG("received top level focus %p", menubar);
+			gchar * buffer;
+			gchar * introspection;
 
-		buffer = g_strdup_printf("menu %p", GDK_WINDOW_XWINDOW(gdkwindow));
-		gtk_widget_set_id(menubar, buffer);
-	    introspection= gtk_widget_introspect_with_handle(menubar);
+			buffer = g_strdup_printf("menu %p", GDK_WINDOW_XWINDOW(gdkwindow));
+			gtk_widget_set_id(menubar, buffer);
+			introspection= gtk_widget_introspect_with_handle(menubar);
 
-		gdkx_tools_set_window_prop_blocked(gdkwindow , gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), introspection, strlen(introspection)+1);
-		gdkx_tools_send_sms(buffer, strlen(buffer) + 1);
+			gdkx_tools_set_window_prop_blocked(gdkwindow , gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), introspection, strlen(introspection)+1);
+			gdkx_tools_send_sms(buffer, strlen(buffer) + 1);
 
-		g_free(introspection);
-		g_free(buffer);
+			g_free(introspection);
+			g_free(buffer);
+/*TODO: thaw the sms filter */
+		}  else {
+/*TODO: freeze the sms filter */
+		
+		}
 	}
 }
 
@@ -886,6 +892,7 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(object, "hierarchy-changed",
 				G_CALLBACK(_s_hierarchy_changed), NULL);
+	/*TODO: create the sms filter if is-global-menu */
 	return object;
 }
 gboolean
