@@ -23,13 +23,13 @@ int main (int argc, char **argv){
 	/* connect signal handlers */
 //	glade_xml_signal_autoconnect(xml);
 	intro = gtk_widget_introspect(menubar);
-	g_print("%s", intro);
+	//g_print("%s", intro);
 
 	builder = builder_new();
 	builder_parse(builder, intro);
 	menubar2 = builder_get_object(builder, "menubar1");
 	intro2 = gtk_widget_introspect(menubar2);
-	g_print("%s", intro2);
+	//g_print("%s", intro2);
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	box = gtk_vbox_new(0, FALSE);

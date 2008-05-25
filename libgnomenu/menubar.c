@@ -41,7 +41,10 @@
 #define LOG_FUNC_NAME LOG("%s", __func__)
 
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 #include "menubar.h"
+#include "widget.h"
+#include "introspector.h"
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
@@ -50,7 +53,8 @@
 enum {
   PROP_0,
   PROP_PACK_DIRECTION,
-  PROP_CHILD_PACK_DIRECTION
+  PROP_CHILD_PACK_DIRECTION,
+  PROP_IS_GLOBAL_MENU
 };
 
 typedef struct _GnomenuMenuBarPrivate GnomenuMenuBarPrivate;
@@ -59,6 +63,7 @@ struct _GnomenuMenuBarPrivate
   GtkPackDirection _pack_direction; /*comaptibility with GtkMenuBar, never directly used*/
   GtkPackDirection _child_pack_direction; /*same as above*/
 
+  gboolean is_global_menu;
 #ifdef OVERFLOWED_ITEMS
 	gboolean disposed;
 	gboolean detached;
@@ -90,9 +95,10 @@ static void gnomenu_menu_bar_paint             (GtkWidget       *widget,
 					    GdkRectangle    *area);
 static gint gnomenu_menu_bar_expose            (GtkWidget       *widget,
 					    GdkEventExpose  *event);
-static void gnomenu_menu_bar_hierarchy_changed (GtkWidget       *widget,
-					    GtkWidget       *old_toplevel);
+static void _s_hierarchy_changed ( GtkWidget       *widget,
+					    GtkWidget       *old_toplevel, gpointer data);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
+static void gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu);
 
 #ifdef OVERFLOWED_ITEMS
 /* GObject interface */
@@ -189,7 +195,6 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
   widget_class->size_request = gnomenu_menu_bar_size_request;
   widget_class->size_allocate = gnomenu_menu_bar_size_allocate;
   widget_class->expose_event = gnomenu_menu_bar_expose;
- // widget_class->hierarchy_changed = gnomenu_menu_bar_hierarchy_changed;
   
   menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
   menu_shell_class->get_popup_delay = gnomenu_menu_bar_get_popup_delay;
@@ -202,6 +207,12 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 	container_class->forall = _forall;
 #endif
   g_type_class_add_private (gobject_class, sizeof (GnomenuMenuBarPrivate));  
+  g_object_class_install_property(gobject_class, PROP_IS_GLOBAL_MENU,
+		  g_param_spec_boolean("is-global-menu",
+			  "whether the menu bar is a global menu",
+			  "whether the menu bar is a global menu",
+			  TRUE, 
+			  G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 #ifdef OVERFLOWED_ITEMS
@@ -214,8 +225,8 @@ static void _menu_item_info_free(MenuItemInfo * info){
 void
 gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
-#ifdef OVERFLOWED_ITEMS
 	GET_OBJECT(object, menu_bar, priv);
+#ifdef OVERFLOWED_ITEMS
 	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, _menu_item_info_free);
 	priv->popup_menu = GTK_MENU(gtk_menu_new());
 	priv->arrow_button = GTK_WIDGET(gtk_toggle_button_new());
@@ -224,12 +235,19 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
 #endif
+	priv->is_global_menu = TRUE;
 }
 
 GtkWidget*
 gnomenu_menu_bar_new (void)
 {
   return g_object_new (GNOMENU_TYPE_MENU_BAR, NULL);
+}
+
+GtkWidget*
+gnomenu_menu_bar_new_local (void)
+{
+  return g_object_new (GNOMENU_TYPE_MENU_BAR, "is-global-menu", FALSE, NULL);
 }
 
 static void
@@ -248,6 +266,10 @@ gnomenu_menu_bar_set_property (GObject      *object,
     case PROP_CHILD_PACK_DIRECTION:
       gnomenu_menu_bar_set_child_pack_direction (menubar, g_value_get_enum (value));
       break;
+    case PROP_IS_GLOBAL_MENU:
+	  gnomenu_menu_bar_set_is_global_menu(menubar, g_value_get_boolean(value));
+	  g_message("set global menu");
+	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -270,6 +292,9 @@ gnomenu_menu_bar_get_property (GObject    *object,
     case PROP_CHILD_PACK_DIRECTION:
       g_value_set_enum (value, gnomenu_menu_bar_get_child_pack_direction (menubar));
       break;
+    case PROP_IS_GLOBAL_MENU:
+	  g_value_set_boolean(value, gnomenu_menu_bar_get_is_global_menu(menubar));
+	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -682,23 +707,36 @@ gnomenu_menu_bar_expose (GtkWidget      *widget,
   return FALSE;
 }
 
+static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
+	if(gnomenu_menu_bar_get_is_global_menu(menubar) && gtk_window_has_toplevel_focus(window)){
+		GdkWindow * gdkwindow = GTK_WIDGET(window)->window;
+		LOG("received top level focus %p", menubar);
+		gchar * buffer;
+		gchar * introspection = gtk_widget_introspect(menubar);
+		gdkx_tools_set_window_prop_blocked(gdkwindow , gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), introspection, strlen(introspection)+1);
+		g_free(introspection);
+		buffer = g_strdup_printf("%p", GDK_WINDOW_XWINDOW(gdkwindow));
+		gdkx_tools_send_sms(buffer, strlen(buffer) + 1);
+	}
+}
 
 static void
-gnomenu_menu_bar_hierarchy_changed (GtkWidget *widget,
-				GtkWidget *old_toplevel)
+_s_hierarchy_changed (GtkWidget *widget,
+				GtkWidget *old_toplevel, gpointer data)
 {
   GtkWidget *toplevel;  
-  GnomenuMenuBar *menubar;
-
-  menubar = GTK_MENU_BAR (widget);
+  GnomenuMenuBar * menubar = GTK_MENU_BAR(widget);
 
   toplevel = gtk_widget_get_toplevel (widget);
 
   if (old_toplevel) {
-  
+		g_signal_handlers_disconnect_by_func(
+			old_toplevel, _s_notify_has_toplevel_focus, menubar);
   }
   
   if (GTK_WIDGET_TOPLEVEL (toplevel)) {
+	g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
+		G_CALLBACK(_s_notify_has_toplevel_focus), menubar);
   
   }
 	
@@ -839,8 +877,21 @@ static GObject* _constructor(GType type,
 				G_CALLBACK(_s_arrow_button_clicked), menu_bar);
 	g_signal_connect_swapped(G_OBJECT(priv->popup_menu), "deactivate",
 				G_CALLBACK(_s_popup_menu_deactivated), menu_bar);
-	
+
+	g_signal_connect(object, "hierarchy-changed",
+				G_CALLBACK(_s_hierarchy_changed), NULL);
+	gtk_widget_set_id(object, "globalmenubar");
 	return object;
+}
+gboolean
+gnomenu_menu_bar_get_is_global_menu(GnomenuMenuBar * menubar){
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
+	return priv->is_global_menu;
+}
+static void
+gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu){
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
+	priv->is_global_menu = is_global_menu;
 }
 
 static void

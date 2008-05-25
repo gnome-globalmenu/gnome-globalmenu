@@ -1,5 +1,6 @@
 #include <config.h>
 #include <gtk/gtk.h>
+#include "menubar.h"
 #include "builder.h"
 #include "widget.h"
 
@@ -35,7 +36,10 @@ static void _start_element1  (GMarkupParseContext *context,
 				END_SWITCH_STR;
 			}
 			gtype = g_type_from_name(type);
-			new_widget = g_object_new(gtype, NULL);
+			if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
+				new_widget = g_object_new(gtype, "is-global-menu", FALSE, NULL);
+			} else
+				new_widget = g_object_new(gtype, NULL);
 			gtk_widget_set_id(new_widget, id);
 
 			if(builder->current_widget) {
@@ -93,7 +97,6 @@ static void _start_element2  (GMarkupParseContext *context,
 				END_SWITCH_STR;
 			}
 			builder->current_widget = g_hash_table_lookup(builder->widgets, id);
-			g_message("current_widget switched: %s", id);
 		}
 		CASE_STR("property") {
 			GType gtype = 0;
