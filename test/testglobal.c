@@ -48,9 +48,9 @@ int main (int argc, char **argv){
 	GtkWidget * window;
 	gtk_init(&argc, &argv);
 
-	//built_menubar = builder_get_object(builder, "globalmenubar");
 	gdkx_tools_add_sms_filter(sms_filter, NULL);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_accept_focus (window, FALSE);
 	notebook = gtk_notebook_new();
 	box = gtk_vbox_new(0, FALSE);
 	gtk_container_add(window, box);

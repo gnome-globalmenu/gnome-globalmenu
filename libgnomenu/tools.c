@@ -142,25 +142,36 @@ gboolean gdkx_tools_send_sms(gchar * sms, int size){
 }
 
 static GList * sms_filter_list = NULL;
-void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
+static GdkXToolsSMSFilterData * _gdkx_tools_find_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
-	GdkWindowAttr attr = {0};
-	/*FIXME: THREAD SAFETY! protect the list!*/
-	GDK_THREADS_ENTER();
 	GList * node;
 	for(node = sms_filter_list; node ; node = node->next){
 		filter_data = node->data;
 		if(filter_data->data == data &&
 			filter_data->func == func){
-			g_warning("filter already exist, returning..");
-			return;
-		}
+			return filter_data;
+		} 
 	}
+	return NULL;
+}
+static void _gdkx_tools_real_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen){
+	GdkXToolsSMSFilterData * filter_data;
+	GdkWindowAttr attr = {0};
+	/*FIXME: THREAD SAFETY! protect the list!*/
+	GDK_THREADS_ENTER();
+	filter_data =  _gdkx_tools_find_sms_filter(func, data);
+
+	if(filter_data != NULL){
+		GDK_THREADS_LEAVE();
+		g_warning("filter already registered");
+		return;
+	}
+
    	filter_data = g_new0(GdkXToolsFilterData, 1);
 	filter_data->type = GDKX_TOOLS_FILTER_TYPE_SMS;
 	filter_data->func = func;
 	filter_data->data = data;
-	filter_data->frozen = FALSE;
+	filter_data->frozen = frozen;
 	attr.wclass = GDK_INPUT_ONLY;
 
 	filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
@@ -169,35 +180,47 @@ void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	gdk_window_add_filter(filter_data->window, _gdkx_tools_filter, filter_data);
 	GDK_THREADS_LEAVE();
 }
+void gdkx_tools_add_sms_filter_frozen(GdkXToolsSMSFilterFunc func, gpointer data) {
+	_gdkx_tools_real_add_sms_filter(func, data, TRUE);
+}
+void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data) {
+	_gdkx_tools_real_add_sms_filter(func, data, FALSE);
+}
 void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
 	GDK_THREADS_ENTER();
-	GList * node;
-	for(node = sms_filter_list; node ; node = node->next){
-		filter_data = node->data;
-		if(filter_data->data == data &&
-			filter_data->func == func){
-			break;
-		}
-	}
-	if(node){
+	filter_data = _gdkx_tools_find_sms_filter(func, data);
+	if(filter_data){
 		filter_data->frozen = TRUE;
+	} else {
+		g_warning("filter is not registered");
 	}
 	GDK_THREADS_LEAVE();
 }
 void gdkx_tools_thaw_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
 	GDK_THREADS_ENTER();
-	GList * node;
-	for(node = sms_filter_list; node ; node = node->next){
-		filter_data = node->data;
-		if(filter_data->data == data &&
-			filter_data->func == func){
-			break;
-		}
-	}
-	if(node){
+	filter_data = _gdkx_tools_find_sms_filter(func, data);
+
+	if(filter_data){
 		filter_data->frozen = FALSE;
+	} else {
+		g_warning("filter is not registered");
+	}
+	GDK_THREADS_LEAVE();
+}
+void gdkx_tools_remove_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
+	GdkXToolsSMSFilterData * filter_data;
+	GDK_THREADS_ENTER();
+	filter_data = _gdkx_tools_find_sms_filter(func, data);
+
+	if(filter_data){
+		gdk_window_remove_filter(filter_data->window, _gdkx_tools_filter, filter_data);
+		g_list_remove(sms_filter_list, filter_data);
+		gdk_window_destroy(filter_data->window);
+		g_free(filter_data);
+	} else {
+		g_warning("filter is not registered");
 	}
 	GDK_THREADS_LEAVE();
 }

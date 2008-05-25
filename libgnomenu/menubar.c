@@ -99,6 +99,7 @@ static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
 static void gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu);
+static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint sizs);
 
 #ifdef OVERFLOWED_ITEMS
 /* GObject interface */
@@ -724,9 +725,9 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec 
 
 			g_free(introspection);
 			g_free(buffer);
-/*TODO: thaw the sms filter */
+			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
 		}  else {
-/*TODO: freeze the sms filter */
+			gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
 		
 		}
 	}
@@ -752,6 +753,9 @@ _s_hierarchy_changed (GtkWidget *widget,
   
   }
 	
+}
+static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint size) {
+	LOG("received sms: %s", sms);
 }
 
 static GtkShadowType
@@ -892,7 +896,7 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(object, "hierarchy-changed",
 				G_CALLBACK(_s_hierarchy_changed), NULL);
-	/*TODO: create the sms filter if is-global-menu */
+	gdkx_tools_add_sms_filter_frozen(_sms_filter, menu_bar);
 	return object;
 }
 gboolean
@@ -912,6 +916,7 @@ _dispose (GObject * _object){
 	if(!priv->disposed){
 		priv->disposed = TRUE;	
 		g_hash_table_remove_all(priv->menu_items);
+		gdkx_tools_remove_sms_filter(_sms_filter, menu_bar);
 	}
 	G_OBJECT_CLASS(_menu_shell_class)->dispose(_object);
 }
