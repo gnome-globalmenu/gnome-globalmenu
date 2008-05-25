@@ -10,7 +10,9 @@ struct _Builder {
 	GMarkupParser parser1;
 	GMarkupParser parser2;
 	GHashTable * widgets;
-	GtkWidget * current_widget;
+	GNode * widget_tree;
+	GNode * current_node;
+	GtkWidget * current_widget; /*for phase 2*/
 };
 #define SWITCH_STR(x) { const gchar * _str_ = x; if(FALSE) {
 #define CASE_STR(value)  } else if(g_str_equal(_str_, value)) {
@@ -65,6 +67,7 @@ static void _start_element1  (GMarkupParseContext *context,
 			const char * type = NULL;
 			const char * id = NULL;
 			GtkWidget * new_widget;
+			GtkWidget * current_widget;
 			GType gtype = 0;
 			for(i=0; attribute_names[i]; i++){
 				SWITCH_STR(attribute_names[i])
@@ -79,16 +82,18 @@ static void _start_element1  (GMarkupParseContext *context,
 				new_widget = g_object_new(gtype, NULL);
 
 			gtk_widget_set_id(new_widget, id);
+			current_widget = builder->current_node->data;
+			if(current_widget) {
+				gtk_container_add(current_widget, new_widget);
+			} else
+				g_object_ref_sink(new_widget); /*this widget is a toplevel node*/
 
-			if(builder->current_widget) {
-				gtk_container_add(builder->current_widget, new_widget);
-			} else {
-				g_object_ref_sink(new_widget); /*this widget is the root*/
-			}
-			/*go downward*/
-			builder->current_widget = new_widget;
+			builder->current_node = g_node_append_data(builder->current_node, new_widget);
 		}
 		CASE_STR("property") {
+		}
+		CASE_STR("root") {
+			builder->current_node = builder->widget_tree;
 		}
 		DEFAULT_STR {
 			g_warning("unknown element: %s\n", element_name);
@@ -103,12 +108,15 @@ static void _end_element1    (GMarkupParseContext *context,
                           GError             **error) {
 	SWITCH_STR(element_name)
 		CASE_STR("object") {
-			GtkWidget * widget = builder->current_widget;
-			g_hash_table_insert(builder->widgets, gtk_widget_get_id(widget), widget);
+			GtkWidget * current_widget = builder->current_node->data;
+			g_hash_table_insert(builder->widgets, gtk_widget_get_id(current_widget), current_widget);
 			/* go upward to the parent*/
-			builder->current_widget = gtk_widget_get_parent(widget);
+			builder->current_node = builder->current_node->parent;
 		}
 		CASE_STR("property") {
+		}
+		CASE_STR("root"){
+			builder->current_node = NULL;
 		}
 		DEFAULT_STR {
 			g_warning("unknown element: %s\n", element_name);
@@ -135,6 +143,9 @@ static void _start_element2  (GMarkupParseContext *context,
 				END_SWITCH_STR;
 			}
 			builder->current_widget = g_hash_table_lookup(builder->widgets, id);
+		}
+		CASE_STR("root"){
+		
 		}
 		CASE_STR("property") {
 			GType gtype = 0;
@@ -192,6 +203,8 @@ static void _end_element2    (GMarkupParseContext *context,
 		}
 		CASE_STR("property") {
 		}
+		CASE_STR("root"){
+		}
 		DEFAULT_STR {
 			g_warning("unknown element: %s\n", element_name);
 		}
@@ -245,6 +258,7 @@ Builder * builder_new (){
 	builder->parser2.error = _error;
 
 	builder->widgets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_object_unref);
+	builder->widget_tree = g_node_new(NULL);
 	return builder;
 }
 void builder_parse(Builder * builder, const gchar * string){
@@ -275,5 +289,6 @@ GtkWidget * builder_get_object(Builder * builder, const gchar * id){
 }
 Builder * builder_destroy(Builder * builder) {
 	g_hash_table_destroy(builder->widgets);
+	g_node_destroy(builder->widget_tree);
 	g_free(builder);
 }
