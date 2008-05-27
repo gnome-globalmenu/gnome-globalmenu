@@ -25,7 +25,6 @@
  */
 
 #include <config.h>
-#define OVERFLOWED_ITEMS
 #define GET_OBJECT(_s, sgmb, p) \
 	GnomenuMenuBar * sgmb = (GnomenuMenuBar*)_s; \
 	GnomenuMenuBarPrivate * p = GNOMENU_MENU_BAR_GET_PRIVATE(_s);
@@ -55,7 +54,8 @@ enum {
   PROP_0,
   PROP_PACK_DIRECTION,
   PROP_CHILD_PACK_DIRECTION,
-  PROP_IS_GLOBAL_MENU
+  PROP_IS_GLOBAL_MENU,
+  PROP_VISIBLE_OVERFLOWN
 };
 
 typedef struct _GnomenuMenuBarPrivate GnomenuMenuBarPrivate;
@@ -67,8 +67,8 @@ struct _GnomenuMenuBarPrivate
   gboolean is_global_menu;
   gchar * introspection;
   gboolean introspection_is_dirty;
+  gboolean visible_overflown;
 
-#ifdef OVERFLOWED_ITEMS
 	gboolean disposed;
 	gboolean detached;
 
@@ -78,7 +78,6 @@ struct _GnomenuMenuBarPrivate
 	gboolean show_arrow;
 	GtkMenu	* popup_menu;
 	GtkRequisition true_requisition;
-#endif
 };
 
 
@@ -112,7 +111,6 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar);
 static gchar * _update_introspection ( GtkMenuBar * menubar);
 static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar);
 static void _invalidate_introspection ( GtkMenuBar * menubar);
-#ifdef OVERFLOWED_ITEMS
 /* GObject interface */
 static GObject * _constructor 		( GType type, guint n_construct_properties, 
 									  GObjectConstructParam *construct_params );
@@ -139,7 +137,6 @@ typedef struct {
 	GtkMenuItem * menu_item;
 	GtkMenuItem * proxy;
 } MenuItemInfo;
-#endif
 
 static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
 
@@ -187,18 +184,14 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
   GObjectClass *gobject_class;
   GtkWidgetClass *widget_class;
   GtkMenuShellClass *menu_shell_class;
-#ifdef OVERFLOWED_ITEMS
-	GtkContainerClass *container_class;
-#endif
+  GtkContainerClass *container_class;
 
   GtkBindingSet *binding_set;
 
   gobject_class = (GObjectClass*) class;
   widget_class = (GtkWidgetClass*) class;
   menu_shell_class = (GtkMenuShellClass*) class;
-#ifdef OVERFLOWED_ITEMS
-	container_class = (GtkContainerClass*) class;
-#endif
+  container_class = (GtkContainerClass*) class;
 
   gobject_class->get_property = gnomenu_menu_bar_get_property;
   gobject_class->set_property = gnomenu_menu_bar_set_property;
@@ -211,13 +204,12 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
   menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
   menu_shell_class->get_popup_delay = gnomenu_menu_bar_get_popup_delay;
 
-#ifdef OVERFLOWED_ITEMS
 	gobject_class->finalize = _finalize;
 	gobject_class->constructor = _constructor;
 	menu_shell_class->insert = _insert;
 	container_class->remove = _remove;
 	container_class->forall = _forall;
-#endif
+
   g_type_class_add_private (gobject_class, sizeof (GnomenuMenuBarPrivate));  
   g_object_class_install_property(gobject_class, PROP_IS_GLOBAL_MENU,
 		  g_param_spec_boolean("is-global-menu",
@@ -225,20 +217,23 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 			  "whether the menu bar is a global menu",
 			  TRUE, 
 			  G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+  g_object_class_install_property(gobject_class, PROP_VISIBLE_OVERFLOWN,
+		  g_param_spec_boolean("visible-overflown",
+			  "show the overflown items in a menu",
+			  "show the overflown items in a menu",
+			  TRUE, 
+			  G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
-#ifdef OVERFLOWED_ITEMS
 static void _menu_item_info_free(MenuItemInfo * info){
 	if(info->proxy) g_object_unref(info->proxy);
 	g_free(info);
 }
-#endif
 
 void
 gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
 	GET_OBJECT(object, menu_bar, priv);
-#ifdef OVERFLOWED_ITEMS
 	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, (GDestroyNotify)_menu_item_info_free);
 	priv->popup_menu = GTK_MENU(gtk_menu_new());
 	priv->arrow_button = GTK_WIDGET(gtk_toggle_button_new());
@@ -246,7 +241,7 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->show_arrow = FALSE;
 	priv->disposed = FALSE;
 	priv->detached = FALSE;
-#endif
+	priv->visible_overflown = TRUE;
 	priv->is_global_menu = TRUE;
 	priv->introspection = NULL;
 	priv->introspection_is_dirty = TRUE;
@@ -282,7 +277,9 @@ gnomenu_menu_bar_set_property (GObject      *object,
       break;
     case PROP_IS_GLOBAL_MENU:
 	  gnomenu_menu_bar_set_is_global_menu(menubar, g_value_get_boolean(value));
-	  g_message("set global menu");
+	  break;
+    case PROP_VISIBLE_OVERFLOWN:
+	  gnomenu_menu_bar_set_visible_overflown(menubar, g_value_get_boolean(value));
 	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -308,6 +305,9 @@ gnomenu_menu_bar_get_property (GObject    *object,
       break;
     case PROP_IS_GLOBAL_MENU:
 	  g_value_set_boolean(value, gnomenu_menu_bar_get_is_global_menu(menubar));
+	  break;
+    case PROP_VISIBLE_OVERFLOWN:
+	  g_value_set_boolean(value, gnomenu_menu_bar_get_visible_overflown(menubar));
 	  break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -396,23 +396,21 @@ gnomenu_menu_bar_size_request (GtkWidget      *widget,
 	  requisition->height += widget->style->ythickness * 2;
 	}
     }
-#ifdef OVERFLOWED_ITEMS
-    priv->true_requisition = *requisition;
-	{
-	GtkPackDirection pack_direction;
-	pack_direction = gnomenu_menu_bar_get_pack_direction(GTK_MENU_BAR(widget));	
-	switch(pack_direction){
-		case GTK_PACK_DIRECTION_LTR:
-		case GTK_PACK_DIRECTION_RTL:
-			requisition->width = 0;
-		break;
-		case GTK_PACK_DIRECTION_BTT:
-		case GTK_PACK_DIRECTION_TTB:
-			requisition->height = 0;
-		break;
+	if(priv->visible_overflown){
+		priv->true_requisition = *requisition;
+		GtkPackDirection pack_direction;
+		pack_direction = gnomenu_menu_bar_get_pack_direction(GTK_MENU_BAR(widget));	
+		switch(pack_direction){
+			case GTK_PACK_DIRECTION_LTR:
+			case GTK_PACK_DIRECTION_RTL:
+				requisition->width = 0;
+			break;
+			case GTK_PACK_DIRECTION_BTT:
+			case GTK_PACK_DIRECTION_TTB:
+				requisition->height = 0;
+			break;
+		}
 	}
-	}
-#endif
 }
 
 static void
@@ -433,12 +431,10 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	GtkPackDirection pack_direction;
 	GtkPackDirection child_pack_direction;
 
-#ifdef OVERFLOWED_ITEMS
 	GtkAllocation adjusted;
 	MenuItemInfo * menu_info;
 	GtkRequisition arrow_requisition;
 	GtkAllocation arrow_allocation;
-#endif
 
   g_return_if_fail (GTK_IS_MENU_BAR (widget));
   g_return_if_fail (allocation != NULL);
@@ -449,7 +445,8 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 
 	pack_direction = gnomenu_menu_bar_get_pack_direction(menu_bar);
 	child_pack_direction = gnomenu_menu_bar_get_child_pack_direction(menu_bar);
-#ifdef OVERFLOWED_ITEMS
+
+	if(priv->visible_overflown){
 	adjusted = * allocation;
 	adjusted.x = 0; /*the x, y offset is taken care by either widget->window or priv->floater*/
 	adjusted.y = 0;
@@ -458,7 +455,8 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	arrow_allocation.width = arrow_requisition.width;
 	arrow_allocation.height = arrow_requisition.height;
 	priv->show_arrow = FALSE;
-#endif
+	}
+
   direction = gtk_widget_get_direction (widget);
 
   widget->allocation = *allocation;
@@ -491,7 +489,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	  offset = child_allocation.x; 	/* Window edge to menubar start */
 	  ltr_x = child_allocation.x;
 	  
-#ifdef OVERFLOWED_ITEMS
+	  if(priv->visible_overflown){
 			if(allocation->width < priv->true_requisition.width){
 				if((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_LTR)){
 					priv->show_arrow = TRUE;
@@ -508,7 +506,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 					arrow_allocation.y = 0;
 				}
 			}
-#endif
+	  }
 	  children = menu_shell->children;
 	  while (children)
 	    {
@@ -521,12 +519,11 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 						 &toggle_size);
 	      gtk_widget_get_child_requisition (child, &child_requisition);
 
-#ifdef OVERFLOWED_ITEMS
+		  if(priv->visible_overflown){
 				menu_info = g_hash_table_lookup(priv->menu_items, child);
 				menu_info->overflowed = (ltr_x + child_requisition.width/2
 										> adjusted.width);
-#endif
-	    
+		  }
 	      if (child_pack_direction == GTK_PACK_DIRECTION_LTR ||
 		  child_pack_direction == GTK_PACK_DIRECTION_RTL)
 		child_requisition.width += toggle_size;
@@ -542,7 +539,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 		}
 	      if (GTK_WIDGET_VISIBLE (child))
 		{
-#ifdef OVERFLOWED_ITEMS
+			if(priv->visible_overflown){
 					if(menu_info->overflowed){ /*move it away & clip it.*/
 						child_allocation.width = 0;
 						child_allocation.x = allocation->width;
@@ -559,15 +556,14 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 											- child_allocation.width - ltr_x; 
 						child_allocation.x += adjusted.x;
 					}
-#else
+			} else{
 		  if ((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_LTR))
 		    child_allocation.x = ltr_x;
 		  else
 		    child_allocation.x = allocation->width -
 		      child_requisition.width - ltr_x; 
 		  child_allocation.width = child_requisition.width;
-#endif		  
-		  
+			} 
 		  gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 						      toggle_size);
 		  gtk_widget_size_allocate (child, &child_allocation);
@@ -582,7 +578,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	  
 	  offset = child_allocation.y; 	/* Window edge to menubar start */
 	  ltr_y = child_allocation.y;
-#ifdef OVERFLOWED_ITEMS
+	  if(priv->visible_overflown){
 			if(allocation->height < priv->true_requisition.height){
 				if((direction == GTK_TEXT_DIR_LTR) == (pack_direction == GTK_PACK_DIRECTION_TTB)){
 					priv->show_arrow = TRUE;
@@ -599,7 +595,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 					arrow_allocation.x = 0;
 				}
 			}
-#endif 
+	  }
 	  children = menu_shell->children;
 	  while (children)
 	    {
@@ -607,11 +603,11 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	      
 	      child = children->data;
 	      children = children->next;
-#ifdef OVERFLOWED_ITEMS 
+		  if(priv->visible_overflown){
 				menu_info = g_hash_table_lookup(priv->menu_items, child);
 				menu_info->overflowed = (ltr_y + child_requisition.height/2
 										> adjusted.height);
-#endif
+		  }
 	      gtk_menu_item_toggle_size_request (GTK_MENU_ITEM (child),
 						 &toggle_size);
 	      gtk_widget_get_child_requisition (child, &child_requisition);
@@ -631,7 +627,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 		}
 	      if (GTK_WIDGET_VISIBLE (child))
 		{
-#ifdef OVERFLOWED_ITEMS
+			if(priv->visible_overflown){
 					if(menu_info->overflowed){ /*move it aw.x & clip it.*/
 						child_allocation.height = 0;
 						child_allocation.y = allocation->height;
@@ -652,7 +648,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 						LOG("r %d %d ", child_requisition);
 						LOG("l %d ", ltr_y);
 					}
-#else
+			}else{
 		  if ((direction == GTK_TEXT_DIR_LTR) ==
 		      (pack_direction == GTK_PACK_DIRECTION_TTB))
 		    child_allocation.y = ltr_y;
@@ -660,7 +656,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 		    child_allocation.y = allocation->height -
 		      child_requisition.height - ltr_y; 
 		  child_allocation.height = child_requisition.height;
-#endif	  
+			}
 		  gtk_menu_item_toggle_size_allocate (GTK_MENU_ITEM (child),
 						      toggle_size);
 		  gtk_widget_size_allocate (child, &child_allocation);
@@ -670,7 +666,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	    }
 	}
     }
-#ifdef OVERFLOWED_ITEMS
+	  if(priv->visible_overflown){
 	if(priv->show_arrow) {
 		LOG("arrow_allocation: %d %d %d %d", arrow_allocation);
 		gtk_widget_size_allocate(priv->arrow_button, &arrow_allocation);
@@ -678,7 +674,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	} else {
 		gtk_widget_hide(priv->arrow_button);
 	}
-#endif
+	  }
 }
 
 static void
@@ -941,7 +937,6 @@ gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
 
   gtk_menu_bar_set_child_pack_direction(menubar, child_pack_dir);
 }
-#ifdef OVERFLOWED_ITEMS
 static GObject* _constructor(GType type, 
 		guint n_construct_properties,
 		GObjectConstructParam *construct_params){
@@ -1170,4 +1165,3 @@ static void _s_popup_menu_deactivated	( GtkWidget * menubar,
 	gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_return_submenu, menu_bar);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->arrow_button), FALSE);
 }
-#endif
