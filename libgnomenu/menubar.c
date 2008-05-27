@@ -100,8 +100,8 @@ static gint gnomenu_menu_bar_expose            (GtkWidget       *widget,
 					    GdkEventExpose  *event);
 static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
-static void _s_realize ( GtkWidget       *widget,
-					    gpointer data);
+static void _s_toplevel_realize ( GnomenuMenuBar       *menubar,
+					    GtkWidget * toplevel);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
 static void gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu);
 static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint sizs);
@@ -796,6 +796,8 @@ _s_hierarchy_changed (GtkWidget *widget,
   toplevel = gtk_widget_get_toplevel (widget);
 
   if (old_toplevel) {
+		g_signal_handlers_disconnect_by_func(old_toplevel,
+				_s_toplevel_realize, menubar);
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_notify_has_toplevel_focus, menubar);
   }
@@ -804,6 +806,8 @@ _s_hierarchy_changed (GtkWidget *widget,
 	if(GTK_WIDGET_REALIZED(toplevel)){
 		_update_widget_id(menubar);
 	}
+	g_signal_connect_swapped(toplevel, "realize",
+				G_CALLBACK(_s_toplevel_realize), menubar);
 	g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
 		G_CALLBACK(_s_notify_has_toplevel_focus), menubar);
   
@@ -811,8 +815,8 @@ _s_hierarchy_changed (GtkWidget *widget,
 	
 }
 static void
-_s_realize (GtkWidget * widget, gpointer data){
-	_update_widget_id(widget);
+_s_toplevel_realize (GnomenuMenuBar * menubar, GtkWidget * toplevel){
+	_update_widget_id(menubar);
 }
 static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint size) {
 	LOG("received sms: %s", sms);
@@ -956,8 +960,6 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(object, "hierarchy-changed",
 				G_CALLBACK(_s_hierarchy_changed), NULL);
-	g_signal_connect(object, "realize",
-				G_CALLBACK(_s_realize), NULL);
 	gdkx_tools_add_sms_filter_frozen(_sms_filter, menu_bar);
 	return object;
 }
