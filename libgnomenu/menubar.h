@@ -125,18 +125,18 @@ GtkWidget * gnomenu_menu_bar_new_local             (void);
 
 GType gnomenu_menu_bar_get_type (void);
 GtkPackDirection
-gnomenu_menu_bar_get_pack_direction (GnomenuMenuBar *menubar);
+gnomenu_menu_bar_get_pack_direction (GtkMenuBar *menubar);
 void
-gnomenu_menu_bar_set_pack_direction (GnomenuMenuBar       *menubar,
+gnomenu_menu_bar_set_pack_direction (GtkMenuBar       *menubar,
                                  GtkPackDirection  pack_dir);
 GtkPackDirection
-gnomenu_menu_bar_get_child_pack_direction (GnomenuMenuBar *menubar);
+gnomenu_menu_bar_get_child_pack_direction (GtkMenuBar *menubar);
 
 void
-gnomenu_menu_bar_set_child_pack_direction (GnomenuMenuBar       *menubar,
+gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
                                        GtkPackDirection  child_pack_dir);
 gboolean
-gnomenu_menu_bar_get_is_global_menu(GnomenuMenuBar * menubar);
+gnomenu_menu_bar_get_is_global_menu(GtkMenuBar * menubar);
 G_END_DECLS
 
 

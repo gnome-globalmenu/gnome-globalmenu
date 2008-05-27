@@ -42,6 +42,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#include <string.h>
 #include "menubar.h"
 #include "widget.h"
 #include "introspector.h"
@@ -100,13 +101,17 @@ static gint gnomenu_menu_bar_expose            (GtkWidget       *widget,
 					    GdkEventExpose  *event);
 static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
-static void _s_toplevel_realize ( GnomenuMenuBar       *menubar,
+static void _s_toplevel_realize ( GtkMenuBar       *menubar,
 					    GtkWidget * toplevel);
+static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
-static void gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu);
-static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint sizs);
+static void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
+static void _sms_filter ( GtkMenuBar * menubar, gchar * sms, gint sizs);
+static void _send_refresh_global_menu_sms (GtkMenuBar * menubar);
 
-static gchar * _update_introspection ( GnomenuMenuBar * menubar);
+static gchar * _update_introspection ( GtkMenuBar * menubar);
+static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar);
+static void _invalidate_introspection ( GtkMenuBar * menubar);
 #ifdef OVERFLOWED_ITEMS
 /* GObject interface */
 static GObject * _constructor 		( GType type, guint n_construct_properties, 
@@ -136,7 +141,7 @@ typedef struct {
 } MenuItemInfo;
 #endif
 
-static GtkShadowType get_shadow_type   (GnomenuMenuBar      *menubar);
+static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
 
 void gnomenu_menu_bar_init (GnomenuMenuBar * self);
 
@@ -265,7 +270,7 @@ gnomenu_menu_bar_set_property (GObject      *object,
 			   const GValue *value,
 			   GParamSpec   *pspec)
 {
-  GnomenuMenuBar *menubar = GTK_MENU_BAR (object);
+  GtkMenuBar *menubar = GTK_MENU_BAR (object);
   
   switch (prop_id)
     {
@@ -291,7 +296,7 @@ gnomenu_menu_bar_get_property (GObject    *object,
 			   GValue     *value,
 			   GParamSpec *pspec)
 {
-  GnomenuMenuBar *menubar = GTK_MENU_BAR (object);
+  GtkMenuBar *menubar = GTK_MENU_BAR (object);
   
   switch (prop_id)
     {
@@ -314,7 +319,7 @@ static void
 gnomenu_menu_bar_size_request (GtkWidget      *widget,
 			   GtkRequisition *requisition)
 {
-  GnomenuMenuBar *menu_bar;
+  GtkMenuBar *menu_bar;
   GnomenuMenuBarPrivate *priv;
   GtkMenuShell *menu_shell;
   GtkWidget *child;
@@ -414,7 +419,7 @@ static void
 gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 			    GtkAllocation *allocation)
 {
-  GnomenuMenuBar *menu_bar;
+  GtkMenuBar *menu_bar;
   GtkMenuShell *menu_shell;
   GnomenuMenuBarPrivate *priv;
   GtkWidget *child;
@@ -715,18 +720,18 @@ gnomenu_menu_bar_expose (GtkWidget      *widget,
 
   return FALSE;
 }
-static GdkWindow * _get_toplevel_gdk_window(GnomenuMenuBar * menubar){
+static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar){
 	GtkWidget * toplevel;
 	GdkWindow * window;
 
-	toplevel = gtk_widget_get_toplevel(menubar);
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
 	g_return_val_if_fail(toplevel!=NULL, NULL);
 
 	window= GTK_WIDGET(toplevel)->window;
 	g_return_val_if_fail(window!=NULL, NULL);
 	return window;
 }
-static void _send_refresh_global_menu_sms (GnomenuMenuBar * menubar){
+static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
 	gchar * sms;
 	GdkWindow * window = _get_toplevel_gdk_window(menubar);
 
@@ -734,25 +739,25 @@ static void _send_refresh_global_menu_sms (GnomenuMenuBar * menubar){
 	gdkx_tools_send_sms(sms, strlen(sms)+1);
 	g_free(sms);
 }
-static void _invalidate_introspection ( GnomenuMenuBar * menubar){
+static void _invalidate_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GtkWidget * toplevel;
 	priv->introspection_is_dirty = TRUE;
 
-	toplevel = gtk_widget_get_toplevel(menubar);
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
 	g_return_if_fail(toplevel!= NULL);
-	if(gtk_window_has_toplevel_focus(toplevel)){
+	if(gtk_window_has_toplevel_focus(GTK_WINDOW(toplevel))){
 		_update_introspection(menubar);
 		_send_refresh_global_menu_sms(menubar);
 	}
 }
 
-static gchar * _update_introspection ( GnomenuMenuBar * menubar){
+static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
 	if(priv->introspection_is_dirty){
 		if(priv->introspection) g_free(priv->introspection);
-		priv->introspection = gtk_widget_introspect_with_handle(menubar);
+		priv->introspection = gtk_widget_introspect_with_handle(GTK_WIDGET(menubar));
 		window = _get_toplevel_gdk_window(menubar);
 		if(window)
 			gdkx_tools_set_window_prop_blocked(window , 
@@ -763,7 +768,7 @@ static gchar * _update_introspection ( GnomenuMenuBar * menubar){
 	}
 	return priv->introspection;
 }
-static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
+static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
 	if(gnomenu_menu_bar_get_is_global_menu(menubar)){
 		if(gtk_window_has_toplevel_focus(window)){
 			LOG("received top level focus %p", menubar);
@@ -777,12 +782,12 @@ static void _s_notify_has_toplevel_focus ( GnomenuMenuBar * menubar, GParamSpec 
 		}
 	}
 }
-static void _update_widget_id(GnomenuMenuBar * menubar){
+static void _update_widget_id(GtkMenuBar * menubar){
   GtkWidget *toplevel;  
-  toplevel = gtk_widget_get_toplevel (menubar);
+  toplevel = gtk_widget_get_toplevel (GTK_WIDGET(menubar));
 
 	gchar * buffer = g_strdup_printf("%p", GDK_WINDOW_XWINDOW(toplevel->window));
-	gtk_widget_set_id(menubar, buffer);
+	gtk_widget_set_id(GTK_WIDGET(menubar), buffer);
 	g_free(buffer);
 	_invalidate_introspection(menubar);
 }
@@ -791,7 +796,7 @@ _s_hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel, gpointer data)
 {
   GtkWidget *toplevel;  
-  GnomenuMenuBar * menubar = GTK_MENU_BAR(widget);
+  GtkMenuBar * menubar = GTK_MENU_BAR(widget);
 
   toplevel = gtk_widget_get_toplevel (widget);
 
@@ -815,15 +820,15 @@ _s_hierarchy_changed (GtkWidget *widget,
 	
 }
 static void
-_s_toplevel_realize (GnomenuMenuBar * menubar, GtkWidget * toplevel){
+_s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	_update_widget_id(menubar);
 }
-static void _sms_filter ( GnomenuMenuBar * menubar, gchar * sms, gint size) {
+static void _sms_filter ( GtkMenuBar * menubar, gchar * sms, gint size) {
 	LOG("received sms: %s", sms);
 }
 
 static GtkShadowType
-get_shadow_type (GnomenuMenuBar *menubar)
+get_shadow_type (GtkMenuBar *menubar)
 {
   GtkShadowType shadow_type = GTK_SHADOW_OUT;
   
@@ -859,14 +864,14 @@ gnomenu_menu_bar_get_popup_delay (GtkMenuShell *menu_shell)
  * Since: 2.8
  **/
 GtkPackDirection
-gnomenu_menu_bar_get_pack_direction (GnomenuMenuBar *menubar)
+gnomenu_menu_bar_get_pack_direction (GtkMenuBar *menubar)
 {
   GnomenuMenuBarPrivate *priv;
 
   g_return_val_if_fail (GTK_IS_MENU_BAR (menubar), 
 			GTK_PACK_DIRECTION_LTR);
   
-  return gtk_menu_bar_get_pack_direction(GTK_MENU_BAR(menubar));
+  return gtk_menu_bar_get_pack_direction(menubar);
 }
 
 /**
@@ -879,7 +884,7 @@ gnomenu_menu_bar_get_pack_direction (GnomenuMenuBar *menubar)
  * Since: 2.8
  **/
 void
-gnomenu_menu_bar_set_pack_direction (GnomenuMenuBar       *menubar,
+gnomenu_menu_bar_set_pack_direction (GtkMenuBar       *menubar,
                                  GtkPackDirection  pack_dir)
 {
   GnomenuMenuBarPrivate *priv;
@@ -887,7 +892,7 @@ gnomenu_menu_bar_set_pack_direction (GnomenuMenuBar       *menubar,
 
   g_return_if_fail (GTK_IS_MENU_BAR (menubar));
 
-  gtk_menu_bar_set_pack_direction(GTK_MENU_BAR(menubar), pack_dir);
+  gtk_menu_bar_set_pack_direction(menubar, pack_dir);
 }
 
 /**
@@ -902,7 +907,7 @@ gnomenu_menu_bar_set_pack_direction (GnomenuMenuBar       *menubar,
  * Since: 2.8
  **/
 GtkPackDirection
-gnomenu_menu_bar_get_child_pack_direction (GnomenuMenuBar *menubar)
+gnomenu_menu_bar_get_child_pack_direction (GtkMenuBar *menubar)
 {
   GnomenuMenuBarPrivate *priv;
 
@@ -911,7 +916,7 @@ gnomenu_menu_bar_get_child_pack_direction (GnomenuMenuBar *menubar)
   
   priv = GNOMENU_MENU_BAR_GET_PRIVATE (menubar);
 
-  return gtk_menu_bar_get_child_pack_direction(GTK_MENU_BAR(menubar));
+  return gtk_menu_bar_get_child_pack_direction(menubar);
 }
 
 /**
@@ -924,7 +929,7 @@ gnomenu_menu_bar_get_child_pack_direction (GnomenuMenuBar *menubar)
  * Since: 2.8
  **/
 void
-gnomenu_menu_bar_set_child_pack_direction (GnomenuMenuBar       *menubar,
+gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
                                        GtkPackDirection  child_pack_dir)
 {
   GnomenuMenuBarPrivate *priv;
@@ -934,7 +939,7 @@ gnomenu_menu_bar_set_child_pack_direction (GnomenuMenuBar       *menubar,
 
   priv = GNOMENU_MENU_BAR_GET_PRIVATE (menubar);
 
-  gtk_menu_bar_set_child_pack_direction(GTK_MENU_BAR(menubar), child_pack_dir);
+  gtk_menu_bar_set_child_pack_direction(menubar, child_pack_dir);
 }
 #ifdef OVERFLOWED_ITEMS
 static GObject* _constructor(GType type, 
@@ -964,12 +969,12 @@ static GObject* _constructor(GType type,
 	return object;
 }
 gboolean
-gnomenu_menu_bar_get_is_global_menu(GnomenuMenuBar * menubar){
+gnomenu_menu_bar_get_is_global_menu(GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	return priv->is_global_menu;
 }
 static void
-gnomenu_menu_bar_set_is_global_menu(GnomenuMenuBar * menubar, gboolean is_global_menu){
+gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	priv->is_global_menu = is_global_menu;
 }
@@ -1061,7 +1066,7 @@ GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
 		
 	/* The image is then lost.*/
 		if(GTK_IS_IMAGE_MENU_ITEM(item)){
-			GtkImage * image = gtk_image_menu_item_get_image(item);
+			GtkImage * image = GTK_IMAGE(gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(item)));
 			GtkImage * dup = NULL;
 			switch(gtk_image_get_storage_type(image)){
 				case GTK_IMAGE_EMPTY:
@@ -1084,7 +1089,7 @@ GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
 				break;
 			}
 			info->proxy = GTK_MENU_ITEM(gtk_image_menu_item_new());
-			gtk_image_menu_item_set_image(info->proxy, dup);
+			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(info->proxy), GTK_WIDGET(dup));
 		} else 
 			info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
 		g_object_ref(info->proxy);
@@ -1118,9 +1123,9 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 			if(proxy) {
 				gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
 				if(GTK_WIDGET_VISIBLE(info->menu_item)) 
-					gtk_widget_show_all(proxy);
+					gtk_widget_show_all(GTK_WIDGET(proxy));
 				else
-					gtk_widget_hide_all(proxy);
+					gtk_widget_hide_all(GTK_WIDGET(proxy));
 			}
 		}
 	}
