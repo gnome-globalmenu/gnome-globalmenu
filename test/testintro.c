@@ -28,6 +28,7 @@ int main (int argc, char **argv){
 	builder = builder_new();
 	builder_parse(builder, intro);
 	menubar2 = builder_get_object(builder, "menubar1");
+	g_object_set(menubar2, "show-arrow", FALSE, NULL);
 	intro2 = gtk_widget_introspect(menubar2);
 	g_print("%s", intro2);
 
