@@ -239,7 +239,7 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 {
 	GET_OBJECT(object, menu_bar, priv);
 #ifdef OVERFLOWED_ITEMS
-	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, _menu_item_info_free);
+	priv->menu_items = g_hash_table_new_full(NULL, NULL, NULL, (GDestroyNotify)_menu_item_info_free);
 	priv->popup_menu = GTK_MENU(gtk_menu_new());
 	priv->arrow_button = GTK_WIDGET(gtk_toggle_button_new());
 	priv->arrow = gtk_arrow_new(GTK_ARROW_DOWN, GTK_SHADOW_NONE);
@@ -1079,8 +1079,8 @@ GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
 					GtkIconSize size;
 					gtk_image_get_stock (
 						image, &stock_id, &size);
-					dup = gtk_image_new_from_stock(
-						stock_id, size);
+					dup = GTK_IMAGE(gtk_image_new_from_stock(
+						stock_id, size));
 				}
 				break;
 				case GTK_IMAGE_ICON_SET:
