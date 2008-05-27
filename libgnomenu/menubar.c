@@ -45,6 +45,7 @@
 #include "menubar.h"
 #include "widget.h"
 #include "introspector.h"
+#include "builder.h"
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
@@ -78,6 +79,7 @@ struct _GnomenuMenuBarPrivate
 	gboolean need_arrow;
 	GtkMenu	* popup_menu;
 	GtkRequisition true_requisition;
+	Builder * builder;
 };
 
 
@@ -110,6 +112,8 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar);
 
 static gchar * _update_introspection ( GtkMenuBar * menubar);
 static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar);
+static GtkMenuItem * _get_item_for_proxy(GtkMenuBar * menubar, GtkMenuItem * proxy);
+GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item);
 static void _invalidate_introspection ( GtkMenuBar * menubar);
 /* GObject interface */
 static GObject * _constructor 		( GType type, guint n_construct_properties, 
@@ -135,7 +139,6 @@ static void _build_popup_menu 		( GnomenuMenuBar * self);
 typedef struct {
 	gboolean overflowed;
 	GtkMenuItem * menu_item;
-	GtkMenuItem * proxy;
 } MenuItemInfo;
 
 static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
@@ -226,7 +229,6 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 }
 
 static void _menu_item_info_free(MenuItemInfo * info){
-	if(info->proxy) g_object_unref(info->proxy);
 	g_free(info);
 }
 
@@ -245,6 +247,7 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->is_global_menu = TRUE;
 	priv->introspection = NULL;
 	priv->introspection_is_dirty = TRUE;
+	priv->builder = NULL;
 }
 
 GtkWidget*
@@ -745,7 +748,19 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 		_send_refresh_global_menu_sms(menubar);
 	}
 }
+static void _s_proxy_activate(GtkWidget * proxy, GtkWidget * item){
+	g_signal_emit_by_name(item, "activate");
+}
+static void _setup_proxy(GtkWidget * item, GtkMenuBar * menubar){
+	GtkMenuItem * proxy;
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 
+	proxy = builder_get_object(priv->builder, gtk_widget_get_id(item));
+	gtk_container_remove(gtk_widget_get_parent(proxy), proxy);
+	g_object_set_data(item, "menu-item-proxy", proxy);
+	g_object_set_data(proxy, "menu-item", item);
+	g_signal_connect(proxy, "activate", _s_proxy_activate, _get_item_for_proxy(menubar, proxy));
+}
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
@@ -758,6 +773,10 @@ static gchar * _update_introspection ( GtkMenuBar * menubar){
 					gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), 
 					priv->introspection, 
 					strlen(priv->introspection)+1);
+		if(priv->builder) builder_destroy(priv->builder);
+		priv->builder = builder_new();
+		builder_parse(priv->builder, priv->introspection);
+		gtk_container_foreach(menubar, _setup_proxy, menubar);
 		priv->introspection_is_dirty = FALSE;
 	}
 	return priv->introspection;
@@ -1000,6 +1019,8 @@ _finalize(GObject * _object){
 	gtk_widget_unparent(priv->arrow_button);
 	g_hash_table_destroy(priv->menu_items);
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
+	if(priv->introspection) g_free(priv->introspection);
+	if(priv->builder) builder_destroy(priv->builder);
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
 }
 static void
@@ -1035,79 +1056,15 @@ static void _forall					( GtkContainer    *container,
 		callback(priv->arrow_button, callback_data);
 	}
 }
-static GtkMenuItem * _get_item_for_proxy(GnomenuMenuBar * self, GtkMenuItem * proxy){
-	GET_OBJECT(self, menu_bar, priv);
-	GList * list = GTK_MENU_SHELL(self)->children;
-	GList * node;
-	for(node = g_list_first(list); node; node = g_list_next(node)){
-		GtkMenuItem * item = node->data;
-		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
-		if(info && info->proxy == proxy){
-			return item;
-		}
-	}
+static GtkMenuItem * _get_item_for_proxy(GtkMenuBar * menubar, GtkMenuItem * proxy){
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
+	GtkMenuItem * item = g_object_get_data(proxy, "menu-item");
+	return item;
 }
-GtkMenuItem * _get_proxy_for_item( GnomenuMenuBar * self, GtkMenuItem * item){
-	GET_OBJECT(self, menu_bar, priv);
-
-	GtkWidget * label;
-	MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
-	const gchar * text = gtk_widget_get_name(GTK_WIDGET(item));
-	GtkWidget * child = gtk_bin_get_child(GTK_BIN(item));
-
-	if(G_OBJECT_TYPE(item) != GTK_TYPE_MENU_ITEM
-	&& G_OBJECT_TYPE(item) != GTK_TYPE_IMAGE_MENU_ITEM){
-/* Can't handle any other subclass of GtkMenuItem */
-		return NULL;
-	}
-	if(GTK_IS_LABEL(child)){
-		text = gtk_label_get_label(GTK_LABEL(child));
-	} else {
-		LOG("unhandled child:%s", G_OBJECT_TYPE_NAME(child));
-	}
-
-	if(!info->proxy) {
-		LOG("menuitem type: %s", G_OBJECT_TYPE_NAME(item));
-		
-	/* The image is then lost.*/
-		if(GTK_IS_IMAGE_MENU_ITEM(item)){
-			GtkImage * image = GTK_IMAGE(gtk_image_menu_item_get_image(GTK_IMAGE_MENU_ITEM(item)));
-			GtkImage * dup = NULL;
-			switch(gtk_image_get_storage_type(image)){
-				case GTK_IMAGE_EMPTY:
-				case GTK_IMAGE_PIXMAP:
-				case GTK_IMAGE_IMAGE:
-				case GTK_IMAGE_PIXBUF:
-				break;
-				case GTK_IMAGE_STOCK: {
-					gchar * stock_id;
-					GtkIconSize size;
-					gtk_image_get_stock (
-						image, &stock_id, &size);
-					dup = GTK_IMAGE(gtk_image_new_from_stock(
-						stock_id, size));
-				}
-				break;
-				case GTK_IMAGE_ICON_SET:
-				case GTK_IMAGE_ANIMATION:
-				case GTK_IMAGE_ICON_NAME:
-				break;
-			}
-			info->proxy = GTK_MENU_ITEM(gtk_image_menu_item_new());
-			gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(info->proxy), GTK_WIDGET(dup));
-		} else 
-			info->proxy = GTK_MENU_ITEM(gtk_menu_item_new());
-		g_object_ref(info->proxy);
-	} else {
-		gtk_container_remove(GTK_CONTAINER(info->proxy),
-				gtk_bin_get_child(GTK_BIN(info->proxy)));
-	} 
-
-	LOG("text = %s", text);
-	label = gtk_label_new_with_mnemonic(text);
-	gtk_container_add(GTK_CONTAINER(info->proxy), label);
-	
-	return info->proxy;	
+GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item){
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
+	GtkMenuItem * proxy = g_object_get_data(item, "menu-item-proxy");
+	return proxy;
 }
 static void _remove_child ( GtkWidget * widget, GtkContainer * container){ 
     gtk_container_remove(container, widget); 
@@ -1127,32 +1084,8 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
 			if(proxy) {
 				gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));
-				if(GTK_WIDGET_VISIBLE(info->menu_item)) 
-					gtk_widget_show_all(GTK_WIDGET(proxy));
-				else
-					gtk_widget_hide_all(GTK_WIDGET(proxy));
 			}
 		}
-	}
-}
-static void _steal_submenu(GtkMenuItem * proxy, GnomenuMenuBar * self){
-	GtkMenuItem * item = _get_item_for_proxy(self, proxy);
-	GtkMenu * submenu = GTK_MENU(gtk_menu_item_get_submenu(item));
-	if(submenu){
-		g_object_ref(submenu);
-		gtk_menu_detach(submenu);
-		gtk_menu_item_set_submenu(proxy, GTK_WIDGET(submenu));	
-		g_object_unref(submenu);
-	}
-}
-static void _return_submenu(GtkMenuItem * proxy, GnomenuMenuBar * self){
-	GtkMenuItem * item = _get_item_for_proxy(self, proxy);
-	GtkMenu * submenu = GTK_MENU(gtk_menu_item_get_submenu(proxy));
-	if(submenu){
-		g_object_ref(submenu);
-		gtk_menu_detach(submenu);
-		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));	
-		g_object_unref(submenu);
 	}
 }
 static void _s_arrow_button_clicked		( GtkWidget * self,
@@ -1161,8 +1094,6 @@ static void _s_arrow_button_clicked		( GtkWidget * self,
 	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (priv->arrow_button)) &&
      !GTK_WIDGET_VISIBLE (priv->popup_menu)) {
 		_build_popup_menu(menu_bar);
-		//gtk_widget_show(GTK_WIDGET(priv->popup_menu));
-		gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_steal_submenu, menu_bar);
 		gtk_menu_popup(priv->popup_menu, NULL, NULL, 
 			NULL, NULL, 0, gtk_get_current_event_time());
 		gtk_menu_shell_select_first (GTK_MENU_SHELL (priv->popup_menu), FALSE);
@@ -1172,6 +1103,5 @@ static void _s_arrow_button_clicked		( GtkWidget * self,
 static void _s_popup_menu_deactivated	( GtkWidget * menubar,
 									  GtkWidget * popup_menu){
 	GET_OBJECT(menubar, menu_bar, priv);
-	gtk_container_foreach(GTK_CONTAINER(priv->popup_menu), (GtkCallback)_return_submenu, menu_bar);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(priv->arrow_button), FALSE);
 }
