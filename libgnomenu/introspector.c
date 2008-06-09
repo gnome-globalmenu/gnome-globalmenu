@@ -107,6 +107,7 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		"icon-size",
 		"pixel-size",
 		"icon-name",
+		"no-show-all",
 		"file",
 		NULL
 	};

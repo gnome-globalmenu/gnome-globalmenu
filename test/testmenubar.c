@@ -5,7 +5,7 @@ void show_arrow_toggled(GtkWidget * toggle, GtkMenuBar * menubar){
 			gtk_toggle_button_get_active(toggle), NULL);
 }
 void is_global_toggled(GtkWidget * toggle, GtkMenuBar * menubar){
-	g_object_get(menubar, "is-global-menu", 
+	g_object_set(menubar, "is-global-menu", 
 			gtk_toggle_button_get_active(toggle), NULL);
 }
 int main (int argc, char **argv){ 

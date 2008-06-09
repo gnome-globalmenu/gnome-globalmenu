@@ -3,15 +3,16 @@
 #include <glade/glade.h>
 #include <libgnomenu/builder.h>
 #include <libgnomenu/tools.h>
+#include <libgnomenu/sms.h>
 
 GtkWidget * notebook;
 void _s_activate(GtkMenuItem * menu_item, gpointer data){
 	char * handle = g_object_get_data(menu_item, "introspect-handle");
-	char * sms;
+	GnomenuSMS sms;
 	g_message("menu item activated, handle = %s", handle);
-	sms = g_strdup_printf("item%s", handle);
-	gdkx_tools_send_sms(sms, strlen(sms)+1);
-	g_free(sms);
+	sms.action = MENUITEM_CLICKED;
+	sms.p[0] = handle;
+	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
 void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){
@@ -20,12 +21,11 @@ void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 				_s_activate, data);
 	}
 }
-void sms_filter(gpointer no_use, gchar * sms, gint size){
+void sms_filter(gpointer no_use, GnomenuSMS * sms, gint size){
 	Window xwindow;
 	GdkWindow * window;
-	gchar action[20];
-	sscanf(sms, "%s %p", action, &xwindow);
-	if(!g_str_equal(action, "menu")) return;
+	if(sms->action != INVALIDATE_MENUBAR) return;
+	xwindow = sms->w[0];
 	window = gdk_window_lookup(xwindow);
 	if(!window) window = gdk_window_foreign_new(xwindow);
 	if(window){
@@ -39,8 +39,7 @@ void sms_filter(gpointer no_use, gchar * sms, gint size){
 		built_menubar_name = g_strdup_printf("%p", xwindow);
 		built_menubar = builder_get_object(builder, built_menubar_name);
 		g_free(built_menubar_name);
-		builder_foreach(builder, setup_handler, NULL);
-
+		builder_foreach(builder, setup_handler, NULL); 
 		gtk_container_add(notebook, built_menubar);
 		g_free(introspection);
 		builder_destroy(builder);

@@ -30,12 +30,20 @@ struct _GdkXToolsSMSFilterData {
 	gboolean frozen;
 	GdkWindow * window;
 };
+struct _GdkXToolsKeyFilterData {
+	GdkXToolsFilterType type;
+	GdkXToolsKeyFilterFunc func;
+	gpointer data;
+	gboolean frozen;
+};
 typedef struct _GdkXToolsSMSFilterData GdkXToolsSMSFilterData;
+typedef struct _GdkXToolsKeyFilterData GdkXToolsKeyFilterData;
 
 typedef union _GdkXToolsFilterData {
 	GdkXToolsFilterType type;
 	GdkXToolsPropFilterData prop;
 	GdkXToolsSMSFilterData sms;
+	GdkXToolsKeyFilterData key;
 } GdkXToolsFilterData;
 
 static GdkFilterReturn _gdkx_tools_client_message_filter(GdkXEvent * xevent, GdkEvent * event, GdkXToolsSMSFilterData * filter_data){
@@ -43,6 +51,13 @@ static GdkFilterReturn _gdkx_tools_client_message_filter(GdkXEvent * xevent, Gdk
 	if(!filter_data->frozen && event->any.window == filter_data->window)
 		filter_data->func(filter_data->data, x_client_message->data.b, 20);
 	return GDK_FILTER_REMOVE;
+}
+
+static GdkFilterReturn _gdkx_tools_key_filter(GdkXEvent * xevent, GdkEvent * event, GdkXToolsKeyFilterData * filter_data){
+	g_assert_not_reached();
+	if(!filter_data->frozen) {
+		return filter_data->func(filter_data->data, event);
+	}
 }
 
 static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * event, GdkXToolsFilterData * data){
@@ -60,6 +75,8 @@ static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * even
 		&& xevent->xclient.message_type 
 		== gdk_x11_atom_to_xatom(gdk_atom_intern("GNOMENU_SMS", FALSE)))
 		return _gdkx_tools_client_message_filter(gdkxevent, event, data);
+		case KeyPress:
+		return _gdkx_tools_key_filter(gdkxevent, event, data);
 	}
 	return GDK_FILTER_CONTINUE;
 }
@@ -224,3 +241,37 @@ void gdkx_tools_remove_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	}
 	GDK_THREADS_LEAVE();
 }
+void gdkx_tools_add_key_filter(GdkXToolsKeyFilterFunc func, gpointer data) {
+
+}
+
+void gdkx_tools_remove_key_filter(GdkXToolsKeyFilterFunc func, gpointer data) {
+
+
+}
+void
+gdkx_tools_grab_key (int      keycode,
+                guint    modifiers)
+{
+	GdkWindow *root;
+
+	root = gdk_get_default_root_window ();
+
+	XGrabKey (GDK_DISPLAY_XDISPLAY (gdk_display_get_default()),
+		  keycode, modifiers,
+		  GDK_WINDOW_XWINDOW (root),
+		  True, GrabModeAsync, GrabModeAsync);
+}
+void
+gdkx_tools_ungrab_key (int      keycode,
+                guint    modifiers) {
+	GdkWindow *root;
+
+	root = gdk_get_default_root_window ();
+
+	XUngrabKey (GDK_DISPLAY_XDISPLAY (gdk_display_get_default()),
+			keycode, modifiers,
+		  GDK_WINDOW_XWINDOW (root));
+
+}
+

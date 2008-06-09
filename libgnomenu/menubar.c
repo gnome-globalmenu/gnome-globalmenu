@@ -46,6 +46,8 @@
 #include "widget.h"
 #include "introspector.h"
 #include "builder.h"
+#include "tools.h"
+#include "sms.h"
 
 #define BORDER_SPACING  0
 #define DEFAULT_IPADDING 1
@@ -80,6 +82,7 @@ struct _GnomenuMenuBarPrivate
 	GtkMenu	* popup_menu;
 	GtkRequisition true_requisition;
 	Builder * builder;
+  GArray * mnemonic_keyvals;
 };
 
 
@@ -107,7 +110,7 @@ static void _s_toplevel_realize ( GtkMenuBar       *menubar,
 static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
 static void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
-static void _sms_filter ( GtkMenuBar * menubar, gchar * sms, gint sizs);
+static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint sizs);
 static void _send_refresh_global_menu_sms (GtkMenuBar * menubar);
 
 static gchar * _update_introspection ( GtkMenuBar * menubar);
@@ -219,7 +222,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 			  "whether the menu bar is a global menu",
 			  "whether the menu bar is a global menu",
 			  TRUE, 
-			  G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+			  G_PARAM_READABLE | G_PARAM_WRITABLE ));
   g_object_class_install_property(gobject_class, PROP_SHOW_ARROW,
 		  g_param_spec_boolean("show-arrow",
 			  "show the overflown items in a menu",
@@ -248,6 +251,9 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->introspection = NULL;
 	priv->introspection_is_dirty = TRUE;
 	priv->builder = NULL;
+	/*keyvals + modifier = 2 * guint*/
+	priv->mnemonic_keyvals = g_array_new(FALSE, FALSE, sizeof(guint) * 2);
+
 }
 
 GtkWidget*
@@ -729,12 +735,12 @@ static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar){
 	return window;
 }
 static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
-	gchar * sms;
+	GnomenuSMS sms;
 	GdkWindow * window = _get_toplevel_gdk_window(menubar);
 
-	sms = g_strdup_printf("menu %p", GDK_WINDOW_XWINDOW(window));
-	gdkx_tools_send_sms(sms, strlen(sms)+1);
-	g_free(sms);
+	sms.action = INVALIDATE_MENUBAR;
+	sms.w[0] = GDK_WINDOW_XWINDOW(window);
+	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
 static void _invalidate_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
@@ -782,15 +788,38 @@ static gchar * _update_introspection ( GtkMenuBar * menubar){
 	return priv->introspection;
 }
 static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
+	int i;
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	if(gnomenu_menu_bar_get_is_global_menu(menubar)){
 		if(gtk_window_has_toplevel_focus(window)){
 			LOG("received top level focus %p", menubar);
-
+			GList * node;
 			_update_introspection(menubar);
 			_send_refresh_global_menu_sms(menubar);
 			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
+			g_assert(priv->mnemonic_keyvals->len == 0);
+			for(node = GTK_MENU_SHELL(menubar)->children; node; node = node->next){
+				GtkLabel * label = gtk_bin_get_child(node->data);
+				if(GTK_IS_LABEL(label)){
+					GdkModifierType modifier;
+					guint keyval;
+					modifier = gtk_window_get_mnemonic_modifier(window);
+					keyval = gtk_label_get_mnemonic_keyval(label);
+					g_array_append_val(priv->mnemonic_keyvals, keyval);
+					g_array_append_val(priv->mnemonic_keyvals, modifier);
+				}
+			}
+			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
+				gdkx_tools_grab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
+						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));
+			}
 		}  else {
 			gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
+			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
+				gdkx_tools_ungrab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
+						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));
+			}
+			g_array_set_size(priv->mnemonic_keyvals, 0);
 		
 		}
 	}
@@ -836,8 +865,16 @@ static void
 _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	_update_widget_id(menubar);
 }
-static void _sms_filter ( GtkMenuBar * menubar, gchar * sms, gint size) {
-	LOG("received sms: %s", sms);
+static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
+	int i;
+	GString * string = g_string_new("");
+	g_string_append(string, "received sms:");
+	g_string_append_printf(string, "%d, ", sms->action);
+	for(i = 0; i< 18; i++){
+		g_string_append_printf(string, "%0.2X ", sms->b[i]);
+	}
+	LOG("%s", string->str);
+	g_string_free(string, TRUE);
 }
 
 static GtkShadowType
@@ -989,6 +1026,13 @@ static void
 gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	priv->is_global_menu = is_global_menu;
+	if(priv->is_global_menu) {
+		if(GTK_WIDGET_REALIZED(menubar))
+		gdk_window_hide(GTK_WIDGET(menubar)->window);
+	} else {
+		if(GTK_WIDGET_VISIBLE(menubar))
+		gdk_window_show(GTK_WIDGET(menubar)->window);
+	}
 }
 void 
 gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow) {
@@ -1021,6 +1065,7 @@ _finalize(GObject * _object){
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
 	if(priv->introspection) g_free(priv->introspection);
 	if(priv->builder) builder_destroy(priv->builder);
+	g_array_free(priv->mnemonic_keyvals, TRUE);
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
 }
 static void
