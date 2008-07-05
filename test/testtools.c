@@ -34,7 +34,7 @@ static void button_clicked(GtkWidget * button, GtkWidget * window){
 		{
 			char sms_data[] = "this is a sms";
 			int i;
-			for(i=0; i<100; i++){
+			for(i=0; i<10; i++){
 			gdkx_tools_add_sms_filter(filter, NULL);
 			if(!gdkx_tools_send_sms(sms_data, sizeof(sms_data))){
 				g_message("failure sending sms");

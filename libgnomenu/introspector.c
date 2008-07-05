@@ -100,7 +100,7 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		"visible",
 		"use-markup",
 		"use-underline",
-		"submenu",
+/*		"submenu",*/
 		"image",
 		"label",
 		"stock",

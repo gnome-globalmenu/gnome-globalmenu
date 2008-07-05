@@ -13,6 +13,7 @@
 typedef enum {
 		GDKX_TOOLS_FILTER_TYPE_PROP,
 		GDKX_TOOLS_FILTER_TYPE_SMS,
+		GDKX_TOOLS_FILTER_TYPE_KEY,
 
 } GdkXToolsFilterType;
 typedef struct _GdkXToolsPropFilterData{
@@ -76,6 +77,7 @@ static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * even
 		== gdk_x11_atom_to_xatom(gdk_atom_intern("GNOMENU_SMS", FALSE)))
 		return _gdkx_tools_client_message_filter(gdkxevent, event, data);
 		case KeyPress:
+		if(data->type == GDKX_TOOLS_FILTER_TYPE_KEY)
 		return _gdkx_tools_key_filter(gdkxevent, event, data);
 	}
 	return GDK_FILTER_CONTINUE;
