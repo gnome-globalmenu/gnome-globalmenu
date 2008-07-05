@@ -810,14 +810,16 @@ static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * ps
 				}
 			}
 			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
-				gdkx_tools_grab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
-						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));
+		/*		gdkx_tools_grab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
+						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));*/
 			}
 		}  else {
 			gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
 			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
+				/*
 				gdkx_tools_ungrab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
 						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));
+						*/
 			}
 			g_array_set_size(priv->mnemonic_keyvals, 0);
 		
@@ -875,6 +877,17 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
+
+	switch(sms->action){
+		case MENUITEM_CLICKED:{
+			GtkMenuItem * item = sms->p[0];
+			if(GTK_IS_MENU_ITEM(item)){
+				GtkMenu * menu = gtk_menu_item_get_submenu(item);
+				gtk_menu_popup(menu, menubar, item, NULL, NULL, 0, gtk_get_current_event_time());
+			}
+			break;
+		  }
+	}
 }
 
 static GtkShadowType
@@ -1029,6 +1042,7 @@ gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_men
 	if(priv->is_global_menu) {
 		if(GTK_WIDGET_REALIZED(menubar))
 		gdk_window_hide(GTK_WIDGET(menubar)->window);
+
 	} else {
 		if(GTK_WIDGET_VISIBLE(menubar))
 		gdk_window_show(GTK_WIDGET(menubar)->window);
