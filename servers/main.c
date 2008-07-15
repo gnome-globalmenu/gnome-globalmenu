@@ -1,7 +1,6 @@
 #include <config.h>
 #include <gtk/gtk.h>
 
-#include "libgnomenu/serverhelper.h"
 #include "application.h"
 #include "log.h"
 #include "intl.h"

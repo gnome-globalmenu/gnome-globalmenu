@@ -343,14 +343,17 @@ gnomenu_menu_bar_size_request (GtkWidget      *widget,
 
   requisition->width = 0;
   requisition->height = 0;
+  priv = GNOMENU_MENU_BAR_GET_PRIVATE (widget);
 
+  if(priv->is_global_menu){
+  	return;
+  }
   if (GTK_WIDGET_VISIBLE (widget))
     {
       menu_bar = GTK_MENU_BAR (widget);
       menu_shell = GTK_MENU_SHELL (widget);
 	  child_pack_direction = gnomenu_menu_bar_get_child_pack_direction(menu_bar); 
 	  pack_direction = gnomenu_menu_bar_get_pack_direction(menu_bar); 
-      priv = GNOMENU_MENU_BAR_GET_PRIVATE (menu_bar);
       nchildren = 0;
       children = menu_shell->children;
 
@@ -1035,11 +1038,11 @@ gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_men
 	if(priv->is_global_menu) {
 		if(GTK_WIDGET_REALIZED(menubar))
 		gdk_window_hide(GTK_WIDGET(menubar)->window);
-
 	} else {
 		if(GTK_WIDGET_VISIBLE(menubar))
 		gdk_window_show(GTK_WIDGET(menubar)->window);
 	}
+	gtk_widget_queue_resize(menubar);
 }
 void 
 gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow) {
@@ -1144,7 +1147,6 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 		GtkWidget * child = node->data;
 		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, child);
 		if(info->overflowed) {
-			LOG("item overflowed");
 			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
 			if(proxy) {
 				gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));

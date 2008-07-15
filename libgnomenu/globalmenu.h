@@ -31,6 +31,7 @@ struct _GnomenuGlobalMenu
 	GHashTable * cache;
 	gpointer active_key;
 	GnomenuMenuBar * active_menu_bar;
+	gboolean auto_switch;
 };
 
 /**
@@ -44,7 +45,7 @@ struct _GnomenuGlobalMenuClass
 
 
 GtkWidget * gnomenu_global_menu_new             (void);
-
+void gnomenu_global_menu_switch (GnomenuGlobalMenu * self, gpointer key);
 GType gnomenu_global_menu_get_type (void);
 
 G_END_DECLS
