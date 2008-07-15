@@ -14,7 +14,7 @@ static void button_clicked(GtkWidget * button, GtkWidget * window){
 		_gdkx_tools_set_window_prop_blocked(window->window, gdk_atom_intern("TEST_PROP", FALSE), prop_value, sizeof(prop_value));
 		prop_value_got = _gdkx_tools_get_window_prop(window->window, gdk_atom_intern("TEST_PROP", FALSE), NULL);
 		g_message("value got: %s", prop_value_got);
-		g_assert_cmpstr(prop_value_got, ==, prop_value);
+		g_assert(g_str_equal(prop_value_got,prop_value));
 		g_free(prop_value_got);
 	}
 }
