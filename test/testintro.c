@@ -22,6 +22,7 @@ int main (int argc, char **argv){
 	menubar = glade_xml_get_widget(xml, "menubar1");
 	/* connect signal handlers */
 //	glade_xml_signal_autoconnect(xml);
+	GNOMENU_INTROSPECT_FLAGS = 0;
 	intro = gtk_widget_introspect(menubar);
 	g_print("%s", intro);
 

@@ -108,6 +108,7 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		"pixel-size",
 		"icon-name",
 		"no-show-all",
+		"show-arrow",
 		"file",
 		NULL
 	};
@@ -150,8 +151,9 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 				introspector_queue_widget(spector, widget);
 				prop_value_content = g_strdup(_ensure_widget_id(spector, widget));
 				}
-			} else
-			LOG("skipped property: %s", prop_name);
+			} else {
+			//LOG("skipped property: %s", prop_name);
+			}
 		}
 
 		g_value_unset(&prop_value);

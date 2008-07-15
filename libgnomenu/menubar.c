@@ -676,7 +676,7 @@ gnomenu_menu_bar_size_allocate (GtkWidget     *widget,
 	}
     }
 	if(priv->show_arrow && priv->need_arrow) {
-		LOG("arrow_allocation: %d %d %d %d", arrow_allocation);
+		//LOG("arrow_allocation: %d %d %d %d", arrow_allocation);
 		gtk_widget_size_allocate(priv->arrow_button, &arrow_allocation);
 		gtk_widget_show_all(priv->arrow_button);
 	} else {
@@ -765,25 +765,11 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 static void _s_proxy_activate(GtkWidget * proxy, GtkWidget * item){
 	g_signal_emit_by_name(item, "activate");
 }
-static void _setup_proxy(GtkWidget * item, GtkMenuBar * menubar){
-	GtkMenuItem * proxy;
-	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
-	gchar * intro = gtk_widget_introspect(item);
-	Builder * builder = builder_new();
-	builder_parse(builder, intro);
-	proxy = builder_get_object(builder, gtk_widget_get_id(item));
-	g_free(intro);
-	g_object_set_data_full(item, "menu-item-proxy", g_object_ref(proxy), g_object_unref);
-	g_object_set_data(proxy, "menu-item", item);
-	g_signal_connect(proxy, "activate", _s_proxy_activate, _get_item_for_proxy(menubar, proxy));
-	builder_destroy(builder);
-}
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
 	if(priv->introspection_is_dirty){
-		if(priv->introspection) g_free(priv->introspection);
-		priv->introspection = gtk_widget_introspect_with_handle(GTK_WIDGET(menubar));
+		priv->introspection = gtk_widget_introspect(GTK_WIDGET(menubar));
 		window = _get_toplevel_gdk_window(menubar);
 		if(window)
 			gdkx_tools_set_window_prop_blocked(window , 
@@ -793,7 +779,6 @@ static gchar * _update_introspection ( GtkMenuBar * menubar){
 		if(priv->builder) builder_destroy(priv->builder);
 		priv->builder = builder_new();
 		builder_parse(priv->builder, priv->introspection);
-		gtk_container_foreach(menubar, _setup_proxy, menubar);
 		priv->introspection_is_dirty = FALSE;
 	}
 	return priv->introspection;
@@ -1090,7 +1075,6 @@ _finalize(GObject * _object){
 	gtk_widget_unparent(priv->arrow_button);
 	g_hash_table_destroy(priv->menu_items);
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
-	if(priv->introspection) g_free(priv->introspection);
 	if(priv->builder) builder_destroy(priv->builder);
 	g_array_free(priv->mnemonic_keyvals, TRUE);
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
@@ -1135,7 +1119,16 @@ static GtkMenuItem * _get_item_for_proxy(GtkMenuBar * menubar, GtkMenuItem * pro
 }
 GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
-	GtkMenuItem * proxy = g_object_get_data(item, "menu-item-proxy");
+	GtkMenuItem * proxy;
+	gchar * intro = gtk_widget_introspect(item);
+	LOG("%s", intro);
+	Builder * builder = builder_new();
+	builder_parse(builder, intro);
+	proxy = builder_get_object(builder, gtk_widget_get_id(item));
+	g_object_set_data_full(item, "menu-item-proxy", g_object_ref(proxy), g_object_unref);
+	g_object_set_data(proxy, "menu-item", item);
+	g_signal_connect(proxy, "activate", _s_proxy_activate, _get_item_for_proxy(menubar, proxy));
+	builder_destroy(builder);
 	return proxy;
 }
 static void _remove_child ( GtkWidget * widget, GtkContainer * container){ 
@@ -1153,6 +1146,7 @@ static void _build_popup_menu 	(GnomenuMenuBar * self){
 		GtkWidget * child = node->data;
 		MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, child);
 		if(info->overflowed) {
+			LOG("item overflowed");
 			GtkMenuItem * proxy = _get_proxy_for_item(self, info->menu_item);
 			if(proxy) {
 				gtk_menu_shell_append(GTK_MENU_SHELL(priv->popup_menu), GTK_WIDGET(proxy));

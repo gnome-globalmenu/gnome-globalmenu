@@ -9,3 +9,4 @@ Introspector * introspector_new();
 void introspector_set_flags(Introspector * spector, IntrospectFlags flags);
 gchar * introspector_destroy(Introspector * spector, gboolean free_blob_string);
 void introspector_visit_all(Introspector * spector);
+extern int GNOMENU_INTROSPECT_FLAGS;
