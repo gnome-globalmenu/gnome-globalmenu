@@ -80,7 +80,7 @@ AC_ARG_ENABLE(gnome-applet,
 AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
 AM_CONDITIONAL([ENABLE_GNOME_APPLET], [test "$enable_gnome_applet" = "yes" ])
 AC_MSG_RESULT($enable_gnome_applet)
-if test "$enable_gnome_applet" = "yes"; then
+if test "$enable_gnome_applet" = "no"; then
 	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0, libglade-2.0, libgnome-menu, libgnomeui-2.0, gnome-desktop-2.0])
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
@@ -95,7 +95,7 @@ AC_MSG_CHECKING(--enable-xfce-plugin argument)
 AC_ARG_ENABLE(xfce-plugin,
 	[	--enable-xfce-plugin	Include xfce-plugin interface ],
 	[	enable_xfce_plugin=$enableval ],
-	[	enable_xfce_plugin="yes" ])
+	[	enable_xfce_plugin="no" ])
 AC_DEFINE([ENABLE_XFCE_PLUGIN], [], [enable xfce plugin])
 AM_CONDITIONAL([ENABLE_XFCE_PLUGIN], [test "$enable_xfce_plugin" = "yes" ])
 AC_MSG_RESULT($enable_xfce_plugin)

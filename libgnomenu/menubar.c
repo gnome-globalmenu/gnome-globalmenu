@@ -742,6 +742,14 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
 	sms.w[0] = GDK_WINDOW_XWINDOW(window);
 	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
+static void _send_activate_global_menu_sms (GtkMenuBar * menubar){
+	GnomenuSMS sms;
+	GdkWindow * window = _get_toplevel_gdk_window(menubar);
+
+	sms.action = MENUBAR_ACTIVATED;
+	sms.w[0] = GDK_WINDOW_XWINDOW(window);
+	gdkx_tools_send_sms(&sms, sizeof(sms));
+}
 static void _invalidate_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GtkWidget * toplevel;
@@ -760,12 +768,15 @@ static void _s_proxy_activate(GtkWidget * proxy, GtkWidget * item){
 static void _setup_proxy(GtkWidget * item, GtkMenuBar * menubar){
 	GtkMenuItem * proxy;
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
-
-	proxy = builder_get_object(priv->builder, gtk_widget_get_id(item));
-	gtk_container_remove(gtk_widget_get_parent(proxy), proxy);
-	g_object_set_data(item, "menu-item-proxy", proxy);
+	gchar * intro = gtk_widget_introspect(item);
+	Builder * builder = builder_new();
+	builder_parse(builder, intro);
+	proxy = builder_get_object(builder, gtk_widget_get_id(item));
+	g_free(intro);
+	g_object_set_data_full(item, "menu-item-proxy", g_object_ref(proxy), g_object_unref);
 	g_object_set_data(proxy, "menu-item", item);
 	g_signal_connect(proxy, "activate", _s_proxy_activate, _get_item_for_proxy(menubar, proxy));
+	builder_destroy(builder);
 }
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
@@ -796,6 +807,7 @@ static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * ps
 			GList * node;
 			_update_introspection(menubar);
 			_send_refresh_global_menu_sms(menubar);
+			_send_activate_global_menu_sms(menubar);
 			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
 			g_assert(priv->mnemonic_keyvals->len == 0);
 			for(node = GTK_MENU_SHELL(menubar)->children; node; node = node->next){
@@ -877,17 +889,18 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
-
+/*
 	switch(sms->action){
 		case MENUITEM_CLICKED:{
 			GtkMenuItem * item = sms->p[0];
 			if(GTK_IS_MENU_ITEM(item)){
 				GtkMenu * menu = gtk_menu_item_get_submenu(item);
-				gtk_menu_popup(menu, menubar, item, NULL, NULL, 0, gtk_get_current_event_time());
+				gtk_menu_popup(menu, NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
 			}
 			break;
 		  }
 	}
+	*/
 }
 
 static GtkShadowType

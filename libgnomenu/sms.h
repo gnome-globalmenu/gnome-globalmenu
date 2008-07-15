@@ -2,15 +2,18 @@
 #define _GNOMENU_SMS_H_
 
 
+#pragma pack(push, 1)
 typedef struct _GnomenuSMS {
 	guchar action;
 	union {
-		guchar b[18];
-		Window w[1];
+		guchar b[16];
+		GdkNativeWindow w[1];
 		gpointer p[1];
 	};
 } GnomenuSMS;
+#pragma pack(pop)
 typedef enum {
+	MENUBAR_ACTIVATED,
 	INVALIDATE_MENUBAR,
 	MENUITEM_CLICKED,
 } GnomenuSMSAction;

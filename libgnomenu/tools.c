@@ -5,6 +5,12 @@
 
 #include "tools.h"
 
+#if ENABLE_TRACING >= 1 || 1
+#define LOG(fmt, args...) g_message("<GnomenuTools>::" fmt,  ## args)
+#else
+#define LOG(fmt, args...)
+#endif
+#define LOG_FUNC_NAME LOG("%s", __func__)
 /**
  * _gdkx_tools_set_window_prop_blocked:
  * 
@@ -153,9 +159,18 @@ gboolean gdkx_tools_send_sms(gchar * sms, int size){
 	event.message_type = gdk_atom_intern("GNOMENU_SMS", FALSE);
 	event.data_format = 8;
 
+	g_message("%d", size);
 	for(i=0; i< size && i<20; i++){
 		event.data.b[i] = sms[i];
 	}
+	GString * string = g_string_new("");
+	g_string_append(string, "sending sms:");
+	g_string_append_printf(string, "%d, ", event.data.b[0]);
+	for(i = 1; i< 18; i++){
+		g_string_append_printf(string, "%0.2X ", (unsigned)event.data.b[i]);
+	}
+	LOG("%s", string->str);
+	g_string_free(string, TRUE);
 	gdk_event_send_clientmessage_toall(&event);
 	return TRUE;
 }

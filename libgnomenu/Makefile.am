@@ -24,6 +24,8 @@ libgnomenu_la_SOURCES = \
 	widget.c \
 	tools.h \
 	tools.c \
+	globalmenu.h \
+	globalmenu.c \
 	sms.h
 
 libgnomenu_la_LDFLAGS = \

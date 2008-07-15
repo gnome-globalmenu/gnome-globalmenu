@@ -18,6 +18,11 @@ struct _Builder {
 #define CASE_STR(value)  } else if(g_str_equal(_str_, value)) {
 #define DEFAULT_STR  } else {
 #define END_SWITCH_STR }}
+gpointer parse_handle(gchar * handle){
+	gpointer rt;
+	rt = g_ascii_strtoll(handle+2/*ignore 0x*/, NULL, 16);
+	return rt;
+}
 static GType
 _gtk_builder_resolve_type_lazily (const gchar *name)
 {
@@ -84,7 +89,10 @@ static void _start_element1  (GMarkupParseContext *context,
 				new_widget = g_object_new(gtype, NULL);
 
 			gtk_widget_set_id(new_widget, id);
-			g_object_set_data_full(new_widget, "introspect-handle", g_strdup(handle), g_free);
+			if(handle){
+				gpointer parsed_handle = parse_handle(handle);
+				g_object_set_data_full(new_widget, "introspect-handle", parsed_handle, NULL);
+			}
 			g_object_ref_sink(new_widget); /*builder always hold the ref*/
 			current_widget = builder->current_node->data;
 			if(current_widget) {
