@@ -115,7 +115,6 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar);
 
 static gchar * _update_introspection ( GtkMenuBar * menubar);
 static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar);
-static GtkMenuItem * _get_item_for_proxy(GtkMenuBar * menubar, GtkMenuItem * proxy);
 GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item);
 static void _invalidate_introspection ( GtkMenuBar * menubar);
 /* GObject interface */
@@ -762,9 +761,6 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 		_send_refresh_global_menu_sms(menubar);
 	}
 }
-static void _s_proxy_activate(GtkWidget * proxy, GtkWidget * item){
-	g_signal_emit_by_name(item, "activate");
-}
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
@@ -1112,22 +1108,25 @@ static void _forall					( GtkContainer    *container,
 		callback(priv->arrow_button, callback_data);
 	}
 }
-static GtkMenuItem * _get_item_for_proxy(GtkMenuBar * menubar, GtkMenuItem * proxy){
-	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
-	GtkMenuItem * item = g_object_get_data(proxy, "menu-item");
-	return item;
+static void _s_proxy_activate(GtkWidget * proxy, gpointer data){
+	gtk_menu_item_activate(g_object_get_data(proxy, "introspect-handle"));
+}
+static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
+	if(GTK_IS_MENU_ITEM(widget)){
+		g_signal_connect(widget,
+				"activate",
+				_s_proxy_activate, data);
+	}
 }
 GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GtkMenuItem * proxy;
 	gchar * intro = gtk_widget_introspect(item);
-	LOG("%s", intro);
 	Builder * builder = builder_new();
 	builder_parse(builder, intro);
 	proxy = builder_get_object(builder, gtk_widget_get_id(item));
 	g_object_set_data_full(item, "menu-item-proxy", g_object_ref(proxy), g_object_unref);
-	g_object_set_data(proxy, "menu-item", item);
-	g_signal_connect(proxy, "activate", _s_proxy_activate, _get_item_for_proxy(menubar, proxy));
+	builder_foreach(builder, setup_handler, NULL); 
 	builder_destroy(builder);
 	return proxy;
 }

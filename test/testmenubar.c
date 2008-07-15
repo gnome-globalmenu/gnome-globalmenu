@@ -8,6 +8,9 @@ void is_global_toggled(GtkWidget * toggle, GtkMenuBar * menubar){
 	g_object_set(menubar, "is-global-menu", 
 			gtk_toggle_button_get_active(toggle), NULL);
 }
+static void activated(GtkWidget * item, gpointer data){
+	g_message("MenuItem %p is activated", item);
+}
 int main (int argc, char **argv){ 
 	    GladeXML *xml;
 	GtkWidget * window;
@@ -24,6 +27,10 @@ int main (int argc, char **argv){
 	menubar = glade_xml_get_widget(xml, "menubar1");
 	/* connect signal handlers */
 //	glade_xml_signal_autoconnect(xml);
+	g_signal_connect(glade_xml_get_widget(xml, "imagemenuitem1"),
+			"activate", activated, NULL);
+	g_signal_connect(glade_xml_get_widget(xml, "imagemenuitem10"),
+			"activate", activated, NULL);
 
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
