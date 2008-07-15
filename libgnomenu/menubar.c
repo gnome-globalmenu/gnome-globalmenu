@@ -870,18 +870,17 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
-/*
 	switch(sms->action){
 		case MENUITEM_CLICKED:{
 			GtkMenuItem * item = sms->p[0];
 			if(GTK_IS_MENU_ITEM(item)){
-				GtkMenu * menu = gtk_menu_item_get_submenu(item);
-				gtk_menu_popup(menu, NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
+				gtk_menu_item_activate(item);
+			} else {
+				LOG("unknown menu item %p", item);
 			}
 			break;
 		  }
 	}
-	*/
 }
 
 static GtkShadowType

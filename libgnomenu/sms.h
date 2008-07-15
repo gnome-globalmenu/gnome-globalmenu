@@ -14,7 +14,7 @@ typedef struct _GnomenuSMS {
 #pragma pack(pop)
 typedef enum {
 	MENUBAR_ACTIVATED,
-	INVALIDATE_MENUBAR,
+	INVALIDATE_MENUBAR, /*has to reload the introspection data*/
 	MENUITEM_CLICKED,
 } GnomenuSMSAction;
 

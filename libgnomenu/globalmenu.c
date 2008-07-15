@@ -22,7 +22,6 @@
 
 G_DEFINE_TYPE(GnomenuGlobalMenu, gnomenu_global_menu, GTK_TYPE_CONTAINER);
 typedef struct {
-	GCache * cache;
 } GnomenuGlobalMenuPrivate;
 static gpointer g_direct_dup(gpointer p){
 	return p;
@@ -45,7 +44,7 @@ static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 				_s_activate, data);
 	}
 }
-static gpointer _new_menu_bar(GdkNativeWindow xwindow){
+static gpointer build_menu_bar(GdkNativeWindow xwindow){
 	GdkWindow * window = gdk_window_lookup(xwindow);
 	if(!window) window = gdk_window_foreign_new(xwindow);
 	if(window){
@@ -68,36 +67,49 @@ static gpointer _new_menu_bar(GdkNativeWindow xwindow){
 	}
 	return NULL;
 }
-static void sms_filter(GtkWidget * self, GnomenuSMS * sms, gint size){
+static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 	GET_OBJECT(self, global_menu, priv);
 	gpointer key;
-	if(sms->action != MENUBAR_ACTIVATED) return;
-	key = sms->w[0];
-	GnomenuMenuBar * active_menu_bar = g_cache_insert(
-				priv->cache, key);
-	if(global_menu->active_menu_bar){
-		gtk_widget_unparent(global_menu->active_menu_bar);
+	switch(sms->action) {
+	case MENUBAR_ACTIVATED:
+		key = sms->w[0];
+		GnomenuMenuBar * menu_bar = g_hash_table_lookup(self->cache, key);
+		if(!menu_bar){
+			menu_bar = build_menu_bar(key);
+			g_hash_table_insert(self->cache, key, menu_bar);
+		}
+		if(global_menu->active_menu_bar){
+			gtk_widget_unparent(global_menu->active_menu_bar);
+		}
+		global_menu->active_key = key;
+		global_menu->active_menu_bar = menu_bar;
+		gtk_widget_set_parent(menu_bar, self);
+		break;
+	case INVALIDATE_MENUBAR:
+		key = sms->w[0];
+		menu_bar = build_menu_bar(key);
+		g_hash_table_replace(self->cache, key, menu_bar);
+		if(key == self->active_key){
+			gtk_widget_unparent(global_menu->active_menu_bar);
+			global_menu->active_menu_bar = menu_bar;
+			gtk_widget_set_parent(menu_bar, self);
+		}
+		break;
 	}
-	global_menu->active_menu_bar = active_menu_bar;
-	gtk_widget_set_parent(global_menu->active_menu_bar, self);
 }
 
 static void gnomenu_global_menu_init (GnomenuGlobalMenu * self) {
-	GnomenuGlobalMenuPrivate * priv = GNOMENU_GLOBAL_MENU_GET_PRIVATE(self);
-	priv->cache = g_cache_new(
-			_new_menu_bar,
-			g_object_unref,
-			g_direct_dup,
-			g_direct_destroy,
+	self->cache = g_hash_table_new_full(
 			g_direct_hash,
-			g_direct_hash,
-			g_direct_equal);
+			g_direct_equal,
+			NULL,
+			g_object_unref);
+
 	gdkx_tools_add_sms_filter(sms_filter, self);
 	GTK_WIDGET_SET_FLAGS(self, GTK_NO_WINDOW);
 }
 static void _finalize(GnomenuGlobalMenu * global_menu) {
-	GnomenuGlobalMenuPrivate * priv = GNOMENU_GLOBAL_MENU_GET_PRIVATE(global_menu);
-	g_cache_destroy(priv->cache);
+	g_hash_table_destroy(global_menu->cache);
 	if(G_OBJECT_CLASS(gnomenu_global_menu_parent_class)->finalize)
 		G_OBJECT_CLASS(gnomenu_global_menu_parent_class)->finalize (global_menu);
 }

@@ -28,7 +28,9 @@ typedef struct _GnomenuGlobalMenuClass  GnomenuGlobalMenuClass;
 struct _GnomenuGlobalMenu
 {
 	GtkContainer parent;
-	GtkWidget * active_menu_bar;
+	GHashTable * cache;
+	gpointer active_key;
+	GnomenuMenuBar * active_menu_bar;
 };
 
 /**
