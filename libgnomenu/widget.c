@@ -29,6 +29,7 @@ static gboolean _expose_event(GtkWidget * widget, GdkEvent * event, gpointer p){
 
 gchar * gtk_widget_introspect(GtkWidget * widget){
 	if(G_UNLIKELY(!IS_INVALIDATED)){
+		/*this signal is not working*/
 		IS_INVALIDATED = g_signal_new(
 				"introspection-invalidated",
 				GTK_TYPE_WIDGET,
