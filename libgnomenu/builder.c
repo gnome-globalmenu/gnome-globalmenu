@@ -196,8 +196,12 @@ static void _start_element2  (GMarkupParseContext *context,
 					g_message("property types mismatch");
 				
 				}
-			}
-			else 
+			} else 
+			if (g_str_equal(name, "accel-string") &&
+					GTK_IS_ACCEL_LABEL(builder->current_widget)) {
+				GTK_ACCEL_LABEL(builder->current_widget)->accel_string
+					=g_strdup(value);
+			} else
 				g_message("no such property %s", name);
 
 		}
@@ -278,6 +282,7 @@ Builder * builder_new (){
 void builder_parse(Builder * builder, const gchar * string){
 	GError * error = NULL;
 	GMarkupParseContext * context;
+	if(!string) return;
 	context = g_markup_parse_context_new(&builder->parser1, G_MARKUP_TREAT_CDATA_AS_TEXT, builder, NULL);
 	g_assert(context);
 	g_markup_parse_context_parse(context, string, strlen(string), &error);

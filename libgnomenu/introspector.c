@@ -104,12 +104,18 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		"image",
 		"label",
 		"stock",
+		"justify",
+		"ellipsize",
 		"icon-size",
 		"pixel-size",
 		"icon-name",
 		"no-show-all",
 		"show-arrow",
 		"file",
+		"xalign",
+		"yalign",
+		"xpad",
+		"ypad",
 		NULL
 	};
 	gint n_props;
@@ -166,6 +172,14 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		}
 	}
 	g_free(prop_params);
+
+	if(GTK_IS_ACCEL_LABEL(widget)){
+		"accel-string",
+		g_string_append_printf(spector->blob, "%s <property name=\"%s\" type=\"%s\" value=\"%s\"/>\n", 
+					spector->prefix->str,
+					"accel-string", "gchararray",
+				   	GTK_ACCEL_LABEL(widget)->accel_string);
+	}
 }
 
 static void _introspector_gtk_container_visit_child(GtkWidget * child, Introspector * spector){
