@@ -103,6 +103,7 @@ static void gnomenu_menu_bar_paint             (GtkWidget       *widget,
 					    GdkRectangle    *area);
 static gint gnomenu_menu_bar_expose            (GtkWidget       *widget,
 					    GdkEventExpose  *event);
+static void _map (GtkWidget * widget);
 static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
 static void _s_toplevel_realize ( GtkMenuBar       *menubar,
@@ -141,6 +142,7 @@ static void _build_popup_menu 		( GnomenuMenuBar * self);
 typedef struct {
 	gboolean overflowed;
 	GtkMenuItem * menu_item;
+	GtkMenuShell * saved_submenu;
 } MenuItemInfo;
 
 static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
@@ -205,7 +207,7 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
   widget_class->size_request = gnomenu_menu_bar_size_request;
   widget_class->size_allocate = gnomenu_menu_bar_size_allocate;
   widget_class->expose_event = gnomenu_menu_bar_expose;
-  
+  widget_class->map = _map; 
   menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
   menu_shell_class->get_popup_delay = gnomenu_menu_bar_get_popup_delay;
 
@@ -1037,10 +1039,19 @@ gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_men
 	priv->is_global_menu = is_global_menu;
 	if(priv->is_global_menu) {
 		if(GTK_WIDGET_REALIZED(menubar))
-		gdk_window_hide(GTK_WIDGET(menubar)->window);
+			gdk_window_hide(GTK_WIDGET(menubar)->window);
 	} else {
 		if(GTK_WIDGET_VISIBLE(menubar))
 		gdk_window_show(GTK_WIDGET(menubar)->window);
+		GList * node;
+		for(node = GTK_MENU_SHELL(menubar)->children;
+				node; node = node->next){
+			GtkMenuItem * item = node->data;
+			MenuItemInfo * info = g_hash_table_lookup(priv->menu_items,
+					item);
+			g_assert(info);
+			item->submenu = info->saved_submenu;
+		}
 	}
 	gtk_widget_queue_resize(menubar);
 }
@@ -1055,6 +1066,14 @@ gnomenu_menu_bar_get_show_arrow(GtkMenuBar * menubar) {
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	return priv->show_arrow;
 
+}
+static void _map (GtkWidget * widget) {
+	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(widget);
+	GTK_WIDGET_CLASS(_menu_shell_class)->map(widget);
+	if(priv->is_global_menu){
+		if(GTK_WIDGET_REALIZED(widget))
+			gdk_window_hide(widget->window);
+	}
 }
 
 static void
@@ -1077,6 +1096,23 @@ _finalize(GObject * _object){
 	g_array_free(priv->mnemonic_keyvals, TRUE);
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
 }
+static gboolean _s_item_mnemonic_activate(GtkWidget * menu_item, gboolean group_cycling,
+		GtkMenuShell * menu_shell){
+	GET_OBJECT(menu_shell, menu_bar, priv);
+	LOG("mnemonic activated %p", menu_item);
+
+	return FALSE;
+}
+static void _s_item_notify_submenu(GtkMenuItem * item, GParamSpec * arg1,
+		GtkMenuShell * menu_shell){
+	GET_OBJECT(menu_shell, menu_bar, priv);
+
+	MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
+	g_assert(info);
+	LOG("backup the submenu %p", item->submenu);
+	info->saved_submenu = gtk_menu_item_get_submenu(item);
+	if(priv->is_global_menu) item->submenu = NULL;
+}
 static void
 _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GtkRequisition req;
@@ -1086,16 +1122,21 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GTK_MENU_SHELL_CLASS(_menu_shell_class)->insert(menu_shell, widget, pos);
 	if(GTK_IS_MENU_ITEM(widget)){
 		item_info->menu_item = GTK_MENU_ITEM(widget);
+		item_info->saved_submenu = gtk_menu_item_get_submenu(widget);
 	}
+	g_signal_connect(widget, "notify::submenu", _s_item_notify_submenu,
+				menu_shell);
+	g_signal_connect(widget, "mnemonic_activate", _s_item_mnemonic_activate,
+				menu_shell);
 	g_hash_table_insert(priv->menu_items, widget, item_info);
 }
 static void
 _remove (GtkContainer * container, GtkWidget * widget){
-	GtkRequisition req;
-
 	GET_OBJECT(container, menu_bar, priv);
 	GTK_CONTAINER_CLASS(_menu_shell_class)->remove(container, widget);
 
+	g_signal_handlers_disconnect_by_func(widget, _s_item_mnemonic_activate, container);
+	g_signal_handlers_disconnect_by_func(widget, _s_item_notify_submenu, container);
 	g_hash_table_remove(priv->menu_items, widget);
 }
 static void _forall					( GtkContainer    *container,
