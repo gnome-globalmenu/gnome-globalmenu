@@ -81,7 +81,7 @@ static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 			gnomenu_global_menu_switch(self, key);
 		}
 		break;
-	case INVALIDATE_MENUBAR:
+	case INTROSPECTION_UPDATED:
 		key = sms->w[0];
 		if(key == self->active_key){
 			if(global_menu->active_menu_bar)
@@ -141,7 +141,7 @@ GtkWidget * gnomenu_global_menu_new(){
 void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GET_OBJECT(self, global_menu, priv);
 	LOG("switch: key = %p", key);
-/*
+
 	GnomenuMenuBar * menu_bar = g_hash_table_lookup(self->cache, key);
 
 	if(!menu_bar){
@@ -156,7 +156,10 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	global_menu->active_menu_bar = menu_bar;
 	if(menu_bar)
 		gtk_widget_set_parent(menu_bar, self);
-		*/
+	GnomenuSMS sms;
+	sms.action = UPDATE_INTROSPECTION;
+	gdkx_tools_send_sms_to(key, &sms, sizeof(sms));
+	/*
 	GnomenuMenuBar * menu_bar = build_menu_bar(key);
 	global_menu->active_key = key;
 	if(global_menu->active_menu_bar){
@@ -167,4 +170,5 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 		g_object_unref(menu_bar);
 	}
 	global_menu->active_menu_bar = menu_bar;
+	*/
 }

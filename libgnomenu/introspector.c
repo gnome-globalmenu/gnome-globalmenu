@@ -148,7 +148,7 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 			HANDLE_TYPE(FLOAT, "f", float);
 			HANDLE_TYPE(DOUBLE, "lf", double);
 			case G_TYPE_STRING:
-			prop_value_content = g_value_dup_string(&prop_value);
+			prop_value_content = g_markup_escape_text(g_value_get_string(&prop_value), -1);
 			break;
 			default:
 			if(G_VALUE_HOLDS(&prop_value, GTK_TYPE_WIDGET)){
@@ -196,7 +196,8 @@ static void _introspector_visit_widget(Introspector * spector, GtkWidget * widge
 	if(!GTK_IS_MENU_SHELL(widget) && !GTK_IS_MENU_ITEM(widget)
 		&& !GTK_IS_LABEL(widget) && !GTK_IS_IMAGE(widget)
 			){
-		g_warning("can't introspect other than menu shell and menu item");
+		g_warning("can't introspect other than menu shell and menu item, :%s",
+				G_OBJECT_TYPE_NAME(widget));
 		return NULL;
 	}
 	_inc_level(spector);

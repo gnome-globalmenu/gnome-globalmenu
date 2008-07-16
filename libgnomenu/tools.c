@@ -275,7 +275,7 @@ void gdkx_tools_remove_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 
 	if(filter_data){
 		gdk_window_remove_filter(filter_data->window, _gdkx_tools_filter, filter_data);
-		g_list_remove(sms_filter_list, filter_data);
+		sms_filter_list = g_list_remove(sms_filter_list, filter_data);
 		if(filter_data->private_window) {
 			gdk_window_destroy(filter_data->window);
 		}

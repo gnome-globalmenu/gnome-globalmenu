@@ -54,7 +54,6 @@ _gtk_builder_resolve_type_lazily (const gchar *name)
 
   if (g_module_symbol (module, symbol, (gpointer)&func))
     gtype = func ();
-  
   g_free (symbol);
 
   return gtype;

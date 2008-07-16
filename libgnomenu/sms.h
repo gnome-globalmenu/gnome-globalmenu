@@ -16,6 +16,8 @@ typedef enum {
 	MENUBAR_ACTIVATED,
 	INVALIDATE_MENUBAR, /*has to reload the introspection data*/
 	MENUITEM_CLICKED,
+	UPDATE_INTROSPECTION,
+	INTROSPECTION_UPDATED,
 } GnomenuSMSAction;
 
 #endif

@@ -742,9 +742,9 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
 	GnomenuSMS sms;
 	GdkWindow * window = _get_toplevel_gdk_window(menubar);
 
-	sms.action = INVALIDATE_MENUBAR;
+	sms.action = INTROSPECTION_UPDATED;
 	sms.w[0] = GDK_WINDOW_XWINDOW(window);
-//	gdkx_tools_send_sms(&sms, sizeof(sms));
+	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
 static void _send_activate_global_menu_sms (GtkMenuBar * menubar){
 	GnomenuSMS sms;
@@ -762,15 +762,18 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
 	g_return_if_fail(toplevel!= NULL);
 	if(gtk_window_has_toplevel_focus(GTK_WINDOW(toplevel))){
+		gchar * old_intro = g_strdup(priv->introspection);
 		_update_introspection(menubar);
-		_send_refresh_global_menu_sms(menubar);
+//		if(!g_str_equal(old_intro, priv->introspection))	
+			_send_refresh_global_menu_sms(menubar);
+		g_free(old_intro);
 	}
 }
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
 	if(priv->introspection_is_dirty){
-		priv->introspection = gtk_widget_introspect(GTK_WIDGET(menubar));
+		priv->introspection = g_strdup(gtk_widget_introspect(GTK_WIDGET(menubar)));
 		window = _get_toplevel_gdk_window(menubar);
 		if(window)
 			gdkx_tools_set_window_prop_blocked(window , 
@@ -791,8 +794,6 @@ static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * ps
 		if(gtk_window_has_toplevel_focus(window)){
 			LOG("received top level focus %p", menubar);
 			GList * node;
-			_update_introspection(menubar);
-			_send_refresh_global_menu_sms(menubar);
 			_send_activate_global_menu_sms(menubar);
 			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
 		}  else {
@@ -864,7 +865,8 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	g_string_free(string, TRUE);
 
 	switch(sms->action){
-		case MENUITEM_CLICKED:{
+		case MENUITEM_CLICKED:
+			{
 			GdkWindow * window = _get_toplevel_gdk_window(menubar);
 
 			if(sms->p[1] != GDK_WINDOW_XWINDOW(window)) break;
@@ -876,7 +878,12 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 				LOG("unknown menu item %p", item);
 			}
 			break;
-		  }
+			}
+		case UPDATE_INTROSPECTION:
+			{
+				_invalidate_introspection(menubar);
+			}
+			break;
 	}
 }
 
