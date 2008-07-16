@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, 0.4)
+AC_INIT(gnome-globalmenu, 0.5)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 GNOME_COMMON_INIT
@@ -86,7 +86,7 @@ AC_ARG_ENABLE(gnome-applet,
 AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
 AM_CONDITIONAL([ENABLE_GNOME_APPLET], [test "$enable_gnome_applet" = "yes" ])
 AC_MSG_RESULT($enable_gnome_applet)
-if test "$enable_gnome_applet" = "no"; then
+if test "$enable_gnome_applet" = "yes"; then
 	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0, libglade-2.0, libgnome-menu, libgnomeui-2.0, gnome-desktop-2.0])
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)

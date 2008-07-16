@@ -141,7 +141,9 @@ GtkWidget * gnomenu_global_menu_new(){
 void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GET_OBJECT(self, global_menu, priv);
 	LOG("switch: key = %p", key);
+/*
 	GnomenuMenuBar * menu_bar = g_hash_table_lookup(self->cache, key);
+
 	if(!menu_bar){
 		menu_bar = build_menu_bar(key);
 		if(menu_bar)
@@ -154,4 +156,15 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	global_menu->active_menu_bar = menu_bar;
 	if(menu_bar)
 		gtk_widget_set_parent(menu_bar, self);
+		*/
+	GnomenuMenuBar * menu_bar = build_menu_bar(key);
+	global_menu->active_key = key;
+	if(global_menu->active_menu_bar){
+		gtk_widget_unparent(global_menu->active_menu_bar);
+	}
+	if(menu_bar){
+		gtk_widget_set_parent(menu_bar, self);
+		g_object_unref(menu_bar);
+	}
+	global_menu->active_menu_bar = menu_bar;
 }

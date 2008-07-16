@@ -14,7 +14,7 @@ gladedir = $(pkgdatadir)
 glade_DATA = application.glade
 
 if ENABLE_GNOME_APPLET 
-#libexec_PROGRAMS += gnome-globalmenu-applet
+libexec_PROGRAMS += gnome-globalmenu-applet
 
 APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
 
@@ -64,15 +64,11 @@ VAST_SOURCE_CODE = application.h \
 	log.h 
 
 gnome_globalmenu_applet_SOURCES = \
-	main-gnome.c \
-	application-gnome.c \
-	application-gnome.h \
-	appmenu.c \
-	appmenu.h \
-	$(VAST_SOURCE_CODE)
+	main-gnome.c
 gnome_globalmenu_applet_CFLAGS = \
 	$(GNOME_GLOBALMENU_APPLET_CFLAGS)
 gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
+								$(top_builddir)/libgtkhotkey/libgtkhotkey.la \
 				$(GNOME_GLOBALMENU_APPLET_LIBS)
 
 xfce_globalmenu_plugin_SOURCES = \
@@ -90,6 +86,7 @@ gtk_globalmenu_server_SOURCES = \
 gtk_globalmenu_server_CFLAGS =\
 	$(GLOBALMENU_SERVER_CFLAGS)
 gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
+								$(top_builddir)/libgtkhotkey/libgtkhotkey.la \
 				$(GLOBALMENU_SERVER_LIBS)
 
 

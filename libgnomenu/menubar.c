@@ -744,7 +744,7 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
 
 	sms.action = INVALIDATE_MENUBAR;
 	sms.w[0] = GDK_WINDOW_XWINDOW(window);
-	gdkx_tools_send_sms(&sms, sizeof(sms));
+//	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
 static void _send_activate_global_menu_sms (GtkMenuBar * menubar){
 	GnomenuSMS sms;
@@ -752,7 +752,7 @@ static void _send_activate_global_menu_sms (GtkMenuBar * menubar){
 
 	sms.action = MENUBAR_ACTIVATED;
 	sms.w[0] = GDK_WINDOW_XWINDOW(window);
-	gdkx_tools_send_sms(&sms, sizeof(sms));
+//	gdkx_tools_send_sms(&sms, sizeof(sms));
 }
 static void _invalidate_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
