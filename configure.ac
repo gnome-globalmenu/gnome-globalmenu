@@ -54,6 +54,12 @@ AC_SUBST(TEST_SUITE_CFLAGS)
 AC_SUBST(TEST_SUITE_LIBS)
 dnl end:libgnomenu
 
+dnl begin:libgtkhotkey
+PKG_CHECK_MODULES(GTK_HOTKEY, [glib-2.0 >= 2.15.6 gobject-2.0 >= 2.15.6 gio-2.0 >= 2.15.6 gtk+-2.0 >= 2.12])
+	AC_SUBST(GTK_HOTKEY_CFLAGS)
+	AC_SUBST(GTK_HOTKEY_LIBS)
+dnl end:
+
 dnl begin:gtk-globalmenu-server
 AC_MSG_CHECKING(--enable-standalone argument)
 AC_ARG_ENABLE(standalone,
@@ -138,6 +144,7 @@ dnl fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
+libgtkhotkey/Makefile
 po/Makefile.in
 gtk+-aqd/Makefile
 doc/Makefile
