@@ -82,7 +82,6 @@ struct _GnomenuMenuBarPrivate
 	GtkMenu	* popup_menu;
 	GtkRequisition true_requisition;
 	Builder * builder;
-  GArray * mnemonic_keyvals;
 };
 
 
@@ -253,7 +252,6 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->introspection_is_dirty = TRUE;
 	priv->builder = NULL;
 	/*keyvals + modifier = 2 * guint*/
-	priv->mnemonic_keyvals = g_array_new(FALSE, FALSE, sizeof(guint) * 2);
 
 }
 
@@ -795,32 +793,8 @@ static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * ps
 			_send_refresh_global_menu_sms(menubar);
 			_send_activate_global_menu_sms(menubar);
 			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
-			g_assert(priv->mnemonic_keyvals->len == 0);
-			for(node = GTK_MENU_SHELL(menubar)->children; node; node = node->next){
-				GtkLabel * label = gtk_bin_get_child(node->data);
-				if(GTK_IS_LABEL(label)){
-					GdkModifierType modifier;
-					guint keyval;
-					modifier = gtk_window_get_mnemonic_modifier(window);
-					keyval = gtk_label_get_mnemonic_keyval(label);
-					g_array_append_val(priv->mnemonic_keyvals, keyval);
-					g_array_append_val(priv->mnemonic_keyvals, modifier);
-				}
-			}
-			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
-		/*		gdkx_tools_grab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
-						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));*/
-			}
 		}  else {
 			gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
-			for(i = 0; i< priv->mnemonic_keyvals->len / 2; i++){
-				/*
-				gdkx_tools_ungrab_key(g_array_index(priv->mnemonic_keyvals, guint, 2 * i),
-						g_array_index(priv->mnemonic_keyvals, guint, 2* i + 1));
-						*/
-			}
-			g_array_set_size(priv->mnemonic_keyvals, 0);
-		
 		}
 	}
 }
@@ -1093,7 +1067,6 @@ _finalize(GObject * _object){
 	g_hash_table_destroy(priv->menu_items);
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
 	if(priv->builder) builder_destroy(priv->builder);
-	g_array_free(priv->mnemonic_keyvals, TRUE);
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
 }
 static gboolean _s_item_mnemonic_activate(GtkWidget * menu_item, gboolean group_cycling,
