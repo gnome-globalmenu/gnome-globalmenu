@@ -36,6 +36,7 @@ struct _GdkXToolsSMSFilterData {
 	gpointer data;
 	gboolean frozen;
 	GdkWindow * window;
+	gboolean private_window;
 };
 struct _GdkXToolsKeyFilterData {
 	GdkXToolsFilterType type;
@@ -55,7 +56,8 @@ typedef union _GdkXToolsFilterData {
 
 static GdkFilterReturn _gdkx_tools_client_message_filter(GdkXEvent * xevent, GdkEvent * event, GdkXToolsSMSFilterData * filter_data){
 	XClientMessageEvent * x_client_message = xevent;
-	if(!filter_data->frozen && event->any.window == filter_data->window)
+	if(!filter_data->frozen 
+			&& event->any.window == filter_data->window)
 		filter_data->func(filter_data->data, x_client_message->data.b, 20);
 	return GDK_FILTER_REMOVE;
 }
@@ -174,7 +176,31 @@ gboolean gdkx_tools_send_sms(gchar * sms, int size){
 	gdk_event_send_clientmessage_toall(&event);
 	return TRUE;
 }
+gboolean gdkx_tools_send_sms_to(GdkNativeWindow target, gchar * sms, int size){
+	GdkEventClient event;
+	int i;
+	event.type = GDK_CLIENT_EVENT;
+	event.window = gdk_get_default_root_window();
+	event.send_event = TRUE;
+	event.message_type = gdk_atom_intern("GNOMENU_SMS", FALSE);
+	event.data_format = 8;
 
+	g_message("%d", size);
+	for(i=0; i< size && i<20; i++){
+		event.data.b[i] = sms[i];
+	}
+	GString * string = g_string_new("");
+	g_string_append(string, "sending sms:");
+	g_string_append_printf(string, "%d, ", event.data.b[0]);
+	for(i = 1; i< 18; i++){
+		g_string_append_printf(string, "%0.2X ", (unsigned)event.data.b[i]);
+	}
+	LOG("%s", string->str);
+	g_string_free(string, TRUE);
+	gdk_event_send_client_message(&event, target);
+	return TRUE;
+
+}
 static GList * sms_filter_list = NULL;
 static GdkXToolsSMSFilterData * _gdkx_tools_find_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
@@ -188,7 +214,7 @@ static GdkXToolsSMSFilterData * _gdkx_tools_find_sms_filter(GdkXToolsSMSFilterFu
 	}
 	return NULL;
 }
-static void _gdkx_tools_real_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen){
+void gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen){
 	GdkXToolsSMSFilterData * filter_data;
 	GdkWindowAttr attr = {0};
 	/*FIXME: THREAD SAFETY! protect the list!*/
@@ -206,20 +232,19 @@ static void _gdkx_tools_real_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointe
 	filter_data->func = func;
 	filter_data->data = data;
 	filter_data->frozen = frozen;
-	attr.wclass = GDK_INPUT_ONLY;
-
-	filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
+	filter_data->private_window = FALSE;
+	if(!window ) {
+		attr.wclass = GDK_INPUT_ONLY;
+		filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
+		filter_data->private_window = TRUE;
+	} else
+		filter_data->window = window;
 	/*FIXME: THREAD SAFETY!*/
 	sms_filter_list = g_list_append(sms_filter_list, filter_data);
 	gdk_window_add_filter(filter_data->window, _gdkx_tools_filter, filter_data);
 	GDK_THREADS_LEAVE();
 }
-void gdkx_tools_add_sms_filter_frozen(GdkXToolsSMSFilterFunc func, gpointer data) {
-	_gdkx_tools_real_add_sms_filter(func, data, TRUE);
-}
-void gdkx_tools_add_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data) {
-	_gdkx_tools_real_add_sms_filter(func, data, FALSE);
-}
+
 void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	GdkXToolsSMSFilterData * filter_data;
 	GDK_THREADS_ENTER();
@@ -251,7 +276,9 @@ void gdkx_tools_remove_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
 	if(filter_data){
 		gdk_window_remove_filter(filter_data->window, _gdkx_tools_filter, filter_data);
 		g_list_remove(sms_filter_list, filter_data);
-		gdk_window_destroy(filter_data->window);
+		if(filter_data->private_window) {
+			gdk_window_destroy(filter_data->window);
+		}
 		g_free(filter_data);
 	} else {
 		g_warning("filter is not registered");

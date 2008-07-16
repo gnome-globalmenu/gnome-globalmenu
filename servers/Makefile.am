@@ -14,7 +14,7 @@ gladedir = $(pkgdatadir)
 glade_DATA = application.glade
 
 if ENABLE_GNOME_APPLET 
-libexec_PROGRAMS += gnome-globalmenu-applet
+#libexec_PROGRAMS += gnome-globalmenu-applet
 
 APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
 
@@ -35,7 +35,7 @@ schemas_DATA     = $(schemas_in_files:.schemas.in=.schemas)
 
 endif
 if ENABLE_XFCE_PLUGIN
-libexec_PROGRAMS += xfce-globalmenu-plugin
+#libexec_PROGRAMS += xfce-globalmenu-plugin
 PLUGIN_LOCATION = $(libexecdir)/xfce-globalmenu-plugin
 #desktopdir = $(datadir)/xfce4/panel-plugins
 desktopdir = $(XFCE_DESKTOP_FILES_PATH)
@@ -86,10 +86,7 @@ xfce_globalmenu_plugin_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				$(XFCE_GLOBALMENU_PLUGIN_LIBS)
 
 gtk_globalmenu_server_SOURCES = \
-	main.c \
-	appmenu.c \
-	appmenu.h \
-	$(VAST_SOURCE_CODE)
+	main.c
 gtk_globalmenu_server_CFLAGS =\
 	$(GLOBALMENU_SERVER_CFLAGS)
 gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\

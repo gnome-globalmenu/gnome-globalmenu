@@ -18,16 +18,21 @@ static gchar * _introspect(GtkWidget * widget){
 	return introspector_destroy(spector, FALSE);
 }
 static gboolean _expose_event(GtkWidget * widget, GdkEvent * event, gpointer p){
+#ifdef INVALIDATE_INTROSPECTION
 	gchar * data = _introspect(widget);
 	if(!g_str_equal(data, g_object_get_data(widget, "widget-introspection"))) {
 		g_object_set_data_full(widget, "widget-introspection", data, g_free);
 		g_signal_emit(widget, IS_INVALIDATED, 0);
 		g_message("invalidate introspection");
 	}
+#endif
 	return FALSE;
 }
 
 gchar * gtk_widget_introspect(GtkWidget * widget){
+	gchar * rt;
+#ifdef INVALIDATE_INTROSPECTION
+
 	if(G_UNLIKELY(!IS_INVALIDATED)){
 		/*this signal is not working*/
 		IS_INVALIDATED = g_signal_new(
@@ -41,12 +46,14 @@ gchar * gtk_widget_introspect(GtkWidget * widget){
 				G_TYPE_NONE,
 				0);
 	}
-	gchar * rt;
 	rt = g_object_get_data(widget, "widget-introspection");
 	if(G_UNLIKELY(!rt)) {
 		g_signal_connect(widget, "expose-event", _expose_event, NULL);
+#endif
 		g_object_set_data_full(widget, "widget-introspection", _introspect(widget), g_free);
 		rt = g_object_get_data(widget, "widget-introspection");
+#ifdef INVALIDATE_INTROSPECTION
 	}
+#endif
 	return rt;
 }

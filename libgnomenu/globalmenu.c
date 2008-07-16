@@ -25,13 +25,19 @@ typedef struct {
 	int foo;
 } GnomenuGlobalMenuPrivate;
 
-static void _s_activate(GtkMenuItem * menu_item, gpointer data){
+static void _s_activate(GtkMenuItem * menu_item, GtkWidget * menubar){
 	gpointer handle = g_object_get_data(menu_item, "introspect-handle");
+	GnomenuGlobalMenu * global_menu =
+		gtk_widget_get_parent(menubar);
+	g_return_if_fail(GNOMENU_IS_GLOBAL_MENU(global_menu));
+	if(menu_item->submenu != NULL) return;
 	GnomenuSMS sms;
-	g_message("menu item activated, handle = %p", handle);
+	LOG("menu item activated, handle = %p", handle);
 	sms.action = MENUITEM_CLICKED;
 	sms.p[0] = handle;
-	gdkx_tools_send_sms(&sms, sizeof(sms));
+	sms.p[1] = global_menu->active_key;
+	LOG("key = %p", global_menu->active_key);
+	gdkx_tools_send_sms_to(global_menu->active_key, &sms, sizeof(sms));
 }
 static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){
@@ -55,7 +61,7 @@ static gpointer build_menu_bar(GdkNativeWindow xwindow){
 		built_menubar = g_object_ref(built_menubar);
 		gnomenu_menu_bar_set_show_arrow(built_menubar, TRUE);
 		g_free(built_menubar_name);
-		builder_foreach(builder, setup_handler, NULL); 
+		builder_foreach(builder, setup_handler, built_menubar); 
 		g_free(introspection);
 		builder_destroy(builder);
 		return built_menubar;
@@ -97,7 +103,7 @@ static void gnomenu_global_menu_init (GnomenuGlobalMenu * self) {
 			NULL,
 			g_object_unref);
 
-	gdkx_tools_add_sms_filter(sms_filter, self);
+	gdkx_tools_add_sms_filter(NULL, sms_filter, self, FALSE);
 	GTK_WIDGET_SET_FLAGS(self, GTK_NO_WINDOW);
 }
 static void _finalize(GnomenuGlobalMenu * global_menu) {
@@ -129,6 +135,7 @@ GtkWidget * gnomenu_global_menu_new(){
 }
 void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GET_OBJECT(self, global_menu, priv);
+	LOG("switch: key = %p", key);
 	GnomenuMenuBar * menu_bar = g_hash_table_lookup(self->cache, key);
 	if(!menu_bar){
 		menu_bar = build_menu_bar(key);

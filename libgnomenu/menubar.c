@@ -107,6 +107,8 @@ static void _s_hierarchy_changed ( GtkWidget       *widget,
 					    GtkWidget       *old_toplevel, gpointer data);
 static void _s_toplevel_realize ( GtkMenuBar       *menubar,
 					    GtkWidget * toplevel);
+static void _s_toplevel_unrealize ( GtkMenuBar       *menubar,
+					    GtkWidget * toplevel);
 static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window);
 static gint gnomenu_menu_bar_get_popup_delay   (GtkMenuShell    *menu_shell);
 static void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
@@ -794,7 +796,7 @@ static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * ps
 			_send_activate_global_menu_sms(menubar);
 			gdkx_tools_thaw_sms_filter(_sms_filter, menubar);
 		}  else {
-			gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
+		//	gdkx_tools_freeze_sms_filter(_sms_filter, menubar);
 		}
 	}
 }
@@ -819,16 +821,22 @@ _s_hierarchy_changed (GtkWidget *widget,
   if (old_toplevel) {
 		g_signal_handlers_disconnect_by_func(old_toplevel,
 				_s_toplevel_realize, menubar);
+		g_signal_handlers_disconnect_by_func(old_toplevel,
+				_s_toplevel_unrealize, menubar);
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_notify_has_toplevel_focus, menubar);
+		gdkx_tools_remove_sms_filter(_sms_filter, menubar);
   }
   
   if (GTK_WIDGET_TOPLEVEL (toplevel)) {
 	if(GTK_WIDGET_REALIZED(toplevel)){
 		_update_widget_id(menubar);
+		gdkx_tools_add_sms_filter(toplevel->window, _sms_filter, menubar, TRUE);
 	}
 	g_signal_connect_swapped(toplevel, "realize",
 				G_CALLBACK(_s_toplevel_realize), menubar);
+	g_signal_connect_swapped(toplevel, "unrealize",
+				G_CALLBACK(_s_toplevel_unrealize), menubar);
 	g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
 		G_CALLBACK(_s_notify_has_toplevel_focus), menubar);
   
@@ -838,6 +846,11 @@ _s_hierarchy_changed (GtkWidget *widget,
 static void
 _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	_update_widget_id(menubar);
+	gdkx_tools_add_sms_filter(toplevel->window, _sms_filter, menubar, TRUE);
+}
+static void
+_s_toplevel_unrealize (GtkMenuBar * menubar, GtkWidget * toplevel){
+	gdkx_tools_remove_sms_filter(_sms_filter, menubar);
 }
 static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	int i;
@@ -849,8 +862,13 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
+
 	switch(sms->action){
 		case MENUITEM_CLICKED:{
+			GdkWindow * window = _get_toplevel_gdk_window(menubar);
+
+			if(sms->p[1] != GDK_WINDOW_XWINDOW(window)) break;
+
 			GtkMenuItem * item = sms->p[0];
 			if(GTK_IS_MENU_ITEM(item)){
 				gtk_menu_item_activate(item);
@@ -999,7 +1017,6 @@ static GObject* _constructor(GType type,
 
 	g_signal_connect(object, "hierarchy-changed",
 				G_CALLBACK(_s_hierarchy_changed), NULL);
-	gdkx_tools_add_sms_filter_frozen(_sms_filter, menu_bar);
 	return object;
 }
 gboolean
@@ -1056,7 +1073,6 @@ _dispose (GObject * _object){
 	if(!priv->disposed){
 		priv->disposed = TRUE;	
 		g_hash_table_remove_all(priv->menu_items);
-		gdkx_tools_remove_sms_filter(_sms_filter, menu_bar);
 	}
 	G_OBJECT_CLASS(_menu_shell_class)->dispose(_object);
 }
