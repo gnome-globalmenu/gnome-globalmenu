@@ -1,5 +1,8 @@
 #include <gtk/gtk.h>
 #include <glade/glade.h>
+#include <libgnomenu/menubar.h>
+
+
 void show_arrow_toggled(GtkWidget * toggle, GtkMenuBar * menubar){
 	g_object_set(menubar, "show-arrow", 
 			gtk_toggle_button_get_active(toggle), NULL);
@@ -19,8 +22,8 @@ int main (int argc, char **argv){
 	GtkWidget * is_global;
 	GtkWidget * show_arrow;
 	GtkMenuBar * menubar;
-
 	gtk_init(&argc, &argv);
+	gnomenu_menu_bar_get_type();
 	xml = glade_xml_new("testintro.glade", NULL, NULL);
 
 	/* get a widget (useful if you want to change something) */

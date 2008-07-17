@@ -2,7 +2,7 @@
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
 <!--Generated with glade3 3.4.4 on Tue May 27 16:27:53 2008 -->
 <glade-interface>
-  <widget class="GtkMenuBar" id="menubar1">
+  <widget class="GnomenuMenuBar" id="menubar1">
     <property name="visible">True</property>
     <child>
       <widget class="GtkMenuItem" id="menuitem1">
