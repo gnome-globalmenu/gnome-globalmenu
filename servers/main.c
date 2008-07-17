@@ -42,6 +42,8 @@ int main(int argc, char * argv[]){
 	g_signal_connect(hkf10, "activated", _s_hkf10_activated, window);
 	gtk_widget_show(window);
 	gtk_main();
+	g_signal_handlers_disconnect_by_func(wnck_screen_get_default(),
+			_s_screen_active_window_changed, globalmenu);
 	g_object_unref(xml);
 	return 0;
 }
