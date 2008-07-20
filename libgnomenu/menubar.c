@@ -810,6 +810,43 @@ static void _update_widget_id(GtkMenuBar * menubar){
 	g_free(buffer);
 	_invalidate_introspection(menubar);
 }
+static gboolean
+_s_toplevel_key_press (GtkMenuBar   *menubar, GdkEventKey *event, 
+		GtkWidget * window)
+{
+	gchar *accel = NULL;
+	gboolean retval = FALSE;
+
+	g_object_get (gtk_widget_get_settings (window),
+				  "gtk-menu-bar-accel", &accel,
+				  NULL);
+
+	if (accel && *accel) {
+      guint keyval = 0;
+      GdkModifierType mods = 0;
+
+      gtk_accelerator_parse (accel, &keyval, &mods);
+
+      if (keyval == 0)
+        g_warning ("Failed to parse menu bar accelerator '%s'\n", accel);
+
+      /* FIXME this is wrong, needs to be in the global accel resolution
+ *        * thing, to properly consider i18n etc., but that probably requires
+ *               * AccelGroup changes etc.
+ *                      */
+		if (event->keyval == keyval &&
+			((event->state & gtk_accelerator_get_default_mod_mask ()) ==
+			(mods & gtk_accelerator_get_default_mod_mask ()))) {
+			if(gnomenu_menu_bar_get_is_global_menu(menubar)){
+				gnomenu_menu_bar_set_is_global_menu(menubar, FALSE);
+			} else {
+				gnomenu_menu_bar_set_is_global_menu(menubar, TRUE);
+			}
+			return TRUE;
+		}	
+	}
+	return FALSE;
+}
 static void
 _s_hierarchy_changed (GtkWidget *widget,
 				GtkWidget *old_toplevel, gpointer data)
@@ -826,6 +863,8 @@ _s_hierarchy_changed (GtkWidget *widget,
 				_s_toplevel_unrealize, menubar);
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_notify_has_toplevel_focus, menubar);
+		g_signal_handlers_disconnect_by_func(
+			old_toplevel, _s_toplevel_key_press, menubar);
 		gdkx_tools_remove_sms_filter(_sms_filter, menubar);
   }
   
@@ -840,7 +879,9 @@ _s_hierarchy_changed (GtkWidget *widget,
 				G_CALLBACK(_s_toplevel_unrealize), menubar);
 	g_signal_connect_swapped(toplevel, "notify::has-toplevel-focus",
 		G_CALLBACK(_s_notify_has_toplevel_focus), menubar);
-  
+  	g_signal_connect_swapped(toplevel, "key-press-event",
+				G_CALLBACK(_s_toplevel_key_press), menubar);
+
   }
 	
 }
