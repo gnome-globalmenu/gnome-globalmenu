@@ -72,6 +72,10 @@ static GdkFilterReturn _gdkx_tools_key_filter(GdkXEvent * xevent, GdkEvent * eve
 
 static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * event, GdkXToolsFilterData * data){
 	XEvent * xevent = gdkxevent;
+	if(data->type == GDKX_TOOLS_FILTER_TYPE_PROP && xevent->type !=PropertyNotify){
+		g_message("message removed");
+		return GDK_FILTER_REMOVE;
+	}
 	switch(xevent->type){
 		case PropertyNotify:
 		if(data->type == GDKX_TOOLS_FILTER_TYPE_PROP 
@@ -135,15 +139,20 @@ gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, const gchar * pr
 	gdk_window_set_events(window, gdk_window_get_events(window) |GDK_PROPERTY_CHANGE_MASK);
 	gdk_error_trap_push();
 	XChangeProperty(display, w, property, type, format, mode, data, nelements);
+	
+	XSync(display, TRUE);
 	if(gdk_error_trap_pop()) {
 		rt = FALSE;
 		goto ex;
 	}
+	/*
 	if(g_main_loop_is_running(filter_data->loop)){
 		GDK_THREADS_LEAVE();
 		g_main_loop_run(filter_data->loop);
 		GDK_THREADS_ENTER();
 	}
+	*/
+	
 ex:
 	g_source_remove(timeout_id);
 	gdk_window_remove_filter(window, _gdkx_tools_filter, filter_data);
@@ -279,6 +288,7 @@ gboolean gdkx_tools_send_sms_to(GdkNativeWindow target, gchar * sms, int size){
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
 	gdk_event_send_client_message(&event, target);
+	gdk_display_sync(gdk_display_get_default());
 	return TRUE;
 
 }
@@ -405,4 +415,8 @@ GdkWindow * gdkx_tools_lookup_window(GdkNativeWindow key){
 	GdkWindow * rt = gdk_window_lookup(key);
 	if(!rt) rt = gdk_window_foreign_new(key);
 	return rt;
+}
+gboolean gdkx_tools_remove_window_prop(GdkWindow * window, const gchar * prop_name) {
+	gdk_property_delete(window, gdk_atom_intern(prop_name, FALSE));
+	return TRUE;
 }

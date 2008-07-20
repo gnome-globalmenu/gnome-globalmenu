@@ -11,8 +11,12 @@ void is_global_toggled(GtkWidget * toggle, GtkMenuBar * menubar){
 	g_object_set(menubar, "is-global-menu", 
 			gtk_toggle_button_get_active(toggle), NULL);
 }
-static void activated(GtkWidget * item, gpointer data){
-	g_message("MenuItem %p is activated", item);
+static void activated(GtkWidget * item, GladeXML * xml){
+	GtkMenuItem * new_item = gtk_menu_item_new_with_label("hello world");
+	GtkMenu * menu = glade_xml_get_widget(xml, "menu3");
+	gtk_widget_show(new_item);
+	gtk_container_add(menu, new_item);
+	g_message("MenuItem %p %p is activated", item, menu);
 }
 int main (int argc, char **argv){ 
 	    GladeXML *xml;
@@ -31,9 +35,11 @@ int main (int argc, char **argv){
 	/* connect signal handlers */
 //	glade_xml_signal_autoconnect(xml);
 	g_signal_connect(glade_xml_get_widget(xml, "imagemenuitem1"),
-			"activate", activated, NULL);
+			"activate", activated, xml);
+	g_signal_connect(glade_xml_get_widget(xml, "menuitem4"),
+			"activate", activated, xml);
 	g_signal_connect(glade_xml_get_widget(xml, "imagemenuitem10"),
-			"activate", activated, NULL);
+			"activate", activated, xml);
 
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);

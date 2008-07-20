@@ -65,8 +65,8 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
-	panel_applet_set_background_widget(applet, applet);
 	gnomenu_global_menu_get_type();
+	panel_applet_set_background_widget(applet, applet);
 	GladeXML * xml;
 	GtkContainer * box;
 	xml = glade_xml_new("GnomenuServerApplet.glade", NULL, NULL);

@@ -28,7 +28,7 @@ int main(int argc, char * argv[]){
 	GtkWidget * window;
 	GnomenuGlobalMenu * globalmenu;
 	GtkHotkeyInfo * hkf10 = gtk_hotkey_info_new(
-			"GlobalMenu", "MenuKey", "F10", NULL);
+			"GlobalMenu", "MenuKey", "F9", NULL);
 	gtk_hotkey_info_bind(hkf10, NULL);
 	gnomenu_global_menu_get_type();
 	xml = glade_xml_new("GnomenuServerWindow.glade", NULL, NULL);

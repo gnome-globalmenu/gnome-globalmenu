@@ -57,21 +57,22 @@ static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 				_s_activate, data);
 	}
 }
-static gpointer build_menu_bar(GdkNativeWindow xwindow){
-	GdkWindow * window = gdk_window_lookup(xwindow);
-	if(!window) window = gdk_window_foreign_new(xwindow);
+static gpointer build_menu_bar(GdkNativeWindow key){
+	GdkWindow * window = gdkx_tools_lookup_window(get_sms_window(key));
 	if(window){
 		Builder * builder;
 		GnomenuMenuBar * built_menubar;
 		gchar * built_menubar_name ;
 		builder = builder_new();
 		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR", NULL);
+		g_message("%s", introspection);
 		builder_parse(builder, introspection);
-		built_menubar_name = g_strdup_printf("%p", xwindow);
+		built_menubar_name = g_strdup_printf("%p", key);
 		built_menubar = builder_get_object(builder, built_menubar_name);
 		if(built_menubar) {
 			built_menubar = g_object_ref(built_menubar);
 			gnomenu_menu_bar_set_show_arrow(built_menubar, TRUE);
+			gnomenu_menu_bar_set_is_global_menu(built_menubar, FALSE);
 		}
 		g_free(built_menubar_name);
 		builder_foreach(builder, setup_handler, built_menubar); 
@@ -170,16 +171,4 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GnomenuSMS sms;
 	sms.action = UPDATE_INTROSPECTION;
 	gdkx_tools_send_sms_to(get_sms_window(key), &sms, sizeof(sms));
-	/*
-	GnomenuMenuBar * menu_bar = build_menu_bar(key);
-	global_menu->active_key = key;
-	if(global_menu->active_menu_bar){
-		gtk_widget_unparent(global_menu->active_menu_bar);
-	}
-	if(menu_bar){
-		gtk_widget_set_parent(menu_bar, self);
-		g_object_unref(menu_bar);
-	}
-	global_menu->active_menu_bar = menu_bar;
-	*/
 }

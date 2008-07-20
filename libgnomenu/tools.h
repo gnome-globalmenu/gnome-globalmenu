@@ -1,5 +1,6 @@
 gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size);
 gboolean gdkx_tools_set_window_prop(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size);
+gboolean gdkx_tools_remove_window_prop(GdkWindow * window, const gchar * prop_name);
 gchar * gdkx_tools_get_window_prop(GdkWindow * window, const gchar * prop_name, gint * bytes_return);
 typedef void (* GdkXToolsSMSFilterFunc)(gpointer data, gchar * sms, int size);
 typedef GdkFilterReturn (* GdkXToolsKeyFilterFunc)(gpointer data, GdkEventKey * event);

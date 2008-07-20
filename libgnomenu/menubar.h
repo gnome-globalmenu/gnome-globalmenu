@@ -137,6 +137,7 @@ gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
                                        GtkPackDirection  child_pack_dir);
 gboolean
 gnomenu_menu_bar_get_is_global_menu(GtkMenuBar * menubar);
+void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
 void 
 gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow);
 gboolean 
