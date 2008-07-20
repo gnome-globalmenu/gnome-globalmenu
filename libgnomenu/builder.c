@@ -10,8 +10,7 @@ struct _Builder {
 	GMarkupParser parser1;
 	GMarkupParser parser2;
 	GHashTable * widgets;
-	GNode * widget_tree;
-	GNode * current_node;
+	GQueue * stack;
 	GtkWidget * current_widget; /*for phase 2*/
 };
 #define SWITCH_STR(x) { const gchar * _str_ = x; if(FALSE) {
@@ -93,17 +92,15 @@ static void _start_element1  (GMarkupParseContext *context,
 				g_object_set_data_full(new_widget, "introspect-handle", parsed_handle, NULL);
 			}
 			g_object_ref_sink(new_widget); /*builder always hold the ref*/
-			current_widget = builder->current_node->data;
+			current_widget = g_queue_peek_tail(builder->stack);
 			if(current_widget) {
 				gtk_container_add(current_widget, new_widget);
 			}
-
-			builder->current_node = g_node_append_data(builder->current_node, new_widget);
+			g_queue_push_tail(builder->stack, new_widget);
 		}
 		CASE_STR("property") {
 		}
 		CASE_STR("root") {
-			builder->current_node = builder->widget_tree;
 		}
 		DEFAULT_STR {
 			g_warning("unknown element: %s\n", element_name);
@@ -118,15 +115,14 @@ static void _end_element1    (GMarkupParseContext *context,
                           GError             **error) {
 	SWITCH_STR(element_name)
 		CASE_STR("object") {
-			GtkWidget * current_widget = builder->current_node->data;
+			GtkWidget * current_widget = g_queue_peek_tail(builder->stack);
 			g_hash_table_insert(builder->widgets, gtk_widget_get_id(current_widget), current_widget);
 			/* go upward to the parent*/
-			builder->current_node = builder->current_node->parent;
+			g_queue_pop_tail(builder->stack);
 		}
 		CASE_STR("property") {
 		}
 		CASE_STR("root"){
-			builder->current_node = NULL;
 		}
 		DEFAULT_STR {
 			g_warning("unknown element: %s\n", element_name);
@@ -275,7 +271,7 @@ Builder * builder_new (){
 	builder->parser2.error = _error;
 
 	builder->widgets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_object_unref);
-	builder->widget_tree = g_node_new(NULL);
+	builder->stack = g_queue_new();
 	return builder;
 }
 void builder_parse(Builder * builder, const gchar * string){
@@ -310,6 +306,6 @@ void builder_foreach(Builder * builder, GHFunc callback, gpointer data){
 }
 Builder * builder_destroy(Builder * builder) {
 	g_hash_table_destroy(builder->widgets);
-	g_node_destroy(builder->widget_tree);
+	g_queue_free(builder->stack);
 	g_free(builder);
 }
