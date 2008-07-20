@@ -2,7 +2,7 @@
 #include <glade/glade.h>
 #include <libgnomenu/introspector.h>
 #include <libgnomenu/builder.h>
-
+#include <libgnomenu/menubar.h>
 
 
 int main (int argc, char **argv){ 
@@ -16,6 +16,7 @@ int main (int argc, char **argv){
 	gchar * intro;
 	gchar * intro2;
 	gtk_init(&argc, &argv);
+	gnomenu_menu_bar_get_type();
 	xml = glade_xml_new("testintro.glade", NULL, NULL);
 
 	/* get a widget (useful if you want to change something) */

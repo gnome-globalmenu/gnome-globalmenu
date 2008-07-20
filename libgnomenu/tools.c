@@ -162,29 +162,81 @@ ex:
 	return rt;
 }
 
-gboolean gdkx_tools_send_sms(gchar * sms, int size){
-	GdkEventClient event;
-	int i;
-	event.type = GDK_CLIENT_EVENT;
-	event.window = gdk_get_default_root_window();
-	event.send_event = TRUE;
-	event.message_type = gdk_atom_intern("GNOMENU_SMS", FALSE);
-	event.data_format = 8;
+/**
+ * _gnomenu_socket_find_targets:
+ * @self: self
+ * @name: the name for the targets
+ * 
+ * Find every possible @GnomenuSocket on this display with the name @name.
+ *
+ * Returns: a GList contains the list of those sockets' native ID. 
+ * It is the caller's obligation to free the list.
+ */
+static GList * _gnomenu_socket_find_targets(GdkScreen * screen, gchar * name){
+	GList * window_list = NULL;
+	GdkWindow * root_window;
+	GdkDisplay * display;
+    Window root_return;
+    Window parent_return;
+    Window * children_return;
+    unsigned int nchildren_return;
+    unsigned int i;
 
-	g_message("%d", size);
-	for(i=0; i< size && i<20; i++){
-		event.data.b[i] = sms[i];
+	g_return_val_if_fail(screen != NULL, NULL);
+
+	root_window = gdk_screen_get_root_window(screen);
+	display = gdk_screen_get_display(screen);
+	g_return_val_if_fail(root_window != NULL, NULL);
+
+    gdk_error_trap_push();
+    XQueryTree(GDK_DISPLAY_XDISPLAY(display),
+        GDK_WINDOW_XWINDOW(root_window),
+        &root_return,
+        &parent_return,
+        &children_return,
+        &nchildren_return);
+	gdk_flush();
+    if(gdk_error_trap_pop()){
+        g_warning("%s: XQueryTree Failed", __func__);
+        return NULL;
+    }
+	g_return_val_if_fail(nchildren_return != 0, NULL);
+		
+	for(i = 0; i < nchildren_return; i++){
+        Atom type_return;
+        Atom type_req = gdk_x11_get_xatom_by_name_for_display (display, "UTF8_STRING");
+        gint format_return;
+        gulong nitems_return;
+        gulong bytes_after_return;
+        guchar * wm_name;
+        gint rt;
+        gdk_error_trap_push();
+        rt = XGetWindowProperty (GDK_DISPLAY_XDISPLAY (display), children_return[i],
+                          gdk_x11_get_xatom_by_name_for_display (display, "_NET_WM_NAME"),
+                          0, G_MAXLONG, False, type_req, &type_return,
+                          &format_return, &nitems_return, &bytes_after_return,
+                          &wm_name);
+		gdk_flush();
+		if(!gdk_error_trap_pop()){
+			if(rt == Success && type_return == type_req){
+				if(name == NULL || g_str_equal(name, wm_name)){
+					window_list = g_list_append(window_list, (gpointer) children_return[i]);
+				}
+			XFree(wm_name);
+			}
+		}else{
+			g_warning("%s:XGetWindowProperty Failed",__func__);
+		}
 	}
-	GString * string = g_string_new("");
-	g_string_append(string, "sending sms:");
-	g_string_append_printf(string, "%d, ", event.data.b[0]);
-	for(i = 1; i< 18; i++){
-		guint b = (guchar)event.data.b[i];
-		g_string_append_printf(string, "%0.2X ", b);
-	}
-	LOG("%s", string->str);
-	g_string_free(string, TRUE);
-	gdk_event_send_clientmessage_toall(&event);
+	XFree(children_return);
+	return window_list;
+}
+gboolean gdkx_tools_send_sms(gchar * sms, int size){
+	GList * list = _gnomenu_socket_find_targets(gdk_screen_get_default(), "GNOMENU_SMS_BROADCAST_LISTENER");
+	GList * node;
+	for(node = list; node; node = node->next)
+		gdkx_tools_send_sms_to(node->data, sms, size);
+	g_list_free(list);
 	return TRUE;
 }
 gboolean gdkx_tools_send_sms_to(GdkNativeWindow target, gchar * sms, int size){
@@ -247,7 +299,8 @@ void gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, 
 	filter_data->private_window = FALSE;
 	if(!window ) {
 		attr.wclass = GDK_INPUT_ONLY;
-		filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, 0);
+		attr.title = "GNOMENU_SMS_BROADCAST_LISTENER";
+		filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, GDK_WA_TITLE);
 		filter_data->private_window = TRUE;
 	} else
 		filter_data->window = window;

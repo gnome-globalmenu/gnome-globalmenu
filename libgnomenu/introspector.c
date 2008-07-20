@@ -116,6 +116,9 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 		"yalign",
 		"xpad",
 		"ypad",
+		"draw-as-radio",
+		"inconsistent",
+		"active",
 		NULL
 	};
 	gint n_props;

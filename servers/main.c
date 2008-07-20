@@ -23,7 +23,7 @@ _s_hkf10_activated(GtkHotkeyInfo * hkinfo, guint event_time, GtkWidget * window)
 }
 int main(int argc, char * argv[]){
 	gtk_init(&argc, &argv);
-
+	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL);
 	GladeXML * xml;
 	GtkWidget * window;
 	GnomenuGlobalMenu * globalmenu;

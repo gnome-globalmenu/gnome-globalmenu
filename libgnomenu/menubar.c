@@ -259,6 +259,7 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->is_global_menu = TRUE;
 	priv->introspection = NULL;
 	/*keyvals + modifier = 2 * guint*/
+	g_object_set_data(menu_bar, "menu-bar", menu_bar);
 	if(parent_set_emission_hook_count == 0) {
 		parent_set_emission_hook_id = 
 			g_signal_add_emission_hook (
@@ -771,18 +772,22 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 static gchar * _update_introspection ( GtkMenuBar * menubar){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GdkWindow * window;
+		gchar * old_intro = g_strdup(priv->introspection);
 		priv->introspection = gtk_widget_introspect(GTK_WIDGET(menubar));
 		window = _get_toplevel_gdk_window(menubar);
 		if(window) {
-			if(priv->is_global_menu) 
+			if(priv->is_global_menu) {
+				if(!old_intro || !g_str_equal(old_intro, priv->introspection))
 				gdkx_tools_set_window_prop_blocked(window , 
 					gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), 
 					priv->introspection, 
 					strlen(priv->introspection)+1);
+			}
 			else 
 				gdk_property_delete(_get_toplevel_gdk_window(menubar),
 						gdk_atom_intern("GNOMENU_MENU_BAR", FALSE));
 		}
+		g_free(old_intro);
 	return priv->introspection;
 }
 static void _s_notify_has_toplevel_focus ( GtkMenuBar * menubar, GParamSpec * pspec, GtkWindow * window){
@@ -931,18 +936,16 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 			break;
 	}
 }
-static void _s_item_notify_submenu(GtkMenuItem * item, GParamSpec * arg1,
-		GtkMenuShell * menu_shell){
-
-		GtkMenuBar *menu_bar = g_object_get_data(item, "menu-bar");;
-
-		/*Problem: the menu-bar on the old sub menu is not altered.*/
-		gtk_widget_tree_set_data(item, "menu-bar", menu_bar);
-		if(menu_bar)
-			_invalidate_introspection(menu_bar);
-
+static GtkWidget * _find_menu_bar(GtkWidget * widget){
+	while(!(GTK_IS_MENU_BAR(widget)) && (GTK_IS_WIDGET(widget))) {
+		if(GTK_IS_MENU(widget)){
+			widget = gtk_menu_get_attach_widget(widget);
+		} else {
+			widget = gtk_widget_get_parent(widget);
+		}
+	}
+	return widget;
 }
-
 static gboolean
 _parent_set_emission_hook (GSignalInvocationHint *ihint,
 			  guint                  n_param_values,
@@ -953,30 +956,25 @@ _parent_set_emission_hook (GSignalInvocationHint *ihint,
 	if (GTK_IS_MENU_ITEM (instance)) {
 		GtkWidget *previous_parent = g_value_get_object (param_values + 1);
 		GtkWidget *menu_shell      = NULL;
+		GtkMenuBar * previous_menu_bar = NULL;
+		GtkMenuBar *menu_bar = NULL;
 
 		if (GTK_IS_MENU_SHELL (previous_parent)) {
 			menu_shell = previous_parent;
-			if (menu_shell) {
-				GtkMenuBar *menu_bar = g_object_get_data(menu_shell, "menu-bar");;
-				if(menu_bar) _invalidate_introspection(menu_bar);
-				g_signal_handlers_disconnect_by_func(instance, 
-						_s_item_notify_submenu, menu_shell);
-			}
-
+	   		previous_menu_bar = _find_menu_bar(menu_shell);
 		}
 		if (GTK_IS_MENU_SHELL (instance->parent)) {
 			menu_shell = instance->parent;
-			if (menu_shell) {
-				GtkMenuBar *menu_bar = g_object_get_data(menu_shell, "menu-bar");;
-
-				gtk_widget_tree_set_data(instance, "menu-bar", menu_bar);
-				if (menu_bar) _invalidate_introspection(menu_bar);
-			}
-			g_signal_connect(G_OBJECT(instance), "notify::submenu", 
-				(GCallback) _s_item_notify_submenu,
-				menu_shell);
+			menu_bar = _find_menu_bar(menu_shell);
 		}
-
+		if (menu_bar) {
+			g_message("invalidate menu bar");
+			_invalidate_introspection(menu_bar);
+		}
+		if(previous_menu_bar && previous_menu_bar != menu_bar){
+			g_message("invalidate previous menu bar");
+			_invalidate_introspection(previous_menu_bar);
+		}
 	}
 	return TRUE;
 }

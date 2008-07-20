@@ -49,6 +49,8 @@ int main (int argc, char **argv){
 	g_signal_connect(show_arrow, "toggled", show_arrow_toggled, menubar);
 	g_signal_connect(is_global, "toggled", is_global_toggled, menubar);
 	gtk_widget_show_all(window);
+	g_signal_connect(window, "destroy", gtk_main_quit, NULL);
 	gtk_main();
+	gtk_widget_destroy(window);
 	return 0;
 }

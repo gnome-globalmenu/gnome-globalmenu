@@ -69,8 +69,10 @@ static void _tree_transverse (GtkWidget * widget, tree_set_data_t * data) {
 	}
 	if(GTK_IS_MENU_ITEM(widget)){
 		GtkMenu * submenu = gtk_menu_item_get_submenu(widget);
-		if(G_TYPE_IS_OBJECT(submenu))
+		if(G_TYPE_IS_OBJECT(submenu)) {
 			_tree_transverse(submenu, data);
+			g_message("visiting submenu");
+		}
 	}
 }
 void gtk_widget_tree_set_data(GtkWidget * widget, gchar * name, gpointer data){
