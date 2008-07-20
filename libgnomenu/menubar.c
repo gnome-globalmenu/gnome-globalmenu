@@ -26,7 +26,7 @@
 
 #include <config.h>
 #define GET_OBJECT(_s, sgmb, p) \
-	GnomenuMenuBar * sgmb = (GnomenuMenuBar*)_s; \
+	GtkMenuBar * sgmb = (GtkMenuBar*)_s; \
 	GnomenuMenuBarPrivate * p = GNOMENU_MENU_BAR_GET_PRIVATE(_s);
 
 #define GNOMENU_MENU_BAR_GET_PRIVATE(o)  \
@@ -138,7 +138,7 @@ static void _s_arrow_button_clicked		( GtkWidget * menubar,
 									  GtkWidget * arrow_button);
 static void _s_popup_menu_deactivated	( GtkWidget * menubar,
 									  GtkWidget * popup_menu);
-static void _build_popup_menu 		( GnomenuMenuBar * self);
+static void _build_popup_menu 		( GtkMenuBar * self);
 
 typedef struct {
 	gboolean overflowed;
@@ -865,13 +865,13 @@ _s_hierarchy_changed (GtkWidget *widget,
 			old_toplevel, _s_notify_has_toplevel_focus, menubar);
 		g_signal_handlers_disconnect_by_func(
 			old_toplevel, _s_toplevel_key_press, menubar);
-		gdkx_tools_remove_sms_filter(_sms_filter, menubar);
+		gdkx_tools_remove_sms_filter((GdkXToolsSMSFilterFunc)_sms_filter, menubar);
   }
   
   if (GTK_WIDGET_TOPLEVEL (toplevel)) {
 	if(GTK_WIDGET_REALIZED(toplevel)){
 		_update_widget_id(menubar);
-		gdkx_tools_add_sms_filter(toplevel->window, _sms_filter, menubar, TRUE);
+		gdkx_tools_add_sms_filter(toplevel->window, (GdkXToolsSMSFilterFunc) _sms_filter, menubar, TRUE);
 	}
 	g_signal_connect_swapped(toplevel, "realize",
 				G_CALLBACK(_s_toplevel_realize), menubar);
@@ -888,11 +888,12 @@ _s_hierarchy_changed (GtkWidget *widget,
 static void
 _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	_update_widget_id(menubar);
-	gdkx_tools_add_sms_filter(toplevel->window, _sms_filter, menubar, TRUE);
+	gdkx_tools_add_sms_filter(toplevel->window, 
+				(GdkXToolsSMSFilterFunc) _sms_filter, menubar, TRUE);
 }
 static void
 _s_toplevel_unrealize (GtkMenuBar * menubar, GtkWidget * toplevel){
-	gdkx_tools_remove_sms_filter(_sms_filter, menubar);
+	gdkx_tools_remove_sms_filter((GdkXToolsSMSFilterFunc)_sms_filter, menubar);
 }
 static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 	int i;
@@ -910,7 +911,7 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 			{
 			GdkWindow * window = _get_toplevel_gdk_window(menubar);
 
-			if(sms->p[1] != GDK_WINDOW_XWINDOW(window)) break;
+			if(sms->p[1] != (gpointer)GDK_WINDOW_XWINDOW(window)) break;
 
 			GtkMenuItem * item = sms->p[0];
 			if(GTK_IS_MENU_ITEM(item)){
@@ -1089,10 +1090,10 @@ gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_men
 			MenuItemInfo * info = g_hash_table_lookup(priv->menu_items,
 					item);
 			g_assert(info);
-			item->submenu = info->saved_submenu;
+			item->submenu = GTK_MENU(info->saved_submenu);
 		}
 	}
-	gtk_widget_queue_resize(menubar);
+	gtk_widget_queue_resize(GTK_WIDGET(menubar));
 }
 void 
 gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow) {
@@ -1147,7 +1148,7 @@ static void _s_item_notify_submenu(GtkMenuItem * item, GParamSpec * arg1,
 	MenuItemInfo * info = g_hash_table_lookup(priv->menu_items, item);
 	g_assert(info);
 	LOG("backup the submenu %p", item->submenu);
-	info->saved_submenu = gtk_menu_item_get_submenu(item);
+	info->saved_submenu = GTK_MENU_SHELL(gtk_menu_item_get_submenu(GTK_MENU_ITEM(item)));
 	if(priv->is_global_menu) item->submenu = NULL;
 }
 static void
@@ -1159,11 +1160,14 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	GTK_MENU_SHELL_CLASS(_menu_shell_class)->insert(menu_shell, widget, pos);
 	if(GTK_IS_MENU_ITEM(widget)){
 		item_info->menu_item = GTK_MENU_ITEM(widget);
-		item_info->saved_submenu = gtk_menu_item_get_submenu(widget);
+		item_info->saved_submenu = 
+			GTK_MENU_SHELL(gtk_menu_item_get_submenu(GTK_MENU_ITEM(widget)));
 	}
-	g_signal_connect(widget, "notify::submenu", _s_item_notify_submenu,
+	g_signal_connect(G_OBJECT(widget), "notify::submenu", 
+				(GCallback) _s_item_notify_submenu,
 				menu_shell);
-	g_signal_connect(widget, "mnemonic_activate", _s_item_mnemonic_activate,
+	g_signal_connect(G_OBJECT(widget), "mnemonic_activate", 
+				(GCallback) _s_item_mnemonic_activate,
 				menu_shell);
 	g_hash_table_insert(priv->menu_items, widget, item_info);
 }
@@ -1189,24 +1193,30 @@ static void _forall					( GtkContainer    *container,
 	}
 }
 static void _s_proxy_activate(GtkWidget * proxy, gpointer data){
-	gtk_menu_item_activate(g_object_get_data(proxy, "introspect-handle"));
+	gtk_menu_item_activate(GTK_MENU_ITEM(g_object_get_data(
+					G_OBJECT(proxy), 
+					"introspect-handle")));
 }
 static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){
-		g_signal_connect(widget,
+		g_signal_connect(G_OBJECT(widget),
 				"activate",
-				_s_proxy_activate, data);
+				(GCallback)_s_proxy_activate, data);
 	}
 }
 GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GtkMenuItem * proxy;
-	gchar * intro = gtk_widget_introspect(item);
+	gchar * intro = gtk_widget_introspect(GTK_WIDGET(item));
 	Builder * builder = builder_new();
 	builder_parse(builder, intro);
-	proxy = builder_get_object(builder, gtk_widget_get_id(item));
-	g_object_set_data_full(item, "menu-item-proxy", g_object_ref(proxy), g_object_unref);
-	builder_foreach(builder, setup_handler, NULL); 
+	proxy = GTK_MENU_ITEM(builder_get_object(builder, 
+						gtk_widget_get_id(GTK_WIDGET(item))));
+	g_object_set_data_full(G_OBJECT(item), 
+			"menu-item-proxy", 
+			g_object_ref(G_OBJECT(proxy)), 
+			g_object_unref);
+	builder_foreach(builder, (GHFunc) setup_handler, NULL); 
 	builder_destroy(builder);
 	return proxy;
 }
@@ -1214,7 +1224,7 @@ static void _remove_child ( GtkWidget * widget, GtkContainer * container){
     gtk_container_remove(container, widget); 
 }
 
-static void _build_popup_menu 	(GnomenuMenuBar * self){
+static void _build_popup_menu 	(GtkMenuBar * self){
 	GET_OBJECT(self, menu_bar, priv);
 	GList * list;
 	GList * node;
