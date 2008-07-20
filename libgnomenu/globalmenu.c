@@ -19,12 +19,23 @@
 #include "builder.h"
 #include "tools.h"
 #include "sms.h"
-
+#include <gdk/gdkx.h>
 G_DEFINE_TYPE(GnomenuGlobalMenu, gnomenu_global_menu, GTK_TYPE_CONTAINER);
 typedef struct {
 	int foo;
 } GnomenuGlobalMenuPrivate;
 
+GdkNativeWindow get_sms_window(GdkNativeWindow key) {
+	GdkNativeWindow * pwindow = gdkx_tools_get_window_prop(
+			gdkx_tools_lookup_window(key),
+			"GNOMENU_SMS_LISTENER", NULL);
+	GdkNativeWindow window = 0;
+	if(pwindow) {
+		window = * pwindow;
+		g_free(pwindow);
+	}
+	return window;
+}
 static void _s_activate(GtkMenuItem * menu_item, GtkWidget * menubar){
 	gpointer handle = g_object_get_data(menu_item, "introspect-handle");
 	GnomenuGlobalMenu * global_menu =
@@ -37,7 +48,7 @@ static void _s_activate(GtkMenuItem * menu_item, GtkWidget * menubar){
 	sms.p[0] = handle;
 	sms.p[1] = global_menu->active_key;
 	LOG("key = %p", global_menu->active_key);
-	gdkx_tools_send_sms_to(global_menu->active_key, &sms, sizeof(sms));
+	gdkx_tools_send_sms_to(get_sms_window(global_menu->active_key), &sms, sizeof(sms));
 }
 static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){
@@ -54,7 +65,7 @@ static gpointer build_menu_bar(GdkNativeWindow xwindow){
 		GnomenuMenuBar * built_menubar;
 		gchar * built_menubar_name ;
 		builder = builder_new();
-		gchar * introspection = gdkx_tools_get_window_prop(window, gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), NULL);
+		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR", NULL);
 		builder_parse(builder, introspection);
 		built_menubar_name = g_strdup_printf("%p", xwindow);
 		built_menubar = builder_get_object(builder, built_menubar_name);
@@ -158,7 +169,7 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 		gtk_widget_set_parent(menu_bar, self);
 	GnomenuSMS sms;
 	sms.action = UPDATE_INTROSPECTION;
-	gdkx_tools_send_sms_to(key, &sms, sizeof(sms));
+	gdkx_tools_send_sms_to(get_sms_window(key), &sms, sizeof(sms));
 	/*
 	GnomenuMenuBar * menu_bar = build_menu_bar(key);
 	global_menu->active_key = key;

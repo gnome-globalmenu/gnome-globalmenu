@@ -96,13 +96,30 @@ static gboolean _gdkx_tools_timeout(GdkXToolsPropFilterData * filter_data){
 	g_main_loop_quit(filter_data->loop);
 	return FALSE;
 }
-gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_name, gchar * buffer, gint size){
+gboolean gdkx_tools_set_window_prop(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size){
+	gboolean rt = TRUE;
+	Display *display = GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window));
+	Window w = GDK_WINDOW_XWINDOW(window);
+	Atom property = gdk_x11_atom_to_xatom(gdk_atom_intern(prop_name, FALSE));
+   	Atom type = gdk_x11_atom_to_xatom(gdk_atom_intern(prop_name, FALSE));
+	int format = 8;
+	int mode = PropModeReplace;
+	unsigned char *data = buffer;
+	int nelements = size;
+	gdk_error_trap_push();
+	XChangeProperty(display, w, property, type, format, mode, data, nelements);
+	if(gdk_error_trap_pop()) {
+		rt = FALSE;
+	}
+	return rt;
+}
+gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size){
 	GdkXToolsPropFilterData * filter_data = g_new0(GdkXToolsFilterData,1);
 	gboolean rt = TRUE;
 	Display *display = GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window));
 	Window w = GDK_WINDOW_XWINDOW(window);
-	Atom property = gdk_x11_atom_to_xatom(prop_name);
-   	Atom type = gdk_x11_atom_to_xatom(prop_name);
+	Atom property = gdk_x11_atom_to_xatom(gdk_atom_intern(prop_name, FALSE));
+   	Atom type = gdk_x11_atom_to_xatom(gdk_atom_intern(prop_name, FALSE));
 	int format = 8;
 	int mode = PropModeReplace;
 	unsigned char *data = buffer;
@@ -110,7 +127,7 @@ gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_nam
 	filter_data->type = GDKX_TOOLS_FILTER_TYPE_PROP;
 	filter_data->loop = g_main_loop_new(NULL, TRUE);
 	filter_data->window = window;
-	filter_data->prop_name = prop_name;
+	filter_data->prop_name = gdk_atom_intern(prop_name, FALSE);
 	filter_data->state = PropertyNewValue;
 	filter_data->been_timeout = FALSE;
 	guint timeout_id = g_timeout_add_seconds(3, _gdkx_tools_timeout, filter_data);
@@ -134,10 +151,10 @@ ex:
 	g_free(filter_data);
 	return rt;
 }
-gchar * gdkx_tools_get_window_prop(GdkWindow * window, GdkAtom prop_name, gint * bytes_return){
+gchar * gdkx_tools_get_window_prop(GdkWindow * window, const gchar * prop_name, gint * bytes_return){
 	Display *display = GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window));
 	Window w = GDK_WINDOW_XWINDOW(window);
-	Atom property = gdk_x11_atom_to_xatom(prop_name);
+	Atom property = gdk_x11_atom_to_xatom(gdk_atom_intern(prop_name, FALSE));
 	long long_offset = 0, long_length = -1;
 	Bool delete = FALSE;
 	Atom req_type = AnyPropertyType; 
@@ -232,7 +249,7 @@ static GList * _gnomenu_socket_find_targets(GdkScreen * screen, gchar * name){
 	return window_list;
 }
 gboolean gdkx_tools_send_sms(gchar * sms, int size){
-	GList * list = _gnomenu_socket_find_targets(gdk_screen_get_default(), "GNOMENU_SMS_BROADCAST_LISTENER");
+	GList * list = _gnomenu_socket_find_targets(gdk_screen_get_default(), "GNOMENU_SMS_LISTENER");
 	GList * node;
 	for(node = list; node; node = node->next)
 		gdkx_tools_send_sms_to(node->data, sms, size);
@@ -278,7 +295,7 @@ static GdkXToolsSMSFilterData * _gdkx_tools_find_sms_filter(GdkXToolsSMSFilterFu
 	}
 	return NULL;
 }
-void gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen){
+GdkWindow * gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen){
 	GdkXToolsSMSFilterData * filter_data;
 	GdkWindowAttr attr = {0};
 	/*FIXME: THREAD SAFETY! protect the list!*/
@@ -299,7 +316,7 @@ void gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, 
 	filter_data->private_window = FALSE;
 	if(!window ) {
 		attr.wclass = GDK_INPUT_ONLY;
-		attr.title = "GNOMENU_SMS_BROADCAST_LISTENER";
+		attr.title = "GNOMENU_SMS_LISTENER";
 		filter_data->window = gdk_window_new(gdk_get_default_root_window(), &attr, GDK_WA_TITLE);
 		filter_data->private_window = TRUE;
 	} else
@@ -308,6 +325,7 @@ void gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, 
 	sms_filter_list = g_list_append(sms_filter_list, filter_data);
 	gdk_window_add_filter(filter_data->window, _gdkx_tools_filter, filter_data);
 	GDK_THREADS_LEAVE();
+	return filter_data->window;
 }
 
 void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data){
@@ -383,4 +401,8 @@ gdkx_tools_ungrab_key (int      keycode,
 		  GDK_WINDOW_XWINDOW (root));
 
 }
-
+GdkWindow * gdkx_tools_lookup_window(GdkNativeWindow key){
+	GdkWindow * rt = gdk_window_lookup(key);
+	if(!rt) rt = gdk_window_foreign_new(key);
+	return rt;
+}

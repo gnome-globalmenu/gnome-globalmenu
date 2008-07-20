@@ -766,7 +766,14 @@ static void _invalidate_introspection ( GtkMenuBar * menubar){
 	g_return_if_fail(toplevel!= NULL);
 	if(GTK_IS_WINDOW(toplevel)) {
 		_update_introspection(menubar);
+	}
+	/*It is possible that after _update_introspection, the state of the widget has changed
+	 * since _update_introspection has a main_loop in it*/
+	if(GTK_IS_WIDGET(menubar)) {
+	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
+	if(GTK_IS_WINDOW(toplevel)) {
 		_send_refresh_global_menu_sms(menubar);
+	}
 	}
 }
 static gchar * _update_introspection ( GtkMenuBar * menubar){
@@ -779,7 +786,7 @@ static gchar * _update_introspection ( GtkMenuBar * menubar){
 			if(priv->is_global_menu) {
 				if(!old_intro || !g_str_equal(old_intro, priv->introspection))
 				gdkx_tools_set_window_prop_blocked(window , 
-					gdk_atom_intern("GNOMENU_MENU_BAR", FALSE), 
+					"GNOMENU_MENU_BAR", 
 					priv->introspection, 
 					strlen(priv->introspection)+1);
 			}
@@ -888,16 +895,19 @@ _s_hierarchy_changed (GtkWidget *widget,
 static void
 _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	_update_widget_id(menubar);
+	gboolean frozen;
 	if(gnomenu_menu_bar_get_is_global_menu(menubar)){
 		_invalidate_introspection(menubar);
-		gdkx_tools_add_sms_filter(toplevel->window, 
+		frozen = FALSE;
+	} else {
+		frozen = TRUE;
+	}
+	GdkWindow * window = gdkx_tools_add_sms_filter(NULL, 
 					(GdkXToolsSMSFilterFunc) _sms_filter, menubar,
 					FALSE);
-	} else {
-		gdkx_tools_add_sms_filter(toplevel->window, 
-					(GdkXToolsSMSFilterFunc) _sms_filter, menubar,
-					TRUE);
-	}
+	GdkNativeWindow data = GDK_WINDOW_XWINDOW(window);
+	gdkx_tools_set_window_prop(toplevel->window, "GNOMENU_SMS_LISTENER",
+			&data, sizeof(GdkNativeWindow));
 }
 static void
 _s_toplevel_unrealize (GtkMenuBar * menubar, GtkWidget * toplevel){
@@ -1203,7 +1213,6 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	MenuItemInfo * item_info = g_new0(MenuItemInfo, 1);
 
 	GET_OBJECT(menu_shell, menu_bar, priv);
-	GTK_MENU_SHELL_CLASS(_menu_shell_class)->insert(menu_shell, widget, pos);
 	if(GTK_IS_MENU_ITEM(widget)){
 		item_info->menu_item = GTK_MENU_ITEM(widget);
 	}
@@ -1211,6 +1220,7 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 				(GCallback) _s_item_mnemonic_activate,
 				menu_shell);
 	g_hash_table_insert(priv->menu_items, widget, item_info);
+	GTK_MENU_SHELL_CLASS(_menu_shell_class)->insert(menu_shell, widget, pos);
 }
 static void
 _remove (GtkContainer * container, GtkWidget * widget){
