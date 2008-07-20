@@ -57,3 +57,23 @@ gchar * gtk_widget_introspect(GtkWidget * widget){
 #endif
 	return rt;
 }
+typedef struct {
+	gchar * name;
+	gpointer data;
+} tree_set_data_t;
+
+static void _tree_transverse (GtkWidget * widget, tree_set_data_t * data) {
+	g_object_set_data(widget, data->name, data->data);
+	if(GTK_IS_CONTAINER(widget)){
+		gtk_container_forall(widget, _tree_transverse, data);
+	}
+	if(GTK_IS_MENU_ITEM(widget)){
+		GtkMenu * submenu = gtk_menu_item_get_submenu(widget);
+		if(G_TYPE_IS_OBJECT(submenu))
+			_tree_transverse(submenu, data);
+	}
+}
+void gtk_widget_tree_set_data(GtkWidget * widget, gchar * name, gpointer data){
+	tree_set_data_t pass_to_children = { name, data};
+	_tree_transverse(widget, &pass_to_children);
+}

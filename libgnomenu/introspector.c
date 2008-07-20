@@ -148,7 +148,8 @@ static void _introspector_visit_widget_properties(Introspector * spector, GtkWid
 			HANDLE_TYPE(FLOAT, "f", float);
 			HANDLE_TYPE(DOUBLE, "lf", double);
 			case G_TYPE_STRING:
-			prop_value_content = g_markup_escape_text(g_value_get_string(&prop_value), -1);
+				prop_value_content = g_value_get_string(&prop_value);
+				prop_value_content = prop_value_content?g_markup_escape_text(prop_value_content, -1):NULL;
 			break;
 			default:
 			if(G_VALUE_HOLDS(&prop_value, GTK_TYPE_WIDGET)){

@@ -169,7 +169,8 @@ gboolean gdkx_tools_send_sms(gchar * sms, int size){
 	g_string_append(string, "sending sms:");
 	g_string_append_printf(string, "%d, ", event.data.b[0]);
 	for(i = 1; i< 18; i++){
-		g_string_append_printf(string, "%0.2X ", (unsigned)event.data.b[i]);
+		guint b = (guchar)event.data.b[i];
+		g_string_append_printf(string, "%0.2X ", b);
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
@@ -193,7 +194,8 @@ gboolean gdkx_tools_send_sms_to(GdkNativeWindow target, gchar * sms, int size){
 	g_string_append(string, "sending sms:");
 	g_string_append_printf(string, "%d, ", event.data.b[0]);
 	for(i = 1; i< 18; i++){
-		g_string_append_printf(string, "%0.2X ", (unsigned)event.data.b[i]);
+		guint b = (guchar)event.data.b[i];
+		g_string_append_printf(string, "%0.2X ", b);
 	}
 	LOG("%s", string->str);
 	g_string_free(string, TRUE);
