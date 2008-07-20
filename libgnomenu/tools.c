@@ -28,6 +28,7 @@ typedef struct _GdkXToolsPropFilterData{
 	GdkWindow * window;
 	GMainLoop * loop;
 	int state;
+	gboolean been_timeout;
 } GdkXToolsPropFilterData;
 
 struct _GdkXToolsSMSFilterData {
@@ -90,6 +91,11 @@ static GdkFilterReturn _gdkx_tools_filter(GdkXEvent * gdkxevent, GdkEvent * even
 	}
 	return GDK_FILTER_CONTINUE;
 }
+static gboolean _gdkx_tools_timeout(GdkXToolsPropFilterData * filter_data){
+	filter_data->been_timeout = TRUE;
+	g_main_loop_quit(filter_data->loop);
+	return FALSE;
+}
 gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_name, gchar * buffer, gint size){
 	GdkXToolsPropFilterData * filter_data = g_new0(GdkXToolsFilterData,1);
 	gboolean rt = TRUE;
@@ -106,6 +112,8 @@ gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_nam
 	filter_data->window = window;
 	filter_data->prop_name = prop_name;
 	filter_data->state = PropertyNewValue;
+	filter_data->been_timeout = FALSE;
+	guint timeout_id = g_timeout_add_seconds(3, _gdkx_tools_timeout, filter_data);
 	gdk_window_add_filter(window, _gdkx_tools_filter, filter_data);
 	gdk_window_set_events(window, gdk_window_get_events(window) |GDK_PROPERTY_CHANGE_MASK);
 	gdk_error_trap_push();
@@ -120,7 +128,9 @@ gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, GdkAtom prop_nam
 		GDK_THREADS_ENTER();
 	}
 ex:
+	g_source_remove(timeout_id);
 	gdk_window_remove_filter(window, _gdkx_tools_filter, filter_data);
+	rt = filter_data->been_timeout;
 	g_free(filter_data);
 	return rt;
 }

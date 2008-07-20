@@ -84,6 +84,7 @@ struct _GnomenuMenuBarPrivate
 };
 
 static guint parent_set_emission_hook_id;
+static guint parent_set_emission_hook_count = 0;
 
 
 static void gnomenu_menu_bar_set_property      (GObject             *object,
@@ -140,11 +141,6 @@ static void _s_popup_menu_deactivated	( GtkWidget * menubar,
 									  GtkWidget * popup_menu);
 static void _build_popup_menu 		( GtkMenuBar * self);
 
-static gboolean
-_notify_submenu_emission_hook (GSignalInvocationHint *ihint,
-			  guint                  n_param_values,
-			  const GValue          *param_values,
-			  gpointer               data);
 static gboolean
 _parent_set_emission_hook (GSignalInvocationHint *ihint,
 			  guint                  n_param_values,
@@ -242,11 +238,6 @@ gnomenu_menu_bar_class_init (GnomenuMenuBarClass *class)
 			  TRUE, 
 			  G_PARAM_READABLE | G_PARAM_WRITABLE));
 
-	parent_set_emission_hook_id = 
-			g_signal_add_emission_hook (
-				g_signal_lookup ("parent-set", GTK_TYPE_WIDGET), 
-				0, _parent_set_emission_hook, 
-				NULL, NULL);
 }
 
 static void _menu_item_info_free(MenuItemInfo * info){
@@ -268,7 +259,14 @@ gnomenu_menu_bar_init (GnomenuMenuBar *object)
 	priv->is_global_menu = TRUE;
 	priv->introspection = NULL;
 	/*keyvals + modifier = 2 * guint*/
-	
+	if(parent_set_emission_hook_count == 0) {
+		parent_set_emission_hook_id = 
+			g_signal_add_emission_hook (
+				g_signal_lookup ("parent-set", GTK_TYPE_WIDGET), 
+				0, _parent_set_emission_hook, 
+				NULL, NULL);
+		parent_set_emission_hook_count ++;
+	}
 }
 
 GtkWidget*
@@ -952,7 +950,6 @@ _parent_set_emission_hook (GSignalInvocationHint *ihint,
 			  gpointer               data)
 {
 	GtkWidget *instance = g_value_get_object (param_values);
-
 	if (GTK_IS_MENU_ITEM (instance)) {
 		GtkWidget *previous_parent = g_value_get_object (param_values + 1);
 		GtkWidget *menu_shell      = NULL;
@@ -1175,8 +1172,16 @@ _dispose (GObject * _object){
 	GET_OBJECT(_object, menu_bar, priv);
 	if(!priv->disposed){
 		priv->disposed = TRUE;	
+		parent_set_emission_hook_count --;
+		if(parent_set_emission_hook_count == 0) {
+			g_signal_remove_emission_hook(
+					g_signal_lookup ("parent-set", GTK_TYPE_WIDGET), 
+					parent_set_emission_hook_id);
+		}
 		g_hash_table_remove_all(priv->menu_items);
+		g_object_ref(priv->arrow_button);
 		gtk_widget_unparent(priv->arrow_button);
+		g_object_unref(priv->arrow_button);
 	}
 	G_OBJECT_CLASS(_menu_shell_class)->dispose(_object);
 }
