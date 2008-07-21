@@ -65,7 +65,6 @@ static gpointer build_menu_bar(GdkNativeWindow key){
 		gchar * built_menubar_name ;
 		builder = builder_new();
 		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR", NULL);
-		g_message("%s", introspection);
 		builder_parse(builder, introspection);
 		built_menubar_name = g_strdup_printf("%p", key);
 		built_menubar = builder_get_object(builder, built_menubar_name);
