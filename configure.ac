@@ -91,7 +91,7 @@ if test "$enable_gnome_applet" = "yes"; then
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
 	AC_DEFINE(ENABLE_GNOME_APPLET)
-	BONOBO_SERVER_FILES_PATH=`pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
+	BONOBO_SERVER_FILES_PATH=`pkg-config --define-variable=prefix=\$prefix --variable=libdir bonobo-activation-2.0`/bonobo/servers
 	AC_SUBST(BONOBO_SERVER_FILES_PATH)
 fi
 dnl end:gnome-globalemnu-applet

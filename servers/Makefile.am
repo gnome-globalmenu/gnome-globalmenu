@@ -18,8 +18,8 @@ libexec_PROGRAMS += gnome-globalmenu-applet
 
 APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
 
-#serverdir       = $(libdir)/bonobo/servers
-serverdir = $(BONOBO_SERVER_FILES_PATH)
+serverdir       = $(libdir)/bonobo/servers
+#serverdir = $(BONOBO_SERVER_FILES_PATH)
 server_in_files = GNOME_GlobalMenuApplet.server.in
 server_DATA     = $(server_in_files:.server.in=.server)
 
@@ -37,8 +37,8 @@ endif
 if ENABLE_XFCE_PLUGIN
 #libexec_PROGRAMS += xfce-globalmenu-plugin
 PLUGIN_LOCATION = $(libexecdir)/xfce-globalmenu-plugin
-#desktopdir = $(datadir)/xfce4/panel-plugins
-desktopdir = $(XFCE_DESKTOP_FILES_PATH)
+desktopdir = $(datadir)/xfce4/panel-plugins
+#desktopdir = $(XFCE_DESKTOP_FILES_PATH)
 desktop_in_files = xfce-globalmenu-plugin.desktop.in
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 $(desktop_in_files): $(desktop_in_files:.desktop.in=.desktop.in.in) Makefile
@@ -54,17 +54,13 @@ endif
 
 
 DISTCLEANFILES = 
-VAST_SOURCE_CODE = application.h \
-	application.c \
-	menuserver.h \
-	menuserver.c \
+VAST_SOURCE_CODE = \
 	intl.h \
-	utils.c \
-	utils.h \
 	log.h 
 
 gnome_globalmenu_applet_SOURCES = \
-	main-gnome.c
+	main-gnome.c \
+	$(VAST_SOURCE_CODE)
 gnome_globalmenu_applet_CFLAGS = \
 	$(GNOME_GLOBALMENU_APPLET_CFLAGS)
 gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
@@ -73,8 +69,6 @@ gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
 
 xfce_globalmenu_plugin_SOURCES = \
 	main-xfce.c \
-	application-xfce.h \
-	application-xfce.c \
 	$(VAST_SOURCE_CODE)
 xfce_globalmenu_plugin_CFLAGS =\
 	$(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
@@ -82,7 +76,8 @@ xfce_globalmenu_plugin_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
 				$(XFCE_GLOBALMENU_PLUGIN_LIBS)
 
 gtk_globalmenu_server_SOURCES = \
-	main.c
+	main.c \
+	$(VAST_SOURCE_CODE)
 gtk_globalmenu_server_CFLAGS =\
 	$(GLOBALMENU_SERVER_CFLAGS)
 gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\

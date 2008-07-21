@@ -19,11 +19,10 @@
 static void
 xfce_applet_construct(XfcePanelPlugin *plugin)
 {
-	Application * app;
 	g_print("constructing plugin\n");
-	app = application_xfce_new(GTK_WIDGET(plugin));
+//	app = application_xfce_new(GTK_WIDGET(plugin));
 	gtk_widget_show_all(GTK_WIDGET(plugin));
-	application_start(app);
+	//application_start(app);
 }
 
 XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL(xfce_applet_construct)

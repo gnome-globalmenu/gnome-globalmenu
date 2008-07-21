@@ -41,7 +41,7 @@ static void _s_activate(GtkMenuItem * menu_item, GtkWidget * menubar){
 	GnomenuGlobalMenu * global_menu =
 		gtk_widget_get_parent(menubar);
 	g_return_if_fail(GNOMENU_IS_GLOBAL_MENU(global_menu));
-	if(menu_item->submenu != NULL) return;
+//	if(menu_item->submenu != NULL) return;
 	GnomenuSMS sms;
 	LOG("menu item activated, handle = %p", handle);
 	sms.action = MENUITEM_CLICKED;

@@ -1188,7 +1188,7 @@ _finalize(GObject * _object){
 	gtk_widget_destroy(GTK_WIDGET(priv->popup_menu));
 	G_OBJECT_CLASS(_menu_shell_class)->finalize(_object);
 }
-static gboolean _s_item_mnemonic_activate(GtkWidget * menu_item, gboolean group_cycling,
+static gboolean _s_item_activate(GtkWidget * menu_item, 
 		GtkMenuShell * menu_shell){
 	GET_OBJECT(menu_shell, menu_bar, priv);
 	LOG("mnemonic activated %p", menu_item);
@@ -1204,8 +1204,8 @@ _insert (GtkMenuShell * menu_shell, GtkWidget * widget, gint pos){
 	if(GTK_IS_MENU_ITEM(widget)){
 		item_info->menu_item = GTK_MENU_ITEM(widget);
 	}
-	g_signal_connect(G_OBJECT(widget), "mnemonic_activate", 
-				(GCallback) _s_item_mnemonic_activate,
+	g_signal_connect(G_OBJECT(widget), "activate", 
+				(GCallback) _s_item_activate,
 				menu_shell);
 	g_hash_table_insert(priv->menu_items, widget, item_info);
 	GTK_MENU_SHELL_CLASS(_menu_shell_class)->insert(menu_shell, widget, pos);
@@ -1215,7 +1215,7 @@ _remove (GtkContainer * container, GtkWidget * widget){
 	GET_OBJECT(container, menu_bar, priv);
 	GTK_CONTAINER_CLASS(_menu_shell_class)->remove(container, widget);
 
-	g_signal_handlers_disconnect_by_func(widget, _s_item_mnemonic_activate, container);
+	g_signal_handlers_disconnect_by_func(widget, _s_item_activate, container);
 	g_hash_table_remove(priv->menu_items, widget);
 }
 static void _forall					( GtkContainer    *container,

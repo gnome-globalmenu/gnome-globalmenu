@@ -82,6 +82,6 @@ gnomenu-enums.h: $(gnomenu_enum_headers)
         $(gnomenu_enum_headers) > $@ 
 
 CLEANFILES = $(BUILT_SOURCES)
-
+EXTRA_DIST = libgnomenu.conf
 dist-hook:
 	cd $(distdir) ;
