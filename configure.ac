@@ -150,6 +150,7 @@ gtk+-aqd/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
+doc/reference/libgtkhotkey/Makefile
 libgnomenu/libgnomenu.pc
 servers/Makefile
 test/Makefile
