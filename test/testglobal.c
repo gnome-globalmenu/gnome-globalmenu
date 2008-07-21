@@ -12,7 +12,6 @@ int main (int argc, char **argv){
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	//gtk_window_set_accept_focus (window, FALSE);
 	globalmenu = gnomenu_global_menu_new();
-	globalmenu->auto_switch = TRUE;
 	box = gtk_vbox_new(0, FALSE);
 	gtk_container_add(window, box);
 	gtk_container_add(box, globalmenu);
