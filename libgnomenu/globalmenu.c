@@ -84,17 +84,13 @@ static gpointer build_menu_bar(GdkNativeWindow key){
 }
 static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 	GET_OBJECT(self, global_menu, priv);
-	gpointer key;
+	GdkNativeWindow key;
+	gpointer handle;
 	GnomenuMenuBar * menu_bar;
 	switch(sms->action) {
-	case MENUBAR_ACTIVATED:
-		if(self->auto_switch){
-			key = sms->w[0];
-			gnomenu_global_menu_switch(self, key);
-		}
-		break;
 	case INTROSPECTION_UPDATED:
 		key = sms->w[0];
+		handle = sms->w[1];
 		if(key == self->active_key){
 			if(global_menu->active_menu_bar)
 				gtk_widget_unparent(global_menu->active_menu_bar);

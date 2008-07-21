@@ -31,7 +31,6 @@ struct _GnomenuGlobalMenu
 	GHashTable * cache;
 	gpointer active_key;
 	GnomenuMenuBar * active_menu_bar;
-	gboolean auto_switch;
 };
 
 /**

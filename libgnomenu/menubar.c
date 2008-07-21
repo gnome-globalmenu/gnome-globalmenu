@@ -754,6 +754,7 @@ static void _send_refresh_global_menu_sms (GtkMenuBar * menubar){
 	if(window) {
 		sms.action = INTROSPECTION_UPDATED;
 		sms.w[0] = GDK_WINDOW_XWINDOW(window);
+		sms.w[1] = menubar;
 		gdkx_tools_send_sms(&sms, sizeof(sms));
 	}
 }
