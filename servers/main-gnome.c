@@ -70,6 +70,9 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	GladeXML * xml;
 	GtkContainer * box;
 	xml = glade_xml_new("GnomenuServerApplet.glade", NULL, NULL);
+	if(!xml)
+		xml = glade_xml_new(GLADEDIR"/GnomenuServerApplet.glade", NULL, NULL);
+	g_assert(xml);
 	GnomenuGlobalMenu * globalmenu;
 	globalmenu = glade_xml_get_widget(xml, "globalmenu");
 	box = glade_xml_get_widget(xml, "GnomenuServerApplet");

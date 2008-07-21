@@ -32,6 +32,9 @@ int main(int argc, char * argv[]){
 	gtk_hotkey_info_bind(hkf10, NULL);
 	gnomenu_global_menu_get_type();
 	xml = glade_xml_new("GnomenuServerWindow.glade", NULL, NULL);
+	if(!xml)
+		xml = glade_xml_new(GLADEDIR"/GnomenuServerWindow.glade", NULL, NULL);
+	g_assert(xml);
 	window = glade_xml_get_widget(xml, "GnomenuServerWindow");
 	globalmenu = glade_xml_get_widget(xml, "globalmenu");
 //	globalmenu->auto_switch = TRUE;
