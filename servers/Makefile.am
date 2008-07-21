@@ -1,110 +1,80 @@
 AM_CPPFLAGS = -I$(top_srcdir) \
 				-DLOCALEDIR=\"${GNOME_GLOBALMENU_LOCALEDIR}\" 
-if MAINTAINER_MODE
-AM_CPPFLAGS += -DGLADEDIR=\".\"
-else
 AM_CPPFLAGS += -DGLADEDIR=\"$(pkgdatadir)\"
-endif 
-#if with xfce, libexec_PROGRAM= xfce-globalmenu-plugin or whatever.
+LIBS = $(top_builddir)/libgnomenu/libgnomenu.la \
+		$(top_builddir)/libgtkhotkey/libgtkhotkey.la
 
 libexec_PROGRAMS =
-bin_PROGRAMS = 
 
 gladedir = $(pkgdatadir)
-glade_DATA = application.glade
+glade_DATA = application.glade GnomenuServerApplet.glade GnomenuServerWindow.glade
+
+@INTLTOOL_SERVER_RULE@
+@INTLTOOL_SCHEMAS_RULE@
+@INTLTOOL_DESKTOP_RULE@
+
+bonobo_data     = GNOME_GlobalMenuApplet.server
+schemas_data = gnome-globalmenu-applet.schemas
+plugin_data = xfce-globalmenu-plugin.desktop
 
 if ENABLE_GNOME_APPLET 
 libexec_PROGRAMS += gnome-globalmenu-applet
 
 APPLET_LOCATION = $(libexecdir)/gnome-globalmenu-applet
-
-#serverdir       = $(libdir)/bonobo/servers
-serverdir = $(BONOBO_SERVER_FILES_PATH)
-server_in_files = GNOME_GlobalMenuApplet.server.in
-server_DATA     = $(server_in_files:.server.in=.server)
-
-$(server_in_files): $(server_in_files:.server.in=.server.in.in) Makefile
-	sed -e "s|\@LOCATION\@|$(APPLET_LOCATION)|" \
-	    $< > $@
-@INTLTOOL_SERVER_RULE@
-
+bonobodir       = $(libdir)/bonobo/servers
 schemasdir       = $(sysconfdir)/gconf/schemas
-schemas_in_files = gnome-globalmenu-applet.schemas.in
-schemas_DATA     = $(schemas_in_files:.schemas.in=.schemas)
-@INTLTOOL_SCHEMAS_RULE@
-
+bonobo_DATA = $(bonobo_data)
+schemas_DATA = $(schemas_data)
 endif
 if ENABLE_XFCE_PLUGIN
 libexec_PROGRAMS += xfce-globalmenu-plugin
 PLUGIN_LOCATION = $(libexecdir)/xfce-globalmenu-plugin
-#desktopdir = $(datadir)/xfce4/panel-plugins
-desktopdir = $(XFCE_DESKTOP_FILES_PATH)
-desktop_in_files = xfce-globalmenu-plugin.desktop.in
-desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
-$(desktop_in_files): $(desktop_in_files:.desktop.in=.desktop.in.in) Makefile
+plugindir = $(datadir)/xfce4/panel-plugins
+plugin_DATA = $(plugin_data)
+endif
+
+
+$(bonobo_data:%=%.in): $(bonobo_data:%=%.in.in) Makefile
+	sed -e "s|\@LOCATION\@|$(APPLET_LOCATION)|" \
+	    $< > $@
+$(plugin_data:%=%.in): $(plugin_data:%=%.in.in) Makefile
 	sed -e "s|\@LOCATION\@|$(PLUGIN_LOCATION)|" \
 	    $< > $@
-@INTLTOOL_DESKTOP_RULE@
 
-endif
 
-if ENABLE_STANDALONE
-bin_PROGRAMS += gtk-globalmenu-server
-endif
-
+bin_PROGRAMS = gtk-globalmenu-server
 
 DISTCLEANFILES = 
-VAST_SOURCE_CODE = application.h \
-	application.c \
-	menuserver.h \
-	menuserver.c \
+VAST_SOURCE_CODE = \
 	intl.h \
-	utils.c \
-	utils.h \
 	log.h 
 
 gnome_globalmenu_applet_SOURCES = \
 	main-gnome.c \
-	application-gnome.c \
-	application-gnome.h \
-	appmenu.c \
-	appmenu.h \
 	$(VAST_SOURCE_CODE)
-gnome_globalmenu_applet_CFLAGS = \
-	$(GNOME_GLOBALMENU_APPLET_CFLAGS)
-gnome_globalmenu_applet_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la \
-				$(GNOME_GLOBALMENU_APPLET_LIBS)
+gnome_globalmenu_applet_CFLAGS = $(GNOME_GLOBALMENU_APPLET_CFLAGS)
+gnome_globalmenu_applet_LDADD = $(GNOME_GLOBALMENU_APPLET_LIBS)
 
 xfce_globalmenu_plugin_SOURCES = \
 	main-xfce.c \
-	application-xfce.h \
-	application-xfce.c \
 	$(VAST_SOURCE_CODE)
-xfce_globalmenu_plugin_CFLAGS =\
-	$(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
-xfce_globalmenu_plugin_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
-				$(XFCE_GLOBALMENU_PLUGIN_LIBS)
+xfce_globalmenu_plugin_CFLAGS = $(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
+xfce_globalmenu_plugin_LDADD = $(XFCE_GLOBALMENU_PLUGIN_LIBS)
 
 gtk_globalmenu_server_SOURCES = \
 	main.c \
-	appmenu.c \
-	appmenu.h \
 	$(VAST_SOURCE_CODE)
-gtk_globalmenu_server_CFLAGS =\
-	$(GLOBALMENU_SERVER_CFLAGS)
-gtk_globalmenu_server_LDADD = $(top_builddir)/libgnomenu/libgnomenu.la	\
-				$(GLOBALMENU_SERVER_LIBS)
+gtk_globalmenu_server_CFLAGS = $(GLOBALMENU_SERVER_CFLAGS)
+gtk_globalmenu_server_LDADD = $(GLOBALMENU_SERVER_LIBS)
 
-
-				
-DISTCLEANFILES += $(server_file_DATA) GNOME_GlobalMenuApplet.server.in xfce-globalmenu-plugin.desktop.in xfce-globalmenu-plugin.desktop gnome-globalmenu-applet.schemas
+DISTCLEANFILES += $(bonobo_data) $(bonobo_data:%=%.in) $(plugin_data) $(plugin_data:%=%.in) $(schemas_data)
 
 EXTRA_DIST = \
-	gnome-globalmenu-applet.schemas.in \
-	GNOME_GlobalMenuApplet.server.in.in \
-	xfce-globalmenu-plugin.desktop.in.in \
-	application.glade 
+		$(bonobo_data:%=%.in.in) \
+		$(schemas_data:%=%.in) \
+		$(plugin_data:%=%.in.in) \
+		$(glade_DATA)
 
 install-data-local:
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
-		gconftool-2 --makefile-install-rule $(schemas_DATA)
+		gconftool-2 --makefile-install-rule $(schemas_data)

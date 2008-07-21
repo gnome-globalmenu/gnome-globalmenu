@@ -3,19 +3,45 @@
 
 enum {
 	SET_PROP,
+	SEND_SMS,
 	BN_MAX,
 };
 GtkButton * buttons[BN_MAX];
+static void filter(gpointer data, gchar * sms, gint size){
+	g_message("sms: %s, data: %p", sms, data);
+}
 static void button_clicked(GtkWidget * button, GtkWidget * window){
-	char prop_value[] = "this is a test";
-	char *prop_value_got;
-	int i;
-	for(i=0; i< 100; i++){
-		_gdkx_tools_set_window_prop_blocked(window->window, gdk_atom_intern("TEST_PROP", FALSE), prop_value, sizeof(prop_value));
-		prop_value_got = _gdkx_tools_get_window_prop(window->window, gdk_atom_intern("TEST_PROP", FALSE), NULL);
-		g_message("value got: %s", prop_value_got);
-		g_assert(g_str_equal(prop_value_got,prop_value));
-		g_free(prop_value_got);
+	int btn;
+	for(btn = 0; btn < BN_MAX; btn++){
+		if(buttons[btn] == button) break;
+	}
+	switch(btn){
+		case SET_PROP: 
+		{
+			char prop_value[] = "this is a test";
+			char *prop_value_got;
+			int i;
+			for(i=0; i< 10000; i++){
+				gdkx_tools_set_window_prop_blocked(window->window, gdk_atom_intern("TEST_PROP", FALSE), prop_value, sizeof(prop_value));
+				prop_value_got = gdkx_tools_get_window_prop(window->window, gdk_atom_intern("TEST_PROP", FALSE), NULL);
+				g_message("value got: %s", prop_value_got);
+				g_assert_cmpstr(prop_value_got, ==, prop_value);
+				g_free(prop_value_got);
+			}
+		}
+		break;
+		case SEND_SMS:
+		{
+			char sms_data[] = "this is a sms";
+			int i;
+			for(i=0; i<10; i++){
+			gdkx_tools_add_sms_filter(NULL, filter, NULL, FALSE);
+			if(!gdkx_tools_send_sms(sms_data, sizeof(sms_data))){
+				g_message("failure sending sms");
+			}
+			}
+		}
+		break;
 	}
 }
 int main(int argc, char* argv[]){
@@ -32,6 +58,7 @@ int main(int argc, char* argv[]){
 			G_CALLBACK(button_clicked), window);\
 	gtk_box_pack_start_defaults(box, GTK_WIDGET(buttons[bn]));
 	ADD_BUTTON(SET_PROP);
+	ADD_BUTTON(SEND_SMS);
 	gtk_widget_show_all(window);
 
 	gtk_main();

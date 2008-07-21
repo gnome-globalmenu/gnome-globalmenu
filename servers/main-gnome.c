@@ -2,75 +2,86 @@
 
 #include <gtk/gtk.h>
 
-
+#include <glade/glade.h>
 #include <panel-applet.h>
-#include "libgnomenu/serverhelper.h"
-#include "application-gnome.h"
+#include <libgnomenu/globalmenu.h>
 
 #include "log.h"
 
 #include "intl.h"
+#define WNCK_I_KNOW_THIS_IS_UNSTABLE
+#include <libwnck/libwnck.h>
+#undef WNCK_I_KNOW_THIS_IS_UNSTABLE
 
 #define FACTORY_IID "OAFIID:GNOME_GlobalMenuApplet_Factory"
 #define APPLET_IID "OAFIID:GNOME_GlobalMenuApplet"
 
 #define APP_NAME "gnome-globalmenu-applet"
-#define APP_VERSION "4"
+#define APP_VERSION "5"
 
 
 static _change_background ( PanelApplet * applet, 
 							PanelAppletBackgroundType bgtp,
 							GdkColor * color,
 							GdkPixmap * pixmap,
-							Application * app){
+							gpointer app){
 	GtkStyle * style = gtk_widget_get_style(applet);
 	switch(bgtp){
 		case PANEL_NO_BACKGROUND:
-			application_set_background(app, &style->bg[GTK_STATE_NORMAL], NULL);
 		break;
 		case PANEL_COLOR_BACKGROUND:
-			application_set_background(app, color, NULL);
 		break;
 		case PANEL_PIXMAP_BACKGROUND:
-			LOG("background");
-			application_set_background(app, NULL, pixmap);
 		break;
 	}
 }
 static void _change_orient(PanelApplet * applet,
 						PanelAppletOrient ori,
-						Application * app){
+						gpointer app){
 	switch(ori){
 		case PANEL_APPLET_ORIENT_UP:
-			g_object_set(app, "orientation", GNOMENU_ORIENT_TOP, NULL);
 		break;
 		case PANEL_APPLET_ORIENT_DOWN:
-			g_object_set(app, "orientation", GNOMENU_ORIENT_BOTTOM, NULL);
 		break;
 		case PANEL_APPLET_ORIENT_LEFT:
-			g_object_set(app, "orientation", GNOMENU_ORIENT_LEFT, NULL);
 		break;
 		case PANEL_APPLET_ORIENT_RIGHT:
-			g_object_set(app, "orientation", GNOMENU_ORIENT_RIGHT, NULL);
 		break;
 	}
+}
+static void 
+	_s_screen_active_window_changed	(WnckScreen * screen, WnckWindow * previous, GnomenuGlobalMenu * global_menu){
+	WnckWindow * active = wnck_screen_get_active_window(screen);
+	if (!active) return;
+	if( wnck_window_get_pid(active) == getpid()){
+		return;
+	}
+	gnomenu_global_menu_switch(global_menu, wnck_window_get_xid(active));
 }
 static gboolean globalmenu_applet_factory (PanelApplet *applet,
                                         const gchar *iid,
                                         gpointer data){
-	Application * App;
   if (g_str_equal(iid, APPLET_IID)){
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
+	gnomenu_global_menu_get_type();
 	panel_applet_set_background_widget(applet, applet);
-	App = application_gnome_new(applet);
-	g_signal_connect(G_OBJECT(applet), "change-background", 
-				_change_background, App);
-	g_signal_connect(G_OBJECT(applet), "change-orient", 
-				_change_orient, App);
+	GladeXML * xml;
+	GtkContainer * box;
+	xml = glade_xml_new("GnomenuServerApplet.glade", NULL, NULL);
+	if(!xml)
+		xml = glade_xml_new(GLADEDIR"/GnomenuServerApplet.glade", NULL, NULL);
+	g_assert(xml);
+	GnomenuGlobalMenu * globalmenu;
+	globalmenu = glade_xml_get_widget(xml, "globalmenu");
+	box = glade_xml_get_widget(xml, "GnomenuServerApplet");
+	glade_xml_signal_autoconnect(xml);
+	g_signal_connect(wnck_screen_get_default(),
+			"active-window-changed", G_CALLBACK(_s_screen_active_window_changed), globalmenu);
+	gtk_container_add(applet, box);
 	gtk_widget_show_all(applet);
-	application_start(App);
+
     return TRUE;
   } else {
 	return FALSE;

@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, 0.4)
+AC_INIT(gnome-globalmenu, 0.5)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 GNOME_COMMON_INIT
@@ -47,12 +47,18 @@ dnl end:tracing
 dnl begin:libgnomenu
 
 PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
-PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10, gdk-2.0])
+PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10 gdk-2.0 libglade-2.0])
 AC_SUBST(LIBGNOMENU_CFLAGS)
 AC_SUBST(LIBGNOMENU_LIBS)
 AC_SUBST(TEST_SUITE_CFLAGS)
 AC_SUBST(TEST_SUITE_LIBS)
 dnl end:libgnomenu
+
+dnl begin:libgtkhotkey
+PKG_CHECK_MODULES(GTK_HOTKEY, [glib-2.0 >= 2.15.6 gobject-2.0 >= 2.15.6 gio-2.0 >= 2.15.6 gtk+-2.0 >= 2.12])
+	AC_SUBST(GTK_HOTKEY_CFLAGS)
+	AC_SUBST(GTK_HOTKEY_LIBS)
+dnl end:
 
 dnl begin:gtk-globalmenu-server
 AC_MSG_CHECKING(--enable-standalone argument)
@@ -85,7 +91,7 @@ if test "$enable_gnome_applet" = "yes"; then
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
 	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
 	AC_DEFINE(ENABLE_GNOME_APPLET)
-	BONOBO_SERVER_FILES_PATH=`pkg-config --variable=libdir bonobo-activation-2.0`/bonobo/servers
+	BONOBO_SERVER_FILES_PATH=`pkg-config --define-variable=prefix=\$prefix --variable=libdir bonobo-activation-2.0`/bonobo/servers
 	AC_SUBST(BONOBO_SERVER_FILES_PATH)
 fi
 dnl end:gnome-globalemnu-applet
@@ -95,7 +101,7 @@ AC_MSG_CHECKING(--enable-xfce-plugin argument)
 AC_ARG_ENABLE(xfce-plugin,
 	[	--enable-xfce-plugin	Include xfce-plugin interface ],
 	[	enable_xfce_plugin=$enableval ],
-	[	enable_xfce_plugin="yes" ])
+	[	enable_xfce_plugin="no" ])
 AC_DEFINE([ENABLE_XFCE_PLUGIN], [], [enable xfce plugin])
 AM_CONDITIONAL([ENABLE_XFCE_PLUGIN], [test "$enable_xfce_plugin" = "yes" ])
 AC_MSG_RESULT($enable_xfce_plugin)
@@ -138,11 +144,13 @@ dnl fi
 AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
+libgtkhotkey/Makefile
 po/Makefile.in
 gtk+-aqd/Makefile
 doc/Makefile
 doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
+doc/reference/libgtkhotkey/Makefile
 libgnomenu/libgnomenu.pc
 servers/Makefile
 test/Makefile

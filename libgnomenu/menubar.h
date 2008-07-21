@@ -57,7 +57,6 @@
 
 #include <gdk/gdk.h>
 #include <gtk/gtkmenubar.h>
-#include "clienthelper.h"
 
 G_BEGIN_DECLS
 
@@ -122,9 +121,27 @@ struct _GnomenuMenuBarClass
 
 
 GtkWidget * gnomenu_menu_bar_new             (void);
+GtkWidget * gnomenu_menu_bar_new_local             (void);
+
 GType gnomenu_menu_bar_get_type (void);
+GtkPackDirection
+gnomenu_menu_bar_get_pack_direction (GtkMenuBar *menubar);
+void
+gnomenu_menu_bar_set_pack_direction (GtkMenuBar       *menubar,
+                                 GtkPackDirection  pack_dir);
+GtkPackDirection
+gnomenu_menu_bar_get_child_pack_direction (GtkMenuBar *menubar);
 
+void
+gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
+                                       GtkPackDirection  child_pack_dir);
+gboolean
+gnomenu_menu_bar_get_is_global_menu(GtkMenuBar * menubar);
+void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
+void 
+gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow);
+gboolean 
+gnomenu_menu_bar_get_show_arrow(GtkMenuBar * menubar);
 G_END_DECLS
-
 
 #endif /* __GNOMENU_MENU_BAR_H__ */

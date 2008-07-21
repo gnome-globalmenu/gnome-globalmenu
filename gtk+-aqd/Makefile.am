@@ -1,7 +1,8 @@
-EXTRA_DIST = README patch.diff overflow.diff
 patchdir = ${docdir}/gtk+-aqd
 patch_files = patch.diff overflow.diff
 patch_DATA = README gtk2-aqd.patch gtk2-menubar-overflow.patch
+
+EXTRA_DIST = patch.diff overflow.diff $(patch_DATA)
 
 prepare:
 	svn checkout http://svn.gnome.org/svn/gtk+/tags/GTK_2_12_5 gtk+-aqd
