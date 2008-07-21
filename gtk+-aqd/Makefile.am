@@ -13,6 +13,6 @@ patch:
 diff:
 	svn diff gtk+-aqd/gtk/gtkmenubar.c > patch.diff
 gtk2-aqd.patch: $(srcdir)/patch.diff
-	cp $< $@
+	sed -e "s|\@LIBGNOMENU_VERSION\@|$(LIBGNOMENU_VERSION)|" $< > $@
 gtk2-menubar-overflow.patch: $(srcdir)/overflow.diff
 	cp $< $@
