@@ -82,6 +82,8 @@ static void _start_element1  (GMarkupParseContext *context,
 			}
 			gtype = _gtk_builder_resolve_type_lazily(type);
 			if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
+				if(gtype == GTK_TYPE_MENU_BAR)
+					gtype = GNOMENU_TYPE_MENU_BAR;
 				new_widget = g_object_new(gtype, "is-global-menu", FALSE, NULL);
 			} else
 				new_widget = g_object_new(gtype, NULL);
