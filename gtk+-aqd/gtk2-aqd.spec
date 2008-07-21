@@ -10,19 +10,25 @@
 %define cairo_version %{cairo_base_version}-1
 %define libpng_version 2:1.2.2-16
 
-%define base_version 2.12.9
+%define base_version 2.12.11
 %define bin_version 2.10.0
-%define svn_version 0.4.svn987
+%define svn_version 0.5.svn1072
 
 Summary: The GIMP ToolKit (GTK+), a library for creating GUIs for X
 Name: gtk2-aqd
 Version: %{svn_version}.%{base_version}
-Release: 5%{?dist}
+Release: 1%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 Source: http://download.gnome.org/sources/gtk+/2.12/gtk+-%{base_version}.tar.bz2
 Source1: update-gdk-pixbuf-loaders
 Source2: update-gtk-immodules 
+Source3: gtk-print-error-16x16.png
+Source4: gtk-print-report-16x16.png
+Source5: gtk-print-warning-16x16.png
+Source6: gtk-print-error-24x24.png
+Source7: gtk-print-report-24x24.png
+Source8: gtk-print-warning-24x24.png
 
 Provides: gtk2 = %{base_version}-%{release}
 Obsoletes: gtk2 <= %{base_version}-%{release}
@@ -40,21 +46,14 @@ Patch3: system-log-crash.patch
 # backport from svn trunk
 Patch4: im-setting.patch
 
-# fixed upstream
-Patch5: foreign-cmap.patch
+# Backported patch from recent upstream
+Patch10: printer-state.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=204621
+Patch13: printer-paper-size.patch
 
 # fixed upstream
-Patch6: implicit-g_fopen.patch
-
-# fixed upstream
-Patch7: filechooser-iconsize.patch
-
-# http://bugzilla.gnome.org/show_bug.cgi?id=521032
-Patch8: filechooser-auth.patch
-
-# http://bugzilla.gnome.org/show_bug.cgi?id=467698
-Patch9: tab-drag-crash.patch
-
+Patch14: empty-modmap-crash.patch
 # gtk-aqd patch
 Patch998: gtk2-menubar-overflow.patch 
 Patch999: gtk2-aqd.patch 
@@ -139,17 +138,24 @@ docs for the GTK+ widget toolkit.
 %patch2 -p1 -b .workaround
 %patch3 -p1 -b .system-log-crash
 %patch4 -p1 -b .im-setting
-%patch5 -p1 -b .foreign-cmap
-%patch6 -p1 -b .implicit-g_fopen
-%patch7 -p1 -b .filechooser-iconsize
-%patch8 -p1 -b .filechooser-auth
-%patch9 -p1 -b .tab-drag-crash
+%patch10 -p0 -b .printer-state
+%patch13 -p0 -b .printer-paper-size
 
 #%patch998 -p1 -b .menubar-overflow
 %patch999 -F3 -p1 -b .aqd
 for i in config.guess config.sub ; do
   test -f %{_datadir}/libtool/$i && cp %{_datadir}/libtool/$i .
 done
+
+test -f %{SOURCE3} && cp %{SOURCE3} ./gtk/stock-icons/16/gtk-print-error.png
+test -f %{SOURCE4} && cp %{SOURCE4} ./gtk/stock-icons/16/gtk-print-report.png
+test -f %{SOURCE5} && cp %{SOURCE5} ./gtk/stock-icons/16/gtk-print-warning.png
+test -f %{SOURCE6} && cp %{SOURCE6} ./gtk/stock-icons/24/gtk-print-error.png
+test -f %{SOURCE7} && cp %{SOURCE7} ./gtk/stock-icons/24/gtk-print-report.png
+test -f %{SOURCE8} && cp %{SOURCE8} ./gtk/stock-icons/24/gtk-print-warning.png
+
+# make sure that gtkbuiltincache.h gets regenerated during the build
+rm --force ./gtk/gtkbuiltincache.h
 
 %build
 libtoolize --force
@@ -328,15 +334,79 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gtk-2.0
 
 %changelog
-* Tue Jan  9 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.5-1
+* Tue Jul  1 2008 Matthias Clasen <mclasen@redhat.com> - 2.12.11-1
+- Update to 2.12.11
+
+* Mon Jun 16 2008 Matthias Clasen <mclasen@redhat.com> - 2.12.10-5
+- Fix a crash if the modifier map is empty 
+
+* Fri Jun 13 2008 - Marek Kasik <mkasik@redhat.com> - 2.12.10-4
+- Sets default paper size according to default paper size of
+  selected printer and locale.
+- Resolves: #204621
+
+* Thu Jun 12 2008 - Marek Kasik <mkasik@redhat.com> - 2.12.10-3
+- Correction of hostname of printer which is the print job sent to.
+- Resolves: #248245
+
+* Sun Jun  8 2008 Matthias Clasen <mclasen@redhat.com> - 2.12.10-2
+- Fix a coordinate system problem
+
+* Thu May 22 2008 - Marek Kasik <mkasik@redhat.com> - 2.12.9-6
+- Add patch to display more printer status information in the
+  print dialog (backported from upstream 2.13.1).
+
+* Wed Apr  9 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.9-5
+- Fix a possible crash when dragging notebook tabs
+
+* Wed Apr  9 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.9-4
+- Make sure we use the right icon size for all icons in the
+  file chooser (Fix by Tomas Bzatek)
+- Improve the handling of auth dialogs in the file chooser (Tomas Bzatek)
+
+* Mon Apr  7 2008 Marek Kasik  <mkasik@redhat.com> - 2.12.9-3
+- Correction of "implicit declaration of function 'g_fopen'"
+  warning
+- Resolves: #439114
+
+* Thu Apr  3 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.9-2
+- Don't free foreign colormaps
+
+* Wed Mar 12 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.9-1
+- Update to 2.12.9
+
+* Tue Mar  4 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.8-3
+- Honor cups user default options from ~/.cups/lpoptions
+
+* Tue Feb 26 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.8-2
+- Work with libbeagle.so.1
+
+* Tue Feb 12 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.8-1
+- Update to 2.12.8
+
+* Wed Jan 30 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.7-1
+- Update to 2.12.7
+
+* Tue Jan 29 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.6-1
+- Update to 2.12.6
+
+* Tue Jan  8 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.5-1
 - Update to 2.12.5
 
 * Tue Jan  8 2008 Matthias Clasen  <mclasen@redhat.com> - 2.12.4-1
 - Update to 2.12.4
 - Drop obsolete patches
 
-* Wed Dec 19 2007 Colin Walters <walters@redhat.com> - 2.12.3-3
-- BR libXcomposite-devel so we get the sexy.
+* Wed Dec 19 2007 Colin Walters <walters@redhat.com> - 2.12.3-5
+- BR libXcomposite-devel so we get the sexiness, also pull it in
+  in the devel package.
+
+* Tue Dec 18 2007 Matthias Clasen <mclasen@redhat.com> - 2.12.3-4
+- Fix a gtk-doc problem
+- Work around a kernel problem in the build system
+
+* Mon Dec 17 2007 Matthias Clasen <mclasen@redhat.com> - 2.12.3-3
+- Add a setting to change input methods
 
 * Tue Dec 11 2007 Matthias Clasen <mclasen@redhat.com> - 2.12.3-2
 - Fix yet another notebook tab related crash
