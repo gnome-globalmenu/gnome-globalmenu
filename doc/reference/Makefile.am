@@ -1,1 +1,1 @@
-SUBDIRS = libgnomenu
+SUBDIRS = libgnomenu libgtkhotkey
