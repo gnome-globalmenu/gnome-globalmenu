@@ -758,22 +758,30 @@ static gboolean _invalidate_introspection ( GtkMenuBar * menubar, GtkWidget * pa
 		gdk_x11_grab_server();
 		if(priv->is_global_menu) {
 			priv->introspection = gtk_widget_introspect(GTK_WIDGET(menubar));
+			gchar * part_introspection = NULL;
+			if(part != menubar ) part_introspection = gtk_widget_introspect(part);
 			if(!old_intro || !g_str_equal(old_intro, priv->introspection)) {
 				rt = gdkx_tools_set_window_prop_blocked(priv->sms_window , 
 					"GNOMENU_MENU_BAR", 
 					priv->introspection, 
 					strlen(priv->introspection)+1);
+				if(part_introspection) 
+				rt = rt && gdkx_tools_set_window_prop_blocked(priv->sms_window , 
+					"GNOMENU_MENU_BAR_PART", 
+					part_introspection, 
+					strlen(part_introspection)+1);
 			} else goto ex;
 		} else  {
 			priv->introspection = NULL;
 			if(old_intro != NULL)  {
 				gdkx_tools_remove_window_prop(priv->sms_window, "GNOMENU_MENU_BAR");
+				gdkx_tools_remove_window_prop(priv->sms_window, "GNOMENU_MENU_BAR_PART");
 			} else goto ex;
 		}
 		GnomenuSMS sms;
 		GdkWindow * window = _get_toplevel_gdk_window(menubar);
 		if(window) {
-			sms.action = INTROSPECTION_UPDATED;
+			sms.action = (menubar == part)?INTROSPECTION_UPDATED:INTROSPECTION_PARTIALLY_UPDATED;
 			sms.w[0] = GDK_WINDOW_XWINDOW(window);
 			sms.w[1] = (GdkNativeWindow) part;
 			gdkx_tools_send_sms(&sms, sizeof(sms));
@@ -895,6 +903,7 @@ _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	GdkNativeWindow data = GDK_WINDOW_XWINDOW(priv->sms_window);
 	gdkx_tools_set_window_prop(toplevel->window, "GNOMENU_SMS_LISTENER",
 			&data, sizeof(GdkNativeWindow));
+	_invalidate_introspection(menubar, menubar);
 }
 static void
 _s_toplevel_unrealize (GtkMenuBar * menubar, GtkWidget * toplevel){
@@ -968,10 +977,11 @@ _parent_set_emission_hook (GSignalInvocationHint *ihint,
 				menu_shell = instance->parent;
 				menu_bar = _find_menu_bar(menu_shell);
 			}
-			if (menu_bar) {
+			if (GTK_IS_MENU_BAR(menu_bar) && gnomenu_menu_bar_get_is_global_menu(menu_bar)) {
 				_invalidate_introspection(menu_bar, GTK_WIDGET(instance->parent));
 			}
-			if(previous_menu_bar && previous_menu_bar != menu_bar){
+			if(GTK_IS_MENU_BAR(previous_menu_bar) && 
+					gnomenu_menu_bar_get_is_global_menu(previous_menu_bar) && previous_menu_bar != menu_bar){
 				_invalidate_introspection(previous_menu_bar, GTK_WIDGET(previous_parent));
 			}
 		}

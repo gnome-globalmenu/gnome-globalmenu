@@ -80,21 +80,28 @@ static void _start_element1  (GMarkupParseContext *context,
 					CASE_STR("handle") handle = attribute_values[i];
 				END_SWITCH_STR;
 			}
-			gtype = _gtk_builder_resolve_type_lazily(type);
-			if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
-				if(gtype == GTK_TYPE_MENU_BAR)
-					gtype = GNOMENU_TYPE_MENU_BAR;
-				new_widget = g_object_new(gtype, "is-global-menu", FALSE, NULL);
-			} else
-				new_widget = g_object_new(gtype, NULL);
+			current_widget = g_queue_peek_tail(builder->stack);
+			new_widget = g_hash_table_lookup(builder->widgets, id);
+			if(!new_widget){
+				gtype = _gtk_builder_resolve_type_lazily(type);
+				if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
+					if(gtype == GTK_TYPE_MENU_BAR)
+						gtype = GNOMENU_TYPE_MENU_BAR;
+					new_widget = g_object_new(gtype, "is-global-menu", FALSE, NULL);
+				} else
+					new_widget = g_object_new(gtype, NULL);
 
-			gtk_widget_set_id(new_widget, id);
+				gtk_widget_set_id(new_widget, id);
+				g_object_ref_sink(new_widget); /*builder always hold the ref*/
+				g_hash_table_insert(builder->widgets, gtk_widget_get_id(new_widget), new_widget);
+			} else {
+				if(GTK_IS_CONTAINER(new_widget))
+					gtk_container_clear(new_widget);
+			}
 			if(handle){
 				gpointer parsed_handle = parse_handle(handle);
 				g_object_set_data_full(new_widget, "introspect-handle", parsed_handle, NULL);
 			}
-			g_object_ref_sink(new_widget); /*builder always hold the ref*/
-			current_widget = g_queue_peek_tail(builder->stack);
 			if(current_widget) {
 				gtk_container_add(current_widget, new_widget);
 			}
@@ -117,10 +124,10 @@ static void _end_element1    (GMarkupParseContext *context,
                           GError             **error) {
 	SWITCH_STR(element_name)
 		CASE_STR("object") {
-			GtkWidget * current_widget = g_queue_peek_tail(builder->stack);
-			g_hash_table_insert(builder->widgets, gtk_widget_get_id(current_widget), current_widget);
-			/* go upward to the parent*/
-			g_queue_pop_tail(builder->stack);
+			GtkWidget * last = g_queue_pop_tail(builder->stack);
+			if(g_queue_is_empty(builder->stack)){
+				g_message("Head = %s", gtk_widget_get_id(last));
+			}
 		}
 		CASE_STR("property") {
 		}
@@ -153,6 +160,7 @@ static void _start_element2  (GMarkupParseContext *context,
 				END_SWITCH_STR;
 			}
 			builder->current_widget = g_hash_table_lookup(builder->widgets, id);
+			g_assert(builder->current_widget);
 		}
 		CASE_STR("root"){
 		
@@ -306,8 +314,14 @@ GtkWidget * builder_get_object(Builder * builder, const gchar * id){
 void builder_foreach(Builder * builder, GHFunc callback, gpointer data){
 	g_hash_table_foreach(builder->widgets, callback, data);
 }
+GList * builder_get_widgets(Builder * builder){
+	return g_hash_table_get_values(builder->widgets);
+}
 Builder * builder_destroy(Builder * builder) {
 	g_hash_table_destroy(builder->widgets);
 	g_queue_free(builder->stack);
 	g_free(builder);
+}
+void builder_cleanup(Builder * builder) {
+	g_hash_table_remove_all(builder->widgets);
 }

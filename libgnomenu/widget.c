@@ -24,3 +24,10 @@ gchar * gtk_widget_introspect(GtkWidget * widget){
 		rt = g_object_get_data(widget, "widget-introspection");
 	return rt;
 }
+static void _remove_one_widget(GtkWidget * widget, GtkContainer * container) {
+	if(gtk_widget_get_parent(widget) == container)
+		gtk_container_remove(container, widget);
+}
+void gtk_container_clear(GtkContainer * container) {
+	gtk_container_foreach(container, _remove_one_widget, container);
+}

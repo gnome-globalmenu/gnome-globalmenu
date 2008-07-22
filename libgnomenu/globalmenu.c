@@ -21,9 +21,15 @@
 #include "sms.h"
 #include <gdk/gdkx.h>
 G_DEFINE_TYPE(GnomenuGlobalMenu, gnomenu_global_menu, GTK_TYPE_CONTAINER);
+static gboolean parsing = FALSE;
 typedef struct {
 	int foo;
 } GnomenuGlobalMenuPrivate;
+typedef struct {
+	Builder * builder;
+	GnomenuMenuBar * menu_bar;
+	gchar * name;
+} MenuBarInfo;
 
 GdkNativeWindow get_sms_window(GdkNativeWindow key) {
 	GdkNativeWindow * pwindow = gdkx_tools_get_window_prop(
@@ -50,6 +56,14 @@ static void _s_activate(GtkMenuItem * menu_item, GtkWidget * menubar){
 	LOG("key = %p", global_menu->active_key);
 	gdkx_tools_send_sms_to(get_sms_window(global_menu->active_key), &sms, sizeof(sms));
 }
+static void remove_handler(gchar * id, GtkWidget * widget, gpointer data){
+	if(GTK_IS_MENU_ITEM(widget)){
+		g_signal_handlers_disconnect_matched(widget, 
+			G_SIGNAL_MATCH_FUNC ,	
+			g_signal_lookup("activate", GTK_TYPE_MENU_ITEM),
+			0, NULL, _s_activate, NULL);
+	}
+}
 static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 	if(GTK_IS_MENU_ITEM(widget)){
 		g_signal_connect(widget,
@@ -57,52 +71,76 @@ static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
 				_s_activate, data);
 	}
 }
-static gpointer build_menu_bar(GdkNativeWindow key){
+static gchar * get_introspection(GdkNativeWindow key) {
 	GdkWindow * window = gdkx_tools_lookup_window(get_sms_window(key));
 	if(window){
-		Builder * builder;
-		GnomenuMenuBar * built_menubar;
-		gchar * built_menubar_name ;
-		builder = builder_new();
 		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR", NULL);
-		builder_parse(builder, introspection);
-		built_menubar_name = g_strdup_printf("%p", key);
-		built_menubar = builder_get_object(builder, built_menubar_name);
-		if(built_menubar) {
-			built_menubar = g_object_ref(built_menubar);
-			gnomenu_menu_bar_set_show_arrow(built_menubar, TRUE);
-			gnomenu_menu_bar_set_is_global_menu(built_menubar, FALSE);
-		}
-		g_free(built_menubar_name);
-		builder_foreach(builder, setup_handler, built_menubar); 
-		g_free(introspection);
-		builder_destroy(builder);
-		return built_menubar;
+		return introspection;
 	}
 	return NULL;
 }
+static gchar * get_partial_introspection(GdkNativeWindow key) {
+	GdkWindow * window = gdkx_tools_lookup_window(get_sms_window(key));
+	if(window){
+		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR_PART", NULL);
+		return introspection;
+	}
+	return NULL;
+}
+static MenuBarInfo * create_menu_bar_info(GnomenuGlobalMenu * self, GdkNativeWindow key){
+	MenuBarInfo * info = g_hash_table_lookup(self->cache, key);
+	if(info) return info;
+
+	info = g_slice_new0(MenuBarInfo);
+	GnomenuMenuBar * menu_bar;
+	gchar * introspection = get_introspection(key);
+	if(introspection){
+		info->builder = builder_new();
+		builder_parse(info->builder, introspection);
+		info->name = g_strdup_printf("%p", key);
+		info->menu_bar = builder_get_object(info->builder, info->name);
+		g_free(introspection);
+		g_hash_table_insert(self->cache, key, info);
+		return info;
+	}
+	return NULL;
+}
+static void destroy_menu_bar_info(MenuBarInfo * info){
+	builder_destroy(info->builder);
+	g_free(info->name);
+	g_slice_free(MenuBarInfo, info);
+}
+
 static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 	GET_OBJECT(self, global_menu, priv);
 	GdkNativeWindow key;
 	gpointer handle;
 	GnomenuMenuBar * menu_bar;
+	gchar * introspection = NULL;
 	switch(sms->action) {
+	case INTROSPECTION_PARTIALLY_UPDATED:
+		key = sms->w[0];
+		introspection = get_partial_introspection(key);
 	case INTROSPECTION_UPDATED:
 		key = sms->w[0];
+		if(!introspection)
+			introspection = get_introspection(key);
 		handle = sms->w[1];
-		if(key == self->active_key){
-			if(global_menu->active_menu_bar)
-				gtk_widget_unparent(global_menu->active_menu_bar);
-			/*ref = 1*/
-		}
-		menu_bar = build_menu_bar(key);
-		if(menu_bar)
-			g_hash_table_replace(self->cache, key, menu_bar);
-		/*ref = 0*/
-		if(key == self->active_key){
-			global_menu->active_menu_bar = menu_bar;
-			if(global_menu->active_menu_bar)
-				gtk_widget_set_parent(menu_bar, self);
+		LOG("received updated introspection: %p->%p", key, handle);
+		MenuBarInfo * info = create_menu_bar_info(self, key);
+		if(!info) break;
+		if(introspection) {
+			builder_foreach(info->builder, remove_handler, info->menu_bar); 
+			builder_parse(info->builder, introspection);
+			builder_foreach(info->builder, setup_handler, info->menu_bar); 
+			g_free(introspection);
+		} else {
+			builder_cleanup(info->builder);
+			if(key == self->active_key) {
+				if(self->active_menu_bar) 
+					gtk_widget_unparent(self->active_menu_bar);
+				self->active_menu_bar = NULL;
+			}
 		}
 		break;
 	}
@@ -113,7 +151,7 @@ static void gnomenu_global_menu_init (GnomenuGlobalMenu * self) {
 			g_direct_hash,
 			g_direct_equal,
 			NULL,
-			g_object_unref);
+			destroy_menu_bar_info);
 
 	gdkx_tools_add_sms_filter(NULL, sms_filter, self, FALSE);
 	GTK_WIDGET_SET_FLAGS(self, GTK_NO_WINDOW);
@@ -148,21 +186,17 @@ GtkWidget * gnomenu_global_menu_new(){
 void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GET_OBJECT(self, global_menu, priv);
 	LOG("switch: key = %p", key);
-
-	GnomenuMenuBar * menu_bar = g_hash_table_lookup(self->cache, key);
-
-	if(!menu_bar){
-		menu_bar = build_menu_bar(key);
-		if(menu_bar)
-			g_hash_table_insert(self->cache, key, menu_bar);
-	}
+	MenuBarInfo * menu_bar_info;
+	g_hash_table_remove(self->cache, global_menu->active_key);
+	/*Work around to disable the cache*/
+	menu_bar_info = create_menu_bar_info(self, key);
 	if(global_menu->active_menu_bar){
 		gtk_widget_unparent(global_menu->active_menu_bar);
 	}
 	global_menu->active_key = key;
-	global_menu->active_menu_bar = menu_bar;
-	if(menu_bar)
-		gtk_widget_set_parent(menu_bar, self);
+	global_menu->active_menu_bar = menu_bar_info?menu_bar_info->menu_bar:NULL;
+	if(global_menu->active_menu_bar)
+		gtk_widget_set_parent(global_menu->active_menu_bar, self);
 	GnomenuSMS sms;
 	sms.action = UPDATE_INTROSPECTION;
 	gdkx_tools_send_sms_to(get_sms_window(key), &sms, sizeof(sms));
