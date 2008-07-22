@@ -1242,6 +1242,22 @@ static void _forall					( GtkContainer    *container,
 		callback(priv->arrow_button, callback_data);
 	}
 }
+static void _s_proxy_activate(GtkWidget * proxy, gpointer data);
+static void remove_handler(gchar * id, GtkWidget * widget, gpointer data){
+	if(GTK_IS_MENU_ITEM(widget)){
+		g_signal_handlers_disconnect_matched(widget, 
+			G_SIGNAL_MATCH_FUNC ,	
+			g_signal_lookup("activate", GTK_TYPE_MENU_ITEM),
+			0, NULL, _s_proxy_activate, NULL);
+	}
+}
+static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
+	if(GTK_IS_MENU_ITEM(widget)){
+		g_signal_connect(G_OBJECT(widget),
+				"activate",
+				(GCallback)_s_proxy_activate, data);
+	}
+}
 static void _s_proxy_activate(GtkWidget * proxy, gpointer data){
 	GtkMenuItem * item = GTK_MENU_ITEM(g_object_get_data(
 					G_OBJECT(proxy), 
@@ -1251,7 +1267,9 @@ static void _s_proxy_activate(GtkWidget * proxy, gpointer data){
 	if(submenu) {
 		gchar * intro = gtk_widget_introspect(GTK_WIDGET(submenu));
 		Builder * builder = builder_new();
+		builder_foreach(builder, (GHFunc) remove_handler, NULL); 
 		builder_parse(builder, intro);
+		builder_foreach(builder, (GHFunc) setup_handler, NULL); 
 		GtkWidget * proxy_menu = builder_get_object(builder, 
 				gtk_widget_get_id(GTK_WIDGET(submenu)));
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(proxy), proxy_menu);
@@ -1259,26 +1277,20 @@ static void _s_proxy_activate(GtkWidget * proxy, gpointer data){
 	}
 	
 }
-static void setup_handler(gchar * id, GtkWidget * widget, gpointer data){
-	if(GTK_IS_MENU_ITEM(widget)){
-		g_signal_connect(G_OBJECT(widget),
-				"activate",
-				(GCallback)_s_proxy_activate, data);
-	}
-}
 GtkMenuItem * _get_proxy_for_item(GtkMenuBar * menubar, GtkMenuItem * item){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	GtkMenuItem * proxy;
 	gchar * intro = gtk_widget_introspect(GTK_WIDGET(item));
 	Builder * builder = builder_new();
+	builder_foreach(builder, (GHFunc) remove_handler, NULL); 
 	builder_parse(builder, intro);
+	builder_foreach(builder, (GHFunc) setup_handler, NULL); 
 	proxy = GTK_MENU_ITEM(builder_get_object(builder, 
 						gtk_widget_get_id(GTK_WIDGET(item))));
 	g_object_set_data_full(G_OBJECT(item), 
 			"menu-item-proxy", 
 			g_object_ref(G_OBJECT(proxy)), 
 			g_object_unref);
-	builder_foreach(builder, (GHFunc) setup_handler, NULL); 
 	builder_destroy(builder);
 	return proxy;
 }
