@@ -12,7 +12,6 @@
 struct _Introspector {
 	GString * blob;
 	GQueue queue;
-	GHashTable * ids;
 	GString * prefix;
 	IntrospectFlags flags;
 };
@@ -27,6 +26,8 @@ static void _inc_level(Introspector * spector){
 static gboolean _str_in_list(gchar * str_list[], gchar * str);
 static gchar * _ensure_widget_id(Introspector * spector, GtkWidget * widget){
 	static int unique = 0;
+	static GHashTable * ids = NULL;
+	if(G_UNLIKELY(ids == NULL)) ids = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	const char * id = gtk_widget_get_id(widget);
 	int i;
 	char * new_id;
@@ -42,7 +43,7 @@ static gchar * _ensure_widget_id(Introspector * spector, GtkWidget * widget){
 	}
 	new_id = g_strdup(id);	
 	i = 0;
-	while(value = g_hash_table_lookup(spector->ids, new_id)){ /*tail it with an integer*/
+	while(value = g_hash_table_lookup(ids, new_id)){ /*tail it with an integer*/
 		if(value == widget) break;
 		g_free(new_id);
 		new_id = g_strdup_printf("%s%d", id, i++);
@@ -50,7 +51,7 @@ static gchar * _ensure_widget_id(Introspector * spector, GtkWidget * widget){
 	g_free(id);
 	/*reset even if this is the correct name for the widget*/
 	gtk_widget_set_id(widget, new_id);
-	g_hash_table_insert(spector->ids, new_id, widget);
+	g_hash_table_insert(ids, new_id, widget);
 	return gtk_widget_get_id(widget);
 }
 
@@ -60,7 +61,6 @@ void introspector_queue_widget(Introspector * spector, GtkWidget * widget){
 Introspector * introspector_new(){
 	Introspector * spector = g_new0(Introspector, 1);
 	spector->blob = g_string_new("");
-	spector->ids = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	spector->prefix = g_string_new("");
 	g_queue_init(&spector->queue);
 	return  spector;
@@ -72,7 +72,6 @@ gchar * introspector_destroy(Introspector * spector, gboolean free_blob_string){
 	char * rt = NULL;
 	rt = g_string_free(spector->blob, free_blob_string);
 	g_string_free(spector->prefix, TRUE);
-	g_hash_table_destroy(spector->ids);
 	g_queue_clear(&spector->queue);
 	g_free(spector);
 	return rt;
