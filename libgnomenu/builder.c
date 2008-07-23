@@ -125,9 +125,6 @@ static void _end_element1    (GMarkupParseContext *context,
 	SWITCH_STR(element_name)
 		CASE_STR("object") {
 			GtkWidget * last = g_queue_pop_tail(builder->stack);
-			if(g_queue_is_empty(builder->stack)){
-				g_message("Head = %s", gtk_widget_get_id(last));
-			}
 		}
 		CASE_STR("property") {
 		}

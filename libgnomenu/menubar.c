@@ -750,9 +750,8 @@ static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar){
 
 static gboolean _invalidate_introspection ( GtkMenuBar * menubar, GtkWidget * part){
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
-	GtkWidget * toplevel;
 	gboolean rt = TRUE;
-	if(priv->sms_window && GTK_WIDGET_REALIZED(menubar)) {
+	if(priv->sms_window && GTK_WIDGET_REALIZED(gtk_widget_get_toplevel(menubar))) {
 		gchar * old_intro = g_strdup(priv->introspection);
 		g_message("invalidate menu bar");
 		gdk_x11_grab_server();
@@ -889,10 +888,9 @@ _s_hierarchy_changed (GtkWidget *widget,
 static void
 _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	GET_OBJECT(menubar, menu_bar, priv);
-	_update_widget_id(menubar);
 	gboolean frozen;
-	if(gnomenu_menu_bar_get_is_global_menu(menubar)){
-		 _invalidate_introspection(menubar, GTK_WIDGET(menubar));
+	_update_widget_id(menubar);
+	if(priv->is_global_menu){
 		frozen = FALSE;
 	} else {
 		frozen = TRUE;
@@ -903,7 +901,9 @@ _s_toplevel_realize (GtkMenuBar * menubar, GtkWidget * toplevel){
 	GdkNativeWindow data = GDK_WINDOW_XWINDOW(priv->sms_window);
 	gdkx_tools_set_window_prop(toplevel->window, "GNOMENU_SMS_LISTENER",
 			&data, sizeof(GdkNativeWindow));
-	_invalidate_introspection(menubar, menubar);
+	if(priv->is_global_menu) {
+		 _invalidate_introspection(menubar, GTK_WIDGET(menubar));
+	}
 }
 static void
 _s_toplevel_unrealize (GtkMenuBar * menubar, GtkWidget * toplevel){
@@ -928,13 +928,13 @@ static void _sms_filter ( GtkMenuBar * menubar, GnomenuSMS * sms, gint size) {
 			if(sms->p[1] != (gpointer)GDK_WINDOW_XWINDOW(window)) break;
 
 			GtkMenuItem * item = sms->p[0];
-			if(GTK_IS_MENU_ITEM(item)){
+			/*only send the event if there is no submenu, most likely disabling 
+			 * building-menu-on-the-fly*/
+			if(GTK_IS_MENU_ITEM(item) && !gtk_menu_item_get_submenu(item)){
 				gtk_menu_item_activate(item);
+				_invalidate_introspection(menubar, GTK_WIDGET(menubar));
 			} else {
 				LOG("unknown menu item %p", item);
-			}
-			if(!gtk_menu_item_get_submenu(GTK_MENU_ITEM(item))){
-				_invalidate_introspection(menubar, GTK_WIDGET(menubar));
 			}
 			break;
 			}

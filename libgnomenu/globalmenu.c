@@ -96,7 +96,9 @@ static MenuBarInfo * create_menu_bar_info(GnomenuGlobalMenu * self, GdkNativeWin
 	gchar * introspection = get_introspection(key);
 	if(introspection){
 		info->builder = builder_new();
+		builder_foreach(info->builder, remove_handler, info->menu_bar); 
 		builder_parse(info->builder, introspection);
+		builder_foreach(info->builder, setup_handler, info->menu_bar); 
 		info->name = g_strdup_printf("%p", key);
 		info->menu_bar = builder_get_object(info->builder, info->name);
 		g_free(introspection);

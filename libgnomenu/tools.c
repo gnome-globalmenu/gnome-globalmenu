@@ -140,7 +140,7 @@ gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, const gchar * pr
 	gdk_error_trap_push();
 	XChangeProperty(display, w, property, type, format, mode, data, nelements);
 	
-	XSync(display, TRUE);
+	XSync(display, FALSE);
 	if(gdk_error_trap_pop()) {
 		rt = FALSE;
 		goto ex;

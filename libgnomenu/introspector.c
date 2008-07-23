@@ -199,10 +199,24 @@ static void _introspector_visit_widget(Introspector * spector, GtkWidget * widge
 	if(!GTK_IS_MENU_SHELL(widget) && !GTK_IS_MENU_ITEM(widget)
 		&& !GTK_IS_LABEL(widget) && !GTK_IS_IMAGE(widget)
 			){
-		g_warning("can't introspect other than menu shell and menu item, :%s",
-				G_OBJECT_TYPE_NAME(widget));
+//		g_warning("can't introspect other than menu shell and menu item, :%s",
+//				G_OBJECT_TYPE_NAME(widget));
 		return NULL;
 	}
+
+	/*This hack is to rebuild the submenu if the applicate would like to*/
+	/*It doesn't work*/
+#if it_work
+	if(GTK_IS_MENU_ITEM(widget)){
+		if(GTK_WIDGET_REALIZED(widget)) {
+			GtkWidget * submenu = gtk_menu_item_get_submenu(widget);
+			if(submenu && GTK_IS_MENU(submenu)) {
+				g_message("%s", gtk_widget_get_id(widget));
+				gtk_menu_item_activate(widget);
+			}
+		}
+	}
+#endif
 	_inc_level(spector);
 	if(spector->flags & INTROSPECT_HANDLE)
 		template = "%s<object type = \"%s\" id = \"%s\" handle = \"%p\">\n";
