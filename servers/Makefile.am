@@ -7,7 +7,7 @@ LIBS = $(top_builddir)/libgnomenu/libgnomenu.la \
 libexec_PROGRAMS =
 
 gladedir = $(pkgdatadir)
-glade_DATA = application.glade GnomenuServerApplet.glade GnomenuServerWindow.glade
+glade_DATA = application.glade GnomenuServerApplet.glade
 
 @INTLTOOL_SERVER_RULE@
 @INTLTOOL_SCHEMAS_RULE@
@@ -42,8 +42,6 @@ $(plugin_data:%=%.in): $(plugin_data:%=%.in.in) Makefile
 	    $< > $@
 
 
-bin_PROGRAMS = gtk-globalmenu-server
-
 DISTCLEANFILES = 
 VAST_SOURCE_CODE = \
 	intl.h \
@@ -60,12 +58,6 @@ xfce_globalmenu_plugin_SOURCES = \
 	$(VAST_SOURCE_CODE)
 xfce_globalmenu_plugin_CFLAGS = $(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
 xfce_globalmenu_plugin_LDADD = $(XFCE_GLOBALMENU_PLUGIN_LIBS)
-
-gtk_globalmenu_server_SOURCES = \
-	main.c \
-	$(VAST_SOURCE_CODE)
-gtk_globalmenu_server_CFLAGS = $(GLOBALMENU_SERVER_CFLAGS)
-gtk_globalmenu_server_LDADD = $(GLOBALMENU_SERVER_LIBS)
 
 DISTCLEANFILES += $(bonobo_data) $(bonobo_data:%=%.in) $(plugin_data) $(plugin_data:%=%.in) $(schemas_data)
 

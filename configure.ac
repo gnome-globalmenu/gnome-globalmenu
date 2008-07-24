@@ -47,7 +47,7 @@ dnl end:tracing
 dnl begin:libgnomenu
 
 PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
-PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10 gdk-2.0 libglade-2.0])
+PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10 gdk-2.0 libglade-2.0 libwnck-1.0])
 AC_SUBST(LIBGNOMENU_CFLAGS)
 AC_SUBST(LIBGNOMENU_LIBS)
 AC_SUBST(TEST_SUITE_CFLAGS)
@@ -59,23 +59,6 @@ PKG_CHECK_MODULES(GTK_HOTKEY, [glib-2.0 >= 2.15.6 gobject-2.0 >= 2.15.6 gio-2.0 
 	AC_SUBST(GTK_HOTKEY_CFLAGS)
 	AC_SUBST(GTK_HOTKEY_LIBS)
 dnl end:
-
-dnl begin:gtk-globalmenu-server
-AC_MSG_CHECKING(--enable-standalone argument)
-AC_ARG_ENABLE(standalone,
-	[	--enable-standalone	Include standalone menu server ],
-	[	enable_standalone=$enableval ],
-	[	enable_standalone="yes" ])
-AC_DEFINE([ENABLE_STANDALONE], [], [enable stand alone])
-AM_CONDITIONAL([ENABLE_STANDALONE], [test "$enable_standalone" = "yes" ])
-AC_MSG_RESULT($enable_standalone)
-if test "$enable_standalone" = "yes"; then
-	PKG_CHECK_MODULES(GLOBALMENU_SERVER, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libglade-2.0, libgnome-menu, libgnomeui-2.0 gnome-desktop-2.0] )
-	AC_SUBST(GLOBALMENU_SERVER_CFLAGS)
-	AC_SUBST(GLOBALMENU_SERVER_LIBS)
-	AC_DEFINE(ENABLE_STANDALONE)
-fi
-dnl end: gtk-globalmenu-applet
 
 dnl begin: gnome-globalmenu-applet
 AC_MSG_CHECKING(--enable-gnome-applet argument)

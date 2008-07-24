@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/globalmenu.h>
 #include <glade/glade.h>
-#include <libgtkhotkey/gtkhotkey.h>
+//#include <libgtkhotkey/gtkhotkey.h>
 #define WNCK_I_KNOW_THIS_IS_UNSTABLE
 #include <libwnck/libwnck.h>
 #undef WNCK_I_KNOW_THIS_IS_UNSTABLE
@@ -18,24 +18,26 @@ static void
 		gnomenu_global_menu_switch(global_menu, wnck_window_get_xid(active));
 	}
 }
+/*
 static void
 _s_hkf10_activated(GtkHotkeyInfo * hkinfo, guint event_time, GtkWidget * window){
 	g_message("f10");
 	gtk_window_present(window);
 }
+*/
 int main(int argc, char * argv[]){
 	gtk_init(&argc, &argv);
 	g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL);
 	GladeXML * xml;
 	GtkWidget * window;
 	GnomenuGlobalMenu * globalmenu;
+	/*
 	GtkHotkeyInfo * hkf10 = gtk_hotkey_info_new(
 			"GlobalMenu", "MenuKey", "F9", NULL);
 	gtk_hotkey_info_bind(hkf10, NULL);
+	*/
 	gnomenu_global_menu_get_type();
 	xml = glade_xml_new("GnomenuServerWindow.glade", NULL, NULL);
-	if(!xml)
-		xml = glade_xml_new(GLADEDIR"/GnomenuServerWindow.glade", NULL, NULL);
 	g_assert(xml);
 	window = glade_xml_get_widget(xml, "GnomenuServerWindow");
 	globalmenu = glade_xml_get_widget(xml, "globalmenu");
@@ -44,7 +46,7 @@ int main(int argc, char * argv[]){
 
 	g_signal_connect(wnck_screen_get_default(),
 			"active-window-changed", G_CALLBACK(_s_screen_active_window_changed), globalmenu);
-	g_signal_connect(hkf10, "activated", _s_hkf10_activated, window);
+//	g_signal_connect(hkf10, "activated", _s_hkf10_activated, window);
 	gtk_window_set_keep_above(window, TRUE);
 	gtk_widget_show(window);
 	gtk_main();
