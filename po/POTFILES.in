@@ -1,9 +1,7 @@
 [encoding: UTF-8]
-servers/main.c
-servers/main-gnome.c
-servers/GNOME_GlobalMenuApplet.server.in.in
-servers/xfce-globalmenu-plugin.desktop.in.in
-servers/gnome-globalmenu-applet.schemas.in
-servers/application.glade
-servers/GnomenuServerApplet.glade
-
+xfce-plugin/xfce-globalmenu-plugin.desktop.in.in
+xfce-plugin/main-xfce.c
+gnome-applet/GnomenuServerApplet.glade
+gnome-applet/main-gnome.c
+gnome-applet/GNOME_GlobalMenuApplet.server.in.in
+gnome-applet/gnome-globalmenu-applet.schemas.in

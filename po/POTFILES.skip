@@ -1,2 +1,2 @@
-servers/GNOME_GlobalMenuApplet.server.in
-servers/xfce-globalmenu-plugin.desktop.in
+gnome-applet/GNOME_GlobalMenuApplet.server.in
+xfce-plugin/xfce-globalmenu-plugin.desktop.in

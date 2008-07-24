@@ -135,6 +135,7 @@ doc/reference/Makefile
 doc/reference/libgnomenu/Makefile
 doc/reference/libgtkhotkey/Makefile
 libgnomenu/libgnomenu.pc
-servers/Makefile
+gnome-applet/Makefile
+xfce-plugin/Makefile
 test/Makefile
 )
