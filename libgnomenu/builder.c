@@ -70,7 +70,7 @@ static void _start_element1  (GMarkupParseContext *context,
 			const char * type = NULL;
 			const char * id = NULL;
 			const char * handle = NULL;
-			GtkWidget * new_widget;
+			GtkWidget * new_widget= NULL;
 			GtkWidget * current_widget;
 			GType gtype = 0;
 			for(i=0; attribute_names[i]; i++){
@@ -81,7 +81,9 @@ static void _start_element1  (GMarkupParseContext *context,
 				END_SWITCH_STR;
 			}
 			current_widget = g_queue_peek_tail(builder->stack);
+
 			new_widget = g_hash_table_lookup(builder->widgets, id);
+
 			if(!new_widget){
 				gtype = _gtk_builder_resolve_type_lazily(type);
 				if(gtype == GTK_TYPE_MENU_BAR || gtype == GNOMENU_TYPE_MENU_BAR) {
@@ -94,7 +96,14 @@ static void _start_element1  (GMarkupParseContext *context,
 				gtk_widget_set_id(new_widget, id);
 				g_object_ref_sink(new_widget); /*builder always hold the ref*/
 				g_hash_table_insert(builder->widgets, gtk_widget_get_id(new_widget), new_widget);
+				g_assert(g_str_equal(gtk_widget_get_id(new_widget), id));
 			} else {
+				GList * list  = g_hash_table_get_keys(builder->widgets);
+				GList * node;
+				for(node = list; node; node = node->next) {
+					g_print("Obj: %s\n", node->data);	
+				}
+				g_error("never reach here, id=%s", id);
 				if(GTK_IS_CONTAINER(new_widget))
 					gtk_container_clear(new_widget);
 			}

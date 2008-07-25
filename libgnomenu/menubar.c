@@ -743,15 +743,16 @@ static GdkWindow * _get_toplevel_gdk_window(GtkMenuBar * menubar){
 	GdkWindow * window = NULL;
 
 	toplevel = gtk_widget_get_toplevel(GTK_WIDGET(menubar));
-	if(GTK_IS_WINDOW(toplevel))
+	if(GTK_IS_WINDOW(toplevel) && GTK_WIDGET_REALIZED(toplevel))
 		window = GTK_WIDGET(toplevel)->window;
 	return window;
 }
 
 static gboolean _invalidate_introspection ( GtkMenuBar * menubar, GtkWidget * part){
+	if(!GTK_IS_MENU_BAR(menubar)) return FALSE;
 	GnomenuMenuBarPrivate * priv = GNOMENU_MENU_BAR_GET_PRIVATE(menubar);
 	gboolean rt = TRUE;
-	if(priv->sms_window && GTK_WIDGET_REALIZED(gtk_widget_get_toplevel(menubar))) {
+	if(priv->sms_window && _get_toplevel_gdk_window(menubar)) {
 		gchar * old_intro = g_strdup(priv->introspection);
 		g_message("invalidate menu bar");
 		gdk_x11_grab_server();

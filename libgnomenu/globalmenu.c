@@ -75,6 +75,7 @@ static gchar * get_introspection(GdkNativeWindow key) {
 	GdkWindow * window = gdkx_tools_lookup_window(get_sms_window(key));
 	if(window){
 		gchar * introspection = gdkx_tools_get_window_prop(window, "GNOMENU_MENU_BAR", NULL);
+		g_print("%s", introspection);
 		return introspection;
 	}
 	return NULL;
@@ -89,18 +90,20 @@ static gchar * get_partial_introspection(GdkNativeWindow key) {
 }
 static MenuBarInfo * create_menu_bar_info(GnomenuGlobalMenu * self, GdkNativeWindow key){
 	MenuBarInfo * info = g_hash_table_lookup(self->cache, key);
-	if(info) return info;
-
+	//	disabling reusing the old intro
+//	if(info) return info;
+	if(info) g_hash_table_remove(self->cache, key);
 	info = g_slice_new0(MenuBarInfo);
 	GnomenuMenuBar * menu_bar;
 	gchar * introspection = get_introspection(key);
 	if(introspection){
 		info->builder = builder_new();
-		builder_foreach(info->builder, remove_handler, info->menu_bar); 
+		builder_foreach(info->builder, remove_handler, NULL); 
 		builder_parse(info->builder, introspection);
-		builder_foreach(info->builder, setup_handler, info->menu_bar); 
 		info->name = g_strdup_printf("%p", key);
 		info->menu_bar = builder_get_object(info->builder, info->name);
+		builder_foreach(info->builder, setup_handler, info->menu_bar); 
+		gtk_widget_set_style(info->menu_bar, gtk_widget_get_style(self));
 		g_free(introspection);
 		g_hash_table_insert(self->cache, key, info);
 		return info;
@@ -122,7 +125,7 @@ static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 	switch(sms->action) {
 	case INTROSPECTION_PARTIALLY_UPDATED:
 		key = sms->w[0];
-		introspection = get_partial_introspection(key);
+//		introspection = get_partial_introspection(key); // Disable Partial At all
 	case INTROSPECTION_UPDATED:
 		key = sms->w[0];
 		if(!introspection)
@@ -130,6 +133,8 @@ static void sms_filter(GnomenuGlobalMenu * self, GnomenuSMS * sms, gint size){
 		handle = sms->w[1];
 		LOG("received updated introspection: %p->%p", key, handle);
 		MenuBarInfo * info = create_menu_bar_info(self, key);
+		/*Because create_menu_bar_info always create new entries, break now*/
+		info = NULL;
 		if(!info) break;
 		if(introspection) {
 			builder_foreach(info->builder, remove_handler, info->menu_bar); 
@@ -174,12 +179,23 @@ static void _size_request(GnomenuGlobalMenu * global_menu, GtkRequisition * requ
 		gtk_widget_size_request(global_menu->active_menu_bar, requisition);
 //	GTK_WIDGET_CLASS(gnomenu_global_menu_parent_class)->size_request(global_menu, requisition);
 }
+static void _style_set(GnomenuGlobalMenu * self, GtkStyle * old_style){
+	GET_OBJECT(self, global_menu, priv);
+	GList * list = g_hash_table_get_values(self->cache);
+	GList * node;
+	for(node = list; node; node=node->next){
+		if(GTK_IS_WIDGET(node->data))
+		gtk_widget_set_style(node->data, gtk_widget_get_style(self));
+	}
+	g_list_free(list);
+}
 static void gnomenu_global_menu_class_init (GnomenuGlobalMenuClass * klass) {
 	GObjectClass * obj_class = (GObjectClass *)klass;
 	GtkWidgetClass * widget_class = (GtkWidgetClass *) klass;
 	obj_class->finalize = _finalize;
 	widget_class->size_allocate = _size_allocate;
 	widget_class->size_request = _size_request;
+	widget_class->style_set = _style_set;
 	g_type_class_add_private(klass, sizeof(GnomenuGlobalMenuPrivate));
 }
 GtkWidget * gnomenu_global_menu_new(){
@@ -189,8 +205,7 @@ void gnomenu_global_menu_switch(GnomenuGlobalMenu * self, gpointer key){
 	GET_OBJECT(self, global_menu, priv);
 	LOG("switch: key = %p", key);
 	MenuBarInfo * menu_bar_info;
-	g_hash_table_remove(self->cache, global_menu->active_key);
-	/*Work around to disable the cache*/
+
 	menu_bar_info = create_menu_bar_info(self, key);
 	if(global_menu->active_menu_bar){
 		gtk_widget_unparent(global_menu->active_menu_bar);
