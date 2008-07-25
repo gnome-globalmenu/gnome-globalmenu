@@ -10,7 +10,10 @@ gboolean ping(GHashTable * parameters, GHashTable * returns, gpointer data) {
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 	ipc_server_register_cmd("Ping", ping, NULL);
-	ipc_server_listen();
+	if(!ipc_server_listen()) {
+		g_error("server already there");
+		return 1;
+	}
 	gtk_main();
 	return 0;
 }

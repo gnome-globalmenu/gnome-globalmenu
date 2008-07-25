@@ -53,7 +53,10 @@ static gboolean ipc_server_call_cmd(const gchar * name, GHashTable * parameters,
 	return info->server_cmd(parameters, results, info->data);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
-void ipc_server_listen() {
+gboolean ipc_server_listen() {
+	gdk_x11_grab_server();
+	GdkNativeWindow old_server = ipc_find_server();
+	if(old_server) return FALSE;
 	GdkWindowAttr attr;
 	attr.title = IPC_SERVER_TITLE;
 	attr.wclass = GDK_INPUT_ONLY;
@@ -61,6 +64,8 @@ void ipc_server_listen() {
 	gdk_window_set_events(server_window, GDK_STRUCTURE_MASK || gdk_window_get_events(server_window));
 	gdk_window_add_filter(server_window, default_filter, NULL);
 	server_frozen = FALSE;
+	gdk_x11_ungrab_server();
+	return TRUE;
 }
 void ipc_server_freeze() {
 	server_frozen = TRUE;
