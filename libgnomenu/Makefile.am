@@ -26,6 +26,13 @@ libgnomenu_la_SOURCES = \
 	tools.c \
 	globalmenu.h \
 	globalmenu.c \
+	ipcserver.c \
+	ipcserver.h \
+	ipcclient.c \
+	ipcclient.h \
+	ipccommand.c \
+	ipccommand.h \
+	ipc.h \
 	sms.h
 
 libgnomenu_la_LDFLAGS = \
