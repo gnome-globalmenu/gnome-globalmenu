@@ -18,14 +18,18 @@ int main(int argc, char* argv[]){
 	}
 
 		g_timer_start(timer);
-	ipc_client_begin_transaction();
+	//ipc_client_begin_transaction();
 	for(i=100; i>0; i--) {
 		gchar * msg = g_strdup_printf("hello %d", i);
-		ipc_client_call_server("Ping", "message", msg, NULL);
+		gchar * rt = ipc_client_call_server("Ping", "message", msg, NULL);
+		if(rt) { 
+			g_message("%s", rt);
+			g_free(rt);
+		}
 		g_free(msg);
 	}
 	GList * returns;
-	ipc_client_end_transaction(&returns);
+	//ipc_client_end_transaction(&returns);
 	g_message("time consumed: %lf", (double) g_timer_elapsed(timer, NULL));
 	gtk_main();
 	return 0;

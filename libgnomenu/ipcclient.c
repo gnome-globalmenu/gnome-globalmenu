@@ -165,7 +165,7 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	if(!in_transaction) {
 		commands = g_list_append(commands, command);
 		returns = ipc_client_call_list(commands);
-		if(returns) rt = strdup(g_hash_table_lookup(((IPCCommand*)returns->data)->results, "default"));
+		if(returns) rt = ipc_command_get_default_result(returns->data);
 		ipc_command_list_free(commands);
 		ipc_command_list_free(returns);
 		return rt;

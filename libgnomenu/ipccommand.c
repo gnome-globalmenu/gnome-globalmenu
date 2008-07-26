@@ -275,3 +275,9 @@ void ipc_command_set_results(IPCCommand * command, gchar * result_name, ...) {
 	ipc_command_set_results_valist(command, result_name, va);
 	va_end(va);
 }
+gchar * ipc_command_get_default_result(IPCCommand * command) {
+	gchar * rt;
+	rt = g_hash_table_lookup(command->results, "default");
+	if(rt) return g_strdup(rt);
+	return NULL;
+}
