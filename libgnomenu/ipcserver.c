@@ -73,72 +73,102 @@ void ipc_server_freeze() {
 void ipc_server_thaw() {
 	server_frozen = FALSE;
 }
+static void client_message_call(XClientMessageEvent * client_message) {
+	GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b));
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
+	gpointer data;
+	Atom type_return;
+	unsigned long format_return;
+	unsigned long nitems_return;
+	unsigned long remaining_bytes;
+	gdk_x11_grab_server();
+	gdk_error_trap_push();
+	XGetWindowProperty(display,
+			src,
+			gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL),
+			0,
+			-1,
+			TRUE,
+			AnyPropertyType,
+			&type_return,
+			&format_return,
+			&nitems_return,
+			&remaining_bytes,
+			&data);
+	if(gdk_error_trap_pop()) {
+		g_warning("could not obtain call information, ignoring the call");
+		goto no_prop;
+	}
+	IPCCommand * command = ipc_command_parse(data);
+	if(!command){
+		g_warning("malformed command, ignoring the call");
+		goto parse_fail;
+	}
+	if(!ipc_server_call_cmd(command)) {
+		g_warning("command was not successfull, ignoring the call");
+		goto call_fail;
+	}
+	gchar * ret = ipc_command_to_string(command);
+	gdk_error_trap_push();
+
+	XChangeProperty(display,
+		src,
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN),
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN), /*type*/
+		8,
+		PropModeReplace,
+		ret,
+		strlen(ret) + 1);
+	XSync(display, FALSE);
+	if(gdk_error_trap_pop()) {
+		g_warning("could not set the property for returing the command");
+	}
+	g_free(ret);
+call_fail:
+	ipc_command_free(command);
+parse_fail:
+	XFree(data);
+no_prop:
+	gdk_x11_ungrab_server();
+}
+
+static void client_message_nego(XClientMessageEvent * client_message) {
+	static guint id = 1000;
+
+	GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b));
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
+	gchar * identify = g_strdup_printf("%d", id++);
+	gdk_error_trap_push();
+	
+	XChangeProperty(display,
+		src,
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_CID),
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_CID), /*type*/
+		8,
+		PropModeReplace,
+		identify,
+		strlen(identify) + 1);
+	XSync(display, FALSE);
+	/*TODO: add the client to a list, listen to its DestroyNotifyEvent*/
+	if(gdk_error_trap_pop()) {
+		g_warning("could not set the identify during NEGO process");
+	}
+	g_free(identify);
+}
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(server_frozen) return GDK_FILTER_CONTINUE;
+	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
 	switch(((XEvent *)xevent)->type) {
-		case ClientMessage: {
-			XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
-			if(client_message->message_type != gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_CALL)) 
-				return GDK_FILTER_CONTINUE;
-			GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b));
-			gpointer data;
-			Atom type_return;
-			unsigned long format_return;
-			unsigned long nitems_return;
-			unsigned long remaining_bytes;
-			Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
-			gdk_x11_grab_server();
-			gdk_error_trap_push();
-			XGetWindowProperty(display,
-					src,
-					gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL),
-					0,
-					-1,
-					TRUE,
-					AnyPropertyType,
-					&type_return,
-					&format_return,
-					&nitems_return,
-					&remaining_bytes,
-					&data);
-			if(gdk_error_trap_pop()) {
-				g_warning("could not obtain call information, ignoring the call");
-				goto no_prop;
+		case ClientMessage:
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_CALL)) {
+				client_message_call(client_message);
+				return GDK_FILTER_REMOVE;
+			} else
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_NEGO)){
+				client_message_nego(client_message);
+				return GDK_FILTER_REMOVE;
 			}
-			IPCCommand * command = ipc_command_parse(data);
-			if(!command){
-				g_warning("malformed command, ignoring the call");
-				goto parse_fail;
-			}
-			if(!ipc_server_call_cmd(command)) {
-				g_warning("command was not successfull, ignoring the call");
-				goto call_fail;
-			}
-			gchar * ret = ipc_command_to_string(command);
-			gdk_error_trap_push();
-	
-			XChangeProperty(display,
-				src,
-				gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN),
-				gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN), /*type*/
-				8,
-				PropModeReplace,
-				ret,
-				strlen(ret) + 1);
-			XSync(display, FALSE);
-			if(gdk_error_trap_pop()) {
-				g_warning("could not set the property for returing the command");
-			}
-			g_free(ret);
-call_fail:
-			ipc_command_free(command);
-parse_fail:
-			XFree(data);
-no_prop:
-			gdk_x11_ungrab_server();
-			return GDK_FILTER_REMOVE;
-		}
-		break;	
+		return GDK_FILTER_CONTINUE;
 	}
 	return GDK_FILTER_CONTINUE;
 }

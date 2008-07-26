@@ -18,6 +18,8 @@ static gboolean client_frozen = TRUE;
 static IPCClientServerDestroyNotify server_destroy_notify = NULL;
 static gpointer server_destroy_notify_data = NULL;
 static GList * queue = NULL;
+static gchar * client_id = NULL; /*obtained after NEGO*/
+
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(((XEvent *)xevent)->type = DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
@@ -38,7 +40,7 @@ static void ipc_client_send_client_message(GdkNativeWindow server, GdkAtom messa
 	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(client_window);
 	gdk_event_send_client_message(&ec, server);
 }
-static gpointer ipc_client_wait_for_property(GdkAtom property_name) {
+static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	Atom type_return;
 	unsigned long format_return;
@@ -52,7 +54,7 @@ static gpointer ipc_client_wait_for_property(GdkAtom property_name) {
 				gdk_x11_atom_to_xatom(property_name),
 				0,
 				-1,
-				TRUE,
+				remove,
 				AnyPropertyType,
 				&type_return,
 				&format_return,
@@ -78,7 +80,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	}
 	GdkWindow * server_gdk = gdk_window_lookup(server);
 	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
-	LOG("%p", server_gdk);
+
 	gdk_window_set_events(server_gdk, gdk_window_get_events(server_gdk) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(server_gdk, server_filter, NULL);
 	server_destroy_notify = notify;
@@ -91,7 +93,15 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 
 	gdk_x11_ungrab_server();
 	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_NEGO);
-	rt = TRUE;
+	gchar * identify = ipc_client_wait_for_property(IPC_PROPERTY_CID, FALSE);
+	if(identify) {
+		client_id = g_strdup(identify);
+		LOG("client_id obtained: %s", client_id);
+		XFree(identify);
+		rt = TRUE;
+	} else {
+		rt = FALSE;
+	}
 no_server:
 	return rt;
 }
@@ -139,7 +149,7 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 		goto no_prop_set;
 	}
 	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_CALL);
-	data = ipc_client_wait_for_property(IPC_PROPERTY_RETURN);
+	data = ipc_client_wait_for_property(IPC_PROPERTY_RETURN, TRUE);
 	if(!data) {
 		g_warning("No return value obtained");
 		goto no_return_val;
