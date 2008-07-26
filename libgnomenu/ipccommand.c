@@ -220,6 +220,15 @@ gchar * ipc_command_to_string(IPCCommand * command){
 	g_string_append_printf(string, "</command>");
 	return g_string_free(string, FALSE);
 }
+gchar * ipc_command_list_to_string(GList * command_list){
+	GList * node;
+	GString * result = g_string_new("");
+	for(node = command_list; node; node = node->next) {
+		g_string_append(result, ipc_command_to_string(node->data));
+		g_string_append_c(result, '\n');
+	}
+	return g_string_free(result, FALSE);
+}
 IPCCommand * ipc_command_new(gchar * cid, gchar * name) {
 	IPCCommand * rt = g_slice_new0(IPCCommand);
 	rt->cid = g_strdup(cid);
