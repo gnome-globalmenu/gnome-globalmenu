@@ -23,6 +23,8 @@ static gchar * cid = NULL; /*obtained after NEGO*/
 static gboolean in_transaction = FALSE; 
 static GList * transaction = NULL;
 
+static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove);
+
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
@@ -30,6 +32,33 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 		if(server_destroy_notify)
 			server_destroy_notify(server_destroy_notify_data);
 	} else {
+	}
+	return GDK_FILTER_CONTINUE;
+}
+static void client_message_event(XClientMessageEvent * client_message) {
+	gchar * event_data = ipc_client_wait_for_property(IPC_PROPERTY_EVENT, TRUE);
+	if(!event_data) {
+		g_critical("can't obtain event data");	
+		return;
+	}
+	IPCEvent * event = ipc_event_parse(event_data);
+	g_message("event arrived: %s", event_data);
+	XFree(event_data);
+	if(!event) {
+		g_critical("malformed event data");
+		return;
+	}
+	ipc_event_free(event);
+}
+static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
+	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
+	switch(((XEvent *)xevent)->type) {
+		case ClientMessage:
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_EVENT)) {
+				client_message_event(client_message);
+				return GDK_FILTER_REMOVE;
+			}
+		return GDK_FILTER_CONTINUE;
 	}
 	return GDK_FILTER_CONTINUE;
 }
@@ -92,6 +121,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	attr.title = IPC_CLIENT_TITLE;
 	attr.wclass = GDK_INPUT_ONLY;
 	client_window = gdk_window_new(NULL, &attr, GDK_WA_TITLE);
+	gdk_window_add_filter(client_window, default_filter, NULL);
 	client_frozen = FALSE;
 
 	gdk_x11_ungrab_server();

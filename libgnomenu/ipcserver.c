@@ -228,3 +228,43 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 	}
 	return GDK_FILTER_CONTINUE;
 }
+static void ipc_server_send_client_message(GdkNativeWindow client_xwindow, GdkAtom message_type) {
+	GdkEventClient ec;
+	ec.type = GDK_CLIENT_EVENT;
+	ec.window = 0;
+	ec.send_event = TRUE;
+	ec.message_type = message_type;
+	ec.data_format = 8;
+	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(server_window);
+	gdk_event_send_client_message(&ec, client_xwindow);
+}
+gboolean ipc_server_send_event(IPCEvent * event) {
+	ClientInfo * info = g_hash_table_lookup(client_hash, event->cid);
+	if(!info) return FALSE;
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
+	gchar * data = ipc_event_to_string(event);
+	if(!data) {
+		g_critical("Could not format the event");
+		return FALSE;
+	}
+	gdk_error_trap_push();
+
+	XChangeProperty(display,
+		info->xwindow,
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT),
+		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT), /*type*/
+		8,
+		PropModeReplace,
+		data,
+		strlen(data) + 1);
+	XSync(display, FALSE);
+	g_free(data);
+	ipc_server_send_client_message(info->xwindow, IPC_CLIENT_MESSAGE_EVENT);
+	if(gdk_error_trap_pop()) {
+		g_warning("could not set the property for the event");
+		goto set_prop_fail;
+	}
+	return TRUE;
+set_prop_fail:
+	return FALSE;
+}
