@@ -119,7 +119,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	unsigned long format_return;
 	unsigned long nitems_return;
 	unsigned long remaining_bytes;
-	gdk_x11_grab_server();
+//	gdk_x11_grab_server();
 	data = ipc_server_get_property(src, IPC_PROPERTY_CALL);
 	if(!data) {
 		g_warning("could not obtain call information, ignoring the call");
@@ -165,7 +165,8 @@ call_fail:
 	ipc_command_list_free(commands);
 parse_fail:
 no_prop:
-	gdk_x11_ungrab_server();
+//	gdk_x11_ungrab_server();
+	return;
 }
 
 static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, ClientInfo * info){
