@@ -138,29 +138,40 @@ static void error  (GMarkupParseContext *context,
 IPCCommand * ipc_command_parse(const gchar * string){
 	ParseInfo cpi = {0};
 	GMarkupParseContext * context;
+	IPCCommand * rt = NULL;
 	GError * error = NULL;
 	context = g_markup_parse_context_new(&parser, 0, &cpi, NULL);
 	if(g_markup_parse_context_parse(context, string, strlen(string), &error)){
-		g_markup_parse_context_free(context);
 	   	if(!cpi.command_list) {
 			g_critical("parsing command failed");
-			return NULL;
+			goto clean_up;
 		}
 		if(g_list_length(cpi.command_list)>1){
 			g_critical("parsing a command list as a command!");
-			return NULL;
+			GList * node;
+			for(node = cpi.command_list; node; node=node->next){
+				ipc_command_free(node->data);
+			}
+			goto clean_up;
 		}
-		IPCCommand * command = cpi.command_list->data;
-		g_list_free(cpi.command_list);
-		return command;
+		rt = cpi.command_list->data;
+		goto clean_up;
 	}
 	if(error) {
 		/* FIXME: free any memory allocation in cpi*/
 		g_critical("Parse command failed: %s", error->message);
 		g_error_free(error);
+		goto clean_up;
 	}
+clean_up:
 	g_markup_parse_context_free(context);
-	return NULL;
+	g_list_free(cpi.command_list);
+	if(cpi.current_command) ipc_command_free(cpi.current_command);
+	if(cpi.current_prop) g_free(cpi.current_prop);
+	if(cpi.current_result) g_free(cpi.current_result);
+	if(cpi.current_prop_value) g_string_free(cpi.current_prop_value, TRUE);
+	if(cpi.current_result_value) g_string_free(cpi.current_result_value, TRUE);
+	return rt;
 
 }
 gchar * ipc_command_to_string(IPCCommand * command){
