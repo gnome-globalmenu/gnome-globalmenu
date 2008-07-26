@@ -131,11 +131,11 @@ static GList * ipc_client_call_list(GList * command_list) {
 			strlen(data) + 1);
 	XSync(display, FALSE);
 	g_free(data);
+	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_CALL);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for calling the command, ignoring the command");
 		goto no_prop_set;
 	}
-	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_CALL);
 	data = ipc_client_wait_for_property(IPC_PROPERTY_RETURN, TRUE);
 	if(!data) {
 		g_warning("No return value obtained");
