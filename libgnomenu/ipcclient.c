@@ -15,13 +15,40 @@
 
 static GdkWindow * client_window = NULL;
 static gboolean client_frozen = TRUE;
+static IPCClientServerDestroyNotify server_destroy_notify = NULL;
+static gpointer server_destroy_notify_data = NULL;
 static GList * queue = NULL;
-void ipc_client_start() {
+static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
+	if(((XEvent *)xevent)->type = DestroyNotify) {
+		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
+		g_critical("Server is down!");
+		if(server_destroy_notify)
+			server_destroy_notify(server_destroy_notify_data);
+	} else {
+	}
+	return GDK_FILTER_CONTINUE;
+}
+gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
+	gboolean rt = FALSE;
+	gdk_x11_grab_server();
+	GdkNativeWindow server = ipc_find_server();
+	if(server == 0) goto no_server;
+	GdkWindow * server_gdk = gdk_window_lookup(server);
+	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
+	LOG("%p", server_gdk);
+	gdk_window_set_events(server_gdk, gdk_window_get_events(server_gdk) | GDK_STRUCTURE_MASK);
+	gdk_window_add_filter(server_gdk, server_filter, NULL);
+	server_destroy_notify = notify;
+	server_destroy_notify_data = data;
 	GdkWindowAttr attr;
 	attr.title = IPC_CLIENT_TITLE;
 	attr.wclass = GDK_INPUT_ONLY;
 	client_window = gdk_window_new(NULL, &attr, GDK_WA_TITLE);
 	client_frozen = FALSE;
+	rt = TRUE;
+no_server:
+	gdk_x11_ungrab_server();
+	return rt;
 }
 gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
 	/* dummy variables */
