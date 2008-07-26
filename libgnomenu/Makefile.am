@@ -32,8 +32,9 @@ libgnomenu_la_SOURCES = \
 	ipcclient.h \
 	ipccommand.c \
 	ipccommand.h \
+	ipcutils.c \
+	ipcutils.h \
 	ipc.h \
-	ipc.c \
 	sms.h
 
 libgnomenu_la_LDFLAGS = \

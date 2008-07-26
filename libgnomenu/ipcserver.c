@@ -10,6 +10,7 @@
 
 #include <gdk/gdkx.h>
 #include "ipc.h"
+#include "ipcutils.h"
 #include "ipcserver.h"
 #include "ipccommand.h"
 
