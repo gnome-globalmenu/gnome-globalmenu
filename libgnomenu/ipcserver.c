@@ -94,7 +94,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 					gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL),
 					0,
 					-1,
-					FALSE,
+					TRUE,
 					AnyPropertyType,
 					&type_return,
 					&format_return,
@@ -135,11 +135,6 @@ call_fail:
 parse_fail:
 			XFree(data);
 no_prop:
-			gdk_error_trap_push();
-			XDeleteProperty(display, src, gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL));
-			if(gdk_error_trap_pop()) {
-				g_warning("could not notify the client this call is finished");
-			}
 			gdk_x11_ungrab_server();
 			return GDK_FILTER_REMOVE;
 		}

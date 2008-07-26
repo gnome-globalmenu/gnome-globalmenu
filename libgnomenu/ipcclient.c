@@ -28,11 +28,54 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 	}
 	return GDK_FILTER_CONTINUE;
 }
+static void ipc_client_send_client_message(GdkNativeWindow server, GdkAtom message_type) {
+	GdkEventClient ec;
+	ec.type = GDK_CLIENT_EVENT;
+	ec.window = 0;
+	ec.send_event = TRUE;
+	ec.message_type = message_type;
+	ec.data_format = 8;
+	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(client_window);
+	gdk_event_send_client_message(&ec, server);
+}
+static gpointer ipc_client_wait_for_property(GdkAtom property_name) {
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+	Atom type_return;
+	unsigned long format_return;
+	unsigned long remaining_bytes;
+	unsigned long nitems_return;
+	gpointer data;
+	while(1) {
+		gdk_error_trap_push();
+		XGetWindowProperty(display,
+				GDK_WINDOW_XWINDOW(client_window),
+				gdk_x11_atom_to_xatom(property_name),
+				0,
+				-1,
+				TRUE,
+				AnyPropertyType,
+				&type_return,
+				&format_return,
+				&nitems_return,
+				&remaining_bytes,
+				&data);
+		if(gdk_error_trap_pop()) {
+			return NULL;
+		} else {
+			if(type_return != None)
+				return data;
+		}
+	}
+	return data;
+}
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	gboolean rt = FALSE;
 	gdk_x11_grab_server();
 	GdkNativeWindow server = ipc_find_server();
-	if(server == 0) goto no_server;
+	if(server == 0) {
+		gdk_x11_ungrab_server();
+		goto no_server;
+	}
 	GdkWindow * server_gdk = gdk_window_lookup(server);
 	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
 	LOG("%p", server_gdk);
@@ -45,9 +88,11 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	attr.wclass = GDK_INPUT_ONLY;
 	client_window = gdk_window_new(NULL, &attr, GDK_WA_TITLE);
 	client_frozen = FALSE;
+
+	gdk_x11_ungrab_server();
+	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_NEGO);
 	rt = TRUE;
 no_server:
-	gdk_x11_ungrab_server();
 	return rt;
 }
 gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
@@ -77,13 +122,6 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	}
 
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-	GdkEventClient ec;
-	ec.type = GDK_CLIENT_EVENT;
-	ec.window = server;
-	ec.send_event = TRUE;
-	ec.message_type = IPC_CLIENT_MESSAGE_CALL;
-	ec.data_format = 8;
-	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(client_window);
 	gdk_error_trap_push();
 	
 	XChangeProperty(display,
@@ -100,58 +138,22 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 		g_warning("could not set the property for calling the command, ignoring the command");
 		goto no_prop_set;
 	}
-	gdk_event_send_client_message(&ec, server);
-	gboolean stop = FALSE;
-	while(!stop) {
-		gdk_error_trap_push();
-		XGetWindowProperty(display,
-				GDK_WINDOW_XWINDOW(client_window),
-				gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL),
-				0,
-				-1,
-				FALSE,
-				AnyPropertyType,
-				&type_return,
-				&format_return,
-				&nitems_return,
-				&remaining_bytes,
-				&data);
-		if(gdk_error_trap_pop()){
-			g_warning("failure in waiting for server to delete the property, assuming done");
-			stop = TRUE;
-		} else {
-			XFree(data);
-			if(type_return == None) stop = TRUE;
-		}
-		//g_usleep(1000);
+	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_CALL);
+	data = ipc_client_wait_for_property(IPC_PROPERTY_RETURN);
+	if(!data) {
+		g_warning("No return value obtained");
+		goto no_return_val;
 	}
-	gdk_error_trap_push();
-	XGetWindowProperty(display,
-			GDK_WINDOW_XWINDOW(client_window),
-			gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN),
-			0,
-			-1,
-			FALSE,
-			AnyPropertyType,
-			&type_return,
-			&format_return,
-			&nitems_return,
-			&remaining_bytes,
-			&data);
-	if(gdk_error_trap_pop()){
-		g_warning("failure in getting the return value, assuming NULL");
-	} else {
-		IPCCommand * ret = ipc_command_parse(data);
-		if(!ret){
-			g_warning("malformed return value, ignoring it");
-			goto malform;
-		}
-		rt = g_strdup(g_hash_table_lookup(ret->results, "default"));
-		ipc_command_free(ret);
+	IPCCommand * ret = ipc_command_parse(data);
+	if(!ret){
+		g_warning("malformed return value, ignoring it");
+		goto malform;
+	}
+	rt = g_strdup(g_hash_table_lookup(ret->results, "default"));
+	ipc_command_free(ret);
 malform:
-		XFree(data);
-	}
-	
+	XFree(data);
+no_return_val:
 no_prop_set:
 	return rt;
 }

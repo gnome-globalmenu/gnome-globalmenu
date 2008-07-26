@@ -2,6 +2,7 @@
 #define _PIC_COMMAND_H_
 typedef struct {
 	gchar * name;
+	gchar * client_id;
 	GHashTable * parameters;
 	GHashTable * results;
 } IPCCommand;
