@@ -21,7 +21,7 @@ static GList * queue = NULL;
 static gchar * client_id = NULL; /*obtained after NEGO*/
 
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
-	if(((XEvent *)xevent)->type = DestroyNotify) {
+	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
 		g_critical("Server is down!");
 		if(server_destroy_notify)
