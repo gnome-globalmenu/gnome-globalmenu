@@ -1,8 +1,6 @@
 #include <config.h>
 #include <gtk/gtk.h>
-#define GET_OBJECT(_s, sgmb, p) \
-	GnomenuGlobalMenu * sgmb = GNOMENU_GLOBAL_MENU(_s); \
-	GnomenuGlobalMenuPrivate * p = GNOMENU_GLOBAL_MENU_GET_PRIVATE(_s);
+
 #if ENABLE_TRACING >= 1
 #define LOG(fmt, args...) g_message("<GnomenuGlobalMenu>::" fmt,  ## args)
 #else
@@ -53,6 +51,7 @@ static gboolean ipc_server_call_cmd(IPCCommand * command) {
 	return info->server_cmd(command->parameters, command->results, info->data);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
+
 gboolean ipc_server_listen() {
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
@@ -65,6 +64,7 @@ gboolean ipc_server_listen() {
 	gdk_window_add_filter(server_window, default_filter, NULL);
 	server_frozen = FALSE;
 	gdk_x11_ungrab_server();
+
 	return TRUE;
 }
 void ipc_server_freeze() {
