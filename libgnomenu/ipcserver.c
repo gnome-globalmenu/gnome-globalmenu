@@ -44,13 +44,13 @@ void ipc_server_register_cmd(const gchar * name, ServerCMD cmd_handler, gpointer
 	}
 	g_hash_table_insert(command_hash, name, info);
 }
-static gboolean ipc_server_call_cmd(const gchar * name, GHashTable * parameters, GHashTable * results) {
+static gboolean ipc_server_call_cmd(IPCCommand * command) {
 	if(command_hash == NULL) {
 		return FALSE;
 	}
-	CommandInfo * info = g_hash_table_lookup(command_hash, name);
+	CommandInfo * info = g_hash_table_lookup(command_hash, command->name);
 	if(!info) return FALSE;
-	return info->server_cmd(parameters, results, info->data);
+	return info->server_cmd(command->parameters, command->results, info->data);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 gboolean ipc_server_listen() {
@@ -105,18 +105,16 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 				g_warning("could not obtain call information, ignoring the call");
 				goto no_prop;
 			}
-			GHashTable * parameters;
-			GHashTable * results;
-			gchar * command_name;
-			if(!ipc_command_parse(data, &command_name, &parameters, &results)) {
+			IPCCommand * command = ipc_command_parse(data);
+			if(!command){
 				g_warning("malformed command, ignoring the call");
 				goto parse_fail;
 			}
-			if(!ipc_server_call_cmd(command_name, parameters, results)) {
+			if(!ipc_server_call_cmd(command)) {
 				g_warning("command was not successfull, ignoring the call");
 				goto call_fail;
 			}
-			gchar * ret = ipc_command_to_string(command_name, parameters, results);
+			gchar * ret = ipc_command_to_string(command);
 			gdk_error_trap_push();
 	
 			XChangeProperty(display,
@@ -133,9 +131,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 			}
 			g_free(ret);
 call_fail:
-			g_free(command_name);
-			g_hash_table_destroy(parameters);
-			g_hash_table_destroy(results);
+			ipc_command_free(command);
 parse_fail:
 			XFree(data);
 no_prop:

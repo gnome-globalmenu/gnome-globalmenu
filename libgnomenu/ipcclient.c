@@ -34,18 +34,21 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	gchar * rt;
 	g_assert(client_window);
 	GdkNativeWindow server = ipc_find_server();
+	IPCCommand * command = ipc_command_new();
+	command->name = g_strdup(command_name);
 	va_list va;
 	va_start(va, para_name);
-	GHashTable * parameters = ipc_parameters_va(para_name, va);
+	ipc_command_set_parameters_valist(command, para_name, va);
 	va_end(va);
-	data = ipc_command_to_string(command_name, parameters, NULL);
-	g_hash_table_destroy(parameters);
+	data = ipc_command_to_string(command);
 	g_return_if_fail(data != NULL);
-	/*build data*/
+	ipc_command_free(command);
+
 	if(!server) {
-		queue = g_list_append(queue, data);
-		return;
+		g_critical("no server is found, method failed");
+		return NULL;
 	}
+
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	GdkEventClient ec;
 	ec.type = GDK_CLIENT_EVENT;
@@ -111,13 +114,13 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	if(gdk_error_trap_pop()){
 		g_warning("failure in getting the return value, assuming NULL");
 	} else {
-		GHashTable * results;
-		if(!ipc_command_parse(data, NULL, NULL, &results)){
+		IPCCommand * ret = ipc_command_parse(data);
+		if(!ret){
 			g_warning("malformed return value, ignoring it");
 			goto malform;
 		}
-		rt = g_strdup(g_hash_table_lookup(results, "default"));
-		g_hash_table_destroy(results);
+		rt = g_strdup(g_hash_table_lookup(ret->results, "default"));
+		ipc_command_free(ret);
 malform:
 		XFree(data);
 	}
