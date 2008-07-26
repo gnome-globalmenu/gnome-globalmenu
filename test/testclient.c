@@ -17,16 +17,16 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 
-	for(i=10; i>0; i--) {
 		g_timer_start(timer);
+	ipc_client_begin_transaction();
+	for(i=100; i>0; i--) {
 		gchar * msg = g_strdup_printf("hello %d", i);
-		gchar * result = ipc_client_call_server("Ping", "message", msg, NULL);
-		g_assert(g_str_equal(result, msg));
+		ipc_client_call_server("Ping", "message", msg, NULL);
 		g_free(msg);
-		g_message("result: %s", result);
-		g_message("time consumed: %lf", (double) g_timer_elapsed(timer, NULL));
-		g_free(result);
 	}
+	GList * returns;
+	ipc_client_end_transaction(&returns);
+	g_message("time consumed: %lf", (double) g_timer_elapsed(timer, NULL));
 	gtk_main();
 	return 0;
 }

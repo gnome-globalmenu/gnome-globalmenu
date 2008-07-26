@@ -244,6 +244,13 @@ void ipc_command_free(IPCCommand * command) {
 	if(command->results) g_hash_table_destroy(command->results);
 	g_slice_free(IPCCommand, command);
 }
+void ipc_command_list_free(GList * list) {
+	GList * node;
+	for(node = list; node; node = node->next){
+		ipc_command_free(node->data);
+	}
+	g_list_free(list);
+}
 void ipc_command_set_parameters_valist(IPCCommand * command, gchar * para_name, va_list va) {
 	if(command->parameters) {
 		g_hash_table_destroy(command->parameters);
@@ -268,4 +275,3 @@ void ipc_command_set_results(IPCCommand * command, gchar * result_name, ...) {
 	ipc_command_set_results_valist(command, result_name, va);
 	va_end(va);
 }
-

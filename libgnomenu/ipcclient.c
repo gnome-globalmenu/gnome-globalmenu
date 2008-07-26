@@ -20,6 +20,8 @@ static IPCClientServerDestroyNotify server_destroy_notify = NULL;
 static gpointer server_destroy_notify_data = NULL;
 static GList * queue = NULL;
 static gchar * cid = NULL; /*obtained after NEGO*/
+static gboolean in_transaction = FALSE; 
+static GList * transaction = NULL;
 
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
@@ -106,26 +108,11 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 no_server:
 	return rt;
 }
-gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
-	/* dummy variables */
-	Atom type_return;
-	unsigned long format_return;
-	unsigned long remaining_bytes;
-	unsigned long nitems_return;
-	gpointer data;
-	/* dummy variables ends here*/
-	gchar * rt;
-	g_assert(client_window);
+static GList * ipc_client_call_list(GList * command_list) {
+	GList * ret = NULL;
 	GdkNativeWindow server = ipc_find_server();
-	IPCCommand * command = ipc_command_new(cid, command_name);
-	va_list va;
-	va_start(va, para_name);
-	ipc_command_set_parameters_valist(command, para_name, va);
-	va_end(va);
-	data = ipc_command_to_string(command);
-	g_return_if_fail(data != NULL);
-	ipc_command_free(command);
-
+	gchar * data = ipc_command_list_to_string(command_list);
+	g_assert(client_window);
 	if(!server) {
 		g_critical("no server is found, method failed");
 		return NULL;
@@ -154,16 +141,53 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 		g_warning("No return value obtained");
 		goto no_return_val;
 	}
-	IPCCommand * ret = ipc_command_parse(data);
+	ret =ipc_command_list_parse(data);
 	if(!ret){
 		g_warning("malformed return value, ignoring it");
 		goto malform;
 	}
-	rt = g_strdup(g_hash_table_lookup(ret->results, "default"));
-	ipc_command_free(ret);
 malform:
 	XFree(data);
 no_return_val:
 no_prop_set:
-	return rt;
+	return ret;
+
+}
+gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
+	gchar * rt = NULL;
+	IPCCommand * command = ipc_command_new(cid, command_name);
+	GList * commands = NULL;
+	GList * returns = NULL;
+	va_list va;
+	va_start(va, para_name);
+	ipc_command_set_parameters_valist(command, para_name, va);
+	va_end(va);
+	if(!in_transaction) {
+		commands = g_list_append(commands, command);
+		returns = ipc_client_call_list(commands);
+		if(returns) rt = strdup(g_hash_table_lookup(((IPCCommand*)returns->data)->results, "default"));
+		ipc_command_list_free(commands);
+		ipc_command_list_free(returns);
+		return rt;
+	} else {
+		transaction = g_list_append(transaction, command);
+		return NULL;
+	}
+}
+void ipc_client_begin_transaction() {
+	transaction = NULL;
+	in_transaction = TRUE;
+}
+void ipc_client_cancel_transaction() {
+	ipc_command_list_free(transaction);
+	in_transaction = FALSE;
+	transaction = NULL;
+}
+void ipc_client_end_transaction(GList ** return_list){
+	GList * rt = ipc_client_call_list(transaction);
+	if(return_list) *return_list = rt;
+	else ipc_command_list_free(rt);
+	ipc_command_list_free(transaction);
+	transaction = NULL;
+	in_transaction = FALSE;
 }

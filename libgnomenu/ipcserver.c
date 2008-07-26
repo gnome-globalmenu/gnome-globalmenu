@@ -125,22 +125,26 @@ static void client_message_call(XClientMessageEvent * client_message) {
 		g_warning("could not obtain call information, ignoring the call");
 		goto no_prop;
 	}
-	IPCCommand * command = ipc_command_parse(data);
+	GList * commands = ipc_command_list_parse(data);
 	XFree(data);
-	if(!command){
+	if(!commands){
 		g_warning("malformed command, ignoring the call");
 		goto parse_fail;
 	}
-	ClientInfo * info = g_hash_table_lookup(client_hash, command->cid);
-	if(!info || info->xwindow != src) {
-		g_warning("unknown client, ignoring the call");
-		goto unknown_client;
+	GList * node;
+	for(node = commands; node; node=node->next){
+		IPCCommand * command = node->data;
+		ClientInfo * info = g_hash_table_lookup(client_hash, command->cid);
+		if(!info || info->xwindow != src) {
+			g_warning("unknown client, ignoring the call");
+			goto unknown_client;
+		}
+		if(!ipc_server_call_cmd(command)) {
+			g_warning("command was not successfull, ignoring the call");
+			goto call_fail;
+		}
 	}
-	if(!ipc_server_call_cmd(command)) {
-		g_warning("command was not successfull, ignoring the call");
-		goto call_fail;
-	}
-	gchar * ret = ipc_command_to_string(command);
+	gchar * ret = ipc_command_list_to_string(commands);
 	gdk_error_trap_push();
 
 	XChangeProperty(display,
@@ -158,7 +162,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	g_free(ret);
 unknown_client:
 call_fail:
-	ipc_command_free(command);
+	ipc_command_list_free(commands);
 parse_fail:
 no_prop:
 	gdk_x11_ungrab_server();
