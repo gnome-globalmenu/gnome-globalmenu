@@ -117,9 +117,7 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	gchar * rt;
 	g_assert(client_window);
 	GdkNativeWindow server = ipc_find_server();
-	IPCCommand * command = ipc_command_new();
-	command->name = g_strdup(command_name);
-	command->cid = g_strdup(cid);
+	IPCCommand * command = ipc_command_new(cid, command_name);
 	va_list va;
 	va_start(va, para_name);
 	ipc_command_set_parameters_valist(command, para_name, va);

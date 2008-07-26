@@ -4,10 +4,10 @@
 #include "ipccommand.h"
 
 static GHashTable * build_hash_table_va(gchar * name, va_list va) {
-	GHashTable * rt = g_hash_table_new(g_str_hash, g_str_equal);
+	GHashTable * rt = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 	gchar * value = va_arg(va, gchar *);
 	do {
-		g_hash_table_insert(rt, name, value);
+		g_hash_table_insert(rt, g_strdup(name), g_strdup(value));
 	gchar * name = va_arg(va, gchar *);
 	if(!name) break;
 	gchar * value = va_arg(va, gchar *);
@@ -17,10 +17,8 @@ static GHashTable * build_hash_table_va(gchar * name, va_list va) {
 }
 
 typedef struct {
-	gchar * name;
-	gchar * cid;
-	GHashTable * parameters;
-	GHashTable * results;
+	GList * command_list;
+	IPCCommand * current_command;
 	gchar * current_prop;
 	GString * current_prop_value;
 	gchar * current_result;
@@ -60,30 +58,17 @@ static void start_element  (GMarkupParseContext *context,
 		GError      **error) {
 	if(g_str_equal(element_name, "command")) {
 		gint i;
-		pi->name = NULL;
-		pi->cid = NULL;
-		pi->current_prop = NULL;
-		pi->current_prop_value = NULL;
-		pi->current_result = NULL;
-		pi->current_result_value = NULL;
+		gchar * name = NULL;
+		gchar * cid = NULL;
 		for(i=0; attribute_names[i]; i++) {
 			if(g_str_equal(attribute_names[i], "name")){
-				pi->name = g_strdup(attribute_values[i]);
+				name = g_strdup(attribute_values[i]);
 			} else
 			if(g_str_equal(attribute_names[i], "cid")){
-				pi->cid = g_strdup(attribute_values[i]);
+				cid = g_strdup(attribute_values[i]);
 			}
 		}
-		pi->parameters = g_hash_table_new_full(
-				g_str_hash,
-				g_str_equal,
-				g_free,
-				g_free);
-		pi->results = g_hash_table_new_full(
-				g_str_hash,
-				g_str_equal,
-				g_free,
-				g_free);
+		pi->current_command = ipc_command_new(cid, name);
 	} else 
 	if(g_str_equal(element_name, "p")){
 		gint i;
@@ -105,25 +90,28 @@ static void start_element  (GMarkupParseContext *context,
 			}
 		}
 	}
-
 }
 static void end_element  (GMarkupParseContext *context, 
 		const gchar * element_name, 
 		ParseInfo    *pi, 
 		GError      **error) {
 	if(g_str_equal(element_name, "p")) {
-		g_hash_table_insert(pi->parameters,
+		g_hash_table_insert(pi->current_command->parameters,
 				pi->current_prop,
 				g_string_free(pi->current_prop_value, FALSE));
 		pi->current_prop = NULL;
 		pi->current_prop_value = NULL;
 	} else 
 	if(g_str_equal(element_name, "r")) {
-		g_hash_table_insert(pi->results,
+		g_hash_table_insert(pi->current_command->results,
 				pi->current_result,
 				g_string_free(pi->current_result_value, FALSE));
 		pi->current_result = NULL;
 		pi->current_result_value = NULL;
+	} else
+	if(g_str_equal(element_name, "command")){
+		pi->command_list = g_list_append(pi->command_list, pi->current_command);
+		pi->current_command = NULL;
 	}
 }
 static void text  (GMarkupParseContext *context, 
@@ -153,19 +141,21 @@ IPCCommand * ipc_command_parse(const gchar * string){
 	GError * error = NULL;
 	context = g_markup_parse_context_new(&parser, 0, &cpi, NULL);
 	if(g_markup_parse_context_parse(context, string, strlen(string), &error)){
-		IPCCommand * command = ipc_command_new();
-			command->cid = cpi.cid;
-			command->name = cpi.name;
-			command->parameters = cpi.parameters;
-			command->results = cpi.results;
 		g_markup_parse_context_free(context);
+	   	if(!cpi.command_list) {
+			g_critical("parsing command failed");
+			return NULL;
+		}
+		if(g_list_length(cpi.command_list)>1){
+			g_critical("parsing a command list as a command!");
+			return NULL;
+		}
+		IPCCommand * command = cpi.command_list->data;
+		g_list_free(cpi.command_list);
 		return command;
 	}
 	if(error) {
-		if(cpi.name) g_free(cpi.name);
-		if(cpi.cid) g_free(cpi.cid);
-		if(cpi.parameters) g_hash_table_destroy(cpi.parameters);
-		if(cpi.results) g_hash_table_destroy(cpi.results);
+		/* FIXME: free any memory allocation in cpi*/
 		g_critical("Parse command failed: %s", error->message);
 		g_error_free(error);
 	}
@@ -211,8 +201,13 @@ gchar * ipc_command_to_string(IPCCommand * command){
 	g_string_append_printf(string, "</command>");
 	return g_string_free(string, FALSE);
 }
-IPCCommand * ipc_command_new() {
-	return g_slice_new0(IPCCommand);
+IPCCommand * ipc_command_new(gchar * cid, gchar * name) {
+	IPCCommand * rt = g_slice_new0(IPCCommand);
+	rt->cid = g_strdup(cid);
+	rt->name = g_strdup(name);
+	rt->parameters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	rt->results = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	return rt;
 }
 void ipc_command_free(IPCCommand * command) {
 	if(command->name) g_free(command->name);

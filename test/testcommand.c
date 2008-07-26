@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[]) {
 	gtk_init(&argc, &argv);
-	gchar * str = "<command name=\"test\"><p name=\"p1\">value <!--note--> part2</p><r name=\"r1\">return 1</r></command>";
+	gchar * str = "<command cid=\"testcid\" name=\"test\"><p name=\"p1\">value <!--note--> part2</p><r name=\"r1\">return 1</r></command>";
 	gchar * name = NULL;
 	IPCCommand * command;
 	g_print("%s\n", str);
