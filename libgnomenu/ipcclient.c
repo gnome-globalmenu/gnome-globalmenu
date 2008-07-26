@@ -19,7 +19,7 @@ static gboolean client_frozen = TRUE;
 static IPCClientServerDestroyNotify server_destroy_notify = NULL;
 static gpointer server_destroy_notify_data = NULL;
 static GList * queue = NULL;
-static gchar * client_id = NULL; /*obtained after NEGO*/
+static gchar * cid = NULL; /*obtained after NEGO*/
 
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
@@ -96,8 +96,8 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_NEGO);
 	gchar * identify = ipc_client_wait_for_property(IPC_PROPERTY_CID, FALSE);
 	if(identify) {
-		client_id = g_strdup(identify);
-		LOG("client_id obtained: %s", client_id);
+		cid = g_strdup(identify);
+		LOG("cid obtained: %s", cid);
 		XFree(identify);
 		rt = TRUE;
 	} else {
@@ -119,6 +119,7 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	GdkNativeWindow server = ipc_find_server();
 	IPCCommand * command = ipc_command_new();
 	command->name = g_strdup(command_name);
+	command->cid = g_strdup(cid);
 	va_list va;
 	va_start(va, para_name);
 	ipc_command_set_parameters_valist(command, para_name, va);

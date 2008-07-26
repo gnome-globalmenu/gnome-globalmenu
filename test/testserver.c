@@ -1,10 +1,10 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/ipcserver.h>
 
-gboolean ping(GHashTable * parameters, GHashTable * returns, gpointer data) {
-	gchar * message = g_hash_table_lookup(parameters, "message");
-	g_message("Ping received: %s", message);
-	g_hash_table_insert(returns, g_strdup("default"), g_strdup(message));
+gboolean ping(IPCCommand * command, gpointer data) {
+	gchar * message = g_hash_table_lookup(command->parameters, "message");
+	g_message("Ping received from %s: %s", command->cid, message);
+	g_hash_table_insert(command->results, g_strdup("default"), g_strdup(message));
 	return TRUE;
 }
 int main(int argc, char* argv[]){

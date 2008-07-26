@@ -18,6 +18,7 @@ static GHashTable * build_hash_table_va(gchar * name, va_list va) {
 
 typedef struct {
 	gchar * name;
+	gchar * cid;
 	GHashTable * parameters;
 	GHashTable * results;
 	gchar * current_prop;
@@ -60,6 +61,7 @@ static void start_element  (GMarkupParseContext *context,
 	if(g_str_equal(element_name, "command")) {
 		gint i;
 		pi->name = NULL;
+		pi->cid = NULL;
 		pi->current_prop = NULL;
 		pi->current_prop_value = NULL;
 		pi->current_result = NULL;
@@ -67,7 +69,9 @@ static void start_element  (GMarkupParseContext *context,
 		for(i=0; attribute_names[i]; i++) {
 			if(g_str_equal(attribute_names[i], "name")){
 				pi->name = g_strdup(attribute_values[i]);
-				break;
+			} else
+			if(g_str_equal(attribute_names[i], "cid")){
+				pi->cid = g_strdup(attribute_values[i]);
 			}
 		}
 		pi->parameters = g_hash_table_new_full(
@@ -150,6 +154,7 @@ IPCCommand * ipc_command_parse(const gchar * string){
 	context = g_markup_parse_context_new(&parser, 0, &cpi, NULL);
 	if(g_markup_parse_context_parse(context, string, strlen(string), &error)){
 		IPCCommand * command = ipc_command_new();
+			command->cid = cpi.cid;
 			command->name = cpi.name;
 			command->parameters = cpi.parameters;
 			command->results = cpi.results;
@@ -158,6 +163,7 @@ IPCCommand * ipc_command_parse(const gchar * string){
 	}
 	if(error) {
 		if(cpi.name) g_free(cpi.name);
+		if(cpi.cid) g_free(cpi.cid);
 		if(cpi.parameters) g_hash_table_destroy(cpi.parameters);
 		if(cpi.results) g_hash_table_destroy(cpi.results);
 		g_critical("Parse command failed: %s", error->message);
@@ -170,9 +176,11 @@ IPCCommand * ipc_command_parse(const gchar * string){
 gchar * ipc_command_to_string(IPCCommand * command){
 	GString * string = g_string_new("");
 	gchar * name = g_markup_escape_text(command->name, -1);
+	gchar * cid = g_markup_escape_text(command->cid, -1);
 	gpointer key, value;
-	g_string_append_printf(string, "<command name=\"%s\">", name);
+	g_string_append_printf(string, "<command name=\"%s\" cid=\"%s\">", name, cid);
 	g_free(name);
+	g_free(cid);
 	if(command->parameters) {
 		GHashTableIter iter;
 		g_hash_table_iter_init(&iter, command->parameters);
@@ -208,6 +216,7 @@ IPCCommand * ipc_command_new() {
 }
 void ipc_command_free(IPCCommand * command) {
 	if(command->name) g_free(command->name);
+	if(command->cid) g_free(command->cid);
 	if(command->parameters) g_hash_table_destroy(command->parameters);
 	if(command->results) g_hash_table_destroy(command->results);
 	g_slice_free(IPCCommand, command);

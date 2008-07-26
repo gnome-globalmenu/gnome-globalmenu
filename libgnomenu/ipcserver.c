@@ -20,7 +20,7 @@ typedef struct _CommandInfo {
 	gpointer data;
 } CommandInfo;
 typedef struct _ClientInfo {
-	gchar * identify;
+	gchar * cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
 } ClientInfo;
@@ -58,7 +58,7 @@ static gboolean ipc_server_call_cmd(IPCCommand * command) {
 	}
 	CommandInfo * info = g_hash_table_lookup(command_hash, command->name);
 	if(!info) return FALSE;
-	return info->server_cmd(command->parameters, command->results, info->data);
+	return info->server_cmd(command, info->data);
 }
 static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_name){
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
@@ -131,6 +131,11 @@ static void client_message_call(XClientMessageEvent * client_message) {
 		g_warning("malformed command, ignoring the call");
 		goto parse_fail;
 	}
+	ClientInfo * info = g_hash_table_lookup(client_hash, command->cid);
+	if(!info || info->xwindow != src) {
+		g_warning("unknown client, ignoring the call");
+		goto unknown_client;
+	}
 	if(!ipc_server_call_cmd(command)) {
 		g_warning("command was not successfull, ignoring the call");
 		goto call_fail;
@@ -151,6 +156,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 		g_warning("could not set the property for returing the command");
 	}
 	g_free(ret);
+unknown_client:
 call_fail:
 	ipc_command_free(command);
 parse_fail:
@@ -161,9 +167,9 @@ no_prop:
 static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, ClientInfo * info){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
-		g_message("client %s is down!", info->identify);
+		g_message("client %s is down!", info->cid);
 		gdk_window_remove_filter(info->window, client_filter, info);
-		g_hash_table_remove(client_hash, info->identify);
+		g_hash_table_remove(client_hash, info->cid);
 	} else {
 	}
 	return GDK_FILTER_CONTINUE;
@@ -179,7 +185,7 @@ static void client_message_nego(XClientMessageEvent * client_message) {
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
-	client_info->identify = identify;
+	client_info->cid = identify;
 	gdk_error_trap_push();
 	
 	XChangeProperty(display,

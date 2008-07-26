@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 
-	for(i=100; i>0; i--) {
+	for(i=10; i>0; i--) {
 		g_timer_start(timer);
 		gchar * msg = g_strdup_printf("hello %d", i);
 		gchar * result = ipc_client_call_server("Ping", "message", msg, NULL);

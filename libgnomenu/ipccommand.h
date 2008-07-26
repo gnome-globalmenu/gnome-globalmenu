@@ -1,8 +1,8 @@
 #ifndef _IPC_COMMAND_H_
-#define _PIC_COMMAND_H_
+#define _IPC_COMMAND_H_
 typedef struct {
 	gchar * name;
-	gchar * client_id;
+	gchar * cid;
 	GHashTable * parameters;
 	GHashTable * results;
 } IPCCommand;
