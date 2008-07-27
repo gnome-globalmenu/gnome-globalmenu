@@ -9,17 +9,20 @@
 
 #include "ipcserver.h"
 
-gboolean Ping(IPCCommand * command, gpointer data) {
-	gchar * message = IPCParam(command, "message");
-	g_message("Ping received from %s: %s", command->cid, message);
-	IPCRet(command, message);
-	return TRUE;
-}
-
+#include "Ping.h"
+typedef struct {
+	gchar * cid;
+} ClientInfo;
 static GHashTable * client_hash = NULL;
+void client_info_free(ClientInfo * info) {
+	g_free(info->cid);
+	g_slice_free(ClientInfo, info);
+}
 static void client_create_callback(gchar * cid, gpointer data) {
 	LOG("New client %s", cid);
-	g_hash_table_insert(client_hash, g_strdup(cid), NULL);
+	ClientInfo * info = g_slice_new0(ClientInfo);
+	info->cid = g_strdup(cid);
+	g_hash_table_insert(client_hash, info->cid, info);
 }
 static void client_destroy_callback(gchar * cid, gpointer data) {
 	LOG("Dead client %s", cid);
@@ -28,7 +31,7 @@ static void client_destroy_callback(gchar * cid, gpointer data) {
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
-	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
 	ipc_server_register_cmd("Ping", Ping, NULL);
 	ipc_server_register_cmd("CreateObject", Ping, NULL);
 	ipc_server_register_cmd("DestroyObject", Ping, NULL);
