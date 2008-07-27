@@ -15,6 +15,10 @@ gchar * ipc_command_list_to_string(GList * command_list);
 	g_hash_table_lookup(((IPCCommand*)(c))->parameters, (p))
 #define IPCRet(c, rt) \
 	g_hash_table_insert(((IPCCommand*)(c))->results, g_strdup("default"), (rt))
+#define IPCRetDup(c, rt) \
+	IPCRet(c, g_strdup(rt))
+#define IPCRetBool(c, rt) \
+	if(rt) IPCRetDup(c, "TRUE"); else IPCRetDup(c, "FALSE"); 
 
 void ipc_command_free(IPCCommand * command);
 void ipc_command_list_free(GList * list);

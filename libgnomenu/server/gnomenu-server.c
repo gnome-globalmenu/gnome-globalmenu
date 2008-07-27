@@ -31,16 +31,41 @@ gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup("This method is Unimplemented"));
 	return TRUE;
 }
+gboolean CreateObject(IPCCommand * command, gpointer data) {
+	gchar * objname = IPCParam(command, "object");
+	IPCRetBool(command, create_object(objname));
+	return TRUE;
+}
+gboolean DestroyObject(IPCCommand * command, gpointer data) {
+	gchar * objname = IPCParam(command, "object");
+	IPCRetBool(command, destroy_object(objname));
+	return TRUE;
+}
+gboolean InsertChild(IPCCommand * command, gpointer data) {
+	gchar * objname = IPCParam(command, "object");
+	gchar * childname = IPCParam(command, "child");
+	gchar * spos = IPCParam(command, "pos");
+	gint pos = strtol(spos, NULL, 10);
+	IPCRetBool(command, insert_child(objname, childname, pos));
+	return TRUE;
+}
+gboolean IntrospectObject(IPCCommand * command, gpointer data) {
+	gchar * objname = IPCParam(command, "object");
+	IPCRet(command, introspect_object(objname));
+	return TRUE;
+}
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
+	object_manager_init();
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
-	ipc_server_register_cmd("CreateObject", Unimplemented, NULL);
-	ipc_server_register_cmd("DestroyObject", Unimplemented, NULL);
+	ipc_server_register_cmd("CreateObject", CreateObject, NULL);
+	ipc_server_register_cmd("DestroyObject", DestroyObject, NULL);
 	ipc_server_register_cmd("SetProperty", Unimplemented, NULL);
 	ipc_server_register_cmd("ActivateObject", Unimplemented, NULL);
-	ipc_server_register_cmd("InsertChild", Unimplemented, NULL);
+	ipc_server_register_cmd("InsertChild", InsertChild, NULL);
 	ipc_server_register_cmd("RemoveChild", Unimplemented, NULL);
+	ipc_server_register_cmd("IntrospectObject", IntrospectObject, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_error("server already there");
 		return 1;
