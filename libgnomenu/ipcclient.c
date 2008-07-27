@@ -23,6 +23,15 @@ static gchar * cid = NULL; /*obtained after NEGO*/
 static gboolean in_transaction = FALSE; 
 static GList * transaction = NULL;
 
+static GData * event_handler_list = NULL;
+typedef struct {
+	IPCClientEventHandler handler;
+	gpointer data;
+} EventHandlerInfo;
+static void event_handler_info_free(EventHandlerInfo * info){
+	g_slice_free(EventHandlerInfo, info);
+}
+
 static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove);
 
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
@@ -42,12 +51,19 @@ static void client_message_event(XClientMessageEvent * client_message) {
 		return;
 	}
 	IPCEvent * event = ipc_event_parse(event_data);
-	g_message("event arrived: %s", event_data);
 	XFree(event_data);
 	if(!event) {
 		g_critical("malformed event data");
 		return;
 	}
+	EventHandlerInfo * info = g_datalist_get_data(&event_handler_list, event->name);
+	if(!info) {
+		g_critical("no handlers for this event is set");
+		ipc_event_free(event);
+		return;
+	}
+	if(info->handler) 
+		info->handler(event, info->data);
 	ipc_event_free(event);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
@@ -131,6 +147,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 		cid = g_strdup(identify);
 		LOG("cid obtained: %s", cid);
 		XFree(identify);
+		g_datalist_init(&event_handler_list);
 		rt = TRUE;
 	} else {
 		rt = FALSE;
@@ -230,9 +247,14 @@ void ipc_client_end_transaction(GList ** return_list){
 	transaction = NULL;
 	in_transaction = FALSE;
 }
-void ipc_client_add_event(gchar * event){
+void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data){
+	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
+	info->data = data;
+	info->handler = handler;
+	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
 	ipc_client_call_server("_AddEvent_", "event", event);
 }
 void ipc_client_remove_event(gchar * event){
+	g_datalist_remove_data(&event_handler_list, event);
 	ipc_client_call_server("_RemoveEvent_", "event", event);
 }

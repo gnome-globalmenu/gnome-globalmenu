@@ -20,6 +20,12 @@ GOptionEntry options[] = {
 	{"value", 'v', 0, G_OPTION_ARG_STRING_ARRAY, &values, "The values", "v"},
 	{NULL}
 };
+static void event_cb (IPCEvent * event, gpointer data) {
+	gchar * str = ipc_event_to_string(event);
+	g_print("%s\n", str);
+	g_free(str);
+	gtk_main_quit();
+}
 int main(int argc, char* argv[]) {
 	GError * error = NULL;
 	if(!gtk_init_with_args(&argc, &argv, "Send a gnomenu call", options, NULL, &error)){
@@ -45,7 +51,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	if(event) {
-		ipc_client_add_event(event);
+		ipc_client_set_event(event, event_cb, NULL);
 		gtk_main();
 	}
 	return 0;
