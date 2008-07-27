@@ -9,7 +9,6 @@
 
 #include "ipcserver.h"
 
-#include "Ping.h"
 typedef struct {
 	gchar * cid;
 } ClientInfo;
@@ -28,17 +27,19 @@ static void client_destroy_callback(gchar * cid, gpointer data) {
 	LOG("Dead client %s", cid);
 	g_hash_table_remove(client_hash, cid);
 }
+gboolean Unimplemented(IPCCommand * command, gpointer data) {
+	return TRUE;
+}
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
-	ipc_server_register_cmd("Ping", Ping, NULL);
-	ipc_server_register_cmd("CreateObject", Ping, NULL);
-	ipc_server_register_cmd("DestroyObject", Ping, NULL);
-	ipc_server_register_cmd("SetProperty", Ping, NULL);
-	ipc_server_register_cmd("ActivateObject", Ping, NULL);
-	ipc_server_register_cmd("InsertChild", Ping, NULL);
-	ipc_server_register_cmd("RemoveChild", Ping, NULL);
+	ipc_server_register_cmd("CreateObject", Unimplemented, NULL);
+	ipc_server_register_cmd("DestroyObject", Unimplemented, NULL);
+	ipc_server_register_cmd("SetProperty", Unimplemented, NULL);
+	ipc_server_register_cmd("ActivateObject", Unimplemented, NULL);
+	ipc_server_register_cmd("InsertChild", Unimplemented, NULL);
+	ipc_server_register_cmd("RemoveChild", Unimplemented, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_error("server already there");
 		return 1;
