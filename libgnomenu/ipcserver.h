@@ -5,9 +5,10 @@
 
 typedef gboolean (*ServerCMD)(IPCCommand * command, gpointer data);
 typedef void (*ClientDestroyCallback)(gchar * cid, gpointer data);
+typedef void (*ClientCreateCallback)(gchar * cid, gpointer data);
 void ipc_server_freeze();
 void ipc_server_thaw();
-gboolean ipc_server_listen(ClientDestroyCallback cb, gpointer data);
+gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data);
 void ipc_server_register_cmd(const gchar * name, ServerCMD cmd_handler, gpointer data);
 gboolean ipc_server_send_event(IPCEvent * event);
 #endif

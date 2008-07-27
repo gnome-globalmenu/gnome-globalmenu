@@ -30,7 +30,8 @@ static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
 static GHashTable * client_hash = NULL;
 static ClientDestroyCallback client_destroy_callback = NULL;
-static gpointer client_destroy_callback_data = NULL;
+static ClientCreateCallback client_create_callback = NULL;
+static gpointer callback_data = NULL;
 
 static void command_info_destroy(CommandInfo * info) {
 	g_free(info->name);
@@ -92,7 +93,7 @@ static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_nam
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 
-gboolean ipc_server_listen(ClientDestroyCallback cb, gpointer data) {
+gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;
@@ -105,8 +106,9 @@ gboolean ipc_server_listen(ClientDestroyCallback cb, gpointer data) {
 	server_frozen = FALSE;
 	gdk_x11_ungrab_server();
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, client_info_destroy);
-	client_destroy_callback = cb;	
-	client_destroy_callback_data = data;	
+	client_destroy_callback = cdcb;	
+	client_create_callback = cccb;	
+	callback_data = data;	
 	return TRUE;
 }
 void ipc_server_freeze() {
@@ -179,7 +181,7 @@ static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, Clien
 		g_message("client %s is down!", info->cid);
 		gdk_window_remove_filter(info->window, client_filter, info);
 		if(client_destroy_callback)
-			client_destroy_callback(info->cid, client_destroy_callback_data);
+			client_destroy_callback(info->cid, callback_data);
 		g_hash_table_remove(client_hash, info->cid);
 	} else {
 	}
@@ -216,6 +218,8 @@ static void client_message_nego(XClientMessageEvent * client_message) {
 		g_warning("could not set the identify during NEGO process");
 	}
 	gdk_x11_ungrab_server();
+	if(client_create_callback)
+		client_create_callback(client_info->cid, callback_data);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(server_frozen) return GDK_FILTER_CONTINUE;
