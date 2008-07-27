@@ -221,3 +221,10 @@ void ipc_client_end_transaction(GList ** return_list){
 	transaction = NULL;
 	in_transaction = FALSE;
 }
+void ipc_client_set_receive_event(gboolean b){
+	GdkNativeWindow server = ipc_find_server();
+	if(b == FALSE)
+		ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_NUMB);
+	else
+		ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_LIVE);
+}

@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GnomenuGlobalMenu>::" fmt,  ## args)
+#define LOG(fmt, args...) g_message("<IPCServer>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -23,6 +23,7 @@ typedef struct _ClientInfo {
 	gchar * cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
+	gboolean numb;
 } ClientInfo;
 
 static GHashTable * command_hash = NULL;
@@ -105,7 +106,7 @@ gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb
 	gdk_window_add_filter(server_window, default_filter, NULL);
 	server_frozen = FALSE;
 	gdk_x11_ungrab_server();
-	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, client_info_destroy);
+	client_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, client_info_destroy);
 	client_destroy_callback = cdcb;	
 	client_create_callback = cccb;	
 	callback_data = data;	
@@ -117,8 +118,7 @@ void ipc_server_freeze() {
 void ipc_server_thaw() {
 	server_frozen = FALSE;
 }
-static void client_message_call(XClientMessageEvent * client_message) {
-	GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b));
+static void client_message_call(ClientInfo * info, XClientMessageEvent * client_message) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
 	gpointer data;
 	Atom type_return;
@@ -126,7 +126,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	unsigned long nitems_return;
 	unsigned long remaining_bytes;
 //	gdk_x11_grab_server();
-	data = ipc_server_get_property(src, IPC_PROPERTY_CALL);
+	data = ipc_server_get_property(info->xwindow, IPC_PROPERTY_CALL);
 	if(!data) {
 		g_warning("could not obtain call information, ignoring the call");
 		goto no_prop;
@@ -140,8 +140,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		ClientInfo * info = g_hash_table_lookup(client_hash, command->cid);
-		if(!info || info->xwindow != src) {
+		if(!g_str_equal(info->cid, command->cid)) {
 			g_warning("unknown client, ignoring the call");
 			goto unknown_client;
 		}
@@ -154,7 +153,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	gdk_error_trap_push();
 
 	XChangeProperty(display,
-		src,
+		info->xwindow,
 		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN),
 		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN), /*type*/
 		8,
@@ -182,12 +181,12 @@ static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, Clien
 		gdk_window_remove_filter(info->window, client_filter, info);
 		if(client_destroy_callback)
 			client_destroy_callback(info->cid, callback_data);
-		g_hash_table_remove(client_hash, info->cid);
+		g_hash_table_remove(client_hash, info->xwindow);
 	} else {
 	}
 	return GDK_FILTER_CONTINUE;
 }
-static void client_message_nego(XClientMessageEvent * client_message) {
+static void client_message_nego(ClientInfo * unused, XClientMessageEvent * client_message) {
 	static guint id = 1000;
 	GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b));
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
@@ -195,6 +194,7 @@ static void client_message_nego(XClientMessageEvent * client_message) {
 	
 	ClientInfo * client_info = g_slice_new0(ClientInfo);
 	client_info->xwindow = src;
+	client_info->numb = TRUE;
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
@@ -211,7 +211,7 @@ static void client_message_nego(XClientMessageEvent * client_message) {
 		strlen(identify) + 1);
 	XSync(display, FALSE);
 	/*TODO: add the client to a list, listen to its DestroyNotifyEvent*/
-	g_hash_table_insert(client_hash, identify, client_info);
+	g_hash_table_insert(client_hash, src, client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(client_info->window, client_filter, client_info);
 	if(gdk_error_trap_pop()) {
@@ -221,17 +221,38 @@ static void client_message_nego(XClientMessageEvent * client_message) {
 	if(client_create_callback)
 		client_create_callback(client_info->cid, callback_data);
 }
+static void client_message_numb(ClientInfo * info, XClientMessageEvent * client_message) {
+	info->numb = TRUE;
+}
+static void client_message_live(ClientInfo * info, XClientMessageEvent * client_message) {
+	info->numb = FALSE;
+}
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(server_frozen) return GDK_FILTER_CONTINUE;
 	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
+#define GET_INFO \
+			GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b)); \
+			ClientInfo * info = g_hash_table_lookup(client_hash, src);
+
 	switch(((XEvent *)xevent)->type) {
 		case ClientMessage:
 			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_CALL)) {
-				client_message_call(client_message);
+				GET_INFO;
+				client_message_call(info, client_message);
 				return GDK_FILTER_REMOVE;
 			} else
 			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_NEGO)){
-				client_message_nego(client_message);
+				client_message_nego(NULL, client_message);
+				return GDK_FILTER_REMOVE;
+			}
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_NUMB)){
+				GET_INFO;
+				client_message_numb(info, client_message);
+				return GDK_FILTER_REMOVE;
+			}
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_LIVE)){
+				GET_INFO;
+				client_message_live(info, client_message);
 				return GDK_FILTER_REMOVE;
 			}
 		return GDK_FILTER_CONTINUE;
@@ -248,9 +269,7 @@ static void ipc_server_send_client_message(GdkNativeWindow client_xwindow, GdkAt
 	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(server_window);
 	gdk_event_send_client_message(&ec, client_xwindow);
 }
-gboolean ipc_server_send_event(IPCEvent * event) {
-	ClientInfo * info = g_hash_table_lookup(client_hash, event->cid);
-	if(!info) return FALSE;
+static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * event) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
 	gchar * data = ipc_event_to_string(event);
 	if(!data) {
@@ -260,7 +279,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 	gdk_error_trap_push();
 
 	XChangeProperty(display,
-		info->xwindow,
+		xwindow,
 		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT),
 		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT), /*type*/
 		8,
@@ -269,7 +288,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 		strlen(data) + 1);
 	XSync(display, FALSE);
 	g_free(data);
-	ipc_server_send_client_message(info->xwindow, IPC_CLIENT_MESSAGE_EVENT);
+	ipc_server_send_client_message(xwindow, IPC_CLIENT_MESSAGE_EVENT);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for the event");
 		goto set_prop_fail;
@@ -277,4 +296,15 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 	return TRUE;
 set_prop_fail:
 	return FALSE;
+}
+gboolean ipc_server_send_event(IPCEvent * event) {
+	GHashTableIter iter;
+	g_hash_table_iter_init(&iter, client_hash);
+	GdkNativeWindow xwindow; 
+	ClientInfo * info;
+	while(g_hash_table_iter_next(&iter, &xwindow, &info)){
+		if(!info->numb)
+			ipc_server_send_event_to(xwindow, event);
+	}
+	return TRUE;
 }
