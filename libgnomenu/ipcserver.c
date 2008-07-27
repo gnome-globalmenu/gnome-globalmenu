@@ -117,8 +117,19 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup(IPCParam(command, "message")));
 	return TRUE;
 }
+static gboolean Emit(IPCCommand * command, gpointer data) {
+	gchar * event_name = IPCParam(command, "_event_");
+	IPCEvent * event = ipc_event_new(command->cid, event_name);
+	GHashTable * tmp = event->parameters;
+	event->parameters = command->parameters;
+	ipc_server_send_event(event);
+	event->parameters = tmp;
+	ipc_event_free(event);
+	return TRUE;
+}
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	ipc_server_register_cmd("Ping", Ping, NULL);
+	ipc_server_register_cmd("Emit", Emit, NULL);
 	ipc_server_register_cmd("_AddEvent_", AddEvent, NULL);
 	ipc_server_register_cmd("_RemoveEvent_", RemoveEvent, NULL);
 	gdk_x11_grab_server();

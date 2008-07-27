@@ -9,10 +9,12 @@
 
 #include "ipcclient.h"
 static gchar * command;
+static gchar * event;
 static gchar ** par_names;
 static gchar ** values;
 
 GOptionEntry options[] = {
+	{"event", 'e', 0, G_OPTION_ARG_STRING, &event, "The event to wait", "name"},
 	{"command", 'c', 0, G_OPTION_ARG_STRING, &command, "The command to call", "name"},
 	{"parameter", 'p', 0, G_OPTION_ARG_STRING_ARRAY, &par_names, "The parameters", "p"},
 	{"value", 'v', 0, G_OPTION_ARG_STRING_ARRAY, &values, "The values", "v"},
@@ -27,15 +29,24 @@ int main(int argc, char* argv[]) {
 		g_printerr("%s", error->message);
 		return 1;
 	}
+	if((!event && !command) || 
+		(event && command)){
+		/*can't do event and command both*/
+		g_printerr("use --help to get help\n");
+		return 1;
+	}
 	if(!ipc_client_start(NULL, NULL)){
 		g_printerr("could not start the client\n");
 		return 1;
 	}
-	if(!command || ! par_names || !values) {
-		g_printerr("use --help to get help\n");
-		return 1;
+	if(command) {
+		gchar * rt = ipc_client_call_server_array(command, par_names, values);
+		g_print("%s\n", rt);
+		return 0;
 	}
-	gchar * rt = ipc_client_call_server_array(command, par_names, values);
-	g_print("%s\n", rt);
+	if(event) {
+		ipc_client_add_event(event);
+		gtk_main();
+	}
 	return 0;
 }
