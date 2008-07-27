@@ -9,6 +9,7 @@ gboolean ping(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 int main(int argc, char* argv[]){
+#if 0
 	gtk_init(&argc, &argv);
 	ipc_server_register_cmd("Ping", ping, NULL);
 	if(!ipc_server_listen(NULL, NULL)) {
@@ -16,5 +17,6 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	gtk_main();
+#endif
 	return 0;
 }

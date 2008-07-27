@@ -2,11 +2,10 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GnomenuGlobalMenu>::" fmt,  ## args)
+#define LOG(fmt, args...) g_message("<GnomenuServer>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
-#define LOG_FUNC_NAME LOG("%s", __func__)
 
 #include "ipcserver.h"
 
@@ -17,12 +16,21 @@ gboolean ping(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 
-GHashTable * client_hash = NULL;
-
+static GHashTable * client_hash = NULL;
+static void client_create_callback(gchar * cid, gpointer data) {
+	LOG("New client %s", cid);
+	g_hash_table_insert(client_hash, g_strdup(cid), NULL);
+}
+static void client_destroy_callback(gchar * cid, gpointer data) {
+	LOG("Dead client %s", cid);
+	g_hash_table_remove(client_hash, cid);
+}
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
+
+	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	ipc_server_register_cmd("Ping", ping, NULL);
-	if(!ipc_server_listen(NULL, NULL, NULL)) {
+	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_error("server already there");
 		return 1;
 	}
