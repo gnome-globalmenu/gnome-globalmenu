@@ -11,7 +11,7 @@ gboolean ping(IPCCommand * command, gpointer data) {
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 	ipc_server_register_cmd("Ping", ping, NULL);
-	if(!ipc_server_listen()) {
+	if(!ipc_server_listen(NULL, NULL)) {
 		g_error("server already there");
 		return 1;
 	}

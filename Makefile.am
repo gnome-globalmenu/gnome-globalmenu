@@ -1,6 +1,6 @@
 #
 DISTCHECK_CONFIGURE_FLAGS == --enable-gtk-doc
-SUBDIRS = libgnomenu libgtkhotkey test gtk+-aqd po xfce-plugin gnome-applet server
+SUBDIRS = libgnomenu libgtkhotkey test gtk+-aqd po xfce-plugin gnome-applet
 
 SUBDIRS += doc
 

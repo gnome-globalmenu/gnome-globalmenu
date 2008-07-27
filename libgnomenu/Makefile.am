@@ -1,5 +1,5 @@
 #
-
+SUBDIRS = server
 AM_CFLAGS = -g $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
