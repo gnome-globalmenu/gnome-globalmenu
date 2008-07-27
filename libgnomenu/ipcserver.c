@@ -23,13 +23,14 @@ typedef struct _ClientInfo {
 	gchar * cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
-	gboolean numb;
+	GData * event_mask;
 } ClientInfo;
 
 static GHashTable * command_hash = NULL;
 static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
 static GHashTable * client_hash = NULL;
+static GHashTable * client_hash_by_cid = NULL;
 static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
@@ -39,6 +40,10 @@ static void command_info_destroy(CommandInfo * info) {
 	g_slice_free(CommandInfo, info);
 }
 static void client_info_destroy(ClientInfo * info){
+	g_hash_table_remove(client_hash_by_cid, info->cid);
+	g_free(info->cid);
+//	gdk_window_destroy(info->window);
+	g_datalist_clear(&info->event_mask);
 	g_slice_free(ClientInfo, info);
 }
 void ipc_server_register_cmd(const gchar * name, ServerCMD cmd_handler, gpointer data) {
@@ -93,8 +98,24 @@ static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_nam
 	}
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
-
+static gboolean AddEvent(IPCCommand * command, gpointer data) {
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	g_assert(info);
+	g_datalist_set_data(&(info->event_mask), 
+			IPCParam(command, "event"),
+			(gpointer) 1);
+	return TRUE;
+}
+static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	g_assert(info);
+	g_datalist_remove_data(&(info->event_mask), 
+			IPCParam(command, "event"));
+	return TRUE;
+}
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
+	ipc_server_register_cmd("_AddEvent_", AddEvent, NULL);
+	ipc_server_register_cmd("_RemoveEvent_", RemoveEvent, NULL);
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;
@@ -107,6 +128,7 @@ gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb
 	server_frozen = FALSE;
 	gdk_x11_ungrab_server();
 	client_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, client_info_destroy);
+	client_hash_by_cid = g_hash_table_new(g_str_hash, g_str_equal);
 	client_destroy_callback = cdcb;	
 	client_create_callback = cccb;	
 	callback_data = data;	
@@ -194,7 +216,7 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	
 	ClientInfo * client_info = g_slice_new0(ClientInfo);
 	client_info->xwindow = src;
-	client_info->numb = TRUE;
+	g_datalist_init(&(client_info->event_mask));
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
@@ -210,8 +232,8 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 		identify,
 		strlen(identify) + 1);
 	XSync(display, FALSE);
-	/*TODO: add the client to a list, listen to its DestroyNotifyEvent*/
 	g_hash_table_insert(client_hash, src, client_info);
+	g_hash_table_insert(client_hash_by_cid, client_info->cid, client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(client_info->window, client_filter, client_info);
 	if(gdk_error_trap_pop()) {
@@ -220,12 +242,6 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	gdk_x11_ungrab_server();
 	if(client_create_callback)
 		client_create_callback(client_info->cid, callback_data);
-}
-static void client_message_numb(ClientInfo * info, XClientMessageEvent * client_message) {
-	info->numb = TRUE;
-}
-static void client_message_live(ClientInfo * info, XClientMessageEvent * client_message) {
-	info->numb = FALSE;
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(server_frozen) return GDK_FILTER_CONTINUE;
@@ -243,16 +259,6 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 			} else
 			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_NEGO)){
 				client_message_nego(NULL, client_message);
-				return GDK_FILTER_REMOVE;
-			}
-			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_NUMB)){
-				GET_INFO;
-				client_message_numb(info, client_message);
-				return GDK_FILTER_REMOVE;
-			}
-			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_LIVE)){
-				GET_INFO;
-				client_message_live(info, client_message);
 				return GDK_FILTER_REMOVE;
 			}
 		return GDK_FILTER_CONTINUE;
@@ -303,7 +309,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 	GdkNativeWindow xwindow; 
 	ClientInfo * info;
 	while(g_hash_table_iter_next(&iter, &xwindow, &info)){
-		if(!info->numb)
+		if(g_datalist_get_data(&(info->event_mask), event->name))
 			ipc_server_send_event_to(xwindow, event);
 	}
 	return TRUE;
