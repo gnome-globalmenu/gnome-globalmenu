@@ -14,7 +14,7 @@ gchar * ipc_command_list_to_string(GList * command_list);
 #define IPCParam(c, p) \
 	g_hash_table_lookup(((IPCCommand*)(c))->parameters, (p))
 #define IPCRet(c, rt) \
-	g_hash_table_insert(((IPCCommand*)(c))->results, g_strdup("default"), g_strdup(rt))
+	g_hash_table_insert(((IPCCommand*)(c))->results, g_strdup("default"), (rt))
 
 void ipc_command_free(IPCCommand * command);
 void ipc_command_list_free(GList * list);
