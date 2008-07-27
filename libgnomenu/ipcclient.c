@@ -94,8 +94,9 @@ static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean rem
 	unsigned long format_return;
 	unsigned long remaining_bytes;
 	unsigned long nitems_return;
-	gpointer data;
-	while(1) {
+	gpointer data = NULL;
+	gint i = 0;
+	while(i<100) {
 		gdk_error_trap_push();
 		XGetWindowProperty(display,
 				GDK_WINDOW_XWINDOW(client_window),
@@ -115,6 +116,8 @@ static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean rem
 			if(type_return != None)
 				return data;
 		}
+		i++;
+		g_usleep(i* 1000);
 	}
 	return data;
 }
