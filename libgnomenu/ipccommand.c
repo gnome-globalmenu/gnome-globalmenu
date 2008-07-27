@@ -18,8 +18,10 @@ static GHashTable * build_hash_table_va(gchar * name, va_list va) {
 static GHashTable * build_hash_table_array(gchar ** keys, gchar ** values) {
 	GHashTable * rt = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 	int i = 0;
-	for(i = 0; keys[i]; i++){
-		g_hash_table_insert(rt, g_strdup(keys[i]), g_strdup(values[i]));
+	if(keys && values) {
+		for(i = 0; keys[i] && values[i]; i++){
+			g_hash_table_insert(rt, g_strdup(keys[i]), g_strdup(values[i]));
+		}
 	}
 	return rt;
 }
