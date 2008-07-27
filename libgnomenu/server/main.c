@@ -9,10 +9,10 @@
 
 #include "ipcserver.h"
 
-gboolean ping(IPCCommand * command, gpointer data) {
-	gchar * message = g_hash_table_lookup(command->parameters, "message");
+gboolean Ping(IPCCommand * command, gpointer data) {
+	gchar * message = IPCParam(command, "message");
 	g_message("Ping received from %s: %s", command->cid, message);
-	g_hash_table_insert(command->results, g_strdup("default"), g_strdup(message));
+	IPCRet(command, message);
 	return TRUE;
 }
 
@@ -29,13 +29,13 @@ int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-	ipc_server_register_cmd("Ping", ping, NULL);
-	ipc_server_register_cmd("CreateObject", ping, NULL);
-	ipc_server_register_cmd("DestroyObject", ping, NULL);
-	ipc_server_register_cmd("SetProperty", ping, NULL);
-	ipc_server_register_cmd("ActivateObject", ping, NULL);
-	ipc_server_register_cmd("InsertChild", ping, NULL);
-	ipc_server_register_cmd("RemoveChild", ping, NULL);
+	ipc_server_register_cmd("Ping", Ping, NULL);
+	ipc_server_register_cmd("CreateObject", Ping, NULL);
+	ipc_server_register_cmd("DestroyObject", Ping, NULL);
+	ipc_server_register_cmd("SetProperty", Ping, NULL);
+	ipc_server_register_cmd("ActivateObject", Ping, NULL);
+	ipc_server_register_cmd("InsertChild", Ping, NULL);
+	ipc_server_register_cmd("RemoveChild", Ping, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_error("server already there");
 		return 1;
