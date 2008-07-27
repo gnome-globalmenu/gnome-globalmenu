@@ -23,6 +23,7 @@ void ipc_command_set_parameters(IPCCommand * command, gchar * para_name, ...);
 void ipc_command_set_results(IPCCommand * command, gchar * result_name, ...);
 
 void ipc_command_set_parameters_valist(IPCCommand * command, gchar * para_name, va_list va);
+void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values);
 void ipc_command_set_results_valist(IPCCommand * command, gchar * para_name, va_list va);
 gchar * ipc_command_get_default_result(IPCCommand * command);
 #endif

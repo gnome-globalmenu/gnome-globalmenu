@@ -183,16 +183,12 @@ no_prop_set:
 	return ret;
 
 }
-gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
-	gchar * rt = NULL;
-	IPCCommand * command = ipc_command_new(cid, command_name);
-	GList * commands = NULL;
-	GList * returns = NULL;
-	va_list va;
-	va_start(va, para_name);
-	ipc_command_set_parameters_valist(command, para_name, va);
-	va_end(va);
+static gchar * ipc_client_call_server_command(IPCCommand * command){
+	/*The command is 'destroyed' after this function'*/
 	if(!in_transaction) {
+		gchar * rt = NULL;
+		GList * commands = NULL;
+		GList * returns = NULL;
 		commands = g_list_append(commands, command);
 		returns = ipc_client_call_list(commands);
 		if(returns) rt = ipc_command_get_default_result(returns->data);
@@ -203,6 +199,19 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 		transaction = g_list_append(transaction, command);
 		return NULL;
 	}
+}
+gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
+	IPCCommand * command = ipc_command_new(cid, command_name);
+	va_list va;
+	va_start(va, para_name);
+	ipc_command_set_parameters_valist(command, para_name, va);
+	va_end(va);
+	return ipc_client_call_server_command(command);
+}
+gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values){
+	IPCCommand * command = ipc_command_new(cid, command_name);
+	ipc_command_set_parameters_array(command, paras, values);
+	return ipc_client_call_server_command(command);
 }
 void ipc_client_begin_transaction() {
 	transaction = NULL;

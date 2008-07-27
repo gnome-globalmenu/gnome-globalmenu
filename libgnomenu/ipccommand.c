@@ -15,6 +15,14 @@ static GHashTable * build_hash_table_va(gchar * name, va_list va) {
 
 	return rt;
 }
+static GHashTable * build_hash_table_array(gchar ** keys, gchar ** values) {
+	GHashTable * rt = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	int i = 0;
+	for(i = 0; keys[i]; i++){
+		g_hash_table_insert(rt, g_strdup(keys[i]), g_strdup(values[i]));
+	}
+	return rt;
+}
 
 typedef struct {
 	GList * command_list;
@@ -250,6 +258,12 @@ void ipc_command_list_free(GList * list) {
 		ipc_command_free(node->data);
 	}
 	g_list_free(list);
+}
+void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values) {
+	if(command->parameters) {
+		g_hash_table_destroy(command->parameters);
+	}
+	command->parameters = build_hash_table_array(paras, values);
 }
 void ipc_command_set_parameters_valist(IPCCommand * command, gchar * para_name, va_list va) {
 	if(command->parameters) {
