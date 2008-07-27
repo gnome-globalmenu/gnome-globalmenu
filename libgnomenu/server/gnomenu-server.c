@@ -28,6 +28,7 @@ static void client_destroy_callback(gchar * cid, gpointer data) {
 	g_hash_table_remove(client_hash, cid);
 }
 gboolean Unimplemented(IPCCommand * command, gpointer data) {
+	IPCRet(command, g_strdup("This method is Unimplemented"));
 	return TRUE;
 }
 int main(int argc, char* argv[]){
