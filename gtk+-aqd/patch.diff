@@ -1,86 +1,642 @@
-Index: gtk+-aqd/gtk/gtkmenubar.c
+Index: gtk+-aqd/gtk/libgnomenu.c
 ===================================================================
---- gtk+-aqd/gtk/gtkmenubar.c	(revision 19601)
-+++ gtk+-aqd/gtk/gtkmenubar.c	(working copy)
-@@ -85,11 +85,55 @@
- 
- static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
- 
-+gpointer _libgnomenu_lookup(gchar * name){
-+	gpointer sym = NULL;
-+	static gboolean loaded = FALSE;
-+	static GModule * libgnomenu = NULL;
-+	static gint * version = NULL;
-+	if(!loaded) {
-+		libgnomenu = g_module_open("libgnomenu", 0 /*G_MODULE_BIND_LOCAL*/);
-+		if(!libgnomenu)
-+			g_warning("Global Menu Library(libgnomenu) not found. "
-+					"Fall back to GTK code for handling menu bar. "
-+					"GTK-aqd is intended to provide Global Menu"
-+					"support from legacy GTK applications. "
-+					);
-+		loaded = TRUE;
-+		if(libgnomenu) 
-+			if(!g_module_symbol(libgnomenu,
-+				"gnomenu_version", 
-+				&version) || (*version >>16) != 4){
-+				libgnomenu = NULL;
-+			g_warning("Global Menu Library(libgnomenu) found, "
-+					"but the version doesn't match. "
-+					"This patch works with libgnomenu == 0.4");
-+		}
+--- gtk+-aqd/gtk/libgnomenu.c	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu.c	(revision 0)
+@@ -0,0 +1,93 @@
++#include <config.h>
++#include "gtkmain.h"
++#include "gtkprivate.h"
++#include "libgnomenu.h"
++
++static GModule * module = NULL;
++static gulong * version = NULL;
++static gboolean (*_ipc_client_start)(IPCClientServerDestroyNotify notify, gpointer data) = NULL;
++static gchar * (*_ipc_client_call_server_valist)(const gchar * command_name, gchar * para_name, va_list va) = NULL;
++static gchar * (*_ipc_client_call_server_array)(const gchar * command_name, gchar ** paras, gchar ** values) = NULL;
++static void (*_ipc_client_begin_transaction)() = NULL;
++static void (*_ipc_client_cancel_transaction)() = NULL;
++static void (*_ipc_client_end_transaction)(GList ** return_list) = NULL;
++static void (*_ipc_client_set_event)(gchar * event, IPCClientEventHandler handler, gpointer data) = NULL;
++static void (*_ipc_client_remove_event)(gchar * event) = NULL;
++gboolean libgnomenu_enabled(){
++	return module == NULL;
++}
++gboolean libgnomenu_load(){
++	module = g_module_open("libgnomenu", 0);
++	if(!module) {
++		g_warning("Global Menu Library not found; \n"
++				"This is no fatal; you only lose global menu.");
++		module = NULL;
++		return FALSE;
 +	}
-+	if(libgnomenu) {
-+		if(!g_module_symbol(libgnomenu, 
-+				name, 
-+				&sym)){
-+			g_warning("Symbol %s is supposed to be in libgnomenu, "
-+					"but it is not found. "
-+					"You are potentially using an incompatible libgnomenu. "
-+					"Fall back to GTK code for menu bar/ or core dump later. ", 
-+					name);
-+			sym = NULL;
-+		};
-+		
++	g_module_symbol(module, "gnomenu_version", &version);
++	if((*version) >> 16 != 5) {
++		g_warning("Global Menu Version mismatch.\n");
++		module = NULL;
++		return FALSE;	
 +	}
-+	return sym;
++#define GET_SYMBOL(x) \
++	g_module_symbol(module, #x, &_ ## x)
++	GET_SYMBOL(ipc_client_start);
++	GET_SYMBOL(ipc_client_call_server_valist);
++	GET_SYMBOL(ipc_client_call_server_array);
++	GET_SYMBOL(ipc_client_begin_transaction);
++	GET_SYMBOL(ipc_client_end_transaction);
++	GET_SYMBOL(ipc_client_cancel_transaction);
++	GET_SYMBOL(ipc_client_set_event);
++	GET_SYMBOL(ipc_client_remove_event);
++	return TRUE;
 +}
 +
- G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
- 
- static void
- gtk_menu_bar_class_init (GtkMenuBarClass *class)
- {
-+  gboolean * compatible = _libgnomenu_lookup("gnomenu_compatible");
-+  void (*gnomenu_menu_bar_class_init)(gpointer klass)
-+			= _libgnomenu_lookup("gnomenu_menu_bar_class_intern_init");
-+
-   GObjectClass *gobject_class;
-   GtkWidgetClass *widget_class;
-   GtkMenuShellClass *menu_shell_class;
-@@ -214,12 +258,25 @@
- 						   0,
- 						   GTK_PARAM_READWRITE));
- 
-+	if(compatible && * compatible && gnomenu_menu_bar_class_init) {
-+		g_message("Using Global Menu");
-+		(*gnomenu_menu_bar_class_init)(class);
-+	} else 
-+
-   g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
- }
- 
- static void
- gtk_menu_bar_init (GtkMenuBar *object)
- {
-+  gboolean * compatible = _libgnomenu_lookup("gnomenu_compatible");
-+  void (*gnomenu_menu_bar_init)(gpointer obj)
-+			= _libgnomenu_lookup("gnomenu_menu_bar_init");
-+
-+	if(compatible && * compatible && gnomenu_menu_bar_init) {
-+		(*gnomenu_menu_bar_init)(object);
-+		return;
++gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
++	if(_ipc_client_start)
++		return _ipc_client_start(notify, data);
++	else
++		return FALSE;
++}
++gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...){
++	if(_ipc_client_call_server_valist) {
++		gchar * rt;
++		va_list va;
++		va_start(para_name, va);
++		rt = _ipc_client_call_server_valist(command_name, para_name, va);
++		va_end(va);
++		return rt;
++	} else {
++		return NULL;
 +	}
- }
++}
++gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values) {
++	if(_ipc_client_call_server_array)
++		return _ipc_client_call_server_array(command_name, paras, values);
++	else
++		return NULL;
++}
++
++void ipc_client_begin_transaction() {
++	if(_ipc_client_begin_transaction)
++		_ipc_client_begin_transaction();
++}
++void ipc_client_cancel_transaction() {
++	if(_ipc_client_cancel_transaction)
++		_ipc_client_cancel_transaction();
++
++}
++void ipc_client_end_transaction(GList ** return_list) {
++	if(_ipc_client_end_transaction)
++		_ipc_client_end_transaction(return_list);
++
++}
++
++void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data) {
++	if(_ipc_client_set_event)
++		_ipc_client_set_event(event, handler, data);
++}
++void ipc_client_remove_event(gchar * event) {
++	if(_ipc_client_remove_event)
++		_ipc_client_remove_event(event);
++}
+Index: gtk+-aqd/gtk/libgnomenu.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu.h	(revision 0)
+@@ -0,0 +1,4 @@
++#include "libgnomenu/ipcclient.h"
++
++gboolean libgnomenu_enabled();
++gboolean libgnomenu_load();
+Index: gtk+-aqd/gtk/libgnomenu/menubar.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/menubar.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/menubar.h	(revision 0)
+@@ -0,0 +1,147 @@
++/*
++ * GnomenuMenuBar
++ * */
++#ifndef __GNOMENU_MENU_BAR_H__
++#define __GNOMENU_MENU_BAR_H__
++/**
++ * SECTION: menubar
++ * 	@short_description: Global Menu Bar widget for GTK, 
++ * 		intended to replace GtkMenuBar
++ * 	@see_also: #GtkMenuBar, #gtk_legacy_menu_bar_new
++ * 	@stability: Unstable
++ * 	@include: libgnomenu/menubar.h
++ *
++ * GnomenuMenuBar is the widget providing a global menu bar to 
++ * the application. It is intended to (be able to) replace 
++ * #GtkMenuBar transparently under most
++ * situation. It has to be added as a child widget of a top level window
++ * to make its full use. Usually you don't want to simplely use
++ * #gnomenu_menu_bar_new. If you want to patch GTK, for the sake of
++ * making every application that are built against 
++ * #GtkMenuBar benifit from #GnomenuMenuBar, 
++ * use #gtk_legacy_menu_bar_new instead. That function deals 
++ * with quirks of various
++ * hackish GTK applications.
++ *
++ * The solution provided by libgnomenu is via remote widget or widget embeding
++ * . So maybe in the future we can seperate these code out and redesign the
++ * GTK widget embedding solution (i.e #GtkPlug and #GtkSocket), which is 
++ * difficult to build widget upon.
++ *
++ * #GnomenuMenuBar plays two roles. 
++ *
++ * 1. It allocates an 'widget->window' whose parent
++ * 	(or parent of parrent, whatever level) is the toplevel widget.
++ * 	The events received from this window will be translated and dispatched
++ * 	from the ordinary GTK mechanism, which provides compatibility with
++ * 	the original #GtkMenuBar, and which is the essential to receive keyboard
++ * 	events (Alt+xxx) from the applications toplevel window.
++ *
++ * 2. It creates an #GnomenuClientHelper, which is a subclass of #GdkSocket
++ * 	that understands widget embedding messages and Global Menu messages
++ * 	(seperating them will be one of the future topic). These messages are
++ * 	then dispatched via #GnomenuClientHelper's signals. This gives the
++ * 	privilege for the menu server to control the clients behavior.
++ *
++ * 	But be careful here. This might be a security hole for a privilege raising
++ * 	. Suppose a global menu
++ * 	client is running as root other process
++ * 	without root access can control a root process in some way. This behavior
++ * 	is by definition and it is
++ * 	dangerous.  However as GTk is supposed to not deal with these circumstances
++ * 	(refer to the discussions around GTK_MODULES environment variable),
++ * 	and the messages we are dealing is really nothing more than 12 bytes
++ * 	(under X11), it might not be a big hole, or not even a hole.
++ *
++ */
++
++#include <gdk/gdk.h>
++#include <gtk/gtkmenubar.h>
++
++G_BEGIN_DECLS
++
++
++#define	GNOMENU_TYPE_MENU_BAR               (gnomenu_menu_bar_get_type ())
++#define GNOMENU_MENU_BAR(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBar))
++#define GNOMENU_MENU_BAR_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
++#define GNOMENU_IS_MENU_BAR(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_MENU_BAR))
++#define GNOMENU_IS_MENU_BAR_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_MENU_BAR))
++#define GNOMENU_MENU_BAR_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), GNOMENU_TYPE_MENU_BAR, GnomenuMenuBarClass))
++
++typedef struct _GnomenuMenuBar       GnomenuMenuBar;
++typedef struct _GnomenuMenuBarClass  GnomenuMenuBarClass;
++
++/**
++ * GnomenuMenuBar:
++ * 	@parent: the parent object. 
++ *	@helper: the helper for it to play the role as a GNOME menu client.
++ *		This is actually an interface. However since at the begining I
++ *		was not sure if interface can have default behavior in GLib. 
++ *		I decided to follow the favoring 'composition' than 'inheriting'
++ *		rule here.
++ *	@container: as the name indicates. #container is the parent window
++ *		for the sub widgets(which turns out to be #GtkMenuItem s) 
++ *		of this #GtkMenuShell. 
++ *	@floater: this is a floating toplevel window which act as the 
++ *		container of the #container window in detached mode.
++ *  @allocation: this is the allocation the menu bar received from
++ *  	the menu server. It should never be confused with the allocation
++ *  	field in the #GtkWidget interface.
++ *  @requisition: this is the requisition the menu bar request from 
++ *  	the menu server. It should never be confused with the requisition
++ *  	field in the #GtkWidget interface. It is the true requisition;
++ *  	whereas the widget's is not always the true requisition.
++ * 	@x: the x position of container in it's parent window. (ltr value)
++ * 	@y: the y position of container in it's parent window. (ltr value)
++ *
++ *  I think some of these variables can be moved in to the Private
++ *  data structure, especially the #allocation and #requisition, since
++ *  The #GtkWidget interface also has those and we have different 
++ *  semantic meanings with the #GtkWidget ones. The original purpose
++ *  to keep them here is ease to refer to. But with my cute GET_OBJECT
++ *  macro in the .c file, referring to a Private variable don't require
++ *  much more typings than a public member.
++ */
++struct _GnomenuMenuBar
++{
++	GtkMenuBar parent;
++};
++
++/**
++ * GnomenuMenuBarClass:
++ *
++ * This is shameless copied from gtkmenubar.c .
++ * Even those _gtk_reserved. and the style of using
++ * the asternoid is also the GTK way instead of my way.
++ */
++struct _GnomenuMenuBarClass
++{
++  GtkMenuBarClass parent_class;
++};
++
++
++GtkWidget * gnomenu_menu_bar_new             (void);
++GtkWidget * gnomenu_menu_bar_new_local             (void);
++
++GType gnomenu_menu_bar_get_type (void);
++GtkPackDirection
++gnomenu_menu_bar_get_pack_direction (GtkMenuBar *menubar);
++void
++gnomenu_menu_bar_set_pack_direction (GtkMenuBar       *menubar,
++                                 GtkPackDirection  pack_dir);
++GtkPackDirection
++gnomenu_menu_bar_get_child_pack_direction (GtkMenuBar *menubar);
++
++void
++gnomenu_menu_bar_set_child_pack_direction (GtkMenuBar       *menubar,
++                                       GtkPackDirection  child_pack_dir);
++gboolean
++gnomenu_menu_bar_get_is_global_menu(GtkMenuBar * menubar);
++void gnomenu_menu_bar_set_is_global_menu(GtkMenuBar * menubar, gboolean is_global_menu);
++void 
++gnomenu_menu_bar_set_show_arrow(GtkMenuBar * menubar, gboolean show_arrow);
++gboolean 
++gnomenu_menu_bar_get_show_arrow(GtkMenuBar * menubar);
++G_END_DECLS
++
++#endif /* __GNOMENU_MENU_BAR_H__ */
+Index: gtk+-aqd/gtk/libgnomenu/introspector.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/introspector.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/introspector.h	(revision 0)
+@@ -0,0 +1,12 @@
++#define	INTROSPECT_DEFAULT 0
++#define	INTROSPECT_HANDLE 1
++
++typedef int IntrospectFlags;
++typedef struct _Introspector Introspector;
++gchar * gtk_widget_introspect(GtkWidget * widget);
++void introspector_queue_widget(Introspector * spector, GtkWidget * widget);
++Introspector * introspector_new();
++void introspector_set_flags(Introspector * spector, IntrospectFlags flags);
++gchar * introspector_destroy(Introspector * spector, gboolean free_blob_string);
++void introspector_visit_all(Introspector * spector);
++extern int GNOMENU_INTROSPECT_FLAGS;
+Index: gtk+-aqd/gtk/libgnomenu/ipcutils.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipcutils.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipcutils.h	(revision 0)
+@@ -0,0 +1,2 @@
++
++GdkNativeWindow ipc_find_server();
+Index: gtk+-aqd/gtk/libgnomenu/gnomenu-enums.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/gnomenu-enums.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/gnomenu-enums.h	(revision 0)
+@@ -0,0 +1,19 @@
++
++/* Generated data (by glib-mkenums) */
++
++#ifndef __GNOMENU_ENUMS_H__
++#define __GNOMENU_ENUMS_H__
++
++G_BEGIN_DECLS
++
++
++/* --- quirks.h --- */
++#define GNOMENU_TYPE_QUIRK_MASK gnomenu_quirk_mask_get_type()
++GType gnomenu_quirk_mask_get_type (void);
++GEnumValue * gnomenu_quirk_mask_get_value (gint i);
++G_END_DECLS
++
++#endif /* __GNOMENU_ENUMS_H__ */
++
++/* Generated data ends here */
++
+Index: gtk+-aqd/gtk/libgnomenu/tools.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/tools.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/tools.h	(revision 0)
+@@ -0,0 +1,14 @@
++gboolean gdkx_tools_set_window_prop_blocked(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size);
++gboolean gdkx_tools_set_window_prop(GdkWindow * window, const gchar * prop_name, gchar * buffer, gint size);
++gboolean gdkx_tools_remove_window_prop(GdkWindow * window, const gchar * prop_name);
++gchar * gdkx_tools_get_window_prop(GdkWindow * window, const gchar * prop_name, gint * bytes_return);
++typedef void (* GdkXToolsSMSFilterFunc)(gpointer data, gchar * sms, int size);
++typedef GdkFilterReturn (* GdkXToolsKeyFilterFunc)(gpointer data, GdkEventKey * event);
++
++gboolean gdkx_tools_send_sms(gchar * sms, int size);
++gboolean gdkx_tools_send_sms_to(GdkNativeWindow target, gchar * sms, int size);
++GdkWindow * gdkx_tools_add_sms_filter(GdkWindow * window, GdkXToolsSMSFilterFunc func, gpointer data, gboolean frozen);
++void gdkx_tools_thaw_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);
++void gdkx_tools_freeze_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);
++void gdkx_tools_remove_sms_filter(GdkXToolsSMSFilterFunc func, gpointer data);
++GdkWindow * gdkx_tools_lookup_window(GdkNativeWindow key);
+Index: gtk+-aqd/gtk/libgnomenu/ipcserver.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipcserver.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipcserver.h	(revision 0)
+@@ -0,0 +1,14 @@
++#ifndef _IPC_SERVER_H_
++#define _IPC_SERVER_H_
++#include "ipccommand.h"
++#include "ipcevent.h"
++
++typedef gboolean (*ServerCMD)(IPCCommand * command, gpointer data);
++typedef void (*ClientDestroyCallback)(gchar * cid, gpointer data);
++typedef void (*ClientCreateCallback)(gchar * cid, gpointer data);
++void ipc_server_freeze();
++void ipc_server_thaw();
++gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data);
++void ipc_server_register_cmd(const gchar * name, ServerCMD cmd_handler, gpointer data);
++gboolean ipc_server_send_event(IPCEvent * event);
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/sms.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/sms.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/sms.h	(revision 0)
+@@ -0,0 +1,25 @@
++#ifndef _GNOMENU_SMS_H_
++#define _GNOMENU_SMS_H_
++
++
++#pragma pack(push, 1)
++typedef struct _GnomenuSMS {
++	guchar action;
++	union {
++		guchar b[16];
++		GdkNativeWindow w[1];
++		gpointer p[1];
++	};
++} GnomenuSMS;
++#pragma pack(pop)
++typedef enum {
++	MENUITEM_CLICKED,
++	UPDATE_INTROSPECTION,
++	INTROSPECTION_UPDATED,
++	INTROSPECTION_PARTIALLY_UPDATED,
++} GnomenuSMSAction;
++
++#endif
++
++
++
+Index: gtk+-aqd/gtk/libgnomenu/ipccommand.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipccommand.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipccommand.h	(revision 0)
+@@ -0,0 +1,33 @@
++#ifndef _IPC_COMMAND_H_
++#define _IPC_COMMAND_H_
++typedef struct {
++	gchar * name;
++	gchar * cid;
++	GHashTable * parameters;
++	GHashTable * results;
++} IPCCommand;
++IPCCommand * ipc_command_parse(const gchar * string);
++GList * ipc_command_list_parse(const gchar * string);
++
++gchar * ipc_command_to_string(IPCCommand * command);
++gchar * ipc_command_list_to_string(GList * command_list);
++#define IPCParam(c, p) \
++	g_hash_table_lookup(((IPCCommand*)(c))->parameters, (p))
++#define IPCRet(c, rt) \
++	g_hash_table_insert(((IPCCommand*)(c))->results, g_strdup("default"), (rt))
++#define IPCRetDup(c, rt) \
++	IPCRet(c, g_strdup(rt))
++#define IPCRetBool(c, rt) \
++	if(rt) IPCRetDup(c, "TRUE"); else IPCRetDup(c, "FALSE"); 
++
++void ipc_command_free(IPCCommand * command);
++void ipc_command_list_free(GList * list);
++IPCCommand * ipc_command_new(gchar * cid, gchar * name);
++void ipc_command_set_parameters(IPCCommand * command, gchar * para_name, ...);
++void ipc_command_set_results(IPCCommand * command, gchar * result_name, ...);
++
++void ipc_command_set_parameters_valist(IPCCommand * command, gchar * para_name, va_list va);
++void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values);
++void ipc_command_set_results_valist(IPCCommand * command, gchar * para_name, va_list va);
++gchar * ipc_command_get_default_result(IPCCommand * command);
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/ipcclient.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipcclient.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipcclient.h	(revision 0)
+@@ -0,0 +1,19 @@
++#ifndef _IPC_CLIENT_H_
++#define _IPC_CLIENT_H_
++#include "ipccommand.h"
++#include "ipcevent.h"
++typedef void (*IPCClientServerDestroyNotify)(gpointer data);
++typedef void (*IPCClientEventHandler)(IPCEvent * event, gpointer data);
++
++gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data) ;
++gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...);
++gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va);
++gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values);
++
++void ipc_client_begin_transaction();
++void ipc_client_cancel_transaction();
++void ipc_client_end_transaction(GList ** return_list);
++
++void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data);
++void ipc_client_remove_event(gchar * event);
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/ipc.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipc.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipc.h	(revision 0)
+@@ -0,0 +1,13 @@
++#ifndef _IPC_H_
++#define _IPC_H_
++#define IPC_SERVER_TITLE "GNOMENU_IPC_SERVER"
++#define IPC_CLIENT_TITLE "GNOMENU_IPC_CLIENT"
++#define IPC_CLIENT_MESSAGE_CALL (gdk_atom_intern("GNOMENU_IPC_CALL", FALSE))
++#define IPC_CLIENT_MESSAGE_NEGO (gdk_atom_intern("GNOMENU_IPC_NEGO", FALSE))
++#define IPC_CLIENT_MESSAGE_EVENT (gdk_atom_intern("GNOMENU_IPC_EVENT", FALSE))
++#define IPC_PROPERTY_CID (gdk_atom_intern("GNOMENU_IPC_CID", FALSE))
++#define IPC_PROPERTY_CALL (gdk_atom_intern("GNOMENU_IPC_CALL", FALSE))
++#define IPC_PROPERTY_RETURN (gdk_atom_intern("GNOMENU_IPC_RETURN", FALSE))
++#define IPC_PROPERTY_EVENT (gdk_atom_intern("GNOMENU_IPC_EVENT", FALSE))
++
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/ipcevent.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/ipcevent.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/ipcevent.h	(revision 0)
+@@ -0,0 +1,12 @@
++#ifndef _IPC_EVENT_H_
++#define _IPC_EVENT_H_
++#include "ipcevent.h"
++typedef IPCCommand IPCEvent;
++
++IPCEvent * ipc_event_parse(const gchar * string);
++IPCEvent * ipc_event_new(const gchar * cid, const gchar * name);
++void ipc_event_free(IPCEvent * event);
++gchar * ipc_event_to_string(IPCEvent * event);
++void ipc_event_set_parameters(IPCEvent * event, gchar * para_name, ...);
++void ipc_event_set_parameters_valist(IPCEvent * event, gchar * para_name, va_list va);
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/quirks.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/quirks.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/quirks.h	(revision 0)
+@@ -0,0 +1,64 @@
++#ifndef __GNOMENU_QUIRKS_H__
++#define __GNOMENU_QUIRKS_H__
++G_BEGIN_DECLS
++/**
++ * SECTION: quirks
++ * 	@title: Dealing with Quirks
++ * 	@short_description: Give a little wisdom to libgnomenu.
++ * 	@see_also: #GnomenuMenuBar
++ * 	@stability: Unstable
++ * 	@include: libgnomenu/quirks.h
++ * 
++ * Quirks is the special treatment for special applications. We need quirks
++ * only because we need to stand-in for GtkMenuBar. 
++ *
++ * Quirks are specified in libgnomenu.conf, located at ~/.libgnomenu.conf
++ * and /etc/libgnomenu.conf.(%sysconfdir).
++ * 
++ * There are two kind of quirks. Default quirk and detail quirk.
++ * Default quirk matches for application's g_prgname(),
++ * Detail quirk matches not only for applicatoin's g_prgname, but also
++ * for a detail string, given by #GnomenuMenuBar. The string should be the
++ * title or the role of the menubar's toplevel window.
++ */
++
++/**
++ * GnomenuQuirkMask:
++ * 	@GNOMENU_QUIRK_NONE:	No quirk needed.
++ * 	@GNOMENU_QUIRK_IGNORE:	Don't replace GtkMenuBar with GnomenuMenuBar
++ * 	@GNOMENU_QUIRK_FORCE_SHOW_ALL:	
++ * 		Issue a gtk_widget_show_all when server requests GnomenuMenuBar
++ * 		to show up. (For nautilus/Desktop)
++ * 	@GNOMENU_QUIRK_HIDE_ON_QUIT:
++ * 		hide itself when the server quits. (For nautilus/Desktop)
++ * 	@GNOMENU_QUIRK_ROAMING:
++ * 		When there is no server, menu bar goes into a seperate 
++ * 		toplevel window instead of go back to app window. (Fow wxWindows).
++ *
++ * 	Different types of quirks. Used by #GnomenuMenuBar.
++ */
++typedef enum { /*< prefix = GNOMENU_QUIRK >*/
++	GNOMENU_QUIRK_NONE = 0, /*< nick=none >*/
++	GNOMENU_QUIRK_IGNORE = 1<<0, /*< nick=ignore >*/
++	GNOMENU_QUIRK_FORCE_SHOW_ALL = 1<<1, /*< nick=force-show-all >*/
++	GNOMENU_QUIRK_HIDE_ON_QUIT = 1<<2, /*< nick=hide-on-quit >*/
++	GNOMENU_QUIRK_ROAMING	= 1<<3, /*< nick=roaming >*/
++} GnomenuQuirkMask;
++/**
++ * GNOMENU_HAS_QUIRK:
++ * 	@m: a #GnomenuQuirkMask
++ * 	@v:	a quirk name stripping the GNOMENU_QUIRK_ prefix
++ *
++ * Test if quirk @m has quirk type @v. 
++ *
++ * NOTE: @v don't need GNOMEN_QUIRK_ prefix.
++ */
++#define GNOMENU_HAS_QUIRK(m, v) ((m) & (GNOMENU_QUIRK_ ## v))
++GnomenuQuirkMask gnomenu_get_default_quirk(); 
++GnomenuQuirkMask gnomenu_get_detail_quirk(const gchar * detail);
++
++/*< private: >*/
++#define GNOMENU_TYPE_QUIRK_MASK gnomenu_quirk_mask_get_type()
++
++G_END_DECLS
++#endif
+Index: gtk+-aqd/gtk/libgnomenu/widget.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/widget.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/widget.h	(revision 0)
+@@ -0,0 +1,5 @@
++gchar * gtk_widget_introspect(GtkWidget * widget);
++gchar * gtk_widget_introspect_with_handle(GtkWidget * widget);
++void gtk_widget_set_id(GtkWidget * widget, gchar * id);
++gchar * gtk_widget_get_id(GtkWidget * widget);
++void gtk_container_clear(GtkContainer * container);
+Index: gtk+-aqd/gtk/libgnomenu/globalmenu.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/globalmenu.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/globalmenu.h	(revision 0)
+@@ -0,0 +1,52 @@
++/*
++ * GnomenuGlobalMenu
++ * */
++#ifndef __GNOMENU_GLOBAL_MENU_H__
++#define __GNOMENU_GLOBAL_MENU_H__
++/**
++ * SECTION: globalmenu
++ *
++ * A view of the active global menu bar.
++ */
++
++#include <gdk/gdk.h>
++#include "menubar.h"
++
++G_BEGIN_DECLS
++
++
++#define	GNOMENU_TYPE_GLOBAL_MENU               (gnomenu_global_menu_get_type ())
++#define GNOMENU_GLOBAL_MENU(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), GNOMENU_TYPE_GLOBAL_MENU, GnomenuGlobalMenu))
++#define GNOMENU_GLOBAL_MENU_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), GNOMENU_TYPE_GLOBAL_MENU, GnomenuGlobalMenuClass))
++#define GNOMENU_IS_GLOBAL_MENU(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GNOMENU_TYPE_GLOBAL_MENU))
++#define GNOMENU_IS_GLOBAL_MENU_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), GNOMENU_TYPE_GLOBAL_MENU))
++#define GNOMENU_GLOBAL_MENU_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), GNOMENU_TYPE_GLOBAL_MENU, GnomenuGlobalMenuClass))
++
++typedef struct _GnomenuGlobalMenu       GnomenuGlobalMenu;
++typedef struct _GnomenuGlobalMenuClass  GnomenuGlobalMenuClass;
++
++struct _GnomenuGlobalMenu
++{
++	GtkContainer parent;
++	GHashTable * cache;
++	gpointer active_key;
++	GnomenuMenuBar * active_menu_bar;
++};
++
++/**
++ * GnomenuGlobalMenuClass:
++ *
++ */
++struct _GnomenuGlobalMenuClass
++{
++  GtkContainerClass parent_class;
++};
++
++
++GtkWidget * gnomenu_global_menu_new             (void);
++void gnomenu_global_menu_switch (GnomenuGlobalMenu * self, gpointer key);
++GType gnomenu_global_menu_get_type (void);
++
++G_END_DECLS
++
++#endif /* __GNOMENU_GLOBAL_MENU_H__ */
+Index: gtk+-aqd/gtk/libgnomenu/builder.h
+===================================================================
+--- gtk+-aqd/gtk/libgnomenu/builder.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/builder.h	(revision 0)
+@@ -0,0 +1,9 @@
++
++typedef struct _Builder Builder;
++Builder * builder_new ();
++Builder * builder_destroy(Builder * builder);
++void builder_parse(Builder * builder, const gchar * string);
++GtkWidget * builder_get_object(Builder * builder, const gchar * id);
++void builder_foreach(Builder * builder, GHFunc callback, gpointer data);
++GList * builder_get_widgets(Builder * builder);
++void builder_cleanup(Builder * builder);
+Index: gtk+-aqd/gtk/Makefile.am
+===================================================================
+--- gtk+-aqd/gtk/Makefile.am	(revision 20909)
++++ gtk+-aqd/gtk/Makefile.am	(working copy)
+@@ -345,6 +345,7 @@
  
- GtkWidget*
+ # GTK+ header files that don't get installed
+ gtk_private_h_sources =		\
++	libgnomenu.h	\
+ 	gtkquery.h		\
+ 	gtksearchengine.h	\
+ 	gtksearchenginesimple.h	\
+@@ -390,6 +391,7 @@
+ 
+ # GTK+ C sources to build the library from
+ gtk_base_c_sources =            \
++	libgnomenu.c \
+ 	gtkquery.c		\
+ 	gtksearchengine.c	\
+ 	gtksearchenginesimple.c	\
