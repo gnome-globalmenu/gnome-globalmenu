@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu.c	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu.c	(revision 0)
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,98 @@
 +#include <config.h>
 +#include "gtkmain.h"
 +#include "gtkprivate.h"
@@ -10,6 +10,7 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +
 +static GModule * module = NULL;
 +static gulong * version = NULL;
++
 +static gboolean (*_ipc_client_start)(IPCClientServerDestroyNotify notify, gpointer data) = NULL;
 +static gchar * (*_ipc_client_call_server_valist)(const gchar * command_name, gchar * para_name, va_list va) = NULL;
 +static gchar * (*_ipc_client_call_server_array)(const gchar * command_name, gchar ** paras, gchar ** values) = NULL;
@@ -27,16 +28,17 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +		g_warning("Global Menu Library not found; \n"
 +				"This is no fatal; you only lose global menu.");
 +		module = NULL;
-+		return FALSE;
 +	}
 +	g_module_symbol(module, "gnomenu_version", &version);
 +	if((*version) >> 16 != 5) {
 +		g_warning("Global Menu Version mismatch.\n");
 +		module = NULL;
-+		return FALSE;	
 +	}
 +#define GET_SYMBOL(x) \
-+	g_module_symbol(module, #x, &_ ## x)
++	if(!g_module_symbol(module, #x, &_ ## x)){ \
++		module = NULL; \
++		g_warning("symbol %s not found", #x); \
++	}
 +	GET_SYMBOL(ipc_client_start);
 +	GET_SYMBOL(ipc_client_call_server_valist);
 +	GET_SYMBOL(ipc_client_call_server_array);
@@ -45,12 +47,15 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +	GET_SYMBOL(ipc_client_cancel_transaction);
 +	GET_SYMBOL(ipc_client_set_event);
 +	GET_SYMBOL(ipc_client_remove_event);
++	if(module == NULL) {
++		return FALSE;
++	}
 +	return TRUE;
 +}
 +
 +gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 +	if(_ipc_client_start)
-+		return _ipc_client_start(notify, data);
++		return  _ipc_client_start(notify, data);
 +	else
 +		return FALSE;
 +}
@@ -105,6 +110,32 @@ Index: gtk+-aqd/gtk/libgnomenu.h
 +
 +gboolean libgnomenu_enabled();
 +gboolean libgnomenu_load();
+Index: gtk+-aqd/gtk/gtkmain.c
+===================================================================
+--- gtk+-aqd/gtk/gtkmain.c	(revision 20909)
++++ gtk+-aqd/gtk/gtkmain.c	(working copy)
+@@ -72,6 +72,8 @@
+ 
+ #include "gdk/gdkprivate.h" /* for GDK_WINDOW_DESTROYED */
+ 
++#include "libgnomenu.h" /* libgnomenu */
++
+ #ifdef G_OS_WIN32
+ 
+ G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name)
+@@ -1147,6 +1149,12 @@
+   tmp_list = functions = init_functions;
+   init_functions = NULL;
+   
++  if(libgnomenu_load()){
++  	if(!ipc_client_start(NULL, NULL)){
++		g_warning("Could not start the the client, is the server running?");
++	}
++  }
++
+   while (tmp_list)
+     {
+       init = tmp_list->data;
 Index: gtk+-aqd/gtk/libgnomenu/menubar.h
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu/menubar.h	(revision 0)
@@ -415,7 +446,7 @@ Index: gtk+-aqd/gtk/libgnomenu/ipcclient.h
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu/ipcclient.h	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu/ipcclient.h	(revision 0)
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,20 @@
 +#ifndef _IPC_CLIENT_H_
 +#define _IPC_CLIENT_H_
 +#include "ipccommand.h"
@@ -424,6 +455,7 @@ Index: gtk+-aqd/gtk/libgnomenu/ipcclient.h
 +typedef void (*IPCClientEventHandler)(IPCEvent * event, gpointer data);
 +
 +gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data) ;
++gboolean ipc_client_started() ;
 +gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...);
 +gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va);
 +gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values);
