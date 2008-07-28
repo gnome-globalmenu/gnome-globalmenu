@@ -14,18 +14,50 @@
 #include "ipcclient.h"
 #include "ipccommand.h"
 
-static GdkWindow * client_window = NULL;
-static gboolean client_frozen = TRUE;
-static GdkNativeWindow server = 0;
-static gboolean started = FALSE;
-static IPCClientServerDestroyNotify server_destroy_notify = NULL;
-static gpointer server_destroy_notify_data = NULL;
-static GList * queue = NULL;
-static gchar * cid = NULL; /*obtained after NEGO*/
-static gboolean in_transaction = FALSE; 
-static GList * transaction = NULL;
 
-static GData * event_handler_list = NULL;
+
+/**
+ * Section: ipcclient
+ *
+ *
+ * This is `ipcclient`. A client for IPCX (ipc on top of X). 
+ *
+ * Caution: This is not thread safe. Every application should call
+ * ipc_client_start at most once.
+ *
+ */
+
+static GdkWindow * 
+	client_window = NULL; /* The window for communication*/
+static gboolean 
+	client_frozen = TRUE; /* Is the client frozen? Unused*/
+static GdkNativeWindow 
+	server = 0;			/* The server window*/
+static gboolean 
+	started = FALSE; 	/*did last ipc_client_start success?*/
+static IPCClientServerDestroyNotify 
+	server_destroy_notify = NULL; /*Called when the server is destroyed*/
+static gpointer 
+	server_destroy_notify_data = NULL; /*data for the callback*/
+static GList * 
+	queue = NULL; /* Queue for unsent commands, unused.*/
+static gchar * 
+	cid = NULL; 	/*Client ID (cid) obtained after NEGO*/
+static gboolean 
+	in_transaction = FALSE;  /*Are we in transaction?*/
+static GList * 
+	transaction = NULL; /*List of IPCCommand for this transaction*/
+
+static GData * 
+	event_handler_list = NULL; /* DataList of EventHandlerInfo.
+									'key' is the name of the event*/
+/**
+ * EventHandlerInfo: 
+ * 	@handler:	Callback
+ * 	@data:		data passed to the callback
+ * 	
+ * internal data keeping track of the event handlers.
+ * */
 typedef struct {
 	IPCClientEventHandler handler;
 	gpointer data;
@@ -35,7 +67,17 @@ static void event_handler_info_free(EventHandlerInfo * info){
 }
 
 static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove);
-
+/**
+ * server_filter:
+ *
+ * Filters the server events. Only XDestroyWindowEvent is interested in. When that event
+ * happends, cleanup and invoke the callback.
+ *
+ * FIXME: the cleanup is dirty. 
+ * 	
+ * 	1. The handlers are not freed.
+ * 	2. Inner state is not consistent. (i.e. perhaps can't call start safely)
+ */
 static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
@@ -48,6 +90,12 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 	}
 	return GDK_FILTER_CONTINUE;
 }
+/**
+ * client_message_event:
+ *
+ * Invoked by default_filter when IPCClient receives only
+ * events from the server.
+ * */
 static void client_message_event(XClientMessageEvent * client_message) {
 	gchar * event_data = ipc_client_wait_for_property(IPC_PROPERTY_EVENT, TRUE);
 	if(!event_data) {
@@ -70,6 +118,11 @@ static void client_message_event(XClientMessageEvent * client_message) {
 		info->handler(event, info->data);
 	ipc_event_free(event);
 }
+/**
+ * default_filter:
+ *
+ * Default dispatcher of XClientMessageEvent.
+ */
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
 	switch(((XEvent *)xevent)->type) {
@@ -82,6 +135,12 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 	}
 	return GDK_FILTER_CONTINUE;
 }
+/**
+ * ipc_client_send_client_message:
+ * 	@message_type: type of the message (IPC_CLIENT_MESSAGE_XXX
+ * 
+ * send a client message to the server.
+ * */
 static void ipc_client_send_client_message(GdkAtom message_type) {
 	GdkEventClient ec;
 	ec.type = GDK_CLIENT_EVENT;
@@ -92,6 +151,19 @@ static void ipc_client_send_client_message(GdkAtom message_type) {
 	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(client_window);
 	gdk_event_send_client_message(&ec, server);
 }
+/**
+ * ipc_client_wait_for_property:
+ * 	@property_name: the property to wait for.
+ * 	@remove: remove it after obtained?
+ *
+ * This function wait block the current thread,
+ * until the given property is obtained from client_window,
+ * Or an error occurs.
+ *
+ * This feature ensures the client and server are in sync.
+ *
+ * Use XFree to free the result.
+ */
 static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	Atom type_return;
@@ -125,9 +197,29 @@ static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean rem
 	}
 	return data;
 }
+/**
+ * ipc_client_started:
+ *
+ * Returns: whether the client is started.
+ */
 gboolean ipc_client_started(){
 	return started;
 }
+/**
+ * ipc_client_start:
+ * 	@notify: the callback when the server is destroy.
+ * 	@data: data passed to the callback
+ *
+ * 	Start an IPCClient. 
+ *
+ * 	The IPCClient is not thread safe and shall be started
+ * 	only once per application.
+ *
+ * 	If a server is not found, this function will try to spawn a new server
+ * 	from the environment variable GNOMENU_SERVER.
+ *
+ * Returns: FALSE if it fails.
+ */
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
 	server = ipc_find_server();
@@ -183,6 +275,11 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 no_server:
 	return started;
 }
+/**
+ * ipc_client_call_list:
+ *
+ * Internal function to performance a transaction.
+ */
 static GList * ipc_client_call_list(GList * command_list) {
 	GList * ret = NULL;
 	g_return_val_if_fail(started, NULL);
@@ -224,6 +321,15 @@ no_prop_set:
 	return ret;
 
 }
+/**
+ *	ipc_client_call_server_command:
+ *
+ *	Internal function to call a command. 
+ *
+ *	It first creates an transaction, then calls
+ *	ipc_client_call_server_list.
+ *
+ * */
 static gchar * ipc_client_call_server_command(IPCCommand * command){
 	/*The command is 'destroyed' after this function'*/
 	if(!in_transaction) {
@@ -241,11 +347,25 @@ static gchar * ipc_client_call_server_command(IPCCommand * command){
 		return NULL;
 	}
 }
+/**
+ * ipc_client_call_server_valist:
+ *
+ * valist_version of ipc_client_call_server.
+ */
 gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_valist(command, para_name, va);
 	return ipc_client_call_server_command(command);
 }
+/**
+ * ipc_client_call_server:
+ * 	@command_name: the name of the command.
+ * 	@para_name: name of the first parameter.
+ * 	@...: 	value of the first parameter and (name, value) pairs for
+ * 			other parameters. Ended by NULL.
+ *
+ * Returns: the 'default' result.
+ */
 gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
 	gchar * rt = NULL;
 	va_list va;
@@ -254,20 +374,41 @@ gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ..
 	va_end(va);
 	return rt;
 }
+/**
+ * ipc_client_call_server:
+ *
+ * 	Array version of ipc_client_call_server.
+ */
 gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values){
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_array(command, paras, values);
 	return ipc_client_call_server_command(command);
 }
+/**
+ * ipc_client_begin_transaction:
+ *
+ * 	Starts a transaction.
+ */
 void ipc_client_begin_transaction() {
 	transaction = NULL;
 	in_transaction = TRUE;
 }
+/**
+ * ipc_client_cancel_transaction:
+ *
+ * 	cancels a transaction.
+ */
 void ipc_client_cancel_transaction() {
 	ipc_command_list_free(transaction);
 	in_transaction = FALSE;
 	transaction = NULL;
 }
+/**
+ * ipc_client_end_transaction:
+ *
+ * Issue the transaction to the server,
+ * and read the results.
+ */
 void ipc_client_end_transaction(GList ** return_list){
 	GList * rt = ipc_client_call_list(transaction);
 	if(return_list) *return_list = rt;
@@ -276,6 +417,17 @@ void ipc_client_end_transaction(GList ** return_list){
 	transaction = NULL;
 	in_transaction = FALSE;
 }
+/**
+ * ipc_client_set_event:
+ * 	@event: name of the event
+ * 	@handler: handler
+ * 	@data: data passed to the handler
+ *
+ * 	Listens to an event from the server. The old handler is removed.
+ *
+ * 	This function utilizes the internal IPC call _AddEvent to get the server-side task done.
+ *
+ */
 void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data){
 	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
 	info->data = data;
@@ -283,6 +435,15 @@ void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
 	ipc_client_call_server("_AddEvent_", "event", event);
 }
+/**
+ * ipc_client_remove_event:
+ * 	@event: name of the event
+ *
+ * 	Stop listening to an event. The handler is removed.
+ *
+ * 	This function utilizes the internal IPC call _RemoveEvent_ to get the server-side
+ * 	task done.
+ */
 void ipc_client_remove_event(gchar * event){
 	g_datalist_remove_data(&event_handler_list, event);
 	ipc_client_call_server("_RemoveEvent_", "event", event);
