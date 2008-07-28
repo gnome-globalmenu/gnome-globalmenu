@@ -142,6 +142,8 @@ gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb
 	gdk_window_set_events(server_window, GDK_STRUCTURE_MASK || gdk_window_get_events(server_window));
 	gdk_window_add_filter(server_window, default_filter, NULL);
 	server_frozen = FALSE;
+	gdk_flush();
+	XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
 	gdk_x11_ungrab_server();
 	client_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, client_info_destroy);
 	client_hash_by_cid = g_hash_table_new(g_str_hash, g_str_equal);

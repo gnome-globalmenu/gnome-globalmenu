@@ -129,15 +129,34 @@ gboolean ipc_client_started(){
 	return started;
 }
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
-	gdk_x11_grab_server();
+	GdkWindow * server_gdk = NULL;
 	server = ipc_find_server();
 	if(server == 0) {
-		gdk_x11_ungrab_server();
-		goto no_server;
+		gchar * server = g_getenv("GNOMENU_SERVER");
+		GError * error = NULL;
+		if(!g_spawn_command_line_async(server, &error)){
+			g_critical("could not start the server: %s:", server);
+			if(error){
+				g_critical("%s", error->message);
+				g_error_free(error);
+			}
+			goto no_server;
+		} else {
+			int i = 0;;
+			while(server == 0 || server_gdk == NULL){
+				g_usleep(1000*100);
+				server = ipc_find_server();
+				server_gdk = gdk_window_lookup(server);
+				if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
+			}
+		}
 	}
-	GdkWindow * server_gdk = gdk_window_lookup(server);
-	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
 
+	gdk_x11_grab_server();
+	server = ipc_find_server();
+	server_gdk = gdk_window_lookup(server);
+	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
+	g_message("GdkWindow server = %p", server_gdk);
 	gdk_window_set_events(server_gdk, gdk_window_get_events(server_gdk) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(server_gdk, server_filter, NULL);
 	server_destroy_notify = notify;
