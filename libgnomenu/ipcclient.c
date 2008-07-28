@@ -16,6 +16,7 @@
 
 static GdkWindow * client_window = NULL;
 static gboolean client_frozen = TRUE;
+static gboolean started = FALSE;
 static IPCClientServerDestroyNotify server_destroy_notify = NULL;
 static gpointer server_destroy_notify_data = NULL;
 static GList * queue = NULL;
@@ -38,6 +39,7 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
 		g_critical("Server is down!");
+		started = FALSE;
 		if(server_destroy_notify)
 			server_destroy_notify(server_destroy_notify_data);
 	} else {
@@ -121,8 +123,10 @@ static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean rem
 	}
 	return data;
 }
+gboolean ipc_client_started(){
+	return started;
+}
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
-	gboolean rt = FALSE;
 	gdk_x11_grab_server();
 	GdkNativeWindow server = ipc_find_server();
 	if(server == 0) {
@@ -151,12 +155,12 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 		LOG("cid obtained: %s", cid);
 		XFree(identify);
 		g_datalist_init(&event_handler_list);
-		rt = TRUE;
+		started = TRUE;
 	} else {
-		rt = FALSE;
+		started = FALSE;
 	}
 no_server:
-	return rt;
+	return started;
 }
 static GList * ipc_client_call_list(GList * command_list) {
 	GList * ret = NULL;
@@ -220,13 +224,18 @@ static gchar * ipc_client_call_server_command(IPCCommand * command){
 		return NULL;
 	}
 }
-gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
+gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, command_name);
+	ipc_command_set_parameters_valist(command, para_name, va);
+	return ipc_client_call_server_command(command);
+}
+gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
+	gchar * rt = NULL;
 	va_list va;
 	va_start(va, para_name);
-	ipc_command_set_parameters_valist(command, para_name, va);
+	rt = ipc_client_call_server_valist(command_name, para_name, va);
 	va_end(va);
-	return ipc_client_call_server_command(command);
+	return rt;
 }
 gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values){
 	IPCCommand * command = ipc_command_new(cid, command_name);
