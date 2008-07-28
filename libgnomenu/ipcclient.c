@@ -16,6 +16,7 @@
 
 static GdkWindow * client_window = NULL;
 static gboolean client_frozen = TRUE;
+static GdkNativeWindow server = 0;
 static gboolean started = FALSE;
 static IPCClientServerDestroyNotify server_destroy_notify = NULL;
 static gpointer server_destroy_notify_data = NULL;
@@ -42,6 +43,7 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 		started = FALSE;
 		if(server_destroy_notify)
 			server_destroy_notify(server_destroy_notify_data);
+		server = 0;
 	} else {
 	}
 	return GDK_FILTER_CONTINUE;
@@ -80,7 +82,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 	}
 	return GDK_FILTER_CONTINUE;
 }
-static void ipc_client_send_client_message(GdkNativeWindow server, GdkAtom message_type) {
+static void ipc_client_send_client_message(GdkAtom message_type) {
 	GdkEventClient ec;
 	ec.type = GDK_CLIENT_EVENT;
 	ec.window = 0;
@@ -128,7 +130,7 @@ gboolean ipc_client_started(){
 }
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	gdk_x11_grab_server();
-	GdkNativeWindow server = ipc_find_server();
+	server = ipc_find_server();
 	if(server == 0) {
 		gdk_x11_ungrab_server();
 		goto no_server;
@@ -148,7 +150,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	client_frozen = FALSE;
 
 	gdk_x11_ungrab_server();
-	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_NEGO);
+	ipc_client_send_client_message(IPC_CLIENT_MESSAGE_NEGO);
 	gchar * identify = ipc_client_wait_for_property(IPC_PROPERTY_CID, FALSE);
 	if(identify) {
 		cid = g_strdup(identify);
@@ -164,13 +166,9 @@ no_server:
 }
 static GList * ipc_client_call_list(GList * command_list) {
 	GList * ret = NULL;
-	GdkNativeWindow server = ipc_find_server();
+	g_return_val_if_fail(started, NULL);
 	gchar * data = ipc_command_list_to_string(command_list);
 	g_assert(client_window);
-	if(!server) {
-		g_critical("no server is found, method failed");
-		return NULL;
-	}
 
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	gdk_error_trap_push();
@@ -185,7 +183,7 @@ static GList * ipc_client_call_list(GList * command_list) {
 			strlen(data) + 1);
 	XSync(display, FALSE);
 	g_free(data);
-	ipc_client_send_client_message(server, IPC_CLIENT_MESSAGE_CALL);
+	ipc_client_send_client_message(IPC_CLIENT_MESSAGE_CALL);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for calling the command, ignoring the command");
 		goto no_prop_set;
