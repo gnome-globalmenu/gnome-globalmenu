@@ -52,7 +52,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = quirks.h menubar.h tools.h introspector.h builder.h
+libgnomenuinclude_HEADERS =
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
