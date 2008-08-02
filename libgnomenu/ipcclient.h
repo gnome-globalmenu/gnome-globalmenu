@@ -7,9 +7,9 @@ typedef void (*IPCClientEventHandler)(IPCEvent * event, gpointer data);
 
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data) ;
 gboolean ipc_client_started() ;
-gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...);
-gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va);
-gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values);
+gboolean ipc_client_call_server(const gchar * command_name, gchar ** ret, gchar * para_name, ...);
+gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** ret, gchar * para_name, va_list va);
+gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** ret, gchar ** paras, gchar ** values);
 
 void ipc_client_begin_transaction();
 void ipc_client_cancel_transaction();

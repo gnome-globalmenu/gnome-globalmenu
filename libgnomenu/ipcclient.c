@@ -330,21 +330,24 @@ no_prop_set:
  *	ipc_client_call_server_list.
  *
  * */
-static gchar * ipc_client_call_server_command(IPCCommand * command){
+static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt){
 	/*The command is 'destroyed' after this function'*/
 	if(!in_transaction) {
-		gchar * rt = NULL;
 		GList * commands = NULL;
 		GList * returns = NULL;
 		commands = g_list_append(commands, command);
 		returns = ipc_client_call_list(commands);
-		if(returns) rt = ipc_command_get_default_result(returns->data);
 		ipc_command_list_free(commands);
-		ipc_command_list_free(returns);
-		return rt;
+		if(returns) {
+			*rt = ipc_command_get_default_result(returns->data);
+			ipc_command_list_free(returns);
+			return TRUE;
+		} else {
+			return FALSE;
+		}
 	} else {
 		transaction = g_list_append(transaction, command);
-		return NULL;
+		return TRUE;
 	}
 }
 /**
@@ -352,10 +355,10 @@ static gchar * ipc_client_call_server_command(IPCCommand * command){
  *
  * valist_version of ipc_client_call_server.
  */
-gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_name, va_list va) {
+gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, gchar * para_name, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_valist(command, para_name, va);
-	return ipc_client_call_server_command(command);
+	return ipc_client_call_server_command(command, rt);
 }
 /**
  * ipc_client_call_server:
@@ -366,23 +369,23 @@ gchar * ipc_client_call_server_valist(const gchar * command_name, gchar * para_n
  *
  * Returns: the 'default' result.
  */
-gchar * ipc_client_call_server(const gchar * command_name, gchar * para_name, ...) {
-	gchar * rt = NULL;
+gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, gchar * para_name, ...) {
+	gboolean r = NULL;
 	va_list va;
 	va_start(va, para_name);
-	rt = ipc_client_call_server_valist(command_name, para_name, va);
+	r = ipc_client_call_server_valist(command_name, rt, para_name, va);
 	va_end(va);
 	return rt;
 }
 /**
- * ipc_client_call_server:
+ * ipc_client_call_server_array:
  *
  * 	Array version of ipc_client_call_server.
  */
-gchar * ipc_client_call_server_array(const gchar * command_name, gchar ** paras, gchar ** values){
+gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_array(command, paras, values);
-	return ipc_client_call_server_command(command);
+	return ipc_client_call_server_command(command, rt);
 }
 /**
  * ipc_client_begin_transaction:
