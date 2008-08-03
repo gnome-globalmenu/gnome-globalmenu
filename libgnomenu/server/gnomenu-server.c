@@ -37,7 +37,7 @@ gboolean Unimplemented(IPCCommand * command, gpointer data) {
 }
 ObjectGroup * find_group(IPCCommand * command){
 	gchar * persist = IPCParam(command, "persist");
-	if(g_str_equal(persist, "true")) {
+	if(persist && g_str_equal(persist, "true")) {
 		return global_group;
 	}
 	gchar * cid = command->cid;
