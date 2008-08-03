@@ -8,19 +8,23 @@
 #endif
 
 #include "ipcserver.h"
-
+#include "object.h"
 typedef struct {
 	gchar * cid;
+	ObjectGroup * group;
 } ClientInfo;
 static GHashTable * client_hash = NULL;
+ObjectGroup * global_group = NULL;
 void client_info_free(ClientInfo * info) {
 	g_free(info->cid);
+	destroy_object_group(info->group);
 	g_slice_free(ClientInfo, info);
 }
 static void client_create_callback(gchar * cid, gpointer data) {
 	LOG("New client %s", cid);
 	ClientInfo * info = g_slice_new0(ClientInfo);
 	info->cid = g_strdup(cid);
+	info->group = create_object_group(info->cid);
 	g_hash_table_insert(client_hash, info->cid, info);
 }
 static void client_destroy_callback(gchar * cid, gpointer data) {
@@ -31,21 +35,31 @@ gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup("This method is Unimplemented"));
 	return TRUE;
 }
+ObjectGroup * find_group(IPCCommand * command){
+	gchar * persist = IPCParam(command, "persist");
+	if(g_str_equal(persist, "true")) {
+		return global_group;
+	}
+	gchar * cid = command->cid;
+	ClientInfo * info = g_hash_table_lookup(client_hash, cid);
+	if(!info) return NULL;
+	return info->group;
+}
 gboolean CreateObject(IPCCommand * command, gpointer data) {
 	gchar * objname = IPCParam(command, "object");
-	IPCRetBool(command, create_object(objname));
+	IPCRetBool(command, create_object(find_group(command), objname));
 	return TRUE;
 }
 gboolean DestroyObject(IPCCommand * command, gpointer data) {
 	gchar * objname = IPCParam(command, "object");
-	IPCRetBool(command, destroy_object(objname));
+	IPCRetBool(command, destroy_object(find_group(command), objname));
 	return TRUE;
 }
 gboolean SetProperty(IPCCommand * command, gpointer data) {
 	gchar * objname = IPCParam(command, "object");
 	gchar * property = IPCParam(command, "property");
 	gchar * value = IPCParam(command, "value");
-	IPCRetBool(command, set_property(objname, property, value));
+	IPCRetBool(command, set_property(find_group(command), objname, property, value));
 	return TRUE;
 }
 gboolean InsertChild(IPCCommand * command, gpointer data) {
@@ -53,7 +67,7 @@ gboolean InsertChild(IPCCommand * command, gpointer data) {
 	gchar * childname = IPCParam(command, "child");
 	gchar * spos = IPCParam(command, "pos");
 	gint pos = strtol(spos, NULL, 10);
-	IPCRetBool(command, insert_child(objname, childname, pos));
+	IPCRetBool(command, insert_child(find_group(command), objname, childname, pos));
 	return TRUE;
 }
 gboolean RemoveChild(IPCCommand * command, gpointer data) {
@@ -61,19 +75,19 @@ gboolean RemoveChild(IPCCommand * command, gpointer data) {
 	gchar * childname = IPCParam(command, "child");
 	gchar * spos = IPCParam(command, "pos");
 	gint pos = strtol(spos, NULL, 10);
-	IPCRetBool(command, remove_child(objname, childname, pos));
+	IPCRetBool(command, remove_child(find_group(command), objname, childname));
 	return TRUE;
 }
 gboolean IntrospectObject(IPCCommand * command, gpointer data) {
 	gchar * objname = IPCParam(command, "object");
-	IPCRet(command, introspect_object(objname));
+	IPCRet(command, introspect_object(find_group(command), objname));
 	return TRUE;
 }
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
-	object_manager_init();
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
+	global_group = create_object_group("Global Group");
 	ipc_server_register_cmd("CreateObject", CreateObject, NULL);
 	ipc_server_register_cmd("DestroyObject", DestroyObject, NULL);
 	ipc_server_register_cmd("SetProperty", SetProperty, NULL);
@@ -86,5 +100,6 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	gtk_main();
+	destroy_object_group(global_group);
 	return 0;
 }
