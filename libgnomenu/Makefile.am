@@ -21,6 +21,8 @@ libgnomenu_la_SOURCES = \
 	ipcutils.c \
 	ipcutils.h \
 	ipc.h  \
+	object.c \
+	object.h \
 	menu.h \
 	menu.c 
 
