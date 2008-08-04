@@ -83,9 +83,6 @@ gboolean set_property(ObjectGroup * group, gchar * name, gchar * prop, gchar * v
 	}
 	return TRUE;
 }
-gboolean activate_object(ObjectGroup * group, gchar * name){
-	return FALSE;
-}
 gboolean insert_child(ObjectGroup * group, gchar * name, gchar * child, gint pos) {
 	g_return_val_if_fail(name, FALSE);
 	g_return_val_if_fail(child, FALSE);

@@ -340,6 +340,7 @@ static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt
 		returns = ipc_client_call_list(commands);
 		ipc_command_list_free(commands);
 		if(returns) {
+			if(rt)
 			*rt = ipc_command_get_default_result(returns->data);
 			ipc_command_list_free(returns);
 			return TRUE;
@@ -437,7 +438,7 @@ void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer
 	info->data = data;
 	info->handler = handler;
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	ipc_client_call_server("_AddEvent_", "event", event);
+	ipc_client_call_server("_AddEvent_", NULL, "event", event, NULL);
 }
 /**
  * ipc_client_remove_event:
@@ -450,5 +451,5 @@ void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer
  */
 void ipc_client_remove_event(gchar * event){
 	g_datalist_remove_data(&event_handler_list, event);
-	ipc_client_call_server("_RemoveEvent_", "event", event);
+	ipc_client_call_server("_RemoveEvent_", NULL, "event", event, NULL);
 }

@@ -81,6 +81,17 @@ gboolean IntrospectObject(IPCCommand * command, gpointer data) {
 	IPCRet(command, introspect_object(find_group(command), objname));
 	return TRUE;
 }
+gboolean ActivateObject(IPCCommand * command, gpointer data){
+	gchar * objname = IPCParam(command, "object");
+	ObjectGroup * group = find_group(command);
+	Object * object = g_hash_table_lookup(group->object_hash, objname);
+	g_return_val_if_fail(object, FALSE);
+	IPCEvent * event = ipc_event_new("", "activate");
+	ipc_event_set_parameters(event, "object", objname, NULL);
+	ipc_server_send_event(event);
+	ipc_event_free(event);
+	return TRUE;
+}
 int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
@@ -89,7 +100,7 @@ int main(int argc, char* argv[]){
 	ipc_server_register_cmd("CreateObject", CreateObject, NULL);
 	ipc_server_register_cmd("DestroyObject", DestroyObject, NULL);
 	ipc_server_register_cmd("SetProperty", SetProperty, NULL);
-	ipc_server_register_cmd("ActivateObject", Unimplemented, NULL);
+	ipc_server_register_cmd("ActivateObject", ActivateObject, NULL);
 	ipc_server_register_cmd("InsertChild", InsertChild, NULL);
 	ipc_server_register_cmd("RemoveChild", RemoveChild, NULL);
 	ipc_server_register_cmd("IntrospectObject", IntrospectObject, NULL);
