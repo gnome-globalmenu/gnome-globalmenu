@@ -7,7 +7,7 @@
 #else
 #define LOG(fmt, args...)
 #endif
-
+static GHashTable * group_hash = NULL;
 static void object_destroy(Object * object) {
 	if(object->ref_count > 0)
 		g_message("Leak: %s ref_count = %d",  object->name, object->ref_count);
@@ -31,6 +31,14 @@ ObjectGroup * create_object_group(gchar * name) {
 	group->name =g_strdup(name);
 	group->object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	g_message("object hash is %p", group->object_hash);
+	if(!group_hash){
+		group_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	}
+	g_hash_table_insert(group_hash, group->name, group);
+	return group;
+}
+ObjectGroup * lookup_object_group(gchar * name){
+	ObjectGroup * group =g_hash_table_lookup(group_hash, name);
 	return group;
 }
 void destroy_object_group(ObjectGroup * group) {
@@ -41,6 +49,7 @@ void destroy_object_group(ObjectGroup * group) {
 		object_destroy(obj);
 	}
 	g_hash_table_destroy(group->object_hash);
+	g_hash_table_remove(group_hash, group->name);
 	g_free(group->name);
 	g_slice_free(ObjectGroup, group);
 }

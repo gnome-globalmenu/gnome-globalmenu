@@ -14,6 +14,7 @@ struct _ObjectGroup {
 };
 
 ObjectGroup * create_object_group(gchar * name);
+ObjectGroup * lookup_object_group(gchar * name);
 void destroy_object_group(ObjectGroup * group);
 gboolean create_object(ObjectGroup * group, gchar * name);
 gboolean destroy_object(ObjectGroup * group, gchar * name);

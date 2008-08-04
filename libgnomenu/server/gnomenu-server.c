@@ -38,14 +38,12 @@ gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 ObjectGroup * find_group(IPCCommand * command){
-	gchar * persist = IPCParam(command, "persist");
-	if(persist && g_str_equal(persist, "true")) {
-		return global_group;
+	gchar * group = IPCParam(command, "group");
+	if(group) {
+		return lookup_object_group(group);
 	}
 	gchar * cid = command->cid;
-	ClientInfo * info = g_hash_table_lookup(client_hash, cid);
-	if(!info) return NULL;
-	return info->group;
+	return lookup_object_group(cid);
 }
 gboolean CreateObject(IPCCommand * command, gpointer data) {
 	gchar * objname = IPCParam(command, "object");
@@ -89,7 +87,7 @@ int main(int argc, char* argv[]){
 	gtk_init(&argc, &argv);
 
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
-	global_group = create_object_group("Global Group");
+	global_group = create_object_group("GLOBAL");
 	ipc_server_register_cmd("CreateObject", CreateObject, NULL);
 	ipc_server_register_cmd("DestroyObject", DestroyObject, NULL);
 	ipc_server_register_cmd("SetProperty", SetProperty, NULL);
