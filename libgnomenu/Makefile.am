@@ -20,7 +20,9 @@ libgnomenu_la_SOURCES = \
 	ipcevent.h \
 	ipcutils.c \
 	ipcutils.h \
-	ipc.h 
+	ipc.h  \
+	menu.h \
+	menu.c 
 
 #	$(BUILT_SOURCES) \
 #	main.c \

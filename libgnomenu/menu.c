@@ -11,13 +11,13 @@
 #include <gdk/gdkx.h>
 #include "ipcclient.h"
 
-TODO:
-Local cache and server crash recovery.
+//TODO:
+//Local cache and server crash recovery.
 
 static GData * object_list = NULL;
 
 typedef void (* GnomenuListener)(GQuark item, gpointer data);
-void activated_handler(IPCEvent * event, gpointer data){
+static void activated_handler(IPCEvent * event, gpointer data){
 	GQuark object = g_quark_from_string(IPCParam(event, "object"));
 	/*invoke the handler*/
 
@@ -53,7 +53,7 @@ gboolean gnomenu_remove_item(GQuark menu, GQuark item){
 	return ipc_client_call_server("RemoveChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), NULL);
 }
 gboolean gnomenu_destroy(GQuark object){
-	return ipc_client_call_server("DestroyObject", NULL, "object", g_quark_to_string(menu), NULL);
+	return ipc_client_call_server("DestroyObject", NULL, "object", g_quark_to_string(object), NULL);
 }
 gboolean gnomenu_listen(GnomenuListener func, gpointer data){
 }
