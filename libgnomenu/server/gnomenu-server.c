@@ -17,6 +17,7 @@ static GHashTable * client_hash = NULL;
 ObjectGroup * global_group = NULL;
 void client_info_free(ClientInfo * info) {
 	g_free(info->cid);
+	g_message("group is %p", info->group);
 	destroy_object_group(info->group);
 	g_slice_free(ClientInfo, info);
 }
@@ -25,6 +26,7 @@ static void client_create_callback(gchar * cid, gpointer data) {
 	ClientInfo * info = g_slice_new0(ClientInfo);
 	info->cid = g_strdup(cid);
 	info->group = create_object_group(info->cid);
+	g_message("group is %p", info->group);
 	g_hash_table_insert(client_hash, info->cid, info);
 }
 static void client_destroy_callback(gchar * cid, gpointer data) {

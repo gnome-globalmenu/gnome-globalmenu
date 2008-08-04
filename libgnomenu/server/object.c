@@ -8,16 +8,14 @@
 #define LOG(fmt, args...)
 #endif
 
-ObjectGroup * create_object_group(gchar * name) {
-	ObjectGroup * group = g_slice_new0(ObjectGroup);
-	group->name =g_strdup(name);
-	group->object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	return group;
-}
-void destroy_object_group(ObjectGroup * group) {
-	g_hash_table_destroy(group->object_hash);
-	g_free(group->name);
-	g_slice_free(ObjectGroup, group);
+static void object_destroy(Object * object) {
+	if(object->ref_count > 0)
+		g_message("Leak: %s ref_count = %d",  object->name, object->ref_count);
+	g_list_free(object->children);
+	g_datalist_clear(&object->properties);
+	g_hash_table_remove(object->group->object_hash, object->name);
+	g_free(object->name);
+	g_slice_free(Object, object);
 }
 static void object_unref(Object * object) {
 	object->ref_count--;
@@ -25,12 +23,26 @@ static void object_unref(Object * object) {
 		GList * node;
 		for(node = object->children; node; node = node->next)
 			object_unref(node->data);
-		g_list_free(object->children);
-		g_datalist_clear(&object->properties);
-		g_hash_table_remove(object->group->object_hash, object->name);
-		g_free(object->name);
-		g_slice_free(Object, object);
+		object_destroy(object);
 	}
+}
+ObjectGroup * create_object_group(gchar * name) {
+	ObjectGroup * group = g_slice_new0(ObjectGroup);
+	group->name =g_strdup(name);
+	group->object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+	g_message("object hash is %p", group->object_hash);
+	return group;
+}
+void destroy_object_group(ObjectGroup * group) {
+	GList * keys = g_hash_table_get_keys(group->object_hash);
+	GList * node;
+	for(node = keys; node; node=node->next){
+		Object * obj = (g_hash_table_lookup(group->object_hash, node->data));
+		object_destroy(obj);
+	}
+	g_hash_table_destroy(group->object_hash);
+	g_free(group->name);
+	g_slice_free(ObjectGroup, group);
 }
 gboolean create_object(ObjectGroup * group, gchar * name) {
 	g_return_val_if_fail(name, FALSE);
