@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 	if(command) {
-		gchar * rt;
+		gchar * rt = NULL;
 	   	ipc_client_call_server_array(command, &rt, par_names, values);
 		g_print("%s\n", rt);
 		return 0;
