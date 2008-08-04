@@ -225,6 +225,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	server = ipc_find_server();
 	if(server == 0) {
 		gchar * server = g_getenv("GNOMENU_SERVER");
+		if(!server) server = "./gnomenu-server";
 		GError * error = NULL;
 		if(!g_spawn_command_line_async(server, &error)){
 			g_critical("could not start the server: %s:", server);
