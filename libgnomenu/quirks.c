@@ -6,7 +6,7 @@
 #include "menubar.h"
 
 #if ENABLE_TRACING >= 3
-#define LOG(fmt, args...) g_printerr("<GnomenuQuirk>::" fmt, ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuQuirk>::" fmt "\n", ## args)
 #else
 #define LOG(fmt, args...)
 #endif

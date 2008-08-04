@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_printerr("<GnomenuGlobalMenu>::" fmt,  ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuGlobalMenu>::" fmt "\n",  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
