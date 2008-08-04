@@ -3,14 +3,14 @@
 #include "object.h"
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GnomenuServer>::" fmt,  ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuServer>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
 static GHashTable * group_hash = NULL;
 static void object_destroy(Object * object) {
 	if(object->ref_count > 0)
-		g_message("Leak: %s ref_count = %d",  object->name, object->ref_count);
+		LOG("%s is leaked ref_count = %d",  object->name, object->ref_count);
 	g_list_free(object->children);
 	g_datalist_clear(&object->properties);
 	g_hash_table_remove(object->group->object_hash, object->name);
@@ -30,7 +30,6 @@ ObjectGroup * create_object_group(gchar * name) {
 	ObjectGroup * group = g_slice_new0(ObjectGroup);
 	group->name =g_strdup(name);
 	group->object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
-	g_message("object hash is %p", group->object_hash);
 	if(!group_hash){
 		group_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 	}

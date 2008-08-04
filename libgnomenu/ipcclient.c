@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GnomenuGlobalMenu>::" fmt,  ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuGlobalMenu>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -249,7 +249,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	server = ipc_find_server();
 	server_gdk = gdk_window_lookup(server);
 	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
-	g_message("GdkWindow server = %p", server_gdk);
+	LOG("GdkWindow server = %p", server_gdk);
 	gdk_window_set_events(server_gdk, gdk_window_get_events(server_gdk) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(server_gdk, server_filter, NULL);
 	server_destroy_notify = notify;

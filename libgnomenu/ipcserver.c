@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<IPCServer>::" fmt,  ## args)
+#define LOG(fmt, args...) g_printerr("<IPCServer>::" fmt,  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -217,7 +217,7 @@ no_prop:
 static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, ClientInfo * info){
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
-		g_message("client %s is down!", info->cid);
+		LOG("client %s is down!", info->cid);
 		gdk_window_remove_filter(info->window, client_filter, info);
 		if(client_destroy_callback)
 			client_destroy_callback(info->cid, callback_data);
