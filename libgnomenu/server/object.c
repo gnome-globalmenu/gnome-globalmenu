@@ -106,6 +106,15 @@ static void prepend(GString * string, guint level){
 		g_string_append_c(string, ' ');
 	}
 }
+static void for_each_property(GQuark key_id, gpointer data, gpointer para[2]){
+	gchar * escaped = g_markup_escape_text(data, -1);
+	GString * string = para[0];
+	gint * level = para[1];
+	prepend(string, *level+1);
+	g_string_append_printf(string, "<prop name=\"%s\">%s</prop>\n",
+			g_quark_to_string(key_id), escaped);
+	g_free(escaped);
+}
 static void introspect(GString * string, Object * object, guint level){
 	prepend(string, level);
 	g_string_append_printf(string, "<object name=\"%s\">\n", object->name);
@@ -118,8 +127,8 @@ static void introspect(GString * string, Object * object, guint level){
 	}
 	prepend(string, level + 1);
 	g_string_append_printf(string, "</children>\n");
-TODO: // properties
-
+	gpointer para[2] = {string, &level};
+	g_datalist_foreach(&object->properties, for_each_property, para);
 	prepend(string, level);
 	g_string_append_printf(string, "</object>\n");
 }
