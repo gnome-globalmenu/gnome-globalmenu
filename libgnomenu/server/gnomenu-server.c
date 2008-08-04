@@ -96,7 +96,7 @@ int main(int argc, char* argv[]){
 	ipc_server_register_cmd("RemoveChild", RemoveChild, NULL);
 	ipc_server_register_cmd("IntrospectObject", IntrospectObject, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
-		g_error("server already there");
+		g_critical("server already there");
 		return 1;
 	}
 	gtk_main();
