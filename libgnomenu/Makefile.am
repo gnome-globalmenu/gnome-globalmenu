@@ -1,5 +1,5 @@
 #
-SUBDIRS = . server
+#SUBDIRS = .
 AM_CFLAGS = -g $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
@@ -7,6 +7,8 @@ moduledir = $(libdir)
 
 module_LTLIBRARIES = libgnomenu.la
 
+bin_PROGRAMS = gnomenu-server gnomenu-call
+LDADD = libgnomenu.la
 # BUILT_SOURCES = gnomenu-enums.c gnomenu-enums.h
 
 libgnomenu_la_SOURCES = \
