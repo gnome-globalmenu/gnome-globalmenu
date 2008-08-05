@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	if(event) {
-		ipc_client_set_event(event, event_cb, NULL);
+		ipc_client_set_event_array(event, event_cb, NULL, par_names, values);
 		gtk_main();
 	}
 	return 0;

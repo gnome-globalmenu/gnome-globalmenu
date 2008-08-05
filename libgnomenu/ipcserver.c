@@ -100,17 +100,25 @@ static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_nam
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 static gboolean AddEvent(IPCCommand * command, gpointer data) {
 	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	gchar * eventname = g_strdup(IPCParam(command, "_event_"));
+	/*strdup because IPCRemoveParam will free it*/
+	LOG("%s is hooking to %s;", info->cid, eventname);
+	
 	g_assert(info);
-	g_datalist_set_data(&(info->event_mask), 
-			IPCParam(command, "event"),
-			(gpointer) 1);
+	/*This is ugly. building a new parameter list is better*/
+	IPCRemoveParam(command, "_event_");
+	LOG("command->parameters = %p", g_hash_table_ref(command->parameters));
+	g_datalist_set_data_full(&(info->event_mask), 
+			eventname,
+			g_hash_table_ref(command->parameters), g_hash_table_unref);
+	g_free(eventname);
 	return TRUE;
 }
 static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
 	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
 	g_assert(info);
 	g_datalist_remove_data(&(info->event_mask), 
-			IPCParam(command, "event"));
+			IPCParam(command, "_event_"));
 	return TRUE;
 }
 static gboolean Ping(IPCCommand * command, gpointer data) {
@@ -321,14 +329,43 @@ static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * eve
 set_prop_fail:
 	return FALSE;
 }
+/**
+ * ipc_server_send_event:
+ *
+ *
+ * Send the event only if 
+ *
+ * (1) the client added the filter.
+ * (2) the parameters and values in the filter matches with the event.
+ *
+ */
 gboolean ipc_server_send_event(IPCEvent * event) {
 	GHashTableIter iter;
 	g_hash_table_iter_init(&iter, client_hash);
 	GdkNativeWindow xwindow; 
 	ClientInfo * info;
 	while(g_hash_table_iter_next(&iter, &xwindow, &info)){
-		if(g_datalist_get_data(&(info->event_mask), event->name))
+		GHashTable * filter = g_datalist_get_data(&(info->event_mask), event->name);
+		LOG("testing client %s for event %s: filter = %p", info->cid, event->name, filter);
+		gboolean send = FALSE;
+		if(filter){
+			send = TRUE;
+			GHashTableIter iter2;
+			g_hash_table_iter_init(&iter2, filter);
+			gchar * prop;
+			gchar * value;
+			while(g_hash_table_iter_next(&iter2, &prop, &value)){
+				gchar * event_value = g_hash_table_lookup(event->parameters, prop);
+				if(!event_value || !g_str_equal(event_value, value)){
+					send = FALSE;	
+					break;
+				}
+			}
+		}
+		if(send) {
+			LOG("sending event %s to %s", event->name, info->cid);
 			ipc_server_send_event_to(xwindow, event);
+		}
 	}
 	return TRUE;
 }

@@ -61,8 +61,10 @@ static GData *
 typedef struct {
 	IPCClientEventHandler handler;
 	gpointer data;
+	GData * filter;
 } EventHandlerInfo;
 static void event_handler_info_free(EventHandlerInfo * info){
+	g_datalist_clear(&info->filter);
 	g_slice_free(EventHandlerInfo, info);
 }
 
@@ -357,9 +359,9 @@ static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt
  *
  * valist_version of ipc_client_call_server.
  */
-gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, gchar * para_name, va_list va) {
+gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, command_name);
-	ipc_command_set_parameters_valist(command, para_name, va);
+	ipc_command_set_parameters_valist(command, va);
 	return ipc_client_call_server_command(command, rt);
 }
 /**
@@ -371,11 +373,11 @@ gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, 
  *
  * Returns: the 'default' result.
  */
-gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, gchar * para_name, ...) {
+gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, ...) {
 	gboolean r = NULL;
 	va_list va;
-	va_start(va, para_name);
-	r = ipc_client_call_server_valist(command_name, rt, para_name, va);
+	va_start(va, rt);
+	r = ipc_client_call_server_valist(command_name, rt, va);
 	va_end(va);
 	return rt;
 }
@@ -433,12 +435,35 @@ void ipc_client_end_transaction(GList ** return_list){
  * 	This function utilizes the internal IPC call _AddEvent to get the server-side task done.
  *
  */
-void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data){
+void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, gpointer data, va_list va){
 	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
+	IPCCommand * command = ipc_command_new(cid, "_AddEvent_");
 	info->data = data;
 	info->handler = handler;
+	g_datalist_init(&info->filter);
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	ipc_client_call_server("_AddEvent_", NULL, "event", event, NULL);
+	/*can't reverse the order since set_parameters will clear the previous settings*/
+	ipc_command_set_parameters_valist(command, va);
+	IPCSetParam(command, "_event_", event);
+	ipc_client_call_server_command(command, NULL);
+}
+void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gpointer data, gchar ** paras, gchar ** values){
+	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
+	IPCCommand * command = ipc_command_new(cid, "_AddEvent_");
+	info->data = data;
+	info->handler = handler;
+	g_datalist_init(&info->filter);
+	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
+	/*can't reverse the order since set_parameters will clear the previous settings*/
+	ipc_command_set_parameters_array(command, paras, values);
+	IPCSetParam(command, g_strdup("_event_"), event);
+	ipc_client_call_server_command(command, NULL);
+}
+void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data, ...){
+	va_list va;
+	va_start(va, data);
+	ipc_client_set_event_valist(event, handler, data, va);
+	va_end(va);
 }
 /**
  * ipc_client_remove_event:

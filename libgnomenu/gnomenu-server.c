@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_printerr("<GnomenuServer>::" fmt,  ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuServer>::" fmt "\n",  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -87,7 +87,7 @@ gboolean ActivateObject(IPCCommand * command, gpointer data){
 	Object * object = g_hash_table_lookup(group->object_hash, objname);
 	g_return_val_if_fail(object, FALSE);
 	IPCEvent * event = ipc_event_new("", "activate");
-	ipc_event_set_parameters(event, "object", objname, NULL);
+	ipc_event_set_parameters(event, "object", objname, "group", object->group->name, NULL);
 	ipc_server_send_event(event);
 	ipc_event_free(event);
 	return TRUE;

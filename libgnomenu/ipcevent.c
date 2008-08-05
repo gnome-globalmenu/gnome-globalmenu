@@ -15,12 +15,12 @@ void ipc_event_free(IPCEvent * event) {
 gchar * ipc_event_to_string(IPCEvent * event){
 	return ipc_command_to_string(event);
 }
-void ipc_event_set_parameters(IPCEvent * event, gchar * para_name, ...){
+void ipc_event_set_parameters(IPCEvent * event,  ...){
 	va_list va;
-	va_start(va, para_name);
-	ipc_event_set_parameters_valist(event, para_name, va);
+	va_start(va, event);
+	ipc_event_set_parameters_valist(event, va);
 	va_end(va);
 }
-void ipc_event_set_parameters_valist(IPCEvent * event, gchar * para_name, va_list va) {
-	ipc_command_set_parameters_valist(event, para_name, va);
+void ipc_event_set_parameters_valist(IPCEvent * event, va_list va) {
+	ipc_command_set_parameters_valist(event, va);
 }
