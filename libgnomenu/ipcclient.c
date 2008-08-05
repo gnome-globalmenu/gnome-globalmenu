@@ -281,7 +281,7 @@ no_server:
 /**
  * ipc_client_call_list:
  *
- * Internal function to performance a transaction.
+ * performance a transaction, send a command list.
  */
 static GList * ipc_client_call_list(GList * command_list) {
 	GList * ret = NULL;
