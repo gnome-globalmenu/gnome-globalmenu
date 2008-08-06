@@ -82,6 +82,10 @@ gboolean IntrospectObject(IPCCommand * command, gpointer data) {
 	IPCRet(command, introspect_object(find_group(command), objname));
 	return TRUE;
 }
+gboolean ListObjects(IPCCommand * command, gpointer data) {
+	IPCRet(command, list_objects(find_group(command)));
+	return TRUE;
+}
 gboolean ActivateObject(IPCCommand * command, gpointer data){
 	gchar * objname = IPCParam(command, "object");
 	ObjectGroup * group = find_group(command);
@@ -112,6 +116,7 @@ int main(int argc, char* argv[]){
 	ipc_server_register_cmd("InsertChild", InsertChild, NULL);
 	ipc_server_register_cmd("RemoveChild", RemoveChild, NULL);
 	ipc_server_register_cmd("IntrospectObject", IntrospectObject, NULL);
+	ipc_server_register_cmd("ListObjects", ListObjects, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_critical("server already there");
 		return 1;

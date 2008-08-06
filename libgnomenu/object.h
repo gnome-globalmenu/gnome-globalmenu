@@ -23,5 +23,6 @@ gboolean insert_child(ObjectGroup * group, gchar * name, gchar * child, gint pos
 gboolean remove_child(ObjectGroup * group, gchar * name, gchar * child);
 gchar * introspect_object(ObjectGroup * group, gchar * name);
 gboolean parse_objects(ObjectGroup * group, gchar * string);
+gchar * list_objects(ObjectGroup * group);
 
 #endif

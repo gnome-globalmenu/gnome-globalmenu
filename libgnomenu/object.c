@@ -145,6 +145,17 @@ gchar * introspect_object(ObjectGroup * group, gchar * name){
 	introspect(string, object, 0);
 	return g_string_free(string, FALSE);
 }
+gchar * list_objects(ObjectGroup * group){
+	GHashTableIter iter;
+	gchar * key;
+	Object * value;
+	g_hash_table_iter_init(&iter, group->object_hash);
+	GString * string = g_string_new("");
+	while(g_hash_table_iter_next(&iter, &key, &value)){
+		g_string_append_printf(string, "%s\n", key);
+	}
+	return g_string_free(string, FALSE);
+}
 gboolean parse_objects(ObjectGroup * group, gchar * string){
 	g_return_val_if_fail(string, FALSE);
 	return FALSE;

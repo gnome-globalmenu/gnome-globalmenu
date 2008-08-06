@@ -31,7 +31,8 @@ gboolean gnomenu_init(){
 }
 GQuark gnomenu_create(const gchar * hint){
 	static guint id = 99;
-	gchar * name = g_strdup_printf("%s%d", hint, id);
+	gchar * name = g_strdup_printf("%s%d", hint, id++);
+	LOG("Creating %s", name);
 	GQuark object = g_quark_from_string(name);
 	ipc_client_call_server("CreateObject", NULL, "object", name, NULL);
 	g_free(name);
@@ -45,6 +46,7 @@ gboolean gnomenu_get_property(GQuark item, gchar * property, gchar ** value){
 }
 gboolean gnomenu_insert_child(GQuark menu, GQuark item, gint pos){
 	gchar * pos_str = g_strdup_printf("%d", pos);
+	LOG("inserting Child %s to %s at %s", g_quark_to_string(item), g_quark_to_string(menu), pos_str);
 	gboolean b = ipc_client_call_server("InsertChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), "pos", pos_str, NULL);
 	g_free(pos_str);
 	return b;
