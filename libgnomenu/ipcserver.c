@@ -14,11 +14,6 @@
 #include "ipcserver.h"
 #include "ipccommand.h"
 
-typedef struct _CommandInfo {
-	gchar * name;
-	ServerCMD server_cmd;
-	gpointer data;
-} CommandInfo;
 typedef struct _ClientInfo {
 	gchar * cid;
 	GdkNativeWindow xwindow;
@@ -26,7 +21,6 @@ typedef struct _ClientInfo {
 	GData * event_mask;
 } ClientInfo;
 
-static GHashTable * command_hash = NULL;
 static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
 static GHashTable * client_hash = NULL;
@@ -35,40 +29,12 @@ static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
 
-static void command_info_destroy(CommandInfo * info) {
-	g_free(info->name);
-	g_slice_free(CommandInfo, info);
-}
 static void client_info_destroy(ClientInfo * info){
 	g_hash_table_remove(client_hash_by_cid, info->cid);
 	g_free(info->cid);
 //	gdk_window_destroy(info->window);
 	g_datalist_clear(&info->event_mask);
 	g_slice_free(ClientInfo, info);
-}
-void ipc_server_register_cmd(const gchar * name, ServerCMD cmd_handler, gpointer data) {
-	CommandInfo * info = g_slice_new0(CommandInfo);
-	info->name = g_strdup(name);
-	info->server_cmd = cmd_handler;
-	info->data = data;
-	if(command_hash == NULL) {
-		command_hash = g_hash_table_new_full(g_str_hash,
-				g_str_equal,
-				NULL,
-				(GDestroyNotify) command_info_destroy);
-	}
-	if(g_hash_table_lookup(command_hash, name)){
-		g_warning("Replacing old command definition");
-	}
-	g_hash_table_insert(command_hash, name, info);
-}
-static gboolean ipc_server_call_cmd(IPCCommand * command) {
-	if(command_hash == NULL) {
-		return FALSE;
-	}
-	CommandInfo * info = g_hash_table_lookup(command_hash, command->name);
-	if(!info) return FALSE;
-	return info->server_cmd(command, info->data);
 }
 static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_name){
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
@@ -136,10 +102,10 @@ static gboolean Emit(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
-	ipc_server_register_cmd("Ping", Ping, NULL);
-	ipc_server_register_cmd("Emit", Emit, NULL);
-	ipc_server_register_cmd("_AddEvent_", AddEvent, NULL);
-	ipc_server_register_cmd("_RemoveEvent_", RemoveEvent, NULL);
+	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
+	ipc_dispatcher_register_cmd("Emit", Emit, NULL);
+	ipc_dispatcher_register_cmd("_AddEvent_", AddEvent, NULL);
+	ipc_dispatcher_register_cmd("_RemoveEvent_", RemoveEvent, NULL);
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;
@@ -192,7 +158,7 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 			g_warning("unknown client, ignoring the call");
 			goto unknown_client;
 		}
-		if(!ipc_server_call_cmd(command)) {
+		if(!ipc_dispatcher_call_cmd(command)) {
 			g_warning("command was not successfull, ignoring the call");
 			goto call_fail;
 		}

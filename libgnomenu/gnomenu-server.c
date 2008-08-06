@@ -109,14 +109,14 @@ int main(int argc, char* argv[]){
 
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
 	global_group = create_object_group("GLOBAL");
-	ipc_server_register_cmd("CreateObject", CreateObject, NULL);
-	ipc_server_register_cmd("DestroyObject", DestroyObject, NULL);
-	ipc_server_register_cmd("SetProperty", SetProperty, NULL);
-	ipc_server_register_cmd("ActivateObject", ActivateObject, NULL);
-	ipc_server_register_cmd("InsertChild", InsertChild, NULL);
-	ipc_server_register_cmd("RemoveChild", RemoveChild, NULL);
-	ipc_server_register_cmd("IntrospectObject", IntrospectObject, NULL);
-	ipc_server_register_cmd("ListObjects", ListObjects, NULL);
+	ipc_dispatcher_register_cmd("CreateObject", CreateObject, NULL);
+	ipc_dispatcher_register_cmd("DestroyObject", DestroyObject, NULL);
+	ipc_dispatcher_register_cmd("SetProperty", SetProperty, NULL);
+	ipc_dispatcher_register_cmd("ActivateObject", ActivateObject, NULL);
+	ipc_dispatcher_register_cmd("InsertChild", InsertChild, NULL);
+	ipc_dispatcher_register_cmd("RemoveChild", RemoveChild, NULL);
+	ipc_dispatcher_register_cmd("IntrospectObject", IntrospectObject, NULL);
+	ipc_dispatcher_register_cmd("ListObjects", ListObjects, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_critical("server already there");
 		return 1;
