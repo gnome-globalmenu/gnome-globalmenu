@@ -73,3 +73,47 @@ GdkNativeWindow ipc_find_server() {
 	}
 	return rt;
 }
+gpointer ipc_wait_for_property(GdkNativeWindow window, GdkAtom property_name, gboolean remove){
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+	Atom type_return;
+	unsigned long format_return;
+	unsigned long remaining_bytes;
+	unsigned long nitems_return;
+	gpointer data = NULL;
+	gint i = 0;
+	while(i<100) {
+		gdk_error_trap_push();
+		XGetWindowProperty(display,
+				window,
+				gdk_x11_atom_to_xatom(property_name),
+				0,
+				-1,
+				remove,
+				AnyPropertyType,
+				&type_return,
+				&format_return,
+				&nitems_return,
+				&remaining_bytes,
+				&data);
+		if(gdk_error_trap_pop()) {
+			return NULL;
+		} else {
+			if(type_return != None)
+				return data;
+		}
+		i++;
+		g_usleep(i* 1000);
+	}
+	return data;
+}
+void ipc_send_client_message(GdkNativeWindow from, GdkNativeWindow to, GdkAtom message_type) {
+	GdkEventClient ec;
+	ec.type = GDK_CLIENT_EVENT;
+	ec.window = 0;
+	ec.send_event = TRUE;
+	ec.message_type = message_type;
+	ec.data_format = 8;
+	*((GdkNativeWindow *)&ec.data.l[0]) = from;
+	gdk_event_send_client_message(&ec, to);
+}
+

@@ -101,6 +101,23 @@ static gboolean Emit(IPCCommand * command, gpointer data) {
 	ipc_event_free(event);
 	return TRUE;
 }
+static gboolean ipc_server_call_client(gchar * target_cid, IPCCommand * command) {
+	return FALSE;
+}
+
+static gboolean Call(IPCCommand * command, gpointer data) {
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	gchar * target_cid = IPCParam(command, "_target_");
+	if(g_str_equal(command->cid, target_cid)){
+		/* doing stuff with oneself causes dead lock*/
+		return FALSE;
+	}
+	/*
+	 * TODO: ipc_server_call_client(target_cid, IPCCommand * command);
+	 *
+	 * */
+	return TRUE;
+}
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
 	ipc_dispatcher_register_cmd("Emit", Emit, NULL);
@@ -258,14 +275,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 	return GDK_FILTER_CONTINUE;
 }
 static void ipc_server_send_client_message(GdkNativeWindow client_xwindow, GdkAtom message_type) {
-	GdkEventClient ec;
-	ec.type = GDK_CLIENT_EVENT;
-	ec.window = 0;
-	ec.send_event = TRUE;
-	ec.message_type = message_type;
-	ec.data_format = 8;
-	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(server_window);
-	gdk_event_send_client_message(&ec, client_xwindow);
+	ipc_send_client_message(GDK_WINDOW_XWINDOW(server_window), client_xwindow, message_type);
 }
 static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * event) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;

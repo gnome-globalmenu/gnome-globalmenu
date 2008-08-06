@@ -144,14 +144,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
  * send a client message to the server.
  * */
 static void ipc_client_send_client_message(GdkAtom message_type) {
-	GdkEventClient ec;
-	ec.type = GDK_CLIENT_EVENT;
-	ec.window = 0;
-	ec.send_event = TRUE;
-	ec.message_type = message_type;
-	ec.data_format = 8;
-	*((GdkNativeWindow *)&ec.data.l[0]) = GDK_WINDOW_XWINDOW(client_window);
-	gdk_event_send_client_message(&ec, server);
+	ipc_send_client_message(GDK_WINDOW_XWINDOW(client_window), server, message_type);
 }
 /**
  * ipc_client_wait_for_property:
@@ -167,37 +160,7 @@ static void ipc_client_send_client_message(GdkAtom message_type) {
  * Use XFree to free the result.
  */
 static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove) {
-	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
-	Atom type_return;
-	unsigned long format_return;
-	unsigned long remaining_bytes;
-	unsigned long nitems_return;
-	gpointer data = NULL;
-	gint i = 0;
-	while(i<100) {
-		gdk_error_trap_push();
-		XGetWindowProperty(display,
-				GDK_WINDOW_XWINDOW(client_window),
-				gdk_x11_atom_to_xatom(property_name),
-				0,
-				-1,
-				remove,
-				AnyPropertyType,
-				&type_return,
-				&format_return,
-				&nitems_return,
-				&remaining_bytes,
-				&data);
-		if(gdk_error_trap_pop()) {
-			return NULL;
-		} else {
-			if(type_return != None)
-				return data;
-		}
-		i++;
-		g_usleep(i* 1000);
-	}
-	return data;
+	return ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), property_name, remove);
 }
 /**
  * ipc_client_started:
@@ -332,6 +295,7 @@ no_prop_set:
  *
  *	It first creates an transaction, then calls
  *	ipc_client_call_server_list.
+ *	the command will be freed.
  *
  * */
 static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt){
