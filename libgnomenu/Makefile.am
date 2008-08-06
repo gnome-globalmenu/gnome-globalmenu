@@ -26,7 +26,8 @@ libgnomenu_la_SOURCES = \
 	object.c \
 	object.h \
 	menu.h \
-	menu.c 
+	menu.c \
+	main.c 
 
 #	$(BUILT_SOURCES) \
 #	main.c \

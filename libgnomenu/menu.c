@@ -24,9 +24,9 @@ static void activated_handler(IPCEvent * event, gpointer data){
 }
 gboolean gnomenu_init(){
 	if(!ipc_client_start(NULL, NULL)) {
-		ipc_client_set_event("Activated", activated_handler, NULL);
 		return FALSE;
 	}
+	ipc_client_set_event("Activated", activated_handler, NULL, NULL);
 	return TRUE;
 }
 GQuark gnomenu_create(const gchar * hint){

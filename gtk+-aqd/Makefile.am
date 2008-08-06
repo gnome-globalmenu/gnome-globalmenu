@@ -9,7 +9,7 @@ prepare:
 post_prepare:
 	svn rm --force gtk+-aqd/gtk/libgnomenu
 	mkdir -p gtk+-aqd/gtk/libgnomenu
-	cp ../libgnomenu/*.h gtk+-aqd/gtk/libgnomenu/
+	cp ../libgnomenu/menu.h gtk+-aqd/gtk/libgnomenu/
 	svn add gtk+-aqd/gtk/libgnomenu
 revert:
 	svn revert gtk+-aqd/gtk

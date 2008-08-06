@@ -9,6 +9,7 @@
 
 #include "ipcserver.h"
 #include "object.h"
+
 typedef struct {
 	gchar * cid;
 	ObjectGroup * group;
@@ -93,6 +94,13 @@ gboolean ActivateObject(IPCCommand * command, gpointer data){
 	return TRUE;
 }
 int main(int argc, char* argv[]){
+	GModule * module = g_module_open(NULL, 0);
+	gboolean * no_global_menu = NULL;
+	g_module_symbol(module, "gtk_no_global_menu", &no_global_menu);
+	if(no_global_menu) {
+		* no_global_menu = TRUE;
+		g_message("hacking gnomenu patch in gtk...");
+	}
 	gtk_init(&argc, &argv);
 
 	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);

@@ -2,7 +2,7 @@
 #include <gtk/gtk.h>
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_printerr("<GnomenuGlobalMenu>::" fmt "\n",  ## args)
+#define LOG(fmt, args...) g_printerr("<IPCClient>::" fmt "\n",  ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -226,11 +226,12 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
 	server = ipc_find_server();
 	if(server == 0) {
-		gchar * server = g_getenv("GNOMENU_SERVER");
-		if(!server) server = "./gnomenu-server";
+		gchar * server_bin = g_getenv("GNOMENU_SERVER");
+		if(!server_bin) server_bin = "./gnomenu-server";
 		GError * error = NULL;
-		if(!g_spawn_command_line_async(server, &error)){
-			g_critical("could not start the server: %s:", server);
+		LOG("Spawning the server: %s", server_bin);
+		if(!g_spawn_command_line_async(server_bin, &error)){
+			g_critical("could not start the server.");
 			if(error){
 				g_critical("%s", error->message);
 				g_error_free(error);
@@ -251,7 +252,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	server = ipc_find_server();
 	server_gdk = gdk_window_lookup(server);
 	if(!server_gdk) server_gdk = gdk_window_foreign_new(server);
-	LOG("GdkWindow server = %p", server_gdk);
+	LOG("Server Found at = %p", server);
 	gdk_window_set_events(server_gdk, gdk_window_get_events(server_gdk) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(server_gdk, server_filter, NULL);
 	server_destroy_notify = notify;
@@ -268,7 +269,7 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	gchar * identify = ipc_client_wait_for_property(IPC_PROPERTY_CID, FALSE);
 	if(identify) {
 		cid = g_strdup(identify);
-		LOG("cid obtained: %s", cid);
+		LOG("CID obtained: %s", cid);
 		XFree(identify);
 		g_datalist_init(&event_handler_list);
 		started = TRUE;
@@ -444,7 +445,7 @@ void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, g
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
 	/*can't reverse the order since set_parameters will clear the previous settings*/
 	ipc_command_set_parameters_valist(command, va);
-	IPCSetParam(command, "_event_", event);
+	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
 	ipc_client_call_server_command(command, NULL);
 }
 void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gpointer data, gchar ** paras, gchar ** values){
@@ -456,7 +457,7 @@ void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gp
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
 	/*can't reverse the order since set_parameters will clear the previous settings*/
 	ipc_command_set_parameters_array(command, paras, values);
-	IPCSetParam(command, g_strdup("_event_"), event);
+	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
 	ipc_client_call_server_command(command, NULL);
 }
 void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data, ...){
