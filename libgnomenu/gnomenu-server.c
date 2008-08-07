@@ -41,7 +41,7 @@ ObjectGroup * find_group(IPCCommand * command){
 	if(group) {
 		return lookup_object_group(group);
 	}
-	gchar * cid = command->cid;
+	gchar * cid = g_quark_to_string(command->from);
 	return lookup_object_group(cid);
 }
 gboolean CreateObject(IPCCommand * command, gpointer data) {
@@ -91,7 +91,7 @@ gboolean ActivateObject(IPCCommand * command, gpointer data){
 	ObjectGroup * group = find_group(command);
 	Object * object = g_hash_table_lookup(group->object_hash, objname);
 	g_return_val_if_fail(object, FALSE);
-	IPCEvent * event = ipc_event_new("", "activate");
+	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), g_quark_to_string(command->to), "activate");
 	ipc_event_set_parameters(event, "object", objname, "group", object->group->name, NULL);
 	ipc_server_send_event(event);
 	ipc_event_free(event);

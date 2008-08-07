@@ -38,9 +38,9 @@ static void client_info_destroy(ClientInfo * info){
 }
 static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_name){
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
-	gpointer data;
+	guchar * data;
 	Atom type_return;
-	unsigned long format_return;
+	guint format_return;
 	unsigned long nitems_return;
 	unsigned long remaining_bytes;
 	gdk_error_trap_push();
@@ -67,10 +67,10 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 static void AddEvent_foreach(GQuark key, gchar * value, gpointer foo[1]){
 	GHashTable * hash = foo[0];
 	if(key != g_quark_from_string("_event_"))
-		g_hash_table_insert(foo, g_quark_to_string(key), g_strdup(value));
+		g_hash_table_insert(hash, g_quark_to_string(key), g_strdup(value));
 }
 static gboolean AddEvent(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
 	g_assert(info);
 	gchar * eventname = IPCParam(command, "_event_");
 	/*strdup because IPCRemoveParam will free it*/
@@ -86,7 +86,7 @@ static gboolean AddEvent(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
 	g_assert(info);
 	g_datalist_remove_data(&(info->event_mask), 
 			IPCParam(command, "_event_"));
@@ -98,7 +98,7 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 }
 static gboolean Emit(IPCCommand * command, gpointer data) {
 	gchar * event_name = IPCParam(command, "_event_");
-	IPCEvent * event = ipc_event_new(command->cid, event_name);
+	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), g_quark_to_string(command->to), event_name);
 	/*FIXME: This is ugly, use a foreach to build the parameters*/
 	gpointer tmp = event->parameters;
 	event->parameters = command->parameters;
@@ -112,9 +112,9 @@ static gboolean ipc_server_call_client(gchar * target_cid, IPCCommand * command)
 }
 
 static gboolean Call(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
-	gchar * target_cid = IPCParam(command, "_target_");
-	if(g_str_equal(command->cid, target_cid)){
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
+	gchar * target_cid = g_quark_to_string(command->to);
+	if(g_str_equal(info->cid, target_cid)){
 		/* doing stuff with oneself causes dead lock*/
 		return FALSE;
 	}
@@ -177,8 +177,8 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(!g_str_equal(info->cid, command->cid)) {
-			g_warning("unknown client, ignoring the call");
+		if(!g_str_equal(info->cid, g_quark_to_string(command->from))) {
+			g_warning("unknown client, ignoring the call: cid = %s from =%s", info->cid, g_quark_to_string(command->from));
 			goto unknown_client;
 		}
 		if(!ipc_dispatcher_call_cmd(command)) {

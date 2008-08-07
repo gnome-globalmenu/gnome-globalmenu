@@ -46,16 +46,20 @@ static void start_element  (GMarkupParseContext *context,
 	if(g_str_equal(element_name, "command")) {
 		gint i;
 		gchar * name = NULL;
-		gchar * cid = NULL;
+		gchar * from = NULL;
+		gchar * to = NULL;
 		for(i=0; attribute_names[i]; i++) {
 			if(g_str_equal(attribute_names[i], "name")){
-				name = g_strdup(attribute_values[i]);
+				name = attribute_values[i];
 			} else
-			if(g_str_equal(attribute_names[i], "cid")){
-				cid = g_strdup(attribute_values[i]);
+			if(g_str_equal(attribute_names[i], "from")){
+				from = (attribute_values[i]);
+			}
+			if(g_str_equal(attribute_names[i], "to")){
+				to = (attribute_values[i]);
 			}
 		}
-		pi->current_command = ipc_command_new(cid, name);
+		pi->current_command = ipc_command_new(from, to, name);
 	} else 
 	if(g_str_equal(element_name, "p")){
 		gint i;
@@ -182,12 +186,14 @@ static void _to_string_foreach(GQuark key, gchar * value, gpointer foo[]){
 }
 gchar * ipc_command_to_string(IPCCommand * command){
 	GString * string = g_string_new("");
-	gchar * name = g_markup_escape_text(command->name, -1);
-	gchar * cid = g_markup_escape_text(command->cid, -1);
+	gchar * name = g_markup_escape_text(g_quark_to_string(command->name), -1);
+	gchar * from = g_markup_escape_text(g_quark_to_string(command->from), -1);
+	gchar * to = g_markup_escape_text(g_quark_to_string(command->to), -1);
 	gpointer key, value;
-	g_string_append_printf(string, "<command name=\"%s\" cid=\"%s\">", name, cid);
+	g_string_append_printf(string, "<command name=\"%s\" from=\"%s\" to=\"%s\">", name, from, to);
 	g_free(name);
-	g_free(cid);
+	g_free(from);
+	g_free(to);
 	gpointer foo[] = {string, "p"};
 	g_datalist_foreach(&command->parameters, _to_string_foreach, foo);
 	gpointer bar[] = {string, "r"};
@@ -204,17 +210,16 @@ gchar * ipc_command_list_to_string(GList * command_list){
 	}
 	return g_string_free(result, FALSE);
 }
-IPCCommand * ipc_command_new(gchar * cid, gchar * name) {
+IPCCommand * ipc_command_new(gchar * from, gchar * to, gchar * name) {
 	IPCCommand * rt = g_slice_new0(IPCCommand);
-	rt->cid = g_strdup(cid);
-	rt->name = g_strdup(name);
+	rt->name = g_quark_from_string(name);
+	rt->from = g_quark_from_string(from);
+	rt->to = g_quark_from_string(to);
 	g_datalist_init(&rt->parameters);
 	g_datalist_init(&rt->results);
 	return rt;
 }
 void ipc_command_free(IPCCommand * command) {
-	if(command->name) g_free(command->name);
-	if(command->cid) g_free(command->cid);
 	g_datalist_clear(&command->parameters);
 	g_datalist_clear(&command->results);
 	g_slice_free(IPCCommand, command);

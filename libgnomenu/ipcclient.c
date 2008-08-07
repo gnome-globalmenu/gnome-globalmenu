@@ -132,6 +132,12 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 				client_message_event(client_message);
 				return GDK_FILTER_REMOVE;
 			}
+			/*
+			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_CALL)) {
+				GET_INFO;
+				client_message_call(info, client_message);
+				return GDK_FILTER_REMOVE;
+			}*/
 		return GDK_FILTER_CONTINUE;
 	}
 	return GDK_FILTER_CONTINUE;
@@ -161,6 +167,8 @@ gboolean ipc_client_started(){
  */
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
+	//ipc_dispatcher_register_cmd("Ping", Ping, NULL);
+
 	server = ipc_find_server();
 	if(server == 0) {
 		gchar * server_bin = g_getenv("GNOMENU_SERVER");
@@ -298,7 +306,7 @@ static gboolean ipc_client_call_server_command(IPCCommand ** command){
  * valist_version of ipc_client_call_server.
  */
 gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, va_list va) {
-	IPCCommand * command = ipc_command_new(cid, command_name);
+	IPCCommand * command = ipc_command_new(cid, "SERVER", command_name);
 	ipc_command_set_parameters_valist(command, va);
 	if(ipc_client_call_server_command(&command)){
 		if(command){
@@ -333,7 +341,7 @@ gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, ...) {
  * 	Array version of ipc_client_call_server.
  */
 gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
-	IPCCommand * command = ipc_command_new(cid, command_name);
+	IPCCommand * command = ipc_command_new(cid, "SERVER", command_name);
 	ipc_command_set_parameters_array(command, paras, values);
 	if(ipc_client_call_server_command(&command)){
 		if(command){
@@ -398,7 +406,7 @@ gboolean ipc_client_end_transaction(GList ** return_list){
  */
 void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, gpointer data, va_list va){
 	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
-	IPCCommand * command = ipc_command_new(cid, "_AddEvent_");
+	IPCCommand * command = ipc_command_new(cid, "SERVER", "_AddEvent_");
 	info->data = data;
 	info->handler = handler;
 	g_datalist_init(&info->filter);
@@ -410,7 +418,7 @@ void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, g
 }
 void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gpointer data, gchar ** paras, gchar ** values){
 	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
-	IPCCommand * command = ipc_command_new(cid, "_AddEvent_");
+	IPCCommand * command = ipc_command_new(cid, "SERVER", "_AddEvent_");
 	info->data = data;
 	info->handler = handler;
 	g_datalist_init(&info->filter);

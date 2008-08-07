@@ -6,8 +6,8 @@
 IPCEvent * ipc_event_parse(const gchar * string) {
 	return ipc_command_parse(string);
 }
-IPCEvent * ipc_event_new(const gchar * cid, const gchar * name) {
-	return ipc_command_new(cid, name);
+IPCEvent * ipc_event_new(const gchar * from, const gchar * to, const gchar * name) {
+	return ipc_command_new(from, to, name);
 }
 void ipc_event_free(IPCEvent * event) {
 	ipc_command_free(event);
