@@ -68,7 +68,6 @@ static void event_handler_info_free(EventHandlerInfo * info){
 	g_slice_free(EventHandlerInfo, info);
 }
 
-static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove);
 /**
  * server_filter:
  *
@@ -99,7 +98,7 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
  * events from the server.
  * */
 static void client_message_event(XClientMessageEvent * client_message) {
-	gchar * event_data = ipc_client_wait_for_property(IPC_PROPERTY_EVENT, TRUE);
+	gchar * event_data = ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_EVENT, TRUE);
 	if(!event_data) {
 		g_critical("can't obtain event data");	
 		return;
@@ -136,31 +135,6 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 		return GDK_FILTER_CONTINUE;
 	}
 	return GDK_FILTER_CONTINUE;
-}
-/**
- * ipc_client_send_client_message:
- * 	@message_type: type of the message (IPC_CLIENT_MESSAGE_XXX
- * 
- * send a client message to the server.
- * */
-static void ipc_client_send_client_message(GdkAtom message_type) {
-	ipc_send_client_message(GDK_WINDOW_XWINDOW(client_window), server, message_type);
-}
-/**
- * ipc_client_wait_for_property:
- * 	@property_name: the property to wait for.
- * 	@remove: remove it after obtained?
- *
- * This function wait block the current thread,
- * until the given property is obtained from client_window,
- * Or an error occurs.
- *
- * This feature ensures the client and server are in sync.
- *
- * Use XFree to free the result.
- */
-static gpointer ipc_client_wait_for_property(GdkAtom property_name, gboolean remove) {
-	return ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), property_name, remove);
 }
 /**
  * ipc_client_started:
@@ -228,8 +202,8 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	client_frozen = FALSE;
 
 	gdk_x11_ungrab_server();
-	ipc_client_send_client_message(IPC_CLIENT_MESSAGE_NEGO);
-	gchar * identify = ipc_client_wait_for_property(IPC_PROPERTY_CID, FALSE);
+	ipc_send_client_message(GDK_WINDOW_XWINDOW(client_window), server, IPC_CLIENT_MESSAGE_NEGO);
+	gchar * identify = ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_CID, FALSE);
 	if(identify) {
 		cid = g_strdup(identify);
 		LOG("CID obtained: %s", cid);
@@ -247,24 +221,14 @@ static gchar * ipc_client_call_server_xml(gchar * xml){
 	g_return_val_if_fail(started, NULL);
 	g_assert(client_window);
 
-	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
 	gdk_error_trap_push();
-	
-	XChangeProperty(display,
-			GDK_WINDOW_XWINDOW(client_window),
-			gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL),
-			gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL), /*type*/
-			8,
-			PropModeReplace,
-			xml,
-			strlen(xml) + 1);
-	XSync(display, FALSE);
-	ipc_client_send_client_message(IPC_CLIENT_MESSAGE_CALL);
+	ipc_set_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_CALL, xml);	
+	ipc_send_client_message(GDK_WINDOW_XWINDOW(client_window), server, IPC_CLIENT_MESSAGE_CALL);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for calling the command, ignoring the command");
 		goto no_prop_set;
 	}
-	ret_xml = ipc_client_wait_for_property(IPC_PROPERTY_RETURN, TRUE);
+	ret_xml = ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_RETURN, TRUE);
 	if(!ret_xml) {
 		g_warning("No return value obtained");
 		goto no_return_val;

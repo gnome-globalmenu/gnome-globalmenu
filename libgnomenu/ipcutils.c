@@ -116,4 +116,15 @@ void ipc_send_client_message(GdkNativeWindow from, GdkNativeWindow to, GdkAtom m
 	*((GdkNativeWindow *)&ec.data.l[0]) = from;
 	gdk_event_send_client_message(&ec, to);
 }
-
+void ipc_set_property(GdkNativeWindow  window, GdkAtom property, gchar * string){
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
+	XChangeProperty(display,
+			window,
+			gdk_x11_atom_to_xatom(property),
+			gdk_x11_atom_to_xatom(property), /*type*/
+			8,
+			PropModeReplace,
+			string,
+			strlen(string) + 1);
+	XSync(display, FALSE);
+}

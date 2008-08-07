@@ -189,15 +189,7 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	gchar * ret = ipc_command_list_to_string(commands);
 	gdk_error_trap_push();
 
-	XChangeProperty(display,
-		info->xwindow,
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN),
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_RETURN), /*type*/
-		8,
-		PropModeReplace,
-		ret,
-		strlen(ret) + 1);
-	XSync(display, FALSE);
+	ipc_set_property(info->xwindow, IPC_PROPERTY_RETURN, ret);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for returing the command");
 	}
@@ -238,15 +230,8 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	client_info->cid = identify;
 	gdk_error_trap_push();
 	
-	XChangeProperty(display,
-		src,
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_CID),
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_CID), /*type*/
-		8,
-		PropModeReplace,
-		identify,
-		strlen(identify) + 1);
-	XSync(display, FALSE);
+	ipc_set_property(src, IPC_PROPERTY_CID, identify);
+
 	g_hash_table_insert(client_hash, src, client_info);
 	g_hash_table_insert(client_hash_by_cid, client_info->cid, client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
@@ -291,16 +276,7 @@ static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * eve
 		return FALSE;
 	}
 	gdk_error_trap_push();
-
-	XChangeProperty(display,
-		xwindow,
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT),
-		gdk_x11_atom_to_xatom(IPC_PROPERTY_EVENT), /*type*/
-		8,
-		PropModeReplace,
-		data,
-		strlen(data) + 1);
-	XSync(display, FALSE);
+	ipc_set_property(xwindow, IPC_PROPERTY_EVENT, data);
 	g_free(data);
 	ipc_server_send_client_message(xwindow, IPC_CLIENT_MESSAGE_EVENT);
 	if(gdk_error_trap_pop()) {
