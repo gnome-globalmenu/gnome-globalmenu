@@ -36,33 +36,6 @@ static void client_info_destroy(ClientInfo * info){
 	g_datalist_clear(&info->event_mask);
 	g_slice_free(ClientInfo, info);
 }
-static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_name){
-	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
-	guchar * data;
-	Atom type_return;
-	guint format_return;
-	unsigned long nitems_return;
-	unsigned long remaining_bytes;
-	gdk_error_trap_push();
-	XGetWindowProperty(display,
-			src,
-			gdk_x11_atom_to_xatom(property_name),
-			0,
-			-1,
-			TRUE,
-			AnyPropertyType,
-			&type_return,
-			&format_return,
-			&nitems_return,
-			&remaining_bytes,
-			&data);
-	if(gdk_error_trap_pop()){
-		return NULL;
-	} else {
-		if(type_return == None) return NULL;
-		return data;
-	}
-}
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 static void AddEvent_foreach(GQuark key, gchar * value, gpointer foo[1]){
 	GHashTable * hash = foo[0];
@@ -107,23 +80,48 @@ static gboolean Emit(IPCCommand * command, gpointer data) {
 	ipc_event_free(event);
 	return TRUE;
 }
-static gboolean ipc_server_call_client(gchar * target_cid, IPCCommand * command) {
+static gchar * ipc_server_call_client_xml(ClientInfo * info, gchar * xml){
+	gchar * ret_xml;
+
+	gdk_error_trap_push();
+	ipc_set_property(info->xwindow, IPC_PROPERTY_SERVERCALL, xml);	
+	ipc_send_client_message(GDK_WINDOW_XWINDOW(server_window), info->xwindow, IPC_CLIENT_MESSAGE_CALL);
+	if(gdk_error_trap_pop()) {
+		g_warning("could not set the property for calling the command, ignoring the command");
+		goto no_prop_set;
+	}
+	ret_xml = ipc_wait_for_property(info->xwindow, IPC_PROPERTY_SERVERRETURN, TRUE);
+	if(!ret_xml) {
+		g_warning("No return value obtained");
+		goto no_return_val;
+	}
+no_return_val:
+no_prop_set:
+	return ret_xml;
+
+}
+static gboolean ipc_server_call_client_command(IPCCommand ** command) {
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, 
+			g_quark_to_string((*command)->to));
+	LOG("target = %s", g_quark_to_string((*command)->to));
+	g_return_val_if_fail(info, FALSE);
+	gchar * xml = ipc_command_to_string(*command);
+	gchar * ret_xml = NULL;
+	ret_xml = ipc_server_call_client_xml(info, xml);
+	IPCCommand * returns = ipc_command_parse(ret_xml);
+	g_free(xml);
+	XFree(ret_xml);
+	if(!returns) {
+		g_warning("malformed return value");
+		return FALSE;
+	} else {
+		ipc_command_free(*command);
+		*command = returns;
+		return TRUE;
+	}
 	return FALSE;
 }
 
-static gboolean Call(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
-	gchar * target_cid = g_quark_to_string(command->to);
-	if(g_str_equal(info->cid, target_cid)){
-		/* doing stuff with oneself causes dead lock*/
-		return FALSE;
-	}
-	/*
-	 * TODO: ipc_server_call_client(target_cid, IPCCommand * command);
-	 *
-	 * */
-	return TRUE;
-}
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
 	ipc_dispatcher_register_cmd("Emit", Emit, NULL);
@@ -158,12 +156,8 @@ void ipc_server_thaw() {
 static void client_message_call(ClientInfo * info, XClientMessageEvent * client_message) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
 	gpointer data;
-	Atom type_return;
-	unsigned long format_return;
-	unsigned long nitems_return;
-	unsigned long remaining_bytes;
 //	gdk_x11_grab_server();
-	data = ipc_server_get_property(info->xwindow, IPC_PROPERTY_CALL);
+	data = ipc_get_property(info->xwindow, IPC_PROPERTY_CALL);
 	if(!data) {
 		g_warning("could not obtain call information, ignoring the call");
 		goto no_prop;
@@ -177,13 +171,17 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(!g_str_equal(info->cid, g_quark_to_string(command->from))) {
+		if(g_quark_from_string(info->cid) != (command->from)) {
 			g_warning("unknown client, ignoring the call: cid = %s from =%s", info->cid, g_quark_to_string(command->from));
 			goto unknown_client;
 		}
-		if(!ipc_dispatcher_call_cmd(command)) {
-			g_warning("command was not successfull, ignoring the call");
-			goto call_fail;
+		if(g_quark_from_string("SERVER") == command->to) {
+			if(!ipc_dispatcher_call_cmd(command)) {
+				g_warning("command was not successfull, ignoring the call");
+				goto call_fail;
+			}
+		} else {
+			ipc_server_call_client_command(&node->data);
 		}
 	}
 	gchar * ret = ipc_command_list_to_string(commands);

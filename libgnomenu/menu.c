@@ -34,28 +34,28 @@ GQuark gnomenu_create(const gchar * hint){
 	gchar * name = g_strdup_printf("%s%d", hint, id++);
 	LOG("Creating %s", name);
 	GQuark object = g_quark_from_string(name);
-	ipc_client_call_server("CreateObject", NULL, "object", name, NULL);
+	ipc_client_call(NULL, "CreateObject", NULL, "object", name, NULL);
 	g_free(name);
 	return object;
 }
 gboolean gnomenu_set_property(GQuark item, gchar * property, gchar * value){
-	return ipc_client_call_server("SetProperty", NULL, "object", g_quark_to_string(item), "property", property, "value", value, NULL);
+	return ipc_client_call(NULL, "SetProperty", NULL, "object", g_quark_to_string(item), "property", property, "value", value, NULL);
 }
 gboolean gnomenu_get_property(GQuark item, gchar * property, gchar ** value){
-	return ipc_client_call_server("GetProperty", value, "object", g_quark_to_string(item), "property", property, NULL);
+	return ipc_client_call(NULL, "GetProperty", value, "object", g_quark_to_string(item), "property", property, NULL);
 }
 gboolean gnomenu_insert_child(GQuark menu, GQuark item, gint pos){
 	gchar * pos_str = g_strdup_printf("%d", pos);
 	LOG("inserting Child %s to %s at %s", g_quark_to_string(item), g_quark_to_string(menu), pos_str);
-	gboolean b = ipc_client_call_server("InsertChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), "pos", pos_str, NULL);
+	gboolean b = ipc_client_call(NULL, "InsertChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), "pos", pos_str, NULL);
 	g_free(pos_str);
 	return b;
 }
 gboolean gnomenu_remove_item(GQuark menu, GQuark item){
-	return ipc_client_call_server("RemoveChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), NULL);
+	return ipc_client_call(NULL, "RemoveChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), NULL);
 }
 gboolean gnomenu_destroy(GQuark object){
-	return ipc_client_call_server("DestroyObject", NULL, "object", g_quark_to_string(object), NULL);
+	return ipc_client_call(NULL, "DestroyObject", NULL, "object", g_quark_to_string(object), NULL);
 }
 gboolean gnomenu_listen(GnomenuListener func, gpointer data){
 }

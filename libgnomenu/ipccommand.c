@@ -147,6 +147,7 @@ clean_up:
 	return rt;
 }
 GList * ipc_command_list_parse(const gchar * string) {
+	g_return_val_if_fail(string, NULL);
 	ParseInfo cpi = {0};
 	GMarkupParseContext * context;
 	GError * error = NULL;
@@ -239,6 +240,7 @@ void ipc_command_clear_results(IPCCommand * command) {
 }
 void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values) {
 	gint i;
+	if(paras)
 	for(i=0; paras[i]; i++){
 		g_datalist_set_data_full(&command->parameters, paras[i], g_strdup(values[i]), g_free);
 	}

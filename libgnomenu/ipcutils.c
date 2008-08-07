@@ -128,3 +128,30 @@ void ipc_set_property(GdkNativeWindow  window, GdkAtom property, gchar * string)
 			strlen(string) + 1);
 	XSync(display, FALSE);
 }
+gchar * ipc_get_property(GdkNativeWindow src, GdkAtom property_name){
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
+	guchar * data;
+	Atom type_return;
+	guint format_return;
+	unsigned long nitems_return;
+	unsigned long remaining_bytes;
+	gdk_error_trap_push();
+	XGetWindowProperty(display,
+			src,
+			gdk_x11_atom_to_xatom(property_name),
+			0,
+			-1,
+			TRUE,
+			AnyPropertyType,
+			&type_return,
+			&format_return,
+			&nitems_return,
+			&remaining_bytes,
+			&data);
+	if(gdk_error_trap_pop()){
+		return NULL;
+	} else {
+		if(type_return == None) return NULL;
+		return data;
+	}
+}

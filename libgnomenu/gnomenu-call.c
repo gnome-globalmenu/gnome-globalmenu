@@ -13,12 +13,14 @@ static gchar * event;
 static gchar ** par_names;
 static gchar ** values;
 static gboolean batch = FALSE;
+static gchar * target = "SERVER";
 GOptionEntry options[] = {
 	{"event", 'e', 0, G_OPTION_ARG_STRING, &event, "The event to wait", "name"},
 	{"batch", 'b', 0, G_OPTION_ARG_NONE, &batch, "batch mode, reading xml input from stdin", NULL},
 	{"command", 'c', 0, G_OPTION_ARG_STRING, &command, "The command to call", "name"},
 	{"parameter", 'p', 0, G_OPTION_ARG_STRING_ARRAY, &par_names, "The parameters", "p"},
 	{"value", 'v', 0, G_OPTION_ARG_STRING_ARRAY, &values, "The values", "v"},
+	{"target", 't', 0, G_OPTION_ARG_STRING, &target, "the target cid that receives the command", "cid|SERVER"},
 	{NULL}
 };
 static void event_cb (IPCEvent * event, gpointer data) {
@@ -53,7 +55,7 @@ int main(int argc, char* argv[]) {
 	}
 	if(command) {
 		gchar * rt = NULL;
-	   	ipc_client_call_server_array(command, &rt, par_names, values);
+	   	ipc_client_call_array(target, command, &rt, par_names, values);
 		g_print("%s\n", rt);
 		return 0;
 	}

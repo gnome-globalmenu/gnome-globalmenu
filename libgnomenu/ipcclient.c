@@ -119,6 +119,50 @@ static void client_message_event(XClientMessageEvent * client_message) {
 		info->handler(event, info->data);
 	ipc_event_free(event);
 }
+static void client_message_call(XClientMessageEvent * client_message) {
+	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;
+	gpointer data;
+	data = ipc_get_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_SERVERCALL);
+	if(!data) {
+		g_warning("could not obtain call information, ignoring the call");
+		goto no_prop;
+	}
+	LOG("%s", data);
+	GList * commands = ipc_command_list_parse(data);
+	XFree(data);
+	if(!commands){
+		g_warning("malformed command, ignoring the call");
+		goto parse_fail;
+	}
+	GList * node;
+	for(node = commands; node; node=node->next){
+		IPCCommand * command = node->data;
+		if(g_quark_from_string(cid) == command->to) {
+			if(!ipc_dispatcher_call_cmd(command)) {
+				g_warning("command was not successfull, ignoring the call");
+				goto call_fail;
+			}
+		} else {
+			g_warning("command is not for this client, ignoreing the call: %s %s", cid, g_quark_to_string(command->to));
+		}
+	}
+	gchar * ret = ipc_command_list_to_string(commands);
+	gdk_error_trap_push();
+
+	ipc_set_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_SERVERRETURN, ret);
+	if(gdk_error_trap_pop()) {
+		g_warning("could not set the property for returing the command");
+	}
+	g_free(ret);
+unknown_client:
+call_fail:
+	ipc_command_list_free(commands);
+parse_fail:
+no_prop:
+//	gdk_x11_ungrab_server();
+	return;
+
+}
 /**
  * default_filter:
  *
@@ -132,12 +176,10 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 				client_message_event(client_message);
 				return GDK_FILTER_REMOVE;
 			}
-			/*
 			if(client_message->message_type == gdk_x11_atom_to_xatom(IPC_CLIENT_MESSAGE_CALL)) {
-				GET_INFO;
-				client_message_call(info, client_message);
+				client_message_call(client_message);
 				return GDK_FILTER_REMOVE;
-			}*/
+			}
 		return GDK_FILTER_CONTINUE;
 	}
 	return GDK_FILTER_CONTINUE;
@@ -149,6 +191,11 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
  */
 gboolean ipc_client_started(){
 	return started;
+}
+static gboolean Ping(IPCCommand * command, gpointer data) {
+	IPCRet(command, g_strdup(IPCParam(command, "message")));
+	LOG("Ping");
+	return TRUE;
 }
 /**
  * ipc_client_start:
@@ -167,7 +214,7 @@ gboolean ipc_client_started(){
  */
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
-	//ipc_dispatcher_register_cmd("Ping", Ping, NULL);
+	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
 
 	server = ipc_find_server();
 	if(server == 0) {
@@ -301,12 +348,12 @@ static gboolean ipc_client_call_server_command(IPCCommand ** command){
 	}
 }
 /**
- * ipc_client_call_server_valist:
+ * ipc_client_call_valist:
  *
- * valist_version of ipc_client_call_server.
+ * valist_version of ipc_client_call.
  */
-gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, va_list va) {
-	IPCCommand * command = ipc_command_new(cid, "SERVER", command_name);
+gboolean ipc_client_call_valist(gchar * target, const gchar * command_name, gchar ** rt, va_list va) {
+	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
 	ipc_command_set_parameters_valist(command, va);
 	if(ipc_client_call_server_command(&command)){
 		if(command){
@@ -327,11 +374,11 @@ gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, 
  *
  * Returns: the 'default' result.
  */
-gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, ...) {
+gboolean ipc_client_call(gchar * target, const gchar * command_name, gchar ** rt, ...) {
 	gboolean r = NULL;
 	va_list va;
 	va_start(va, rt);
-	r = ipc_client_call_server_valist(command_name, rt, va);
+	r = ipc_client_call_valist(command_name, target, rt, va);
 	va_end(va);
 	return rt;
 }
@@ -340,8 +387,8 @@ gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, ...) {
  *
  * 	Array version of ipc_client_call_server.
  */
-gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
-	IPCCommand * command = ipc_command_new(cid, "SERVER", command_name);
+gboolean ipc_client_call_array(gchar * target, const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
+	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
 	ipc_command_set_parameters_array(command, paras, values);
 	if(ipc_client_call_server_command(&command)){
 		if(command){
@@ -445,5 +492,5 @@ void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer
  */
 void ipc_client_remove_event(gchar * event){
 	g_datalist_remove_data(&event_handler_list, event);
-	ipc_client_call_server("_RemoveEvent_", NULL, "event", event, NULL);
+	ipc_client_call(NULL, "_RemoveEvent_", NULL, "event", event, NULL);
 }
