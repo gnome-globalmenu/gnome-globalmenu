@@ -3,26 +3,6 @@
 #include <glib.h>
 #include "ipccommand.h"
 
-static GHashTable * build_hash_table_va(va_list va) {
-	GHashTable * rt = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-	gchar * name;
-   	while(name = va_arg(va, gchar *)){
-		gchar * value = va_arg(va, gchar *);
-		g_hash_table_insert(rt, g_strdup(name), g_strdup(value));
-	};
-	return rt;
-}
-static GHashTable * build_hash_table_array(gchar ** keys, gchar ** values) {
-	GHashTable * rt = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-	int i = 0;
-	if(keys && values) {
-		for(i = 0; keys[i] && values[i]; i++){
-			g_hash_table_insert(rt, g_strdup(keys[i]), g_strdup(values[i]));
-		}
-	}
-	return rt;
-}
-
 typedef struct {
 	GList * command_list;
 	IPCCommand * current_command;
@@ -103,16 +83,16 @@ static void end_element  (GMarkupParseContext *context,
 		ParseInfo    *pi, 
 		GError      **error) {
 	if(g_str_equal(element_name, "p")) {
-		g_hash_table_insert(pi->current_command->parameters,
+		g_datalist_set_data_full(&pi->current_command->parameters,
 				pi->current_prop,
-				g_string_free(pi->current_prop_value, FALSE));
+				g_string_free(pi->current_prop_value, FALSE), g_free);
 		pi->current_prop = NULL;
 		pi->current_prop_value = NULL;
 	} else 
 	if(g_str_equal(element_name, "r")) {
-		g_hash_table_insert(pi->current_command->results,
+		g_datalist_set_data_full(&pi->current_command->results,
 				pi->current_result,
-				g_string_free(pi->current_result_value, FALSE));
+				g_string_free(pi->current_result_value, FALSE), g_free);
 		pi->current_result = NULL;
 		pi->current_result_value = NULL;
 	} else
@@ -189,6 +169,17 @@ clean_up:
 	if(cpi.current_result_value) g_string_free(cpi.current_result_value, TRUE);
 	return cpi.command_list;
 }
+static void _to_string_foreach(GQuark key, gchar * value, gpointer foo[]){
+	GString * string = foo[0];
+	gchar * tag = foo[1];
+	gchar * para_name = g_markup_escape_text(g_quark_to_string(key), -1);
+	gchar * para_value = g_markup_escape_text(value, -1);
+	g_string_append_printf(string, "<%s name=\"%s\">", tag, para_name);
+	g_string_append_printf(string, "%s",  para_value);
+	g_string_append_printf(string, "</%s>", tag);
+	g_free(para_name);
+	g_free(para_value);
+}
 gchar * ipc_command_to_string(IPCCommand * command){
 	GString * string = g_string_new("");
 	gchar * name = g_markup_escape_text(command->name, -1);
@@ -197,33 +188,10 @@ gchar * ipc_command_to_string(IPCCommand * command){
 	g_string_append_printf(string, "<command name=\"%s\" cid=\"%s\">", name, cid);
 	g_free(name);
 	g_free(cid);
-	if(command->parameters) {
-		GHashTableIter iter;
-		g_hash_table_iter_init(&iter, command->parameters);
-		while(g_hash_table_iter_next(&iter, &key, &value)){
-			gchar * para_name = g_markup_escape_text(key, -1);
-			gchar * para_value = g_markup_escape_text(value, -1);
-			g_string_append_printf(string, "<p name=\"%s\">", para_name);
-			g_string_append_printf(string, "%s",  para_value);
-			g_string_append_printf(string, "</p>");
-			g_free(para_name);
-			g_free(para_value);
-		}
-	}
-	if(command->results) {
-		GHashTableIter iter;
-		g_hash_table_iter_init(&iter, command->results);
-		while(g_hash_table_iter_next(&iter, &key, &value)){
-			gchar * result_name = g_markup_escape_text(key, -1);
-			gchar * result_value = g_markup_escape_text(value, -1);
-			g_string_append_printf(string, "<r name=\"%s\">", result_name);
-			g_string_append_printf(string, "%s",  result_value);
-			g_string_append_printf(string, "</r>");
-			g_free(result_name);
-			g_free(result_value);
-		}
-	
-	}
+	gpointer foo[] = {string, "p"};
+	g_datalist_foreach(&command->parameters, _to_string_foreach, foo);
+	gpointer bar[] = {string, "r"};
+	g_datalist_foreach(&command->results, _to_string_foreach, bar);
 	g_string_append_printf(string, "</command>");
 	return g_string_free(string, FALSE);
 }
@@ -240,15 +208,15 @@ IPCCommand * ipc_command_new(gchar * cid, gchar * name) {
 	IPCCommand * rt = g_slice_new0(IPCCommand);
 	rt->cid = g_strdup(cid);
 	rt->name = g_strdup(name);
-	rt->parameters = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-	rt->results = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	g_datalist_init(&rt->parameters);
+	g_datalist_init(&rt->results);
 	return rt;
 }
 void ipc_command_free(IPCCommand * command) {
 	if(command->name) g_free(command->name);
 	if(command->cid) g_free(command->cid);
-	if(command->parameters) g_hash_table_unref(command->parameters);
-	if(command->results) g_hash_table_unref(command->results);
+	g_datalist_clear(&command->parameters);
+	g_datalist_clear(&command->results);
 	g_slice_free(IPCCommand, command);
 }
 void ipc_command_list_free(GList * list) {
@@ -258,23 +226,33 @@ void ipc_command_list_free(GList * list) {
 	}
 	g_list_free(list);
 }
+void ipc_command_clear_parameters(IPCCommand * command) {
+	g_datalist_clear(&command->parameters);
+}
+void ipc_command_clear_results(IPCCommand * command) {
+	g_datalist_clear(&command->results);
+}
 void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values) {
-	if(command->parameters) {
-		g_hash_table_unref(command->parameters);
+	gint i;
+	for(i=0; paras[i]; i++){
+		g_datalist_set_data_full(&command->parameters, paras[i], g_strdup(values[i]), g_free);
 	}
-	command->parameters = build_hash_table_array(paras, values);
 }
 void ipc_command_set_parameters_valist(IPCCommand * command, va_list va) {
-	if(command->parameters) {
-		g_hash_table_unref(command->parameters);
+	gchar * paraname;
+	gchar * value;
+	while(paraname = va_arg(va, gchar*)){
+		value = va_arg(va, gchar *);
+		g_datalist_set_data_full(&command->parameters, paraname, g_strdup(value), g_free);
 	}
-	command->parameters = build_hash_table_va(va);
 }
 void ipc_command_set_results_valist(IPCCommand * command, va_list va) {
-	if(command->results) {
-		g_hash_table_unref(command->results);
+	gchar * paraname;
+	gchar * value;
+	while(paraname = va_arg(va, gchar*)){
+		value = va_arg(va, gchar *);
+		g_datalist_set_data_full(&command->results, paraname, g_strdup(value), g_free);
 	}
-	command->results = build_hash_table_va(va);
 }
 void ipc_command_set_parameters(IPCCommand * command,  ...) {
 	va_list va;
@@ -290,7 +268,6 @@ void ipc_command_set_results(IPCCommand * command, ...) {
 }
 gchar * ipc_command_get_default_result(IPCCommand * command) {
 	gchar * rt;
-	rt = g_hash_table_lookup(command->results, "default");
-	if(rt) return g_strdup(rt);
-	return NULL;
+	rt = g_datalist_get_data(&command->results, "default");
+	return rt;
 }

@@ -3,8 +3,8 @@
 typedef struct {
 	gchar * name;
 	gchar * cid;
-	GHashTable * parameters;
-	GHashTable * results;
+	GData * parameters;
+	GData * results;
 } IPCCommand;
 IPCCommand * ipc_command_parse(const gchar * string);
 GList * ipc_command_list_parse(const gchar * string);
@@ -12,13 +12,13 @@ GList * ipc_command_list_parse(const gchar * string);
 gchar * ipc_command_to_string(IPCCommand * command);
 gchar * ipc_command_list_to_string(GList * command_list);
 #define IPCParam(c, p) \
-	g_hash_table_lookup(((IPCCommand*)(c))->parameters, (p))
+	g_datalist_get_data(&((IPCCommand*)(c))->parameters, (p))
 #define IPCSetParam(c, p, v) \
-	g_hash_table_insert(((IPCCommand*)(c))->parameters, (p), (v))
+	g_datalist_set_data_full(&((IPCCommand*)(c))->parameters, p, (v), g_free)
 #define IPCRemoveParam(c, p) \
-	g_hash_table_remove(((IPCCommand*)(c))->parameters, (p))
+	g_datalist_remove_data(&((IPCCommand*)(c))->parameters, (p))
 #define IPCRet(c, rt) \
-	g_hash_table_insert(((IPCCommand*)(c))->results, g_strdup("default"), (rt))
+	g_datalist_set_data_full(&((IPCCommand*)(c))->results, "default", (rt), g_free)
 #define IPCRetDup(c, rt) \
 	IPCRet(c, g_strdup(rt))
 #define IPCRetBool(c, rt) \
@@ -29,7 +29,8 @@ void ipc_command_list_free(GList * list);
 IPCCommand * ipc_command_new(gchar * cid, gchar * name);
 void ipc_command_set_parameters(IPCCommand * command,  ...);
 void ipc_command_set_results(IPCCommand * command, ...);
-
+void ipc_command_clear_parameters(IPCCommand * command);
+void ipc_command_clear_results(IPCCommand * command);
 void ipc_command_set_parameters_valist(IPCCommand * command,  va_list va);
 void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values);
 void ipc_command_set_results_valist(IPCCommand * command, va_list va);

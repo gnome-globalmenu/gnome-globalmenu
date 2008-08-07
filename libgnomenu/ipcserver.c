@@ -64,20 +64,25 @@ static gchar * ipc_server_get_property(GdkNativeWindow src, GdkAtom property_nam
 	}
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
+static void AddEvent_foreach(GQuark key, gchar * value, gpointer foo[1]){
+	GHashTable * hash = foo[0];
+	if(key != g_quark_from_string("_event_"))
+		g_hash_table_insert(foo, g_quark_to_string(key), g_strdup(value));
+}
 static gboolean AddEvent(IPCCommand * command, gpointer data) {
 	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, command->cid);
-	gchar * eventname = g_strdup(IPCParam(command, "_event_"));
+	g_assert(info);
+	gchar * eventname = IPCParam(command, "_event_");
 	/*strdup because IPCRemoveParam will free it*/
 	LOG("%s is hooking to %s;", info->cid, eventname);
 	
-	g_assert(info);
 	/*This is ugly. building a new parameter list is better*/
-	IPCRemoveParam(command, "_event_");
-	LOG("command->parameters = %p", g_hash_table_ref(command->parameters));
+	GHashTable * ipc_event_filter_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
+	gpointer foo[] = {ipc_event_filter_hash};
+	g_datalist_foreach(command->parameters, AddEvent_foreach, foo);
 	g_datalist_set_data_full(&(info->event_mask), 
 			eventname,
-			g_hash_table_ref(command->parameters), g_hash_table_unref);
-	g_free(eventname);
+			ipc_event_filter_hash, g_hash_table_unref);
 	return TRUE;
 }
 static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
@@ -94,7 +99,8 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 static gboolean Emit(IPCCommand * command, gpointer data) {
 	gchar * event_name = IPCParam(command, "_event_");
 	IPCEvent * event = ipc_event_new(command->cid, event_name);
-	GHashTable * tmp = event->parameters;
+	/*FIXME: This is ugly, use a foreach to build the parameters*/
+	gpointer tmp = event->parameters;
 	event->parameters = command->parameters;
 	ipc_server_send_event(event);
 	event->parameters = tmp;
@@ -331,7 +337,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 			gchar * prop;
 			gchar * value;
 			while(g_hash_table_iter_next(&iter2, &prop, &value)){
-				gchar * event_value = g_hash_table_lookup(event->parameters, prop);
+				gchar * event_value = IPCParam(event, prop);
 				if(!event_value || !g_str_equal(event_value, value)){
 					send = FALSE;	
 					break;

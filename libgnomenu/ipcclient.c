@@ -308,7 +308,7 @@ static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt
 		ipc_command_list_free(commands);
 		if(returns) {
 			if(rt)
-			*rt = ipc_command_get_default_result(returns->data);
+			*rt = g_strdup(ipc_command_get_default_result(returns->data));
 			ipc_command_list_free(returns);
 			return TRUE;
 		} else {
