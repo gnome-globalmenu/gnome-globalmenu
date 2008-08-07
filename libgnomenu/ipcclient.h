@@ -13,7 +13,7 @@ gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** ret, 
 
 void ipc_client_begin_transaction();
 void ipc_client_cancel_transaction();
-void ipc_client_end_transaction(GList ** return_list);
+gboolean ipc_client_end_transaction(GList ** return_list);
 
 void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data, ...);
 void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, gpointer data, va_list va);

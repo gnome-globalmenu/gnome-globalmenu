@@ -242,15 +242,9 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 no_server:
 	return started;
 }
-/**
- * ipc_client_call_list:
- *
- * performance a transaction, send a command list.
- */
-static GList * ipc_client_call_list(GList * command_list) {
-	GList * ret = NULL;
+static gchar * ipc_client_call_server_xml(gchar * xml){
+	gchar * ret_xml;
 	g_return_val_if_fail(started, NULL);
-	gchar * data = ipc_command_list_to_string(command_list);
 	g_assert(client_window);
 
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default());
@@ -262,31 +256,44 @@ static GList * ipc_client_call_list(GList * command_list) {
 			gdk_x11_atom_to_xatom(IPC_PROPERTY_CALL), /*type*/
 			8,
 			PropModeReplace,
-			data,
-			strlen(data) + 1);
+			xml,
+			strlen(xml) + 1);
 	XSync(display, FALSE);
-	g_free(data);
 	ipc_client_send_client_message(IPC_CLIENT_MESSAGE_CALL);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for calling the command, ignoring the command");
 		goto no_prop_set;
 	}
-	data = ipc_client_wait_for_property(IPC_PROPERTY_RETURN, TRUE);
-	if(!data) {
+	ret_xml = ipc_client_wait_for_property(IPC_PROPERTY_RETURN, TRUE);
+	if(!ret_xml) {
 		g_warning("No return value obtained");
 		goto no_return_val;
 	}
-	ret =ipc_command_list_parse(data);
-	if(!ret){
-		g_warning("malformed return value, ignoring it");
-		goto malform;
-	}
-malform:
-	XFree(data);
 no_return_val:
 no_prop_set:
-	return ret;
+	return ret_xml;
 
+}
+/**
+ * ipc_client_call_list:
+ *
+ * performance a transaction, send a command list.
+ */
+static gboolean ipc_client_call_list(GList ** command_list) {
+	gchar * xml = ipc_command_list_to_string(*command_list);
+	gchar * ret_xml = ipc_client_call_server_xml(xml);
+	GList * newlist = NULL;
+	g_free(xml);
+	if(!ret_xml) return FALSE;
+	newlist = ipc_command_list_parse(ret_xml);
+	XFree(ret_xml);
+	if(!*command_list) {
+		g_warning("malformed return value");	
+		return FALSE;
+	}
+	ipc_command_list_free(*command_list);
+	*command_list = newlist;
+	return TRUE;
 }
 /**
  *	ipc_client_call_server_command:
@@ -304,12 +311,10 @@ static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt
 		GList * commands = NULL;
 		GList * returns = NULL;
 		commands = g_list_append(commands, command);
-		returns = ipc_client_call_list(commands);
-		ipc_command_list_free(commands);
-		if(returns) {
+		if(ipc_client_call_list(&commands)) {
 			if(rt)
-			*rt = g_strdup(ipc_command_get_default_result(returns->data));
-			ipc_command_list_free(returns);
+			*rt = g_strdup(ipc_command_get_default_result(commands->data));
+			ipc_command_list_free(commands);
 			return TRUE;
 		} else {
 			return FALSE;
@@ -380,14 +385,21 @@ void ipc_client_cancel_transaction() {
  *
  * Issue the transaction to the server,
  * and read the results.
+ * Returns: FALSE if transaction fails, where we are still in the transaction
+ * after this function returns.
  */
-void ipc_client_end_transaction(GList ** return_list){
-	GList * rt = ipc_client_call_list(transaction);
-	if(return_list) *return_list = rt;
-	else ipc_command_list_free(rt);
-	ipc_command_list_free(transaction);
-	transaction = NULL;
-	in_transaction = FALSE;
+gboolean ipc_client_end_transaction(GList ** return_list){
+	if(ipc_client_call_list(&transaction)) {
+		if(return_list)
+			*return_list = transaction;
+		else
+			ipc_command_list_free(transaction);
+		transaction = NULL;
+		in_transaction = FALSE;
+	}
+	else {
+		return FALSE;
+	}
 }
 /**
  * ipc_client_set_event:
