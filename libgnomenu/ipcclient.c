@@ -302,25 +302,29 @@ static gboolean ipc_client_call_list(GList ** command_list) {
  *
  *	It first creates an transaction, then calls
  *	ipc_client_call_server_list.
- *	the command will be freed.
+ *	the command will be replaced with the a new command object with the result.
  *
  * */
-static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt){
+static gboolean ipc_client_call_server_command(IPCCommand ** command){
 	/*The command is 'destroyed' after this function'*/
 	if(!in_transaction) {
-		GList * commands = NULL;
-		GList * returns = NULL;
-		commands = g_list_append(commands, command);
-		if(ipc_client_call_list(&commands)) {
-			if(rt)
-			*rt = g_strdup(ipc_command_get_default_result(commands->data));
-			ipc_command_list_free(commands);
-			return TRUE;
-		} else {
+		gchar * xml = ipc_command_to_string(*command);
+		gchar * ret_xml = NULL;
+		ret_xml = ipc_client_call_server_xml(xml);
+		IPCCommand * returns = ipc_command_parse(ret_xml);
+		g_free(xml);
+		XFree(ret_xml);
+		if(!returns) {
+			g_warning("malformed return value");
 			return FALSE;
+		} else {
+			ipc_command_free(*command);
+			*command = returns;
+			return TRUE;
 		}
 	} else {
-		transaction = g_list_append(transaction, command);
+		transaction = g_list_append(transaction, *command);
+		*command = NULL;
 		return TRUE;
 	}
 }
@@ -332,7 +336,15 @@ static gboolean ipc_client_call_server_command(IPCCommand * command, gchar ** rt
 gboolean ipc_client_call_server_valist(const gchar * command_name, gchar ** rt, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_valist(command, va);
-	return ipc_client_call_server_command(command, rt);
+	if(ipc_client_call_server_command(&command)){
+		if(command){
+			if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+			ipc_command_free(command);
+		}
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 /**
  * ipc_client_call_server:
@@ -359,7 +371,15 @@ gboolean ipc_client_call_server(const gchar * command_name, gchar ** rt, ...) {
 gboolean ipc_client_call_server_array(const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
 	IPCCommand * command = ipc_command_new(cid, command_name);
 	ipc_command_set_parameters_array(command, paras, values);
-	return ipc_client_call_server_command(command, rt);
+	if(ipc_client_call_server_command(&command)){
+		if(command){
+			if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+			ipc_command_free(command);
+		}
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 /**
  * ipc_client_begin_transaction:
@@ -419,10 +439,10 @@ void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, g
 	info->handler = handler;
 	g_datalist_init(&info->filter);
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	/*can't reverse the order since set_parameters will clear the previous settings*/
 	ipc_command_set_parameters_valist(command, va);
 	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
-	ipc_client_call_server_command(command, NULL);
+	ipc_client_call_server_command(&command);
+	if(command) ipc_command_free(command);
 }
 void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gpointer data, gchar ** paras, gchar ** values){
 	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
@@ -431,10 +451,10 @@ void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gp
 	info->handler = handler;
 	g_datalist_init(&info->filter);
 	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	/*can't reverse the order since set_parameters will clear the previous settings*/
 	ipc_command_set_parameters_array(command, paras, values);
 	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
-	ipc_client_call_server_command(command, NULL);
+	ipc_client_call_server_command(&command);
+	if(command) ipc_command_free(command);
 }
 void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data, ...){
 	va_list va;
