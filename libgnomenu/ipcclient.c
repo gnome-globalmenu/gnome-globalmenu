@@ -103,21 +103,24 @@ static void client_message_event(XClientMessageEvent * client_message) {
 		g_critical("can't obtain event data");	
 		return;
 	}
-	IPCEvent * event = ipc_event_parse(event_data);
+	GList * list = ipc_event_list_parse(event_data);
 	XFree(event_data);
-	if(!event) {
-		g_critical("malformed event data");
+	if(!list) {
+		/*This occurs when multiple events accumulate*/
+		LOG("empty event list, ignore this message");
 		return;
 	}
-	EventHandlerInfo * info = g_datalist_get_data(&event_handler_list, event->name);
-	if(!info) {
-		g_critical("no handlers for this event is set");
-		ipc_event_free(event);
-		return;
+	GList * node;
+	for(node = list; node; node = node->next){
+		IPCEvent * event = node->data;
+		EventHandlerInfo * info = g_datalist_get_data(&event_handler_list, event->name);
+		if(!info) {
+			g_critical("no handlers for this event is set; shouldn't happen");
+		}
+		if(info->handler) 
+			info->handler(event, info->data);
 	}
-	if(info->handler) 
-		info->handler(event, info->data);
-	ipc_event_free(event);
+	ipc_event_list_free(list);
 }
 static void client_message_call(XClientMessageEvent * client_message) {
 	Display * display = GDK_DISPLAY_XDISPLAY(gdk_display_get_default()) ;

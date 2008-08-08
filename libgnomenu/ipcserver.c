@@ -274,8 +274,18 @@ static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * eve
 		return FALSE;
 	}
 	gdk_error_trap_push();
-	ipc_set_property(xwindow, IPC_PROPERTY_EVENT, data);
+	gdk_x11_grab_server(); /*ensure the client is not taking away the unprocessed event*/
+	gchar * old_event_data = ipc_get_property(xwindow, IPC_PROPERTY_EVENT);
+	gchar * new_event_data;
+	if(old_event_data) {
+		new_event_data = g_strdup_printf("%s\n%s", old_event_data, data);
+		XFree(old_event_data);
+	} else
+		new_event_data = g_strdup(data);
 	g_free(data);
+	ipc_set_property(xwindow, IPC_PROPERTY_EVENT, new_event_data);
+	gdk_x11_ungrab_server();
+	g_free(new_event_data);
 	ipc_server_send_client_message(xwindow, IPC_CLIENT_MESSAGE_EVENT);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for the event");

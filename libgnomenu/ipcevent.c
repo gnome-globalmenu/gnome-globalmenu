@@ -24,3 +24,9 @@ void ipc_event_set_parameters(IPCEvent * event,  ...){
 void ipc_event_set_parameters_valist(IPCEvent * event, va_list va) {
 	ipc_command_set_parameters_valist(event, va);
 }
+GList * ipc_event_list_parse(const gchar * string) {
+	return ipc_command_list_parse(string);
+}
+void ipc_event_list_free(GList * list){
+	ipc_command_list_free(list);
+}
