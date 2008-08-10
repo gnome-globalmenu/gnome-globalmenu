@@ -2,22 +2,31 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu.c	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu.c	(revision 0)
-@@ -0,0 +1,77 @@
+@@ -0,0 +1,66 @@
 +#include <config.h>
 +#include "gtkmain.h"
 +#include "gtkprivate.h"
 +#include "libgnomenu.h"
++#include "gtkwidget.h"
++
 +
 +static GModule * module = NULL;
 +static gulong * version = NULL;
 +
-+gboolean (*_gnomenu_init)();
-+GQuark (*_gnomenu_create)(const gchar * hint);
-+gboolean (*_gnomenu_set_property)(GQuark item, gchar * property, gchar * value);
-+gboolean (*_gnomenu_get_property)(GQuark item, gchar * property, gchar ** value);
-+gboolean (*_gnomenu_insert_child)(GQuark menu, GQuark item, gint pos);
-+gboolean (*_gnomenu_remove_item)(GQuark menu, GQuark item);
-+gboolean (*_gnomenu_destroy)(GQuark object);
++gboolean (*_gnomenu_init_)();
++
++#define P(...) (__VA_ARGS__)
++#define DEF_FUNC(type, NAME, ...) \
++	static type ( * _ ## NAME ##_ ) (__VA_ARGS__); \
++	type NAME (__VA_ARGS__) {\
++	return (*_ ## NAME ## _)(__VA_ARGS__); \
++	}
++
++DEF_FUNC(GQuark, gnomenu_wrap_widget, widget)
++DEF_FUNC(void, gnomenu_unwrap_widget, widget)
++DEF_FUNC(void, gnomenu_bind_menu, window, menu)
++DEF_FUNC(void, gnomenu_unbind_menu, window, menu)
++DEF_FUNC(GtkWidget *, gnomenu_find_widget, object)
 +
 +static gboolean libgnomenu_load(){
 +	module = g_module_open("libgnomenu", 0);
@@ -32,17 +41,16 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +		module = NULL;
 +	}
 +#define GET_SYMBOL(x) \
-+	if(!g_module_symbol(module, #x, & _ ## x)){ \
++	if(!g_module_symbol(module, #x, & _ ## x ## _)){ \
 +		module = NULL; \
 +		g_warning("symbol %s not found", #x); \
 +	}
 +	GET_SYMBOL(gnomenu_init);
-+	GET_SYMBOL(gnomenu_create);
-+	GET_SYMBOL(gnomenu_set_property);
-+	GET_SYMBOL(gnomenu_get_property);
-+	GET_SYMBOL(gnomenu_insert_child);
-+	GET_SYMBOL(gnomenu_remove_item);
-+	GET_SYMBOL(gnomenu_destroy);
++	GET_SYMBOL(gnomenu_wrap_widget);
++	GET_SYMBOL(gnomenu_unwrap_widget);
++	GET_SYMBOL(gnomenu_bind_menu);
++	GET_SYMBOL(gnomenu_unbind_menu);
++	GET_SYMBOL(gnomenu_find_widget);
 +
 +	if(module == NULL) {
 +		return FALSE;
@@ -55,38 +63,18 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +		g_gnomenu_initialized = libgnomenu_load();
 +	}
 +	if(g_gnomenu_initialized)
-+		g_gnomenu_initialized  = _gnomenu_init();
++		g_gnomenu_initialized  = _gnomenu_init_();
 +	return g_gnomenu_initialized;
 +}
-+gboolean gnomenu_initalized(){
++gboolean gnomenu_initialized(){
 +	return g_gnomenu_initialized;
-+}
-+GQuark gnomenu_create(const gchar * hint){
-+	return _gnomenu_create(hint);
-+
-+}
-+gboolean gnomenu_set_property(GQuark item, gchar * property, gchar * value){
-+	return _gnomenu_set_property(item, property, value);
-+}
-+gboolean gnomenu_get_property(GQuark item, gchar * property, gchar ** value) {
-+	return gnomenu_get_property(item, property, value);
-+}
-+gboolean gnomenu_insert_child(GQuark menu, GQuark item, gint pos){
-+	return gnomenu_insert_child(menu, item, pos);
-+}
-+gboolean gnomenu_remove_item(GQuark menu, GQuark item) {
-+	return gnomenu_remove_item(menu, item);
-+}
-+gboolean gnomenu_destroy(GQuark object){
-+	return gnomenu_destroy(object);
 +}
 Index: gtk+-aqd/gtk/libgnomenu.h
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu.h	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu.h	(revision 0)
-@@ -0,0 +1,2 @@
-+#include "menu.h"
-+gboolean gnomenu_initalized();
+@@ -0,0 +1 @@
++gboolean gnomenu_initialized();
 Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmenubar.c	(revision 20909)
@@ -106,6 +94,53 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
 +
+ }
+ 
+ static void
+@@ -639,7 +642,18 @@
+ 
+   return retval;
+ }
+-
++static void toplevel_realized(GtkWidget * toplevel, gpointer data){
++  GtkMenuBar * menubar = data;
++  if(gnomenu_initialized()){
++	  gnomenu_bind_menu(toplevel->window, menubar);
++  }
++}
++static void toplevel_unrealized(GtkWidget * toplevel, gpointer data){
++  GtkMenuBar * menubar = data;
++  if(gnomenu_initialized()){
++    gnomenu_unbind_menu(toplevel->window, menubar);
++  }
++}
+ static void
+ add_to_window (GtkWindow  *window,
+                GtkMenuBar *menubar)
+@@ -655,6 +669,14 @@
+     }
+ 
+   set_menu_bars (window, g_list_prepend (menubars, menubar));
++
++	g_signal_connect(window, "realize", toplevel_realized, menubar);
++	g_signal_connect(window, "unrealize", toplevel_unrealized, menubar);
++	  if(GTK_WIDGET_REALIZED(window)){
++		  toplevel_realized(window, menubar);
++	  }
++
++
+ }
+ 
+ static void
+@@ -673,6 +695,11 @@
+     }
+ 
+   set_menu_bars (window, menubars);
++	g_signal_handlers_disconnect_by_func(window, toplevel_realized, menubar);
++	g_signal_handlers_disconnect_by_func(window, toplevel_unrealized, menubar);
++	  if(GTK_WIDGET_REALIZED(window)){
++		  toplevel_unrealized(window, menubar);
++	  }
  }
  
  static void
@@ -137,7 +172,7 @@ Index: gtk+-aqd/gtk/gtkmain.c
 +
 +  if(!gtk_no_global_menu){
 +	  gnomenu_init();
-+	  if(!gnomenu_initalized())
++	  if(!gnomenu_initialized())
 +		g_warning("Gnomenu failed to start.");
 +  }
      }
@@ -152,7 +187,7 @@ Index: gtk+-aqd/gtk/gtkmain.c
 +  {
 +	  if(!gtk_no_global_menu){
 +		  gnomenu_init();
-+		  if(!gnomenu_initalized())
++		  if(!gnomenu_initialized())
 +			g_warning("Gnomenu failed to start.");
 +	  }
 +	  return TRUE;
@@ -165,16 +200,15 @@ Index: gtk+-aqd/gtk/libgnomenu/menu.h
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu/menu.h	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu/menu.h	(revision 0)
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,9 @@
 +#ifndef _MENU_H_
 +#define _MENU_H_
 +gboolean gnomenu_init();
-+GQuark gnomenu_create(const gchar * hint);
-+gboolean gnomenu_set_property(GQuark item, gchar * property, gchar * value);
-+gboolean gnomenu_get_property(GQuark item, gchar * property, gchar ** value);
-+gboolean gnomenu_insert_child(GQuark menu, GQuark item, gint pos);
-+gboolean gnomenu_remove_item(GQuark menu, GQuark item);
-+gboolean gnomenu_destroy(GQuark object);
++GQuark gnomenu_wrap_object(GtkWidget * widget);
++void gnomenu_bind_menu(GdkWindow * window, GQuark object);
++void gnomenu_unbind_menu(GdkWindow * window, GQuark object);
++void gnomenu_unwrap_object(GQuark object);
++GtkWidget * gnomenu_find_widget(GQuark object);
 +#endif
 Index: gtk+-aqd/gtk/Makefile.am
 ===================================================================
@@ -196,3 +230,105 @@ Index: gtk+-aqd/gtk/Makefile.am
  	gtkquery.c		\
  	gtksearchengine.c	\
  	gtksearchenginesimple.c	\
+Index: gtk+-aqd/gtk/gtkmenuitem.c
+===================================================================
+--- gtk+-aqd/gtk/gtkmenuitem.c	(revision 20909)
++++ gtk+-aqd/gtk/gtkmenuitem.c	(working copy)
+@@ -40,6 +40,8 @@
+ #include "gtkintl.h"
+ #include "gtkalias.h"
+ 
++#include "libgnomenu.h"
++
+ #define MENU_ITEM_CLASS(w)  GTK_MENU_ITEM_CLASS (GTK_OBJECT (w)->klass)
+ 
+ enum {
+@@ -260,6 +262,11 @@
+   menu_item->right_justify = FALSE;
+ 
+   menu_item->timer = 0;
++
++  if(gnomenu_initialized()){
++  	gnomenu_wrap_widget(menu_item);
++  }
++  
+ }
+ 
+ GtkWidget*
+@@ -359,6 +366,11 @@
+ {
+   GtkMenuItem *menu_item = GTK_MENU_ITEM (object);
+ 
++  if(gnomenu_initialized()){
++  	gnomenu_unwrap_widget(menu_item);
++  }
++  
++
+   g_free (menu_item->accel_path);
+ 
+   G_OBJECT_CLASS (gtk_menu_item_parent_class)->finalize (object);
+@@ -785,6 +797,7 @@
+   gdk_window_set_user_data (menu_item->event_window, widget);
+ 
+   widget->style = gtk_style_attach (widget->style, widget->window);
++
+ }
+ 
+ static void
+Index: gtk+-aqd/gtk/gtkmenu.c
+===================================================================
+--- gtk+-aqd/gtk/gtkmenu.c	(revision 20909)
++++ gtk+-aqd/gtk/gtkmenu.c	(working copy)
+@@ -897,6 +897,7 @@
+   priv->lower_arrow_state = GTK_STATE_NORMAL;
+ 
+   priv->have_layout = FALSE;
++
+ }
+ 
+ static void
+Index: gtk+-aqd/gtk/gtkmenushell.c
+===================================================================
+--- gtk+-aqd/gtk/gtkmenushell.c	(revision 20909)
++++ gtk+-aqd/gtk/gtkmenushell.c	(working copy)
+@@ -43,6 +43,8 @@
+ #include "gtkintl.h"
+ #include "gtkalias.h"
+ 
++#include "libgnomenu.h"
++
+ #define MENU_SHELL_TIMEOUT   500
+ 
+ #define PACK_DIRECTION(m)                                 \
+@@ -397,6 +399,11 @@
+   priv->key_hash = NULL;
+   priv->take_focus = TRUE;
+   priv->activated_submenu = FALSE;
++
++  if(gnomenu_initialized()){
++  	gnomenu_wrap_widget(menu_shell);
++  }
++
+ }
+ 
+ static void
+@@ -443,6 +450,11 @@
+   GtkMenuShell *menu_shell = GTK_MENU_SHELL (object);
+   GtkMenuShellPrivate *priv = GTK_MENU_SHELL_GET_PRIVATE (menu_shell);
+ 
++  if(gnomenu_initialized()){
++  	gnomenu_unwrap_widget(menu_shell);
++  }
++
++
+   if (priv->mnemonic_hash)
+     _gtk_mnemonic_hash_free (priv->mnemonic_hash);
+   if (priv->key_hash)
+@@ -532,6 +544,7 @@
+ 
+   widget->style = gtk_style_attach (widget->style, widget->window);
+   gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
++
+ }
+ 
+ void
