@@ -278,7 +278,7 @@ static gchar * ipc_client_call_server_xml(gchar * xml){
 	gchar * ret_xml;
 	g_return_val_if_fail(started, NULL);
 	g_assert(client_window);
-
+	LOG("calling %s", xml);
 	gdk_error_trap_push();
 	ipc_set_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_CALL, xml);	
 	ipc_send_client_message(GDK_WINDOW_XWINDOW(client_window), server, IPC_CLIENT_MESSAGE_CALL);
@@ -381,7 +381,7 @@ gboolean ipc_client_call(gchar * target, const gchar * command_name, gchar ** rt
 	gboolean r = NULL;
 	va_list va;
 	va_start(va, rt);
-	r = ipc_client_call_valist(command_name, target, rt, va);
+	r = ipc_client_call_valist(target, command_name, rt, va);
 	va_end(va);
 	return rt;
 }

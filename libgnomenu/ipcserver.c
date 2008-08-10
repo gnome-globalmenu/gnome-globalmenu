@@ -15,7 +15,7 @@
 #include "ipccommand.h"
 
 typedef struct _ClientInfo {
-	gchar * cid;
+	GQuark cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
 	GData * event_mask;
@@ -29,9 +29,9 @@ static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
 
-static void client_info_destroy(ClientInfo * info){
-	g_hash_table_remove(client_hash_by_cid, info->cid);
-	g_free(info->cid);
+static void client_info_destroy(gpointer data){
+	ClientInfo * info = data;
+	g_hash_table_remove(client_hash_by_cid, g_quark_to_string(info->cid));
 //	gdk_window_destroy(info->window);
 	g_datalist_clear(&info->event_mask);
 	g_slice_free(ClientInfo, info);
@@ -47,15 +47,15 @@ static gboolean AddEvent(IPCCommand * command, gpointer data) {
 	g_assert(info);
 	gchar * eventname = IPCParam(command, "_event_");
 	/*strdup because IPCRemoveParam will free it*/
-	LOG("%s is hooking to %s;", info->cid, eventname);
+	LOG("%s is hooking to %s;", g_quark_to_string(info->cid), eventname);
 	
 	/*This is ugly. building a new parameter list is better*/
 	GHashTable * ipc_event_filter_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
 	gpointer foo[] = {ipc_event_filter_hash};
-	g_datalist_foreach(command->parameters, AddEvent_foreach, foo);
+	g_datalist_foreach(&command->parameters, AddEvent_foreach, foo);
 	g_datalist_set_data_full(&(info->event_mask), 
 			eventname,
-			ipc_event_filter_hash, g_hash_table_unref);
+			ipc_event_filter_hash, (GDestroyNotify)g_hash_table_unref);
 	return TRUE;
 }
 static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
@@ -171,8 +171,8 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(g_quark_from_string(info->cid) != (command->from)) {
-			g_warning("unknown client, ignoring the call: cid = %s from =%s", info->cid, g_quark_to_string(command->from));
+		if(info->cid != (command->from)) {
+			g_warning("unknown client, ignoring the call: cid = %s from =%s", g_quark_to_string(info->cid), g_quark_to_string(command->from));
 			goto unknown_client;
 		}
 		if(g_quark_from_string("SERVER") == command->to) {
@@ -181,7 +181,8 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 				goto call_fail;
 			}
 		} else {
-			ipc_server_call_client_command(&node->data);
+			ipc_server_call_client_command(&command);
+			node->data = command;
 		}
 	}
 	gchar * ret = ipc_command_list_to_string(commands);
@@ -201,14 +202,15 @@ no_prop:
 	return;
 }
 
-static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, ClientInfo * info){
+static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, gpointer data){
+	ClientInfo * info = data;
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
-		LOG("client %s is down!", info->cid);
+		LOG("client %s is down!", g_quark_to_string(info->cid));
 		gdk_window_remove_filter(info->window, client_filter, info);
 		if(client_destroy_callback)
 			client_destroy_callback(info->cid, callback_data);
-		g_hash_table_remove(client_hash, info->xwindow);
+		g_hash_table_remove(client_hash, (gpointer) info->xwindow);
 	} else {
 	}
 	return GDK_FILTER_CONTINUE;
@@ -225,13 +227,13 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
-	client_info->cid = identify;
+	client_info->cid = g_quark_from_string(identify);
 	gdk_error_trap_push();
 	
 	ipc_set_property(src, IPC_PROPERTY_CID, identify);
 
-	g_hash_table_insert(client_hash, src, client_info);
-	g_hash_table_insert(client_hash_by_cid, client_info->cid, client_info);
+	g_hash_table_insert(client_hash, (gpointer) src, client_info);
+	g_hash_table_insert(client_hash_by_cid, g_quark_to_string(client_info->cid), client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(client_info->window, client_filter, client_info);
 	if(gdk_error_trap_pop()) {
@@ -246,7 +248,7 @@ static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpo
 	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
 #define GET_INFO \
 			GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b)); \
-			ClientInfo * info = g_hash_table_lookup(client_hash, src);
+			ClientInfo * info = g_hash_table_lookup(client_hash, (gpointer) src);
 
 	switch(((XEvent *)xevent)->type) {
 		case ClientMessage:
@@ -310,16 +312,16 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 	g_hash_table_iter_init(&iter, client_hash);
 	GdkNativeWindow xwindow; 
 	ClientInfo * info;
-	while(g_hash_table_iter_next(&iter, &xwindow, &info)){
-		GHashTable * filter = g_datalist_get_data(&(info->event_mask), event->name);
-		LOG("testing client %s for event %s: filter = %p", info->cid, event->name, filter);
+	while(g_hash_table_iter_next(&iter, (gpointer*)&xwindow, (gpointer*)&info)){
+		GHashTable * filter = g_datalist_id_get_data(&(info->event_mask), event->name);
+		LOG("testing client %s for event %s: filter = %p", g_quark_to_string(info->cid), g_quark_to_string(event->name), filter);
 		gboolean send = FALSE;
 		if(filter){
 			send = TRUE;
 			GHashTableIter iter2;
 			g_hash_table_iter_init(&iter2, filter);
-			gchar * prop;
-			gchar * value;
+			gpointer prop;
+			gpointer value;
 			while(g_hash_table_iter_next(&iter2, &prop, &value)){
 				gchar * event_value = IPCParam(event, prop);
 				if(!event_value || !g_str_equal(event_value, value)){
@@ -329,7 +331,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 			}
 		}
 		if(send) {
-			LOG("sending event %s to %s", event->name, info->cid);
+			LOG("sending event %s to %s", g_quark_to_string(event->name), g_quark_to_string(info->cid));
 			ipc_server_send_event_to(xwindow, event);
 		}
 	}

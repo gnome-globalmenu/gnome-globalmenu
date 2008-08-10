@@ -11,90 +11,89 @@
 #include "object.h"
 
 typedef struct {
-	gchar * cid;
-	ObjectGroup * group;
+	GQuark cid;
+	GHashTable * menus;
 } ClientInfo;
-static GHashTable * client_hash = NULL;
-ObjectGroup * global_group = NULL;
+#define ADD_MENU(cli, wind, menu) g_hash_table_insert(cli->menus, wind, menu)
+#define REMOVE_MENU(cli, wind, menu) g_hash_table_remove(cli->menus, wind)
+#define FIND_MENU(cli, wind) g_hash_table_lookup(cli->menus, wind)
+#define find_client(cli) g_datalist_id_get_data(&client_list, cli)
+static GData * client_list = NULL;
 void client_info_free(ClientInfo * info) {
-	g_free(info->cid);
-	destroy_object_group(info->group);
+	g_hash_table_destroy(info->menus);
 	g_slice_free(ClientInfo, info);
 }
-static void client_create_callback(gchar * cid, gpointer data) {
-	LOG("New client %s", cid);
+static void client_create_callback(GQuark cid, gpointer data) {
+	LOG("New client %s", g_quark_to_string(cid));
 	ClientInfo * info = g_slice_new0(ClientInfo);
-	info->cid = g_strdup(cid);
-	info->group = create_object_group(info->cid);
-	g_hash_table_insert(client_hash, info->cid, info);
+	info->cid = cid;
+	info->menus = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	g_datalist_id_set_data_full(&client_list, info->cid, info, client_info_free);
 }
-static void client_destroy_callback(gchar * cid, gpointer data) {
-	LOG("Dead client %s", cid);
-	g_hash_table_remove(client_hash, cid);
+static void client_destroy_callback(GQuark cid, gpointer data) {
+	LOG("Dead client %s", g_quark_to_string(cid));
+	g_datalist_id_remove_data(&client_list, cid);
 }
 gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup("This method is Unimplemented"));
 	return TRUE;
 }
-ObjectGroup * find_group(IPCCommand * command){
-	gchar * group = IPCParam(command, "group");
-	if(group) {
-		return lookup_object_group(group);
+gboolean BindMenu(IPCCommand * command, gpointer data){
+	ClientInfo * ci = find_client(command->from);
+	g_return_val_if_fail(ci, FALSE);
+	gchar * wind = IPCParam(command, "window");
+	gchar * menu = IPCParam(command, "menu");
+	ADD_MENU(ci, g_strdup(wind), g_strdup(menu));
+	return TRUE;
+}
+gboolean UnbindMenu(IPCCommand * command, gpointer data){
+	ClientInfo * ci = find_client(command->from);
+	g_return_val_if_fail(ci, FALSE);
+	gchar * wind = IPCParam(command, "window");
+	gchar * menu = IPCParam(command, "menu");
+	/*FIXME: menu parameter is ignored*/
+	REMOVE_MENU(ci, wind, menu);
+	return TRUE;
+}
+static void LookupMenu_foreach_client(GQuark key, gpointer value, gpointer foo[]){
+	ClientInfo * ci = value;
+	gchar * wind = foo[0];
+	gchar * menu = FIND_MENU(ci, wind);
+	if(menu) {
+		foo[1] = menu;
+		foo[2] = ci;
 	}
-	gchar * cid = g_quark_to_string(command->from);
-	return lookup_object_group(cid);
 }
-gboolean CreateObject(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	IPCRetBool(command, create_object(find_group(command), objname));
+gboolean LookupWindow(IPCCommand * command, gpointer data){
+	gchar * wind = IPCParam(command, "window");
+	gpointer foo[3] = {wind, 
+		NULL/*Return value, the found menu*/,
+		NULL/*Return value, the cid*/};
+	g_datalist_foreach(&client_list, LookupMenu_foreach_client, foo);
+	if(foo[2]){
+		IPCRetDup(command, g_quark_to_string(((ClientInfo*)foo[2])->cid));
+	}
 	return TRUE;
 }
-gboolean DestroyObject(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	IPCRetBool(command, destroy_object(find_group(command), objname));
-	return TRUE;
+static void ListClients_foreach_menu(gpointer key, gpointer value, gpointer foo[]){
+	GString * string = foo[0];
+	gchar * wind = key;
+	gchar * menu = value;
+	g_string_append_printf(string, "<toplevel window=\"%s\" menu=\"%s\"/>\n",
+			wind, menu);
 }
-gboolean SetProperty(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	gchar * property = IPCParam(command, "property");
-	gchar * value = IPCParam(command, "value");
-	IPCRetBool(command, set_property(find_group(command), objname, property, value));
-	return TRUE;
+static void ListClients_foreach_client(GQuark cid, gpointer value, gpointer foo[]){
+	GString * string = foo[0];
+	ClientInfo * info = value;
+	g_string_append_printf(string, "<client cid=\"%s\">\n", g_quark_to_string(info->cid));
+	g_hash_table_foreach(info->menus, ListClients_foreach_menu, foo);
+	g_string_append_printf(string, "</client>\n");
 }
-gboolean InsertChild(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	gchar * childname = IPCParam(command, "child");
-	gchar * spos = IPCParam(command, "pos");
-	gint pos = strtol(spos, NULL, 10);
-	IPCRetBool(command, insert_child(find_group(command), objname, childname, pos));
-	return TRUE;
-}
-gboolean RemoveChild(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	gchar * childname = IPCParam(command, "child");
-	gchar * spos = IPCParam(command, "pos");
-	gint pos = strtol(spos, NULL, 10);
-	IPCRetBool(command, remove_child(find_group(command), objname, childname));
-	return TRUE;
-}
-gboolean IntrospectObject(IPCCommand * command, gpointer data) {
-	gchar * objname = IPCParam(command, "object");
-	IPCRet(command, introspect_object(find_group(command), objname));
-	return TRUE;
-}
-gboolean ListObjects(IPCCommand * command, gpointer data) {
-	IPCRet(command, list_objects(find_group(command)));
-	return TRUE;
-}
-gboolean ActivateObject(IPCCommand * command, gpointer data){
-	gchar * objname = IPCParam(command, "object");
-	ObjectGroup * group = find_group(command);
-	Object * object = g_hash_table_lookup(group->object_hash, objname);
-	g_return_val_if_fail(object, FALSE);
-	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), g_quark_to_string(command->to), "activate");
-	ipc_event_set_parameters(event, "object", objname, "group", object->group->name, NULL);
-	ipc_server_send_event(event);
-	ipc_event_free(event);
+gboolean ListClients(IPCCommand * command, gpointer data){
+	GString * string = g_string_new("");
+	gpointer foo[] = { string };
+	g_datalist_foreach(&client_list, ListClients_foreach_client, foo);
+	IPCRet(command, g_string_free(string, FALSE));
 	return TRUE;
 }
 int main(int argc, char* argv[]){
@@ -107,21 +106,39 @@ int main(int argc, char* argv[]){
 	}
 	gtk_init(&argc, &argv);
 
-	client_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, client_info_free);
-	global_group = create_object_group("GLOBAL");
-	ipc_dispatcher_register_cmd("CreateObject", CreateObject, NULL);
-	ipc_dispatcher_register_cmd("DestroyObject", DestroyObject, NULL);
-	ipc_dispatcher_register_cmd("SetProperty", SetProperty, NULL);
-	ipc_dispatcher_register_cmd("ActivateObject", ActivateObject, NULL);
-	ipc_dispatcher_register_cmd("InsertChild", InsertChild, NULL);
-	ipc_dispatcher_register_cmd("RemoveChild", RemoveChild, NULL);
-	ipc_dispatcher_register_cmd("IntrospectObject", IntrospectObject, NULL);
-	ipc_dispatcher_register_cmd("ListObjects", ListObjects, NULL);
+	g_datalist_init(&client_list);
+	/* BindMenu:
+	 * 	window: the toplevel GdkNativeWindow to bind to (string from in dec)
+	 * 	menu: the name of the menu object
+	 *
+	 * 	Bind a menu object to a toplevel window.
+	 * 	*/
+	ipc_dispatcher_register_cmd("BindMenu", BindMenu, NULL);
+	/* UnbindMenu:
+	 * 	window: the toplevel GdkNativeWindow to bind to (string from in dec)
+	 * 	menu: the name of the menu object
+	 *
+	 * 	Unbind a menu object to a toplevel window.
+	 * 	*/
+	ipc_dispatcher_register_cmd("UnbindMenu", UnbindMenu, NULL);
+	/* LookupWindow:
+	 * 	window: the toplevel window you are interested in.
+	 *
+	 * 	Returns:
+	 * 		the cid associated with the window.
+	 */
+	ipc_dispatcher_register_cmd("LookupWindow", LookupWindow, NULL);
+	/* ListClients:
+	 * 	void
+	 *
+	 * 	Returns:
+	 * 	 a GMarkup text segment describing the clients and their toplevels with menus.
+	 * 	*/
+	ipc_dispatcher_register_cmd("ListClients", ListClients, NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_critical("server already there");
 		return 1;
 	}
 	gtk_main();
-	destroy_object_group(global_group);
 	return 0;
 }

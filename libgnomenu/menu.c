@@ -15,47 +15,101 @@
 //Local cache and server crash recovery.
 
 static GData * object_list = NULL;
-
-typedef void (* GnomenuListener)(GQuark item, gpointer data);
-static void activated_handler(IPCEvent * event, gpointer data){
-	GQuark object = g_quark_from_string(IPCParam(event, "object"));
-	/*invoke the handler*/
+static gchar * get_native_object_name(GtkWidget * widget){
+	return g_object_get_data(G_OBJECT(widget), "native-menu-object");
+}
+static void introspect_property(GString * string, gchar * propname, gchar * value){
+	g_string_append_printf(string, "<p name=\"%s\">%s</p>",
+			propname, value);
 
 }
+static void introspect_item(GString * string, GtkWidget * item) {
+	g_string_append_printf(string, "<item name=\"%s\">", get_native_object_name(item));
+	introspect_property(string, "title", get_native_object_name(item));
+	GtkWidget * submenu =gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
+	if(submenu){
+		introspect_property(string, "submenu", get_native_object_name(submenu));	
+	}
+	introspect_property(string, "title", get_native_object_name(item));
+	g_string_append_printf(string, "</item>");
+}
+static void introspect_menu_foreach(GtkWidget * widget, gpointer foo[]){
+	GString * string = foo[0];
+	introspect_item(string, widget);
+}
+static void introspect_menu(GString * string, GtkWidget * menu){
+	gpointer foo[] = { string };
+	g_string_append_printf(string, "<menu name=\"%s\">\n", get_native_object_name(menu));
+	gtk_container_foreach(menu, introspect_menu_foreach, foo);
+	g_string_append_printf(string, "</menu>\n");
+}
+static gboolean QueryMenu(IPCCommand * command, gpointer data){
+	gchar * objectname = IPCParam(command, "menu");
+	GtkWidget * menu_shell = GTK_WIDGET(g_datalist_get_data(&object_list, objectname));
+	if(GTK_IS_MENU_SHELL(menu_shell)){
+		GString * string = g_string_new("");
+		introspect_menu(string, menu_shell);
+		IPCRet(command, g_string_free(string, FALSE));
+		return TRUE;
+	} else {
+		g_warning("the menu_shell is missing");
+		return FALSE;
+	}
+}
+static gboolean ActivateItem(IPCCommand * command, gpointer data){
+	gchar * objectname = IPCParam(command, "item");
+	GtkWidget * menu_item = g_datalist_get_data(&object_list, objectname);
+	if(GTK_IS_MENU_ITEM(menu_item)){
+		gtk_menu_item_activate(menu_item);	
+		IPCRetDup(command, "OK");	
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
 gboolean gnomenu_init(){
+	ipc_dispatcher_register_cmd("QueryMenu", QueryMenu, NULL);
+	ipc_dispatcher_register_cmd("ActivateItem", ActivateItem, NULL);
+	g_datalist_init(&object_list);
 	if(!ipc_client_start(NULL, NULL)) {
 		return FALSE;
 	}
-	ipc_client_set_event("Activated", activated_handler, NULL, NULL);
 	return TRUE;
 }
-GQuark gnomenu_create(const gchar * hint){
+static void toggle_ref_notify(gchar * object_name, GObject * object, gboolean is_last){
+	if(is_last){
+		gnomenu_unwrap_widget(g_quark_try_string(object));
+	}
+}
+GQuark gnomenu_wrap_widget(GtkWidget * widget){
 	static guint id = 99;
-	gchar * name = g_strdup_printf("%s%d", hint, id++);
+	gchar * name = g_strdup_printf("Widget%d", id++);
 	LOG("Creating %s", name);
 	GQuark object = g_quark_from_string(name);
-	ipc_client_call(NULL, "CreateObject", NULL, "object", name, NULL);
+	g_object_set_data(widget, "native-menu-object", g_quark_to_string(object));
+	g_object_add_toggle_ref(widget, toggle_ref_notify, g_quark_to_string(object));
+	g_datalist_id_set_data_full(&object_list, object, widget, NULL);
 	g_free(name);
 	return object;
 }
-gboolean gnomenu_set_property(GQuark item, gchar * property, gchar * value){
-	return ipc_client_call(NULL, "SetProperty", NULL, "object", g_quark_to_string(item), "property", property, "value", value, NULL);
+GtkWidget * gnomenu_find_widget(GQuark object){
+	return g_datalist_id_get_data(&object_list, object);
 }
-gboolean gnomenu_get_property(GQuark item, gchar * property, gchar ** value){
-	return ipc_client_call(NULL, "GetProperty", value, "object", g_quark_to_string(item), "property", property, NULL);
+void gnomenu_unwrap_widget(GQuark object){
+	GtkWidget * widget = g_datalist_id_get_data(&object_list, object);
+	if(widget) {
+		g_object_remove_toggle_ref(widget, toggle_ref_notify, NULL);
+		g_object_set_data(widget, "native-menu-object", NULL);
+		g_datalist_id_remove_data(&object_list, object);
+	}
 }
-gboolean gnomenu_insert_child(GQuark menu, GQuark item, gint pos){
-	gchar * pos_str = g_strdup_printf("%d", pos);
-	LOG("inserting Child %s to %s at %s", g_quark_to_string(item), g_quark_to_string(menu), pos_str);
-	gboolean b = ipc_client_call(NULL, "InsertChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), "pos", pos_str, NULL);
-	g_free(pos_str);
-	return b;
+void gnomenu_bind_menu(GdkWindow * window, GtkWidget * menubar){
+	gchar * window_str = g_strdup_printf("%ld", GDK_WINDOW_XWINDOW(window));
+	ipc_client_call(NULL, "BindMenu", NULL, "window", window_str, "menu", get_native_object_name(menubar), NULL); 
+	g_free(window_str);
 }
-gboolean gnomenu_remove_item(GQuark menu, GQuark item){
-	return ipc_client_call(NULL, "RemoveChild", NULL, "object", g_quark_to_string(menu), "child", g_quark_to_string(item), NULL);
-}
-gboolean gnomenu_destroy(GQuark object){
-	return ipc_client_call(NULL, "DestroyObject", NULL, "object", g_quark_to_string(object), NULL);
-}
-gboolean gnomenu_listen(GnomenuListener func, gpointer data){
+void gnomenu_unbind_menu(GdkWindow * window, GtkWidget * menubar){
+	gchar * window_str = g_strdup_printf("%ld", GDK_WINDOW_XWINDOW(window));
+	ipc_client_call(NULL, "UnbindMenu", NULL, "window", window_str, "menu", get_native_object_name(menubar), NULL); 
+	g_free(window_str);
 }
