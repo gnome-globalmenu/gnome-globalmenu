@@ -89,7 +89,26 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  #define BORDER_SPACING  0
  #define DEFAULT_IPADDING 1
  
-@@ -215,6 +217,7 @@
+@@ -83,6 +85,8 @@
+ static void gtk_menu_bar_move_current      (GtkMenuShell     *menu_shell,
+                                             GtkMenuDirectionType direction);
+ 
++static void gtk_menu_bar_map		(GtkWidget * widget);
++
+ static GtkShadowType get_shadow_type   (GtkMenuBar      *menubar);
+ 
+ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
+@@ -107,7 +111,8 @@
+   widget_class->size_allocate = gtk_menu_bar_size_allocate;
+   widget_class->expose_event = gtk_menu_bar_expose;
+   widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
+-  
++  widget_class->map = gtk_menu_bar_map;
++
+   menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
+   menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
+   menu_shell_class->move_current = gtk_menu_bar_move_current;
+@@ -215,6 +220,7 @@
  						   GTK_PARAM_READWRITE));
  
    g_type_class_add_private (gobject_class, sizeof (GtkMenuBarPrivate));  
@@ -97,7 +116,20 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -639,7 +642,18 @@
+@@ -290,7 +296,11 @@
+ 
+   requisition->width = 0;
+   requisition->height = 0;
+-  
++
++  if(gnomenu_initialized()){
++ 	return ; 
++  }
++
+   if (GTK_WIDGET_VISIBLE (widget))
+     {
+       menu_bar = GTK_MENU_BAR (widget);
+@@ -639,7 +649,18 @@
  
    return retval;
  }
@@ -117,7 +149,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  static void
  add_to_window (GtkWindow  *window,
                 GtkMenuBar *menubar)
-@@ -655,6 +669,14 @@
+@@ -655,6 +676,14 @@
      }
  
    set_menu_bars (window, g_list_prepend (menubars, menubar));
@@ -132,7 +164,7 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
-@@ -673,6 +695,11 @@
+@@ -673,6 +702,11 @@
      }
  
    set_menu_bars (window, menubars);
@@ -144,6 +176,21 @@ Index: gtk+-aqd/gtk/gtkmenubar.c
  }
  
  static void
+@@ -692,6 +726,14 @@
+   if (GTK_WIDGET_TOPLEVEL (toplevel))
+     add_to_window (GTK_WINDOW (toplevel), menubar);
+ }
++static void
++gtk_menu_bar_map(GtkWidget * widget) {
++  if(gnomenu_initialized()){
++	  return;
++  } else {
++	GTK_WIDGET_CLASS(gtk_menu_bar_parent_class)->map(widget);
++  }
++}
+ 
+ /**
+  * _gtk_menu_bar_cycle_focus:
 Index: gtk+-aqd/gtk/gtkmain.c
 ===================================================================
 --- gtk+-aqd/gtk/gtkmain.c	(revision 20909)
