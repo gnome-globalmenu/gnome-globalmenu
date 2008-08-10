@@ -23,15 +23,25 @@ static void introspect_property(GString * string, gchar * propname, gchar * valu
 			propname, value);
 
 }
-static void introspect_item(GString * string, GtkWidget * item) {
-	g_string_append_printf(string, "<item name=\"%s\">", get_native_object_name(item));
-	introspect_property(string, "title", get_native_object_name(item));
-	GtkWidget * submenu =gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
-	if(submenu){
-		introspect_property(string, "submenu", get_native_object_name(submenu));	
+gchar * guess_title(GtkWidget * item){
+	GtkLabel * label = gtk_bin_get_child(GTK_BIN(item));
+	if(GTK_IS_LABEL(label)){
+		return gtk_label_get_text(label);
 	}
-	introspect_property(string, "title", get_native_object_name(item));
-	g_string_append_printf(string, "</item>");
+	return get_native_object_name(item);
+}
+static void introspect_item(GString * string, GtkWidget * item) {
+	GtkWidget * submenu =gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
+	gchar * title = g_markup_escape_text(guess_title(item), -1);
+	g_string_append_printf(string, "<item name=\"%s\">", get_native_object_name(item));
+	introspect_property(string, "title", title);
+	if(submenu){
+		gchar * submenu_str = g_markup_escape_text(get_native_object_name(submenu), -1);
+		introspect_property(string, "submenu", submenu_str);
+		g_free(submenu_str);
+	}
+	g_string_append_printf(string, "</item>\n");
+	g_free(title);
 }
 static void introspect_menu_foreach(GtkWidget * widget, gpointer foo[]){
 	GString * string = foo[0];
@@ -39,9 +49,11 @@ static void introspect_menu_foreach(GtkWidget * widget, gpointer foo[]){
 }
 static void introspect_menu(GString * string, GtkWidget * menu){
 	gpointer foo[] = { string };
-	g_string_append_printf(string, "<menu name=\"%s\">\n", get_native_object_name(menu));
+	gchar * name = g_markup_escape_text(get_native_object_name(menu), -1);
+	g_string_append_printf(string, "<menu name=\"%s\">\n", name);
 	gtk_container_foreach(menu, introspect_menu_foreach, foo);
 	g_string_append_printf(string, "</menu>\n");
+	g_free(name);
 }
 static gboolean QueryMenu(IPCCommand * command, gpointer data){
 	gchar * objectname = IPCParam(command, "menu");
@@ -67,6 +79,7 @@ static gboolean ActivateItem(IPCCommand * command, gpointer data){
 		return FALSE;
 	}
 }
+
 gboolean gnomenu_init(){
 	ipc_dispatcher_register_cmd("QueryMenu", QueryMenu, NULL);
 	ipc_dispatcher_register_cmd("ActivateItem", ActivateItem, NULL);
