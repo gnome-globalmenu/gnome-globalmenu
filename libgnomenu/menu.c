@@ -99,12 +99,13 @@ gboolean gnomenu_init(){
 	}
 	return TRUE;
 }
+static void gnomenu_unwrap_widget(GtkWidget * widget);
 static void toggle_ref_notify(gchar * object_name, GObject * object, gboolean is_last){
 	if(is_last){
-		gnomenu_unwrap_widget(g_quark_try_string(object));
+		gnomenu_unwrap_widget(object);
 	}
 }
-GQuark gnomenu_wrap_widget(GtkWidget * widget){
+void gnomenu_wrap_widget(GtkWidget * widget){
 	static guint id = 99;
 	gchar * name = g_strdup_printf("Widget%d", id++);
 	LOG("Creating %s", name);
@@ -113,17 +114,15 @@ GQuark gnomenu_wrap_widget(GtkWidget * widget){
 	g_object_add_toggle_ref(widget, toggle_ref_notify, g_quark_to_string(object));
 	g_datalist_id_set_data_full(&object_list, object, widget, NULL);
 	g_free(name);
-	return object;
 }
-GtkWidget * gnomenu_find_widget(GQuark object){
-	return g_datalist_id_get_data(&object_list, object);
-}
-void gnomenu_unwrap_widget(GQuark object){
-	GtkWidget * widget = g_datalist_id_get_data(&object_list, object);
-	if(widget) {
-		g_object_remove_toggle_ref(widget, toggle_ref_notify, NULL);
+static void gnomenu_unwrap_widget(GtkWidget * widget){
+	gchar * objectname = get_native_object_name(widget);
+	if(objectname) {
+		GQuark object = g_quark_try_string(objectname);
+		LOG("Destroying %s", objectname);
 		g_object_set_data(widget, "native-menu-object", NULL);
-		g_datalist_id_remove_data(&object_list, object);
+		g_datalist_remove_data(&object_list, objectname);
+		g_object_remove_toggle_ref(widget, toggle_ref_notify, g_quark_to_string(object));
 	}
 }
 void gnomenu_bind_menu(GdkWindow * window, GtkWidget * menubar){
