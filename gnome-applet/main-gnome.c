@@ -4,7 +4,7 @@
 
 #include <glade/glade.h>
 #include <panel-applet.h>
-#include <libgnomenu/globalmenu.h>
+//#include <libgnomenu/globalmenu.h>
 
 #include "log.h"
 
@@ -50,7 +50,7 @@ static void _change_orient(PanelApplet * applet,
 	}
 }
 static void 
-	_s_screen_active_window_changed	(WnckScreen * screen, WnckWindow * previous, GnomenuGlobalMenu * global_menu){
+	_s_screen_active_window_changed	(WnckScreen * screen, WnckWindow * previous, gpointer global_menu){
 	WnckWindow * active = wnck_screen_get_active_window(screen);
 	if (!active) return;
 	if( wnck_window_get_pid(active) == getpid()){
@@ -65,7 +65,7 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	panel_applet_set_flags(applet, 
 		PANEL_APPLET_EXPAND_MAJOR | PANEL_APPLET_EXPAND_MINOR | PANEL_APPLET_HAS_HANDLE);
 	gtk_widget_set_name(GTK_WIDGET(applet), "globalmenu-applet-eventbox");
-	gnomenu_global_menu_get_type();
+//	gnomenu_global_menu_get_type();
 	panel_applet_set_background_widget(applet, applet);
 	GladeXML * xml;
 	GtkContainer * box;
@@ -73,12 +73,14 @@ static gboolean globalmenu_applet_factory (PanelApplet *applet,
 	if(!xml)
 		xml = glade_xml_new(GLADEDIR"/GnomenuServerApplet.glade", NULL, NULL);
 	g_assert(xml);
+	/*
 	GnomenuGlobalMenu * globalmenu;
 	globalmenu = glade_xml_get_widget(xml, "globalmenu");
 	box = glade_xml_get_widget(xml, "GnomenuServerApplet");
 	glade_xml_signal_autoconnect(xml);
 	g_signal_connect(wnck_screen_get_default(),
 			"active-window-changed", G_CALLBACK(_s_screen_active_window_changed), globalmenu);
+			*/
 	gtk_container_add(applet, box);
 	gtk_widget_show_all(applet);
 

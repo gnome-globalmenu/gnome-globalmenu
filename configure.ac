@@ -146,5 +146,4 @@ libgnomenu/libgnomenu.pc
 gnome-applet/Makefile
 xfce-plugin/Makefile
 test/Makefile
-libgnomenu/server/Makefile
 )
