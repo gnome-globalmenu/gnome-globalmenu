@@ -133,8 +133,10 @@ dnl	fi
 dnl fi
 
 AC_OUTPUT(
+[
 Makefile
 libgnomenu/Makefile
+libgnomenu/test.sh
 libgtkhotkey/Makefile
 po/Makefile.in
 gtk+-aqd/Makefile
@@ -146,4 +148,8 @@ libgnomenu/libgnomenu.pc
 gnome-applet/Makefile
 xfce-plugin/Makefile
 test/Makefile
+],
+[
+chmod +x libgnomenu/test.sh
+]
 )
