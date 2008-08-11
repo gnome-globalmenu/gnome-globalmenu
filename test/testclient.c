@@ -1,83 +1,51 @@
 #include <gtk/gtk.h>
-#include <libgnomenu/socket.h>
-#include <libgnomenu/clienthelper.h>
-#include <libgnomenu/messages.h>
+#include <libgnomenu/ipcclient.h>
+#include <glade/glade.h>
+void server_destroy(gpointer data) {
+	g_message("server destroy was caught");
+}
+void test_single() {
+	int i;
+	for(i=10; i>0; i--) {
+		gchar * msg = g_strdup_printf("hello %d", i);
+		gchar * rt = ipc_client_call_server("Ping", "message", msg, NULL);
+		if(rt) { 
+			g_message("%s", rt);
+			g_free(rt);
+		}
+		g_free(msg);
+	}
 
-GtkWidget * create, * destroy, * size, * bgcolor;
-GnomenuClientHelper * client;
-GnomenuSocket * server;
-GnomenuSocket * service;
-
-static void window_destroy_event_cb(GtkWidget * window, GdkEvent * ev, gpointer user_data){
-	gtk_main_quit();
-}
-static void service_data_arrival(GnomenuSocket * socket, gpointer data, gint bytes, gpointer userdata){
-	g_message("ding: %d", *(gint*)data);
-}
-static void server_connect_req(GnomenuSocket * socket, GnomenuSocketNativeID target, gpointer userdata){
-	service = gnomenu_socket_new("service", 5);
-	gnomenu_socket_accept(socket, service, target);
-	g_signal_connect(G_OBJECT(service), "data", service_data_arrival, 0);	
-}
-static void button_clicked(GtkButton * button, gpointer usrdata){
-	if(button == create){
-		GnomenuMessage msg;
-		server = gnomenu_socket_new(GNOMENU_SERVER_NAME, 10);
-		g_signal_connect(G_OBJECT(server), "request",
-				G_CALLBACK(server_connect_req), NULL);
-		gnomenu_socket_listen(server);
-		msg.any.type = GNOMENU_MSG_SERVER_NEW;
-		msg.server_new.socket_id = gnomenu_socket_get_native(server);
-		gnomenu_socket_broadcast(server, &msg, sizeof(msg));
-	}
-	if(button == size){
-		GnomenuMessage msg;
-		msg.any.type = GNOMENU_MSG_SIZE_QUERY;
-		gnomenu_socket_send(service, &msg, sizeof(msg));
-	}
-	if(button == destroy){
-		gnomenu_socket_shutdown(service);
-	}
-	if(button == bgcolor){
-		GnomenuMessage msg;
-		msg.any.type = GNOMENU_MSG_BGCOLOR_SET;
-		msg.bgcolor_set.red = g_random_int();
-		msg.bgcolor_set.blue = g_random_int();
-		msg.bgcolor_set.green = g_random_int();
-		
-		gnomenu_socket_send(service, &msg, sizeof(msg));
-	}
 }
 int main(int argc, char* argv[]){
 	GtkWindow * window;
 	GtkBox * box;
-
+	GTimer * timer;
+	int i;
 	gtk_init(&argc, &argv);
 
-	client = gnomenu_client_helper_new();
-	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+	timer = g_timer_new();
+	if(!ipc_client_start(server_destroy, NULL)) {
+		g_message("no server there");
+		return 1;
+	}
 
-	box = GTK_BOX(gtk_vbox_new(FALSE, 0));
+	g_timer_start(timer);
+	test_single();
+	g_message("time consumed: %lf", (double) g_timer_elapsed(timer, NULL));
 
-#define ADD_BUTTON(bn) \
-	bn = gtk_button_new_with_label(#bn);\
-	g_signal_connect(G_OBJECT(bn), "clicked", \
-			G_CALLBACK(button_clicked), client);\
-	gtk_box_pack_start_defaults(box, GTK_WIDGET(bn));
-	ADD_BUTTON(create)
-	ADD_BUTTON(bgcolor);
-	ADD_BUTTON(size)
-	ADD_BUTTON(destroy);
-	
-	g_signal_connect(G_OBJECT(window), "destroy",
-			G_CALLBACK(window_destroy_event_cb), NULL);
-
-	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(box));
-
-	gtk_widget_show_all(GTK_WIDGET(window));
+	g_message("transaction begins");
+	g_timer_start(timer);
+	ipc_client_begin_transaction();
+	GList * returns, * node;
+	test_single();
+	ipc_client_end_transaction(&returns);
+	g_message("time consumed: %lf", (double) g_timer_elapsed(timer, NULL));
+	g_message("transaction ends");
+	for(node = returns; node; node=node->next){
+		gchar * rt = ipc_command_get_default_result(node->data);
+		g_message("%s", rt);
+	}
 	gtk_main();
-//	g_object_unref(client);
-//	g_object_unref(socket);
-
 	return 0;
 }

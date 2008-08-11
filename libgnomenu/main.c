@@ -2,10 +2,9 @@
 #include <gtk/gtk.h>
 
 #include "quirks.h"
-#include "menubar.h"
 
 #if ENABLE_TRACING >= 1
-#define LOG(fmt, args...) g_message("<GnomenuMain>::" fmt, ## args)
+#define LOG(fmt, args...) g_printerr("<GnomenuMain>::" fmt "\n", ## args)
 #else
 #define LOG(fmt, args...)
 #endif
@@ -28,7 +27,7 @@ GType gnomenu_menu_bar_type = 0;
 G_MODULE_EXPORT gboolean gnomenu_compatible = FALSE;
 guint gnomenu_version = LIBGNOMENU_VERSION;
 const char * g_module_check_init(GModule * module){
-	GnomenuQuirkMask mask = gnomenu_get_default_quirk();
+	//GnomenuQuirkMask mask = gnomenu_get_default_quirk();
 	gchar *flags[] = {
 					"GTK_MENUBAR_NO_MAC", 		"GTK_MENU_BAR_NO_MAC",
 					"GTK_MENUBAR_NO_GLOBALMENU","GTK_MENU_BAR_NO_GLOBALMENU",
@@ -37,12 +36,13 @@ const char * g_module_check_init(GModule * module){
 			};
 	int i;
 	LOG("libgnomenu is loaded. ");
-
+/*
 	if(GNOMENU_HAS_QUIRK(mask, IGNORE)){
 		gnomenu_compatible = FALSE;
 		LOG("application is ignored by quirk");
 		return NULL;
 	}
+	*/
 	for(i = 0;flags[i];i++)
 		if(getenv(flags[i])){
 			gnomenu_compatible = FALSE;

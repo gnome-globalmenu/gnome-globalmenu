@@ -1,5 +1,5 @@
 #
-
+#SUBDIRS = .
 AM_CFLAGS = -g $(LIBGNOMENU_CFLAGS)
 AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
 
@@ -7,26 +7,47 @@ moduledir = $(libdir)
 
 module_LTLIBRARIES = libgnomenu.la
 
-BUILT_SOURCES = gnomenu-enums.c gnomenu-enums.h
+bin_PROGRAMS = gnomenu-server gnomenu-call
+LDADD = libgnomenu.la
+# BUILT_SOURCES = gnomenu-enums.c gnomenu-enums.h
 
 libgnomenu_la_SOURCES = \
-	$(BUILT_SOURCES) \
-	main.c \
-	quirks.h \
-	quirks.c \
-    menubar.h \
-	menubar.c \
-	introspector.h \
-	introspector.c \
-	builder.h \
-	builder.c \
-	widget.h \
-	widget.c \
-	tools.h \
-	tools.c \
-	globalmenu.h \
-	globalmenu.c \
-	sms.h
+	ipcserver.c \
+	ipcserver.h \
+	ipcdispatcher.c \
+	ipcdispatcher.h \
+	ipcclient.c \
+	ipcclient.h \
+	ipccommand.c \
+	ipccommand.h \
+	ipcevent.c \
+	ipcevent.h \
+	ipcutils.c \
+	ipcutils.h \
+	ipc.h  \
+	object.c \
+	object.h \
+	menu.h \
+	menu.c \
+	main.c 
+
+#	$(BUILT_SOURCES) \
+#	main.c \
+#	quirks.h \
+#	quirks.c \
+#    menubar.h \
+#	menubar.c \
+#	introspector.h \
+#	introspector.c \
+#	builder.h \
+#	builder.c \
+#	widget.h \
+#	widget.c \
+#	tools.h \
+#	tools.c \
+#	globalmenu.h \
+#	globalmenu.c \
+#	sms.h
 
 libgnomenu_la_LDFLAGS = \
 	-g \
@@ -40,7 +61,7 @@ $(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
 
 
 libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS = quirks.h menubar.h tools.h introspector.h builder.h
+libgnomenuinclude_HEADERS =
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
