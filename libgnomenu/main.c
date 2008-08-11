@@ -1,7 +1,7 @@
 #include <config.h>
 #include <gtk/gtk.h>
 
-#include "quirks.h"
+//#include "quirks.h"
 
 #if ENABLE_TRACING >= 1
 #define LOG(fmt, args...) g_printerr("<GnomenuMain>::" fmt "\n", ## args)
