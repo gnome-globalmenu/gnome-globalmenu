@@ -10,11 +10,11 @@
 
 #include <gdk/gdkx.h>
 #include "ipcclient.h"
-
 //TODO:
 //Local cache and server crash recovery.
-
-static GData * object_list = NULL;
+//
+static GHashTable * object_hash = NULL;
+/*HashTable is better than DataList because it doesn't propagate the GQuarks */
 static gchar * get_native_object_name(GtkWidget * widget){
 	return g_object_get_data(G_OBJECT(widget), "native-menu-object");
 }
@@ -23,10 +23,10 @@ static void introspect_property(GString * string, gchar * propname, gchar * valu
 			propname, value);
 
 }
-gchar * guess_title(GtkWidget * item){
-	GtkLabel * label = gtk_bin_get_child(GTK_BIN(item));
+const gchar * guess_title(GtkWidget * item){
+	GtkWidget * label = gtk_bin_get_child(GTK_BIN(item));
 	if(GTK_IS_LABEL(label)){
-		return gtk_label_get_text(label);
+		return gtk_label_get_text(GTK_LABEL(label));
 	} else {
 		if(GTK_IS_SEPARATOR_MENU_ITEM(item)){
 			return "|";	
@@ -67,7 +67,7 @@ static void introspect_menu(GString * string, GtkWidget * menu){
 }
 static gboolean QueryMenu(IPCCommand * command, gpointer data){
 	gchar * objectname = IPCParam(command, "menu");
-	GtkWidget * menu_shell = GTK_WIDGET(g_datalist_get_data(&object_list, objectname));
+	GtkWidget * menu_shell = GTK_WIDGET(g_hash_table_lookup(object_hash, objectname));
 	if(GTK_IS_MENU_SHELL(menu_shell)){
 		GString * string = g_string_new("");
 		introspect_menu(string, menu_shell);
@@ -80,9 +80,9 @@ static gboolean QueryMenu(IPCCommand * command, gpointer data){
 }
 static gboolean ActivateItem(IPCCommand * command, gpointer data){
 	gchar * objectname = IPCParam(command, "item");
-	GtkWidget * menu_item = g_datalist_get_data(&object_list, objectname);
+	GtkWidget * menu_item = g_hash_table_lookup(object_hash, objectname);
 	if(GTK_IS_MENU_ITEM(menu_item)){
-		gtk_menu_item_activate(menu_item);	
+		gtk_menu_item_activate(GTK_MENU_ITEM(menu_item));
 		IPCRetDup(command, "OK");	
 		return TRUE;
 	} else {
@@ -93,37 +93,33 @@ static gboolean ActivateItem(IPCCommand * command, gpointer data){
 gboolean gnomenu_init(){
 	ipc_dispatcher_register_cmd("QueryMenu", QueryMenu, NULL);
 	ipc_dispatcher_register_cmd("ActivateItem", ActivateItem, NULL);
-	g_datalist_init(&object_list);
+	object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	if(!ipc_client_start(NULL, NULL)) {
 		return FALSE;
 	}
 	return TRUE;
 }
-static void toggle_ref_notify(gchar * object_name, GObject * object, gboolean is_last){
+static void gnomenu_unwrap_widget(GtkWidget * widget);
+static void toggle_ref_notify(gpointer objectname, GObject * object, gboolean is_last){
 	if(is_last){
-		gnomenu_unwrap_widget(g_quark_try_string(object));
+		gnomenu_unwrap_widget(GTK_WIDGET(object));
 	}
 }
-GQuark gnomenu_wrap_widget(GtkWidget * widget){
+void gnomenu_wrap_widget(GtkWidget * widget){
 	static guint id = 99;
 	gchar * name = g_strdup_printf("Widget%d", id++);
 	LOG("Creating %s", name);
-	GQuark object = g_quark_from_string(name);
-	g_object_set_data(widget, "native-menu-object", g_quark_to_string(object));
-	g_object_add_toggle_ref(widget, toggle_ref_notify, g_quark_to_string(object));
-	g_datalist_id_set_data_full(&object_list, object, widget, NULL);
-	g_free(name);
-	return object;
+	g_object_set_data(G_OBJECT(widget), "native-menu-object", name);
+	g_object_add_toggle_ref(G_OBJECT(widget), toggle_ref_notify, name);
+	g_hash_table_insert(object_hash, name, widget);
 }
-GtkWidget * gnomenu_find_widget(GQuark object){
-	return g_datalist_id_get_data(&object_list, object);
-}
-void gnomenu_unwrap_widget(GQuark object){
-	GtkWidget * widget = g_datalist_id_get_data(&object_list, object);
-	if(widget) {
-		g_object_remove_toggle_ref(widget, toggle_ref_notify, NULL);
-		g_object_set_data(widget, "native-menu-object", NULL);
-		g_datalist_id_remove_data(&object_list, object);
+static void gnomenu_unwrap_widget(GtkWidget * widget){
+	gchar * objectname = get_native_object_name(widget);
+	if(objectname) {
+		LOG("Destroying %s", objectname);
+		g_object_set_data(G_OBJECT(widget), "native-menu-object", NULL);
+		g_object_remove_toggle_ref(G_OBJECT(widget), toggle_ref_notify, objectname);
+		g_hash_table_remove(object_hash, objectname);
 	}
 }
 void gnomenu_bind_menu(GdkWindow * window, GtkWidget * menubar){

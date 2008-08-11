@@ -2,7 +2,7 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu.c	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu.c	(revision 0)
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,71 @@
 +#include <config.h>
 +#include "gtkmain.h"
 +#include "gtkprivate.h"
@@ -21,12 +21,19 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +	type NAME (__VA_ARGS__) {\
 +	return (*_ ## NAME ## _)(__VA_ARGS__); \
 +	}
++static void (*_gnomenu_wrap_widget_)(GtkWidget * widget);
++static void (*_gnomenu_bind_menu_)(GdkWindow * widget, GtkWidget * menu);
++static void (*_gnomenu_unbind_menu_)(GdkWindow * widget, GtkWidget * menu);
++void gnomenu_wrap_widget(GtkWidget * widget){
++	_gnomenu_wrap_widget_(widget);
++}
++void gnomenu_bind_menu(GdkWindow * window, GtkWidget * menu){
++	_gnomenu_bind_menu_(window, menu);
++}
++void gnomenu_unbind_menu(GdkWindow *  window, GtkWidget * menu){
++	_gnomenu_unbind_menu_(window, menu);
 +
-+DEF_FUNC(GQuark, gnomenu_wrap_widget, widget)
-+DEF_FUNC(void, gnomenu_unwrap_widget, widget)
-+DEF_FUNC(void, gnomenu_bind_menu, window, menu)
-+DEF_FUNC(void, gnomenu_unbind_menu, window, menu)
-+DEF_FUNC(GtkWidget *, gnomenu_find_widget, object)
++}
 +
 +static gboolean libgnomenu_load(){
 +	module = g_module_open("libgnomenu", 0);
@@ -47,10 +54,8 @@ Index: gtk+-aqd/gtk/libgnomenu.c
 +	}
 +	GET_SYMBOL(gnomenu_init);
 +	GET_SYMBOL(gnomenu_wrap_widget);
-+	GET_SYMBOL(gnomenu_unwrap_widget);
 +	GET_SYMBOL(gnomenu_bind_menu);
 +	GET_SYMBOL(gnomenu_unbind_menu);
-+	GET_SYMBOL(gnomenu_find_widget);
 +
 +	if(module == NULL) {
 +		return FALSE;
@@ -73,7 +78,8 @@ Index: gtk+-aqd/gtk/libgnomenu.h
 ===================================================================
 --- gtk+-aqd/gtk/libgnomenu.h	(revision 0)
 +++ gtk+-aqd/gtk/libgnomenu.h	(revision 0)
-@@ -0,0 +1 @@
+@@ -0,0 +1,2 @@
++#include "libgnomenu/gnomenugtkbinding.h"
 +gboolean gnomenu_initialized();
 Index: gtk+-aqd/gtk/gtkmenubar.c
 ===================================================================
@@ -243,19 +249,17 @@ Index: gtk+-aqd/gtk/gtkmain.c
  }
  
  #ifdef G_PLATFORM_WIN32
-Index: gtk+-aqd/gtk/libgnomenu/menu.h
+Index: gtk+-aqd/gtk/libgnomenu/gnomenugtkbinding.h
 ===================================================================
---- gtk+-aqd/gtk/libgnomenu/menu.h	(revision 0)
-+++ gtk+-aqd/gtk/libgnomenu/menu.h	(revision 0)
-@@ -0,0 +1,9 @@
+--- gtk+-aqd/gtk/libgnomenu/gnomenugtkbinding.h	(revision 0)
++++ gtk+-aqd/gtk/libgnomenu/gnomenugtkbinding.h	(revision 0)
+@@ -0,0 +1,7 @@
 +#ifndef _MENU_H_
 +#define _MENU_H_
 +gboolean gnomenu_init();
-+GQuark gnomenu_wrap_object(GtkWidget * widget);
-+void gnomenu_bind_menu(GdkWindow * window, GQuark object);
-+void gnomenu_unbind_menu(GdkWindow * window, GQuark object);
-+void gnomenu_unwrap_object(GQuark object);
-+GtkWidget * gnomenu_find_widget(GQuark object);
++void gnomenu_wrap_widget(GtkWidget * widget);
++void gnomenu_bind_menu(GdkWindow * window, GtkWidget * menu);
++void gnomenu_unbind_menu(GdkWindow * window, GtkWidget * menu);
 +#endif
 Index: gtk+-aqd/gtk/Makefile.am
 ===================================================================
@@ -302,34 +306,10 @@ Index: gtk+-aqd/gtk/gtkmenuitem.c
  }
  
  GtkWidget*
-@@ -359,6 +366,11 @@
- {
-   GtkMenuItem *menu_item = GTK_MENU_ITEM (object);
- 
-+  if(gnomenu_initialized()){
-+  	gnomenu_unwrap_widget(menu_item);
-+  }
-+  
-+
-   g_free (menu_item->accel_path);
- 
-   G_OBJECT_CLASS (gtk_menu_item_parent_class)->finalize (object);
-@@ -785,6 +797,7 @@
+@@ -785,6 +792,7 @@
    gdk_window_set_user_data (menu_item->event_window, widget);
  
    widget->style = gtk_style_attach (widget->style, widget->window);
-+
- }
- 
- static void
-Index: gtk+-aqd/gtk/gtkmenu.c
-===================================================================
---- gtk+-aqd/gtk/gtkmenu.c	(revision 20909)
-+++ gtk+-aqd/gtk/gtkmenu.c	(working copy)
-@@ -897,6 +897,7 @@
-   priv->lower_arrow_state = GTK_STATE_NORMAL;
- 
-   priv->have_layout = FALSE;
 +
  }
  
@@ -359,23 +339,3 @@ Index: gtk+-aqd/gtk/gtkmenushell.c
  }
  
  static void
-@@ -443,6 +450,11 @@
-   GtkMenuShell *menu_shell = GTK_MENU_SHELL (object);
-   GtkMenuShellPrivate *priv = GTK_MENU_SHELL_GET_PRIVATE (menu_shell);
- 
-+  if(gnomenu_initialized()){
-+  	gnomenu_unwrap_widget(menu_shell);
-+  }
-+
-+
-   if (priv->mnemonic_hash)
-     _gtk_mnemonic_hash_free (priv->mnemonic_hash);
-   if (priv->key_hash)
-@@ -532,6 +544,7 @@
- 
-   widget->style = gtk_style_attach (widget->style, widget->window);
-   gtk_style_set_background (widget->style, widget->window, GTK_STATE_NORMAL);
-+
- }
- 
- void
