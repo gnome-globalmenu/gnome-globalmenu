@@ -14,31 +14,54 @@ typedef struct {
 	GQuark cid;
 	GHashTable * menus;
 } ClientInfo;
-#define ADD_MENU(cli, wind, menu) g_hash_table_insert(cli->menus, wind, menu)
+#define ADD_MENU(cli, wind, menu) add_menu(cli, wind, menu)
 #define REMOVE_MENU(cli, wind, menu) g_hash_table_remove(cli->menus, wind)
-#define FIND_MENU(cli, wind) g_hash_table_lookup(cli->menus, wind)
+#define FIND_MENUS(cli, wind) g_hash_table_lookup(cli->menus, wind)
 #define find_client(cli) g_datalist_id_get_data(&client_list, cli)
+void add_menu(ClientInfo * cli, gchar * window, gchar * menu){
+	GList * list = g_hash_table_steal(cli->menus, window);
+	list = g_list_append(list, g_strdup(menu));
+	g_hash_table_insert(cli->menus, window, list);
+}
+gint strcmp(gpointer, gpointer);
+void remove_menu(ClientInfo * cli, gchar * window, gchar * menu){
+	GList * list = g_hash_table_steal(cli->menus, window);
+	GList * node = g_list_find_custom(list, menu, strcmp);
+	if(node) {
+		g_free(node->data);
+		list = g_list_delete_link(list, node);
+	}
+	g_hash_table_insert(cli->menus, window, list);
+}
 static GData * client_list = NULL;
-void client_info_free(ClientInfo * info) {
+static void client_info_free(ClientInfo * info) {
 	g_hash_table_destroy(info->menus);
 	g_slice_free(ClientInfo, info);
+}
+static void menu_list_free(gpointer p){
+	GList * list = p;
+	GList * node;
+	for(node = list; node; node = node->next){
+		g_free(node->data);
+	}
+	g_list_free(p);
 }
 static void client_create_callback(GQuark cid, gpointer data) {
 	LOG("New client %s", g_quark_to_string(cid));
 	ClientInfo * info = g_slice_new0(ClientInfo);
 	info->cid = cid;
-	info->menus = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+	info->menus = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, menu_list_free);
 	g_datalist_id_set_data_full(&client_list, info->cid, info, client_info_free);
 }
 static void client_destroy_callback(GQuark cid, gpointer data) {
 	LOG("Dead client %s", g_quark_to_string(cid));
 	g_datalist_id_remove_data(&client_list, cid);
 }
-gboolean Unimplemented(IPCCommand * command, gpointer data) {
+static gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup("This method is Unimplemented"));
 	return TRUE;
 }
-gboolean BindMenu(IPCCommand * command, gpointer data){
+static gboolean BindMenu(IPCCommand * command, gpointer data){
 	ClientInfo * ci = find_client(command->from);
 	g_return_val_if_fail(ci, FALSE);
 	gchar * wind = IPCParam(command, "window");
@@ -46,54 +69,68 @@ gboolean BindMenu(IPCCommand * command, gpointer data){
 	ADD_MENU(ci, g_strdup(wind), g_strdup(menu));
 	return TRUE;
 }
-gboolean UnbindMenu(IPCCommand * command, gpointer data){
+static gboolean UnbindMenu(IPCCommand * command, gpointer data){
 	ClientInfo * ci = find_client(command->from);
 	g_return_val_if_fail(ci, FALSE);
 	gchar * wind = IPCParam(command, "window");
 	gchar * menu = IPCParam(command, "menu");
-	/*FIXME: menu parameter is ignored*/
 	REMOVE_MENU(ci, wind, menu);
 	return TRUE;
 }
-static void LookupMenu_foreach_client(GQuark key, gpointer value, gpointer foo[]){
+static void LookupWindow_foreach_client(GQuark key, gpointer value, gpointer foo[]){
 	ClientInfo * ci = value;
 	gchar * wind = foo[0];
-	gchar * menu = FIND_MENU(ci, wind);
-	if(menu) {
-		foo[1] = menu;
+	GList * menus = FIND_MENUS(ci, wind);
+	if(menus) {
+		foo[1] = menus;
 		foo[2] = ci;
 	}
 }
-gboolean LookupWindow(IPCCommand * command, gpointer data){
-	gchar * wind = IPCParam(command, "window");
-	gpointer foo[3] = {wind, 
-		NULL/*Return value, the found menu*/,
-		NULL/*Return value, the cid*/};
-	g_datalist_foreach(&client_list, LookupMenu_foreach_client, foo);
-	if(foo[2]){
-		IPCRetDup(command, g_quark_to_string(((ClientInfo*)foo[2])->cid));
-	}
-	return TRUE;
-}
-static void ListClients_foreach_menu(gpointer key, gpointer value, gpointer foo[]){
+static void introspect_client_foreach_menu(gpointer key, gpointer value, gpointer foo[]){
 	GString * string = foo[0];
 	gchar * wind = key;
-	gchar * menu = value;
-	g_string_append_printf(string, "<toplevel window=\"%s\" menu=\"%s\"/>\n",
-			wind, menu);
+	GList * menus = value;
+	GList * node;
+	g_string_append_printf(string, "<toplevel window=\"%s\">\n",
+			wind);
+	for(node = menus; node; node=node->next){
+		g_string_append_printf(string, "<menu name=\"%s\"/>\n"	,
+				node->data);
+	}
+	g_string_append_printf(string, "</toplevel>\n");
+}
+static void introspect_client(GString * string, ClientInfo * info){
+	gpointer foo[] ={string};
+	g_string_append_printf(string, "<client cid=\"%s\">\n", g_quark_to_string(info->cid));
+	g_hash_table_foreach(info->menus, introspect_client_foreach_menu, foo);
+	g_string_append_printf(string, "</client>\n");
+}
+static gboolean LookupWindow(IPCCommand * command, gpointer data){
+	gchar * wind = IPCParam(command, "window");
+	gpointer foo[3] = {wind, 
+		NULL/*Return value, list all menus*/,
+		NULL/*Return value, the cid*/};
+	g_datalist_foreach(&client_list, LookupWindow_foreach_client, foo);
+	if(foo[2]){
+		ClientInfo * ci = foo[2];
+		GString * string = g_string_new("");
+		introspect_client(string, ci);
+		IPCRet(command, g_string_free(string, FALSE));
+	}
+	return TRUE;
 }
 static void ListClients_foreach_client(GQuark cid, gpointer value, gpointer foo[]){
 	GString * string = foo[0];
 	ClientInfo * info = value;
-	g_string_append_printf(string, "<client cid=\"%s\">\n", g_quark_to_string(info->cid));
-	g_hash_table_foreach(info->menus, ListClients_foreach_menu, foo);
-	g_string_append_printf(string, "</client>\n");
+	introspect_client(string, info);
 }
 gboolean ListClients(IPCCommand * command, gpointer data){
 	GString * string = g_string_new("");
 	gpointer foo[] = { string };
 	g_datalist_foreach(&client_list, ListClients_foreach_client, foo);
-	IPCRet(command, g_string_free(string, FALSE));
+	gchar * s = g_string_free(string, FALSE);
+	LOG("rt = %s", s);
+	IPCRet(command, s);
 	return TRUE;
 }
 int main(int argc, char* argv[]){

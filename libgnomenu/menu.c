@@ -27,21 +27,31 @@ gchar * guess_title(GtkWidget * item){
 	GtkLabel * label = gtk_bin_get_child(GTK_BIN(item));
 	if(GTK_IS_LABEL(label)){
 		return gtk_label_get_text(label);
+	} else {
+		if(GTK_IS_SEPARATOR_MENU_ITEM(item)){
+			return "|";	
+		}
 	}
 	return get_native_object_name(item);
 }
 static void introspect_item(GString * string, GtkWidget * item) {
-	GtkWidget * submenu =gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
-	gchar * title = g_markup_escape_text(guess_title(item), -1);
-	g_string_append_printf(string, "<item name=\"%s\">", get_native_object_name(item));
-	introspect_property(string, "title", title);
-	if(submenu){
-		gchar * submenu_str = g_markup_escape_text(get_native_object_name(submenu), -1);
-		introspect_property(string, "submenu", submenu_str);
-		g_free(submenu_str);
+	gboolean visible;
+	g_object_get(item, "visible", &visible, NULL);
+
+	if(visible) {
+		gchar * title = g_markup_escape_text(guess_title(item), -1);
+		GtkWidget * submenu =gtk_menu_item_get_submenu(GTK_MENU_ITEM(item));
+		g_string_append_printf(string, "<item name=\"%s\">", get_native_object_name(item));
+		introspect_property(string, "title", title);
+		
+		if(submenu){
+			gchar * submenu_str = g_markup_escape_text(get_native_object_name(submenu), -1);
+			introspect_property(string, "submenu", submenu_str);
+			g_free(submenu_str);
+		}
+		g_string_append_printf(string, "</item>\n");
+		g_free(title);
 	}
-	g_string_append_printf(string, "</item>\n");
-	g_free(title);
 }
 static void introspect_menu_foreach(GtkWidget * widget, gpointer foo[]){
 	GString * string = foo[0];
