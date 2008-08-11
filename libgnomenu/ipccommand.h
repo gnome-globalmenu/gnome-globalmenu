@@ -6,6 +6,7 @@ typedef struct {
 	GQuark to;
 	GData * parameters;
 	GData * results;
+	gboolean failed;
 } IPCCommand;
 IPCCommand * ipc_command_parse(const gchar * string);
 GList * ipc_command_list_parse(const gchar * string);
@@ -24,6 +25,7 @@ gchar * ipc_command_list_to_string(GList * command_list);
 	IPCRet(c, g_strdup(rt))
 #define IPCRetBool(c, rt) \
 	if(rt) IPCRetDup(c, "TRUE"); else IPCRetDup(c, "FALSE"); 
+#define IPCFail(c) ((IPCCommand*)(c))->failed = TRUE
 
 void ipc_command_free(IPCCommand * command);
 void ipc_command_list_free(GList * list);

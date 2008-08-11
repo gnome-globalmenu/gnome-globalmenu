@@ -80,6 +80,9 @@ static void start_element  (GMarkupParseContext *context,
 				break;
 			}
 		}
+	} else
+	if(g_str_equal(element_name, "failed")){
+		pi->current_command->failed = TRUE;
 	}
 }
 static void end_element  (GMarkupParseContext *context, 
@@ -199,6 +202,9 @@ gchar * ipc_command_to_string(IPCCommand * command){
 	g_datalist_foreach(&command->parameters, _to_string_foreach, foo);
 	gpointer bar[] = {string, "r"};
 	g_datalist_foreach(&command->results, _to_string_foreach, bar);
+	if(command->failed){
+		g_string_append_printf(string, "<failed/>");
+	}
 	g_string_append_printf(string, "</command>");
 	return g_string_free(string, FALSE);
 }

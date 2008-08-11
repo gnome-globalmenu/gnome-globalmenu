@@ -143,7 +143,7 @@ static void client_message_call(XClientMessageEvent * client_message) {
 		if(g_quark_from_string(cid) == command->to) {
 			if(!ipc_dispatcher_call_cmd(command)) {
 				g_warning("command was not successfull, ignoring the call");
-				goto call_fail;
+				IPCFail(command);
 			}
 		} else {
 			g_warning("command is not for this client, ignoreing the call: %s %s", cid, g_quark_to_string(command->to));

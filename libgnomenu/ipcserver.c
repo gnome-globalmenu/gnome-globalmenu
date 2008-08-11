@@ -177,11 +177,13 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 		}
 		if(g_quark_from_string("SERVER") == command->to) {
 			if(!ipc_dispatcher_call_cmd(command)) {
+				IPCFail(command);
 				g_warning("command was not successfull, ignoring the call");
-				goto call_fail;
 			}
 		} else {
-			ipc_server_call_client_command(&command);
+			if(!ipc_server_call_client_command(&command)){
+				IPCFail(command);
+			}
 			node->data = command;
 		}
 	}
