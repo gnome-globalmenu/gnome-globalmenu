@@ -8,7 +8,6 @@
 #endif
 
 #include "ipcserver.h"
-#include "object.h"
 
 typedef struct {
 	GQuark cid;
