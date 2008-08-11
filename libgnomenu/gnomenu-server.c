@@ -134,13 +134,7 @@ gboolean ListClients(IPCCommand * command, gpointer data){
 	return TRUE;
 }
 int main(int argc, char* argv[]){
-	GModule * module = g_module_open(NULL, 0);
-	gboolean * no_global_menu = NULL;
-	g_module_symbol(module, "gtk_no_global_menu", &no_global_menu);
-	if(no_global_menu) {
-		* no_global_menu = TRUE;
-		g_message("hacking gnomenu patch in gtk...");
-	}
+	gnomenu_disable();
 	gtk_init(&argc, &argv);
 
 	g_datalist_init(&client_list);

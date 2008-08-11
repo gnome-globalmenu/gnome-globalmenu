@@ -13,6 +13,7 @@
 //TODO:
 //Local cache and server crash recovery.
 //
+static gboolean g_gnomenu_disabled = FALSE;
 static GHashTable * object_hash = NULL;
 /*HashTable is better than DataList because it doesn't propagate the GQuarks */
 static gchar * get_native_object_name(GtkWidget * widget){
@@ -91,6 +92,7 @@ static gboolean ActivateItem(IPCCommand * command, gpointer data){
 }
 
 gboolean gnomenu_init(){
+	if(g_gnomenu_disabled) return FALSE;
 	ipc_dispatcher_register_cmd("QueryMenu", QueryMenu, NULL);
 	ipc_dispatcher_register_cmd("ActivateItem", ActivateItem, NULL);
 	object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
@@ -131,4 +133,8 @@ void gnomenu_unbind_menu(GdkWindow * window, GtkWidget * menubar){
 	gchar * window_str = g_strdup_printf("%ld", GDK_WINDOW_XWINDOW(window));
 	ipc_client_call(NULL, "UnbindMenu", NULL, "window", window_str, "menu", get_native_object_name(menubar), NULL); 
 	g_free(window_str);
+}
+
+void gnomenu_disable(){
+	g_gnomenu_disabled = TRUE;
 }
