@@ -24,8 +24,8 @@ libgnomenu_la_SOURCES = \
 	ipcutils.c \
 	ipcutils.h \
 	ipc.h  \
-	menu.h \
-	menu.c \
+	binding-gtk.h \
+	binding-gtk.c \
 	main.c 
 
 libgnomenu_la_LDFLAGS = \
