@@ -21,6 +21,8 @@ libgnomenu_la_SOURCES = \
 	ipccommand.h \
 	ipcevent.c \
 	ipcevent.h \
+	ipceventsink.c \
+	ipceventsink.h \
 	ipcutils.c \
 	ipcutils.h \
 	ipc.h  \
