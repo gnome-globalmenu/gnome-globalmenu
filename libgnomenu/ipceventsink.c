@@ -25,11 +25,12 @@ void ipc_event_sink_listen(const gchar * event, IPCEventHandler handler, gpointe
 	if(!info) {
 		info = g_slice_new0(IPCEventInfo);
 		g_datalist_set_data_full(&events, event, info, ipc_event_info_free);
-	} else {
-		IPCEventHandlerInfo * hinfo = g_slice_new0(IPCEventHandlerInfo);
-		hinfo->handler = handler;
-		hinfo->data = data;
-		info->handlers = g_list_append(info->handlers, hinfo);
+	}
+	{
+	IPCEventHandlerInfo * hinfo = g_slice_new0(IPCEventHandlerInfo);
+	hinfo->handler = handler;
+	hinfo->data = data;
+	info->handlers = g_list_append(info->handlers, hinfo);
 	}
 }
 void ipc_event_sink_unlisten(const gchar * event, IPCEventHandler handler, gpointer data) {

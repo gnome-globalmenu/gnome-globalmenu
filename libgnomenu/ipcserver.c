@@ -72,7 +72,7 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 }
 static gboolean Emit(IPCCommand * command, gpointer data) {
 	gchar * event_name = IPCParam(command, "_event_");
-	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), g_quark_to_string(command->to), event_name);
+	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), event_name);
 	/*FIXME: This is ugly, use a foreach to build the parameters*/
 	gpointer tmp = event->parameters;
 	event->parameters = command->parameters;

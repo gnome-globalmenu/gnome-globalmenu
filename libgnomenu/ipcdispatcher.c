@@ -4,7 +4,7 @@
 #include "ipcdispatcher.h"
 
 typedef struct _CommandInfo {
-	gchar * name;
+	const gchar * name;
 	IPCCMD server_cmd;
 	gpointer data;
 	const gchar ** in;
@@ -14,7 +14,6 @@ typedef struct _CommandInfo {
 static GData * command_hash = NULL;
 static gboolean initialized = FALSE;
 static void command_info_destroy(CommandInfo * info) {
-	g_free(info->name);
 	g_slice_free(CommandInfo, info);
 }
 
@@ -41,9 +40,10 @@ static gboolean Introspect(IPCCommand * command, gpointer data){
 	IPCRet(command, g_string_free(string, FALSE));
 	return TRUE;
 }
+/** Never call this function directly, use the macro IPC_DISPATCHER_REGISTER instead*/
 void ipc_dispatcher_register(const gchar * name, IPCCMD cmd_handler, const gchar * in, const gchar * out, gpointer data) {
 	CommandInfo * info = g_slice_new0(CommandInfo);
-	info->name = g_strdup(name);
+	info->name = name;
 	info->server_cmd = cmd_handler;
 	info->data = data;
 	info->in = in;

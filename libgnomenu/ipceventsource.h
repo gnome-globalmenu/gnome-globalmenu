@@ -3,8 +3,9 @@
 #include "ipcevent.h"
 #define IPC_EVENT_SOURCE_REGISTER(name, in) \
 { \
-	static gchar * _ipc_in = in; \
-	ipc_event_source_register(event, in); \
+	static gchar ** _ipc_in = in; \
+	static gchar _ipc_name[] = name; \
+	ipc_event_source_register(_ipc_name, in); \
 }
 void ipc_event_source_register(const gchar * event, const gchar * in);
 void ipc_event_source_mute(const gchar * event);

@@ -6,7 +6,8 @@
 IPCEvent * ipc_event_parse(const gchar * string) {
 	return ipc_command_parse(string);
 }
-IPCEvent * ipc_event_new(const gchar * from, const gchar * to, const gchar * name) {
+IPCEvent * ipc_event_new(const gchar * from, const gchar * name) {
+	static const gchar to[] = "ANY";
 	return ipc_command_new(from, to, name);
 }
 void ipc_event_free(IPCEvent * event) {
@@ -23,6 +24,9 @@ void ipc_event_set_parameters(IPCEvent * event,  ...){
 }
 void ipc_event_set_parameters_valist(IPCEvent * event, va_list va) {
 	ipc_command_set_parameters_valist(event, va);
+}
+void ipc_event_set_parameters_array(IPCEvent * event, const gchar * paras[], const gchar * values[]){
+	ipc_command_set_parameters_array(event, paras, values);
 }
 GList * ipc_event_list_parse(const gchar * string) {
 	return ipc_command_list_parse(string);
