@@ -45,7 +45,8 @@ libgnomenuinclude_HEADERS =
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
 
+EXTRA_DIST = ipccommand.dtd
 
 CLEANFILES = $(BUILT_SOURCES)
+
 dist-hook:
-	cd $(distdir) ;

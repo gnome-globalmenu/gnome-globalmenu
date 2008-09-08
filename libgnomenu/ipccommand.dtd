@@ -1,0 +1,14 @@
+<!ELEMENT command (p r)>
+<!ELEMENT p CDATA>
+<!ELEMENT r CDATA>
+<!ATTLIST command name CDATA #REQUIRED>
+<!ATTLIST command from CDATA #REQUIRED>
+<!ATTLIST command to CDATA #REQUIRED>
+<!ATTLIST p name CDATA #REQUIRED>
+<!ATTLIST r name CDATA #REQUIRED>
+<!-- 
+<command name="" from="" to="">
+	<p name=""></p>
+	<r name=""></r>
+</command>
+-->
