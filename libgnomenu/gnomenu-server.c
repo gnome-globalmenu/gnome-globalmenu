@@ -6,7 +6,7 @@
 #else
 #define LOG(fmt, args...)
 #endif
-
+#include "ipcdispatcher.h"
 #include "ipcserver.h"
 
 typedef struct {
@@ -143,28 +143,40 @@ int main(int argc, char* argv[]){
 	 *
 	 * 	Bind a menu object to a toplevel window.
 	 * 	*/
-	ipc_dispatcher_register_cmd("BindMenu", BindMenu, NULL);
+	IPC_DISPATCHER_REGISTER("BindMenu", BindMenu, 
+			IPC_IN("window", "menu"),
+			IPC_OUT("VOID"),
+			NULL);
 	/* UnbindMenu:
 	 * 	window: the toplevel GdkNativeWindow to bind to (string from in dec)
 	 * 	menu: the name of the menu object
 	 *
 	 * 	Unbind a menu object to a toplevel window.
 	 * 	*/
-	ipc_dispatcher_register_cmd("UnbindMenu", UnbindMenu, NULL);
+	IPC_DISPATCHER_REGISTER("UnbindMenu", UnbindMenu, 
+			IPC_IN("window", "menu"),
+			IPC_OUT("VOID"),
+			NULL);
 	/* LookupWindow:
 	 * 	window: the toplevel window you are interested in.
 	 *
 	 * 	Returns:
 	 * 		the cid associated with the window.
 	 */
-	ipc_dispatcher_register_cmd("LookupWindow", LookupWindow, NULL);
+	IPC_DISPATCHER_REGISTER("LookupWindow", LookupWindow, 
+			IPC_IN("window"),
+			IPC_OUT("result"),
+			NULL);
 	/* ListClients:
 	 * 	void
 	 *
 	 * 	Returns:
 	 * 	 a GMarkup text segment describing the clients and their toplevels with menus.
 	 * 	*/
-	ipc_dispatcher_register_cmd("ListClients", ListClients, NULL);
+	IPC_DISPATCHER_REGISTER("ListClients", ListClients, 
+			IPC_IN("VOID"),
+			IPC_OUT("result"),
+			NULL);
 	if(!ipc_server_listen(client_create_callback, client_destroy_callback, NULL)) {
 		g_critical("server already there");
 		return 1;

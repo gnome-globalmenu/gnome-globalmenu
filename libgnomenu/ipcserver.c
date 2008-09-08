@@ -13,6 +13,7 @@
 #include "ipcutils.h"
 #include "ipcserver.h"
 #include "ipccommand.h"
+#include "ipcdispatcher.h"
 
 typedef struct _ClientInfo {
 	GQuark cid;
@@ -123,10 +124,10 @@ static gboolean ipc_server_call_client_command(IPCCommand ** command) {
 }
 
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
-	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
-	ipc_dispatcher_register_cmd("Emit", Emit, NULL);
-	ipc_dispatcher_register_cmd("_AddEvent_", AddEvent, NULL);
-	ipc_dispatcher_register_cmd("_RemoveEvent_", RemoveEvent, NULL);
+	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
+	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("_AddEvent_", AddEvent, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("_RemoveEvent_", RemoveEvent, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;

@@ -13,7 +13,7 @@
 #include "ipcutils.h"
 #include "ipcclient.h"
 #include "ipccommand.h"
-
+#include "ipcdispatcher.h"
 
 
 /**
@@ -217,7 +217,7 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
  */
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
-	ipc_dispatcher_register_cmd("Ping", Ping, NULL);
+	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
 
 	server = ipc_find_server();
 	if(server == 0) {

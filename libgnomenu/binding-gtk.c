@@ -10,6 +10,8 @@
 
 #include <gdk/gdkx.h>
 #include "ipcclient.h"
+#include "ipcdispatcher.h"
+
 //TODO:
 //Local cache and server crash recovery.
 //
@@ -93,8 +95,14 @@ static gboolean ActivateItem(IPCCommand * command, gpointer data){
 
 gboolean gnomenu_init(){
 	if(g_gnomenu_disabled) return FALSE;
-	ipc_dispatcher_register_cmd("QueryMenu", QueryMenu, NULL);
-	ipc_dispatcher_register_cmd("ActivateItem", ActivateItem, NULL);
+	IPC_DISPATCHER_REGISTER("QueryMenu", QueryMenu, 
+			IPC_IN("menu"),
+			IPC_OUT("result"),
+			NULL);
+	IPC_DISPATCHER_REGISTER("ActivateItem", ActivateItem, 
+			IPC_IN("item"),
+			IPC_OUT("result"),
+			NULL);
 	object_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	if(!ipc_client_start(NULL, NULL)) {
 		return FALSE;
