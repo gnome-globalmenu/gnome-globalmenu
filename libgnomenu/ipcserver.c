@@ -15,11 +15,20 @@
 #include "ipccommand.h"
 #include "ipcdispatcher.h"
 
+typedef struct _InstalledEventInfo{
+	gint ref_count;
+};
+typedef struct _ListeningEventInfo{
+	gchar * source;
+};
 typedef struct _ClientInfo {
 	GQuark cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
-	GData * event_mask;
+	struct {
+		GData * installed;
+		GData * listening;
+	} events;
 } ClientInfo;
 
 static GdkWindow * server_window = NULL;
@@ -34,7 +43,8 @@ static void client_info_destroy(gpointer data){
 	ClientInfo * info = data;
 	g_hash_table_remove(client_hash_by_cid, g_quark_to_string(info->cid));
 //	gdk_window_destroy(info->window);
-	g_datalist_clear(&info->event_mask);
+	g_datalist_clear(&info->events.installed);
+	g_datalist_clear(&info->events.listening); /*FIXME: unref these events*/
 	g_slice_free(ClientInfo, info);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
@@ -199,7 +209,8 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	
 	ClientInfo * client_info = g_slice_new0(ClientInfo);
 	client_info->xwindow = src;
-	g_datalist_init(&(client_info->event_mask));
+	g_datalist_init(&(client_info->events.listening));
+	g_datalist_init(&(client_info->events.installed));
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
