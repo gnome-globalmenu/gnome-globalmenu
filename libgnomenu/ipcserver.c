@@ -38,22 +38,18 @@ static void client_info_destroy(gpointer data){
 	g_slice_free(ClientInfo, info);
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
-static void AddEvent_foreach(GQuark key, gchar * value, gpointer foo[1]){
-	GHashTable * hash = foo[0];
-	if(key != g_quark_from_string("_event_"))
-		g_hash_table_insert(hash, g_quark_to_string(key), g_strdup(value));
-}
-static gboolean AddEvent(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
-static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
+
 static gboolean Ping(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup(IPCParam(command, "message")));
 	return TRUE;
 }
 static gboolean Emit(IPCCommand * command, gpointer data) {
+	return TRUE;
+}
+static gboolean Listen(IPCCommand * command, gpointer data) {
+	return TRUE;
+}
+static gboolean Unlisten(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 static gchar * ipc_server_call_client_xml(ClientInfo * info, gchar * xml){
@@ -98,9 +94,9 @@ static gboolean ipc_server_call_client_command(IPCCommand * command) {
 
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
-	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
-	IPC_DISPATCHER_REGISTER("_AddEvent_", AddEvent, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
-	IPC_DISPATCHER_REGISTER("_RemoveEvent_", RemoveEvent, IPC_IN("_event_", "..."), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("event_content"), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("Listen", Listen, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("Unlisten", Unlisten, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;
