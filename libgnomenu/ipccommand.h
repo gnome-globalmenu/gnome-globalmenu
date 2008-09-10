@@ -37,5 +37,6 @@ void ipc_command_clear_results(IPCCommand * command);
 void ipc_command_set_parameters_valist(IPCCommand * command,  va_list va);
 void ipc_command_set_parameters_array(IPCCommand * command, gchar ** paras, gchar ** values);
 void ipc_command_set_results_valist(IPCCommand * command, va_list va);
+void ipc_command_steal(IPCCommand * theft, IPCCommand * stolen);
 gchar * ipc_command_get_default_result(IPCCommand * command);
 #endif

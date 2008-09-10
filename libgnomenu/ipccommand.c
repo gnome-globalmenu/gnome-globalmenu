@@ -149,6 +149,10 @@ clean_up:
 	g_list_free(list);
 	return rt;
 }
+void ipc_command_steal(IPCCommand * theft, IPCCommand * stolen){
+	g_memmove(theft, stolen, sizeof(IPCCommand));
+	g_slice_free(IPCCommand, stolen);
+}
 GList * ipc_command_list_parse(const gchar * string) {
 	g_return_val_if_fail(string, NULL);
 	ParseInfo cpi = {0};
