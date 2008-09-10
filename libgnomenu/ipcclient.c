@@ -173,8 +173,18 @@ gboolean ipc_client_started(){
 }
 static gboolean Ping(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup(IPCParam(command, "message")));
-	LOG("Ping");
 	return TRUE;
+}
+static gboolean Mute(IPCCommand * command, gpointer data){
+	ipc_event_source_mute(IPCParam(command, "event"));
+	return TRUE;
+}
+static gboolean Unmute(IPCCommand * command, gpointer data){
+	ipc_event_source_unmute(IPCParam(command, "event"));
+	return TRUE;
+}
+static void ServerSampleEvent(IPCEvent * event, gpointer data){
+	LOG("received a server event");
 }
 /**
  * ipc_client_start:
@@ -194,7 +204,9 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 	GdkWindow * server_gdk = NULL;
 	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
-
+	IPC_DISPATCHER_REGISTER("Mute", Mute, IPC_IN("event"), IPC_OUT("result"), NULL);
+	IPC_DISPATCHER_REGISTER("Unmute", Unmute, IPC_IN("event"), IPC_OUT("result"), NULL);
+	ipc_event_sink_listen("SampleEvent", "SERVER", ServerSampleEvent, NULL);
 	server = ipc_find_server();
 	if(server == 0) {
 		gchar * server_bin = g_getenv("GNOMENU_SERVER");
