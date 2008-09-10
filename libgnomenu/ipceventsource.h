@@ -7,7 +7,7 @@
 	static gchar _ipc_name[] = name; \
 	ipc_event_source_register(_ipc_name, in); \
 }
-void ipc_event_source_register(const gchar * event, const gchar * in);
+void ipc_event_source_register(const gchar * event, const gchar ** in);
 void ipc_event_source_mute(const gchar * event);
 void ipc_event_source_unmute(const gchar * event);
 void ipc_event_source_emit(const gchar * event, ...);

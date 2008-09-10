@@ -46,6 +46,9 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 static gboolean Emit(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
+static gboolean InstallEvent(IPCCommand * command, gpointer data) {
+	return TRUE;
+}
 static gboolean Listen(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
@@ -95,6 +98,7 @@ static gboolean ipc_server_call_client_command(IPCCommand * command) {
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
 	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("event_content"), IPC_OUT("VOID"), NULL);
+	IPC_DISPATCHER_REGISTER("InstallEvent", InstallEvent, IPC_IN("event"), IPC_OUT("VOID"), NULL);
 	IPC_DISPATCHER_REGISTER("Listen", Listen, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
 	IPC_DISPATCHER_REGISTER("Unlisten", Unlisten, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
 	gdk_x11_grab_server();

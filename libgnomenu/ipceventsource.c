@@ -15,7 +15,7 @@ static gboolean initialized = FALSE;
 static void event_info_destroy(EventInfo * info){
 	g_slice_free(EventInfo, info);
 }
-void ipc_event_source_register(const gchar * name, const gchar * in) {
+void ipc_event_source_register(const gchar * name, const gchar ** in) {
 	EventInfo * info = g_slice_new0(EventInfo);
 	info->name = name;
 	info->in = in;
@@ -23,6 +23,7 @@ void ipc_event_source_register(const gchar * name, const gchar * in) {
 	if(!initialized){
 		g_datalist_init(&event_hash);
 	}
+	ipc_client_call(NULL, "InstallEvent", NULL, "event", name, NULL);
 	g_datalist_set_data_full(&event_hash, name, info, event_info_destroy);
 }
 void ipc_event_source_mute(const gchar * name) {
