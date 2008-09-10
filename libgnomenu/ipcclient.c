@@ -302,10 +302,10 @@ static gboolean ipc_client_call_list(GList ** command_list) {
  *	the command will be replaced with the a new command object with the result.
  *
  * */
-static gboolean ipc_client_call_server_command(IPCCommand ** command){
+static gboolean ipc_client_call_server_command(IPCCommand * command){
 	/*The command is 'destroyed' after this function'*/
 	if(!in_transaction) {
-		gchar * xml = ipc_command_to_string(*command);
+		gchar * xml = ipc_command_to_string(command);
 		gchar * ret_xml = NULL;
 		ret_xml = ipc_client_call_server_xml(xml);
 		IPCCommand * returns = ipc_command_parse(ret_xml);
@@ -315,13 +315,11 @@ static gboolean ipc_client_call_server_command(IPCCommand ** command){
 			g_warning("malformed return value");
 			return FALSE;
 		} else {
-			ipc_command_free(*command);
-			*command = returns;
+			ipc_command_steal(command, returns);
 			return TRUE;
 		}
 	} else {
-		transaction = g_list_append(transaction, *command);
-		*command = NULL;
+		transaction = g_list_append(transaction, command);
 		return TRUE;
 	}
 }
@@ -333,11 +331,9 @@ static gboolean ipc_client_call_server_command(IPCCommand ** command){
 gboolean ipc_client_call_valist(gchar * target, const gchar * command_name, gchar ** rt, va_list va) {
 	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
 	ipc_command_set_parameters_valist(command, va);
-	if(ipc_client_call_server_command(&command)){
-		if(command){
-			if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
-			ipc_command_free(command);
-		}
+	if(ipc_client_call_server_command(command)){
+		if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+		ipc_command_free(command);
 		return TRUE;
 	} else {
 		return FALSE;
@@ -368,11 +364,9 @@ gboolean ipc_client_call(gchar * target, const gchar * command_name, gchar ** rt
 gboolean ipc_client_call_array(gchar * target, const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
 	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
 	ipc_command_set_parameters_array(command, paras, values);
-	if(ipc_client_call_server_command(&command)){
-		if(command){
-			if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
-			ipc_command_free(command);
-		}
+	if(ipc_client_call_server_command(command)){
+		if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+		ipc_command_free(command);
 		return TRUE;
 	} else {
 		return FALSE;

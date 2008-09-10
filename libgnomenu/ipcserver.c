@@ -101,12 +101,12 @@ no_prop_set:
 	return ret_xml;
 
 }
-static gboolean ipc_server_call_client_command(IPCCommand ** command) {
+static gboolean ipc_server_call_client_command(IPCCommand * command) {
 	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, 
-			g_quark_to_string((*command)->to));
-	LOG("target = %s", g_quark_to_string((*command)->to));
+			g_quark_to_string((command)->to));
+	LOG("target = %s", g_quark_to_string((command)->to));
 	g_return_val_if_fail(info, FALSE);
-	gchar * xml = ipc_command_to_string(*command);
+	gchar * xml = ipc_command_to_string(command);
 	gchar * ret_xml = NULL;
 	ret_xml = ipc_server_call_client_xml(info, xml);
 	IPCCommand * returns = ipc_command_parse(ret_xml);
@@ -116,8 +116,7 @@ static gboolean ipc_server_call_client_command(IPCCommand ** command) {
 		g_warning("malformed return value");
 		return FALSE;
 	} else {
-		ipc_command_free(*command);
-		*command = returns;
+		ipc_command_steal(command, returns);
 		return TRUE;
 	}
 	return FALSE;
@@ -182,10 +181,9 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 				g_warning("command was not successfull, ignoring the call");
 			}
 		} else {
-			if(!ipc_server_call_client_command(&command)){
+			if(!ipc_server_call_client_command(command)){
 				IPCFail(command);
 			}
-			node->data = command;
 		}
 	}
 	gchar * ret = ipc_command_list_to_string(commands);
