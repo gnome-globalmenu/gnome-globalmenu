@@ -16,7 +16,7 @@ typedef struct {
 #define ADD_MENU(cli, wind, menu) add_menu(cli, wind, menu)
 #define REMOVE_MENU(cli, wind, menu) g_hash_table_remove(cli->menus, wind)
 #define FIND_MENUS(cli, wind) g_hash_table_lookup(cli->menus, wind)
-#define find_client(cli) g_datalist_id_get_data(&client_list, cli)
+#define find_client(cli) g_datalist_get_data(&client_list, cli)
 void add_menu(ClientInfo * cli, gchar * window, gchar * menu){
 	GList * list = g_hash_table_steal(cli->menus, window);
 	list = g_list_append(list, g_strdup(menu));
@@ -61,7 +61,7 @@ static gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 static gboolean BindMenu(IPCCommand * command, gpointer data){
-	ClientInfo * ci = find_client(command->from);
+	ClientInfo * ci = find_client(ipc_command_get_source(command));
 	g_return_val_if_fail(ci, FALSE);
 	gchar * wind = IPCParam(command, "window");
 	gchar * menu = IPCParam(command, "menu");
@@ -69,7 +69,7 @@ static gboolean BindMenu(IPCCommand * command, gpointer data){
 	return TRUE;
 }
 static gboolean UnbindMenu(IPCCommand * command, gpointer data){
-	ClientInfo * ci = find_client(command->from);
+	ClientInfo * ci = find_client(ipc_command_get_source(command));
 	g_return_val_if_fail(ci, FALSE);
 	gchar * wind = IPCParam(command, "window");
 	gchar * menu = IPCParam(command, "menu");

@@ -56,7 +56,7 @@ void ipc_dispatcher_register(const gchar * name, IPCCMD cmd_handler, const gchar
 	g_datalist_set_data_full(&command_hash, name, info, command_info_destroy);
 }
 gboolean ipc_dispatcher_call_cmd(IPCCommand * command) {
-	CommandInfo * info = g_datalist_id_get_data(&command_hash, command->name);
+	CommandInfo * info = g_datalist_get_data(&command_hash, ipc_command_get_name(command));
 	if(!info) return FALSE;
 	return info->server_cmd(command, info->data);
 }

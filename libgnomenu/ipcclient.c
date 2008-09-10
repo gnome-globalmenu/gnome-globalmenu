@@ -116,13 +116,13 @@ static void client_message_call(XClientMessageEvent * client_message) {
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(g_quark_from_string(cid) == command->to) {
+		if(g_str_equal(cid, ipc_command_get_target(command))) {
 			if(!ipc_dispatcher_call_cmd(command)) {
 				g_warning("command was not successfull, ignoring the call");
 				IPCFail(command);
 			}
 		} else {
-			g_warning("command is not for this client, ignoreing the call: %s %s", cid, g_quark_to_string(command->to));
+			g_warning("command is not for this client, ignoreing the call: %s %s", cid, ipc_command_get_target(command));
 		}
 	}
 	gchar * ret = ipc_command_list_to_string(commands);
@@ -329,15 +329,21 @@ static gboolean ipc_client_call_server_command(IPCCommand * command){
  * valist_version of ipc_client_call.
  */
 gboolean ipc_client_call_valist(gchar * target, const gchar * command_name, gchar ** rt, va_list va) {
-	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
+	IPCCommand * command = ipc_command_new(command_name);
+	ipc_command_set_source(command, cid);
+	ipc_command_set_target(command, target?target:"SERVER");
 	ipc_command_set_parameters_valist(command, va);
 	if(ipc_client_call_server_command(command)){
-		if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+		if(rt) *rt = g_strdup(ipc_command_get_return_value(command));
 		ipc_command_free(command);
 		return TRUE;
 	} else {
 		return FALSE;
 	}
+}
+gboolean ipc_client_call_command(IPCCommand * command) {
+	ipc_command_set_source(command, cid);
+	return ipc_client_call_server_command(command);
 }
 /**
  * ipc_client_call:
@@ -362,10 +368,12 @@ gboolean ipc_client_call(gchar * target, const gchar * command_name, gchar ** rt
  * 	Array version of ipc_client_call_server.
  */
 gboolean ipc_client_call_array(gchar * target, const gchar * command_name, gchar ** rt, gchar ** paras, gchar ** values){
-	IPCCommand * command = ipc_command_new(cid, target?target:"SERVER", command_name);
+	IPCCommand * command = ipc_command_new(command_name);
+	ipc_command_set_source(command, cid);
+	ipc_command_set_target(command, target?target:"SERVER");
 	ipc_command_set_parameters_array(command, paras, values);
 	if(ipc_client_call_server_command(command)){
-		if(rt) *rt = g_strdup(ipc_command_get_default_result(command));
+		if(rt) *rt = g_strdup(ipc_command_get_return_value(command));
 		ipc_command_free(command);
 		return TRUE;
 	} else {

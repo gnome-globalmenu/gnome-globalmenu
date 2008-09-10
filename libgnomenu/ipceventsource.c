@@ -36,7 +36,7 @@ void ipc_event_source_unmute(const gchar * name) {
 	info->muted = FALSE;
 }
 void ipc_event_source_emit_event(IPCEvent * event) {
-	EventInfo * info = g_datalist_id_get_data(&event_hash, event->name);
+	EventInfo * info = g_datalist_get_data(&event_hash, ipc_command_get_name(event));
 	if(!info->muted) {
 		gchar * event_str = ipc_event_to_string(event);
 		ipc_client_call(NULL, "Emit", NULL, "event", event_str, NULL);

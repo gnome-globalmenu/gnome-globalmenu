@@ -3,6 +3,15 @@
 #include <glib.h>
 #include "ipccommand.h"
 
+struct _IPCCommand {
+	GQuark name;
+	GQuark from;
+	GQuark to;
+	GData * parameters;
+	GData * results;
+	gboolean failed;
+} ;
+
 typedef struct {
 	GList * command_list;
 	IPCCommand * current_command;
@@ -59,7 +68,9 @@ static void start_element  (GMarkupParseContext *context,
 				to = (attribute_values[i]);
 			}
 		}
-		pi->current_command = ipc_command_new(from, to, name);
+		pi->current_command = ipc_command_new(name);
+		ipc_command_set_source(pi->current_command, from);
+		ipc_command_set_target(pi->current_command, to);
 	} else 
 	if(g_str_equal(element_name, "p")){
 		gint i;
@@ -221,11 +232,9 @@ gchar * ipc_command_list_to_string(GList * command_list){
 	}
 	return g_string_free(result, FALSE);
 }
-IPCCommand * ipc_command_new(gchar * from, gchar * to, gchar * name) {
+IPCCommand * ipc_command_new(gchar * name) {
 	IPCCommand * rt = g_slice_new0(IPCCommand);
 	rt->name = g_quark_from_string(name);
-	rt->from = g_quark_from_string(from);
-	rt->to = g_quark_from_string(to);
 	g_datalist_init(&rt->parameters);
 	g_datalist_init(&rt->results);
 	return rt;
@@ -283,8 +292,36 @@ void ipc_command_set_results(IPCCommand * command, ...) {
 	ipc_command_set_results_valist(command, va);
 	va_end(va);
 }
-gchar * ipc_command_get_default_result(IPCCommand * command) {
-	gchar * rt;
-	rt = g_datalist_get_data(&command->results, "default");
-	return rt;
+void ipc_command_set_source(IPCCommand * command, const gchar * from) {
+	command->from = g_quark_from_string(from);
+}
+const gchar * ipc_command_get_source(IPCCommand * command) {
+	return g_quark_to_string(command->from);
+}
+void ipc_command_set_target(IPCCommand * command, const gchar * target) {
+	command->to = g_quark_from_string(target);
+}
+const gchar * ipc_command_get_target(IPCCommand * command) {
+	return g_quark_to_string(command->to);
+}
+const gchar * ipc_command_get_parameter(IPCCommand * command, const gchar * paraname) {
+	return g_datalist_get_data(&command->parameters, paraname);
+}
+void ipc_command_set_parameter(IPCCommand * command, const gchar * paraname, const gchar * value) {
+	g_datalist_set_data_full(&command->parameters, paraname, value, g_free);
+}
+const gchar * ipc_command_get_return_value(IPCCommand * command) {
+	return g_datalist_get_data(&command->results, "default");
+}
+void ipc_command_set_return_value(IPCCommand * command, const gchar * value) {
+	g_datalist_set_data_full(&command->results, "default", value, g_free);
+}
+void ipc_command_set_fail(IPCCommand * command, const gboolean fail) {
+	command->failed = fail;
+}
+gboolean ipc_command_get_fail(IPCCommand * command) {
+	return command->failed;
+}
+const gchar * ipc_command_get_name(IPCCommand * command){
+	return g_quark_to_string(command->name);
 }

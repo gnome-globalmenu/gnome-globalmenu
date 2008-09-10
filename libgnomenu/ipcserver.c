@@ -44,26 +44,9 @@ static void AddEvent_foreach(GQuark key, gchar * value, gpointer foo[1]){
 		g_hash_table_insert(hash, g_quark_to_string(key), g_strdup(value));
 }
 static gboolean AddEvent(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
-	g_assert(info);
-	gchar * eventname = IPCParam(command, "_event_");
-	/*strdup because IPCRemoveParam will free it*/
-	LOG("%s is hooking to %s;", g_quark_to_string(info->cid), eventname);
-	
-	/*This is ugly. building a new parameter list is better*/
-	GHashTable * ipc_event_filter_hash = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, g_free);
-	gpointer foo[] = {ipc_event_filter_hash};
-	g_datalist_foreach(&command->parameters, AddEvent_foreach, foo);
-	g_datalist_set_data_full(&(info->event_mask), 
-			eventname,
-			ipc_event_filter_hash, (GDestroyNotify)g_hash_table_unref);
 	return TRUE;
 }
 static gboolean RemoveEvent(IPCCommand * command, gpointer data) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, g_quark_to_string(command->from));
-	g_assert(info);
-	g_datalist_remove_data(&(info->event_mask), 
-			IPCParam(command, "_event_"));
 	return TRUE;
 }
 static gboolean Ping(IPCCommand * command, gpointer data) {
@@ -71,14 +54,6 @@ static gboolean Ping(IPCCommand * command, gpointer data) {
 	return TRUE;
 }
 static gboolean Emit(IPCCommand * command, gpointer data) {
-	gchar * event_name = IPCParam(command, "_event_");
-	IPCEvent * event = ipc_event_new(g_quark_to_string(command->from), event_name);
-	/*FIXME: This is ugly, use a foreach to build the parameters*/
-	gpointer tmp = event->parameters;
-	event->parameters = command->parameters;
-	ipc_server_send_event(event);
-	event->parameters = tmp;
-	ipc_event_free(event);
 	return TRUE;
 }
 static gchar * ipc_server_call_client_xml(ClientInfo * info, gchar * xml){
@@ -102,9 +77,8 @@ no_prop_set:
 
 }
 static gboolean ipc_server_call_client_command(IPCCommand * command) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, 
-			g_quark_to_string((command)->to));
-	LOG("target = %s", g_quark_to_string((command)->to));
+	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, ipc_command_get_target(command));
+	LOG("target = %s", ipc_command_get_target(command));
 	g_return_val_if_fail(info, FALSE);
 	gchar * xml = ipc_command_to_string(command);
 	gchar * ret_xml = NULL;
@@ -171,11 +145,12 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(info->cid != (command->from)) {
-			g_warning("unknown client, ignoring the call: cid = %s from =%s", g_quark_to_string(info->cid), g_quark_to_string(command->from));
+		if(info->cid != g_quark_from_string(ipc_command_get_source(command))) {
+			g_warning("unknown client, ignoring the call: cid = %s from =%s", 
+					g_quark_to_string(info->cid), ipc_command_get_source(command));
 			goto unknown_client;
 		}
-		if(g_quark_from_string("SERVER") == command->to) {
+		if(g_str_equal("SERVER", ipc_command_get_target(command))) {
 			if(!ipc_dispatcher_call_cmd(command)) {
 				IPCFail(command);
 				g_warning("command was not successfull, ignoring the call");
@@ -314,27 +289,7 @@ gboolean ipc_server_send_event(IPCEvent * event) {
 	GdkNativeWindow xwindow; 
 	ClientInfo * info;
 	while(g_hash_table_iter_next(&iter, (gpointer*)&xwindow, (gpointer*)&info)){
-		GHashTable * filter = g_datalist_id_get_data(&(info->event_mask), event->name);
-		LOG("testing client %s for event %s: filter = %p", g_quark_to_string(info->cid), g_quark_to_string(event->name), filter);
-		gboolean send = FALSE;
-		if(filter){
-			send = TRUE;
-			GHashTableIter iter2;
-			g_hash_table_iter_init(&iter2, filter);
-			gpointer prop;
-			gpointer value;
-			while(g_hash_table_iter_next(&iter2, &prop, &value)){
-				gchar * event_value = IPCParam(event, prop);
-				if(!event_value || !g_str_equal(event_value, value)){
-					send = FALSE;	
-					break;
-				}
-			}
-		}
-		if(send) {
-			LOG("sending event %s to %s", g_quark_to_string(event->name), g_quark_to_string(info->cid));
-			ipc_server_send_event_to(xwindow, event);
-		}
+		ipc_server_send_event_to(xwindow, event);
 	}
 	return TRUE;
 }

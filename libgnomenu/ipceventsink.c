@@ -48,7 +48,7 @@ void ipc_event_sink_unlisten(const gchar * event, IPCEventHandler handler, gpoin
 }
 
 void ipc_event_sink_dispatch(IPCEvent * event) {
-	IPCEventInfo * info  = g_datalist_id_get_data(&events, event->name);
+	IPCEventInfo * info  = g_datalist_get_data(&events, ipc_command_get_name(event));
 	g_return_if_fail(info != NULL);
 	GList * node;
 	for(node = info->handlers; node; node = node->next) {
