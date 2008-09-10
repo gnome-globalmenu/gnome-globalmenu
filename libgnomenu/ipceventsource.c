@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 
 #include "ipceventsource.h"
+#include "ipcclient.h"
+
 typedef struct {
 	const gchar * name;
 	const gchar ** in;
@@ -32,12 +34,13 @@ void ipc_event_source_unmute(const gchar * name) {
 	EventInfo * info = g_datalist_get_data(&event_hash, name);
 	g_return_if_fail(info != NULL);
 	info->muted = FALSE;
-
 }
 void ipc_event_source_emit_event(IPCEvent * event) {
 	EventInfo * info = g_datalist_id_get_data(&event_hash, event->name);
 	if(!info->muted) {
-		/*ipc_client_call (SERVER, Emit)*/
+		gchar * event_str = ipc_event_to_string(event);
+		ipc_client_call(NULL, "Emit", NULL, "event", event_str, NULL);
+		g_free(event_str);
 	}
 }
 void ipc_event_source_emit(const gchar * event, ...);

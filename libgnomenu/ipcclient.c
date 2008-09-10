@@ -14,7 +14,8 @@
 #include "ipcclient.h"
 #include "ipccommand.h"
 #include "ipcdispatcher.h"
-
+#include "ipceventsink.h"
+#include "ipceventsource.h"
 
 /**
  * Section: ipcclient
@@ -47,26 +48,6 @@ static gboolean
 	in_transaction = FALSE;  /*Are we in transaction?*/
 static GList * 
 	transaction = NULL; /*List of IPCCommand for this transaction*/
-
-static GData * 
-	event_handler_list = NULL; /* DataList of EventHandlerInfo.
-									'key' is the name of the event*/
-/**
- * EventHandlerInfo: 
- * 	@handler:	Callback
- * 	@data:		data passed to the callback
- * 	
- * internal data keeping track of the event handlers.
- * */
-typedef struct {
-	IPCClientEventHandler handler;
-	gpointer data;
-	GData * filter;
-} EventHandlerInfo;
-static void event_handler_info_free(EventHandlerInfo * info){
-	g_datalist_clear(&info->filter);
-	g_slice_free(EventHandlerInfo, info);
-}
 
 /**
  * server_filter:
@@ -113,12 +94,7 @@ static void client_message_event(XClientMessageEvent * client_message) {
 	GList * node;
 	for(node = list; node; node = node->next){
 		IPCEvent * event = node->data;
-		EventHandlerInfo * info = g_datalist_get_data(&event_handler_list, event->name);
-		if(!info) {
-			g_critical("no handlers for this event is set; shouldn't happen");
-		}
-		if(info->handler) 
-			info->handler(event, info->data);
+		ipc_event_sink_dispatch(event);
 	}
 	ipc_event_list_free(list);
 }
@@ -266,7 +242,6 @@ gboolean ipc_client_start(IPCClientServerDestroyNotify notify, gpointer data){
 		cid = g_strdup(identify);
 		LOG("CID obtained: %s", cid);
 		XFree(identify);
-		g_datalist_init(&event_handler_list);
 		started = TRUE;
 	} else {
 		started = FALSE;
@@ -369,7 +344,7 @@ gboolean ipc_client_call_valist(gchar * target, const gchar * command_name, gcha
 	}
 }
 /**
- * ipc_client_call_server:
+ * ipc_client_call:
  * 	@command_name: the name of the command.
  * 	@para_name: name of the first parameter.
  * 	@...: 	value of the first parameter and (name, value) pairs for
@@ -442,58 +417,4 @@ gboolean ipc_client_end_transaction(GList ** return_list){
 	else {
 		return FALSE;
 	}
-}
-/**
- * ipc_client_set_event:
- * 	@event: name of the event
- * 	@handler: handler
- * 	@data: data passed to the handler
- *
- * 	Listens to an event from the server. The old handler is removed.
- *
- * 	This function utilizes the internal IPC call _AddEvent to get the server-side task done.
- *
- */
-void ipc_client_set_event_valist(gchar * event, IPCClientEventHandler handler, gpointer data, va_list va){
-	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
-	IPCCommand * command = ipc_command_new(cid, "SERVER", "_AddEvent_");
-	info->data = data;
-	info->handler = handler;
-	g_datalist_init(&info->filter);
-	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	ipc_command_set_parameters_valist(command, va);
-	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
-	ipc_client_call_server_command(&command);
-	if(command) ipc_command_free(command);
-}
-void ipc_client_set_event_array(gchar * event, IPCClientEventHandler handler, gpointer data, gchar ** paras, gchar ** values){
-	EventHandlerInfo * info = g_slice_new0(EventHandlerInfo);
-	IPCCommand * command = ipc_command_new(cid, "SERVER", "_AddEvent_");
-	info->data = data;
-	info->handler = handler;
-	g_datalist_init(&info->filter);
-	g_datalist_set_data_full(&event_handler_list, event, info, event_handler_info_free);
-	ipc_command_set_parameters_array(command, paras, values);
-	IPCSetParam(command, g_strdup("_event_"), g_strdup(event));
-	ipc_client_call_server_command(&command);
-	if(command) ipc_command_free(command);
-}
-void ipc_client_set_event(gchar * event, IPCClientEventHandler handler, gpointer data, ...){
-	va_list va;
-	va_start(va, data);
-	ipc_client_set_event_valist(event, handler, data, va);
-	va_end(va);
-}
-/**
- * ipc_client_remove_event:
- * 	@event: name of the event
- *
- * 	Stop listening to an event. The handler is removed.
- *
- * 	This function utilizes the internal IPC call _RemoveEvent_ to get the server-side
- * 	task done.
- */
-void ipc_client_remove_event(gchar * event){
-	g_datalist_remove_data(&event_handler_list, event);
-	ipc_client_call(NULL, "_RemoveEvent_", NULL, "event", event, NULL);
 }
