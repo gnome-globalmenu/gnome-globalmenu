@@ -37,14 +37,14 @@ static GStringChunk * string_list = NULL;
 static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
 
-static GHashTable * client_hash_by_cid = NULL;
+static GHashTable * client_hash = NULL;
 static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
 
 static void client_info_free(gpointer data){
 	ClientInfo * info = data;
-	g_hash_table_remove(client_hash_by_cid, info->cid);
+	g_hash_table_remove(client_hash, info->cid);
 //	gdk_window_destroy(info->window);
 	g_datalist_clear(&info->events.installed);
 	g_datalist_clear(&info->events.listening); /*FIXME: unref these events*/
@@ -98,7 +98,7 @@ no_prop_set:
 
 }
 static gboolean ipc_server_call_client_command(IPCCommand * command) {
-	ClientInfo * info = g_hash_table_lookup(client_hash_by_cid, ipc_command_get_target(command));
+	ClientInfo * info = g_hash_table_lookup(client_hash, ipc_command_get_target(command));
 	LOG("target = %s", ipc_command_get_target(command));
 	g_return_val_if_fail(info, FALSE);
 	gchar * xml = ipc_command_to_string(command);
@@ -138,7 +138,7 @@ gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb
 	XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
 	gdk_x11_ungrab_server();
 
-	client_hash_by_cid = g_hash_table_new(g_str_hash, g_str_equal);
+	client_hash = g_hash_table_new(g_str_hash, g_str_equal);
 	client_destroy_callback = cdcb;	
 	client_create_callback = cccb;	
 	callback_data = data;	
@@ -232,7 +232,7 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	
 	ipc_set_property(src, IPC_PROPERTY_CID, identify);
 
-	g_hash_table_insert(client_hash_by_cid, client_info->cid, client_info);
+	g_hash_table_insert(client_hash, client_info->cid, client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(client_info->window, client_filter, client_info);
 	if(gdk_error_trap_pop()) {
@@ -251,7 +251,7 @@ static ClientInfo * get_info_from_xwindow(GdkNativeWindow window){
 		&window,
 		NULL	
 	};
-	g_hash_table_foreach(client_hash_by_cid, get_info_from_xwindow_foreach, foo);
+	g_hash_table_foreach(client_hash, get_info_from_xwindow_foreach, foo);
 	return foo[1];
 }
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
@@ -320,7 +320,7 @@ set_prop_fail:
  */
 gboolean ipc_server_send_event(IPCEvent * event) {
 	GHashTableIter iter;
-	g_hash_table_iter_init(&iter, client_hash_by_cid);
+	g_hash_table_iter_init(&iter, client_hash);
 	const gchar * cid;
 	ClientInfo * info;
 	while(g_hash_table_iter_next(&iter, (gpointer*) &cid, (gpointer*)&info)){
