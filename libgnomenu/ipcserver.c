@@ -15,14 +15,9 @@
 #include "ipccommand.h"
 #include "ipcdispatcher.h"
 
-typedef struct _InstalledEventInfo{
-	gint ref_count;
-};
-typedef struct _ListeningEventInfo{
-	gchar * source;
-};
+
 typedef struct _ClientInfo {
-	GQuark cid;
+	const gchar * cid;
 	GdkNativeWindow xwindow;
 	GdkWindow * window;
 	struct {
@@ -30,23 +25,40 @@ typedef struct _ClientInfo {
 		GData * listening;
 	} events;
 } ClientInfo;
+typedef struct _InstalledEventInfo{
+	gint ref_count;
+} InstalledEventInfo;
+typedef struct _ListeningEventInfo{
+	ClientInfo * source_info;
+} ListeningEventInfo;
 
+static GStringChunk * string_list = NULL;
+#define STR(str) g_string_chunk_insert_const(string_list, str)
 static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
-static GHashTable * client_hash = NULL;
+
 static GHashTable * client_hash_by_cid = NULL;
 static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
 
-static void client_info_destroy(gpointer data){
+static void client_info_free(gpointer data){
 	ClientInfo * info = data;
-	g_hash_table_remove(client_hash_by_cid, g_quark_to_string(info->cid));
+	g_hash_table_remove(client_hash_by_cid, info->cid);
 //	gdk_window_destroy(info->window);
 	g_datalist_clear(&info->events.installed);
 	g_datalist_clear(&info->events.listening); /*FIXME: unref these events*/
 	g_slice_free(ClientInfo, info);
 }
+static void installed_event_info_free(gpointer data){
+	InstalledEventInfo * info = data;
+	g_slice_free(InstalledEventInfo, info);
+}
+static void listening_event_info_free(gpointer data){
+	ListeningEventInfo * info = data;
+	g_slice_free(ListeningEventInfo, info);
+}
+
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 
 static gboolean Ping(IPCCommand * command, gpointer data) {
@@ -106,6 +118,7 @@ static gboolean ipc_server_call_client_command(IPCCommand * command) {
 }
 
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
+	string_list = g_string_chunk_new(0);
 	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
 	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("event_content"), IPC_OUT("VOID"), NULL);
 	IPC_DISPATCHER_REGISTER("InstallEvent", InstallEvent, IPC_IN("event"), IPC_OUT("VOID"), NULL);
@@ -124,7 +137,7 @@ gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb
 	gdk_flush();
 	XSync(GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
 	gdk_x11_ungrab_server();
-	client_hash = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, client_info_destroy);
+
 	client_hash_by_cid = g_hash_table_new(g_str_hash, g_str_equal);
 	client_destroy_callback = cdcb;	
 	client_create_callback = cccb;	
@@ -155,9 +168,9 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(info->cid != g_quark_from_string(ipc_command_get_source(command))) {
+		if(info->cid != STR(ipc_command_get_source(command))) {
 			g_warning("unknown client, ignoring the call: cid = %s from =%s", 
-					g_quark_to_string(info->cid), ipc_command_get_source(command));
+					info->cid, ipc_command_get_source(command));
 			goto unknown_client;
 		}
 		if(g_str_equal("SERVER", ipc_command_get_target(command))) {
@@ -192,11 +205,11 @@ static GdkFilterReturn client_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
 	ClientInfo * info = data;
 	if(((XEvent *)xevent)->type == DestroyNotify) {
 		XDestroyWindowEvent * dwe = (XDestroyWindowEvent *) xevent;
-		LOG("client %s is down!", g_quark_to_string(info->cid));
+		LOG("client %s is down!", info->cid);
 		gdk_window_remove_filter(info->window, client_filter, info);
 		if(client_destroy_callback)
 			client_destroy_callback(info->cid, callback_data);
-		g_hash_table_remove(client_hash, (gpointer) info->xwindow);
+		client_info_free(data);
 	} else {
 	}
 	return GDK_FILTER_CONTINUE;
@@ -214,13 +227,12 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
-	client_info->cid = g_quark_from_string(identify);
+	client_info->cid = STR(identify);
 	gdk_error_trap_push();
 	
 	ipc_set_property(src, IPC_PROPERTY_CID, identify);
 
-	g_hash_table_insert(client_hash, (gpointer) src, client_info);
-	g_hash_table_insert(client_hash_by_cid, g_quark_to_string(client_info->cid), client_info);
+	g_hash_table_insert(client_hash_by_cid, client_info->cid, client_info);
 	gdk_window_set_events(client_info->window, gdk_window_get_events(client_info->window) | GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(client_info->window, client_filter, client_info);
 	if(gdk_error_trap_pop()) {
@@ -230,12 +242,24 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	if(client_create_callback)
 		client_create_callback(client_info->cid, callback_data);
 }
+static void get_info_from_xwindow_foreach(gpointer key, gpointer value, gpointer foo[]){
+	ClientInfo * info = value;
+	if(info->xwindow = *((GdkNativeWindow *)foo[0])) foo[1] = info;
+}
+static ClientInfo * get_info_from_xwindow(GdkNativeWindow window){
+	gpointer foo[] = {
+		&window,
+		NULL	
+	};
+	g_hash_table_foreach(client_hash_by_cid, get_info_from_xwindow_foreach, foo);
+	return foo[1];
+}
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data){
 	if(server_frozen) return GDK_FILTER_CONTINUE;
 	XClientMessageEvent * client_message = (XClientMessageEvent *) xevent;
 #define GET_INFO \
 			GdkNativeWindow src = * ((GdkNativeWindow *) (&client_message->data.b)); \
-			ClientInfo * info = g_hash_table_lookup(client_hash, (gpointer) src);
+			ClientInfo * info = get_info_from_xwindow(src);
 
 	switch(((XEvent *)xevent)->type) {
 		case ClientMessage:
@@ -296,11 +320,11 @@ set_prop_fail:
  */
 gboolean ipc_server_send_event(IPCEvent * event) {
 	GHashTableIter iter;
-	g_hash_table_iter_init(&iter, client_hash);
-	GdkNativeWindow xwindow; 
+	g_hash_table_iter_init(&iter, client_hash_by_cid);
+	const gchar * cid;
 	ClientInfo * info;
-	while(g_hash_table_iter_next(&iter, (gpointer*)&xwindow, (gpointer*)&info)){
-		ipc_server_send_event_to(xwindow, event);
+	while(g_hash_table_iter_next(&iter, (gpointer*) &cid, (gpointer*)&info)){
+		ipc_server_send_event_to(info->xwindow, event);
 	}
 	return TRUE;
 }
