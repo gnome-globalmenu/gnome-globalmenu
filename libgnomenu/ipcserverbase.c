@@ -209,7 +209,7 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 }
 static void get_info_from_xwindow_foreach(gpointer key, gpointer value, gpointer foo[]){
 	ClientInfo * info = value;
-	if(info->xwindow = *((GdkNativeWindow *)foo[0])) foo[1] = info;
+	if(info->xwindow == *((GdkNativeWindow *)foo[0])) foo[1] = info;
 }
 static ClientInfo * get_info_from_xwindow(GdkNativeWindow window){
 	gpointer foo[] = {
@@ -260,11 +260,13 @@ static gboolean ipc_server_send_event_to(GdkNativeWindow xwindow, IPCEvent * eve
 		XFree(old_event_data);
 	} else
 		new_event_data = g_strdup(data);
+	LOG("event_data: %s", new_event_data);
 	g_free(data);
 	ipc_set_property(xwindow, IPC_PROPERTY_EVENT, new_event_data);
 	gdk_x11_ungrab_server();
 	g_free(new_event_data);
 	ipc_server_send_client_message(xwindow, IPC_CLIENT_MESSAGE_EVENT);
+	LOG("sending to %X", xwindow);
 	if(gdk_error_trap_pop()) {
 		g_warning("could not set the property for the event");
 		goto set_prop_fail;
@@ -276,19 +278,16 @@ set_prop_fail:
 /**
  * ipc_server_send_event:
  *
- *
- * Send the event only if 
- *
- * (1) the client added the filter.
- * (2) the parameters and values in the filter matches with the event.
+ * FIXME: respect the filters.
  *
  */
 gboolean ipc_server_send_event(IPCEvent * event) {
 	GHashTableIter iter;
 	g_hash_table_iter_init(&iter, client_hash);
-	const gchar * cid;
 	ClientInfo * info;
+	const gchar * cid;
 	while(g_hash_table_iter_next(&iter, (gpointer*) &cid, (gpointer*)&info)){
+		LOG("sending to %s(%s)", info->cid, cid);
 		ipc_server_send_event_to(info->xwindow, event);
 	}
 	return TRUE;

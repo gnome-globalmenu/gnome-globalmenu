@@ -80,6 +80,7 @@ static GdkFilterReturn server_filter(GdkXEvent * xevent, GdkEvent * event, gpoin
  * */
 static void client_message_event(XClientMessageEvent * client_message) {
 	gchar * event_data = ipc_wait_for_property(GDK_WINDOW_XWINDOW(client_window), IPC_PROPERTY_EVENT, TRUE);
+	LOG("event dataa %s", event_data);
 	if(!event_data) {
 		g_critical("can't obtain event data");	
 		return;

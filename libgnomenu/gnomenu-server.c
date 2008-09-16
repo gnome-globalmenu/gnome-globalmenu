@@ -10,7 +10,7 @@
 #include "ipcserver.h"
 
 typedef struct {
-	GQuark cid;
+	const gchar * cid;
 	GHashTable * menus;
 } ClientInfo;
 #define ADD_MENU(cli, wind, menu) add_menu(cli, wind, menu)
@@ -45,16 +45,16 @@ static void menu_list_free(gpointer p){
 	}
 	g_list_free(p);
 }
-static void client_create_callback(GQuark cid, gpointer data) {
-	LOG("New client %s", g_quark_to_string(cid));
+static void client_create_callback(const gchar * cid, gpointer data) {
+	LOG("New client %s", cid);
 	ClientInfo * info = g_slice_new0(ClientInfo);
 	info->cid = cid;
 	info->menus = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, menu_list_free);
-	g_datalist_id_set_data_full(&client_list, info->cid, info, client_info_free);
+	g_datalist_set_data_full(&client_list, info->cid, info, client_info_free);
 }
-static void client_destroy_callback(GQuark cid, gpointer data) {
-	LOG("Dead client %s", g_quark_to_string(cid));
-	g_datalist_id_remove_data(&client_list, cid);
+static void client_destroy_callback(const gchar * cid, gpointer data) {
+	LOG("Dead client %s", cid);
+	g_datalist_remove_data(&client_list, cid);
 }
 static gboolean Unimplemented(IPCCommand * command, gpointer data) {
 	IPCRet(command, g_strdup("This method is Unimplemented"));
@@ -100,7 +100,7 @@ static void introspect_client_foreach_menu(gpointer key, gpointer value, gpointe
 }
 static void introspect_client(GString * string, ClientInfo * info){
 	gpointer foo[] ={string};
-	g_string_append_printf(string, "<client cid=\"%s\">\n", g_quark_to_string(info->cid));
+	g_string_append_printf(string, "<client cid=\"%s\">\n", info->cid);
 	g_hash_table_foreach(info->menus, introspect_client_foreach_menu, foo);
 	g_string_append_printf(string, "</client>\n");
 }
@@ -108,7 +108,7 @@ static gboolean LookupWindow(IPCCommand * command, gpointer data){
 	gchar * wind = IPCParam(command, "window");
 	gpointer foo[3] = {wind, 
 		NULL/*Return value, list all menus*/,
-		NULL/*Return value, the cid*/};
+		NULL/*Return value, the ci*/};
 	g_datalist_foreach(&client_list, LookupWindow_foreach_client, foo);
 	if(foo[2]){
 		ClientInfo * ci = foo[2];
@@ -118,7 +118,7 @@ static gboolean LookupWindow(IPCCommand * command, gpointer data){
 	}
 	return TRUE;
 }
-static void ListClients_foreach_client(GQuark cid, gpointer value, gpointer foo[]){
+static void ListClients_foreach_client(GQuark qcid, gpointer value, gpointer foo[]){
 	GString * string = foo[0];
 	ClientInfo * info = value;
 	introspect_client(string, info);
