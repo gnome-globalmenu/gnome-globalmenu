@@ -11,7 +11,7 @@ bin_PROGRAMS = gnomenu-server gnomenu-call
 LDADD = libgnomenu.la
 
 libgnomenu_la_SOURCES = \
-	ipcserver.c \
+	ipcserverbase.c \
 	ipcserver.h \
 	ipcdispatcher.c \
 	ipcdispatcher.h \
