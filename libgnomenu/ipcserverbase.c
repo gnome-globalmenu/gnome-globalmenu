@@ -12,28 +12,11 @@
 #include "ipc.h"
 #include "ipcutils.h"
 #include "ipcserver.h"
+#include "ipcserverbase.h"
 #include "ipccommand.h"
 #include "ipcdispatcher.h"
 
-
-typedef struct _ClientInfo {
-	const gchar * cid;
-	GdkNativeWindow xwindow;
-	GdkWindow * window;
-	struct {
-		GData * installed;
-		GData * listening;
-	} events;
-} ClientInfo;
-typedef struct _InstalledEventInfo{
-	gint ref_count;
-} InstalledEventInfo;
-typedef struct _ListeningEventInfo{
-	ClientInfo * source_info;
-} ListeningEventInfo;
-
 static GStringChunk * string_list = NULL;
-#define STR(str) g_string_chunk_insert_const(string_list, str)
 static GdkWindow * server_window = NULL;
 static gboolean server_frozen = TRUE;
 
@@ -42,6 +25,9 @@ static ClientDestroyCallback client_destroy_callback = NULL;
 static ClientCreateCallback client_create_callback = NULL;
 static gpointer callback_data = NULL;
 
+const gchar * ipc_server_define_string(const gchar * string) {
+	return g_string_chunk_insert_const(string_list, string);
+}
 static void client_info_free(gpointer data){
 	ClientInfo * info = data;
 	g_hash_table_remove(client_hash, info->cid);
@@ -61,22 +47,6 @@ static void listening_event_info_free(gpointer data){
 
 static GdkFilterReturn default_filter (GdkXEvent * xevent, GdkEvent * event, gpointer data);
 
-static gboolean Ping(IPCCommand * command, gpointer data) {
-	IPCRet(command, g_strdup(IPCParam(command, "message")));
-	return TRUE;
-}
-static gboolean Emit(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
-static gboolean InstallEvent(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
-static gboolean Listen(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
-static gboolean Unlisten(IPCCommand * command, gpointer data) {
-	return TRUE;
-}
 static gchar * ipc_server_call_client_xml(ClientInfo * info, gchar * xml){
 	gchar * ret_xml;
 
@@ -117,13 +87,8 @@ static gboolean ipc_server_call_client_command(IPCCommand * command) {
 	return FALSE;
 }
 
-gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
+gboolean ipc_server_boot(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data) {
 	string_list = g_string_chunk_new(0);
-	IPC_DISPATCHER_REGISTER("Ping", Ping, IPC_IN("message"), IPC_OUT("result"), NULL);
-	IPC_DISPATCHER_REGISTER("Emit", Emit, IPC_IN("event_content"), IPC_OUT("VOID"), NULL);
-	IPC_DISPATCHER_REGISTER("InstallEvent", InstallEvent, IPC_IN("event"), IPC_OUT("VOID"), NULL);
-	IPC_DISPATCHER_REGISTER("Listen", Listen, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
-	IPC_DISPATCHER_REGISTER("Unlisten", Unlisten, IPC_IN("event", "source"), IPC_OUT("VOID"), NULL);
 	gdk_x11_grab_server();
 	GdkNativeWindow old_server = ipc_find_server();
 	if(old_server) return FALSE;
@@ -168,7 +133,7 @@ static void client_message_call(ClientInfo * info, XClientMessageEvent * client_
 	GList * node;
 	for(node = commands; node; node=node->next){
 		IPCCommand * command = node->data;
-		if(info->cid != STR(ipc_command_get_source(command))) {
+		if(info->cid != SVR_STR(ipc_command_get_source(command))) {
 			g_warning("unknown client, ignoring the call: cid = %s from =%s", 
 					info->cid, ipc_command_get_source(command));
 			goto unknown_client;
@@ -227,7 +192,7 @@ static void client_message_nego(ClientInfo * unused, XClientMessageEvent * clien
 	gdk_x11_grab_server();
 	client_info->window = gdk_window_lookup(src);
 	if(!client_info->window) client_info->window = gdk_window_foreign_new(src);
-	client_info->cid = STR(identify);
+	client_info->cid = SVR_STR(identify);
 	gdk_error_trap_push();
 	
 	ipc_set_property(src, IPC_PROPERTY_CID, identify);

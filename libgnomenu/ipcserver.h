@@ -9,4 +9,5 @@ void ipc_server_freeze();
 void ipc_server_thaw();
 gboolean ipc_server_listen(ClientCreateCallback cccb, ClientDestroyCallback cdcb, gpointer data);
 gboolean ipc_server_send_event(IPCEvent * event);
+
 #endif

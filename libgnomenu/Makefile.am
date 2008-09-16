@@ -12,6 +12,8 @@ LDADD = libgnomenu.la
 
 libgnomenu_la_SOURCES = \
 	ipcserverbase.c \
+	ipcserverbase.h \
+	ipcserver.c \
 	ipcserver.h \
 	ipcdispatcher.c \
 	ipcdispatcher.h \
