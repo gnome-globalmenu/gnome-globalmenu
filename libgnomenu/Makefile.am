@@ -12,7 +12,7 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		stringchunk.vapi \
+		valacompat.vapi \
 		xmlparser.vala \
 		client.vala \
 		bindinggtk.vala \
