@@ -1,4 +1,4 @@
-
+SUBDIRS = . tests
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
@@ -12,20 +12,16 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		libgnomenu.vala \
-		menu.vala \
-		application.vala \
-		busagent.vala \
-		document.vala \
-		menuitem.vala \
-		menuowner.vala \
-		busobject.vala \
+		stringchunk.vapi \
+		xmlparser.vala \
+		client.vala \
 		$(NULL)
 
 libgnomenu_la_SOURCES = \
 		$(libgnomenu_la_VALASOURCES:.vala=.c) \
 		$(libgnomenu_la_VALASOURCES:.vala=.h) \
 		$(NULL)
+
 
 libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
 	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --library gnomenu $^
