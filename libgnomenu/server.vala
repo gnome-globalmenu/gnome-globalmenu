@@ -9,12 +9,27 @@ namespace Gnomenu {
 		Connection conn;
 		XML xml;
 		XMLNode clients;
+		dynamic DBus.Object dbus;
 		public Server() {}
+		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
+			if(new_owner != "") return;
+			foreach (weak XMLNode node in clients.children) {
+				if(node is XMLTagNode) {
+					weak XMLTagNode tagnode = node as XMLTagNode;
+					if(tagnode.get("bus") == bus) {
+						clients.children.remove(node);
+						break;
+					}
+				}
+			}
+			
+		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
-			dynamic DBus.Object bus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+			dbus.NameOwnerChanged += name_owner_changed;
 			
-			uint r = bus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
+			uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Server", this);
 			xml = new XML();
@@ -30,7 +45,7 @@ namespace Gnomenu {
 		public string FindClient(string window) {
 			foreach (weak XMLNode node in clients.children) {
 				if(node is XMLTagNode) {
-					XMLTagNode tagnode = node as XMLTagNode;
+					weak XMLTagNode tagnode = node as XMLTagNode;
 					if(tagnode.get("window") == window) {
 						return tagnode.get("bus");
 					}
@@ -40,10 +55,12 @@ namespace Gnomenu {
 		}
 		public void RemoveWindow (string client_bus, string window) {
 			foreach (weak XMLNode node in clients.children) {
-				XMLTagNode tagnode = node as XMLTagNode;
-				if(tagnode is XMLTagNode) {
-					if(tagnode.get("window") == window) {
+				if(node is XMLTagNode) {
+					weak XMLTagNode tagnode = node as XMLTagNode;
+					if(tagnode.get("window") == window &&
+						tagnode.get("bus") == client_bus) {
 						clients.children.remove(node);
+						break;
 					}
 				}
 			}

@@ -15,6 +15,7 @@ libgnomenu_la_VALASOURCES = \
 		stringchunk.vapi \
 		xmlparser.vala \
 		client.vala \
+		bindinggtk.vala \
 		server.vala \
 		$(NULL)
 
