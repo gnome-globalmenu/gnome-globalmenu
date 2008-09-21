@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = libgnomenu libgnomenu-gtk tests po service
+SUBDIRS = libgnomenu
 
 AM_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \

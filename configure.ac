@@ -40,29 +40,13 @@ if test "$enable_tracing" == "3"; then
 fi
 dnl end:tracing
 
-dnl begin:gnomenu-service
-PKG_CHECK_MODULES(GNOMENU_SERVICE, [glib-2.0 dbus-glib-1])
-AC_SUBST(GNOMENU_SERVICE_CFLAGS)
-AC_SUBST(GNOMENU_SERVICE_LIBS)
-GNOMENU_SERVICE_VALA_PKGS="--pkg dbus-glib-1"
-AC_SUBST(GNOMENU_SERVICE_VALA_PKGS)
-dnl end:gnomenu-service
-
 dnl begin:libgnomenu
-PKG_CHECK_MODULES(LIBGNOMENU, [glib-2.0 dbus-glib-1])
+PKG_CHECK_MODULES(LIBGNOMENU, [glib-2.0 dbus-glib-1 gtk+-2.0])
 AC_SUBST(LIBGNOMENU_CFLAGS)
 AC_SUBST(LIBGNOMENU_LIBS)
-LIBGNOMENU_VALA_PKGS="--pkg dbus-glib-1"
+LIBGNOMENU_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
 AC_SUBST(LIBGNOMENU_VALA_PKGS)
 dnl end:libgnomenu
-
-dnl begin:libgnomenu-gtk
-PKG_CHECK_MODULES(LIBGNOMENU_GTK, [glib-2.0 dbus-glib-1 gtk+-2.0])
-AC_SUBST(LIBGNOMENU_GTK_CFLAGS)
-AC_SUBST(LIBGNOMENU_GTK_LIBS)
-LIBGNOMENU_GTK_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(LIBGNOMENU_GTK_VALA_PKGS)
-dnl end:libgnomenu-gtk
 
 dnl begin:tests
 PKG_CHECK_MODULES(TESTS, [glib-2.0 dbus-glib-1 gtk+-2.0])
@@ -89,19 +73,10 @@ dnl end: glade
 
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
-dnl if test "$enable_gtk_doc" = "yes" ; then
-dnl	AC_SUBST(DIA)
-dnl	AC_CHECK_PROGS(DIA, dia)
-dnl	if test x$DIA = "x" ; then
-dnl		AC_MSG_ERROR([dia is needed to build the doc])
-dnl	fi
-dnl fi
 
 AC_OUTPUT(
 Makefile
-service/Makefile
 libgnomenu/Makefile
-libgnomenu-gtk/Makefile
-tests/Makefile
+libgnomenu/tests/Makefile
 po/Makefile.in
 )
