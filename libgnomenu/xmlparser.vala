@@ -42,7 +42,7 @@ namespace Markup {
 			StringBuilder sb = new StringBuilder("");
 			foreach(weak string key in props.get_keys()) {
 				string escaped = GLib.Markup.escape_text(props.lookup(key));
-				sb.append_printf(" \"%s\" = \"%s\"", key, escaped);
+				sb.append_printf(" %s=\"%s\"", key, escaped);
 			}
 			return sb.str;
 		}
@@ -81,12 +81,14 @@ namespace Markup {
 		public XML (){
 			strings = new StringChunk(1024);
 			root = new XMLRootNode();
-			current = root;
+		}
+		public weak string S(string str) {
+			return strings.insert_const(str);
 		}
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
 			weak XML xml = (XML) user_data;
-			weak string tag = xml.strings.insert_const(element_name);
+			weak string tag = xml.S(element_name);
 			XMLNode node = new XMLTagNode(tag);
 			node.parent = xml.current;
 			xml.current.children.append(node);
@@ -95,7 +97,7 @@ namespace Markup {
 
 			weak XMLTagNode tagnode = node as XMLTagNode;
 			for(uint i = 0; attribute_names[i]!=null; i++){
-				weak string prop_name = xml.strings.insert_const(attribute_names[i]);
+				weak string prop_name = xml.S(attribute_names[i]);
 				weak string val = attribute_values[i];
 				print("Prop %s = %s\n", prop_name, val);
 				tagnode.set(prop_name, val);
@@ -104,7 +106,7 @@ namespace Markup {
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
 			XML xml = (XML) user_data;
-			weak string tag = xml.strings.insert_const(element_name);
+			weak string tag = xml.S(element_name);
 			xml.current = xml.current.parent;
 			print("EndElement: %s\n", tag);
 		}
@@ -139,6 +141,7 @@ namespace Markup {
 				Error
 			};
 			MarkupParseContext context = new MarkupParseContext(parser, 0, (void*)this, null);
+			current = root;
 			try {
 				context.parse(foo, foo.size());
 			} catch(MarkupError e) {

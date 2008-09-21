@@ -24,8 +24,6 @@ namespace Gnomenu {
 			dynamic DBus.Object bus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			
 			string str = bus.GetId();
-			message("here");
-			message("%s", str);
 			uint r = bus.RequestName ("org.gnome.GlobalMenu.Applications." + str, (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
