@@ -1,0 +1,117 @@
+diff --git a/gtk/gnomenu.h b/gtk/gnomenu.h
+new file mode 100644
+index 0000000..61b58bd
+--- /dev/null
++++ b/gtk/gnomenu.h
+@@ -0,0 +1,23 @@
++#define SYMBOL(t, s, p, ...) \
++	static t (* s ## _) p;
++#include "gnomenu.symbols"
++#undef SYMBOL
++#define SYMBOL(t, s, p, ...) \
++	static t s p { \
++		if(s ## _) \
++		s ## _ (__VA_ARGS__) ; \
++	}
++#include "gnomenu.symbols"
++#undef SYMBOL
++static inline void gnomenu_gtk_load_symbols(void) {
++	GModule * module = g_module_open("libgnomenu", 0);
++	if(module) {
++		g_message("global menu 0.6");
++#define SYMBOL(t, s, p, ...) \
++		if(FALSE == g_module_symbol(module, # s, & s ##_)) {\
++			g_warning("symbol %s not found", #s);\
++		}
++#include "gnomenu.symbols"	
++#undef SYMBOL
++	}
++}
+diff --git a/gtk/gnomenu.symbols b/gtk/gnomenu.symbols
+new file mode 100644
+index 0000000..f2b3d64
+--- /dev/null
++++ b/gtk/gnomenu.symbols
+@@ -0,0 +1,5 @@
++SYMBOL(void, gnomenu_gtk_bind_menu, (GtkWidget* window, GtkWidget* widget), window, widget)
++SYMBOL(void, gnomenu_gtk_unbind_menu, (GtkWidget* window, GtkWidget* widget), window, widget)
++SYMBOL(void, gnomenu_gtk_wrap_widget, (GtkWidget* widget), widget)
++SYMBOL(void, gnomenu_gtk_init_args, (char*** args, int* args_length1), args, args_length1)
++SYMBOL(void, gnomenu_gtk_init, (void))
+diff --git a/gtk/gtkmenubar.c b/gtk/gtkmenubar.c
+index 8be9682..7af0a1a 100644
+--- a/gtk/gtkmenubar.c
++++ b/gtk/gtkmenubar.c
+@@ -39,6 +39,7 @@
+ #include "gtkprivate.h"
+ #include "gtkalias.h"
+ 
++#include "gnomenu.h"
+ 
+ #define BORDER_SPACING  0
+ #define DEFAULT_IPADDING 1
+@@ -90,6 +91,9 @@ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
+ static void
+ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+ {
++  gnomenu_gtk_load_symbols();
++  gnomenu_gtk_init();
++  
+   GObjectClass *gobject_class;
+   GtkWidgetClass *widget_class;
+   GtkMenuShellClass *menu_shell_class;
+@@ -655,6 +659,7 @@ add_to_window (GtkWindow  *window,
+     }
+ 
+   set_menu_bars (window, g_list_prepend (menubars, menubar));
++  gnomenu_gtk_bind_menu(window, menubar);
+ }
+ 
+ static void
+@@ -673,6 +678,7 @@ remove_from_window (GtkWindow  *window,
+     }
+ 
+   set_menu_bars (window, menubars);
++  gnomenu_gtk_unbind_menu(window, menubar);
+ }
+ 
+ static void
+diff --git a/gtk/gtkmenushell.c b/gtk/gtkmenushell.c
+index 63e81b3..48ea0c9 100644
+--- a/gtk/gtkmenushell.c
++++ b/gtk/gtkmenushell.c
+@@ -58,6 +58,7 @@ enum {
+   CANCEL,
+   CYCLE_FOCUS,
+   MOVE_SELECTED,
++  INSERT,
+   LAST_SIGNAL
+ };
+ 
+@@ -242,6 +243,14 @@ gtk_menu_shell_class_init (GtkMenuShellClass *klass)
+   klass->insert = gtk_menu_shell_real_insert;
+   klass->move_selected = gtk_menu_shell_real_move_selected;
+ 
++  menu_shell_signals[INSERT] =
++    g_signal_new (I_("insert"),
++		  G_OBJECT_CLASS_TYPE (object_class),
++		  G_SIGNAL_RUN_FIRST,
++		  G_STRUCT_OFFSET (GtkMenuShellClass, insert),
++		  NULL, NULL,
++		  _gtk_marshal_VOID__POINTER_INT,
++		  G_TYPE_NONE, 2, GTK_TYPE_WIDGET, G_TYPE_INT);
+   menu_shell_signals[DEACTIVATE] =
+     g_signal_new (I_("deactivate"),
+ 		  G_OBJECT_CLASS_TYPE (object_class),
+@@ -478,8 +487,9 @@ gtk_menu_shell_insert (GtkMenuShell *menu_shell,
+ 
+   class = GTK_MENU_SHELL_GET_CLASS (menu_shell);
+ 
+-  if (class->insert)
+-    class->insert (menu_shell, child, position);
++/*  if (class->insert)
++    class->insert (menu_shell, child, position);*/
++  g_signal_emit(menu_shell, menu_shell_signals[INSERT], 0, child, position);
+ }
+ 
+ static void
