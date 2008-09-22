@@ -1,152 +1,58 @@
 using GLib;
-namespace Markup {
-	public abstract class XMLNode {
-		public weak XMLNode parent;
-		public List<XMLNode> children;
-		public XMLNode (){ }
-		public virtual string to_string () {
-			return summary(-1);
-		}
-		public abstract virtual string summary(int level);
-	}
-
-	public class XMLTextNode : XMLNode {
-		public string text;
-		public XMLTextNode(string text) {
-			this.text = text;
-		}
-		public override string summary (int level) {
-			return text;
-		}
-	}
-	public class XMLSpecialNode: XMLNode {
-		private string text;
-		public XMLSpecialNode(string text) {
-			this.text = text;
-		}
-		public override string summary (int level) {
-			return text;
-		}
-	}
-	public class XMLTagNode : XMLNode {
-		public weak string tag;
-		private HashTable<weak string, string> props;
-		public XMLTagNode (string tag) {
-			this.tag = tag;
-		}
-		public void set(string prop, string val) {
-			if(props == null) {
-				props = new HashTable<weak string, string>(str_hash, str_equal);
-			}
-			props.insert(prop, val);
-		}
-		public void remove(string prop) {
-			if(props == null) {
-				props = new HashTable<weak string, string>(str_hash, str_equal);
-			}
-			props.remove(prop);
-		}
-		public weak string? get(string prop) {
-			if(props == null) {
-				props = new HashTable<weak string, string>(str_hash, str_equal);
-			}
-			return props.lookup(prop);
-		}
-		private string props_to_string() {
-			if(props == null) {
-				props = new HashTable<weak string, string>(str_hash, str_equal);
-			}
-			StringBuilder sb = new StringBuilder("");
-			foreach(weak string key in props.get_keys()) {
-				string escaped = GLib.Markup.escape_text(props.lookup(key));
-				sb.append_printf(" %s=\"%s\"", key, escaped);
-			}
-			return sb.str;
-		}
-		public override string summary(int level) {
-			StringBuilder sb = new StringBuilder("");
-			if(this.children == null || level == 0)
-					sb.append_printf("<%s%s/>\n", tag, props_to_string());
-			else {
-				sb.append_printf("<%s%s>\n", tag, props_to_string());
-				foreach(weak XMLNode child in children){
-					sb.append_printf("%s", child.summary((level>0)?(level - 1):level));
-				}
-				sb.append_printf("</%s>\n", tag);
-			}
-			return sb.str;
-		}
-	}
-	public class XML {
-		private StringChunk strings;
-		public XMLNode root;
-		private weak XMLNode current;
-		class XMLRootNode : XMLNode {
-			public XMLRootNode(){}
-			public override string summary(int level) {
-				StringBuilder sb = new StringBuilder("");
-				if(this.children == null)
-					return "";
-				else {
-					foreach(weak XMLNode child in children){
-						sb.append_printf("%s", child.summary(level - 1));
-					}
-				}
-				return sb.str;
-			}
-		}
-		public XML (){
-			strings = new StringChunk(1024);
-			root = new XMLRootNode();
-		}
-		public weak string S(string str) {
-			return strings.insert_const(str);
+namespace XML {
+	public class Parser {
+		public Node root;
+		private weak Node current;
+		private NodeFactory factory;
+		public Parser(NodeFactory # factory){
+			this.factory = #factory;
+			root = this.factory.CreateRootNode();
 		}
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
-			weak XML xml = (XML) user_data;
-			weak string tag = xml.S(element_name);
-			XMLNode node = new XMLTagNode(tag);
-			node.parent = xml.current;
-			xml.current.children.append(node);
-			xml.current = node;
-			print("StartElement: %s\n", tag);
+			weak Parser parser = (Parser) user_data;
+			Node node = parser.factory.CreateTagNode(element_name);
+			node.parent = parser.current;
+			parser.current.children.append(node);
+			parser.current = node;
+			print("StartElement: %s\n", element_name);
 
-			weak XMLTagNode tagnode = node as XMLTagNode;
+			weak TagNode tagnode = node as TagNode;
 			for(uint i = 0; attribute_names[i]!=null; i++){
-				weak string prop_name = xml.S(attribute_names[i]);
+				weak string prop_name = attribute_names[i];
 				weak string val = attribute_values[i];
 				print("Prop %s = %s\n", prop_name, val);
 				tagnode.set(prop_name, val);
 			}
+			parser.factory.FinishNode(node);
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
-			XML xml = (XML) user_data;
-			weak string tag = xml.S(element_name);
-			xml.current = xml.current.parent;
-			print("EndElement: %s\n", tag);
+			weak Parser parser = (Parser) user_data;
+			parser.current = parser.current.parent;
+			print("EndElement: %s\n", element_name);
 		}
 		
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
-			XML xml = (XML) user_data;
+			weak Parser parser = (Parser) user_data;
 			string newtext = text.ndup(text_len);
-			XMLTextNode node = new XMLTextNode(newtext);
-			xml.current.children.append(node);
+			TextNode node = parser.factory.CreateTextNode(newtext);
+			parser.current.children.append(node);
 			print("Text: %s\n", newtext);
+			parser.factory.FinishNode(node);
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
-			XML xml = (XML) user_data;
+			weak Parser parser = (Parser) user_data;
 			string newtext = passthrough_text.ndup(text_len);
-			XMLTextNode node = new XMLTextNode(newtext);
-			xml.current.children.append(node);
+			SpecialNode node = parser.factory.CreateSpecialNode(newtext);
+			parser.current.children.append(node);
 			print("Special: %s\n", newtext);
-
+			parser.factory.FinishNode(node);
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {
-			XML xml = (XML) user_data;
+			weak Parser parser = (Parser) user_data;
 
 		}
 		public bool parse (string foo) {
@@ -167,16 +73,47 @@ namespace Markup {
 			}
 			return true;
 		}
+		private class NaiveNodeFactory : NodeFactory {
+			private StringChunk strings;
+			public NaiveNodeFactory() {
+			}
+			construct {
+				strings = new StringChunk(1024);
+			}
+			public override weak string S(string s) {
+				return strings.insert_const(s);
+			}
+			public override RootNode CreateRootNode() {
+				return new RootNode(this);
+			}
+			public override TextNode CreateTextNode(string text) {
+				TextNode rt = new TextNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override SpecialNode CreateSpecialNode(string text) {
+				SpecialNode rt = new SpecialNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override TagNode CreateTagNode(string tag) {
+				TagNode rt = new TagNode(this);
+				rt.tag = strings.insert_const(tag);
+				return rt;
+			}
+			public override void FinishNode(Node node) { }
+		}
 		public static int test (string [] args){
-			XML xml = new XML();
-			xml.parse("<?xml?>\n" +
+			NaiveNodeFactory factory = new NaiveNodeFactory();
+			Parser parser = new Parser(factory);
+			parser.parse("<?xml?>\n" +
 					"<root id=\"root\">" +
 					"<node id=\"node1\">"+
 					"node1data" +
 					"</node>\n"+
 					"rootdata\n" +
 					"</root>\n");
-			print("back to string %s\n", xml.root.to_string());
+			print("back to string %s\n", parser.root.to_string());
 			return 0;
 		}
 	}
