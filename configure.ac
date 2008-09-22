@@ -78,5 +78,6 @@ AC_OUTPUT(
 Makefile
 libgnomenu/Makefile
 libgnomenu/tests/Makefile
+gtk-aqd/Makefile
 po/Makefile.in
 )

@@ -13,6 +13,7 @@ namespace Gnomenu {
 		public Server() {}
 		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 			if(new_owner != "") return;
+			/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
 			foreach (weak XMLNode node in clients.children) {
 				if(node is XMLTagNode) {
 					weak XMLTagNode tagnode = node as XMLTagNode;
@@ -36,36 +37,44 @@ namespace Gnomenu {
 			clients = new XMLTagNode(xml.S("clients"));
 			xml.root.children.append(clients);
 		}
-		public void RegisterWindow (string client_bus, string window) {
-			XMLTagNode node = new XMLTagNode(xml.S("client"));
+		private weak XMLTagNode? find_node_by_xid(string xid) {
+			foreach (weak XMLNode node in clients.children) {
+				if(node is XMLTagNode) {
+					weak XMLTagNode tagnode = node as XMLTagNode;
+					if(tagnode.get("xid") == xid) {
+						return tagnode;
+					}
+				}
+			}
+			return null;
+		}
+		public void RegisterWindow (string client_bus, string xid) {
+			XMLTagNode node = find_node_by_xid(xid);
+			if(node!=null) {
+				if(node.get("bus") == client_bus) {
+					return;
+				} else {
+					/*remove the old client that binds to the window*/
+					clients.children.remove(node);
+				}
+			}	
+			node =new XMLTagNode(xml.S("client"));
 			node.set(xml.S("bus"), client_bus);
-			node.set(xml.S("window"), window);
+			node.set(xml.S("xid"), xid);
 			clients.children.append(node as XMLNode);
 		}
-		public string FindClient(string window) {
-			foreach (weak XMLNode node in clients.children) {
-				if(node is XMLTagNode) {
-					weak XMLTagNode tagnode = node as XMLTagNode;
-					if(tagnode.get("window") == window) {
-						return tagnode.get("bus");
-					}
-				}
-			}
+		public string QueryWindow(string xid) {
+			XMLTagNode node = find_node_by_xid(xid);
+			if(node != null) return node.to_string();
 			return "";
 		}
-		public void RemoveWindow (string client_bus, string window) {
-			foreach (weak XMLNode node in clients.children) {
-				if(node is XMLTagNode) {
-					weak XMLTagNode tagnode = node as XMLTagNode;
-					if(tagnode.get("window") == window &&
-						tagnode.get("bus") == client_bus) {
-						clients.children.remove(node);
-						break;
-					}
-				}
-			}
+		public void RemoveWindow (string client_bus, string xid) {
+			XMLTagNode node= find_node_by_xid(xid);
+			if(node != null)
+				if(node.get("bus") == client_bus)
+					clients.children.remove(node);
 		}
-		public string ListClients() {
+		public string QueryWindows() {
 			return xml.root.to_string();
 		}
 		public static int test(string[] args) {

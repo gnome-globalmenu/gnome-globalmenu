@@ -30,15 +30,29 @@ namespace Markup {
 		private HashTable<weak string, string> props;
 		public XMLTagNode (string tag) {
 			this.tag = tag;
-			this.props = new HashTable<weak string, string>(str_hash, str_equal);
 		}
 		public void set(string prop, string val) {
+			if(props == null) {
+				props = new HashTable<weak string, string>(str_hash, str_equal);
+			}
 			props.insert(prop, val);
 		}
+		public void remove(string prop) {
+			if(props == null) {
+				props = new HashTable<weak string, string>(str_hash, str_equal);
+			}
+			props.remove(prop);
+		}
 		public weak string? get(string prop) {
+			if(props == null) {
+				props = new HashTable<weak string, string>(str_hash, str_equal);
+			}
 			return props.lookup(prop);
 		}
 		private string props_to_string() {
+			if(props == null) {
+				props = new HashTable<weak string, string>(str_hash, str_equal);
+			}
 			StringBuilder sb = new StringBuilder("");
 			foreach(weak string key in props.get_keys()) {
 				string escaped = GLib.Markup.escape_text(props.lookup(key));

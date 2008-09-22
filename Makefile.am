@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = libgnomenu
+SUBDIRS = libgnomenu gtk-aqd
 
 AM_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \
