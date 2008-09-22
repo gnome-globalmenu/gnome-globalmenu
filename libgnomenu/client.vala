@@ -27,6 +27,7 @@ namespace Gnomenu {
 				return dict.lookup(widget);
 			}
 			~XMLWidgetNode() {
+				/* FIXME: vala doesn't invoke the deconstructor*/
 				dict.remove(widget);
 			}
 		}
