@@ -14,12 +14,13 @@ libgnomenu_LTLIBRARIES = \
 libgnomenu_la_VALASOURCES = \
 		valacompat.vapi \
 		xmlparser.vala \
+		xmlnodefactory.vala \
 		xml.vala \
+		server.vala  \
+		client.vala \
 		$(NULL)
-#		client.vala
+
 #		bindinggtk.vala 
-#		server.vala 
-#
 libgnomenu_la_SOURCES = \
 		$(libgnomenu_la_VALASOURCES:.vala=.c) \
 		$(libgnomenu_la_VALASOURCES:.vala=.h) \

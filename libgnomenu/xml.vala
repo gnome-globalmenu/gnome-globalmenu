@@ -8,6 +8,10 @@ namespace XML {
 		public virtual string to_string () {
 			return summary(-1);
 		}
+		public void append(Node # node) {
+			node.parent = this;
+			children.append(node);
+		}
 		public abstract virtual string summary(int level);
 	}
 	public abstract class NodeFactory: Object {

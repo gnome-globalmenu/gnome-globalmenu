@@ -1,6 +1,10 @@
 LDADD = $(builddir)/../libgnomenu.la
-CLASSES = XML_Parser
-#	Gnomenu_Gtk_Client Gnomenu_Server Markup_XML
+CLASSES = 
+CLASSES += XML_Parser 
+#CLASSES +=	Gnomenu_Gtk_Client 
+CLASSES += Gnomenu_Server 
+CLASSES += Gnomenu_Client
+
 noinst_PROGRAMS = $(CLASSES)
 BUILT_SOURCES = $(CLASSES:%=%.c)
 

@@ -1,22 +1,22 @@
 using GLib;
 using Gtk;
 using DBus;
-using Markup;
+using XML;
 namespace Gnomenu {
 
 	[DBus (name = "org.gnome.GlobalMenu.Server")]
 	public class Server:GLib.Object {
 		Connection conn;
-		XML xml;
-		XMLNode clients;
+		XML.NodeFactory factory = new SimpleNodeFactory();
+		XML.Node clients;
 		dynamic DBus.Object dbus;
 		public Server() {}
 		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 			if(new_owner != "") return;
 			/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
-			foreach (weak XMLNode node in clients.children) {
-				if(node is XMLTagNode) {
-					weak XMLTagNode tagnode = node as XMLTagNode;
+			foreach (weak XML.Node node in clients.children) {
+				if(node is XML.TagNode) {
+					weak XML.TagNode tagnode = node as XML.TagNode;
 					if(tagnode.get("bus") == bus) {
 						clients.children.remove(node);
 						break;
@@ -33,14 +33,13 @@ namespace Gnomenu {
 			uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Server", this);
-			xml = new XML();
-			clients = new XMLTagNode(xml.S("clients"));
-			xml.root.children.append(clients);
+			factory = new XML.SimpleNodeFactory();
+			clients = factory.CreateTagNode("clients");
 		}
-		private weak XMLTagNode? find_node_by_xid(string xid) {
-			foreach (weak XMLNode node in clients.children) {
-				if(node is XMLTagNode) {
-					weak XMLTagNode tagnode = node as XMLTagNode;
+		private weak XML.TagNode? find_node_by_xid(string xid) {
+			foreach (weak XML.Node node in clients.children) {
+				if(node is XML.TagNode) {
+					weak XML.TagNode tagnode = node as XML.TagNode;
 					if(tagnode.get("xid") == xid) {
 						return tagnode;
 					}
@@ -49,7 +48,7 @@ namespace Gnomenu {
 			return null;
 		}
 		public void RegisterWindow (string client_bus, string xid) {
-			XMLTagNode node = find_node_by_xid(xid);
+			XML.TagNode node = find_node_by_xid(xid);
 			if(node!=null) {
 				if(node.get("bus") == client_bus) {
 					return;
@@ -58,24 +57,25 @@ namespace Gnomenu {
 					clients.children.remove(node);
 				}
 			}	
-			node =new XMLTagNode(xml.S("client"));
-			node.set(xml.S("bus"), client_bus);
-			node.set(xml.S("xid"), xid);
-			clients.children.append(node as XMLNode);
+			node = factory.CreateTagNode("client");
+			node.set("bus", client_bus);
+			node.set("xid", xid);
+			clients.append(node as XML.Node);
+			factory.FinishNode(node);
 		}
 		public string QueryWindow(string xid) {
-			XMLTagNode node = find_node_by_xid(xid);
+			XML.TagNode node = find_node_by_xid(xid);
 			if(node != null) return node.to_string();
 			return "";
 		}
 		public void RemoveWindow (string client_bus, string xid) {
-			XMLTagNode node= find_node_by_xid(xid);
+			XML.TagNode node= find_node_by_xid(xid);
 			if(node != null)
 				if(node.get("bus") == client_bus)
 					clients.children.remove(node);
 		}
 		public string QueryWindows() {
-			return xml.root.to_string();
+			return clients.to_string();
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);

@@ -2,42 +2,43 @@ using GLib;
 using Gdk;
 using Gtk;
 using DBus;
-using Markup;
+using XML;
 namespace Gnomenu {
-	[DBus (name = "org.gnome.GlobalMenu.Client")]
-	public abstract class Client:GLib.Object {
-		public class XMLWidgetNode: XMLTagNode {
-			public HashTable<weak string, weak XMLWidgetNode> dict {get; construct;}
-			public weak string widget {
-				get {
-					return get("widget");
-				}
-				set {
-					if(value == null) remove("widget");
-					set("widget", value);
-				}
+	public class WidgetNodeFactory: SimpleNodeFactory {
+		private HashTable <weak string, weak XML.TagNode> dict;
+		private class WidgetNode:TagNode {
+			public WidgetNode(NodeFactory factory) {
+				this.factory = factory;
 			}
-			public XMLWidgetNode(string tag, string widget, HashTable<weak string, weak XMLWidgetNode> dict) {
-				this.dict = dict;
-				this.tag = tag;
-				this.widget = widget;
-				dict.insert(widget, this);
-			}
-			public weak XMLWidgetNode? lookup(string widget) {
-				return dict.lookup(widget);
-			}
-			~XMLWidgetNode() {
-				/* FIXME: vala doesn't invoke the deconstructor*/
-				dict.remove(widget);
+			~WidgetNode() {
+				dict.remove(this.get("widget"));
 			}
 		}
+		public WidgetNodeFactory() { }
+		construct {
+			dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
+		}
+		public weak XML.TagNode? lookup(string widget){
+			return dict.lookup(widget);
+		}
+		public virtual TagNode CreateWidgetNode(string widget) {
+			TagNode rt = new WidgetNode(this);
+			rt.tag = S("widget");
+			rt.set("widget", widget);
+			dict.insert(widget, rt);
+			return rt;
+		}
+	}
+	[DBus (name = "org.gnome.GlobalMenu.Client")]
+	public class Client:GLib.Object {
 		Connection conn;
 		string bus;
 		dynamic DBus.Object dbus;
-		protected XML xml;
-		protected XMLNode windows;
-		protected HashTable<weak string, weak XMLWidgetNode> dict;
-		public Client() {
+		[DBus (visible = false)]
+		public WidgetNodeFactory factory {get; construct;}
+		protected TagNode windows;
+		public Client(WidgetNodeFactory factory) {
+			this.factory = factory;
 		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
@@ -48,19 +49,16 @@ namespace Gnomenu {
 			uint r = dbus.RequestName (bus, (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
-			xml = new XML();
-			windows = new XMLTagNode(xml.S("windows"));
-			xml.root.children.append(windows);
-			dict = new HashTable<weak string, weak XMLWidgetNode>(str_hash, str_equal);
+			windows = factory.CreateTagNode("windows");
 		}
 		public string QueryNode(string widget, int level = -1){
-			weak XMLNode node = find_node_by_widget(widget);
+			weak TagNode node = factory.lookup(widget);
 			if(node!= null)
 				return node.summary(level);
 			return "";
 		}
 		public string QueryXID(string xid) {
-			weak XMLNode node = find_window_by_xid(xid);
+			weak TagNode node = find_window_by_xid(xid);
 			if(node != null) {
 				return node.summary(0);
 			}
@@ -70,7 +68,7 @@ namespace Gnomenu {
 			return windows.summary(1);
 		}
 		public void ActivateItem(string widget){
-			weak XMLWidgetNode node = find_node_by_widget(widget);
+			weak TagNode node = factory.lookup(widget);
 			activate_item(node);
 		}
 		public signal void updated(string widget);
@@ -78,15 +76,13 @@ namespace Gnomenu {
 		protected dynamic DBus.Object get_server(){
 			return conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
 		}
-		protected abstract virtual void activate_item(XMLWidgetNode item_node);
-		protected abstract virtual void sync_node(XMLWidgetNode node);
-		private weak XMLWidgetNode? find_node_by_widget(string widget) {
-			return dict.lookup(widget);
+		protected virtual void activate_item(TagNode item_node) {
+			message("%s is activated", item_node.summary(0));
 		}
-		private weak XMLWidgetNode? find_window_by_xid(string xid) {
-			foreach (weak XMLNode node in windows.children) {
-				if(node is XMLWidgetNode) {
-					weak XMLWidgetNode tagnode = node as XMLWidgetNode;
+		private weak TagNode? find_window_by_xid(string xid) {
+			foreach (weak XML.Node node in windows.children) {
+				if(node is TagNode) {
+					weak TagNode tagnode = node as TagNode;
 					if(tagnode.get("xid") == xid) {
 						return tagnode;
 					}
@@ -94,21 +90,28 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		protected void add_window(string widget) {
-			weak XMLTagNode node = find_node_by_widget(widget);
+		protected void add_widget(string? parent, string widget) {
+			weak TagNode node = factory.lookup(widget);
+			weak TagNode parent_node;
+			if(parent == null)
+				parent_node = windows;
+			else
+				parent_node = factory.lookup(parent);
 			if(node == null) {
-				message("add window %s stage 1", widget);
-				XMLTagNode node = new XMLWidgetNode(
-					xml.S("window"),
-					xml.S(widget), dict);
-				windows.children.append(node);
-				message("add window %s stage 2", widget);
+				TagNode node = factory.CreateWidgetNode(widget);
+				parent_node.append(node);
+			}
+		}
+		protected void remove_widget(string widget) {
+			weak TagNode node = factory.lookup(widget);
+			if(node != null) {
+				node.parent.children.remove(node);
 			}
 		}
 		protected void register_window(string widget, string xid) {
-			weak XMLTagNode node = find_node_by_widget(widget);
+			weak TagNode node = factory.lookup(widget);
 			if(node != null) {
-				node.set(xml.S("xid"), xid);
+				node.set("xid", xid);
 				try {
 					get_server().RegisterWindow(this.bus, xid);
 				} catch(GLib.Error e) {
@@ -117,7 +120,7 @@ namespace Gnomenu {
 			}
 		}
 		protected void unregister_window(string widget) {
-			weak XMLTagNode node = find_node_by_widget(widget);
+			weak TagNode node = factory.lookup(widget);
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -129,41 +132,17 @@ namespace Gnomenu {
 			}
 
 		}
-		protected void remove_window(string widget) {
-			weak XMLTagNode node = find_node_by_widget(widget);
-			if(node != null) {
-				windows.children.remove(node);
-			}
-		}
-		protected void add_menu(string window_widget, string menu_widget) {
-			weak XMLTagNode node = find_node_by_widget(window_widget);
-			if(node == null) {
-				warning("window %s doesn't exist", window_widget);
-				return;
-			}
-			weak XMLTagNode menu_node = find_node_by_widget(menu_widget);
-			if(menu_node != null) {
-				warning("menu already added to the window");
-				return;
-			} else {
-				XMLWidgetNode menu_node = new XMLWidgetNode(
-							xml.S("menu"),
-							xml.S(menu_widget), 
-							dict);
-				node.children.append(menu_node);
-				sync_node(menu_node);
-			}
-		}
-		protected void remove_menu(string window_widget, string menu_widget) {
-			weak XMLTagNode node = find_node_by_widget(window_widget);
-			if(node == null) {
-				warning("window %s doesn't exist", window_widget);
-				return;
-			}
-			weak XMLTagNode menu_node = find_node_by_widget(menu_widget);
-			if(menu_node != null) {
-				node.children.remove(menu_node);
-			}
+		public static int test(string[] args) {
+			Gtk.init(ref args);
+			MainLoop loop = new MainLoop(null, false);
+			WidgetNodeFactory factory = new WidgetNodeFactory();
+			Client c = new Client(factory);
+			c.add_widget(null, "window1");
+			c.add_widget(null, "window2");
+			c.add_widget("window1", "menu1");
+			c.add_widget("window2", "menu2");
+			loop.run();
+			return 0;
 		}
 	}
 }

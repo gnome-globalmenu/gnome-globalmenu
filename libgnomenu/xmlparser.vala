@@ -12,8 +12,7 @@ namespace XML {
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			Node node = parser.factory.CreateTagNode(element_name);
-			node.parent = parser.current;
-			parser.current.children.append(node);
+			parser.current.append(node);
 			parser.current = node;
 			print("StartElement: %s\n", element_name);
 
@@ -37,7 +36,7 @@ namespace XML {
 			weak Parser parser = (Parser) user_data;
 			string newtext = text.ndup(text_len);
 			TextNode node = parser.factory.CreateTextNode(newtext);
-			parser.current.children.append(node);
+			parser.current.append(node);
 			print("Text: %s\n", newtext);
 			parser.factory.FinishNode(node);
 		}
@@ -46,7 +45,7 @@ namespace XML {
 			weak Parser parser = (Parser) user_data;
 			string newtext = passthrough_text.ndup(text_len);
 			SpecialNode node = parser.factory.CreateSpecialNode(newtext);
-			parser.current.children.append(node);
+			parser.current.append(node);
 			print("Special: %s\n", newtext);
 			parser.factory.FinishNode(node);
 		}
@@ -73,38 +72,8 @@ namespace XML {
 			}
 			return true;
 		}
-		private class NaiveNodeFactory : NodeFactory {
-			private StringChunk strings;
-			public NaiveNodeFactory() {
-			}
-			construct {
-				strings = new StringChunk(1024);
-			}
-			public override weak string S(string s) {
-				return strings.insert_const(s);
-			}
-			public override RootNode CreateRootNode() {
-				return new RootNode(this);
-			}
-			public override TextNode CreateTextNode(string text) {
-				TextNode rt = new TextNode(this);
-				rt.text = text;
-				return rt;
-			}
-			public override SpecialNode CreateSpecialNode(string text) {
-				SpecialNode rt = new SpecialNode(this);
-				rt.text = text;
-				return rt;
-			}
-			public override TagNode CreateTagNode(string tag) {
-				TagNode rt = new TagNode(this);
-				rt.tag = strings.insert_const(tag);
-				return rt;
-			}
-			public override void FinishNode(Node node) { }
-		}
 		public static int test (string [] args){
-			NaiveNodeFactory factory = new NaiveNodeFactory();
+			SimpleNodeFactory factory = new SimpleNodeFactory();
 			Parser parser = new Parser(factory);
 			parser.parse("<?xml?>\n" +
 					"<root id=\"root\">" +
