@@ -4,7 +4,10 @@ namespace Markup {
 		public weak XMLNode parent;
 		public List<XMLNode> children;
 		public XMLNode (){ }
-		public abstract virtual string to_string ();
+		public virtual string to_string () {
+			return summary(-1);
+		}
+		public abstract virtual string summary(int level);
 	}
 
 	public class XMLTextNode : XMLNode {
@@ -12,7 +15,7 @@ namespace Markup {
 		public XMLTextNode(string text) {
 			this.text = text;
 		}
-		public override string to_string () {
+		public override string summary (int level) {
 			return text;
 		}
 	}
@@ -21,7 +24,7 @@ namespace Markup {
 		public XMLSpecialNode(string text) {
 			this.text = text;
 		}
-		public override string to_string () {
+		public override string summary (int level) {
 			return text;
 		}
 	}
@@ -60,16 +63,16 @@ namespace Markup {
 			}
 			return sb.str;
 		}
-		public override string to_string() {
+		public override string summary(int level) {
 			StringBuilder sb = new StringBuilder("");
-			if(this.children == null)
-				sb.append_printf("<%s%s/>", tag, props_to_string());
+			if(this.children == null || level == 0)
+					sb.append_printf("<%s%s/>\n", tag, props_to_string());
 			else {
-				sb.append_printf("<%s%s>", tag, props_to_string());
+				sb.append_printf("<%s%s>\n", tag, props_to_string());
 				foreach(weak XMLNode child in children){
-					sb.append_printf("%s", child.to_string());
+					sb.append_printf("%s", child.summary((level>0)?(level - 1):level));
 				}
-				sb.append_printf("</%s>", tag);
+				sb.append_printf("</%s>\n", tag);
 			}
 			return sb.str;
 		}
@@ -80,13 +83,13 @@ namespace Markup {
 		private weak XMLNode current;
 		class XMLRootNode : XMLNode {
 			public XMLRootNode(){}
-			public override string to_string() {
+			public override string summary(int level) {
 				StringBuilder sb = new StringBuilder("");
 				if(this.children == null)
 					return "";
 				else {
 					foreach(weak XMLNode child in children){
-						sb.append_printf("%s", child.to_string());
+						sb.append_printf("%s", child.summary(level - 1));
 					}
 				}
 				return sb.str;

@@ -53,21 +53,21 @@ namespace Gnomenu {
 			xml.root.children.append(windows);
 			dict = new HashTable<weak string, weak XMLWidgetNode>(str_hash, str_equal);
 		}
-		public string QueryNode(string widget){
+		public string QueryNode(string widget, int level = -1){
 			weak XMLNode node = find_node_by_widget(widget);
 			if(node!= null)
-				return node.to_string();
+				return node.summary(level);
 			return "";
 		}
 		public string QueryXID(string xid) {
 			weak XMLNode node = find_window_by_xid(xid);
 			if(node != null) {
-				return node.to_string();
+				return node.summary(0);
 			}
 			return "";
 		}
 		public string QueryWindows() {
-			return xml.root.to_string();
+			return windows.summary(1);
 		}
 		public void ActivateItem(string widget){
 			weak XMLWidgetNode node = find_node_by_widget(widget);
