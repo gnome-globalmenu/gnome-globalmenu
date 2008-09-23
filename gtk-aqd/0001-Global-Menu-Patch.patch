@@ -1,5 +1,5 @@
 diff --git a/gtk/gtkmenubar.c b/gtk/gtkmenubar.c
-index 8be9682..34baf20 100644
+index 8be9682..7b3e87c 100644
 --- a/gtk/gtkmenubar.c
 +++ b/gtk/gtkmenubar.c
 @@ -39,6 +39,7 @@
@@ -10,7 +10,33 @@ index 8be9682..34baf20 100644
  
  #define BORDER_SPACING  0
  #define DEFAULT_IPADDING 1
-@@ -90,6 +91,8 @@ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
+@@ -47,7 +48,8 @@
+ enum {
+   PROP_0,
+   PROP_PACK_DIRECTION,
+-  PROP_CHILD_PACK_DIRECTION
++  PROP_CHILD_PACK_DIRECTION,
++  PROP_LOCAL
+ };
+ 
+ typedef struct _GtkMenuBarPrivate GtkMenuBarPrivate;
+@@ -55,6 +57,7 @@ struct _GtkMenuBarPrivate
+ {
+   GtkPackDirection pack_direction;
+   GtkPackDirection child_pack_direction;
++  gboolean islocal;
+ };
+ 
+ #define GTK_MENU_BAR_GET_PRIVATE(o)  \
+@@ -73,6 +76,7 @@ static void gtk_menu_bar_size_request      (GtkWidget       *widget,
+ 					    GtkRequisition  *requisition);
+ static void gtk_menu_bar_size_allocate     (GtkWidget       *widget,
+ 					    GtkAllocation   *allocation);
++static void gtk_menu_bar_map			   (GtkWidget	    *widget);
+ static void gtk_menu_bar_paint             (GtkWidget       *widget,
+ 					    GdkRectangle    *area);
+ static gint gtk_menu_bar_expose            (GtkWidget       *widget,
+@@ -90,6 +94,8 @@ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
  static void
  gtk_menu_bar_class_init (GtkMenuBarClass *class)
  {
@@ -19,7 +45,101 @@ index 8be9682..34baf20 100644
    GObjectClass *gobject_class;
    GtkWidgetClass *widget_class;
    GtkMenuShellClass *menu_shell_class;
-@@ -655,6 +658,7 @@ add_to_window (GtkWindow  *window,
+@@ -107,6 +113,7 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+   widget_class->size_allocate = gtk_menu_bar_size_allocate;
+   widget_class->expose_event = gtk_menu_bar_expose;
+   widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
++  widget_class->map = gtk_menu_bar_map;
+   
+   menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
+   menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
+@@ -153,6 +160,22 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+ 				"move_current", 1,
+ 				GTK_TYPE_MENU_DIRECTION_TYPE,
+ 				GTK_MENU_DIR_CHILD);
++  /**
++   * GtkMenuBar:local:
++   *
++   * Control whether the menu is a global menu or a local menu.
++   * A global menu is invisible in the local window. Once attached
++   * with libgnomenu, the menu will be accessible via DBus.
++   *
++   * Since: 2.14
++   */
++  g_object_class_install_property (gobject_class,
++				   PROP_LOCAL,
++				   g_param_spec_boolean ("local",
++ 						      P_("Local Menu or Global Menu"),
++ 						      P_("Whether the menu is a local one"),
++ 						      FALSE,
++ 						      GTK_PARAM_READWRITE));
+ 
+   /**
+    * GtkMenuBar:pack-direction:
+@@ -235,7 +258,7 @@ gtk_menu_bar_set_property (GObject      *object,
+ 			   GParamSpec   *pspec)
+ {
+   GtkMenuBar *menubar = GTK_MENU_BAR (object);
+-  
++  GtkMenuBarPrivate *priv = GTK_MENU_BAR_GET_PRIVATE(menubar); 
+   switch (prop_id)
+     {
+     case PROP_PACK_DIRECTION:
+@@ -244,6 +267,9 @@ gtk_menu_bar_set_property (GObject      *object,
+     case PROP_CHILD_PACK_DIRECTION:
+       gtk_menu_bar_set_child_pack_direction (menubar, g_value_get_enum (value));
+       break;
++	case PROP_LOCAL:
++	  priv->islocal = g_value_get_boolean (value);
++	  break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -257,6 +283,7 @@ gtk_menu_bar_get_property (GObject    *object,
+ 			   GParamSpec *pspec)
+ {
+   GtkMenuBar *menubar = GTK_MENU_BAR (object);
++  GtkMenuBarPrivate *priv = GTK_MENU_BAR_GET_PRIVATE(menubar); 
+   
+   switch (prop_id)
+     {
+@@ -266,6 +293,9 @@ gtk_menu_bar_get_property (GObject    *object,
+     case PROP_CHILD_PACK_DIRECTION:
+       g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (menubar));
+       break;
++	case PROP_LOCAL:
++	  g_value_set_boolean (value, priv->islocal);
++	  break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -296,6 +326,8 @@ gtk_menu_bar_size_request (GtkWidget      *widget,
+       menu_bar = GTK_MENU_BAR (widget);
+       menu_shell = GTK_MENU_SHELL (widget);
+       priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
++      
++	  if(priv->islocal == FALSE) return; /* require no size if non-local*/
+ 
+       nchildren = 0;
+       children = menu_shell->children;
+@@ -504,6 +536,16 @@ gtk_menu_bar_size_allocate (GtkWidget     *widget,
+ }
+ 
+ static void
++gtk_menu_bar_map (GtkWidget    *widget) {
++  GtkMenuBarPrivate *priv;
++  
++  priv = GTK_MENU_BAR_GET_PRIVATE (widget);
++  
++  if(priv->islocal == FALSE) return;
++  (* GTK_WIDGET_CLASS (gtk_menu_bar_parent_class)->map) (widget);
++}
++
++static void
+ gtk_menu_bar_paint (GtkWidget    *widget,
+                     GdkRectangle *area)
+ {
+@@ -655,6 +697,7 @@ add_to_window (GtkWindow  *window,
      }
  
    set_menu_bars (window, g_list_prepend (menubars, menubar));
@@ -27,7 +147,7 @@ index 8be9682..34baf20 100644
  }
  
  static void
-@@ -673,6 +677,7 @@ remove_from_window (GtkWindow  *window,
+@@ -673,6 +716,7 @@ remove_from_window (GtkWindow  *window,
      }
  
    set_menu_bars (window, menubars);
@@ -36,7 +156,7 @@ index 8be9682..34baf20 100644
  
  static void
 diff --git a/gtk/gtkmenushell.c b/gtk/gtkmenushell.c
-index 63e81b3..48ea0c9 100644
+index 63e81b3..f533139 100644
 --- a/gtk/gtkmenushell.c
 +++ b/gtk/gtkmenushell.c
 @@ -58,6 +58,7 @@ enum {
@@ -62,14 +182,12 @@ index 63e81b3..48ea0c9 100644
    menu_shell_signals[DEACTIVATE] =
      g_signal_new (I_("deactivate"),
  		  G_OBJECT_CLASS_TYPE (object_class),
-@@ -478,8 +487,9 @@ gtk_menu_shell_insert (GtkMenuShell *menu_shell,
+@@ -478,8 +487,7 @@ gtk_menu_shell_insert (GtkMenuShell *menu_shell,
  
    class = GTK_MENU_SHELL_GET_CLASS (menu_shell);
  
 -  if (class->insert)
 -    class->insert (menu_shell, child, position);
-+/*  if (class->insert)
-+    class->insert (menu_shell, child, position);*/
 +  g_signal_emit(menu_shell, menu_shell_signals[INSERT], 0, child, position);
  }
  
