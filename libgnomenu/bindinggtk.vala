@@ -9,7 +9,7 @@ namespace GnomenuGtk {
 	private weak Client client() {
 		return Singleton.instance().client;
 	}
-	private weak GtkNodeFactory factory() {
+	private weak NodeFactory factory() {
 		return Singleton.instance().factory;
 	}
 	private void bind_widget(Gtk.Widget widget, void* parent_widget /*override parent widget*/= null, int pos = -1) {

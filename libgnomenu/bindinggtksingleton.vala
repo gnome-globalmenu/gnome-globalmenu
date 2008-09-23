@@ -14,7 +14,7 @@ namespace GnomenuGtk {
 	protected class Singleton {
 		static Singleton _instance;
 		public Client client;
-		public weak GtkNodeFactory factory;
+		public weak NodeFactory factory;
 		private int unique_id;
 		public int unique {
 			get {
@@ -29,7 +29,7 @@ namespace GnomenuGtk {
 			return _instance;
 		}
 		private Singleton() {
-			GtkNodeFactory factory = new GtkNodeFactory();
+			NodeFactory factory = new NodeFactory();
 			this.factory = factory;
 			client = new Client(factory);
 			unique_id = 99;

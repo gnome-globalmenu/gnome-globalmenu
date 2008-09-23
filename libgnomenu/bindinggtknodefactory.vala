@@ -5,7 +5,7 @@ using XML;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class GtkNodeFactory : Client.NodeFactory {
+	protected class NodeFactory : Client.NodeFactory {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
 		HashTable<weak string, weak TagNode> dict_nn;
 		public Gtk.TreeStore tree;
@@ -16,7 +16,7 @@ namespace GnomenuGtk {
 			}
 			~TagNode() {
 				message("TagNode %s is removed", this.tag);
-				(this.factory as GtkNodeFactory).tree.remove(this.iter);
+				(this.factory as NodeFactory).tree.remove(this.iter);
 			}
 		}
 		private class WidgetNode:TagNode {
@@ -25,10 +25,10 @@ namespace GnomenuGtk {
 			}
 			~WidgetNode(){
 				message("WidgetNode %s is removed", this.get("name"));
-				(this.factory as GtkNodeFactory).dict_nn.remove(this.get("name"));
+				(this.factory as NodeFactory).dict_nn.remove(this.get("name"));
 			}
 		}
-		public GtkNodeFactory() {}
+		public NodeFactory() {}
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
