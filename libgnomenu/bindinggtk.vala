@@ -12,7 +12,7 @@ namespace GnomenuGtk {
 	private weak GtkNodeFactory factory() {
 		return Singleton.instance().factory;
 	}
-	private void bind_widget(Gtk.Widget widget, void* parent_widget /*override parent widget*/= null) {
+	private void bind_widget(Gtk.Widget widget, void* parent_widget /*override parent widget*/= null, int pos = -1) {
 		if(!(widget is Gtk.MenuItem)
 		&& !(widget is Gtk.MenuShell)) return;
 		weak Gtk.Widget pw;
@@ -21,17 +21,19 @@ namespace GnomenuGtk {
 		weak string name = factory().wrap(widget);
 		weak string parent = factory().wrap(pw);
 		message("add %s to %s", name, parent);
-		client().add_widget(parent, name);
+		client().add_widget(parent, name, pos);
 		if(widget is Gtk.MenuShell) {
 			weak List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();
 			foreach(weak Gtk.Widget child in children) {
-				bind_widget(child);
+				bind_widget(child, widget, children.index(child));
 			}
 			(widget as GtkAQD.MenuShell).insert += (w, c, pos) => {
-				message("TODO: insert to menu shell");
+				message("insert to menu shell");
+				bind_widget(c, w, pos);
 			};
 			(widget as GtkAQD.MenuShell).remove += (w, c) => {
-				message("TODO: remove from menu shell");
+				message("remove from menu shell");
+				client().remove_widget(factory().wrap(c));
 			};
 		}
 		if(widget is Gtk.MenuItem) {

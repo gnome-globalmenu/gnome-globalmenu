@@ -89,7 +89,7 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		protected void add_widget(string? parent, string name) {
+		protected void add_widget(string? parent, string name, int pos = -1) {
 			weak TagNode node = factory.lookup(name);
 			weak TagNode parent_node;
 			if(parent == null) {
@@ -99,7 +99,7 @@ namespace Gnomenu {
 				parent_node = factory.lookup(parent);
 			if(node == null) {
 				TagNode node = factory.CreateWidgetNode(name);
-				parent_node.append(node);
+				parent_node.insert(node, pos);
 				factory.FinishNode(node);
 			}
 		}
