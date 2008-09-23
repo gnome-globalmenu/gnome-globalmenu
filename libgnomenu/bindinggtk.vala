@@ -28,12 +28,11 @@ namespace GnomenuGtk {
 				bind_widget(child, widget, children.index(child));
 			}
 			(widget as GtkAQD.MenuShell).insert += (w, c, pos) => {
-				message("insert to menu shell");
 				bind_widget(c, w, pos);
 			};
 			(widget as GtkAQD.MenuShell).remove += (w, c) => {
-				message("remove from menu shell");
-				client().remove_widget(factory().wrap(c));
+				client().remove_widget(factory().wrap(c)); /*This might be not so useful, since the node is removed when 
+											the MenuShell is disposed*/
 			};
 		}
 		if(widget is Gtk.MenuItem) {
@@ -41,6 +40,12 @@ namespace GnomenuGtk {
 			if(submenu != null) {
 				bind_widget(submenu, widget);
 			}
+			widget.notify["submenu"] += (widget, pspec) => {
+				weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
+				if(submenu != null) {
+					bind_widget(submenu, widget as Gtk.Widget);
+				}
+			};
 		}
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
