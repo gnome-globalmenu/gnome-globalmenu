@@ -47,22 +47,6 @@ namespace GnomenuGtk {
 			rt.set("name", name);
 			if(gtk is Gtk.MenuItem) { 
 				rt.tag = "item";
-				if(gtk is Gtk.TearoffMenuItem) {
-					rt.set("title", "&");
-				} else 
-				if(gtk is Gtk.SeparatorMenuItem) {
-					rt.set("title", "|");
-				} else  {
-					weak Gtk.Label l = find_menu_item_label(gtk);
-					if(l!= null) {
-						rt.set("title", l.label);
-					}
-					if(gtk is Gtk.CheckMenuItem) {
-						rt.set("active", (gtk as Gtk.CheckMenuItem).active?"true":"false");
-						rt.set("draw-as-radio", (gtk as Gtk.CheckMenuItem).draw_as_radio?"true":"false");
-						rt.set("inconsistent", (gtk as Gtk.CheckMenuItem).inconsistent?"true":"false");
-					}
-				}
 			}
 			if(gtk is Gtk.MenuShell) {
 				rt.tag = "menu";
@@ -75,12 +59,40 @@ namespace GnomenuGtk {
 		}
 		public override void FinishNode(XML.Node node) {
 			if(node is TagNode) {
+				weak TagNode tagnode = node as TagNode;
 				if(node.parent is TagNode) {
-					tree.insert(out (node as TagNode).iter, (node.parent as TagNode).iter, node.parent.index(node));
+					tree.insert(out tagnode.iter, (node.parent as TagNode).iter, node.parent.index(node));
 				} else {
-					tree.insert(out (node as TagNode).iter, null, 0);
+					tree.insert(out tagnode.iter, null, 0);
 				}
-				tree.set((node as TagNode).iter, 0, node, -1);
+				tree.set(tagnode.iter, 0, node, -1);
+				weak Gtk.Widget gtk = dict_nw.lookup(tagnode.get("name"));
+				if(gtk is Gtk.MenuItem) { 
+					refresh_item_property(gtk, "visible");
+					gtk.notify["visible"] += item_property_notify;
+					refresh_item_property(gtk, "enabled");
+					gtk.notify["enabled"] += item_property_notify;
+					if(gtk is Gtk.TearoffMenuItem) {
+						tagnode.set("label", "&");
+					} else 
+					if(gtk is Gtk.SeparatorMenuItem) {
+						tagnode.set("label", "|");
+					} else  {
+						weak Gtk.Label l = find_menu_item_label(gtk);
+						if(l!= null) {
+							refresh_item_property(l, "label");
+							l.notify["label"] += item_property_notify;
+						}
+						if(gtk is Gtk.CheckMenuItem) {
+							refresh_item_property(gtk, "active");
+							gtk.notify["active"] += item_property_notify;
+							refresh_item_property(gtk, "draw-as-radio");
+							gtk.notify["draw-as-radio"] += item_property_notify;
+							refresh_item_property(gtk, "inconsistent");
+							gtk.notify["inconsistent"] += item_property_notify;
+						}
+					}
+				}
 			}
 			node.unfreeze();
 		}
@@ -96,6 +108,11 @@ namespace GnomenuGtk {
 		}
 		private void toggle_ref_notify(GLib.Object object, bool is_last){
 			if(!is_last) return;
+			if(object is Gtk.MenuItem) {
+				weak Gtk.Label label = find_menu_item_label(object as Gtk.Widget);
+				if(label != null) label.notify["label"] -= item_property_notify;
+			}
+			unbind_widget(object as Gtk.Widget);
 			weak string name = (string) object.get_data("native-name");
 			if(name != null) {
 				message("GtkWidget %s is removed", name);
@@ -111,6 +128,36 @@ namespace GnomenuGtk {
 			}
 			object.set_data("native-name", null);
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
+		}
+		private void refresh_item_property(Gtk.Widget w, string prop) {
+			Type t = w.get_type();
+			weak TypeClass tc = t.class_peek();
+			weak ParamSpec pspec = ((ObjectClass) tc).find_property(prop);
+			if(pspec != null) {
+				item_property_notify(w, pspec);
+			}
+		}
+		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
+			weak TagNode node = dict_nn.lookup((string)w.get_data("native-name"));
+			if(node == null) {
+				warning("no xml node found for widget %s", (string) w.get_data("native-name"));
+				return;
+			}
+			string val;
+			if(pspec.value_type == typeof(string)) {
+				w.get(pspec.name, out val, null);
+			}
+			if(pspec.value_type == typeof(bool)) {
+				bool b;
+				w.get(pspec.name, out b, null);
+				val = b.to_string();
+			}
+			if(pspec.value_type == typeof(int)) {
+				int i;
+				w.get(pspec.name, out i, null);
+				val = i.to_string();
+			}
+			node.set(pspec.name, val);
 		}
 	}
 	private weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {

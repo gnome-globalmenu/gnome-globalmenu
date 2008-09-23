@@ -19,6 +19,7 @@ libgnomenu_la_VALASOURCES = \
 		client.vala \
 		bindinggtk.vala \
 		bindinggtksingleton.vala \
+		bindinggtknavigator.vala \
 		bindinggtknodefactory.vala  \
 		$(NULL)
 
