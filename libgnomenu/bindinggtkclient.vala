@@ -13,8 +13,14 @@ namespace GnomenuGtk {
 				this.factory = factory;
 			}
 			~WidgetNode() {
+				message("XMLNode %s is removed", this.get("name"));
 				(this.factory as GtkNodeFactory).dict_nn.remove(this.get("name"));
 			}
+		}
+		public GtkNodeFactory() {}
+		construct {
+			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
+			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
 		public override weak TagNode? lookup(string name) {
 			return dict_nn.lookup(name);
@@ -22,7 +28,7 @@ namespace GnomenuGtk {
 		public override TagNode CreateWidgetNode(string name) {
 			weak TagNode node = dict_nn.lookup(name);
 			if(node != null) return node;
-			TagNode rt = new TagNode(this);
+			TagNode rt = new WidgetNode(this);
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
 			assert(gtk != null);
 			if(gtk is Gtk.MenuItem) rt.tag = "item";
@@ -46,9 +52,11 @@ namespace GnomenuGtk {
 			if(!is_last) return;
 			weak string name = (string) object.get_data("native-name");
 			if(name != null) {
+				message("GtkWidget %s is removed", name);
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
 				weak TagNode node = dict_nn.lookup(name);
 				if(node != null){
+					assert(node.parent != null);
 					node.parent.remove(node);
 				}
 			}

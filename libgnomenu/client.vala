@@ -85,6 +85,7 @@ namespace Gnomenu {
 		protected void remove_widget(string name) {
 			weak TagNode node = factory.lookup(name);
 			if(node != null) {
+				assert(node.parent != null);
 				node.parent.remove(node);
 				node = null;
 			}

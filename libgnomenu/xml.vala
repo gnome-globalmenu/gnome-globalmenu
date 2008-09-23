@@ -2,7 +2,7 @@ using GLib;
 namespace XML {
 	public abstract class Node: Object {
 		public weak Node parent;
-		protected List<Node> children;
+		protected List<weak Node> children;
 		public weak NodeFactory factory {get; construct;}
 		public Node (NodeFactory factory){ this.factory = factory;}
 		public virtual string to_string () {
@@ -21,6 +21,8 @@ namespace XML {
 			node.unref();
 		}
 		public abstract virtual string summary(int level = 0);
+		~Node() {
+		}
 	}
 	public abstract class NodeFactory: Object {
 		public abstract virtual RootNode CreateRootNode();
