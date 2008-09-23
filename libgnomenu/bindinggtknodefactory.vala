@@ -41,8 +41,10 @@ namespace GnomenuGtk {
 			weak TagNode node = dict_nn.lookup(name);
 			if(node != null) return node;
 			TagNode rt = new WidgetNode(this);
+			rt.freeze();
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
 			assert(gtk != null);
+			rt.set("name", name);
 			if(gtk is Gtk.MenuItem) { 
 				rt.tag = "item";
 				if(gtk is Gtk.TearoffMenuItem) {
@@ -68,7 +70,6 @@ namespace GnomenuGtk {
 			if(gtk is Gtk.Window) {
 				rt.tag = "window";
 			}
-			rt.set("name", name);
 			dict_nn.insert(name, rt);
 			return rt;
 		}
@@ -81,6 +82,7 @@ namespace GnomenuGtk {
 				}
 				tree.set((node as TagNode).iter, 0, node, -1);
 			}
+			node.unfreeze();
 		}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");

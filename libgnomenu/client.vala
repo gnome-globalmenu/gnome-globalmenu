@@ -9,25 +9,32 @@ namespace Gnomenu {
 		public abstract class NodeFactory: XML.NodeFactory {
 			public override RootNode CreateRootNode() {
 				RootNode rt = new RootNode(this);
+				rt.freeze();
 				return rt;
 			}
 			public override TextNode CreateTextNode(string text) {
 				TextNode rt = new TextNode(this);
+				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
 			public override  SpecialNode CreateSpecialNode(string text) {
 				SpecialNode rt = new SpecialNode(this);
+				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
 			public override TagNode CreateTagNode(string tag) {
 				TagNode rt = new TagNode(this);
+				rt.freeze();
 				rt.tag = S(tag);
 				return rt;
 			}
 			public abstract virtual weak XML.TagNode? lookup(string name);
 			public abstract virtual TagNode CreateWidgetNode(string name);
+			public override void FinishNode(XML.Node node) {
+				node.unfreeze();
+			}
 		}
 		Connection conn;
 		string bus;
@@ -49,6 +56,23 @@ namespace Gnomenu {
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
 			windows = factory.CreateTagNode("windows");
 			factory.FinishNode(windows);
+			factory.added += (f, p, o, i) => {
+				if(!(p is TagNode) || !(o is TagNode)) return;
+				weak TagNode parent_node = p as TagNode;
+				weak TagNode node = o as TagNode;
+				message("added %s to %s at %d", node.get("name"), parent_node.get("name"), i);
+			};
+			factory.removed += (f, p, o) => {
+				if(!(p is TagNode) || !(o is TagNode)) return;
+				weak TagNode parent_node = p as TagNode;
+				weak TagNode node = o as TagNode;
+				message("removed %s to %s", node.get("name"), parent_node.get("name"));
+			};
+			factory.updated += (f, o, prop) => {
+				if(!(o is TagNode)) return;
+				weak TagNode node = o as TagNode;
+				message("updated %s of %s", prop, node.get("name"));
+			};
 		}
 		public string QueryNode(string name, int level = -1){
 			weak TagNode node = factory.lookup(name);
@@ -71,6 +95,8 @@ namespace Gnomenu {
 			activate_item(node);
 		}
 		public signal void updated(string name);
+		public signal void inserted(string parent, string name, int pos);
+		public signal void removed(string parent, string name);
 
 		protected dynamic DBus.Object get_server(){
 			return conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
@@ -165,15 +191,6 @@ namespace Gnomenu {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			NodeFactory factory = new TestFactory();
-			factory.added += (f, p, o) => {
-				message("added %s to %s", o.summary(), p.summary());
-			};
-			factory.removed += (f, p, o) => {
-				message("removed %s to %s", o.summary(), p.summary());
-			};
-			factory.updated += (f, o, p) => {
-				message("updated %s of %s", p, o.summary());
-			};
 			Client c = new Client(factory);
 			c.add_widget(null, "window1");
 			c.add_widget(null, "window2");

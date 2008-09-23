@@ -2,12 +2,14 @@ using GLib;
 namespace XML {
 	public abstract class Node: Object {
 		private bool disposed;
+		protected bool freezed;
 		public weak Node parent;
 		protected List<weak Node> children;
 		public weak NodeFactory factory {get; construct;}
 		public Node (NodeFactory factory){ this.factory = factory;}
 		construct {
 			disposed = false;
+			freezed = false;
 		}
 		public virtual string to_string () {
 			return summary(-1);
@@ -18,11 +20,13 @@ namespace XML {
 		public void insert(Node node, int pos) {
 			node.parent = this;
 			children.insert(node.ref() as Node, pos);
+			if(!freezed)
 			factory.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
 			children.remove(node);
+			if(!freezed)
 			factory.removed(parent, node);
 			node.parent = null;
 			node.unref();
@@ -39,6 +43,12 @@ namespace XML {
 				}
 			}
 		}
+		public void freeze() {
+			freezed = true;
+		}
+		public void unfreeze() {
+			freezed = false;	
+		}	
 		~Node() {
 		}
 	}
@@ -104,6 +114,7 @@ namespace XML {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
 			props.insert(factory.S(prop), val);
+			if(!freezed)
 			factory.updated(this, prop);
 		}
 		public void unset(string prop) {
@@ -111,6 +122,8 @@ namespace XML {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
 			props.remove(prop);
+			if(!freezed)
+			factory.updated(this, prop);
 		}
 		public weak string? get(string prop) {
 			if(props == null) {
