@@ -22,6 +22,9 @@ namespace XML {
 		}
 		public abstract virtual string summary(int level = 0);
 		~Node() {
+			foreach(weak Node node in children){
+				node.unref();
+			}
 		}
 	}
 	public abstract class NodeFactory: Object {
