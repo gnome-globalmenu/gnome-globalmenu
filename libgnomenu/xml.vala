@@ -1,18 +1,26 @@
 using GLib;
 namespace XML {
-	public abstract class Node {
+	public abstract class Node: Object {
 		public weak Node parent;
-		public List<Node> children;
-		public weak NodeFactory factory;
+		protected List<Node> children;
+		public weak NodeFactory factory {get; construct;}
 		public Node (NodeFactory factory){ this.factory = factory;}
 		public virtual string to_string () {
 			return summary(-1);
 		}
-		public void append(Node # node) {
+		public void append(Node node) {
 			node.parent = this;
-			children.append(node);
+			children.append(node.ref() as Node);
+			factory.added(this, node);
 		}
-		public abstract virtual string summary(int level);
+		public void remove(Node node) {
+			Node parent = node.parent;
+			children.remove(node);
+			factory.removed(parent, node);
+			node.parent = null;
+			node.unref();
+		}
+		public abstract virtual string summary(int level = 0);
 	}
 	public abstract class NodeFactory: Object {
 		public abstract virtual RootNode CreateRootNode();
@@ -20,14 +28,18 @@ namespace XML {
 		public abstract virtual SpecialNode CreateSpecialNode(string text);
 		public abstract virtual TagNode CreateTagNode(string tag);
 		public abstract virtual void FinishNode(Node node);
+		public abstract virtual void DestroyNode(Node node);
 		public abstract virtual weak string S(string s);
+		public signal void updated(Node node, string prop);
+		public signal void added(Node parent, Node node);
+		public signal void removed(Node parent, Node node);
 	}
 	public class TextNode : Node {
 		public string text;
 		public TextNode(NodeFactory factory) {
 			this.factory = factory;
 		}
-		public override string summary (int level) {
+		public override string summary (int level = 0) {
 			return text;
 		}
 	}
@@ -36,7 +48,7 @@ namespace XML {
 		public SpecialNode(NodeFactory factory) {
 			this.factory = factory;
 		}
-		public override string summary (int level) {
+		public override string summary (int level = 0) {
 			return text;
 		}
 	}
@@ -44,7 +56,7 @@ namespace XML {
 		public RootNode(NodeFactory factory){
 			this.factory = factory;
 		}
-		public override string summary(int level) {
+		public override string summary(int level = 0) {
 			StringBuilder sb = new StringBuilder("");
 			if(this.children == null)
 				return "";
@@ -67,8 +79,9 @@ namespace XML {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
 			props.insert(factory.S(prop), val);
+			factory.updated(this, prop);
 		}
-		public void remove(string prop) {
+		public void unset(string prop) {
 			if(props == null) {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}

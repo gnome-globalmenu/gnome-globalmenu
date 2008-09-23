@@ -4,30 +4,9 @@ using Gtk;
 using DBus;
 using XML;
 namespace Gnomenu {
-	public class WidgetNodeFactory: SimpleNodeFactory {
-		private HashTable <weak string, weak XML.TagNode> dict;
-		private class WidgetNode:TagNode {
-			public WidgetNode(NodeFactory factory) {
-				this.factory = factory;
-			}
-			~WidgetNode() {
-				dict.remove(this.get("widget"));
-			}
-		}
-		public WidgetNodeFactory() { }
-		construct {
-			dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
-		}
-		public weak XML.TagNode? lookup(string widget){
-			return dict.lookup(widget);
-		}
-		public virtual TagNode CreateWidgetNode(string widget) {
-			TagNode rt = new WidgetNode(this);
-			rt.tag = S("widget");
-			rt.set("widget", widget);
-			dict.insert(widget, rt);
-			return rt;
-		}
+	public abstract class WidgetNodeFactory: SimpleNodeFactory {
+		public abstract virtual weak XML.TagNode? lookup(string name);
+		public abstract virtual TagNode CreateWidgetNode(string name);
 	}
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
@@ -51,8 +30,8 @@ namespace Gnomenu {
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
 			windows = factory.CreateTagNode("windows");
 		}
-		public string QueryNode(string widget, int level = -1){
-			weak TagNode node = factory.lookup(widget);
+		public string QueryNode(string name, int level = -1){
+			weak TagNode node = factory.lookup(name);
 			if(node!= null)
 				return node.summary(level);
 			return "";
@@ -67,11 +46,11 @@ namespace Gnomenu {
 		public string QueryWindows() {
 			return windows.summary(1);
 		}
-		public void ActivateItem(string widget){
-			weak TagNode node = factory.lookup(widget);
+		public void ActivateItem(string name){
+			weak TagNode node = factory.lookup(name);
 			activate_item(node);
 		}
-		public signal void updated(string widget);
+		public signal void updated(string name);
 
 		protected dynamic DBus.Object get_server(){
 			return conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
@@ -90,26 +69,28 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		protected void add_widget(string? parent, string widget) {
-			weak TagNode node = factory.lookup(widget);
+		protected void add_widget(string? parent, string name) {
+			weak TagNode node = factory.lookup(name);
 			weak TagNode parent_node;
-			if(parent == null)
+			if(parent == null) {
 				parent_node = windows;
+			}
 			else
 				parent_node = factory.lookup(parent);
 			if(node == null) {
-				TagNode node = factory.CreateWidgetNode(widget);
+				TagNode node = factory.CreateWidgetNode(name);
 				parent_node.append(node);
 			}
 		}
-		protected void remove_widget(string widget) {
-			weak TagNode node = factory.lookup(widget);
+		protected void remove_widget(string name) {
+			weak TagNode node = factory.lookup(name);
 			if(node != null) {
-				node.parent.children.remove(node);
+				node.parent.remove(node);
+				node = null;
 			}
 		}
-		protected void register_window(string widget, string xid) {
-			weak TagNode node = factory.lookup(widget);
+		protected void register_window(string name, string xid) {
+			weak TagNode node = factory.lookup(name);
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -119,8 +100,8 @@ namespace Gnomenu {
 				}
 			}
 		}
-		protected void unregister_window(string widget) {
-			weak TagNode node = factory.lookup(widget);
+		protected void unregister_window(string name) {
+			weak TagNode node = factory.lookup(name);
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -128,19 +109,56 @@ namespace Gnomenu {
 				} catch(GLib.Error e) {
 					warning("%s", e.message);
 				}
-				node.remove("xid");
+				node.unset("xid");
 			}
 
+		}
+		private class TestFactory: WidgetNodeFactory {
+			private HashTable <weak string, weak XML.TagNode> dict;
+			private class WidgetNode:TagNode {
+				public WidgetNode(NodeFactory factory) {
+					this.factory = factory;
+				}
+				~WidgetNode() {
+					(this.factory as TestFactory).dict.remove(this.get("name"));
+				}
+			}
+			public TestFactory() { }
+			construct {
+				dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
+			}
+			public override weak XML.TagNode? lookup(string name){
+				return dict.lookup(name);
+			}
+			public override TagNode CreateWidgetNode(string name) {
+				TagNode rt = new WidgetNode(this);
+				rt.tag = S("widget");
+				rt.set("name", name);
+				dict.insert(name, rt);
+				return rt;
+			}
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			WidgetNodeFactory factory = new WidgetNodeFactory();
+			WidgetNodeFactory factory = new TestFactory();
+			factory.added += (f, p, o) => {
+				message("added %s to %s", o.summary(), p.summary());
+			};
+			factory.removed += (f, p, o) => {
+				message("removed %s to %s", o.summary(), p.summary());
+			};
+			factory.updated += (f, o, p) => {
+				message("updated %s of %s", p, o.summary());
+			};
 			Client c = new Client(factory);
 			c.add_widget(null, "window1");
 			c.add_widget(null, "window2");
 			c.add_widget("window1", "menu1");
 			c.add_widget("window2", "menu2");
+			c.register_window("window1", "0000000");
+			c.register_window("window2", "0000001");
+//			c.remove_widget("window1");
 			loop.run();
 			return 0;
 		}

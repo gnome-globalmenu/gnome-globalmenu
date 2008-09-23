@@ -18,7 +18,7 @@ namespace Gnomenu {
 				if(node is XML.TagNode) {
 					weak XML.TagNode tagnode = node as XML.TagNode;
 					if(tagnode.get("bus") == bus) {
-						clients.children.remove(node);
+						clients.remove(node);
 						break;
 					}
 				}
@@ -54,7 +54,7 @@ namespace Gnomenu {
 					return;
 				} else {
 					/*remove the old client that binds to the window*/
-					clients.children.remove(node);
+					clients.remove(node);
 				}
 			}	
 			node = factory.CreateTagNode("client");
@@ -72,7 +72,7 @@ namespace Gnomenu {
 			XML.TagNode node= find_node_by_xid(xid);
 			if(node != null)
 				if(node.get("bus") == client_bus)
-					clients.children.remove(node);
+					clients.remove(node);
 		}
 		public string QueryWindows() {
 			return clients.to_string();

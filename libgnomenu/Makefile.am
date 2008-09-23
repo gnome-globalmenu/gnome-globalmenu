@@ -18,9 +18,12 @@ libgnomenu_la_VALASOURCES = \
 		xml.vala \
 		server.vala  \
 		client.vala \
+		bindinggtk.vala \
+		bindinggtksingleton.vala \
+		bindinggtkclient.vala  \
 		$(NULL)
 
-#		bindinggtk.vala 
+
 libgnomenu_la_SOURCES = \
 		$(libgnomenu_la_VALASOURCES:.vala=.c) \
 		$(libgnomenu_la_VALASOURCES:.vala=.h) \

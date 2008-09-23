@@ -12,14 +12,15 @@ namespace XML {
 			return strings.insert_const(s);
 		}
 		public override RootNode CreateRootNode() {
-			return new RootNode(this);
+			RootNode rt = new RootNode(this);
+			return rt;
 		}
 		public override TextNode CreateTextNode(string text) {
 			TextNode rt = new TextNode(this);
 			rt.text = text;
 			return rt;
 		}
-		public override SpecialNode CreateSpecialNode(string text) {
+		public override  SpecialNode CreateSpecialNode(string text) {
 			SpecialNode rt = new SpecialNode(this);
 			rt.text = text;
 			return rt;
@@ -30,5 +31,6 @@ namespace XML {
 			return rt;
 		}
 		public override void FinishNode(Node node) { }
+		public override void DestroyNode(Node node) { }
 	}
 }
