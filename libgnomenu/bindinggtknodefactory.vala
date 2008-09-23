@@ -45,6 +45,22 @@ namespace GnomenuGtk {
 			assert(gtk != null);
 			if(gtk is Gtk.MenuItem) { 
 				rt.tag = "item";
+				if(gtk is Gtk.TearoffMenuItem) {
+					rt.set("title", "&");
+				} else 
+				if(gtk is Gtk.SeparatorMenuItem) {
+					rt.set("title", "|");
+				} else  {
+					weak Gtk.Label l = find_menu_item_label(gtk);
+					if(l!= null) {
+						rt.set("title", l.label);
+					}
+					if(gtk is Gtk.CheckMenuItem) {
+						rt.set("active", (gtk as Gtk.CheckMenuItem).active?"true":"false");
+						rt.set("draw-as-radio", (gtk as Gtk.CheckMenuItem).draw_as_radio?"true":"false");
+						rt.set("inconsistent", (gtk as Gtk.CheckMenuItem).inconsistent?"true":"false");
+					}
+				}
 			}
 			if(gtk is Gtk.MenuShell) {
 				rt.tag = "menu";
@@ -94,5 +110,23 @@ namespace GnomenuGtk {
 			object.set_data("native-name", null);
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
 		}
+	}
+	private weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {
+		Queue<weak Gtk.Widget> q = new Queue<weak Gtk.Widget>();
+		q.push_tail(widget);
+		while(!q.is_empty()) {
+			weak Gtk.Widget w = q.pop_head();
+			if(w is Gtk.Container) {
+				weak List<weak Gtk.Widget> children = (w as Gtk.Container).get_children();
+				foreach(weak Gtk.Widget child in children){
+					q.push_tail(child);
+				}
+			}
+			if(w is Gtk.Label) {
+				w.set_data("native-name", widget.get_data("native-name"));
+				return w as Gtk.Label;
+			}
+		}
+		return null;
 	}
 }
