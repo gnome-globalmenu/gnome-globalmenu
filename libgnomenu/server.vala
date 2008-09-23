@@ -3,14 +3,49 @@ using Gtk;
 using DBus;
 using XML;
 namespace Gnomenu {
-
 	[DBus (name = "org.gnome.GlobalMenu.Server")]
 	public class Server:GLib.Object {
+		public class NodeFactory : XML.NodeFactory {
+			private StringChunk strings;
+			public NodeFactory() { }
+			public override RootNode CreateRootNode() {
+				RootNode rt = new RootNode(this);
+				return rt;
+			}
+			public override TextNode CreateTextNode(string text) {
+				TextNode rt = new TextNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override  SpecialNode CreateSpecialNode(string text) {
+				SpecialNode rt = new SpecialNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override TagNode CreateTagNode(string tag) {
+				TagNode rt = new TagNode(this);
+				rt.tag = strings.insert_const(tag);
+				return rt;
+			}
+			public override void FinishNode(XML.Node node) { }
+		}
+
 		Connection conn;
-		XML.NodeFactory factory = new SimpleNodeFactory();
+		NodeFactory factory;
 		XML.Node clients;
 		dynamic DBus.Object dbus;
 		public Server() {}
+		construct {
+			conn = Bus.get(DBus.BusType.SESSION);
+			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+			dbus.NameOwnerChanged += name_owner_changed;
+			
+			uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
+			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
+			conn.register_object("/org/gnome/GlobalMenu/Server", this);
+			factory = new NodeFactory();
+			clients = factory.CreateTagNode("clients");
+		}
 		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 			if(new_owner != "") return;
 			/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
@@ -23,18 +58,6 @@ namespace Gnomenu {
 					}
 				}
 			}
-			
-		}
-		construct {
-			conn = Bus.get(DBus.BusType.SESSION);
-			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
-			dbus.NameOwnerChanged += name_owner_changed;
-			
-			uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
-			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
-			conn.register_object("/org/gnome/GlobalMenu/Server", this);
-			factory = new XML.SimpleNodeFactory();
-			clients = factory.CreateTagNode("clients");
 		}
 		private weak XML.TagNode? find_node_by_xid(string xid) {
 			foreach (weak XML.Node node in clients.children) {

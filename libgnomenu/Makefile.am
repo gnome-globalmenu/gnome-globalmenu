@@ -14,7 +14,6 @@ libgnomenu_LTLIBRARIES = \
 libgnomenu_la_VALASOURCES = \
 		valacompat.vapi \
 		xmlparser.vala \
-		xmlnodefactory.vala \
 		xml.vala \
 		server.vala  \
 		client.vala \
