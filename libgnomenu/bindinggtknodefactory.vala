@@ -8,19 +8,23 @@ namespace GnomenuGtk {
 	protected class GtkNodeFactory : Client.NodeFactory {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
 		HashTable<weak string, weak TagNode> dict_nn;
-		private Gtk.TreeStore tree;
+		public Gtk.TreeStore tree;
 		private class TagNode:XML.TagNode {
 			public Gtk.TreeIter iter;
 			public TagNode(NodeFactory factory) {
 				this.factory = factory;
+			}
+			~TagNode() {
+				message("TagNode %s is removed", this.tag);
+				(this.factory as GtkNodeFactory).tree.remove(this.iter);
 			}
 		}
 		private class WidgetNode:TagNode {
 			public WidgetNode(NodeFactory factory) {
 				this.factory = factory;
 			}
-			~WidgetNode() {
-				message("XMLNode %s is removed", this.get("name"));
+			~WidgetNode(){
+				message("WidgetNode %s is removed", this.get("name"));
 				(this.factory as GtkNodeFactory).dict_nn.remove(this.get("name"));
 			}
 		}
@@ -28,7 +32,7 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
-			tree = new Gtk.TreeStore(1, typeof(string));
+			tree = new Gtk.TreeStore(1, typeof(constpointer));
 		}
 		public override weak XML.TagNode? lookup(string name) {
 			return dict_nn.lookup(name);
@@ -52,7 +56,16 @@ namespace GnomenuGtk {
 			dict_nn.insert(name, rt);
 			return rt;
 		}
-		public override void FinishNode(XML.Node node) {}
+		public override void FinishNode(XML.Node node) {
+			if(node is TagNode) {
+				if(node.parent is TagNode) {
+					tree.insert(out (node as TagNode).iter, (node.parent as TagNode).iter, node.parent.index(node));
+				} else {
+					tree.insert(out (node as TagNode).iter, null, 0);
+				}
+				tree.set((node as TagNode).iter, 0, node, -1);
+			}
+		}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");
 			if(name != null) return name;
@@ -71,7 +84,10 @@ namespace GnomenuGtk {
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
 				weak TagNode node = dict_nn.lookup(name);
 				if(node != null){
-					assert(node.parent != null);
+					if(node.parent == null) {
+						message("parent = null for %s", name);
+						assert(false);
+					}
 					node.parent.remove(node);
 				}
 			}
@@ -79,5 +95,4 @@ namespace GnomenuGtk {
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
 		}
 	}
-
 }

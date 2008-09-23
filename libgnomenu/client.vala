@@ -48,6 +48,7 @@ namespace Gnomenu {
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
 			windows = factory.CreateTagNode("windows");
+			factory.FinishNode(windows);
 		}
 		public string QueryNode(string name, int level = -1){
 			weak TagNode node = factory.lookup(name);
@@ -99,6 +100,7 @@ namespace Gnomenu {
 			if(node == null) {
 				TagNode node = factory.CreateWidgetNode(name);
 				parent_node.append(node);
+				factory.FinishNode(node);
 			}
 		}
 		protected void remove_widget(string name) {

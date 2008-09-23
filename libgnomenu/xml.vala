@@ -1,10 +1,14 @@
 using GLib;
 namespace XML {
 	public abstract class Node: Object {
+		private bool disposed;
 		public weak Node parent;
 		protected List<weak Node> children;
 		public weak NodeFactory factory {get; construct;}
 		public Node (NodeFactory factory){ this.factory = factory;}
+		construct {
+			disposed = false;
+		}
 		public virtual string to_string () {
 			return summary(-1);
 		}
@@ -23,11 +27,19 @@ namespace XML {
 			node.parent = null;
 			node.unref();
 		}
+		public int index(Node node) {
+			return children.index(node);
+		}
 		public abstract virtual string summary(int level = 0);
-		~Node() {
-			foreach(weak Node node in children){
-				node.unref();
+		protected override void dispose() {
+			if(!disposed){
+				disposed = true;
+				foreach(weak Node node in children){
+					node.unref();
+				}
 			}
+		}
+		~Node() {
 		}
 	}
 	public abstract class NodeFactory: Object {
