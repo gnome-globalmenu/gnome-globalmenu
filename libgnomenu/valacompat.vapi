@@ -54,8 +54,22 @@ namespace GtkAQD {
 		public virtual signal void move_current (Gtk.MenuDirectionType direction);
 		public virtual signal bool move_selected (int distance);
 		public virtual signal void selection_done ();
+/* Below are in GtkAQD*/
 		[HasEmitter]
 		public virtual signal void insert(Gtk.Widget widget, int pos);
 	}
 
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class MenuBar : MenuShell, Atk.Implementor, Gtk.Buildable {
+		public Gtk.PackDirection get_child_pack_direction ();
+		public Gtk.PackDirection get_pack_direction ();
+		[CCode (type = "GtkWidget*")]
+		public MenuBar ();
+		public void set_child_pack_direction (Gtk.PackDirection child_pack_dir);
+		public void set_pack_direction (Gtk.PackDirection pack_dir);
+		public Gtk.PackDirection child_pack_direction { get; set; }
+		public Gtk.PackDirection pack_direction { get; set; }
+		[NoAccessorMethod]
+		public bool local {get; set;}
+	}
 }

@@ -22,6 +22,10 @@ namespace GnomenuGtk {
 			public override void activate() {
 				weak Gtk.Widget widget = (factory as NodeFactory).dict_nw.lookup(this.get("name"));
 				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
+				if(widget is GtkAQD.MenuBar) {
+					bool local = (widget as GtkAQD.MenuBar).local;
+					(widget as GtkAQD.MenuBar).local = !local;
+				}
 			}
 		}
 		public NodeFactory() {}
