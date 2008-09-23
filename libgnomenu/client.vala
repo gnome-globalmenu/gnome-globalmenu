@@ -6,13 +6,14 @@ using XML;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
-		public class WidgetNode:XML.TagNode {
+		public abstract class WidgetNode:XML.TagNode {
 			public WidgetNode(NodeFactory factory) {
 				this.factory = factory;
 			}
 			~WidgetNode(){
 				message("WidgetNode %s is removed", this.get("name"));
 			}
+			public abstract virtual void activate();
 		}
 		public abstract class NodeFactory: XML.NodeFactory {
 			public override RootNode CreateRootNode() {
@@ -99,8 +100,8 @@ namespace Gnomenu {
 			return windows.summary(1);
 		}
 		public void ActivateItem(string name){
-			weak TagNode node = factory.lookup(name);
-			activate_item(node);
+			weak WidgetNode node = factory.lookup(name);
+			node.activate();
 		}
 		public signal void updated(string name);
 		public signal void inserted(string parent, string name, int pos);
@@ -108,9 +109,6 @@ namespace Gnomenu {
 
 		protected dynamic DBus.Object get_server(){
 			return conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
-		}
-		protected virtual void activate_item(TagNode item_node) {
-			message("%s is activated", item_node.summary(0));
 		}
 		private weak TagNode? find_window_by_xid(string xid) {
 			foreach (weak XML.Node node in windows.children) {
@@ -178,6 +176,9 @@ namespace Gnomenu {
 				public override void dispose() {
 					base.dispose();
 					(this.factory as TestFactory).dict.remove(this.get("name"));
+				}
+				public override void activate() {
+					message("%s is activated", summary(0));
 				}
 			}
 			public TestFactory() { }

@@ -19,6 +19,10 @@ namespace GnomenuGtk {
 				(this.factory as NodeFactory).dict_nn.remove(this.get("name"));
 				(this.factory as NodeFactory).tree.remove(this.iter);
 			}
+			public override void activate() {
+				weak Gtk.Widget widget = (factory as NodeFactory).dict_nw.lookup(this.get("name"));
+				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
+			}
 		}
 		public NodeFactory() {}
 		construct {
