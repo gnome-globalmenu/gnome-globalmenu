@@ -4,19 +4,38 @@ using Gtk;
 using DBus;
 using XML;
 namespace Gnomenu {
-	public abstract class WidgetNodeFactory: SimpleNodeFactory {
-		public abstract virtual weak XML.TagNode? lookup(string name);
-		public abstract virtual TagNode CreateWidgetNode(string name);
-	}
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
+		public abstract class NodeFactory: XML.NodeFactory {
+			public override RootNode CreateRootNode() {
+				RootNode rt = new RootNode(this);
+				return rt;
+			}
+			public override TextNode CreateTextNode(string text) {
+				TextNode rt = new TextNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override  SpecialNode CreateSpecialNode(string text) {
+				SpecialNode rt = new SpecialNode(this);
+				rt.text = text;
+				return rt;
+			}
+			public override TagNode CreateTagNode(string tag) {
+				TagNode rt = new TagNode(this);
+				rt.tag = S(tag);
+				return rt;
+			}
+			public abstract virtual weak XML.TagNode? lookup(string name);
+			public abstract virtual TagNode CreateWidgetNode(string name);
+		}
 		Connection conn;
 		string bus;
 		dynamic DBus.Object dbus;
 		[DBus (visible = false)]
-		public WidgetNodeFactory factory {get; construct;}
+		public NodeFactory factory {get; construct;}
 		protected TagNode windows;
-		public Client(WidgetNodeFactory factory) {
+		public Client(NodeFactory factory) {
 			this.factory = factory;
 		}
 		construct {
@@ -114,7 +133,7 @@ namespace Gnomenu {
 			}
 
 		}
-		private class TestFactory: WidgetNodeFactory {
+		private class TestFactory: NodeFactory {
 			private HashTable <weak string, weak XML.TagNode> dict;
 			private class WidgetNode:TagNode {
 				public WidgetNode(NodeFactory factory) {
@@ -138,11 +157,12 @@ namespace Gnomenu {
 				dict.insert(name, rt);
 				return rt;
 			}
+			public override void FinishNode(XML.Node node){}
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			WidgetNodeFactory factory = new TestFactory();
+			NodeFactory factory = new TestFactory();
 			factory.added += (f, p, o) => {
 				message("added %s to %s", o.summary(), p.summary());
 			};

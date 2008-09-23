@@ -5,9 +5,16 @@ using XML;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class GtkNodeFactory : WidgetNodeFactory {
+	protected class GtkNodeFactory : Client.NodeFactory {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
 		HashTable<weak string, weak TagNode> dict_nn;
+		private Gtk.TreeStore tree;
+		private class TagNode:XML.TagNode {
+			public Gtk.TreeIter iter;
+			public TagNode(NodeFactory factory) {
+				this.factory = factory;
+			}
+		}
 		private class WidgetNode:TagNode {
 			public WidgetNode(NodeFactory factory) {
 				this.factory = factory;
@@ -21,23 +28,31 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
+			tree = new Gtk.TreeStore(1, typeof(string));
 		}
-		public override weak TagNode? lookup(string name) {
+		public override weak XML.TagNode? lookup(string name) {
 			return dict_nn.lookup(name);
 		}
-		public override TagNode CreateWidgetNode(string name) {
+		public override XML.TagNode CreateWidgetNode(string name) {
 			weak TagNode node = dict_nn.lookup(name);
 			if(node != null) return node;
 			TagNode rt = new WidgetNode(this);
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
 			assert(gtk != null);
-			if(gtk is Gtk.MenuItem) rt.tag = "item";
-			if(gtk is Gtk.MenuShell) rt.tag = "menu";
-			if(gtk is Gtk.Window) rt.tag = "window";
+			if(gtk is Gtk.MenuItem) { 
+				rt.tag = "item";
+			}
+			if(gtk is Gtk.MenuShell) {
+				rt.tag = "menu";
+			}
+			if(gtk is Gtk.Window) {
+				rt.tag = "window";
+			}
 			rt.set("name", name);
 			dict_nn.insert(name, rt);
 			return rt;
 		}
+		public override void FinishNode(XML.Node node) {}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");
 			if(name != null) return name;

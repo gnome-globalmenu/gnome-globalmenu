@@ -5,12 +5,6 @@ namespace XML {
 		private StringChunk strings;
 		public SimpleNodeFactory() {
 		}
-		construct {
-			strings = new StringChunk(1024);
-		}
-		public override weak string S(string s) {
-			return strings.insert_const(s);
-		}
 		public override RootNode CreateRootNode() {
 			RootNode rt = new RootNode(this);
 			return rt;
@@ -31,6 +25,5 @@ namespace XML {
 			return rt;
 		}
 		public override void FinishNode(Node node) { }
-		public override void DestroyNode(Node node) { }
 	}
 }

@@ -9,9 +9,12 @@ namespace XML {
 			return summary(-1);
 		}
 		public void append(Node node) {
+			insert(node, -1);
+		}
+		public void insert(Node node, int pos) {
 			node.parent = this;
-			children.append(node.ref() as Node);
-			factory.added(this, node);
+			children.insert(node.ref() as Node, pos);
+			factory.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
@@ -28,15 +31,20 @@ namespace XML {
 		}
 	}
 	public abstract class NodeFactory: Object {
+		private StringChunk strings;
+		construct {
+			strings = new StringChunk(1024);
+		}
 		public abstract virtual RootNode CreateRootNode();
 		public abstract virtual TextNode CreateTextNode(string text);
 		public abstract virtual SpecialNode CreateSpecialNode(string text);
 		public abstract virtual TagNode CreateTagNode(string tag);
 		public abstract virtual void FinishNode(Node node);
-		public abstract virtual void DestroyNode(Node node);
-		public abstract virtual weak string S(string s);
+		public virtual weak string S(string s) {
+			return strings.insert_const(s);
+		}
 		public signal void updated(Node node, string prop);
-		public signal void added(Node parent, Node node);
+		public signal void added(Node parent, Node node, int pos);
 		public signal void removed(Node parent, Node node);
 	}
 	public class TextNode : Node {
