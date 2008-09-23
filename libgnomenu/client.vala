@@ -6,6 +6,14 @@ using XML;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
+		public class WidgetNode:XML.TagNode {
+			public WidgetNode(NodeFactory factory) {
+				this.factory = factory;
+			}
+			~WidgetNode(){
+				message("WidgetNode %s is removed", this.get("name"));
+			}
+		}
 		public abstract class NodeFactory: XML.NodeFactory {
 			public override RootNode CreateRootNode() {
 				RootNode rt = new RootNode(this);
@@ -30,8 +38,8 @@ namespace Gnomenu {
 				rt.tag = S(tag);
 				return rt;
 			}
-			public abstract virtual weak XML.TagNode? lookup(string name);
-			public abstract virtual TagNode CreateWidgetNode(string name);
+			public abstract virtual weak WidgetNode? lookup(string name);
+			public abstract virtual WidgetNode CreateWidgetNode(string name);
 			public override void FinishNode(XML.Node node) {
 				node.unfreeze();
 			}
@@ -130,7 +138,7 @@ namespace Gnomenu {
 			}
 		}
 		protected void remove_widget(string name) {
-			weak TagNode node = factory.lookup(name);
+			weak WidgetNode node = factory.lookup(name);
 			if(node != null) {
 				assert(node.parent != null);
 				node.parent.remove(node);
@@ -162,12 +170,13 @@ namespace Gnomenu {
 
 		}
 		private class TestFactory: NodeFactory {
-			private HashTable <weak string, weak XML.TagNode> dict;
-			private class WidgetNode:TagNode {
+			private HashTable <weak string, weak WidgetNode> dict;
+			private class WidgetNode:Client.WidgetNode {
 				public WidgetNode(NodeFactory factory) {
 					this.factory = factory;
 				}
-				~WidgetNode() {
+				public override void dispose() {
+					base.dispose();
 					(this.factory as TestFactory).dict.remove(this.get("name"));
 				}
 			}
@@ -175,11 +184,11 @@ namespace Gnomenu {
 			construct {
 				dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
 			}
-			public override weak XML.TagNode? lookup(string name){
+			public override weak Client.WidgetNode? lookup(string name){
 				return dict.lookup(name);
 			}
-			public override TagNode CreateWidgetNode(string name) {
-				TagNode rt = new WidgetNode(this);
+			public override Client.WidgetNode CreateWidgetNode(string name) {
+				WidgetNode rt = new WidgetNode(this);
 				rt.tag = S("widget");
 				rt.set("name", name);
 				dict.insert(name, rt);

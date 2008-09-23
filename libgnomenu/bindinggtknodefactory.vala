@@ -7,25 +7,17 @@ using GtkAQD;
 namespace GnomenuGtk {
 	protected class NodeFactory : Client.NodeFactory {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		HashTable<weak string, weak TagNode> dict_nn;
+		HashTable<weak string, weak WidgetNode> dict_nn;
 		public Gtk.TreeStore tree;
-		private class TagNode:XML.TagNode {
+		private class WidgetNode:Client.WidgetNode {
 			public Gtk.TreeIter iter;
-			public TagNode(NodeFactory factory) {
-				this.factory = factory;
-			}
-			~TagNode() {
-				message("TagNode %s is removed", this.tag);
-				(this.factory as NodeFactory).tree.remove(this.iter);
-			}
-		}
-		private class WidgetNode:TagNode {
 			public WidgetNode(NodeFactory factory) {
 				this.factory = factory;
 			}
-			~WidgetNode(){
-				message("WidgetNode %s is removed", this.get("name"));
+			public override void dispose() {
+				base.dispose();
 				(this.factory as NodeFactory).dict_nn.remove(this.get("name"));
+				(this.factory as NodeFactory).tree.remove(this.iter);
 			}
 		}
 		public NodeFactory() {}
@@ -34,13 +26,13 @@ namespace GnomenuGtk {
 			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			tree = new Gtk.TreeStore(1, typeof(constpointer));
 		}
-		public override weak XML.TagNode? lookup(string name) {
+		public override weak Client.WidgetNode? lookup(string name) {
 			return dict_nn.lookup(name);
 		}
-		public override XML.TagNode CreateWidgetNode(string name) {
-			weak TagNode node = dict_nn.lookup(name);
+		public override Client.WidgetNode CreateWidgetNode(string name) {
+			weak WidgetNode node = dict_nn.lookup(name);
 			if(node != null) return node;
-			TagNode rt = new WidgetNode(this);
+			WidgetNode rt = new WidgetNode(this);
 			rt.freeze();
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
 			assert(gtk != null);
@@ -57,26 +49,26 @@ namespace GnomenuGtk {
 			dict_nn.insert(name, rt);
 			return rt;
 		}
-		public override void FinishNode(XML.Node node) {
-			if(node is TagNode) {
-				weak TagNode tagnode = node as TagNode;
-				if(node.parent is TagNode) {
-					tree.insert(out tagnode.iter, (node.parent as TagNode).iter, node.parent.index(node));
+		public override void FinishNode(XML.Node n) {
+			if(n is WidgetNode) {
+				weak WidgetNode node = n as WidgetNode;
+				if(node.parent is WidgetNode) {
+					tree.insert(out node.iter, (node.parent as WidgetNode).iter, node.parent.index(node));
 				} else {
-					tree.insert(out tagnode.iter, null, 0);
+					tree.insert(out node.iter, null, 0);
 				}
-				tree.set(tagnode.iter, 0, node, -1);
-				weak Gtk.Widget gtk = dict_nw.lookup(tagnode.get("name"));
+				tree.set(node.iter, 0, node, -1);
+				weak Gtk.Widget gtk = dict_nw.lookup(node.get("name"));
 				if(gtk is Gtk.MenuItem) { 
 					refresh_item_property(gtk, "visible");
 					gtk.notify["visible"] += item_property_notify;
 					refresh_item_property(gtk, "enabled");
 					gtk.notify["enabled"] += item_property_notify;
 					if(gtk is Gtk.TearoffMenuItem) {
-						tagnode.set("label", "&");
+						node.set("label", "&");
 					} else 
 					if(gtk is Gtk.SeparatorMenuItem) {
-						tagnode.set("label", "|");
+						node.set("label", "|");
 					} else  {
 						weak Gtk.Label l = find_menu_item_label(gtk);
 						if(l!= null) {
@@ -94,7 +86,7 @@ namespace GnomenuGtk {
 					}
 				}
 			}
-			node.unfreeze();
+			n.unfreeze();
 		}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");
@@ -117,7 +109,7 @@ namespace GnomenuGtk {
 			if(name != null) {
 				message("GtkWidget %s is removed", name);
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
-				weak TagNode node = dict_nn.lookup(name);
+				weak WidgetNode node = dict_nn.lookup(name);
 				if(node != null){
 					if(node.parent == null) {
 						message("parent = null for %s", name);
@@ -138,7 +130,7 @@ namespace GnomenuGtk {
 			}
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
-			weak TagNode node = dict_nn.lookup((string)w.get_data("native-name"));
+			weak WidgetNode node = dict_nn.lookup((string)w.get_data("native-name"));
 			if(node == null) {
 				warning("no xml node found for widget %s", (string) w.get_data("native-name"));
 				return;
