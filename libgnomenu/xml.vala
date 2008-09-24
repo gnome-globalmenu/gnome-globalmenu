@@ -5,8 +5,8 @@ namespace XML {
 		protected bool freezed;
 		public weak Node parent;
 		protected List<weak Node> children;
-		public weak NodeFactory factory {get; construct;}
-		public Node (NodeFactory factory){ this.factory = factory;}
+		public weak Document document {get; construct;}
+		public Node (Document document){ this.document = document;}
 		construct {
 			disposed = false;
 			freezed = false;
@@ -21,13 +21,13 @@ namespace XML {
 			node.parent = this;
 			children.insert(node.ref() as Node, pos);
 			if(!freezed)
-			factory.added(this, node, pos);
+			document.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
 			children.remove(node);
 			if(!freezed)
-			factory.removed(parent, node);
+			document.removed(parent, node);
 			node.parent = null;
 			node.unref();
 		}
@@ -52,12 +52,30 @@ namespace XML {
 		~Node() {
 		}
 	}
-	public abstract class NodeFactory: Object {
+	public abstract class Document: Object {
 		private StringChunk strings;
+		private RootNode _root;
+		public Node root {get{return _root;}}
+		private class RootNode : Node {
+			public RootNode(Document document){
+				this.document = document;
+			}
+			public override string summary(int level = 0) {
+				StringBuilder sb = new StringBuilder("");
+				if(this.children == null)
+					return "";
+				else {
+					foreach(weak Node child in children){
+						sb.append_printf("%s", child.summary(level - 1));
+					}
+				}
+				return sb.str;
+			}
+		}
 		construct {
 			strings = new StringChunk(1024);
+			_root = new RootNode(this);
 		}
-		public abstract virtual RootNode CreateRootNode();
 		public abstract virtual TextNode CreateTextNode(string text);
 		public abstract virtual SpecialNode CreateSpecialNode(string text);
 		public abstract virtual TagNode CreateTagNode(string tag);
@@ -71,8 +89,8 @@ namespace XML {
 	}
 	public class TextNode : Node {
 		public string text;
-		public TextNode(NodeFactory factory) {
-			this.factory = factory;
+		public TextNode(Document document) {
+			this.document = document;
 		}
 		public override string summary (int level = 0) {
 			return text;
@@ -80,42 +98,26 @@ namespace XML {
 	}
 	public class SpecialNode: Node {
 		public string text;
-		public SpecialNode(NodeFactory factory) {
-			this.factory = factory;
+		public SpecialNode(Document document) {
+			this.document = document;
 		}
 		public override string summary (int level = 0) {
 			return text;
 		}
 	}
-	public class RootNode : Node {
-		public RootNode(NodeFactory factory){
-			this.factory = factory;
-		}
-		public override string summary(int level = 0) {
-			StringBuilder sb = new StringBuilder("");
-			if(this.children == null)
-				return "";
-			else {
-				foreach(weak Node child in children){
-					sb.append_printf("%s", child.summary(level - 1));
-				}
-			}
-			return sb.str;
-		}
-	}
 	public class TagNode : Node {
 		public weak string tag;
 		private HashTable<weak string, string> props;
-		public TagNode (NodeFactory factory) {
-			this.factory = factory;
+		public TagNode (Document document) {
+			this.document = document;
 		}
 		public void set(string prop, string val) {
 			if(props == null) {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
-			props.insert(factory.S(prop), val);
+			props.insert(document.S(prop), val);
 			if(!freezed)
-			factory.updated(this, prop);
+			document.updated(this, prop);
 		}
 		public void unset(string prop) {
 			if(props == null) {
@@ -123,7 +125,7 @@ namespace XML {
 			}
 			props.remove(prop);
 			if(!freezed)
-			factory.updated(this, prop);
+			document.updated(this, prop);
 		}
 		public weak string? get(string prop) {
 			if(props == null) {

@@ -2,18 +2,39 @@ using GLib;
 using Gtk;
 using XML;
 namespace Gnomenu {
-	public abstract class WidgetNode:XML.TagNode {
-		public WidgetNode(NodeFactory factory) {
-			this.factory = factory;
+	public abstract class Document: XML.Document {
+		public abstract class Widget:XML.TagNode {
+			public weak string name {
+				get {return get("name");}
+				set {
+					if(name != null)
+					(document as Document).dict.remove(name);
+					set("name", value);
+					if(name != null)
+					(document as Document).dict.insert(name, this);
+				}
+			}
+			public Widget(Document document) {
+				this.document = document;
+			}
+			construct {
+			}
+			public override void dispose() {
+				(document as Document).dict.remove(name);
+			}
+			~Widget(){
+				message("WidgetNode %s is removed", name);
+			}
+			public abstract virtual void activate();
 		}
-		~WidgetNode(){
-			message("WidgetNode %s is removed", this.get("name"));
+		public abstract virtual Widget CreateWidgetNode(string name);
+		private HashTable <weak string, weak Widget> dict;
+		construct {
+			dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
 		}
-		public abstract virtual void activate();
-	}
-	public abstract class NodeFactory: XML.NodeFactory {
-		public abstract virtual weak WidgetNode? lookup(string name);
-		public abstract virtual WidgetNode CreateWidgetNode(string name);
+		public virtual weak Widget? lookup(string name) {
+			return dict.lookup(name);
+		}
 		public override void FinishNode(XML.Node node) {
 			node.unfreeze();
 		}
