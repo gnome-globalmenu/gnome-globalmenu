@@ -74,6 +74,14 @@ namespace GnomenuGtk {
 		weak string menu_name = factory().wrap(menu);
 		client().add_widget(null, window_name);
 		bind_widget(menu, window);
+		window.realize += (window) => {
+			weak string window_name = factory().wrap(window);
+			client().register_window(window_name, XWINDOW(window.window).to_string());
+		};
+		window.unrealize += (window) => {
+			weak string window_name = factory().wrap(window);
+			client().unregister_window(window_name);
+		};
 		message("bind_menu %s to %s", menu_name, window_name);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {

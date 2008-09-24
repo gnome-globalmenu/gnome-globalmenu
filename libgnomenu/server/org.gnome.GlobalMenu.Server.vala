@@ -1,5 +1,6 @@
 using GLib;
 using Gnomenu;
+using DBus;
 
 public class Application {
 	public static int main(string[] args) {

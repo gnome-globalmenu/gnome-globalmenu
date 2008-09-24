@@ -7,7 +7,7 @@ namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
 		Connection conn;
-		string bus;
+		public string bus;
 		dynamic DBus.Object dbus;
 		[DBus (visible = false)]
 		public NodeFactory factory {get; construct;}

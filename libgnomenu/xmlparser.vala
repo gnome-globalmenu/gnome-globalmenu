@@ -73,7 +73,6 @@ namespace XML {
 			return true;
 		}
 		private class TestFactory : NodeFactory {
-			private StringChunk strings;
 			public TestFactory() { }
 			public override RootNode CreateRootNode() {
 				RootNode rt = new RootNode(this);
@@ -91,7 +90,7 @@ namespace XML {
 			}
 			public override TagNode CreateTagNode(string tag) {
 				TagNode rt = new TagNode(this);
-				rt.tag = strings.insert_const(tag);
+				rt.tag = S(tag);
 				return rt;
 			}
 			public override void FinishNode(Node node) { }

@@ -6,7 +6,6 @@ namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Server")]
 	public class Server:GLib.Object {
 		public class NodeFactory : XML.NodeFactory {
-			private StringChunk strings;
 			public NodeFactory() { }
 			public override RootNode CreateRootNode() {
 				RootNode rt = new RootNode(this);
@@ -24,7 +23,7 @@ namespace Gnomenu {
 			}
 			public override TagNode CreateTagNode(string tag) {
 				TagNode rt = new TagNode(this);
-				rt.tag = strings.insert_const(tag);
+				rt.tag = S(tag);
 				return rt;
 			}
 			public override void FinishNode(XML.Node node) { }
@@ -45,6 +44,7 @@ namespace Gnomenu {
 			conn.register_object("/org/gnome/GlobalMenu/Server", this);
 			factory = new NodeFactory();
 			clients = factory.CreateTagNode("clients");
+			message("server ready");
 		}
 		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 			if(new_owner != "") return;
@@ -84,6 +84,7 @@ namespace Gnomenu {
 			node.set("bus", client_bus);
 			node.set("xid", xid);
 			clients.append(node as XML.Node);
+			message("register window %s %s", client_bus, xid);
 			factory.FinishNode(node);
 		}
 		public string QueryWindow(string xid) {
@@ -93,6 +94,7 @@ namespace Gnomenu {
 		}
 		public void RemoveWindow (string client_bus, string xid) {
 			XML.TagNode node= find_node_by_xid(xid);
+			message("remove window %s %s", client_bus, xid);
 			if(node != null)
 				if(node.get("bus") == client_bus)
 					clients.remove(node);
