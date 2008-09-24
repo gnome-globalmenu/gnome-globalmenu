@@ -17,6 +17,7 @@ libgnomenu_la_VALASOURCES = \
 		xml.vala \
 		server.vala  \
 		client.vala \
+		nodefactory.vala \
 		bindinggtk.vala \
 		bindinggtksingleton.vala \
 		bindinggtknavigator.vala \

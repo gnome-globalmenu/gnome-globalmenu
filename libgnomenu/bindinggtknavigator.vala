@@ -54,8 +54,8 @@ namespace GnomenuGtk {
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
-				if(node is Client.WidgetNode) {
-					(node as Client.WidgetNode).activate();
+				if(node is WidgetNode) {
+					(node as WidgetNode).activate();
 				}
 			};
 		}

@@ -6,45 +6,6 @@ using XML;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:GLib.Object {
-		public abstract class WidgetNode:XML.TagNode {
-			public WidgetNode(NodeFactory factory) {
-				this.factory = factory;
-			}
-			~WidgetNode(){
-				message("WidgetNode %s is removed", this.get("name"));
-			}
-			public abstract virtual void activate();
-		}
-		public abstract class NodeFactory: XML.NodeFactory {
-			public override RootNode CreateRootNode() {
-				RootNode rt = new RootNode(this);
-				rt.freeze();
-				return rt;
-			}
-			public override TextNode CreateTextNode(string text) {
-				TextNode rt = new TextNode(this);
-				rt.freeze();
-				rt.text = text;
-				return rt;
-			}
-			public override  SpecialNode CreateSpecialNode(string text) {
-				SpecialNode rt = new SpecialNode(this);
-				rt.freeze();
-				rt.text = text;
-				return rt;
-			}
-			public override TagNode CreateTagNode(string tag) {
-				TagNode rt = new TagNode(this);
-				rt.freeze();
-				rt.tag = S(tag);
-				return rt;
-			}
-			public abstract virtual weak WidgetNode? lookup(string name);
-			public abstract virtual WidgetNode CreateWidgetNode(string name);
-			public override void FinishNode(XML.Node node) {
-				node.unfreeze();
-			}
-		}
 		Connection conn;
 		string bus;
 		dynamic DBus.Object dbus;
@@ -169,7 +130,7 @@ namespace Gnomenu {
 		}
 		private class TestFactory: NodeFactory {
 			private HashTable <weak string, weak WidgetNode> dict;
-			private class WidgetNode:Client.WidgetNode {
+			private class WidgetNode:Gnomenu.WidgetNode {
 				public WidgetNode(NodeFactory factory) {
 					this.factory = factory;
 				}
@@ -185,10 +146,10 @@ namespace Gnomenu {
 			construct {
 				dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
 			}
-			public override weak Client.WidgetNode? lookup(string name){
+			public override weak Gnomenu.WidgetNode? lookup(string name){
 				return dict.lookup(name);
 			}
-			public override Client.WidgetNode CreateWidgetNode(string name) {
+			public override Gnomenu.WidgetNode CreateWidgetNode(string name) {
 				WidgetNode rt = new WidgetNode(this);
 				rt.tag = S("widget");
 				rt.set("name", name);

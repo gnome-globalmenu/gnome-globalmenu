@@ -5,11 +5,11 @@ using XML;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class NodeFactory : Client.NodeFactory {
+	protected class NodeFactory : Gnomenu.NodeFactory {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
 		HashTable<weak string, weak WidgetNode> dict_nn;
 		public Gtk.TreeStore tree;
-		private class WidgetNode:Client.WidgetNode {
+		private class WidgetNode:Gnomenu.WidgetNode {
 			public Gtk.TreeIter iter;
 			public WidgetNode(NodeFactory factory) {
 				this.factory = factory;
@@ -34,10 +34,10 @@ namespace GnomenuGtk {
 			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			tree = new Gtk.TreeStore(1, typeof(constpointer));
 		}
-		public override weak Client.WidgetNode? lookup(string name) {
+		public override weak Gnomenu.WidgetNode? lookup(string name) {
 			return dict_nn.lookup(name);
 		}
-		public override Client.WidgetNode CreateWidgetNode(string name) {
+		public override Gnomenu.WidgetNode CreateWidgetNode(string name) {
 			weak WidgetNode node = dict_nn.lookup(name);
 			if(node != null) return node;
 			WidgetNode rt = new WidgetNode(this);
