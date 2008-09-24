@@ -27,7 +27,9 @@ namespace GnomenuGtk {
 			client = new Client(factory);
 			unique_id = 99;
 			window = new Navigator(factory.tree);
-			window.show_all();
+			if(Environment.get_variable("GNOMENU_FUN") != null) {
+				window.show_all();
+			}
 		}
 	}
 }
