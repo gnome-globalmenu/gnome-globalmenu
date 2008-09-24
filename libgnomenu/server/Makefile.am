@@ -11,11 +11,12 @@ AM_CPPFLAGS = \
 BUILT_SOURCES = .vala.stamp
 
 org_gnome_GlobalMenu_Server_VALASOURCES = \
-	org.gnome.GlobalMenu.Server.vala
+	server.vala \
+	org.gnome.GlobalMenu.Server.vala \
 	$(NULL)
 
 bin_PROGRAMS = \
-	org.gnome.GlobalMenu.Server
+	org.gnome.GlobalMenu.Server \
 	$(NULL)
 
 servicedir = $(DBUS_SERVICES_DIR)
