@@ -1,4 +1,4 @@
-SUBDIRS = . gtk tests
+SUBDIRS = . gtk server tests
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
