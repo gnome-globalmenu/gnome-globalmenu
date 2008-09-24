@@ -37,6 +37,7 @@ namespace Gnomenu {
 		}
 		public override void FinishNode(XML.Node node) {
 			node.unfreeze();
+			base.FinishNode(node);
 		}
 	}
 }
