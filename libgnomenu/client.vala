@@ -149,6 +149,29 @@ namespace Gnomenu {
 			public override weak Gnomenu.WidgetNode? lookup(string name){
 				return dict.lookup(name);
 			}
+			public override RootNode CreateRootNode() {
+				RootNode rt = new RootNode(this);
+				rt.freeze();
+				return rt;
+			}
+			public override TextNode CreateTextNode(string text) {
+				TextNode rt = new TextNode(this);
+				rt.freeze();
+				rt.text = text;
+				return rt;
+			}
+			public override  SpecialNode CreateSpecialNode(string text) {
+				SpecialNode rt = new SpecialNode(this);
+				rt.freeze();
+				rt.text = text;
+				return rt;
+			}
+			public override TagNode CreateTagNode(string tag) {
+				TagNode rt = new TagNode(this);
+				rt.freeze();
+				rt.tag = S(tag);
+				return rt;
+			}
 			public override Gnomenu.WidgetNode CreateWidgetNode(string name) {
 				WidgetNode rt = new WidgetNode(this);
 				rt.tag = S("widget");

@@ -1,4 +1,4 @@
-SUBDIRS = . tests
+SUBDIRS = . gtk tests
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
@@ -12,16 +12,11 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		valacompat.vapi \
 		xmlparser.vala \
 		xml.vala \
 		server.vala  \
 		client.vala \
 		nodefactory.vala \
-		bindinggtk.vala \
-		bindinggtksingleton.vala \
-		bindinggtknavigator.vala \
-		bindinggtknodefactory.vala  \
 		$(NULL)
 
 
@@ -31,8 +26,8 @@ libgnomenu_la_SOURCES = \
 		$(NULL)
 
 
-libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --library gnomenu $^
+gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
+	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(srcdir) --library gnomenu --pkg valacompat $^
 	touch $@
 
 libgnomenu_la_LIBADD = \
