@@ -76,9 +76,9 @@ namespace XML {
 			strings = new StringChunk(1024);
 			_root = new Root(this);
 		}
-		public abstract virtual Document.Text CreateTextNode(string text);
-		public abstract virtual Document.Special CreateSpecialNode(string text);
-		public abstract virtual Document.Tag CreateTagNode(string tag);
+		public abstract virtual Document.Text CreateText(string text);
+		public abstract virtual Document.Special CreateSpecial(string text);
+		public abstract virtual Document.Tag CreateTag(string tag);
 		public abstract virtual void FinishNode(Node node);
 		public virtual weak string S(string s) {
 			return strings.insert_const(s);

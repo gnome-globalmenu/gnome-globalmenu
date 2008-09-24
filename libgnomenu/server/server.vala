@@ -8,10 +8,6 @@ using Gnomenu;
 public class Server:GLib.Object {
 	public class NodeFactory : XML.NodeFactory {
 		public NodeFactory() { }
-		public override RootNode CreateRootNode() {
-			RootNode rt = new RootNode(this);
-			return rt;
-		}
 		public override TextNode CreateTextNode(string text) {
 			TextNode rt = new TextNode(this);
 			rt.text = text;

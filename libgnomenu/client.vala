@@ -27,7 +27,7 @@ namespace Gnomenu {
 			uint r = dbus.RequestName (bus, (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
-			Document.Widget windows = document.CreateWidgetNode("windows", "windows");
+			Document.Widget windows = document.CreateWidget("windows", "windows");
 			document.root.append(windows);
 			document.FinishNode(windows);
 			this.windows = windows;
@@ -93,7 +93,7 @@ namespace Gnomenu {
 			else
 				parent_node = document.lookup(parent);
 			if(node == null) {
-				Document.Widget node = document.CreateWidgetNode("widget", name);
+				Document.Widget node = document.CreateWidget("widget", name);
 				parent_node.insert(node, pos);
 				document.FinishNode(node);
 			}
@@ -130,7 +130,7 @@ namespace Gnomenu {
 			}
 
 		}
-		private class TestFactory: Document {
+		private class TestDocument: Document {
 			private class Widget:Document.Widget {
 				public Widget(Document document) {
 					this.document = document;
@@ -139,26 +139,26 @@ namespace Gnomenu {
 					message("%s is activated", summary(0));
 				}
 			}
-			public TestFactory() { }
-			public override XML.Document.Text CreateTextNode(string text) {
+			public TestDocument() { }
+			public override XML.Document.Text CreateText(string text) {
 				XML.Document.Text rt = new XML.Document.Text(this);
 				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
-			public override  XML.Document.Special CreateSpecialNode(string text) {
+			public override  XML.Document.Special CreateSpecial(string text) {
 				XML.Document.Special rt = new XML.Document.Special(this);
 				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
-			public override XML.Document.Tag CreateTagNode(string tag) {
+			public override XML.Document.Tag CreateTag(string tag) {
 				XML.Document.Tag rt = new XML.Document.Tag(this);
 				rt.freeze();
 				rt.tag = S(tag);
 				return rt;
 			}
-			public override Document.Widget CreateWidgetNode(string type, string name) {
+			public override Document.Widget CreateWidget(string type, string name) {
 				Widget rt = new Widget(this);
 				rt.tag = S(type);
 				rt.name = name;
@@ -169,7 +169,7 @@ namespace Gnomenu {
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			Document document = new TestFactory();
+			Document document = new TestDocument();
 			Client c = new Client(document);
 			c.add_widget(null, "window1");
 			c.add_widget(null, "window2");

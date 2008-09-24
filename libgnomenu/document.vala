@@ -27,7 +27,7 @@ namespace Gnomenu {
 			}
 			public abstract virtual void activate();
 		}
-		public abstract virtual Widget CreateWidgetNode(string type, string name);
+		public abstract virtual Widget CreateWidget(string type, string name);
 		private HashTable <weak string, weak Widget> dict;
 		construct {
 			dict = new HashTable<weak string, weak XML.Document.Tag>(str_hash, str_equal);

@@ -9,7 +9,7 @@ namespace XML {
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
-			Document.Tag node = parser.document.CreateTagNode(element_name);
+			Document.Tag node = parser.document.CreateTag(element_name);
 			parser.current.append(node);
 			parser.current = node;
 			print("StartElement: %s\n", element_name);
@@ -32,7 +32,7 @@ namespace XML {
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			string newtext = text.ndup(text_len);
-			Document.Text node = parser.document.CreateTextNode(newtext);
+			Document.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
 			print("Text: %s\n", newtext);
 			parser.document.FinishNode(node);
@@ -41,7 +41,7 @@ namespace XML {
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			string newtext = passthrough_text.ndup(text_len);
-			Document.Special node = parser.document.CreateSpecialNode(newtext);
+			Document.Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
 			print("Special: %s\n", newtext);
 			parser.document.FinishNode(node);
@@ -69,19 +69,19 @@ namespace XML {
 			}
 			return true;
 		}
-		private class TestFactory : Document {
-			public TestFactory() { }
-			public override Document.Text CreateTextNode(string text) {
+		private class TestDocument : Document {
+			public TestDocument() { }
+			public override Document.Text CreateText(string text) {
 				Document.Text rt = new Document.Text(this);
 				rt.text = text;
 				return rt;
 			}
-			public override  Document.Special CreateSpecialNode(string text) {
+			public override  Document.Special CreateSpecial(string text) {
 				Document.Special rt = new Document.Special(this);
 				rt.text = text;
 				return rt;
 			}
-			public override Document.Tag CreateTagNode(string tag) {
+			public override Document.Tag CreateTag(string tag) {
 				Document.Tag rt = new Document.Tag(this);
 				rt.tag = S(tag);
 				return rt;
@@ -89,7 +89,7 @@ namespace XML {
 			public override void FinishNode(Node node) { }
 		}
 		public static int test (string [] args){
-			Document document = new TestFactory();
+			Document document = new TestDocument();
 			Parser parser = new Parser(document);
 			parser.parse("<?xml?>\n" +
 					"<docroot id=\"root\">" +
