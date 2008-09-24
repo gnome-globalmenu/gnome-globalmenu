@@ -10,12 +10,12 @@ AM_CPPFLAGS = \
 
 BUILT_SOURCES = .vala.stamp
 
-gnomenu_server_VALASOURCES = \
-	gnomenu-server.vala
+org_gnome_GlobalMenu_Server_VALASOURCES = \
+	org.gnome.GlobalMenu.Server.vala
 	$(NULL)
 
 bin_PROGRAMS = \
-	gnomenu-server \
+	org.gnome.GlobalMenu.Server
 	$(NULL)
 
 servicedir = $(DBUS_SERVICES_DIR)
@@ -25,16 +25,16 @@ service_DATA = $(service_in_files:.service.in=.service)
 $(service_DATA): $(service_in_files) Makefile
 	sed -e "s|@LOCATION@|$(bindir)|" $< > $@
 
-gnomenu_server_SOURCES = \
-	$(gnomenu_server_VALASOURCES:.vala=.c) \
-	$(gnomenu_server_VALASOURCES:.vala=.h) \
+org_gnome_GlobalMenu_Server_SOURCES = \
+	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.c) \
+	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.h) \
 	$(NULL)
 
-.vala.stamp: $(gnomenu_server_VALASOURCES)
+.vala.stamp: $(org_gnome_GlobalMenu_Server_VALASOURCES)
 	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(srcdir)/.. --vapidir=$(builddir)/.. --pkg gnomenu --pkg valacompat $^
 	touch $@
 
-gnomenu_server_LDADD = \
+org_gnome_GlobalMenu_Server_LDADD = \
 		$(LIBGNOMENU_LIBS) \
 		$(builddir)/../libgnomenu.la \
 		$(NULL)
