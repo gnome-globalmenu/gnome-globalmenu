@@ -18,7 +18,7 @@ libgnomenu_la_VALASOURCES = \
 		xmlparser.vala \
 		xml.vala \
 		client.vala \
-		nodefactory.vala \
+		document.vala \
 		$(NULL)
 
 
