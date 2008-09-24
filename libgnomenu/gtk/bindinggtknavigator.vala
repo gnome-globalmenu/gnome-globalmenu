@@ -21,7 +21,7 @@ namespace GnomenuGtk {
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
-					weak XML.TagNode node;
+					weak XML.Document.Tag node;
 					model.get(iter, 0, out node, -1);
 					weak string text = null;
 					text = node.get("label");
@@ -54,8 +54,8 @@ namespace GnomenuGtk {
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
-				if(node is WidgetNode) {
-					(node as WidgetNode).activate();
+				if(node is Gnomenu.Document.Widget) {
+					(node as Gnomenu.Document.Widget).activate();
 				}
 			};
 		}

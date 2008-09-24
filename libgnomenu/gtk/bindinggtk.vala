@@ -9,8 +9,8 @@ namespace GnomenuGtk {
 	private weak Client client() {
 		return Singleton.instance().client;
 	}
-	private weak NodeFactory factory() {
-		return Singleton.instance().factory;
+	private weak Document document() {
+		return Singleton.instance().document;
 	}
 	private void submenu_notify(Gtk.Widget widget, ParamSpec pspec) {
 		weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
@@ -19,7 +19,7 @@ namespace GnomenuGtk {
 		}
 	}
 	private void child_remove(Gtk.Widget widget, Gtk.Widget c) {
-		client().remove_widget(factory().wrap(c)); /*This might be not so useful, since the node is removed when 
+		client().remove_widget(document().wrap(c)); /*This might be not so useful, since the node is removed when 
 									the MenuShell is disposed*/
 	}
 	private void child_insert(Gtk.Widget w, Gtk.Widget c, int pos) {
@@ -31,8 +31,8 @@ namespace GnomenuGtk {
 		weak Gtk.Widget pw;
 		if(parent_widget == null) pw = widget.parent;
 		else pw = (Gtk.Widget) parent_widget;
-		weak string name = factory().wrap(widget);
-		weak string parent = factory().wrap(pw);
+		weak string name = document().wrap(widget);
+		weak string parent = document().wrap(pw);
 		message("add %s to %s", name, parent);
 		client().add_widget(parent, name, pos);
 
@@ -70,23 +70,23 @@ namespace GnomenuGtk {
 		}
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		weak string window_name = factory().wrap(window);
-		weak string menu_name = factory().wrap(menu);
+		weak string window_name = document().wrap(window);
+		weak string menu_name = document().wrap(menu);
 		client().add_widget(null, window_name);
 		bind_widget(menu, window);
 		window.realize += (window) => {
-			weak string window_name = factory().wrap(window);
+			weak string window_name = document().wrap(window);
 			client().register_window(window_name, XWINDOW(window.window).to_string());
 		};
 		window.unrealize += (window) => {
-			weak string window_name = factory().wrap(window);
+			weak string window_name = document().wrap(window);
 			client().unregister_window(window_name);
 		};
 		message("bind_menu %s to %s", menu_name, window_name);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		weak string window_name = factory().wrap(window);
-		weak string menu_name = factory().wrap(menu);
+		weak string window_name = document().wrap(window);
+		weak string menu_name = document().wrap(menu);
 		message("unbind_menu %s from %s", menu_name, window_name);
 		client().remove_widget(menu_name);
 	}

@@ -7,7 +7,7 @@ namespace GnomenuGtk {
 	protected class Singleton {
 		static Singleton _instance;
 		public Client client;
-		public weak NodeFactory factory;
+		public weak Document document;
 		private int unique_id;
 		public int unique {
 			get {
@@ -22,11 +22,11 @@ namespace GnomenuGtk {
 			return _instance;
 		}
 		private Singleton() {
-			NodeFactory factory = new NodeFactory();
-			this.factory = factory;
-			client = new Client(factory);
+			Document document = new Document();
+			this.document = document;
+			client = new Client(document);
 			unique_id = 99;
-			window = new Navigator(factory.tree);
+			window = new Navigator(document.tree);
 			if(Environment.get_variable("GNOMENU_FUN") != null) {
 				window.show_all();
 			}

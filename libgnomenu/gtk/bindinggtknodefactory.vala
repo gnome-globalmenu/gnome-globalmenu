@@ -5,22 +5,20 @@ using XML;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class NodeFactory : Gnomenu.NodeFactory {
+	protected class Document : Gnomenu.Document {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		HashTable<weak string, weak WidgetNode> dict_nn;
 		public Gtk.TreeStore tree;
-		private class WidgetNode:Gnomenu.WidgetNode {
+		private class Widget:Gnomenu.Document.Widget {
 			public Gtk.TreeIter iter;
-			public WidgetNode(NodeFactory factory) {
-				this.factory = factory;
+			public Widget(Document document) {
+				this.document = document;
 			}
 			public override void dispose() {
 				base.dispose();
-				(this.factory as NodeFactory).dict_nn.remove(this.get("name"));
-				(this.factory as NodeFactory).tree.remove(this.iter);
+				(this.document as Document).tree.remove(this.iter);
 			}
 			public override void activate() {
-				weak Gtk.Widget widget = (factory as NodeFactory).dict_nw.lookup(this.get("name"));
+				weak Gtk.Widget widget = (document as Document).dict_nw.lookup(this.get("name"));
 				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
 				if(widget is GtkAQD.MenuBar) {
 					bool local = (widget as GtkAQD.MenuBar).local;
@@ -28,64 +26,45 @@ namespace GnomenuGtk {
 				}
 			}
 		}
-		public NodeFactory() {}
+		public Document() {}
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
-			dict_nn = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 			tree = new Gtk.TreeStore(1, typeof(constpointer));
 		}
-		public override RootNode CreateRootNode() {
-			RootNode rt = new RootNode(this);
-			rt.freeze();
-			return rt;
-		}
-		public override TextNode CreateTextNode(string text) {
-			TextNode rt = new TextNode(this);
+		public override XML.Document.Text CreateText(string text) {
+			XML.Document.Text rt = new XML.Document.Text(this);
 			rt.freeze();
 			rt.text = text;
 			return rt;
 		}
-		public override  SpecialNode CreateSpecialNode(string text) {
-			SpecialNode rt = new SpecialNode(this);
+		public override  XML.Document.Special CreateSpecial(string text) {
+			XML.Document.Special rt = new XML.Document.Special(this);
 			rt.freeze();
 			rt.text = text;
 			return rt;
 		}
-		public override TagNode CreateTagNode(string tag) {
-			TagNode rt = new TagNode(this);
+		public override XML.Document.Tag CreateTag(string tag) {
+			XML.Document.Tag rt = new XML.Document.Tag(this);
 			rt.freeze();
 			rt.tag = S(tag);
 			return rt;
 		}
-		
-		public override weak Gnomenu.WidgetNode? lookup(string name) {
-			return dict_nn.lookup(name);
-		}
-		public override Gnomenu.WidgetNode CreateWidgetNode(string name) {
-			weak WidgetNode node = dict_nn.lookup(name);
+		public override Gnomenu.Document.Widget CreateWidget(string type, string name) {
+			weak Gnomenu.Document.Widget node = lookup(name);
 			if(node != null) return node;
-			WidgetNode rt = new WidgetNode(this);
+			Widget rt = new Widget(this);
 			rt.freeze();
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
-			assert(gtk != null);
-			rt.set("name", name);
-			if(gtk is Gtk.MenuItem) { 
-				rt.tag = "item";
-			}
-			if(gtk is Gtk.MenuShell) {
-				rt.tag = "menu";
-			}
-			if(gtk is Gtk.Window) {
-				rt.tag = "window";
-			}
-			dict_nn.insert(name, rt);
+			rt.name = name;
+			rt.tag = type;
 			return rt;
 		}
 		public override void FinishNode(XML.Node n) {
-			if(n is WidgetNode) {
-				weak WidgetNode node = n as WidgetNode;
-				if(node.parent is WidgetNode) {
-					tree.insert(out node.iter, (node.parent as WidgetNode).iter, node.parent.index(node));
+			if(n is Widget) {
+				message("FinishNode Widget");
+				weak Widget node = n as Widget;
+				if(node.parent is Widget) {
+					tree.insert(out node.iter, (node.parent as Widget).iter, node.parent.index(node));
 				} else {
 					tree.insert(out node.iter, null, 0);
 				}
@@ -118,7 +97,7 @@ namespace GnomenuGtk {
 					}
 				}
 			}
-			n.unfreeze();
+			base.FinishNode(n);
 		}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");
@@ -141,7 +120,7 @@ namespace GnomenuGtk {
 			if(name != null) {
 				message("GtkWidget %s is removed", name);
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
-				weak WidgetNode node = dict_nn.lookup(name);
+				weak Gnomenu.Document.Widget node = lookup(name);
 				if(node != null){
 					if(node.parent == null) {
 						message("parent = null for %s", name);
@@ -162,7 +141,7 @@ namespace GnomenuGtk {
 			}
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
-			weak WidgetNode node = dict_nn.lookup((string)w.get_data("native-name"));
+			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name"));
 			if(node == null) {
 				warning("no xml node found for widget %s", (string) w.get_data("native-name"));
 				return;

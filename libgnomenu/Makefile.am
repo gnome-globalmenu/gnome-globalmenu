@@ -1,6 +1,6 @@
 SUBDIRS = . 
 SUBDIRS += tests
-#SUBDIRS += gtk 
+SUBDIRS += gtk 
 SUBDIRS += server 
 AM_CPPFLAGS = \
 	-g \
