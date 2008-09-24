@@ -9,17 +9,16 @@ namespace XML {
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
-			Node node = parser.document.CreateTagNode(element_name);
+			Document.Tag node = parser.document.CreateTagNode(element_name);
 			parser.current.append(node);
 			parser.current = node;
 			print("StartElement: %s\n", element_name);
 
-			weak TagNode tagnode = node as TagNode;
 			for(uint i = 0; attribute_names[i]!=null; i++){
 				weak string prop_name = attribute_names[i];
 				weak string val = attribute_values[i];
 				print("Prop %s = %s\n", prop_name, val);
-				tagnode.set(prop_name, val);
+				node.set(prop_name, val);
 			}
 			parser.document.FinishNode(node);
 		}
@@ -33,7 +32,7 @@ namespace XML {
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			string newtext = text.ndup(text_len);
-			TextNode node = parser.document.CreateTextNode(newtext);
+			Document.Text node = parser.document.CreateTextNode(newtext);
 			parser.current.append(node);
 			print("Text: %s\n", newtext);
 			parser.document.FinishNode(node);
@@ -42,7 +41,7 @@ namespace XML {
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			string newtext = passthrough_text.ndup(text_len);
-			SpecialNode node = parser.document.CreateSpecialNode(newtext);
+			Document.Special node = parser.document.CreateSpecialNode(newtext);
 			parser.current.append(node);
 			print("Special: %s\n", newtext);
 			parser.document.FinishNode(node);
@@ -72,18 +71,18 @@ namespace XML {
 		}
 		private class TestFactory : Document {
 			public TestFactory() { }
-			public override TextNode CreateTextNode(string text) {
-				TextNode rt = new TextNode(this);
+			public override Document.Text CreateTextNode(string text) {
+				Document.Text rt = new Document.Text(this);
 				rt.text = text;
 				return rt;
 			}
-			public override  SpecialNode CreateSpecialNode(string text) {
-				SpecialNode rt = new SpecialNode(this);
+			public override  Document.Special CreateSpecialNode(string text) {
+				Document.Special rt = new Document.Special(this);
 				rt.text = text;
 				return rt;
 			}
-			public override TagNode CreateTagNode(string tag) {
-				TagNode rt = new TagNode(this);
+			public override Document.Tag CreateTagNode(string tag) {
+				Document.Tag rt = new Document.Tag(this);
 				rt.tag = S(tag);
 				return rt;
 			}

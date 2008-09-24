@@ -3,7 +3,7 @@ using Gtk;
 using XML;
 namespace Gnomenu {
 	public abstract class Document: XML.Document {
-		public abstract class Widget:XML.TagNode {
+		public abstract class Widget:XML.Document.Tag {
 			public weak string name {
 				get {return get("name");}
 				set {
@@ -27,10 +27,10 @@ namespace Gnomenu {
 			}
 			public abstract virtual void activate();
 		}
-		public abstract virtual Widget CreateWidgetNode(string name);
+		public abstract virtual Widget CreateWidgetNode(string type, string name);
 		private HashTable <weak string, weak Widget> dict;
 		construct {
-			dict = new HashTable<weak string, weak XML.TagNode>(str_hash, str_equal);
+			dict = new HashTable<weak string, weak XML.Document.Tag>(str_hash, str_equal);
 		}
 		public virtual weak Widget? lookup(string name) {
 			return dict.lookup(name);

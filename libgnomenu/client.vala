@@ -12,7 +12,7 @@ namespace Gnomenu {
 		dynamic DBus.Object server;
 		[DBus (visible = false)]
 		public Document document {get; construct;}
-		public weak TagNode windows;
+		public weak Document.Widget windows;
 		public Client(Document document) {
 			this.document = document;
 		}
@@ -27,36 +27,36 @@ namespace Gnomenu {
 			uint r = dbus.RequestName (bus, (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
-			TagNode windows_ = document.CreateTagNode("windows");
-			document.root.append(windows_);
-			document.FinishNode(windows_);
-			windows = windows_;
+			Document.Widget windows = document.CreateWidgetNode("windows", "windows");
+			document.root.append(windows);
+			document.FinishNode(windows);
+			this.windows = windows;
 			document.added += (f, p, o, i) => {
-				if(!(p is TagNode) || !(o is TagNode)) return;
-				weak TagNode parent_node = p as TagNode;
-				weak TagNode node = o as TagNode;
-				message("added %s to %s at %d", node.get("name"), parent_node.get("name"), i);
+				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
+				weak Document.Widget parent_node = p as Document.Widget;
+				weak Document.Widget node = o as Document.Widget;
+				message("added %s to %s at %d", node.name, parent_node.name, i);
 			};
 			document.removed += (f, p, o) => {
-				if(!(p is TagNode) || !(o is TagNode)) return;
-				weak TagNode parent_node = p as TagNode;
-				weak TagNode node = o as TagNode;
-				message("removed %s to %s", node.get("name"), parent_node.get("name"));
+				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
+				weak Document.Widget parent_node = p as Document.Widget;
+				weak Document.Widget node = o as Document.Widget;
+				message("removed %s to %s", node.name, parent_node.name);
 			};
 			document.updated += (f, o, prop) => {
-				if(!(o is TagNode)) return;
-				weak TagNode node = o as TagNode;
-				message("updated %s of %s", prop, node.get("name"));
+				if(!(o is Document.Widget)) return;
+				weak Document.Widget node = o as Document.Widget;
+				message("updated %s of %s", prop, node.name);
 			};
 		}
 		public string QueryNode(string name, int level = -1){
-			weak TagNode node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name);
 			if(node!= null)
 				return node.summary(level);
 			return "";
 		}
 		public string QueryXID(string xid) {
-			weak TagNode node = find_window_by_xid(xid);
+			weak Document.Widget node = find_window_by_xid(xid);
 			if(node != null) {
 				return node.summary(0);
 			}
@@ -73,27 +73,27 @@ namespace Gnomenu {
 		public signal void inserted(string parent, string name, int pos);
 		public signal void removed(string parent, string name);
 
-		private weak TagNode? find_window_by_xid(string xid) {
+		private weak Document.Widget? find_window_by_xid(string xid) {
 			foreach (weak XML.Node node in windows.children) {
-				if(node is TagNode) {
-					weak TagNode tagnode = node as TagNode;
-					if(tagnode.get("xid") == xid) {
-						return tagnode;
+				if(node is Document.Widget) {
+					weak Document.Widget widget = node as Document.Widget;
+					if(widget.get("xid") == xid) {
+						return widget;
 					}
 				}
 			}
 			return null;
 		}
 		protected void add_widget(string? parent, string name, int pos = -1) {
-			weak TagNode node = document.lookup(name);
-			weak TagNode parent_node;
+			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget parent_node;
 			if(parent == null) {
 				parent_node = windows;
 			}
 			else
 				parent_node = document.lookup(parent);
 			if(node == null) {
-				TagNode node = document.CreateWidgetNode(name);
+				Document.Widget node = document.CreateWidgetNode("widget", name);
 				parent_node.insert(node, pos);
 				document.FinishNode(node);
 			}
@@ -107,7 +107,7 @@ namespace Gnomenu {
 			}
 		}
 		protected void register_window(string name, string xid) {
-			weak TagNode node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -118,7 +118,7 @@ namespace Gnomenu {
 			}
 		}
 		protected void unregister_window(string name) {
-			weak TagNode node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -140,27 +140,27 @@ namespace Gnomenu {
 				}
 			}
 			public TestFactory() { }
-			public override TextNode CreateTextNode(string text) {
-				TextNode rt = new TextNode(this);
+			public override XML.Document.Text CreateTextNode(string text) {
+				XML.Document.Text rt = new XML.Document.Text(this);
 				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
-			public override  SpecialNode CreateSpecialNode(string text) {
-				SpecialNode rt = new SpecialNode(this);
+			public override  XML.Document.Special CreateSpecialNode(string text) {
+				XML.Document.Special rt = new XML.Document.Special(this);
 				rt.freeze();
 				rt.text = text;
 				return rt;
 			}
-			public override TagNode CreateTagNode(string tag) {
-				TagNode rt = new TagNode(this);
+			public override XML.Document.Tag CreateTagNode(string tag) {
+				XML.Document.Tag rt = new XML.Document.Tag(this);
 				rt.freeze();
 				rt.tag = S(tag);
 				return rt;
 			}
-			public override Document.Widget CreateWidgetNode(string name) {
+			public override Document.Widget CreateWidgetNode(string type, string name) {
 				Widget rt = new Widget(this);
-				rt.tag = S("widget");
+				rt.tag = S(type);
 				rt.name = name;
 				return rt;
 			}
