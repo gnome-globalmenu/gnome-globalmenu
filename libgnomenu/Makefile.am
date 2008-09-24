@@ -1,7 +1,7 @@
 SUBDIRS = . 
 SUBDIRS += tests
 #SUBDIRS += gtk 
-#SUBDIRS += server 
+SUBDIRS += server 
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \

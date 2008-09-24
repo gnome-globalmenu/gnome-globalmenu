@@ -6,20 +6,20 @@ using Gnomenu;
 
 [DBus (name = "org.gnome.GlobalMenu.Server")]
 public class Server:GLib.Object {
-	public class NodeFactory : XML.NodeFactory {
-		public NodeFactory() { }
-		public override TextNode CreateTextNode(string text) {
-			TextNode rt = new TextNode(this);
+	public class Document : XML.Document {
+		public Document() { }
+		public override XML.Document.Text CreateText(string text) {
+			XML.Document.Text rt = new XML.Document.Text(this);
 			rt.text = text;
 			return rt;
 		}
-		public override  SpecialNode CreateSpecialNode(string text) {
-			SpecialNode rt = new SpecialNode(this);
+		public override  XML.Document.Special CreateSpecial(string text) {
+			XML.Document.Special rt = new XML.Document.Special(this);
 			rt.text = text;
 			return rt;
 		}
-		public override TagNode CreateTagNode(string tag) {
-			TagNode rt = new TagNode(this);
+		public override XML.Document.Tag CreateTag(string tag) {
+			XML.Document.Tag rt = new XML.Document.Tag(this);
 			rt.tag = S(tag);
 			return rt;
 		}
@@ -27,8 +27,8 @@ public class Server:GLib.Object {
 	}
 
 	Connection conn;
-	NodeFactory factory;
-	XML.Node clients;
+	Document document;
+	weak XML.Node clients;
 	dynamic DBus.Object dbus;
 	public Server() {}
 	construct {
@@ -39,16 +39,18 @@ public class Server:GLib.Object {
 		uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 		assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 		conn.register_object("/org/gnome/GlobalMenu/Server", this);
-		factory = new NodeFactory();
-		clients = factory.CreateTagNode("clients");
+		document = new Document();
+		XML.Node clients = document.CreateTag("clients");
+		document.root.append(clients);
+		this.clients = clients;
 		message("server ready");
 	}
 	private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 		if(new_owner != "") return;
 		/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
 		foreach (weak XML.Node node in clients.children) {
-			if(node is XML.TagNode) {
-				weak XML.TagNode tagnode = node as XML.TagNode;
+			if(node is XML.Document.Tag) {
+				weak XML.Document.Tag tagnode = node as XML.Document.Tag;
 				if(tagnode.get("bus") == bus) {
 					clients.remove(node);
 					break;
@@ -56,10 +58,10 @@ public class Server:GLib.Object {
 			}
 		}
 	}
-	private weak XML.TagNode? find_node_by_xid(string xid) {
+	private weak XML.Document.Tag? find_node_by_xid(string xid) {
 		foreach (weak XML.Node node in clients.children) {
-			if(node is XML.TagNode) {
-				weak XML.TagNode tagnode = node as XML.TagNode;
+			if(node is XML.Document.Tag) {
+				weak XML.Document.Tag tagnode = node as XML.Document.Tag;
 				if(tagnode.get("xid") == xid) {
 					return tagnode;
 				}
@@ -68,7 +70,7 @@ public class Server:GLib.Object {
 		return null;
 	}
 	public void RegisterWindow (string client_bus, string xid) {
-		XML.TagNode node = find_node_by_xid(xid);
+		XML.Document.Tag node = find_node_by_xid(xid);
 		if(node!=null) {
 			if(node.get("bus") == client_bus) {
 				return;
@@ -77,20 +79,20 @@ public class Server:GLib.Object {
 				clients.remove(node);
 			}
 		}	
-		node = factory.CreateTagNode("client");
+		node = document.CreateTag("client");
 		node.set("bus", client_bus);
 		node.set("xid", xid);
-		clients.append(node as XML.Node);
+		clients.append(node);
 		message("register window %s %s", client_bus, xid);
-		factory.FinishNode(node);
+		document.FinishNode(node);
 	}
 	public string QueryWindow(string xid) {
-		XML.TagNode node = find_node_by_xid(xid);
+		XML.Document.Tag node = find_node_by_xid(xid);
 		if(node != null) return node.to_string();
 		return "";
 	}
 	public void RemoveWindow (string client_bus, string xid) {
-		XML.TagNode node= find_node_by_xid(xid);
+		XML.Document.Tag node= find_node_by_xid(xid);
 		message("remove window %s %s", client_bus, xid);
 		if(node != null)
 			if(node.get("bus") == client_bus)
