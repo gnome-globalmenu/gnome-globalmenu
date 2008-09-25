@@ -2,7 +2,7 @@ using GLib;
 namespace XML {
 	public abstract class Node: Object {
 		private bool disposed;
-		protected bool freezed;
+		protected int freezed;
 		protected weak Node _parent;
 		public weak Node parent {
 				get {return _parent;} 
@@ -18,7 +18,7 @@ namespace XML {
 		public Node (Document document){ this.document = document;}
 		construct {
 			disposed = false;
-			freezed = false;
+			freezed = 0;
 		}
 		public virtual string to_string () {
 			return summary(-1);
@@ -29,13 +29,13 @@ namespace XML {
 		public void insert(Node node, int pos) {
 			node.parent = this;
 			children.insert(node.ref() as Node, pos);
-			if(!freezed)
+			if(freezed < 0)
 			document.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
 			children.remove(node);
-			if(!freezed)
+			if(freezed < 0)
 			document.removed(parent, node);
 			node.parent = null;
 			node.unref();
@@ -53,10 +53,10 @@ namespace XML {
 			}
 		}
 		public void freeze() {
-			freezed = true;
+			freezed--;
 		}
 		public void unfreeze() {
-			freezed = false;	
+			freezed++;
 		}	
 		~Node() {
 		}
@@ -66,17 +66,34 @@ namespace XML {
 		public abstract Document.Root root {get;}
 		public virtual Document.Text CreateText(string text) {
 			Document.Text t = new Document.Text(this);
+			t.freeze();
 			t.text = text;
+			t.unfreeze();
 			return t;
 		}
 		public virtual Document.Special CreateSpecial(string text) {
 			Document.Special s = new Document.Special(this);
+			s.freeze();
 			s.text = text;
+			s.unfreeze();
 			return s;
 		}
 		public virtual Document.Tag CreateTag(string tag) {
 			Document.Tag t = new Document.Tag(this);
+			t.freeze();
 			t.tag = tag;
+			t.unfreeze();
+			return t;
+		}
+		public virtual Document.Tag CreateTag_with_attributes(string tag, 
+				string[] attr_names, string[] attr_values) {
+			Document.Tag t = new Document.Tag(this);
+			t.freeze();
+			t.tag = tag;
+			for(int i = 0; i< attr_names.length; i++) {
+				t.set(attr_names[i], attr_values[i]);
+			}
+			t.unfreeze();
 			return t;
 		}
 		public virtual weak string S(string s) {
@@ -131,12 +148,12 @@ namespace XML {
 			}
 			public void set(string prop, string val) {
 				props.insert(document.S(prop), val);
-				if(!freezed)
+				if(freezed < 0)
 				document.updated(this, prop);
 			}
 			public void unset(string prop) {
 				props.remove(prop);
-				if(!freezed)
+				if(freezed < 0)
 				document.updated(this, prop);
 			}
 			public weak string? get(string prop) {
