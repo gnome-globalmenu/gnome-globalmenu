@@ -19,22 +19,34 @@ namespace GnomenuGtk {
 		}
 	}
 	private void child_remove(Gtk.Widget widget, Gtk.Widget c) {
-		client().remove_widget(document().wrap(c)); /*This might be not so useful, since the node is removed when 
+		unbind_widget(c); /*This might be not so useful, since the node is removed when 
 									the MenuShell is disposed*/
 	}
 	private void child_insert(Gtk.Widget w, Gtk.Widget c, int pos) {
 		bind_widget(c, w, pos);
 	}
-	private void bind_widget(Gtk.Widget widget, void* parent_widget /*override parent widget*/= null, int pos = -1) {
+	private void bind_widget(Gtk.Widget widget, Gtk.Widget? parent_widget /*override parent widget*/= null, int pos = -1) {
 		if(!(widget is Gtk.MenuItem)
-		&& !(widget is Gtk.MenuShell)) return;
-		weak Gtk.Widget pw;
-		if(parent_widget == null) pw = widget.parent;
-		else pw = (Gtk.Widget) parent_widget;
+		&& !(widget is Gtk.MenuShell)
+		&& !(widget is Gtk.Window)) return;
+
 		weak string name = document().wrap(widget);
-		weak string parent = document().wrap(pw);
-		message("add %s to %s", name, parent);
-		client().add_widget(parent, name, pos);
+		if(document().lookup(name) != null) return;
+
+		weak XML.Node parent_node;
+		if(parent_widget == null) {
+			parent_node = document().root;
+			message("add %s to %s", name, "root");
+		}
+		else {
+			weak string parent = document().wrap(parent_widget);
+			message("add %s to %s", name, parent);
+			parent_node = document().lookup(parent);
+		}
+
+		Gnomenu.Document.Widget node = document().CreateWidget("widget", name);
+		parent_node.insert(node, pos);
+		document().FinishNode(node);
 
 		if(widget is Gtk.MenuShell) {
 			weak List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();
@@ -72,7 +84,8 @@ namespace GnomenuGtk {
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		client().add_widget(null, window_name);
+		message("bind_menu %s to %s", menu_name, window_name);
+		bind_widget(window);
 		bind_widget(menu, window);
 		window.realize += (window) => {
 			weak string window_name = document().wrap(window);
@@ -82,12 +95,12 @@ namespace GnomenuGtk {
 			weak string window_name = document().wrap(window);
 			client().unregister_window(window_name);
 		};
-		message("bind_menu %s to %s", menu_name, window_name);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
 		message("unbind_menu %s from %s", menu_name, window_name);
-		client().remove_widget(menu_name);
+		weak Gnomenu.Document.Widget node =document().lookup(menu_name);
+		if(node != null && node.parent != null) node.parent.remove(node);
 	}
 }

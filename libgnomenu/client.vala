@@ -12,7 +12,6 @@ namespace Gnomenu {
 		dynamic DBus.Object server;
 		[DBus (visible = false)]
 		public Document document {get; construct;}
-		public weak Document.Widget windows;
 		public Client(Document document) {
 			this.document = document;
 		}
@@ -27,10 +26,6 @@ namespace Gnomenu {
 			uint r = dbus.RequestName (bus, (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
-			Document.Widget windows = document.CreateWidget("windows", "windows");
-			document.root.append(windows);
-			document.FinishNode(windows);
-			this.windows = windows;
 			document.added += (f, p, o, i) => {
 				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
 				weak Document.Widget parent_node = p as Document.Widget;
@@ -60,7 +55,7 @@ namespace Gnomenu {
 			return "";
 		}
 		public string QueryWindows() {
-			return windows.summary(1);
+			return document.root.summary(1);
 		}
 		public void ActivateItem(string name){
 			weak Document.Widget node = document.lookup(name);
@@ -71,7 +66,7 @@ namespace Gnomenu {
 		public signal void removed(string parent, string name);
 
 		private weak Document.Widget? find_window_by_xid(string xid) {
-			foreach (weak XML.Node node in windows.children) {
+			foreach (weak XML.Node node in document.root.children) {
 				if(node is Document.Widget) {
 					weak Document.Widget widget = node as Document.Widget;
 					if(widget.get("xid") == xid) {
@@ -81,11 +76,11 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		protected void add_widget(string? parent, string name, int pos = -1) {
-			weak Document.Widget node = document.lookup(name);
-			weak Document.Widget parent_node;
+		private void add_widget(string? parent, string name, int pos = -1) {
+			weak XML.Node node = document.lookup(name);
+			weak XML.Node parent_node;
 			if(parent == null) {
-				parent_node = windows;
+				parent_node = document.root;
 			}
 			else
 				parent_node = document.lookup(parent);
@@ -95,7 +90,7 @@ namespace Gnomenu {
 				document.FinishNode(node);
 			}
 		}
-		protected void remove_widget(string name) {
+		private void remove_widget(string name) {
 			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				assert(node.parent != null);
