@@ -85,7 +85,7 @@ namespace XML {
 			t.unfreeze();
 			return t;
 		}
-		public virtual Document.Tag CreateTag_with_attributes(string tag, 
+		public virtual Document.Tag CreateTagWithAttributes(string tag, 
 				string[] attr_names, string[] attr_values) {
 			Document.Tag t = new Document.Tag(this);
 			t.freeze();
