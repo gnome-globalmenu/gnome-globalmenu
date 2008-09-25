@@ -35,18 +35,15 @@ namespace Gnomenu {
 				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
 				weak Document.Widget parent_node = p as Document.Widget;
 				weak Document.Widget node = o as Document.Widget;
-				message("added %s to %s at %d", node.name, parent_node.name, i);
 			};
 			document.removed += (f, p, o) => {
 				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
 				weak Document.Widget parent_node = p as Document.Widget;
 				weak Document.Widget node = o as Document.Widget;
-				message("removed %s to %s", node.name, parent_node.name);
 			};
 			document.updated += (f, o, prop) => {
 				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				message("updated %s of %s", prop, node.name);
 			};
 		}
 		public string QueryNode(string name, int level = -1){

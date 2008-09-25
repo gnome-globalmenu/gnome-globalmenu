@@ -26,7 +26,7 @@ namespace GnomenuGtk {
 			this.document = document;
 			client = new Client(document);
 			unique_id = 99;
-			window = new Navigator(document.tree);
+			window = new Navigator(document);
 			if(Environment.get_variable("GNOMENU_FUN") != null) {
 				window.show_all();
 			}

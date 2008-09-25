@@ -7,7 +7,6 @@ using GtkAQD;
 namespace GnomenuGtk {
 	protected class Document : Gnomenu.Document {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		public Gtk.TreeStore tree;
 		private class Widget:Gnomenu.Document.Widget {
 			public Gtk.TreeIter iter;
 			public Widget(Document document) {
@@ -15,7 +14,6 @@ namespace GnomenuGtk {
 			}
 			public override void dispose() {
 				base.dispose();
-				(this.document as Document).tree.remove(this.iter);
 			}
 			public override void activate() {
 				weak Gtk.Widget widget = (document as Document).dict_nw.lookup(this.get("name"));
@@ -29,7 +27,6 @@ namespace GnomenuGtk {
 		public Document() {}
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
-			tree = new Gtk.TreeStore(1, typeof(constpointer));
 		}
 		public override XML.Document.Text CreateText(string text) {
 			XML.Document.Text rt = new XML.Document.Text(this);
@@ -61,14 +58,7 @@ namespace GnomenuGtk {
 		}
 		public override void FinishNode(XML.Node n) {
 			if(n is Widget) {
-				message("FinishNode Widget");
 				weak Widget node = n as Widget;
-				if(node.parent is Widget) {
-					tree.insert(out node.iter, (node.parent as Widget).iter, node.parent.index(node));
-				} else {
-					tree.insert(out node.iter, null, 0);
-				}
-				tree.set(node.iter, 0, node, -1);
 				weak Gtk.Widget gtk = dict_nw.lookup(node.get("name"));
 				if(gtk is Gtk.MenuItem) { 
 					refresh_item_property(gtk, "visible");
