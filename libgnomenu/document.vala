@@ -2,7 +2,7 @@ using GLib;
 using Gtk;
 using XML;
 namespace Gnomenu {
-	public abstract class Document: XML.Document, Gtk.TreeModel {
+	public abstract class Document: GLib.Object, XML.Document, Gtk.TreeModel {
 		public abstract class Widget:XML.Document.Tag {
 			public Gtk.TreeIter iter;
 			public weak string name {
@@ -18,7 +18,17 @@ namespace Gnomenu {
 			public Widget(Document document) {
 				this.document = document;
 			}
-			construct {}
+			construct {
+				this.parent_set += (o, old) => {
+					if(this.parent == null) return;
+					if(this.parent is Widget) {
+						(document as Document).treestore.insert(out this.iter, (this.parent as Widget).iter, this.parent.index(this));
+					} else {
+						(document as Document).treestore.insert(out this.iter, null, 0);
+					}
+					(document as Document).treestore.set(this.iter, 0, this, -1);
+				};
+			}
 			public override void dispose() {
 				base.dispose();
 				(document as Document).dict.remove(name);
@@ -31,9 +41,12 @@ namespace Gnomenu {
 		}
 		public abstract virtual Widget CreateWidget(string type, string name);
 		public Gtk.TreeStore treestore;
+		private XML.Document.Root _root;
+		public XML.Document.Root root {get {return _root;}}
 		private HashTable <weak string, weak Widget> dict;
 		construct {
 			dict = new HashTable<weak string, weak XML.Document.Tag>(str_hash, str_equal);
+			_root = new XML.Document.Root(this);
 			treestore = new Gtk.TreeStore(1, typeof(constpointer));
 			treestore.row_changed += (o, p, i) => { row_changed(p, i);};
 			treestore.row_deleted += (o, p) => { row_deleted(p);};
@@ -43,17 +56,6 @@ namespace Gnomenu {
 		}
 		public virtual weak Widget? lookup(string name) {
 			return dict.lookup(name);
-		}
-		public override void FinishNode(XML.Node n) {
-			weak Widget node = n as Widget;
-			if(node.parent is Widget) {
-				treestore.insert(out node.iter, (node.parent as Widget).iter, node.parent.index(node));
-			} else {
-				treestore.insert(out node.iter, null, 0);
-			}
-			treestore.set(node.iter, 0, node, -1);
-			node.unfreeze();
-			base.FinishNode(node);
 		}
 		public GLib.Type get_column_type (int index_) {
 			return treestore.get_column_type(index_);

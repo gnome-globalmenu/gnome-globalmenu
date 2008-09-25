@@ -20,7 +20,6 @@ namespace XML {
 				print("Prop %s = %s\n", prop_name, val);
 				node.set(prop_name, val);
 			}
-			parser.document.FinishNode(node);
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
@@ -35,7 +34,6 @@ namespace XML {
 			Document.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
 			print("Text: %s\n", newtext);
-			parser.document.FinishNode(node);
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
@@ -44,7 +42,6 @@ namespace XML {
 			Document.Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
 			print("Special: %s\n", newtext);
-			parser.document.FinishNode(node);
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {
@@ -69,24 +66,28 @@ namespace XML {
 			}
 			return true;
 		}
-		private class TestDocument : Document {
+		private class TestDocument : Object, Document {
+			Document.Root _root;
+			Document.Root root { get {return _root;}}
 			public TestDocument() { }
-			public override Document.Text CreateText(string text) {
+			construct {
+				_root = new Document.Root(this);
+			}
+			public Document.Text CreateText(string text) {
 				Document.Text rt = new Document.Text(this);
 				rt.text = text;
 				return rt;
 			}
-			public override  Document.Special CreateSpecial(string text) {
+			public Document.Special CreateSpecial(string text) {
 				Document.Special rt = new Document.Special(this);
 				rt.text = text;
 				return rt;
 			}
-			public override Document.Tag CreateTag(string tag) {
+			public Document.Tag CreateTag(string tag) {
 				Document.Tag rt = new Document.Tag(this);
 				rt.tag = S(tag);
 				return rt;
 			}
-			public override void FinishNode(Node node) { }
 		}
 		public static int test (string [] args){
 			Document document = new TestDocument();

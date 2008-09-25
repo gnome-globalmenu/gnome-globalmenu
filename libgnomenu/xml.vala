@@ -3,7 +3,16 @@ namespace XML {
 	public abstract class Node: Object {
 		private bool disposed;
 		protected bool freezed;
-		public weak Node parent;
+		protected weak Node _parent;
+		public weak Node parent {
+				get {return _parent;} 
+				set{
+					Node old_parent = _parent;
+					_parent = value;
+					parent_set(old_parent);
+				}
+		}
+		public signal void parent_set(Node? old_parent);
 		protected List<weak Node> children;
 		public weak Document document {get; construct;}
 		public Node (Document document){ this.document = document;}
@@ -52,11 +61,32 @@ namespace XML {
 		~Node() {
 		}
 	}
-	public abstract class Document: Object {
-		private StringChunk strings;
-		private Root _root;
-		public Node root {get{return _root;}}
-		private class Root : Node {
+	public interface Document: Object {
+		private static StringChunk strings = null;
+		public abstract Document.Root root {get;}
+		public virtual Document.Text CreateText(string text) {
+			Document.Text t = new Document.Text(this);
+			t.text = text;
+			return t;
+		}
+		public virtual Document.Special CreateSpecial(string text) {
+			Document.Special s = new Document.Special(this);
+			s.text = text;
+			return s;
+		}
+		public virtual Document.Tag CreateTag(string tag) {
+			Document.Tag t = new Document.Tag(this);
+			t.tag = tag;
+			return t;
+		}
+		public virtual weak string S(string s) {
+			if(strings == null) strings = new StringChunk(1024);
+			return strings.insert_const(s);
+		}
+		public signal void updated(Node node, string prop);
+		public signal void added(Node parent, Node node, int pos);
+		public signal void removed(Node parent, Node node);
+		public class Root : Node {
 			public Root(Document document){
 				this.document = document;
 			}
@@ -72,20 +102,6 @@ namespace XML {
 				return sb.str;
 			}
 		}
-		construct {
-			strings = new StringChunk(1024);
-			_root = new Root(this);
-		}
-		public abstract virtual Document.Text CreateText(string text);
-		public abstract virtual Document.Special CreateSpecial(string text);
-		public abstract virtual Document.Tag CreateTag(string tag);
-		public virtual void FinishNode(Node node) {}
-		public virtual weak string S(string s) {
-			return strings.insert_const(s);
-		}
-		public signal void updated(Node node, string prop);
-		public signal void added(Node parent, Node node, int pos);
-		public signal void removed(Node parent, Node node);
 		public class Text : Node {
 			public string text;
 			public Text(Document document) {

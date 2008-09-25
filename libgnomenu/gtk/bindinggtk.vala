@@ -46,7 +46,6 @@ namespace GnomenuGtk {
 
 		Gnomenu.Document.Widget node = document().CreateWidget("widget", name);
 		parent_node.insert(node, pos);
-		document().FinishNode(node);
 
 		if(widget is Gtk.MenuShell) {
 			weak List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();

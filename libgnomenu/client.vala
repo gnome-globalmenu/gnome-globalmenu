@@ -87,7 +87,6 @@ namespace Gnomenu {
 			if(node == null) {
 				Document.Widget node = document.CreateWidget("widget", name);
 				parent_node.insert(node, pos);
-				document.FinishNode(node);
 			}
 		}
 		private void remove_widget(string name) {
@@ -132,31 +131,12 @@ namespace Gnomenu {
 				}
 			}
 			public TestDocument() { }
-			public override XML.Document.Text CreateText(string text) {
-				XML.Document.Text rt = new XML.Document.Text(this);
-				rt.freeze();
-				rt.text = text;
-				return rt;
-			}
-			public override  XML.Document.Special CreateSpecial(string text) {
-				XML.Document.Special rt = new XML.Document.Special(this);
-				rt.freeze();
-				rt.text = text;
-				return rt;
-			}
-			public override XML.Document.Tag CreateTag(string tag) {
-				XML.Document.Tag rt = new XML.Document.Tag(this);
-				rt.freeze();
-				rt.tag = S(tag);
-				return rt;
-			}
 			public override Document.Widget CreateWidget(string type, string name) {
 				Widget rt = new Widget(this);
 				rt.tag = S(type);
 				rt.name = name;
 				return rt;
 			}
-			public override void FinishNode(XML.Node node){}
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);

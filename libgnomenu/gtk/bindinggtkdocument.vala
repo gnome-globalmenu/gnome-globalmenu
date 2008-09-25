@@ -28,66 +28,44 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
-		public override XML.Document.Text CreateText(string text) {
-			XML.Document.Text rt = new XML.Document.Text(this);
-			rt.freeze();
-			rt.text = text;
-			return rt;
-		}
-		public override  XML.Document.Special CreateSpecial(string text) {
-			XML.Document.Special rt = new XML.Document.Special(this);
-			rt.freeze();
-			rt.text = text;
-			return rt;
-		}
-		public override XML.Document.Tag CreateTag(string tag) {
-			XML.Document.Tag rt = new XML.Document.Tag(this);
-			rt.freeze();
-			rt.tag = S(tag);
-			return rt;
-		}
 		public override Gnomenu.Document.Widget CreateWidget(string type, string name) {
-			weak Gnomenu.Document.Widget node = lookup(name);
-			if(node != null) return node;
-			Widget rt = new Widget(this);
-			rt.freeze();
+			{
+				weak Gnomenu.Document.Widget node = lookup(name);
+				if(node != null) return node;
+			}
+			Widget node = new Widget(this);
+			node.freeze();
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
-			rt.name = name;
-			rt.tag = type;
-			return rt;
-		}
-		public override void FinishNode(XML.Node n) {
-			if(n is Widget) {
-				weak Widget node = n as Widget;
-				weak Gtk.Widget gtk = dict_nw.lookup(node.get("name"));
-				if(gtk is Gtk.MenuItem) { 
-					refresh_item_property(gtk, "visible");
-					gtk.notify["visible"] += item_property_notify;
-					refresh_item_property(gtk, "enabled");
-					gtk.notify["enabled"] += item_property_notify;
-					if(gtk is Gtk.TearoffMenuItem) {
-						node.set("label", "&");
-					} else 
-					if(gtk is Gtk.SeparatorMenuItem) {
-						node.set("label", "|");
-					} else  {
-						weak Gtk.Label l = find_menu_item_label(gtk);
-						if(l!= null) {
-							refresh_item_property(l, "label");
-							l.notify["label"] += item_property_notify;
-						}
-						if(gtk is Gtk.CheckMenuItem) {
-							refresh_item_property(gtk, "active");
-							gtk.notify["active"] += item_property_notify;
-							refresh_item_property(gtk, "draw-as-radio");
-							gtk.notify["draw-as-radio"] += item_property_notify;
-							refresh_item_property(gtk, "inconsistent");
-							gtk.notify["inconsistent"] += item_property_notify;
-						}
+			node.name = name;
+			node.tag = type;
+			if(gtk is Gtk.MenuItem) { 
+				refresh_item_property(gtk, "visible");
+				gtk.notify["visible"] += item_property_notify;
+				refresh_item_property(gtk, "enabled");
+				gtk.notify["enabled"] += item_property_notify;
+				if(gtk is Gtk.TearoffMenuItem) {
+					node.set("label", "&");
+				} else 
+				if(gtk is Gtk.SeparatorMenuItem) {
+					node.set("label", "|");
+				} else  {
+					weak Gtk.Label l = find_menu_item_label(gtk);
+					if(l!= null) {
+						refresh_item_property(l, "label");
+						l.notify["label"] += item_property_notify;
+					}
+					if(gtk is Gtk.CheckMenuItem) {
+						refresh_item_property(gtk, "active");
+						gtk.notify["active"] += item_property_notify;
+						refresh_item_property(gtk, "draw-as-radio");
+						gtk.notify["draw-as-radio"] += item_property_notify;
+						refresh_item_property(gtk, "inconsistent");
+						gtk.notify["inconsistent"] += item_property_notify;
 					}
 				}
 			}
-			base.FinishNode(n);
+			node.unfreeze();
+			return node;
 		}
 		public weak string wrap(Gtk.Widget widget) {
 			weak string name = (string)widget.get_data("native-name");
