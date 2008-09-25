@@ -81,7 +81,7 @@ namespace XML {
 		public virtual Document.Tag CreateTag(string tag) {
 			Document.Tag t = new Document.Tag(this);
 			t.freeze();
-			t.tag = tag;
+			t.tag = S(tag);
 			t.unfreeze();
 			return t;
 		}
@@ -89,7 +89,7 @@ namespace XML {
 				string[] attr_names, string[] attr_values) {
 			Document.Tag t = new Document.Tag(this);
 			t.freeze();
-			t.tag = tag;
+			t.tag = S(tag);
 			for(int i = 0; i< attr_names.length; i++) {
 				t.set(attr_names[i], attr_values[i]);
 			}
@@ -146,17 +146,18 @@ namespace XML {
 			construct {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
-			public void set(string prop, string val) {
-				props.insert(document.S(prop), val);
+			public virtual void set(string prop, string? val) {
+				if(val == null)
+					props.remove(prop);
+				else 
+					props.insert(document.S(prop), val);
 				if(freezed < 0)
 				document.updated(this, prop);
 			}
-			public void unset(string prop) {
-				props.remove(prop);
-				if(freezed < 0)
-				document.updated(this, prop);
+			public virtual void unset(string prop) {
+				set(prop, null);
 			}
-			public weak string? get(string prop) {
+			public virtual weak string? get(string prop) {
 				return props.lookup(prop);
 			}
 			private string props_to_string() {

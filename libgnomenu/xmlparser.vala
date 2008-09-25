@@ -9,17 +9,19 @@ namespace XML {
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
-			Document.Tag node = parser.document.CreateTag(element_name);
+			weak string[] names = attribute_names;
+			weak string[] values = attribute_values;
+			names.length = (int) strv_length(attribute_names);
+			values.length = (int) strv_length(attribute_values);
+			Document.Tag node = parser.document.CreateTagWithAttributes(element_name,
+				names,
+				values
+				);
 			parser.current.append(node);
 			parser.current = node;
 			print("StartElement: %s\n", element_name);
-
-			for(uint i = 0; attribute_names[i]!=null; i++){
-				weak string prop_name = attribute_names[i];
-				weak string val = attribute_values[i];
-				print("Prop %s = %s\n", prop_name, val);
-				node.set(prop_name, val);
-			}
+			print("to string= %s\n", node.summary(0));
+			print("root = %s\n", parser.document.root.to_string());
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
@@ -33,7 +35,7 @@ namespace XML {
 			string newtext = text.ndup(text_len);
 			Document.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
-			print("Text: %s\n", newtext);
+			print("Text: \"%s\"\n", newtext);
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
@@ -41,7 +43,7 @@ namespace XML {
 			string newtext = passthrough_text.ndup(text_len);
 			Document.Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
-			print("Special: %s\n", newtext);
+			print("Special: \"%s\"\n", newtext);
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {
@@ -67,26 +69,11 @@ namespace XML {
 			return true;
 		}
 		private class TestDocument : Object, Document {
-			Document.Root _root;
-			Document.Root root { get {return _root;}}
+			private Document.Root _root;
+			public Document.Root root { get {return _root;}}
 			public TestDocument() { }
 			construct {
 				_root = new Document.Root(this);
-			}
-			public Document.Text CreateText(string text) {
-				Document.Text rt = new Document.Text(this);
-				rt.text = text;
-				return rt;
-			}
-			public Document.Special CreateSpecial(string text) {
-				Document.Special rt = new Document.Special(this);
-				rt.text = text;
-				return rt;
-			}
-			public Document.Tag CreateTag(string tag) {
-				Document.Tag rt = new Document.Tag(this);
-				rt.tag = S(tag);
-				return rt;
 			}
 		}
 		public static int test (string [] args){

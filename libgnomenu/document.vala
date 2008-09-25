@@ -8,12 +8,15 @@ namespace Gnomenu {
 			public weak string name {
 				get {return get("name");}
 				set {
-					if(name != null)
-					(document as Document).dict.remove(name);
 					set("name", value);
-					if(name != null)
-					(document as Document).dict.insert(name, this);
 				}
+			}
+			public override void set(string prop, string? val) {
+				if(prop == "name" && name != null)
+					(document as Document).dict.remove(name);
+				base.set(prop, val);
+				if(prop == "name" && name != null)
+					(document as Document).dict.insert(name, this);
 			}
 			public Widget(Document document) {
 				this.document = document;
