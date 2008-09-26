@@ -6,16 +6,7 @@ using Gnomenu;
 
 [DBus (name = "org.gnome.GlobalMenu.Server")]
 public class Server:GLib.Object {
-	public class Document : GLib.Object, XML.Document {
-		private XML.Document.Root _root;
-		public XML.Document.Root root {
-			get {
-				return _root;
-			}
-		}
-		construct {
-			_root = new XML.Document.Root(this);
-		}
+	public class Document : Gnomenu.Document {
 	}
 
 	Connection conn;
@@ -36,26 +27,22 @@ public class Server:GLib.Object {
 	private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 		if(new_owner != "") return;
 		/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
+		List<weak XML.Node> to_remove;
+
 		foreach (weak XML.Node node in document.root.children) {
 			if(node is XML.Document.Tag) {
 				weak XML.Document.Tag tagnode = node as XML.Document.Tag;
 				if(tagnode.get("bus") == bus) {
-					document.root.remove(node);
-					break;
+					to_remove.append(tagnode);
 				}
 			}
+		}
+		foreach(weak XML.Node node in to_remove) {
+			document.root.remove(node);
 		}
 	}
 	private weak XML.Document.Tag? find_node_by_xid(string xid) {
-		foreach (weak XML.Node node in document.root.children) {
-			if(node is XML.Document.Tag) {
-				weak XML.Document.Tag tagnode = node as XML.Document.Tag;
-				if(tagnode.get("xid") == xid) {
-					return tagnode;
-				}
-			}
-		}
-		return null;
+		return document.lookup(xid);
 	}
 	public void RegisterWindow (string client_bus, string xid) {
 		XML.Document.Tag node = find_node_by_xid(xid);
@@ -68,9 +55,11 @@ public class Server:GLib.Object {
 			}
 		}	
 		node = document.CreateTag("client");
-		node.set("bus", client_bus);
-		node.set("xid", xid);
+		node.freeze();
+		node.set("name", xid);
+		node.unfreeze();
 		document.root.append(node);
+		node.set("bus", client_bus);
 		message("register window %s %s", client_bus, xid);
 	}
 	public string QueryWindow(string xid) {
