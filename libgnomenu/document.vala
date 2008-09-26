@@ -53,6 +53,12 @@ namespace Gnomenu {
 			dict = new HashTable<weak string, weak XML.Document.Tag>(str_hash, str_equal);
 			_root = new XML.Document.Root(this);
 			treestore = new Gtk.TreeStore(1, typeof(constpointer));
+			this.updated += (o, node) => {
+				if(node is Widget) {
+					weak Widget w = node as Widget;
+					row_changed(this.treestore.get_path(w.iter), w.iter);
+				}
+			};
 			treestore.row_changed += (o, p, i) => { row_changed(p, i);};
 			treestore.row_deleted += (o, p) => { row_deleted(p);};
 			treestore.row_has_child_toggled += (o, p, i) => { row_has_child_toggled(p, i);};

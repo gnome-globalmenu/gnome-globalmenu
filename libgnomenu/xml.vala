@@ -29,13 +29,13 @@ namespace XML {
 		public void insert(Node node, int pos) {
 			node.parent = this;
 			children.insert(node.ref() as Node, pos);
-			if(freezed < 0)
+			if(freezed <= 0)
 			document.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
 			children.remove(node);
-			if(freezed < 0)
+			if(freezed <= 0)
 			document.removed(parent, node);
 			node.parent = null;
 			node.unref();
@@ -53,10 +53,10 @@ namespace XML {
 			}
 		}
 		public void freeze() {
-			freezed--;
+			freezed++;
 		}
 		public void unfreeze() {
-			freezed++;
+			freezed--;
 		}	
 		~Node() {
 		}
@@ -155,7 +155,7 @@ namespace XML {
 					props.remove(prop);
 				else 
 					props.insert(document.S(prop), val);
-				if(freezed < 0)
+				if(freezed <= 0)
 				document.updated(this, prop);
 			}
 			public virtual void unset(string prop) {
