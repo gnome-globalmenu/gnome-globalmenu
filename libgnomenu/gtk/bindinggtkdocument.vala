@@ -9,8 +9,9 @@ namespace GnomenuGtk {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
 		private class Widget:Gnomenu.Document.Widget {
 			public Gtk.TreeIter iter;
-			public Widget(Document document) {
+			private Widget(Document document, string tag) {
 				this.document = document;
+				this.tag = document.S(tag);
 			}
 			public override void dispose() {
 				base.dispose();
@@ -29,19 +30,13 @@ namespace GnomenuGtk {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
 		public override XML.Document.Tag CreateTag(string tag) {
-			Widget node = new Widget(this);
-			node.freeze();
-			node.tag = S(tag);
-			node.unfreeze();
-			return node;
+			return new Widget(this, tag);
 		}
 		private void list_to_array(List<weak string>? l, ref string[] array){
-			message("l.length = %u", l.length());
 			array.resize((int)l.length());
 			int i = 0;
 			foreach(weak string s in l) {
 				array[i] = s;
-				message("list_to_array %s", array[i]);
 				i++;
 			}
 		}
@@ -124,7 +119,6 @@ namespace GnomenuGtk {
 				weak Gnomenu.Document.Widget node = lookup(name);
 				if(node != null){
 					if(node.parent == null) {
-						message("parent = null for %s", name);
 						assert(false);
 					}
 					node.parent.remove(node);

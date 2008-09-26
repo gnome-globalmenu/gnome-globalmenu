@@ -18,8 +18,9 @@ namespace Gnomenu {
 				if(prop == "name" && name != null)
 					(document as Document).dict.insert(name, this);
 			}
-			public Widget(Document document) {
+			private Widget(Document document, string tag) {
 				this.document = document;
+				this.tag = document.S(tag);
 			}
 			construct {
 				this.parent_set += (o, old) => {
@@ -59,10 +60,7 @@ namespace Gnomenu {
 			treestore.rows_reordered += (o, p, i, n) => {rows_reordered(p, i, n);};
 		}
 		public virtual XML.Document.Tag CreateTag(string tag) {
-			XML.Document.Tag t = new Widget(this);
-			t.freeze();
-			t.tag = S(tag);
-			t.unfreeze();
+			XML.Document.Tag t = new Widget(this, tag);
 			return t;
 		}
 		public virtual weak Widget? lookup(string name) {

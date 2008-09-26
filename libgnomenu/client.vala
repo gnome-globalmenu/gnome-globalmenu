@@ -55,7 +55,7 @@ namespace Gnomenu {
 			return "";
 		}
 		public string QueryWindows() {
-			return document.root.summary(1);
+			return( document.root.summary(1));
 		}
 		public void ActivateItem(string name){
 			weak Document.Widget node = document.lookup(name);
@@ -100,7 +100,8 @@ namespace Gnomenu {
 				node = null;
 			}
 		}
-		public void register_window(string name, string xid) {
+		[DBus (visible = false)]
+		protected void register_window(string name, string xid) {
 			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				node.set("xid", xid);
@@ -111,7 +112,8 @@ namespace Gnomenu {
 				}
 			}
 		}
-		public void unregister_window(string name) {
+		[DBus (visible = false)]
+		protected void unregister_window(string name) {
 			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				weak string xid = node.get("xid");

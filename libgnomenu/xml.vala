@@ -65,25 +65,13 @@ namespace XML {
 		private static StringChunk strings = null;
 		public abstract Document.Root root {get;}
 		public virtual Document.Text CreateText(string text) {
-			Document.Text t = new Document.Text(this);
-			t.freeze();
-			t.text = text;
-			t.unfreeze();
-			return t;
+			return new Document.Text(this, text);
 		}
 		public virtual Document.Special CreateSpecial(string text) {
-			Document.Special s = new Document.Special(this);
-			s.freeze();
-			s.text = text;
-			s.unfreeze();
-			return s;
+			return new Document.Special(this, text);
 		}
 		public virtual Document.Tag CreateTag(string tag) {
-			Document.Tag t = new Document.Tag(this);
-			t.freeze();
-			t.tag = S(tag);
-			t.unfreeze();
-			return t;
+			return new Document.Tag(this, tag);
 		}
 		public virtual Document.Tag CreateTagWithAttributes(string tag, 
 				string[] attr_names, string[] attr_values) {
@@ -117,28 +105,41 @@ namespace XML {
 			}
 		}
 		public class Text : Node {
-			public string text;
-			private Text(Document document) {
+			public string text {
+				get; construct set;
+			}
+			private Text(Document document, string text) {
 				this.document = document;
+				this.text = text;
 			}
 			public override string summary (int level = 0) {
 				return text;
 			}
 		}
 		public class Special: Node {
-			public string text;
-			private Special(Document document) {
+			public string text {
+				get; construct set;
+			}
+			private Special(Document document, string text) {
 				this.document = document;
+				this.text = text;
 			}
 			public override string summary (int level = 0) {
 				return text;
 			}
 		}
 		public class Tag : Node {
-			public weak string tag;
+			private weak string _tag;
+			public weak string tag {
+				get{ return _tag;}
+				construct set {
+					_tag = document.S(value);
+				}
+			}
 			private HashTable<weak string, string> props;
-			private Tag (Document document) {
+			private Tag (Document document, string tag) {
 				this.document = document;
+				this.tag = tag;
 			}
 			construct {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
