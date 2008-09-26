@@ -20,11 +20,14 @@ namespace Gnomenu {
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			server = conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
 			
-			string str = dbus.GetId();
-			bus = "org.gnome.GlobalMenu.Applications." + Environment.get_prgname() + str;
-			message("Obtaining BUS name: %s", bus);
-			uint r = dbus.RequestName (bus, (uint) 0);
-			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
+			Rand rand = new Rand();
+			uint r;
+			do {
+				string str = rand.next_int().to_string().strip();
+				bus = "org.gnome.GlobalMenu.Applications." + Environment.get_prgname() + "-" + str;
+				message("Obtaining BUS name: %s", bus);
+				r = dbus.RequestName (bus, (uint) 0);
+			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
 			conn.register_object("/org/gnome/GlobalMenu/Application", this);
 			document.added += (f, p, o, i) => {
 				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
