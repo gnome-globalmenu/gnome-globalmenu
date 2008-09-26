@@ -146,7 +146,6 @@ namespace XML {
 			public void set_attributes(string[] names, string[] values) {
 				assert(names.length == values.length);
 				for(int i=0; i< names.length && i < values.length; i++) {
-					message("setting %s to %s", names[i], values[i]);
 					this.set(names[i], values[i]);
 				}
 			}

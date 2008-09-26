@@ -83,7 +83,6 @@ namespace Gnomenu {
 				parent_node = document.root;
 			}
 			else {
-				message("parent = %s", parent);
 				parent_node = document.lookup(parent);
 			}
 			if(node == null) {
@@ -101,7 +100,7 @@ namespace Gnomenu {
 				node = null;
 			}
 		}
-		protected void register_window(string name, string xid) {
+		public void register_window(string name, string xid) {
 			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				node.set("xid", xid);
@@ -112,7 +111,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		protected void unregister_window(string name) {
+		public void unregister_window(string name) {
 			weak Document.Widget node = document.lookup(name);
 			if(node != null) {
 				weak string xid = node.get("xid");

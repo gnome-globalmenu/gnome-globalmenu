@@ -12,7 +12,6 @@ namespace Gnomenu {
 				}
 			}
 			public override void set(string prop, string? val) {
-				message("setting name to %s", val);
 				if(prop == "name" && name != null)
 					(document as Document).dict.remove(name);
 				base.set(prop, val);

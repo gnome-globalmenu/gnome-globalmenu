@@ -36,11 +36,9 @@ namespace GnomenuGtk {
 		weak XML.Node parent_node;
 		if(parent_widget == null) {
 			parent_node = document().root;
-			message("add %s to %s", name, "root");
 		}
 		else {
 			weak string parent = document().wrap(parent_widget);
-			message("add %s to %s", name, parent);
 			parent_node = document().lookup(parent);
 		}
 
@@ -83,7 +81,6 @@ namespace GnomenuGtk {
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		message("bind_menu %s to %s", menu_name, window_name);
 		bind_widget(window);
 		bind_widget(menu, window);
 		window.realize += (window) => {
@@ -98,7 +95,6 @@ namespace GnomenuGtk {
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		message("unbind_menu %s from %s", menu_name, window_name);
 		weak Gnomenu.Document.Widget node =document().lookup(menu_name);
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}
