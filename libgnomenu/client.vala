@@ -82,10 +82,14 @@ namespace Gnomenu {
 			if(parent == null) {
 				parent_node = document.root;
 			}
-			else
+			else {
+				message("parent = %s", parent);
 				parent_node = document.lookup(parent);
+			}
 			if(node == null) {
-				Document.Widget node = document.CreateWidget("widget", name);
+				string[] names = {"name"};
+				string[] values = {name};
+				XML.Document.Tag node = document.CreateTagWithAttributes("widget", names, values);
 				parent_node.insert(node, pos);
 			}
 		}
@@ -121,27 +125,10 @@ namespace Gnomenu {
 			}
 
 		}
-		private class TestDocument: Document {
-			private class Widget:Document.Widget {
-				public Widget(Document document) {
-					this.document = document;
-				}
-				public override void activate() {
-					message("%s is activated", summary(0));
-				}
-			}
-			public TestDocument() { }
-			public override Document.Widget CreateWidget(string type, string name) {
-				Widget rt = new Widget(this);
-				rt.tag = S(type);
-				rt.name = name;
-				return rt;
-			}
-		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			Document document = new TestDocument();
+			Document document = new Document();
 			Client c = new Client(document);
 			c.add_widget(null, "window1");
 			c.add_widget(null, "window2");

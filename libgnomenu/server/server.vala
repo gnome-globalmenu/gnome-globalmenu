@@ -67,7 +67,7 @@ public class Server:GLib.Object {
 				document.root.remove(node);
 			}
 		}	
-		node = document.CreateTag("client");
+		node = document.CreateTagWithAttributes("client");
 		node.set("bus", client_bus);
 		node.set("xid", xid);
 		document.root.append(node);

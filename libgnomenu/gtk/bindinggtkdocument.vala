@@ -28,43 +28,76 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
-		public override Gnomenu.Document.Widget CreateWidget(string type, string name) {
+		public override XML.Document.Tag CreateTag(string tag) {
+			Widget node = new Widget(this);
+			node.freeze();
+			node.tag = S(tag);
+			node.unfreeze();
+			return node;
+		}
+		private void list_to_array(List<weak string>? l, ref string[] array){
+			message("l.length = %u", l.length());
+			array.resize((int)l.length());
+			int i = 0;
+			foreach(weak string s in l) {
+				array[i] = s;
+				message("list_to_array %s", array[i]);
+				i++;
+			}
+		}
+		public Gnomenu.Document.Widget CreateWidget(string type, string name) {
 			{
 				weak Gnomenu.Document.Widget node = lookup(name);
 				if(node != null) return node;
 			}
-			Widget node = new Widget(this);
-			node.freeze();
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
-			node.name = name;
-			node.tag = type;
+			List<weak string> names;
+			List<weak string> values;
+			names.append("name");
+			values.append(name);
 			if(gtk is Gtk.MenuItem) { 
-				refresh_item_property(gtk, "visible");
-				gtk.notify["visible"] += item_property_notify;
-				refresh_item_property(gtk, "enabled");
-				gtk.notify["enabled"] += item_property_notify;
+				Gtk.MenuItem item = gtk as Gtk.MenuItem;
+				item.notify["visible"] += item_property_notify;
+				item.notify["sensitive"] += item_property_notify;
+				if(!item.visible) {
+					names.append("visible");
+					values.append("false");
+				}
+				if(!item.sensitive) {
+					names.append("sensitive");
+					values.append("false");
+				}
+				names.append("label");
 				if(gtk is Gtk.TearoffMenuItem) {
-					node.set("label", "&");
-				} else 
-				if(gtk is Gtk.SeparatorMenuItem) {
-					node.set("label", "|");
+					values.append("&");
+				} else if(gtk is Gtk.SeparatorMenuItem) {
+					values.append("|");
 				} else  {
 					weak Gtk.Label l = find_menu_item_label(gtk);
 					if(l!= null) {
-						refresh_item_property(l, "label");
 						l.notify["label"] += item_property_notify;
-					}
+						values.append(l.label);
+					} else 
+						values.append("unknown");
 					if(gtk is Gtk.CheckMenuItem) {
-						refresh_item_property(gtk, "active");
+						Gtk.CheckMenuItem c = gtk as Gtk.CheckMenuItem;
 						gtk.notify["active"] += item_property_notify;
-						refresh_item_property(gtk, "draw-as-radio");
 						gtk.notify["draw-as-radio"] += item_property_notify;
-						refresh_item_property(gtk, "inconsistent");
 						gtk.notify["inconsistent"] += item_property_notify;
+						names.append("active");
+						values.append(c.active?"true":"false");
+						names.append("draw-as-radio");
+						values.append(c.draw_as_radio?"true":"false");
+						names.append("indonsistent");
+						values.append(c.inconsistent?"true":"false");
 					}
 				}
 			}
-			node.unfreeze();
+			string[] anames = new string[1];
+			string[] avalues = new string[1];
+			list_to_array(names, ref anames);
+			list_to_array(values, ref avalues);
+			Widget node = CreateTagWithAttributes(type, anames, avalues) as Widget;
 			return node;
 		}
 		public weak string wrap(Gtk.Widget widget) {
@@ -99,14 +132,6 @@ namespace GnomenuGtk {
 			}
 			object.set_data("native-name", null);
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
-		}
-		private void refresh_item_property(Gtk.Widget w, string prop) {
-			Type t = w.get_type();
-			weak TypeClass tc = t.class_peek();
-			weak ParamSpec pspec = ((ObjectClass) tc).find_property(prop);
-			if(pspec != null) {
-				item_property_notify(w, pspec);
-			}
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name"));

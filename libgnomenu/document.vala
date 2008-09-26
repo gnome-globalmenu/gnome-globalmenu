@@ -2,8 +2,8 @@ using GLib;
 using Gtk;
 using XML;
 namespace Gnomenu {
-	public abstract class Document: GLib.Object, XML.Document, Gtk.TreeModel {
-		public abstract class Widget:XML.Document.Tag {
+	public class Document: GLib.Object, XML.Document, Gtk.TreeModel {
+		public class Widget:XML.Document.Tag {
 			public Gtk.TreeIter iter;
 			public weak string name {
 				get {return get("name");}
@@ -12,6 +12,7 @@ namespace Gnomenu {
 				}
 			}
 			public override void set(string prop, string? val) {
+				message("setting name to %s", val);
 				if(prop == "name" && name != null)
 					(document as Document).dict.remove(name);
 				base.set(prop, val);
@@ -38,11 +39,12 @@ namespace Gnomenu {
 				(this.document as Document).treestore.remove(this.iter);
 			}
 			~Widget(){
-				message("WidgetNode %s is removed", name);
+				message("Widget %s is removed", name);
 			}
-			public abstract virtual void activate();
+			public virtual void activate() {
+				message("Widget %s is activated", name);
+			}
 		}
-		public abstract virtual Widget CreateWidget(string type, string name);
 		public Gtk.TreeStore treestore;
 		private XML.Document.Root _root;
 		public XML.Document.Root root {get {return _root;}}
@@ -56,6 +58,13 @@ namespace Gnomenu {
 			treestore.row_has_child_toggled += (o, p, i) => { row_has_child_toggled(p, i);};
 			treestore.row_inserted += (o, p, i) => { row_inserted(p, i);};
 			treestore.rows_reordered += (o, p, i, n) => {rows_reordered(p, i, n);};
+		}
+		public virtual XML.Document.Tag CreateTag(string tag) {
+			XML.Document.Tag t = new Widget(this);
+			t.freeze();
+			t.tag = S(tag);
+			t.unfreeze();
+			return t;
 		}
 		public virtual weak Widget? lookup(string name) {
 			return dict.lookup(name);

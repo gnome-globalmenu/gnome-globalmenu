@@ -87,12 +87,9 @@ namespace XML {
 		}
 		public virtual Document.Tag CreateTagWithAttributes(string tag, 
 				string[] attr_names, string[] attr_values) {
-			Document.Tag t = new Document.Tag(this);
+			Document.Tag t = CreateTag(tag);
 			t.freeze();
-			t.tag = S(tag);
-			for(int i = 0; i< attr_names.length; i++) {
-				t.set(attr_names[i], attr_values[i]);
-			}
+			t.set_attributes(attr_names, attr_values);
 			t.unfreeze();
 			return t;
 		}
@@ -121,7 +118,7 @@ namespace XML {
 		}
 		public class Text : Node {
 			public string text;
-			public Text(Document document) {
+			private Text(Document document) {
 				this.document = document;
 			}
 			public override string summary (int level = 0) {
@@ -130,7 +127,7 @@ namespace XML {
 		}
 		public class Special: Node {
 			public string text;
-			public Special(Document document) {
+			private Special(Document document) {
 				this.document = document;
 			}
 			public override string summary (int level = 0) {
@@ -140,11 +137,18 @@ namespace XML {
 		public class Tag : Node {
 			public weak string tag;
 			private HashTable<weak string, string> props;
-			public Tag (Document document) {
+			private Tag (Document document) {
 				this.document = document;
 			}
 			construct {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
+			}
+			public void set_attributes(string[] names, string[] values) {
+				assert(names.length == values.length);
+				for(int i=0; i< names.length && i < values.length; i++) {
+					message("setting %s to %s", names[i], values[i]);
+					this.set(names[i], values[i]);
+				}
 			}
 			public virtual void set(string prop, string? val) {
 				if(val == null)
