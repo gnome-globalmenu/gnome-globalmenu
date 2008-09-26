@@ -19,6 +19,7 @@ libgnomenu_la_VALASOURCES = \
 		xml.vala \
 		client.vala \
 		document.vala \
+		viewer.vala \
 		navigator.vala \
 		$(NULL)
 

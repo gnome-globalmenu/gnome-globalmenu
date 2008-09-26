@@ -26,8 +26,10 @@ namespace GnomenuGtk {
 			this.document = document;
 			client = new Client(document);
 			unique_id = 99;
-			window = new Navigator(document);
 			if(Environment.get_variable("GNOMENU_FUN") != null) {
+				window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
+				Viewer viewer = new Viewer(document);
+				window.add(viewer);
 				window.show_all();
 			}
 		}
