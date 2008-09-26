@@ -175,14 +175,14 @@ namespace XML {
 				}
 				return sb.str;
 			}
-			public override string summary(int level) {
+			public override string summary(int level = 0) {
 				StringBuilder sb = new StringBuilder("");
 				if(this.children == null || level == 0)
 						sb.append_printf("<%s%s/>", tag, props_to_string());
 				else {
-					sb.append_printf("<%s%s>\n", tag, props_to_string());
+					sb.append_printf("<%s%s>", tag, props_to_string());
 					foreach(weak Node child in children){
-						sb.append_printf("%s\n", child.summary((level>0)?(level - 1):level));
+						sb.append_printf("%s", child.summary((level>0)?(level - 1):level));
 					}
 					sb.append_printf("</%s>", tag);
 				}
