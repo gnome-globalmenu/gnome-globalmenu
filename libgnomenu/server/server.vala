@@ -6,13 +6,12 @@ using Gnomenu;
 
 [DBus (name = "org.gnome.GlobalMenu.Server")]
 public class Server:GLib.Object {
-	public class Document : Gnomenu.Document {
-	}
-
 	Connection conn;
-	Document document;
+	public Gnomenu.Document document {get; construct;}
 	dynamic DBus.Object dbus;
-	public Server() {}
+	public Server(Gnomenu.Document document) {
+		this.document = document;
+	}
 	construct {
 		conn = Bus.get(DBus.BusType.SESSION);
 		dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
@@ -21,12 +20,10 @@ public class Server:GLib.Object {
 		uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 		assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
 		conn.register_object("/org/gnome/GlobalMenu/Server", this);
-		document = new Document();
 		message("server ready");
 	}
 	private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 		if(new_owner != "") return;
-		/*FIXME: this is buggy, node_it is freed before node_it->next is got*/
 		List<weak XML.Node> to_remove;
 
 		foreach (weak XML.Node node in document.root.children) {
