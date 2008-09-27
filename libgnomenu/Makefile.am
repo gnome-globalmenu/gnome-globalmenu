@@ -2,6 +2,7 @@ SUBDIRS = .
 SUBDIRS += tests
 SUBDIRS += gtk 
 SUBDIRS += server 
+SUBDIRS += navigator
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
@@ -22,7 +23,6 @@ libgnomenu_la_VALASOURCES = \
 		listview.vala \
 		dbusview.vala \
 		remotedocument.vala \
-		navigator.vala \
 		$(NULL)
 
 
