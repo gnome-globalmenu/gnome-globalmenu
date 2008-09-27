@@ -42,6 +42,7 @@ namespace Gnomenu {
 				message("Widget %s is removed", name);
 			}
 			public virtual void activate() {
+				(document as Document).activated(this);
 				message("Widget %s is activated", name);
 			}
 		}
@@ -76,6 +77,7 @@ namespace Gnomenu {
 			}
 			return dict.lookup(name);
 		}
+		public signal void activated(Widget node);
 		public GLib.Type get_column_type (int index_) {
 			return treestore.get_column_type(index_);
 		}

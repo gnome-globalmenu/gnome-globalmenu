@@ -23,6 +23,7 @@ namespace GnomenuGtk {
 					bool local = (widget as GtkAQD.MenuBar).local;
 					(widget as GtkAQD.MenuBar).local = !local;
 				}
+				base.activate();
 			}
 		}
 		public Document() {}
