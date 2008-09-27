@@ -38,7 +38,7 @@ public class Server:Gnomenu.DBusView {
 		}
 	}
 	private weak XML.Document.Tag? find_node_by_xid(string xid) {
-		return document.lookup(xid);
+		return document.lookup(xid) as XML.Document.Tag;
 	}
 	public void RegisterWindow (string client_bus, string xid) {
 		XML.Document.Tag node = find_node_by_xid(xid);

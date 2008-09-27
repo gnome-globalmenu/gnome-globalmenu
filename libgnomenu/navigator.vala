@@ -8,7 +8,7 @@ namespace Gnomenu {
 	public class Navigator: Gtk.Window {
 		private Document document;
 		private Parser parser;
-		private Viewer viewer;
+		private ListView viewer;
 		private string ui;
 		private Gtk.Builder builder;
 		private Gtk.ComboBox selector;
@@ -26,7 +26,7 @@ namespace Gnomenu {
 			remote.Updated += remote_updated;
 			document = new Gnomenu.Document();
 			parser = new XML.Parser(document);
-			viewer = new Viewer(document);
+			viewer = new ListView(document);
 
 			builder = new Gtk.Builder();
 			ui = """

@@ -11,11 +11,11 @@ namespace Gnomenu {
 		Gtk.TreeCellDataFunc func, 
 		GLib.DestroyNotify? dnotify);
 
-	public class Viewer : Gtk.ScrolledWindow {
+	public class ListView : Gtk.ScrolledWindow {
 		private Gtk.TreeView treeview;
 		public Document document {get; construct;}
 //		private Gtk.ScrolledWindow scrw;
-		public Viewer(Document document) {
+		public ListView(Document document) {
 			this.document = document;
 		}
 		construct {

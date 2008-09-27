@@ -40,7 +40,7 @@ public class Application {
 		Server c = new Server(document);
 		if(viewer) {
 			Gtk.Window window = new Window(Gtk.WindowType.TOPLEVEL);
-			window.add(new Gnomenu.Viewer(document));
+			window.add(new Gnomenu.ListView(document));
 			window.show_all();
 		}
 		loop.run();
