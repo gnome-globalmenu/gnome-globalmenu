@@ -40,15 +40,11 @@ namespace XML {
 				parser.current.append(node);
 			}
 			parser.current = node;
-			print("StartElement: %s\n", element_name);
-			print("to string= %s\n", node.summary(0));
-			print("root = %s\n", parser.document.root.to_string());
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
 			weak Parser parser = (Parser) user_data;
 			parser.current = parser.current.parent;
-			print("EndElement: %s\n", element_name);
 		}
 		
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
@@ -56,7 +52,6 @@ namespace XML {
 			string newtext = text.ndup(text_len);
 			Document.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
-			print("Text: \"%s\"\n", newtext);
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
@@ -64,7 +59,6 @@ namespace XML {
 			string newtext = passthrough_text.ndup(text_len);
 			Document.Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
-			print("Special: \"%s\"\n", newtext);
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {

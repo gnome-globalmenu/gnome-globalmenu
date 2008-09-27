@@ -33,7 +33,9 @@ namespace Gnomenu {
 
 			string clients = remote.QueryRoot(0);
 			parser.parse(clients);
-
+			this.activated += (doc, node) => {
+				remote.Activate(node.name);
+			};
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			weak XML.Node parent = lookup(parentname);

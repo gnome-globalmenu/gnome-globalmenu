@@ -13,18 +13,22 @@ namespace Gnomenu {
 
 	public class ListView : Gtk.ScrolledWindow {
 		private Gtk.TreeView treeview;
-		public Document document {get; construct;}
-//		private Gtk.ScrolledWindow scrw;
-		public ListView(Document document) {
+		private Document _document;
+		public weak Document? document {
+			get {
+				return _document;
+			} set {
+				_document = value;
+				treeview.set_model(document);
+			}
+		}
+		public ListView(Document? document) {
 			this.document = document;
 		}
 		construct {
 			message("constructing the viewer");
-			treeview = new Gtk.TreeView.with_model(document);
-//			scrw = new Gtk.ScrolledWindow(null, null);
+			treeview = new Gtk.TreeView();
 			this.add(treeview);
-//			this.add(new Label("hello world"));
-//			this.add(new Label("hello world"));
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
