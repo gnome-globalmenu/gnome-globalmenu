@@ -5,15 +5,14 @@ using DBus;
 using XML;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
-	public class Client:GLib.Object {
+	public class Client:DBusView {
 		Connection conn;
 		public string bus;
 		dynamic DBus.Object dbus;
 		dynamic DBus.Object server;
-		[DBus (visible = false)]
-		public Document document {get; construct;}
 		public Client(Document document) {
 			this.document = document;
+			this.path = "/org/gnome/GlobalMenu/Application";
 		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
@@ -28,48 +27,14 @@ namespace Gnomenu {
 				message("Obtaining BUS name: %s", bus);
 				r = dbus.RequestName (bus, (uint) 0);
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
-			conn.register_object("/org/gnome/GlobalMenu/Application", this);
-			document.added += (f, p, o, i) => {
-				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
-				weak Document.Widget parent_node = p as Document.Widget;
-				weak Document.Widget node = o as Document.Widget;
-				inserted(parent_node.name, node.name, i);
-			};
-			document.removed += (f, p, o) => {
-				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
-				weak Document.Widget parent_node = p as Document.Widget;
-				weak Document.Widget node = o as Document.Widget;
-				removed(parent_node.name, node.name);
-			};
-			document.updated += (f, o, prop) => {
-				if(!(o is Document.Widget)) return;
-				weak Document.Widget node = o as Document.Widget;
-				updated(node.name);
-			};
-		}
-		public string QueryNode(string name, int level = -1){
-			weak Document.Widget node = document.lookup(name);
-			if(node!= null)
-				return node.summary(level);
-			return "";
 		}
 		public string QueryXID(string xid) {
 			weak Document.Widget node = find_window_by_xid(xid);
 			if(node != null) {
-				return node.summary(0);
+				return node.name;
 			}
 			return "";
 		}
-		public string QueryWindows() {
-			return( document.root.summary(1));
-		}
-		public void ActivateItem(string name){
-			weak Document.Widget node = document.lookup(name);
-			node.activate();
-		}
-		public signal void updated(string name);
-		public signal void inserted(string parent, string name, int pos);
-		public signal void removed(string parent, string name);
 
 		private weak Document.Widget? find_window_by_xid(string xid) {
 			foreach (weak XML.Node node in document.root.children) {
