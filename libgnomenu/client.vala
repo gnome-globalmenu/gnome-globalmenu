@@ -64,7 +64,7 @@ namespace Gnomenu {
 			}
 		}
 		private void remove_widget(string name) {
-			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			if(node != null) {
 				assert(node.parent != null);
 				node.parent.remove(node);
@@ -73,7 +73,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void register_window(string name, string xid) {
-			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -85,7 +85,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void unregister_window(string name) {
-			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {

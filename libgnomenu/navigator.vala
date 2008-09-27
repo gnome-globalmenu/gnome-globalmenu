@@ -7,15 +7,12 @@ using DBus;
 namespace Gnomenu {
 	public class Navigator: Gtk.Window {
 		private Document document;
-		private Document serverdocument;
 		private Parser parser;
-		private Parser serverparser;
 		private Viewer viewer;
-		private Viewer serverviewer;
 		private string ui;
 		private Gtk.Builder builder;
 		private Gtk.ComboBox selector;
-		private dynamic DBus.Object server;
+		private dynamic DBus.Object remote;
 		private dynamic DBus.Connection conn;
 
 		public Navigator() {
@@ -23,14 +20,14 @@ namespace Gnomenu {
 		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
-			server = conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Server");
-
+			remote = conn.get_object("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server", "org.gnome.GlobalMenu.Document");
+			remote.Inserted += remote_inserted;
+			remote.Removed += remote_removed;
+			remote.Updated += remote_updated;
 			document = new Gnomenu.Document();
 			parser = new XML.Parser(document);
-			serverdocument = new Gnomenu.Document();
-			serverparser = new XML.Parser(serverdocument);
-			viewer = new Gnomenu.Viewer(document);
-			serverviewer = new Viewer(serverdocument);
+			viewer = new Viewer(document);
+
 			builder = new Gtk.Builder();
 			ui = """
 			<interface>
@@ -40,15 +37,30 @@ namespace Gnomenu {
 			builder.add_from_string(ui, -1);
 			Gtk.Box box = builder.get_object("MainBox") as Gtk.Box;
 			this.add(box);
-			box.pack_start_defaults(serverviewer);
 			box.pack_start_defaults(viewer);
 
-			string clients = server.QueryWindows();
+			string clients = remote.QueryRoot(0);
 			print("%s\n", clients);
-			serverparser.parse(clients);
-			print("%s\n", serverdocument.root.to_string());
+			parser.parse(clients);
+			print("%s\n", document.root.to_string());
 
 		}
+		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
+			weak XML.Node parent = document.lookup(parentname);
+			XML.Node node = parser.parse_tag(remote.QueryNode(nodename, -1));
+			parent.insert(node, pos);
+		}
+		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
+			weak XML.Node parent = document.lookup(parentname);
+			weak XML.Node node = document.lookup(nodename);
+			parent.remove(node);
+		}
+		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
+			weak XML.Node node = document.lookup(nodename);
+			XML.Document.Tag updated_node = parser.parse_tag(remote.QueryNode(nodename, 0));
+			node.set(propname, updated_node.get(propname));
+		}
+
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);

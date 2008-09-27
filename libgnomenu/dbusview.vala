@@ -51,13 +51,13 @@ namespace Gnomenu {
 			return document.root.summary(level);
 		}
 		public string QueryNode(string name, int level = -1){
-			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			if(node!= null)
 				return node.summary(level);
 			return "";
 		}
 		public void Activate(string name){
-			weak Document.Widget node = document.lookup(name);
+			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			node.activate();
 		}
 		public signal void updated(string name);

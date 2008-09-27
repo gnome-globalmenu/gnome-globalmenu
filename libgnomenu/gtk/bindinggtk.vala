@@ -95,7 +95,7 @@ namespace GnomenuGtk {
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		weak Gnomenu.Document.Widget node =document().lookup(menu_name);
+		weak Gnomenu.Document.Widget node =document().lookup(menu_name) as Gnomenu.Document.Widget;
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}
 }

@@ -42,8 +42,8 @@ namespace GnomenuGtk {
 		}
 		public Gnomenu.Document.Widget CreateWidget(string type, string name) {
 			{
-				weak Gnomenu.Document.Widget node = lookup(name);
-				if(node != null) return node;
+				weak XML.Node node = lookup(name);
+				if(node != null) return node as Gnomenu.Document.Widget;
 			}
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
 			List<weak string> names;
@@ -116,7 +116,7 @@ namespace GnomenuGtk {
 			if(name != null) {
 				message("GtkWidget %s is removed", name);
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
-				weak Gnomenu.Document.Widget node = lookup(name);
+				weak Gnomenu.Document.Widget node = lookup(name) as Gnomenu.Document.Widget;
 				if(node != null){
 					if(node.parent == null) {
 						assert(false);
@@ -128,7 +128,7 @@ namespace GnomenuGtk {
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
-			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name"));
+			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
 			if(node == null) {
 				warning("no xml node found for widget %s", (string) w.get_data("native-name"));
 				return;

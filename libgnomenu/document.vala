@@ -69,7 +69,11 @@ namespace Gnomenu {
 			XML.Document.Tag t = new Widget(this, tag);
 			return t;
 		}
-		public virtual weak Widget? lookup(string name) {
+		public virtual weak XML.Node lookup(string name) { 
+			/* returning root */
+			if(name == "root") {
+				return root;
+			}
 			return dict.lookup(name);
 		}
 		public GLib.Type get_column_type (int index_) {
