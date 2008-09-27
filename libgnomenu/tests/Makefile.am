@@ -2,7 +2,7 @@ LDADD = $(builddir)/../libgnomenu.la
 CLASSES = 
 CLASSES += XML_Parser 
 CLASSES += Gnomenu_Client
-CLASSES += Gnomenu_Navigator
+CLASSES += Gnomenu_Remote_Document
 CLASSES += Gnomenu_DBus_View
 
 noinst_PROGRAMS = $(CLASSES)

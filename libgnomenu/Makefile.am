@@ -21,6 +21,7 @@ libgnomenu_la_VALASOURCES = \
 		document.vala \
 		listview.vala \
 		dbusview.vala \
+		remotedocument.vala \
 		navigator.vala \
 		$(NULL)
 
