@@ -3,6 +3,7 @@ CLASSES =
 CLASSES += XML_Parser 
 CLASSES += Gnomenu_Client
 CLASSES += Gnomenu_Navigator
+CLASSES += Gnomenu_DBus_View
 
 noinst_PROGRAMS = $(CLASSES)
 BUILT_SOURCES = $(CLASSES:%=%.c)

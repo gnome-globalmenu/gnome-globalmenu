@@ -92,7 +92,7 @@ namespace XML {
 			public Root(Document document){
 				this.document = document;
 			}
-			public override string summary(int level = 0) {
+			public override string summary(int level = 1) {
 				StringBuilder sb = new StringBuilder("");
 				if(this.children == null)
 					return "";

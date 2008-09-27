@@ -20,6 +20,7 @@ libgnomenu_la_VALASOURCES = \
 		client.vala \
 		document.vala \
 		viewer.vala \
+		dbusview.vala \
 		navigator.vala \
 		$(NULL)
 

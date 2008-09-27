@@ -7,8 +7,11 @@ using DBus;
 namespace Gnomenu {
 	public class Navigator: Gtk.Window {
 		private Document document;
+		private Document serverdocument;
 		private Parser parser;
+		private Parser serverparser;
 		private Viewer viewer;
+		private Viewer serverviewer;
 		private string ui;
 		private Gtk.Builder builder;
 		private Gtk.ComboBox selector;
@@ -24,23 +27,27 @@ namespace Gnomenu {
 
 			document = new Gnomenu.Document();
 			parser = new XML.Parser(document);
+			serverdocument = new Gnomenu.Document();
+			serverparser = new XML.Parser(serverdocument);
 			viewer = new Gnomenu.Viewer(document);
+			serverviewer = new Viewer(serverdocument);
 			builder = new Gtk.Builder();
 			ui = """
 			<interface>
-			  <object class="GtkVBox" id="MainBox">
-				<child>
-				  <object class="GtkComboBox" id="WindowSelector" />
-				</child>
-			  </object>
+			  <object class="GtkVBox" id="MainBox"/>
 			</interface>
 			""";
 			builder.add_from_string(ui, -1);
 			Gtk.Box box = builder.get_object("MainBox") as Gtk.Box;
 			this.add(box);
+			box.pack_start_defaults(serverviewer);
 			box.pack_start_defaults(viewer);
-			selector = builder.get_object("WindowSelector") as Gtk.ComboBox;
-			
+
+			string clients = server.QueryWindows();
+			print("%s\n", clients);
+			serverparser.parse(clients);
+			print("%s\n", serverdocument.root.to_string());
+
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
