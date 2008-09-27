@@ -5,12 +5,12 @@ using XML;
 using Gnomenu;
 
 [DBus (name = "org.gnome.GlobalMenu.Server")]
-public class Server:GLib.Object {
+public class Server:Gnomenu.DBusView {
 	Connection conn;
-	public Gnomenu.Document document {get; construct;}
 	dynamic DBus.Object dbus;
 	public Server(Gnomenu.Document document) {
 		this.document = document;
+		this.path = "/org/gnome/GlobalMenu/Server";
 	}
 	construct {
 		conn = Bus.get(DBus.BusType.SESSION);
@@ -19,7 +19,6 @@ public class Server:GLib.Object {
 		
 		uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 		assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
-		conn.register_object("/org/gnome/GlobalMenu/Server", this);
 		message("server ready");
 	}
 	private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
@@ -54,15 +53,10 @@ public class Server:GLib.Object {
 		node = document.CreateTag("client");
 		node.freeze();
 		node.set("name", xid);
+		node.set("bus", client_bus);
 		node.unfreeze();
 		document.root.append(node);
-		node.set("bus", client_bus);
 		message("register window %s %s", client_bus, xid);
-	}
-	public string QueryWindow(string xid) {
-		XML.Document.Tag node = find_node_by_xid(xid);
-		if(node != null) return node.to_string();
-		return "";
 	}
 	public void RemoveWindow (string client_bus, string xid) {
 		XML.Document.Tag node= find_node_by_xid(xid);
@@ -70,8 +64,5 @@ public class Server:GLib.Object {
 		if(node != null)
 			if(node.get("bus") == client_bus)
 				document.root.remove(node);
-	}
-	public string QueryWindows() {
-		return document.root.to_string();
 	}
 }

@@ -22,16 +22,24 @@ namespace Gnomenu {
 
 			conn.register_object(path, this);
 			document.added += (f, p, o, i) => {
-				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
-				weak Document.Widget parent_node = p as Document.Widget;
+				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				inserted(parent_node.name, node.name, i);
+				if(p is XML.Document.Root) {
+					inserted("root", node.name, i);
+				} else {
+					weak Document.Widget parent_node = p as Document.Widget;
+					inserted(parent_node.name, node.name, i);
+				}
 			};
 			document.removed += (f, p, o) => {
-				if(!(p is Document.Widget) || !(o is Document.Widget)) return;
-				weak Document.Widget parent_node = p as Document.Widget;
+				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				removed(parent_node.name, node.name);
+				if(p is XML.Document.Root) {
+					removed("root", node.name);
+				} else {
+					weak Document.Widget parent_node = p as Document.Widget;
+					removed(parent_node.name, node.name);
+				}
 			};
 			document.updated += (f, o, prop) => {
 				if(!(o is Document.Widget)) return;
