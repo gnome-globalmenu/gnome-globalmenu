@@ -2,9 +2,21 @@ using GLib;
 namespace XML {
 	public class Parser {
 		private weak Node current;
+		private Document.Tag result; /*the result of a PARTIAL parse*/
 		private Document document;
+		private enum ParseType {
+			TAG, /*create a new node by parsing a tag*/
+			ROOT /*create a new document*/
+		}
+		private ParseType type;
+		public static MarkupParser parser_funcs;
 		public Parser(Document document){
 			this.document = document;
+			parser_funcs.start_element = StartElement;
+			parser_funcs.end_element = EndElement;
+			parser_funcs.text = Text;
+			parser_funcs.passthrough = Passthrough;
+			parser_funcs.error = Error;
 		}
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
@@ -17,7 +29,16 @@ namespace XML {
 				names,
 				values
 				);
-			parser.current.append(node);
+			if(parser.current == null) { /*First node in a partial parse*/
+				assert(parser.type == ParseType.TAG);
+				if(parser.result != null) {
+					critical("parsing multiple tags for parse_tag is not supported, extra tags are ignored");
+				} else {
+					parser.result = node;
+				}
+			} else {
+				parser.current.append(node);
+			}
 			parser.current = node;
 			print("StartElement: %s\n", element_name);
 			print("to string= %s\n", node.summary(0));
@@ -51,15 +72,9 @@ namespace XML {
 
 		}
 		public bool parse (string foo) {
-			MarkupParser parser = {
-				StartElement,
-				EndElement, 
-				Text, 
-				Passthrough,
-				Error
-			};
-			MarkupParseContext context = new MarkupParseContext(parser, 0, (void*)this, null);
+			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			current = document.root;
+			type = ParseType.ROOT;
 			try {
 				context.parse(foo, foo.size());
 			} catch(MarkupError e) {
@@ -67,6 +82,18 @@ namespace XML {
 				return false;
 			}
 			return true;
+		}
+		public Document.Tag? parse_tag(string foo) {
+			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
+			type = ParseType.TAG;
+			current = null;
+			try {
+				context.parse(foo, foo.size());
+			} catch(MarkupError e) {
+				warning("%s", e.message);
+				return null;
+			}
+			return #result;
 		}
 		private class TestDocument : Object, Document {
 			private Document.Root _root;
@@ -79,14 +106,27 @@ namespace XML {
 		public static int test (string [] args){
 			Document document = new TestDocument();
 			Parser parser = new Parser(document);
-			parser.parse("<?xml?>\n" +
-					"<docroot id=\"root\">" +
-					"<node id=\"node1\">"+
-					"node1data" +
-					"</node>\n"+
-					"rootdata\n" +
-					"</docroot>\n");
+			parser.parse(
+"""
+<html><title>title</title>
+<body name="body">
+<div name="header">
+	<h1> This is a header</h1>
+</div>
+<div name="content"></div>
+<div name="tail"><br/></div>
+</body>
+"""
+			);
 			print("back to string %s\n", parser.document.root.to_string());
+			Node n = parser.parse_tag(
+"""
+<p name="paragraph">
+Sucks
+</p>
+"""
+			);
+			print("a node %s", n.to_string());
 			return 0;
 		}
 	}
