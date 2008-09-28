@@ -124,7 +124,7 @@ namespace XML {
 		}
 		private class TestDocument : Object, Document {
 			private Document.Root _root;
-			public Document.Root root { get {return _root;}}
+			public XML.Node root { get {return _root;}}
 			public TestDocument() { }
 			construct {
 				_root = new Document.Root(this);

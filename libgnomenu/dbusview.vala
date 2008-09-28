@@ -21,7 +21,7 @@ namespace Gnomenu {
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 
 			conn.register_object(path, this);
-			document.added += (f, p, o, i) => {
+			document.inserted += (f, p, o, i) => {
 				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
 				if(p is XML.Document.Root) {

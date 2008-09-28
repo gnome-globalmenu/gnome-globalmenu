@@ -48,7 +48,7 @@ namespace Gnomenu {
 		}
 		public Gtk.TreeStore treestore;
 		private XML.Document.Root _root;
-		public XML.Document.Root root {get {return _root;}}
+		public XML.Node root {get {return _root;}}
 		private HashTable <weak string, weak Widget> dict;
 		construct {
 			dict = new HashTable<weak string, weak XML.Document.Tag>(str_hash, str_equal);

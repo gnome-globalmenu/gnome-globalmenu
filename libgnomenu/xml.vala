@@ -31,7 +31,7 @@ namespace XML {
 			children.insert(node.ref() as Node, pos);
 			node.parent = this;
 			if(freezed <= 0)
-			document.added(this, node, pos);
+			document.inserted(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
@@ -62,9 +62,50 @@ namespace XML {
 		~Node() {
 		}
 	}
+	public class Section: Object, Document {
+		public Document document  {get; construct;}
+		public weak XML.Node root {get {return pseudo_root;}}
+		public weak XML.Node pseudo_root {get; construct;}	
+		public Section(Document document, XML.Node root) {
+			this.document = document;
+			this.pseudo_root = root;
+		}
+		private bool is_inside(XML.Node node) {
+			for(weak XML.Node n = node;
+				n != null;
+				n = n.parent) {
+					if(node == root) return true;
+				}
+			return false;	
+		}
+		public virtual Document.Text CreateText(string text) {
+			return document.CreateText(text);
+		}
+		public virtual Document.Special CreateSpecial(string text) {
+			return document.CreateSpecial(text);
+		}
+		public virtual Document.Tag CreateTag(string tag) {
+			return document.CreateTag(tag);
+		}
+		public virtual Document.Tag CreateTagWithAttributes(string tag, 
+				string[] attr_names, string[] attr_values) {
+			return document.CreateTagWithAttributes(tag, attr_names, attr_values);
+		}
+		construct {
+			document.updated += (d, n, prop) => {
+				if(is_inside(n)) this.updated(n, prop);
+			};
+			document.inserted += (d, p, n, pos) => {
+				if(is_inside(p)) this.inserted(p, n, pos);
+			};
+			document.removed += (d, p, n) => {
+				if(is_inside(p)) this.removed(p, n);
+			};
+		}
+	}
 	public interface Document: Object {
 		private static StringChunk strings = null;
-		public abstract Document.Root root {get;}
+		public abstract weak XML.Node root {get;}
 		public virtual Document.Text CreateText(string text) {
 			return new Document.Text(this, text);
 		}
@@ -87,7 +128,7 @@ namespace XML {
 			return strings.insert_const(s);
 		}
 		public signal void updated(Node node, string prop);
-		public signal void added(Node parent, Node node, int pos);
+		public signal void inserted(Node parent, Node node, int pos);
 		public signal void removed(Node parent, Node node);
 		public class Root : Node {
 			public Root(Document document){
