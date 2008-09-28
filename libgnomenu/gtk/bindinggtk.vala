@@ -42,7 +42,18 @@ namespace GnomenuGtk {
 			parent_node = document().lookup(parent);
 		}
 
-		Gnomenu.Document.Widget node = document().CreateWidget("widget", name);
+		weak string type;
+		type = "widget";
+		if(widget is Gtk.MenuBar)
+			type = "menubar";
+		if(widget is Gtk.Menu)
+			type = "menu";
+		if(widget is Gtk.MenuItem)
+			type = "item";
+		if(widget is Gtk.Window)
+			type = "window";
+		
+		Gnomenu.Document.Widget node = document().CreateWidget(type, name);
 		parent_node.insert(node, pos);
 
 		if(widget is Gtk.MenuShell) {
