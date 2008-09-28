@@ -6,8 +6,8 @@ using XML;
 
 namespace Gnomenu {
 	public class MenuView : GtkAQD.MenuBar {
-		private Document? _document;
-		public weak Document? document {
+		private XML.Document? _document;
+		public weak XML.Document? document {
 			get {
 				return _document;
 			} set {
@@ -17,20 +17,18 @@ namespace Gnomenu {
 					_document.removed -= document_removed;
 				}
 				_document = value;
+				clean();	
 				if(_document != null) {
 					document.inserted += document_inserted;
 					document.updated += document_updated;
 					document.removed += document_removed;
-				}
-				clean();	
-				if(_document != null) {
-				foreach(weak XML.Node child in document.root.children) {
-					if(child is Document.Widget) {
-						if((child as Document.Widget).tag == "item") {
-							this.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+					foreach(weak XML.Node child in document.root.children) {
+						if(child is Document.Widget) {
+							if((child as Document.Widget).tag == "item") {
+								this.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+							}
 						}
 					}
-				}
 				}
 			}
 		}
@@ -75,11 +73,16 @@ namespace Gnomenu {
 								gtk.submenu = create_widget(child as Document.Widget);
 						}
 					}
+					gtk.activate += (o) => {
+						weak Document.Widget widget = (Document.Widget) o.get_data("node");
+						widget.activate();
+					};
 					if(widget.get("visible") == "false" ) gtk.visible = false; else gtk.visible = true;
 					if(widget.get("sensitive") == "false" ) gtk.sensitive = false; else gtk.sensitive = true;
 					rt = gtk;
 				break;
 			}
+			rt.set_data("node", widget);
 			widget.set_data_full("gtk", rt.ref(), g_object_unref);
 			return rt;
 		}
@@ -152,8 +155,6 @@ namespace Gnomenu {
 				}
 			}
 			
-		}
-		public void view(string menuname) {
 		}
 	}
 
