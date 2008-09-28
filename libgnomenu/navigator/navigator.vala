@@ -32,6 +32,10 @@ public class Navigator :Gtk.Window{
 			print("attatch to bus %s", bus);
 			RemoteDocument doc = new Gnomenu.RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
 			doc.activated += (docu, node) => {
+				if(node.tag == "menubar") {
+					XML.Section section = new XML.Section(docu, node);
+					viewer2.document = section;
+				}
 			};
 			viewer.document = doc;
 		};

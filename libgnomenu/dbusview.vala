@@ -24,7 +24,7 @@ namespace Gnomenu {
 			document.inserted += (f, p, o, i) => {
 				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				if(p is XML.Document.Root) {
+				if(p == f.root) {
 					inserted("root", node.name, i);
 				} else {
 					weak Document.Widget parent_node = p as Document.Widget;
@@ -34,7 +34,7 @@ namespace Gnomenu {
 			document.removed += (f, p, o) => {
 				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				if(p is XML.Document.Root) {
+				if(p == f.root) {
 					removed("root", node.name);
 				} else {
 					weak Document.Widget parent_node = p as Document.Widget;

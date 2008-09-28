@@ -6,25 +6,31 @@ using XML;
 
 namespace Gnomenu {
 	public class MenuView : GtkAQD.MenuBar {
-		private Document _document;
+		private Document? _document;
 		public weak Document? document {
 			get {
 				return _document;
 			} set {
-				_document.inserted -= document_inserted;
-				_document.updated -= document_updated;
-				_document.removed -= document_removed;
+				if(_document != null) {
+					_document.inserted -= document_inserted;
+					_document.updated -= document_updated;
+					_document.removed -= document_removed;
+				}
 				_document = value;
-				document.inserted += document_inserted;
-				document.updated += document_updated;
-				document.removed += document_removed;
+				if(_document != null) {
+					document.inserted += document_inserted;
+					document.updated += document_updated;
+					document.removed += document_removed;
+				}
 				clean();	
+				if(_document != null) {
 				foreach(weak XML.Node child in document.root.children) {
 					if(child is Document.Widget) {
 						if((child as Document.Widget).tag == "item") {
 							this.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
 						}
 					}
+				}
 				}
 			}
 		}
@@ -33,7 +39,7 @@ namespace Gnomenu {
 			this.local = true;
 		}
 		private weak Gtk.Widget create_widget(Document.Widget widget) {
-			weak Gtk.Widget rt;
+			Gtk.Widget rt;
 			weak Gtk.Widget gtk = (Gtk.Widget) widget.get_data("gtk");
 			if(gtk != null) return gtk;
 			switch(widget.tag) {
@@ -84,7 +90,7 @@ namespace Gnomenu {
 		}
 		private void document_inserted(XML.Document document, XML.Node p, XML.Node n, int pos) {
 			weak Document.Widget node = n as Document.Widget;
-			if(p is XML.Document.Root) {
+			if(p == document.root ) {
 				this.insert(create_widget(node) as Gtk.MenuItem, pos);
 				return;
 			}
@@ -103,7 +109,7 @@ namespace Gnomenu {
 			}
 		}
 		private void document_removed(XML.Document document, XML.Node p, XML.Node n) {
-			if(p is XML.Document.Root) {
+			if(p == document.root) {
 				this.remove((Gtk.Widget)p.get_data("gtk"));
 				return;
 			}
