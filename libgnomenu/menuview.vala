@@ -53,6 +53,7 @@ namespace Gnomenu {
 					rt = gtk;
 				break;
 				case "item":
+				case "check":
 					string label = widget.get("label");
 					Gtk.MenuItem gtk;
 					switch(label) {
@@ -63,7 +64,17 @@ namespace Gnomenu {
 						gtk = new Gtk.SeparatorMenuItem();
 						break;
 						default:
-						gtk = new Gtk.MenuItem.with_label(widget.get("label"));
+						switch(widget.tag) {
+							case "check":
+							gtk = new Gtk.CheckMenuItem.with_mnemonic(widget.get("label"));
+							break;
+							case "radio":
+							gtk = new Gtk.RadioMenuItem.with_mnemonic(null, widget.get("label"));
+							break;
+							case "item":
+							gtk = new Gtk.MenuItem.with_mnemonic(widget.get("label"));
+							break;
+						}
 						break;
 					}
 					message("adding a menu item %s", label);
