@@ -40,11 +40,11 @@ namespace Gnomenu {
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			weak XML.Node parent = lookup(parentname);
 			parser.parse_child(parent, remote.QueryNode(nodename, 0), pos);
-			message("%s is inserted to %s at %d", nodename, parentname, pos);
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			weak XML.Node parent = lookup(parentname);
 			weak XML.Node node = lookup(nodename);
+			message("removed %s", nodename);
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {

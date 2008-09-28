@@ -75,7 +75,8 @@ namespace Gnomenu {
 					}
 					gtk.activate += (o) => {
 						weak Document.Widget widget = (Document.Widget) o.get_data("node");
-						widget.activate();
+						if(widget != null);
+							widget.activate();
 					};
 					if(widget.get("visible") == "false" ) gtk.visible = false; else gtk.visible = true;
 					if(widget.get("sensitive") == "false" ) gtk.sensitive = false; else gtk.sensitive = true;
@@ -92,6 +93,7 @@ namespace Gnomenu {
 			}
 		}
 		private void document_inserted(XML.Document document, XML.Node p, XML.Node n, int pos) {
+			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(p == document.root ) {
 				this.insert(create_widget(node) as Gtk.MenuItem, pos);
@@ -112,17 +114,19 @@ namespace Gnomenu {
 			}
 		}
 		private void document_removed(XML.Document document, XML.Node p, XML.Node n) {
+			if(!(n is Document.Widget)) return;
+			weak Document.Widget node = n as Document.Widget;
 			if(p == document.root) {
-				this.remove((Gtk.Widget)p.get_data("gtk"));
+				message("%s", n.get_type().name());
+				this.remove((Gtk.Widget)node.get_data("gtk"));
 				return;
 			}
 			weak Document.Widget parent = p as Document.Widget;
-			weak Document.Widget node = n as Document.Widget;
 			if(parent != null && node != null) {
 				switch(parent.tag) {
 					case "menu":
 						Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
-						pgtk.remove((Gtk.Widget)p.get_data("gtk"));
+						pgtk.remove((Gtk.Widget)node.get_data("gtk"));
 					break;
 					case "item":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
@@ -132,6 +136,7 @@ namespace Gnomenu {
 			}
 		}
 		private void document_updated(XML.Document document, XML.Node n, string prop) {
+			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(node != null) {
 				switch(node.tag) {

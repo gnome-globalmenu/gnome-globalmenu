@@ -33,12 +33,23 @@ namespace XML {
 			if(freezed <= 0)
 			document.inserted(this, node, pos);
 		}
+		public void remove_all() {
+			foreach(weak Node node in children) {
+				node.remove_all();
+				if(freezed <= 0)
+					document.removed(this, node);
+				node.parent = null;
+				node.unref();
+			}
+			children = null;
+		}
 		public void remove(Node node) {
-			Node parent = node.parent;
-			node.parent = null;
+			node.remove_all();
 			children.remove(node);
 			if(freezed <= 0)
-			document.removed(parent, node);
+			document.removed(this, node);
+			node.parent = null;
+			message("ref count = %u", node.ref_count);
 			node.unref();
 		}
 		public int index(Node node) {
@@ -48,9 +59,7 @@ namespace XML {
 		protected override void dispose() {
 			if(!disposed){
 				disposed = true;
-				foreach(weak Node node in children){
-					node.unref();
-				}
+				remove_all();
 			}
 		}
 		public void freeze() {
@@ -74,8 +83,9 @@ namespace XML {
 			for(weak XML.Node n = node;
 				n != null;
 				n = n.parent) {
-					if(node == root) return true;
-				}
+				if(n == root)
+					return true;
+			}
 			return false;	
 		}
 		public virtual Document.Text CreateText(string text) {
