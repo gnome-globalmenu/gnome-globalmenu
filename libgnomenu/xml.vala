@@ -9,6 +9,7 @@ namespace XML {
 				set{
 					Node old_parent = _parent;
 					_parent = value;
+					if(freezed <=0)
 					parent_set(old_parent);
 				}
 		}
@@ -27,17 +28,17 @@ namespace XML {
 			insert(node, -1);
 		}
 		public void insert(Node node, int pos) {
-			node.parent = this;
 			children.insert(node.ref() as Node, pos);
+			node.parent = this;
 			if(freezed <= 0)
 			document.added(this, node, pos);
 		}
 		public void remove(Node node) {
 			Node parent = node.parent;
+			node.parent = null;
 			children.remove(node);
 			if(freezed <= 0)
 			document.removed(parent, node);
-			node.parent = null;
 			node.unref();
 		}
 		public int index(Node node) {

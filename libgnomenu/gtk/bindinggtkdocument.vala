@@ -17,13 +17,13 @@ namespace GnomenuGtk {
 				base.dispose();
 			}
 			public override void activate() {
+				base.activate();
 				weak Gtk.Widget widget = (document as Document).dict_nw.lookup(this.get("name"));
 				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
 				if(widget is GtkAQD.MenuBar) {
 					bool local = (widget as GtkAQD.MenuBar).local;
 					(widget as GtkAQD.MenuBar).local = !local;
 				}
-				base.activate();
 			}
 		}
 		public Document() {}

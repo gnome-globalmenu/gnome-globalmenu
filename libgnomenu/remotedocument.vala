@@ -39,8 +39,8 @@ namespace Gnomenu {
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			weak XML.Node parent = lookup(parentname);
-			XML.Node node = parser.parse_tag(remote.QueryNode(nodename, -1));
-			parent.insert(node, pos);
+			parser.parse_child(parent, remote.QueryNode(nodename, 0), pos);
+			message("%s is inserted to %s at %d", nodename, parentname, pos);
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			weak XML.Node parent = lookup(parentname);
@@ -48,9 +48,8 @@ namespace Gnomenu {
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
-			weak XML.Node node = lookup(nodename);
-			XML.Document.Tag updated_node = parser.parse_tag(remote.QueryNode(nodename, 0));
-			node.set(propname, updated_node.get(propname));
+			weak XML.Document.Tag node = lookup(nodename) as XML.Document.Tag;
+			parser.update_tag(node, propname, remote.QueryNode(nodename, 0));
 		}
 
 		public static int test(string[] args) {

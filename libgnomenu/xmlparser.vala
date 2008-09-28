@@ -2,13 +2,16 @@ using GLib;
 namespace XML {
 	public class Parser {
 		private weak Node current;
-		private Document.Tag result; /*the result of a PARTIAL parse*/
 		private Document document;
 		private enum ParseType {
-			TAG, /*create a new node by parsing a tag*/
-			ROOT /*create a new document*/
+			CHILD, /*create a new child node*/
+			ROOT, /*create a new document*/
+			UPDATE, /*update a node nonrecursively*/
 		}
+		private int pos;
+		private bool first;
 		private ParseType type;
+		private weak string propname;
 		public static MarkupParser parser_funcs;
 		public Parser(Document document){
 			this.document = document;
@@ -25,30 +28,42 @@ namespace XML {
 			weak string[] values = attribute_values;
 			names.length = (int) strv_length(attribute_names);
 			values.length = (int) strv_length(attribute_values);
-			Document.Tag node = parser.document.CreateTagWithAttributes(element_name,
-				names,
-				values
-				);
-			if(parser.current == null) { /*First node in a partial parse*/
-				assert(parser.type == ParseType.TAG);
-				if(parser.result != null) {
-					critical("parsing multiple tags for parse_tag is not supported, extra tags are ignored");
-				} else {
-					parser.result = node;
-				}
-			} else {
-				parser.current.append(node);
+			switch(parser.type) {
+				case ParseType.ROOT:
+				case ParseType.CHILD:
+					Document.Tag node = parser.document.CreateTagWithAttributes(element_name,
+						names,
+						values
+						);
+					if((parser.type == ParseType.CHILD) && parser.first) {
+						parser.first = false;
+						parser.current.insert(node, parser.pos);
+					} else
+						parser.current.append(node);
+							
+					parser.current = node;
+				break;
+				case ParseType.UPDATE:
+					if(parser.first) {
+						for(int i=0; i< names.length; i++) {
+							if(names[i] == parser.propname)
+								parser.current.set(parser.propname, values[i]);
+						}
+						parser.first = false;
+					}
+				break;
 			}
-			parser.current = node;
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
 			weak Parser parser = (Parser) user_data;
+			if(parser.type == ParseType.UPDATE) return;
 			parser.current = parser.current.parent;
 		}
 		
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
+			if(parser.type == ParseType.UPDATE) return;
 			string newtext = text.ndup(text_len);
 			Document.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
@@ -56,6 +71,7 @@ namespace XML {
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
+			if(parser.type == ParseType.UPDATE) return;
 			string newtext = passthrough_text.ndup(text_len);
 			Document.Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
@@ -77,17 +93,34 @@ namespace XML {
 			}
 			return true;
 		}
-		public Document.Tag? parse_tag(string foo) {
+		public bool parse_child(Node parent, string foo, int pos) {
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
-			type = ParseType.TAG;
-			current = null;
+			type = ParseType.CHILD;
+			this.pos = pos;
+			this.first = true;
+			current = parent;
 			try {
 				context.parse(foo, foo.size());
 			} catch(MarkupError e) {
 				warning("%s", e.message);
-				return null;
+				return false;
 			}
-			return #result;
+			return true;
+		}
+		public bool update_tag(Document.Tag node, string propname, string foo) {
+			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
+			type = ParseType.UPDATE;
+			current = node;
+			first = true;
+			this.propname = propname;
+			try {
+				context.parse(foo, foo.size());
+			} catch(MarkupError e) {
+				warning("%s", e.message);
+				return false;
+			}
+			return true;
+
 		}
 		private class TestDocument : Object, Document {
 			private Document.Root _root;
@@ -113,14 +146,6 @@ namespace XML {
 """
 			);
 			print("back to string %s\n", parser.document.root.to_string());
-			Node n = parser.parse_tag(
-"""
-<p name="paragraph">
-Sucks
-</p>
-"""
-			);
-			print("a node %s", n.to_string());
 			return 0;
 		}
 	}
