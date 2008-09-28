@@ -84,7 +84,7 @@ namespace GnomenuGtk {
 						values.append(c.active?"true":"false");
 						names.append("draw-as-radio");
 						values.append(c.draw_as_radio?"true":"false");
-						names.append("indonsistent");
+						names.append("inconsistent");
 						values.append(c.inconsistent?"true":"false");
 					}
 				}

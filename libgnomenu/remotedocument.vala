@@ -44,11 +44,11 @@ namespace Gnomenu {
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			weak XML.Node parent = lookup(parentname);
 			weak XML.Node node = lookup(nodename);
-			message("removed %s", nodename);
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			weak XML.Document.Tag node = lookup(nodename) as XML.Document.Tag;
+			message("updated %s", nodename);
 			parser.update_tag(node, propname, remote.QueryNode(nodename, 0));
 		}
 

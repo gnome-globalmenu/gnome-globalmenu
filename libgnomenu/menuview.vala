@@ -39,21 +39,29 @@ namespace Gnomenu {
 		private weak Gtk.Widget create_widget(Document.Widget widget) {
 			Gtk.Widget rt;
 			weak Gtk.Widget gtk = (Gtk.Widget) widget.get_data("gtk");
+			message("creating widget %s", widget.name);
 			if(gtk != null) return gtk;
 			switch(widget.tag) {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
 					message("adding a menu");
 					foreach(weak XML.Node child in widget.children) {
+						message("%s", child.get_type().name());
 						if(child is Document.Widget) {
-							if((child as Document.Widget).tag == "item")
+							switch((child as Document.Widget).tag){
+								case "item":
+								case "check":
+								case "radio":
 								gtk.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+								break;
+							}
 						}
 					}
 					rt = gtk;
 				break;
 				case "item":
 				case "check":
+				case "radio":
 					string label = widget.get("label");
 					Gtk.MenuItem gtk;
 					switch(label) {
@@ -93,6 +101,9 @@ namespace Gnomenu {
 					if(widget.get("sensitive") == "false" ) gtk.sensitive = false; else gtk.sensitive = true;
 					rt = gtk;
 				break;
+				default:
+				message("skipping tag %s", widget.tag);
+				break;
 			}
 			rt.set_data("node", widget);
 			widget.set_data_full("gtk", rt.ref(), g_object_unref);
@@ -118,6 +129,8 @@ namespace Gnomenu {
 						pgtk.insert(create_widget(node) as Gtk.MenuItem, pos);
 					break;
 					case "item":
+					case "check":
+					case "radio":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = create_widget(node);
 					break;
@@ -140,6 +153,8 @@ namespace Gnomenu {
 						pgtk.remove((Gtk.Widget)node.get_data("gtk"));
 					break;
 					case "item":
+					case "check":
+					case "radio":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = null;
 					break;
@@ -154,6 +169,8 @@ namespace Gnomenu {
 					case "menu":
 					break;
 					case "item":
+					case "check":
+					case "radio":
 						Gtk.MenuItem gtk = (Gtk.MenuItem) node.get_data("gtk");
 						switch(prop) {
 							case "label":

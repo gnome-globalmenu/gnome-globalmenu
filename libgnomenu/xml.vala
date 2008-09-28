@@ -103,6 +103,7 @@ namespace XML {
 		}
 		construct {
 			document.updated += (d, n, prop) => {
+				message("%s", is_inside(n).to_string());
 				if(is_inside(n)) this.updated(n, prop);
 			};
 			document.inserted += (d, p, n, pos) => {
