@@ -44,7 +44,7 @@ namespace Gnomenu {
 			document.updated += (f, o, prop) => {
 				if(!(o is Document.Widget)) return;
 				weak Document.Widget node = o as Document.Widget;
-				updated(node.name);
+				updated(node.name, prop);
 			};
 		}
 		public string QueryRoot(int level = -1) {
@@ -60,7 +60,7 @@ namespace Gnomenu {
 			weak Document.Widget node = document.lookup(name) as Document.Widget;
 			node.activate();
 		}
-		public signal void updated(string name);
+		public signal void updated(string name, string prop);
 		public signal void inserted(string parent, string name, int pos);
 		public signal void removed(string parent, string name);
 

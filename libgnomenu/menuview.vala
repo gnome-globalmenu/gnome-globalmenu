@@ -36,22 +36,21 @@ namespace Gnomenu {
 			this.document = document;
 			this.local = true;
 		}
-		private weak Gtk.Widget create_widget(Document.Widget widget) {
+		private weak Gtk.Widget create_widget(Document.Widget node) {
 			Gtk.Widget rt;
-			weak Gtk.Widget gtk = (Gtk.Widget) widget.get_data("gtk");
-			message("creating widget %s", widget.name);
+			weak Gtk.Widget gtk = (Gtk.Widget) node.get_data("gtk");
+			message("creating node %s", node.name);
 			if(gtk != null) return gtk;
-			switch(widget.tag) {
+			switch(node.tag) {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
 					message("adding a menu");
-					foreach(weak XML.Node child in widget.children) {
+					foreach(weak XML.Node child in node.children) {
 						message("%s", child.get_type().name());
 						if(child is Document.Widget) {
 							switch((child as Document.Widget).tag){
 								case "item":
 								case "check":
-								case "radio":
 								gtk.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
 								break;
 							}
@@ -61,52 +60,54 @@ namespace Gnomenu {
 				break;
 				case "item":
 				case "check":
-				case "radio":
-					string label = widget.get("label");
+					string label = node.get("label");
 					Gtk.MenuItem gtk;
 					switch(label) {
 						case "&":
 						gtk = new Gtk.TearoffMenuItem();
+						gtk.activate += menu_item_activated;
+						string[] p = {"visible", "sensitive"};
+						update_properties(gtk, node, p);
 						break;
 						case "|":
 						gtk = new Gtk.SeparatorMenuItem();
+						gtk.activate += menu_item_activated;
+						string[] p = {"visible", "sensitive"};
+						update_properties(gtk, node, p);
 						break;
 						default:
-						switch(widget.tag) {
+						switch(node.tag) {
 							case "check":
-							gtk = new Gtk.CheckMenuItem.with_mnemonic(widget.get("label"));
-							break;
-							case "radio":
-							gtk = new Gtk.RadioMenuItem.with_mnemonic(null, widget.get("label"));
+								gtk = new Gtk.CheckMenuItem.with_mnemonic(node.get("label"));
+								gtk.activate += menu_item_activated;
+								string[] p = {"visible", "sensitive", "label", "active", "inconsistent", "draw-as-radio"};
+								update_properties(gtk, node, p);
 							break;
 							case "item":
-							gtk = new Gtk.MenuItem.with_mnemonic(widget.get("label"));
+								gtk = new Gtk.MenuItem.with_mnemonic(node.get("label"));
+								gtk.activate += menu_item_activated;
+								string[] p = {"visible", "sensitive", "label"};
+								update_properties(gtk, node, p);
 							break;
 						}
 						break;
 					}
 					message("adding a menu item %s", label);
-					foreach(weak XML.Node child in widget.children) {
+					foreach(weak XML.Node child in node.children) {
 						if(child is Document.Widget) {
 							if((child as Document.Widget).tag == "menu")
 								gtk.submenu = create_widget(child as Document.Widget);
 						}
 					}
-					gtk.activate += (o) => {
-						weak Document.Widget widget = (Document.Widget) o.get_data("node");
-						if(widget != null);
-							widget.activate();
-					};
-					if(widget.get("visible") == "false" ) gtk.visible = false; else gtk.visible = true;
-					if(widget.get("sensitive") == "false" ) gtk.sensitive = false; else gtk.sensitive = true;
+
 					rt = gtk;
 				break;
 				default:
-				message("skipping tag %s", widget.tag);
+				message("skipping tag %s", node.tag);
 				break;
 			}
-			rt.set_data("node", widget);
-			widget.set_data_full("gtk", rt.ref(), g_object_unref);
+			rt.set_data("node", node);
+			node.set_data_full("gtk", rt.ref(), g_object_unref);
 			return rt;
 		}
 		private void clean() {
@@ -130,7 +131,6 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
-					case "radio":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = create_widget(node);
 					break;
@@ -154,12 +154,50 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
-					case "radio":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = null;
 					break;
 				}
 			}
+		}
+		private void menu_item_activated (Gtk.MenuItem o) {
+			weak Document.Widget widget = (Document.Widget) o.get_data("node");
+			if(widget != null);
+				widget.activate();
+		}
+		private void update_properties(Gtk.Widget gtk, Document.Widget node, string[] props) {
+			foreach(weak string s in props) {
+				update_property(gtk, node, s);
+			}
+		}
+		private void update_property(Gtk.Widget gtk, Document.Widget node, string prop) {
+				if(gtk is Gtk.MenuItem) {
+					(gtk as Gtk.MenuItem).activate -= menu_item_activated;
+				}
+				switch(prop) {
+					case "label":
+						Gtk.Label label = (gtk as Gtk.Bin).get_child() as Gtk.Label;
+						label.label = node.get("label");
+					break;
+					case "visible":
+					case "sensitive":
+						if(node.get(prop) == "false")
+							gtk.set(prop, false, null);
+						else
+							gtk.set(prop, true, null);
+					break;
+					case "active":
+					case "inconsistent":
+					case "draw-as-radio":
+						if(node.get(prop) == "true")
+							gtk.set(prop, true, null);
+						else
+							gtk.set(prop, false, null);
+					break;
+				}
+				if(gtk is Gtk.MenuItem) {
+					(gtk as Gtk.MenuItem).activate += menu_item_activated;
+				}
 		}
 		private void document_updated(XML.Document document, XML.Node n, string prop) {
 			if(!(n is Document.Widget)) return;
@@ -170,20 +208,8 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
-					case "radio":
 						Gtk.MenuItem gtk = (Gtk.MenuItem) node.get_data("gtk");
-						switch(prop) {
-							case "label":
-								Gtk.Label label = gtk.get_child() as Gtk.Label;
-								label.label = node.get("label");
-							break;
-							case "visible":
-								if(node.get("visible") == "false" ) gtk.visible = false; else gtk.visible = true;
-							break;
-							case "sensible":
-								if(node.get("sensitive") == "false" ) gtk.sensitive = false; else gtk.sensitive = true;
-							break;
-						}
+						update_property(gtk, node, prop);
 					break;
 				}
 			}

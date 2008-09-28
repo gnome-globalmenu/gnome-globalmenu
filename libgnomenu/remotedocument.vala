@@ -34,12 +34,25 @@ namespace Gnomenu {
 			string clients = remote.QueryRoot(0);
 			parser.parse(clients);
 			this.activated += (doc, node) => {
-				remote.Activate(node.name);
+				try {
+					remote.Activate(node.name);
+				} catch(GLib.Error e){
+					warning("%s", e.message);
+				}
 			};
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			weak XML.Node parent = lookup(parentname);
-			parser.parse_child(parent, remote.QueryNode(nodename, 0), pos);
+			try {
+				string s = remote.QueryNode(nodename, 0);
+				if(s == null) {
+					warning("remote document didn't reply");
+					return;
+				}
+				parser.parse_child(parent, s, pos);
+			} catch(GLib.Error e){
+				warning("%s", e.message);
+			}
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			weak XML.Node parent = lookup(parentname);
@@ -49,7 +62,16 @@ namespace Gnomenu {
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			weak XML.Document.Tag node = lookup(nodename) as XML.Document.Tag;
 			message("updated %s", nodename);
-			parser.update_tag(node, propname, remote.QueryNode(nodename, 0));
+			try {
+				string s = remote.QueryNode(nodename, 0);
+				if(s == null) {
+					warning("remote document didn't reply");
+					return;
+				}
+				parser.update_tag(node, propname, s);
+			} catch(GLib.Error e){
+				warning("%s", e.message);
+			}
 		}
 
 		public static int test(string[] args) {

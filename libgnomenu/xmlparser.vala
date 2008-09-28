@@ -47,7 +47,7 @@ namespace XML {
 					if(parser.first) {
 						for(int i=0; i< names.length; i++) {
 							if(names[i] == parser.propname)
-								parser.current.set(parser.propname, values[i]);
+								(parser.current as Document.Tag).set(parser.propname, values[i]);
 						}
 						parser.first = false;
 					}
