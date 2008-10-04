@@ -1,16 +1,16 @@
 diff --git a/gtk/gtkmenubar.c b/gtk/gtkmenubar.c
-index 8be9682..cb5a524 100644
+index 8be9682..1cb979d 100644
 --- a/gtk/gtkmenubar.c
 +++ b/gtk/gtkmenubar.c
-@@ -39,6 +39,7 @@
+@@ -39,7 +39,6 @@
  #include "gtkprivate.h"
  #include "gtkalias.h"
  
-+#include "gnomenu.h"
- 
+-
  #define BORDER_SPACING  0
  #define DEFAULT_IPADDING 1
-@@ -47,7 +48,8 @@
+ 
+@@ -47,7 +46,8 @@
  enum {
    PROP_0,
    PROP_PACK_DIRECTION,
@@ -20,7 +20,7 @@ index 8be9682..cb5a524 100644
  };
  
  typedef struct _GtkMenuBarPrivate GtkMenuBarPrivate;
-@@ -55,6 +57,7 @@ struct _GtkMenuBarPrivate
+@@ -55,6 +55,7 @@ struct _GtkMenuBarPrivate
  {
    GtkPackDirection pack_direction;
    GtkPackDirection child_pack_direction;
@@ -28,7 +28,7 @@ index 8be9682..cb5a524 100644
  };
  
  #define GTK_MENU_BAR_GET_PRIVATE(o)  \
-@@ -73,6 +76,7 @@ static void gtk_menu_bar_size_request      (GtkWidget       *widget,
+@@ -73,6 +74,7 @@ static void gtk_menu_bar_size_request      (GtkWidget       *widget,
  					    GtkRequisition  *requisition);
  static void gtk_menu_bar_size_allocate     (GtkWidget       *widget,
  					    GtkAllocation   *allocation);
@@ -36,16 +36,7 @@ index 8be9682..cb5a524 100644
  static void gtk_menu_bar_paint             (GtkWidget       *widget,
  					    GdkRectangle    *area);
  static gint gtk_menu_bar_expose            (GtkWidget       *widget,
-@@ -90,6 +94,8 @@ G_DEFINE_TYPE (GtkMenuBar, gtk_menu_bar, GTK_TYPE_MENU_SHELL)
- static void
- gtk_menu_bar_class_init (GtkMenuBarClass *class)
- {
-+  gnomenu_gtk_load_symbols();
-+  
-   GObjectClass *gobject_class;
-   GtkWidgetClass *widget_class;
-   GtkMenuShellClass *menu_shell_class;
-@@ -107,6 +113,7 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+@@ -107,6 +109,7 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
    widget_class->size_allocate = gtk_menu_bar_size_allocate;
    widget_class->expose_event = gtk_menu_bar_expose;
    widget_class->hierarchy_changed = gtk_menu_bar_hierarchy_changed;
@@ -53,7 +44,7 @@ index 8be9682..cb5a524 100644
    
    menu_shell_class->submenu_placement = GTK_TOP_BOTTOM;
    menu_shell_class->get_popup_delay = gtk_menu_bar_get_popup_delay;
-@@ -153,6 +160,22 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
+@@ -153,6 +156,22 @@ gtk_menu_bar_class_init (GtkMenuBarClass *class)
  				"move_current", 1,
  				GTK_TYPE_MENU_DIRECTION_TYPE,
  				GTK_MENU_DIR_CHILD);
@@ -76,7 +67,7 @@ index 8be9682..cb5a524 100644
  
    /**
     * GtkMenuBar:pack-direction:
-@@ -235,7 +258,7 @@ gtk_menu_bar_set_property (GObject      *object,
+@@ -235,7 +254,7 @@ gtk_menu_bar_set_property (GObject      *object,
  			   GParamSpec   *pspec)
  {
    GtkMenuBar *menubar = GTK_MENU_BAR (object);
@@ -85,7 +76,7 @@ index 8be9682..cb5a524 100644
    switch (prop_id)
      {
      case PROP_PACK_DIRECTION:
-@@ -244,6 +267,12 @@ gtk_menu_bar_set_property (GObject      *object,
+@@ -244,6 +263,12 @@ gtk_menu_bar_set_property (GObject      *object,
      case PROP_CHILD_PACK_DIRECTION:
        gtk_menu_bar_set_child_pack_direction (menubar, g_value_get_enum (value));
        break;
@@ -98,7 +89,7 @@ index 8be9682..cb5a524 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -257,6 +286,7 @@ gtk_menu_bar_get_property (GObject    *object,
+@@ -257,6 +282,7 @@ gtk_menu_bar_get_property (GObject    *object,
  			   GParamSpec *pspec)
  {
    GtkMenuBar *menubar = GTK_MENU_BAR (object);
@@ -106,7 +97,7 @@ index 8be9682..cb5a524 100644
    
    switch (prop_id)
      {
-@@ -266,6 +296,9 @@ gtk_menu_bar_get_property (GObject    *object,
+@@ -266,6 +292,9 @@ gtk_menu_bar_get_property (GObject    *object,
      case PROP_CHILD_PACK_DIRECTION:
        g_value_set_enum (value, gtk_menu_bar_get_child_pack_direction (menubar));
        break;
@@ -116,7 +107,7 @@ index 8be9682..cb5a524 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -296,6 +329,8 @@ gtk_menu_bar_size_request (GtkWidget      *widget,
+@@ -296,6 +325,8 @@ gtk_menu_bar_size_request (GtkWidget      *widget,
        menu_bar = GTK_MENU_BAR (widget);
        menu_shell = GTK_MENU_SHELL (widget);
        priv = GTK_MENU_BAR_GET_PRIVATE (menu_bar);
@@ -125,7 +116,7 @@ index 8be9682..cb5a524 100644
  
        nchildren = 0;
        children = menu_shell->children;
-@@ -504,6 +539,21 @@ gtk_menu_bar_size_allocate (GtkWidget     *widget,
+@@ -504,6 +535,21 @@ gtk_menu_bar_size_allocate (GtkWidget     *widget,
  }
  
  static void
@@ -147,22 +138,6 @@ index 8be9682..cb5a524 100644
  gtk_menu_bar_paint (GtkWidget    *widget,
                      GdkRectangle *area)
  {
-@@ -655,6 +705,7 @@ add_to_window (GtkWindow  *window,
-     }
- 
-   set_menu_bars (window, g_list_prepend (menubars, menubar));
-+  gnomenu_gtk_bind_menu(window, menubar);
- }
- 
- static void
-@@ -673,6 +724,7 @@ remove_from_window (GtkWindow  *window,
-     }
- 
-   set_menu_bars (window, menubars);
-+  gnomenu_gtk_unbind_menu(window, menubar);
- }
- 
- static void
 diff --git a/gtk/gtkmenushell.c b/gtk/gtkmenushell.c
 index 63e81b3..f533139 100644
 --- a/gtk/gtkmenushell.c

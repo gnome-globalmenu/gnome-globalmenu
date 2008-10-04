@@ -6,6 +6,26 @@ using GtkAQD;
 using XML;
 
 namespace GnomenuGtk {
+	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
+		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
+		if(!(self is Gtk.MenuBar)) return true;
+		Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
+		Gtk.Widget toplevel = self.get_toplevel();
+		if(old_toplevel != null) {
+			unbind_menu(old_toplevel, self);
+		}
+		if(toplevel != null) {
+			bind_menu(toplevel, self);
+		}
+		return true;
+	}
+	[CCode (cname="gtk_module_init")]
+	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
+		message("module loaded");
+		typeof(Gtk.Widget).class_ref();
+		uint signal_id = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
+		Signal.add_emission_hook (signal_id, 0, hook_func, null);
+	}
 	private weak Client client() {
 		return Singleton.instance().client;
 	}
