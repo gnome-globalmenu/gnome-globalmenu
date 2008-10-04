@@ -55,9 +55,14 @@ namespace GnomenuGtk {
 				Gtk.MenuItem item = gtk as Gtk.MenuItem;
 				item.notify["visible"] += item_property_notify;
 				item.notify["sensitive"] += item_property_notify;
+				item.notify["no-show-all"] += item_property_notify;
 				if(!item.visible) {
 					names.append("visible");
 					values.append("false");
+				}
+				if(item.no_show_all) {
+					names.append("no-show-all");
+					values.append("true");
 				}
 				if(!item.sensitive) {
 					names.append("sensitive");

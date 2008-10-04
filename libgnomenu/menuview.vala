@@ -66,13 +66,13 @@ namespace Gnomenu {
 						case "&":
 						gtk = new Gtk.TearoffMenuItem();
 						gtk.activate += menu_item_activated;
-						string[] p = {"visible", "sensitive"};
+						string[] p = {"visible", "sensitive", "no-show-all"};
 						update_properties(gtk, node, p);
 						break;
 						case "|":
 						gtk = new Gtk.SeparatorMenuItem();
 						gtk.activate += menu_item_activated;
-						string[] p = {"visible", "sensitive"};
+						string[] p = {"visible", "sensitive", "no-show-all"};
 						update_properties(gtk, node, p);
 						break;
 						default:
@@ -80,13 +80,13 @@ namespace Gnomenu {
 							case "check":
 								gtk = new Gtk.CheckMenuItem.with_mnemonic(node.get("label"));
 								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "label", "active", "inconsistent", "draw-as-radio"};
+								string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio"};
 								update_properties(gtk, node, p);
 							break;
 							case "item":
 								gtk = new Gtk.MenuItem.with_mnemonic(node.get("label"));
 								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "label"};
+								string[] p = {"visible", "sensitive", "no-show-all", "label"};
 								update_properties(gtk, node, p);
 							break;
 						}
@@ -186,6 +186,7 @@ namespace Gnomenu {
 						else
 							gtk.set(prop, true, null);
 					break;
+					case "no-show-all":
 					case "active":
 					case "inconsistent":
 					case "draw-as-radio":
