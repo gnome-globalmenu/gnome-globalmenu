@@ -6,6 +6,11 @@ using GtkAQD;
 using XML;
 
 namespace GnomenuGtk {
+	[CCode (cname = "_patch_menu_bar")]
+	private extern  void patch_menu_bar();
+	[CCode (cname = "_patch_menu_shell")]
+	private extern  void patch_menu_shell();
+
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
 		if(!(self is Gtk.MenuBar)) return true;
@@ -27,6 +32,8 @@ namespace GnomenuGtk {
 		typeof(Gtk.Widget).class_ref();
 		uint signal_id = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 		Signal.add_emission_hook (signal_id, 0, hook_func, null);
+		patch_menu_shell();
+		patch_menu_bar();
 	}
 	private weak Client client() {
 		return Singleton.instance().client;

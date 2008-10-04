@@ -8,11 +8,21 @@ public class StringChunk {
 	public weak string insert_len(void * buffer, ulong len);
 	public void clear();
 }
+[CCode (cname = "g_object_class_install_property")]
+public static void object_class_install_property  (ObjectClass oclass,
+													 uint property_id,
+													 ParamSpec pspec);
 [CCode (cname = "g_object_add_toggle_ref")]
 public static void object_add_toggle_ref(Object object, ToggleNotify notify, void* data);
 [CCode (cname = "g_object_remove_toggle_ref")]
 public static void object_remove_toggle_ref(Object object, ToggleNotify notify, void* data);
 public static delegate void ToggleNotify (void* data, Object object, bool is_last);
+
+public class ParamSpecBoolean : ParamSpec {
+	[CCode (cname = "g_param_spec_boolean")]
+	public ParamSpecBoolean (string name, string nick, string blurb, bool defaultvalue, ParamFlags flags);
+}
+
 }
 namespace Gdk {
 [CCode (cname = "GDK_WINDOW_XID", cheader_filename="gdk/gdkx.h")]
