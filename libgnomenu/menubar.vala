@@ -53,10 +53,17 @@ namespace Gnomenu {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Gtk.Window window = new Gtk.Window(WindowType.TOPLEVEL);
-			MenuBar menubar = new MenuBar(args[1]);
+			MenuBar menubar = new MenuBar(null);
 			Gtk.Box box = new Gtk.HBox(false, 0);
+			Gtk.Entry entry = new Gtk.Entry();
+			entry.set_text(args[1]);
+			entry.set_data("menu-bar", menubar);
+			entry.activate += (entry) => {
+				MenuBar menubar = (MenuBar) entry.get_data("menu-bar");
+				menubar.xid = entry.get_text();
+			};
 			window.add(box);
-			box.pack_start_defaults(new Gtk.Label("suck"));
+			box.pack_start_defaults(entry);
 			box.pack_start_defaults(menubar);
 			window.show_all();
 			loop.run();
