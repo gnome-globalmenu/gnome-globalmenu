@@ -9,12 +9,14 @@ namespace GnomenuGtk {
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
 		if(!(self is Gtk.MenuBar)) return true;
+		message("%d = %d", (int) ihint.run_type, (int) SignalFlags.RUN_FIRST);
+		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 		Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
 		Gtk.Widget toplevel = self.get_toplevel();
 		if(old_toplevel != null) {
 			unbind_menu(old_toplevel, self);
 		}
-		if(toplevel != null) {
+		if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.TOPLEVEL))) {
 			bind_menu(toplevel, self);
 		}
 		return true;
@@ -114,6 +116,7 @@ namespace GnomenuGtk {
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
+		message("binding menu %s to %s", menu_name, window_name);
 		bind_widget(window);
 		bind_widget(menu, window);
 		window.realize += (window) => {
@@ -128,6 +131,7 @@ namespace GnomenuGtk {
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
+		message("unbinding menu %s to %s", menu_name, window_name);
 		weak Gnomenu.Document.Widget node =document().lookup(menu_name) as Gnomenu.Document.Widget;
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}
