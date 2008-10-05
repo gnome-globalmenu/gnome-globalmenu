@@ -1,4 +1,3 @@
-SUBDIRS = . 
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
@@ -6,6 +5,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS =  \
+	$(LIBGNOMENU_VALA_PKGS) \
 	$(NULL)
 
 BUILT_SOURCES = libgmarkupdoc.vala.stamp
@@ -27,7 +27,7 @@ libgmarkupdoc_la_SOURCES = \
 
 
 gnomenu.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_la_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --library gmarkupdoc  $^
+	$(VALAC) -C  --library gmarkupdoc  $^
 	touch $@
 
 libgmarkupdoc_la_LIBADD = \

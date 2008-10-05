@@ -11,6 +11,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS = \
+	$(LIBGNOMENU_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
 	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--vapidir=$(top_srcdir)/libgnomenu \
@@ -44,12 +45,13 @@ org_gnome_GlobalMenu_Server_SOURCES = \
 	$(NULL)
 
 .vala.stamp: $(org_gnome_GlobalMenu_Server_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) $^
+	$(VALAC) -C  $^
 	touch $@
 
 org_gnome_GlobalMenu_Server_LDADD = \
 		$(LIBGNOMENU_LIBS) \
 		$(top_builddir)/libgnomenu/libgnomenu.la \
+		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
 EXTRA_DIST = .vala.stamp $(org_gnome_GlobalMenu_Server_VALASOURCES) $(service_in_files)

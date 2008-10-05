@@ -1,6 +1,7 @@
 NULL = 
 
 AM_VALAC_FLAGS =  \
+	$(LIBGNOMENU_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
 	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--pkg gmarkupdoc \
@@ -38,7 +39,7 @@ libgnomenu_la_SOURCES = \
 
 
 gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) $(VALAC_FLAGS) --library gnomenu $^
+	$(VALAC) -C --library gnomenu $^
 	touch $@
 
 libgnomenu_la_LIBADD = \
