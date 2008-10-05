@@ -83,6 +83,41 @@ namespace GtkAQD {
 		[NoAccessorMethod]
 		public bool local {get; set;}
 	}
+
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class MenuItem : Gtk.Item, Atk.Implementor, Gtk.Buildable {
+		public weak Gdk.Window event_window;
+		public ushort toggle_size;
+		public ushort accelerator_width;
+		public weak string accel_path;
+		public uint show_submenu_indicator;
+		public uint submenu_placement;
+		public uint submenu_direction;
+		public uint right_justify;
+		public uint timer_from_keypress;
+		public uint from_menubar;
+		public uint timer;
+		public bool get_right_justified ();
+		public weak Gtk.Widget get_submenu ();
+		[CCode (type = "GtkWidget*")]
+		public MenuItem ();
+		[CCode (type = "GtkWidget*")]
+		public MenuItem.with_label (string label);
+		[CCode (type = "GtkWidget*")]
+		public MenuItem.with_mnemonic (string label);
+		public void set_accel_path (string accel_path);
+		public void set_right_justified (bool right_justified);
+		public void set_submenu (Gtk.Widget submenu);
+		public Gtk.Menu submenu { get; set; }
+		[HasEmitter]
+		public virtual signal void activate ();
+		public virtual signal void activate_item ();
+		[HasEmitter]
+		public virtual signal void toggle_size_allocate (int allocation);
+		[HasEmitter]
+		public virtual signal void toggle_size_request (void* requisition);
+		public signal void label_set(Gtk.Label? label);
+	}
 }
 [CCode (cprefix = "Gtk", lower_case_cprefix = "gtk_")]
 namespace GtkCompat {

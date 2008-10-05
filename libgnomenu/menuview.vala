@@ -144,8 +144,14 @@ namespace Gnomenu {
 			weak Document.Widget parent = p as Document.Widget;
 			if(parent != null && node != null) {
 				switch(parent.tag) {
+					case "menubar":
 					case "menu":
-						Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
+						weak Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
+						weak Gtk.MenuItem gtk = (Gtk.MenuItem)node.get_data("gtk");
+						if(gtk != null && gtk.submenu != null) {
+							gtk.submenu.popdown();
+							gtk.submenu = null;
+						}
 						pgtk.remove((Gtk.Widget)node.get_data("gtk"));
 					break;
 					case "item":

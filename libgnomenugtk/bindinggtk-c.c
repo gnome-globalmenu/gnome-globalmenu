@@ -30,6 +30,7 @@ _real_insert (GtkMenuShell *menu_shell,
 
 
 static guint SignalIDInsert = 0;
+static guint SignalIDLabelSet = 0;
 
 void _patch_menu_bar() {
 	GObjectClass * klass =  g_type_class_ref(GTK_TYPE_MENU_BAR);
@@ -63,6 +64,56 @@ void _patch_menu_shell() {
 		  G_TYPE_NONE, 2, GTK_TYPE_WIDGET, G_TYPE_INT);
 	old_real_insert = menu_shell_klass->insert;
 	menu_shell_klass->insert = _real_insert;
+}
+static gboolean menu_item_parent_set_hook(GSignalInvocationHint * hint,
+			int value_count, GValue values[], gpointer data) {
+	GObject * self = g_value_get_object(&values[0]);
+	if(!GTK_IS_WIDGET(self)) return TRUE;
+	GtkWidget * label = NULL;
+	GQueue queue = G_QUEUE_INIT;
+	g_queue_push_tail(&queue, self);
+	while(!g_queue_is_empty(&queue)){
+		GtkWidget* head = g_queue_pop_head(&queue);
+		if(GTK_IS_CONTAINER(head)) {
+			GList * list = gtk_container_get_children(head);
+			GList * node;
+			for(node = list; node; node = node->next) {
+				g_queue_push_tail(&queue, node->data);
+			}
+		}
+		if(GTK_IS_LABEL(head)) {
+			g_queue_clear(&queue);
+			label = head;
+			break;
+		}
+	}
+	GObject * parent = gtk_widget_get_parent(self);
+	for(; parent; parent = gtk_widget_get_parent(parent)) {
+		if(GTK_IS_MENU_ITEM(parent)) {
+			if(label != g_object_get_data(parent, "label")) {
+				g_object_set_data(parent, "label", label);
+				g_signal_emit(parent, SignalIDLabelSet, 0, label);
+			}
+			break;
+		}
+	}
+	return TRUE;
+}
+void _patch_menu_item() {
+	GObjectClass * klass =  g_type_class_ref(GTK_TYPE_MENU_ITEM);
+	GtkMenuItemClass * menu_tem_klass = (GtkMenuItemClass*)klass;
+	SignalIDLabelSet =
+		g_signal_new (("label-set"),
+		  G_OBJECT_CLASS_TYPE (klass),
+		  G_SIGNAL_RUN_FIRST,
+		  0, 
+		  NULL, NULL,
+		  gtk_marshal_VOID__POINTER,
+		  G_TYPE_NONE, 1, G_TYPE_POINTER);
+	g_signal_add_emission_hook(
+			g_signal_lookup("parent-set", GTK_TYPE_WIDGET),
+			0,
+			menu_item_parent_set_hook, NULL, NULL);
 }
 static void
 _set_property (GObject      *object,

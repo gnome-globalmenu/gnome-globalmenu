@@ -30,6 +30,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 				menubar.switch(xid);
 			}
 		};
+		this.can_focus = false;
 	}
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("");

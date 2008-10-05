@@ -52,7 +52,7 @@ namespace GnomenuGtk {
 			names.append("name");
 			values.append(name);
 			if(gtk is Gtk.MenuItem) { 
-				Gtk.MenuItem item = gtk as Gtk.MenuItem;
+				GtkAQD.MenuItem item = gtk as GtkAQD.MenuItem;
 				item.notify["visible"] += item_property_notify;
 				item.notify["sensitive"] += item_property_notify;
 				item.notify["no-show-all"] += item_property_notify;
@@ -80,6 +80,7 @@ namespace GnomenuGtk {
 						values.append(l.label);
 					} else 
 						values.append("unknown");
+					item.label_set += item_label_set;
 					if(gtk is Gtk.CheckMenuItem) {
 						Gtk.CheckMenuItem c = gtk as Gtk.CheckMenuItem;
 						gtk.notify["active"] += item_property_notify;
@@ -154,6 +155,14 @@ namespace GnomenuGtk {
 				val = i.to_string();
 			}
 			node.set(pspec.name, val);
+		}
+		private void item_label_set(Gtk.Widget w, Gtk.Label? l) {
+			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
+			if(l!= null) {
+				l.notify["label"] -= item_property_notify;
+				l.notify["label"] += item_property_notify;
+				node.set("label", l.label);
+			}
 		}
 	}
 	private weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {

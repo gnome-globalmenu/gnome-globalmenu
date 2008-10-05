@@ -10,20 +10,23 @@ namespace GnomenuGtk {
 	private extern  void patch_menu_bar();
 	[CCode (cname = "_patch_menu_shell")]
 	private extern  void patch_menu_shell();
+	[CCode (cname = "_patch_menu_item")]
+	private extern  void patch_menu_item();
 
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
-		if(!(self is Gtk.MenuBar)) return true;
-		message("%d = %d", (int) ihint.run_type, (int) SignalFlags.RUN_FIRST);
-		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
-		Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
-		Gtk.Widget toplevel = self.get_toplevel();
-		if(old_toplevel != null) {
-			unbind_menu(old_toplevel, self);
-		}
-		if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.TOPLEVEL))) {
-			bind_menu(toplevel, self);
-		}
+		if(self is Gtk.MenuBar) {
+			message("%d = %d", (int) ihint.run_type, (int) SignalFlags.RUN_FIRST);
+			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
+			Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
+			Gtk.Widget toplevel = self.get_toplevel();
+			if(old_toplevel != null) {
+				unbind_menu(old_toplevel, self);
+			}
+			if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.TOPLEVEL))) {
+				bind_menu(toplevel, self);
+			}
+		} 
 		return true;
 	}
 	[CCode (cname="gtk_module_init")]
@@ -43,6 +46,7 @@ namespace GnomenuGtk {
 		typeof(Gtk.Widget).class_ref();
 		uint signal_id = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 		Signal.add_emission_hook (signal_id, 0, hook_func, null);
+		patch_menu_item();
 		patch_menu_shell();
 		patch_menu_bar();
 	}

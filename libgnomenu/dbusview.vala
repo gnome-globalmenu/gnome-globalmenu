@@ -58,7 +58,10 @@ namespace Gnomenu {
 		}
 		public void Activate(string name){
 			weak Document.Widget node = document.lookup(name) as Document.Widget;
-			node.activate();
+			if(node != null)
+				node.activate();
+			else 
+				message("node %s exeptionally disappeared", name);
 		}
 		public signal void updated(string name, string prop);
 		public signal void inserted(string parent, string name, int pos);

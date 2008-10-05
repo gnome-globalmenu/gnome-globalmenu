@@ -83,14 +83,19 @@ namespace Gnomenu {
 			MenuBar menubar = new MenuBar();
 			Gtk.Box box = new Gtk.HBox(false, 0);
 			Gtk.Entry entry = new Gtk.Entry();
+			Gtk.Button button = new Gtk.Button.with_label("Go");
 			entry.set_text(args[1]);
-			entry.set_data("menu-bar", menubar);
-			entry.activate += (entry) => {
-				MenuBar menubar = (MenuBar) entry.get_data("menu-bar");
+			button.set_data("menu-bar", menubar);
+			button.set_data("entry", entry);
+			button.clicked += (button) => {
+				MenuBar menubar = (MenuBar) button.get_data("menu-bar");
+				Gtk.Entry entry = (Gtk.Entry) button.get_data("entry");
 				menubar.switch(entry.get_text());
 			};
+			window.accept_focus = false;
 			window.add(box);
 			box.pack_start_defaults(entry);
+			box.pack_start_defaults(button);
 			box.pack_start_defaults(menubar);
 			window.show_all();
 			loop.run();
