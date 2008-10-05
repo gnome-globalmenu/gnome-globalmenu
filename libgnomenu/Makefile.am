@@ -5,7 +5,6 @@ AM_VALAC_FLAGS =  \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
 	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--pkg gmarkupdoc \
-	--pkg gtkcompat \
 	$(NULL)
 
 AM_CPPFLAGS = \
