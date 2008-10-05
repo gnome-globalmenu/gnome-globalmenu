@@ -1,0 +1,5 @@
+#! /bin/sh
+
+killall bonobo-activation-server
+exec env BONOBO_ACTIVATION_PATH=$PWD /usr/libexec/bonobo-activation-server --register-server --ac-activate
+
