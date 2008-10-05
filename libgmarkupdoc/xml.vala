@@ -72,7 +72,11 @@ namespace XML {
 		}
 	}
 	public class Section: Object, Document {
-		public Document document  {get; construct;}
+		private Document _document;
+		public weak Document document  {
+			get { return _document;} 
+			construct {_document = value;}
+		}
 		private weak XML.Node _root;
 		private XML.Node pseudo_root; 
 		private bool invalid;

@@ -84,3 +84,101 @@ namespace GtkAQD {
 		public bool local {get; set;}
 	}
 }
+[CCode (cprefix = "Gtk", lower_case_cprefix = "gtk_")]
+namespace GtkCompat {
+	[CCode (cheader_filename = "gtk/gtk.h", cname="GtkNotebook")]
+	public class Notebook : Gtk.Container, Atk.Implementor, Gtk.Buildable {
+		public weak Gtk.NotebookPage cur_page;
+		public weak GLib.List children;
+		public weak GLib.List first_tab;
+		public weak Gtk.Widget menu;
+		public weak Gdk.Window event_window;
+		public uint timer;
+		public uint in_child;
+		public uint click_child;
+		public uint button;
+		public uint need_timer;
+		public uint child_has_focus;
+		public uint have_visible_child;
+		public uint focus_out;
+		public uint has_before_previous;
+		public uint has_before_next;
+		public uint has_after_previous;
+		public uint has_after_next;
+		public int append_page (Gtk.Widget child, Gtk.Widget? tab_label);
+		public int append_page_menu (Gtk.Widget child, Gtk.Widget tab_label, Gtk.Widget menu_label);
+		public int get_current_page ();
+		public void* get_group ();
+		public weak Gtk.Widget get_menu_label (Gtk.Widget child);
+		public weak string get_menu_label_text (Gtk.Widget child);
+		public int get_n_pages ();
+		public weak Gtk.Widget get_nth_page (int page_num);
+		public bool get_scrollable ();
+		public bool get_show_border ();
+		public bool get_show_tabs ();
+		public bool get_tab_detachable (Gtk.Widget child);
+		public weak Gtk.Widget get_tab_label (Gtk.Widget child);
+		public weak string get_tab_label_text (Gtk.Widget child);
+		public Gtk.PositionType get_tab_pos ();
+		public bool get_tab_reorderable (Gtk.Widget child);
+		public int insert_page_menu (Gtk.Widget child, Gtk.Widget tab_label, Gtk.Widget menu_label, int position);
+		[CCode (type = "GtkWidget*")]
+		public Notebook ();
+		public void next_page ();
+		public void popup_disable ();
+		public void popup_enable ();
+		public int prepend_page (Gtk.Widget child, Gtk.Widget tab_label);
+		public int prepend_page_menu (Gtk.Widget child, Gtk.Widget tab_label, Gtk.Widget menu_label);
+		public void prev_page ();
+		public void query_tab_label_packing (Gtk.Widget child, bool expand, bool fill, Gtk.PackType pack_type);
+		public void remove_page (int page_num);
+		public void reorder_child (Gtk.Widget child, int position);
+		public void set_current_page (int page_num);
+		public void set_group (void* group);
+		public void set_menu_label (Gtk.Widget child, Gtk.Widget menu_label);
+		public void set_menu_label_text (Gtk.Widget child, string menu_text);
+		public void set_scrollable (bool scrollable);
+		public void set_show_border (bool show_border);
+		public void set_show_tabs (bool show_tabs);
+		public void set_tab_detachable (Gtk.Widget child, bool detachable);
+		public void set_tab_label (Gtk.Widget child, Gtk.Widget tab_label);
+		public void set_tab_label_packing (Gtk.Widget child, bool expand, bool fill, Gtk.PackType pack_type);
+		public void set_tab_label_text (Gtk.Widget child, string tab_text);
+		public void set_tab_pos (Gtk.PositionType pos);
+		public void set_tab_reorderable (Gtk.Widget child, bool reorderable);
+		public static void set_window_creation_hook (Gtk.NotebookWindowCreationFunc func, void* data, GLib.DestroyNotify destroy);
+		public virtual int insert_page (Gtk.Widget child, Gtk.Widget tab_label, int position);
+		public int page_num(Gtk.Widget child);
+		[NoAccessorMethod]
+		public bool enable_popup { get; set; }
+		public void* group { get; set; }
+		[NoAccessorMethod]
+		public int group_id { get; set; }
+		[NoAccessorMethod]
+		public bool homogeneous { get; set; }
+		[NoAccessorMethod]
+		public int page { get; set; }
+		public bool scrollable { get; set; }
+		public bool show_border { get; set; }
+		public bool show_tabs { get; set; }
+		[NoAccessorMethod]
+		public uint tab_border { set; }
+		[NoAccessorMethod]
+		public uint tab_hborder { get; set; }
+		public Gtk.PositionType tab_pos { get; set; }
+		[NoAccessorMethod]
+		public uint tab_vborder { get; set; }
+		public virtual signal bool change_current_page (int offset);
+		public virtual signal weak Gtk.Notebook create_window (Gtk.Widget page, int x, int y);
+		public virtual signal bool focus_tab (Gtk.NotebookTab type);
+		public virtual signal void move_focus_out (Gtk.DirectionType direction);
+		public virtual signal void page_added (Gtk.Widget p0, uint p1);
+		public virtual signal void page_removed (Gtk.Widget p0, uint p1);
+		public virtual signal void page_reordered (Gtk.Widget p0, uint p1);
+		public virtual signal bool reorder_tab (Gtk.DirectionType direction, bool move_to_last);
+		public virtual signal bool select_page (bool move_focus);
+		public virtual signal void switch_page (void* page, uint page_num);
+	}
+
+
+}

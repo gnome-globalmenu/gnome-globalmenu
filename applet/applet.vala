@@ -15,9 +15,10 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	public Applet() {
 	}
 	construct {
-		menubar = new Gnomenu.MenuBar(null);
+		menubar = new Gnomenu.MenuBar();
 		Gtk.Box box = new Gtk.HBox(false, 0);
 		Gtk.Label label = new Gtk.Label("label");
+		menubar.show_tabs = false;
 		box.pack_start_defaults(label);
 		box.pack_start_defaults(menubar);
 		this.add(box);
@@ -26,7 +27,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			weak Wnck.Window window = screen.get_active_window();
 			if(window != previous_window) {
 				string xid = window.get_xid().to_string();
-				menubar.xid = xid;
+				menubar.switch(xid);
 			}
 		};
 	}
