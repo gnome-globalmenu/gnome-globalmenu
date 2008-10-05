@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = vapi-compat libgmarkupdoc libgnomenu server navigator po libgnomenugtk tests
+SUBDIRS = vapi-compat libgmarkupdoc libgnomenu server navigator libgnomenugtk applet tests po
 
 AM_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \

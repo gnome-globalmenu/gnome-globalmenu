@@ -23,28 +23,6 @@ AC_SUBST(VALAC)
 AC_SUBST(VALAC_FLAGS)
 AC_SUBST(AM_VALAC_FLAGS)
 
-dnl begin: tracing
-AC_MSG_CHECKING(--enable-tracing arguement)
-AC_ARG_ENABLE(tracing,
-	[	--enable-tracing Enable many debugging information (1,2,no)],
-	[	enable_tracing=$enableval ],
-	[	enable_tracing="1"	])
-AC_MSG_RESULT($enable_tracing)
-
-if test "$enable_tracing" == "no"; then
-	AC_DEFINE([ENABLE_TRACING], 0, [enable tracing])
-fi
-if test "$enable_tracing" == "1"; then
-	AC_DEFINE([ENABLE_TRACING], 1, [enable tracing])
-fi
-if test "$enable_tracing" == "2"; then
-	AC_DEFINE([ENABLE_TRACING], 2, [enable tracing])
-fi
-if test "$enable_tracing" == "3"; then
-	AC_DEFINE([ENABLE_TRACING], 3, [enable tracing])
-fi
-dnl end:tracing
-
 dnl begin:libgnomenu
 PKG_CHECK_MODULES(LIBGNOMENU, [glib-2.0 dbus-glib-1 gtk+-2.0])
 AC_SUBST(LIBGNOMENU_CFLAGS)
@@ -53,13 +31,29 @@ LIBGNOMENU_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
 AC_SUBST(LIBGNOMENU_VALA_PKGS)
 dnl end:libgnomenu
 
-dnl begin:tests
-PKG_CHECK_MODULES(TESTS, [glib-2.0 dbus-glib-1 gtk+-2.0])
-AC_SUBST(TESTS_CFLAGS)
-AC_SUBST(TESTS_LIBS)
-TESTS_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(TESTS_VALA_PKGS)
-dnl end:libgnomenu
+dnl begin:applet
+AC_MSG_CHECKING(--enable-gnome-applet argument)
+AC_ARG_ENABLE(gnome-applet,
+	[	--enable-gnome-applet	Include gnome-applet interface ],
+	[	enable_gnome_applet=$enableval ],
+	[	enable_gnome_applet="yes" ])
+AC_DEFINE([ENABLE_PANEL_APPLET], [], [enable gnome applet])
+AM_CONDITIONAL([ENABLE_PANEL_APPLET], [test "$enable_gnome_applet" = "yes" ])
+AC_MSG_RESULT($enable_gnome_applet)
+
+if test "$enable_gnome_applet" = "yes"; then
+PKG_CHECK_MODULES(GLOBAL_MENU_APPLET, [glib-2.0 dbus-glib-1 gtk+-2.0 libwnck-1.0 libpanelapplet-2.0])
+fi
+AC_SUBST(GLOBAL_MENU_APPLET_CFLAGS)
+AC_SUBST(GLOBAL_MENU_APPLET_LIBS)
+GLOBAL_MENU_APPLET_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg libpanelapplet-2.0"
+AC_SUBST(GLOBAL_MENU_APPLET_VALA_PKGS)
+
+BONOBO_SERVER_DIR="$libdir/bonobo/servers"
+AC_SUBST(BONOBO_SERVER_DIR)
+AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir for BONOBO is])
+
+dnl end:applet
 
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
@@ -95,5 +89,6 @@ libgnomenugtk/Makefile
 server/Makefile
 navigator/Makefile
 tests/Makefile
+applet/Makefile
 po/Makefile.in
 )
