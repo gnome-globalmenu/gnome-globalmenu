@@ -35,6 +35,7 @@ namespace GnomenuGtk {
 		switch(Environment.get_prgname()) {
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
+			case "gdm-user-switch-applet":
 			message("Quirks are found. Skipping the application");
 			return;
 			break;
