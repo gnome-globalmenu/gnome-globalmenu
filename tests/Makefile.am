@@ -1,4 +1,9 @@
-LDADD = $(builddir)/../libgnomenu.la
+NULL = 
+LDADD =  \
+$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
+$(top_builddir)/libgnomenu/libgnomenu.la \
+$(NULL)
+
 CLASSES = 
 CLASSES += XML_Parser 
 CLASSES += Gnomenu_Client

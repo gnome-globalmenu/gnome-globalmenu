@@ -94,6 +94,6 @@ libgnomenu/Makefile
 libgnomenu/gtk/Makefile
 server/Makefile
 navigator/Makefile
-libgnomenu/tests/Makefile
+tests/Makefile
 po/Makefile.in
 )

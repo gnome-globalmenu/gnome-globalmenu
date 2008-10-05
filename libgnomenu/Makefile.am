@@ -1,5 +1,4 @@
 SUBDIRS = . 
-SUBDIRS += tests
 SUBDIRS += gtk 
 
 AM_VALAC_FLAGS =  \
