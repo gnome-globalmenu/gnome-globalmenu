@@ -33,4 +33,4 @@ gnomenu_navigator_LDADD = \
 		$(builddir)/../libgnomenu.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp	
+EXTRA_DIST = .vala.stamp	$(gnomenu_navigator_VALASOURCES)

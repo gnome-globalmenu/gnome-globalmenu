@@ -12,4 +12,4 @@ BUILT_SOURCES = $(CLASSES:%=%.c)
 $(BUILT_SOURCES): test.c
 	cpp -D__class_test=`echo $@ | awk -v FS=. '{printf "%s_test", tolower($$1);}'` $^ $@
 
-extra_DIST = test.c
+EXTRA_DIST = test.c

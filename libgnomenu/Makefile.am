@@ -42,4 +42,4 @@ libgnomenu_la_LIBADD = \
 		$(LIBGNOMENU_LIBS) \
 		$(NULL)
 
-EXTRA_DIST = libgnomenu.vala.stamp	
+EXTRA_DIST = libgnomenu.vala.stamp $(libgnomenu_la_VALASOURCES)

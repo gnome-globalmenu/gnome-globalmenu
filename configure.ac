@@ -67,7 +67,7 @@ AC_SUBST(GNOME_GLOBALMENU_LOCALEDIR)
 dnl end:gettext
 
 dnl dbus
-DBUS_SERVICES_DIR="$DATADIR/dbus-1/services"
+DBUS_SERVICES_DIR="$datadir/dbus-1/services"
 AC_SUBST(DBUS_SERVICES_DIR)
 AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
 dnl dubs

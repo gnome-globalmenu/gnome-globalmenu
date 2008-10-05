@@ -40,4 +40,5 @@ org_gnome_GlobalMenu_Server_LDADD = \
 		$(builddir)/../libgnomenu.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp	
+EXTRA_DIST = .vala.stamp $(org_gnome_GlobalMenu_Server_VALASOURCES) $(service_in_files)
+DISTCLEANFILES = $(service_DATA)
