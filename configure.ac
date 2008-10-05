@@ -15,8 +15,13 @@ AC_HEADER_STDC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
-AC_PATH_PROG(VALAC, valac, valac, [`pwd`/vala$PATH_SEPARATOR$PATH])
+AC_PATH_PROG(VALAC_BIN, valac, valac, [`pwd`/vala$PATH_SEPARATOR$PATH])
+VALAC='$(VALAC_BIN) $(VALAC_FLAGS)'
+VALAC_FLAGS='--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'
+AC_SUBST(VALAC_BIN)
 AC_SUBST(VALAC)
+AC_SUBST(VALAC_FLAGS)
+AC_SUBST(AM_VALAC_FLAGS)
 
 dnl begin: tracing
 AC_MSG_CHECKING(--enable-tracing arguement)
@@ -83,6 +88,8 @@ GNOME_DOC_INIT
 
 AC_OUTPUT(
 Makefile
+vapi-compat/Makefile
+libgmarkupdoc/Makefile
 libgnomenu/Makefile
 libgnomenu/gtk/Makefile
 server/Makefile

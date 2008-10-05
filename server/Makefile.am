@@ -4,11 +4,23 @@ AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
+	-I$(top_srcdir)/libgmarkupdoc \
+	-I$(top_builddir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
 	-I$(top_builddir)/libgnomenu \
 	$(NULL)
 
+AM_VALAC_FLAGS = \
+	--vapidir=$(top_srcdir)/libgmarkupdoc \
+	--vapidir=$(top_builddir)/libgmarkupdoc \
+	--vapidir=$(top_srcdir)/libgnomenu \
+	--vapidir=$(top_builddir)/libgnomenu  \
+	--pkg=gnomenu  \
+	--pkg=gmarkupdoc  \
+	$(NULL)
+
 BUILT_SOURCES = .vala.stamp
+
 
 org_gnome_GlobalMenu_Server_VALASOURCES = \
 	server.vala \
@@ -32,7 +44,7 @@ org_gnome_GlobalMenu_Server_SOURCES = \
 	$(NULL)
 
 .vala.stamp: $(org_gnome_GlobalMenu_Server_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(top_srcdir)/libgnomenu --vapidir=$(top_builddir)/libgnomenu --pkg gnomenu --pkg valacompat $^
+	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) $^
 	touch $@
 
 org_gnome_GlobalMenu_Server_LDADD = \

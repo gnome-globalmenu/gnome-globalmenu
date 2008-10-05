@@ -1,8 +1,17 @@
 SUBDIRS = . 
 SUBDIRS += tests
 SUBDIRS += gtk 
+
+AM_VALAC_FLAGS =  \
+	--vapidir=$(top_srcdir)/libgmarkupdoc \
+	--vapidir=$(top_builddir)/libgmarkupdoc \
+	--pkg gmarkupdoc \
+	$(NULL)
+
 AM_CPPFLAGS = \
 	-g \
+	-I$(top_srcdir)/libgmarkupdoc \
+	-I$(top_builddir)/libgmarkupdoc \
 	$(LIBGNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	$(NULL)
@@ -14,8 +23,6 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		xmlparser.vala \
-		xml.vala \
 		client.vala \
 		document.vala \
 		listview.vala \
@@ -33,11 +40,12 @@ libgnomenu_la_SOURCES = \
 
 
 gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(srcdir) --library gnomenu --pkg valacompat $^
+	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) $(VALAC_FLAGS) --library gnomenu $^
 	touch $@
 
 libgnomenu_la_LIBADD = \
 		$(LIBGNOMENU_LIBS) \
+		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
 EXTRA_DIST = libgnomenu.vala.stamp $(libgnomenu_la_VALASOURCES)
