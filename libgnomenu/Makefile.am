@@ -1,5 +1,4 @@
-SUBDIRS = . 
-SUBDIRS += gtk 
+NULL = 
 
 AM_VALAC_FLAGS =  \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \

@@ -91,7 +91,7 @@ Makefile
 vapi-compat/Makefile
 libgmarkupdoc/Makefile
 libgnomenu/Makefile
-libgnomenu/gtk/Makefile
+libgnomenugtk/Makefile
 server/Makefile
 navigator/Makefile
 tests/Makefile
