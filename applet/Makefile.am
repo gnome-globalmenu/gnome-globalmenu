@@ -36,7 +36,7 @@ libexec_PROGRAMS = \
 	GlobalMenu.PanelApplet \
 	$(NULL)
 
-serverdir = $(BONOBO_SERVERS_DIR)
+serverdir = $(BONOBO_SERVER_DIR)
 server_in_files = GlobalMenu_PanelApplet.server.in
 server_DATA = $(server_in_files:.server.in=.server)
 
@@ -59,4 +59,5 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp	$(GlobalMenu_PanelApplet_VALASOURCES)
+EXTRA_DIST = .vala.stamp $(GlobalMenu_PanelApplet_VALASOURCES) $(server_in_files)
+DISTCLEANFILES = $(server_DATA)
