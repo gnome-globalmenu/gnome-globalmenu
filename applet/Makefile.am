@@ -41,7 +41,7 @@ server_in_files = GlobalMenu_PanelApplet.server.in
 server_DATA = $(server_in_files:.server.in=.server)
 
 $(server_DATA): $(server_in_files) Makefile
-	sed -e "s|@LOCATION@|$(libexecdir)/$(libexec_PROGRAMS)|" $< > $@
+	sed -e "s|@LOCATION@|$(libexecdir)|" $< > $@
 
 GlobalMenu_PanelApplet_SOURCES = \
 	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \

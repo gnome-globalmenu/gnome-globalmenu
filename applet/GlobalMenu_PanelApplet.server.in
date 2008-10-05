@@ -1,6 +1,6 @@
 <oaf_info>
   <oaf_server iid="OAFIID:GlobalMenu_PanelApplet_Factory" type="exe"
-    location="@LOCATION@">
+    location="@LOCATION@/GlobalMenu.PanelApplet">
     <oaf_attribute name="repo_ids" type="stringv">
       <item value="IDL:Bonobo/GenericFactory:1.0"/>
       <item value="IDL:Bonobo/Unknown:1.0"/>

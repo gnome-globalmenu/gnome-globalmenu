@@ -29,6 +29,16 @@ namespace GnomenuGtk {
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 		message("module loaded");
+		if(Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null) {
+			message("GTK_MENUBAR_NO_MAC is set. Skipping the application");
+		}
+		switch(Environment.get_prgname()) {
+			case "gnome-panel":
+			case "GlobalMenu.PanelApplet":
+			message("Quirks are found. Skipping the application");
+			return;
+			break;
+		}
 		typeof(Gtk.Widget).class_ref();
 		uint signal_id = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 		Signal.add_emission_hook (signal_id, 0, hook_func, null);
