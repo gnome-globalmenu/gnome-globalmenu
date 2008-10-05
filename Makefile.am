@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = libgnomenu navigator po
+SUBDIRS = libgnomenu server navigator po
 
 AM_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \

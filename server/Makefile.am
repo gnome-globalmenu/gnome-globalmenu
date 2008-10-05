@@ -4,8 +4,8 @@ AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
-	-I$(srcdir)/.. \
-	-I$(builddir)/.. \
+	-I$(top_srcdir)/libgnomenu \
+	-I$(top_builddir)/libgnomenu \
 	$(NULL)
 
 BUILT_SOURCES = .vala.stamp
@@ -32,12 +32,12 @@ org_gnome_GlobalMenu_Server_SOURCES = \
 	$(NULL)
 
 .vala.stamp: $(org_gnome_GlobalMenu_Server_VALASOURCES)
-	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(srcdir)/.. --vapidir=$(builddir)/.. --pkg gnomenu --pkg valacompat $^
+	$(VALAC) -C $(LIBGNOMENU_VALA_PKGS) --vapidir=$(top_srcdir)/libgnomenu --vapidir=$(top_builddir)/libgnomenu --pkg gnomenu --pkg valacompat $^
 	touch $@
 
 org_gnome_GlobalMenu_Server_LDADD = \
 		$(LIBGNOMENU_LIBS) \
-		$(builddir)/../libgnomenu.la \
+		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(NULL)
 
 EXTRA_DIST = .vala.stamp $(org_gnome_GlobalMenu_Server_VALASOURCES) $(service_in_files)
