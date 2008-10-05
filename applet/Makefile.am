@@ -8,6 +8,11 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
 	-I$(top_builddir)/libgnomenu \
+	-DPREFIX=\"$(prefix)\" \
+	-DSYSCONFDIR=\"$(sysconfdir)\" \
+	-DDATADIR=\"$(datadir)\" \
+	-DLIBDIR=\"$(libdir)\" \
+	-DWNCK_I_KNOW_THIS_IS_UNSTABLE
 	$(NULL)
 
 AM_VALAC_FLAGS = \
@@ -37,10 +42,10 @@ server_DATA = $(server_in_files:.server.in=.server)
 $(server_DATA): $(server_in_files) Makefile
 	sed -e "s|@LOCATION@|$(libexecdir)/$(libexec_PROGRAMS)|" $< > $@
 
-
 GlobalMenu_PanelApplet_SOURCES = \
 	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \
 	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.h) \
+	applet-c.c \
 	$(NULL)
 
 .vala.stamp: $(GlobalMenu_PanelApplet_VALASOURCES)
