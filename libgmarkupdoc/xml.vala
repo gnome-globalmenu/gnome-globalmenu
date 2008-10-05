@@ -49,7 +49,7 @@ namespace XML {
 			if(freezed <= 0)
 			document.removed(this, node);
 			node.parent = null;
-			message("ref count = %u", node.ref_count);
+			//message("ref count = %u", node.ref_count);
 			node.unref();
 		}
 		public int index(Node node) {
@@ -73,11 +73,20 @@ namespace XML {
 	}
 	public class Section: Object, Document {
 		public Document document  {get; construct;}
-		public weak XML.Node root {get {return pseudo_root;}}
-		public weak XML.Node pseudo_root {get; construct;}	
+		private weak XML.Node _root;
+		private XML.Node pseudo_root; 
+		public weak XML.Node root {
+			get {return _root;}
+		}
+		public weak XML.Node set_root {
+			construct {
+				_root = value;
+				object_add_toggle_ref(_root, toggle_ref_notify, this);
+			}
+		}
 		public Section(Document document, XML.Node root) {
 			this.document = document;
-			this.pseudo_root = root;
+			this.set_root = root;
 		}
 		private bool is_inside(XML.Node node) {
 			for(weak XML.Node n = node;
@@ -103,7 +112,7 @@ namespace XML {
 		}
 		construct {
 			document.updated += (d, n, prop) => {
-				message("%s", is_inside(n).to_string());
+				//message("%s", is_inside(n).to_string());
 				if(is_inside(n)) this.updated(n, prop);
 			};
 			document.inserted += (d, p, n, pos) => {
@@ -112,6 +121,12 @@ namespace XML {
 			document.removed += (d, p, n) => {
 				if(is_inside(p)) this.removed(p, n);
 			};
+			pseudo_root = new Document.Root(document);
+		}
+		private void toggle_ref_notify(GLib.Object object, bool is_last) {
+			if(!is_last) return;
+			object_remove_toggle_ref(object, toggle_ref_notify, this);
+			_root = pseudo_root;
 		}
 	}
 	public interface Document: Object {

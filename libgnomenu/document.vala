@@ -39,11 +39,11 @@ namespace Gnomenu {
 				(this.document as Document).treestore.remove(this.iter);
 			}
 			~Widget(){
-				message("Widget %s is removed", name);
+				//debug("Widget %s is removed", name);
 			}
 			public virtual void activate() {
 				(document as Document).activated(this);
-				message("Widget %s is activated", name);
+				//debug("Widget %s is activated", name);
 			}
 		}
 		public Gtk.TreeStore treestore;

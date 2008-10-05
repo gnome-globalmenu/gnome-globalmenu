@@ -9,6 +9,8 @@ namespace Gnomenu {
 		private Parser parser;
 		private dynamic DBus.Object remote;
 		private dynamic DBus.Connection conn;
+		public bool invalid {get; set;}
+		dynamic DBus.Object dbus;
 		private XML.Node _root;
 		public XML.Node root {
 			get {
@@ -23,16 +25,23 @@ namespace Gnomenu {
 			this.bus = bus;
 		}
 		construct {
+			invalid = false;
 			_root = new XML.Document.Root(this);
 			conn = Bus.get(DBus.BusType.SESSION);
+			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
+			dbus.NameOwnerChanged += name_owner_changed;
+
 			remote = conn.get_object(bus, path, "org.gnome.GlobalMenu.Document");
 			remote.Inserted += remote_inserted;
 			remote.Removed += remote_removed;
 			remote.Updated += remote_updated;
 			parser = new XML.Parser(this);
-
-			string clients = remote.QueryRoot(0);
-			parser.parse(clients);
+			try {
+				string xml = remote.QueryRoot(0);
+				parser.parse(xml);
+			} catch (GLib.Error e) {
+				warning("%s", e.message);
+			}
 			this.activated += (doc, node) => {
 				try {
 					remote.Activate(node.name);
@@ -42,6 +51,7 @@ namespace Gnomenu {
 			};
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
+			if(invalid) return;
 			weak XML.Node parent = lookup(parentname);
 			try {
 				string s = remote.QueryNode(nodename, 0);
@@ -55,13 +65,14 @@ namespace Gnomenu {
 			}
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
+			if(invalid) return;
 			weak XML.Node parent = lookup(parentname);
 			weak XML.Node node = lookup(nodename);
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
+			if(invalid) return;
 			weak XML.Document.Tag node = lookup(nodename) as XML.Document.Tag;
-			message("updated %s", nodename);
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
@@ -70,7 +81,28 @@ namespace Gnomenu {
 				}
 				parser.update_tag(node, propname, s);
 			} catch(GLib.Error e){
-				warning("%s", e.message);
+				warning("%s %s", e.domain.to_string(), e.message);
+			}
+		}
+		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
+			if(bus != this.bus) return;
+			if(new_owner != "" && old_owner == "") {
+				message("new owner of %s", bus);
+				this.root.remove_all();
+				try {
+					string xml = remote.QueryRoot(0);
+					parser.parse(xml);
+				} catch (GLib.Error e) {
+					warning("%s", e.message);
+				}
+				invalid = false;
+				return;
+			}
+			if(new_owner == "" && old_owner != "") {
+				message("owner of %s disappeared", bus);
+				this.root.remove_all();
+				invalid = true;
+				return;
 			}
 		}
 

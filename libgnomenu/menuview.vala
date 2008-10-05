@@ -39,14 +39,12 @@ namespace Gnomenu {
 		private weak Gtk.Widget create_widget(Document.Widget node) {
 			Gtk.Widget rt;
 			weak Gtk.Widget gtk = (Gtk.Widget) node.get_data("gtk");
-			message("creating node %s", node.name);
+			//debug("creating node %s", node.name);
 			if(gtk != null) return gtk;
 			switch(node.tag) {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
-					message("adding a menu");
 					foreach(weak XML.Node child in node.children) {
-						message("%s", child.get_type().name());
 						if(child is Document.Widget) {
 							switch((child as Document.Widget).tag){
 								case "item":
@@ -92,7 +90,6 @@ namespace Gnomenu {
 						}
 						break;
 					}
-					message("adding a menu item %s", label);
 					foreach(weak XML.Node child in node.children) {
 						if(child is Document.Widget) {
 							if((child as Document.Widget).tag == "menu")
@@ -103,7 +100,7 @@ namespace Gnomenu {
 					rt = gtk;
 				break;
 				default:
-				message("skipping tag %s", node.tag);
+				debug("skipping tag %s", node.tag);
 				break;
 			}
 			rt.set_data("node", node);
@@ -141,7 +138,6 @@ namespace Gnomenu {
 			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(p == document.root) {
-				message("%s", n.get_type().name());
 				this.remove((Gtk.Widget)node.get_data("gtk"));
 				return;
 			}
