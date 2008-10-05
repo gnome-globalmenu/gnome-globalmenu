@@ -1,1 +1,1 @@
-EXTRA_DIST = valacompat.vapi
+EXTRA_DIST = valacompat.vapi wnckcompat.vapi

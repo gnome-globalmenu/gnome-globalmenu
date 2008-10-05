@@ -75,6 +75,8 @@ namespace XML {
 		public Document document  {get; construct;}
 		private weak XML.Node _root;
 		private XML.Node pseudo_root; 
+		private bool invalid;
+		private bool disposed;
 		public weak XML.Node root {
 			get {return _root;}
 		}
@@ -87,6 +89,13 @@ namespace XML {
 		public Section(Document document, XML.Node root) {
 			this.document = document;
 			this.set_root = root;
+		}
+		public override void dispose() {
+			if(!disposed) {
+				disposed = true;
+				if(!invalid)
+					object_remove_toggle_ref(_root, toggle_ref_notify, this);
+			}
 		}
 		private bool is_inside(XML.Node node) {
 			for(weak XML.Node n = node;
@@ -111,6 +120,8 @@ namespace XML {
 			return document.CreateTagWithAttributes(tag, attr_names, attr_values);
 		}
 		construct {
+			disposed = false;
+			invalid = false;
 			document.updated += (d, n, prop) => {
 				//message("%s", is_inside(n).to_string());
 				if(is_inside(n)) this.updated(n, prop);
@@ -126,6 +137,7 @@ namespace XML {
 		private void toggle_ref_notify(GLib.Object object, bool is_last) {
 			if(!is_last) return;
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
+			invalid = true;
 			_root = pseudo_root;
 		}
 	}

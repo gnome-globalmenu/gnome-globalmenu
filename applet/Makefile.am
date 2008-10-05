@@ -23,6 +23,7 @@ AM_VALAC_FLAGS = \
 	--vapidir=$(top_builddir)/libgnomenu  \
 	--pkg gnomenu  \
 	--pkg gmarkupdoc  \
+	--pkg wnckcompat  \
 	$(NULL)
 	
 BUILT_SOURCES = .vala.stamp
