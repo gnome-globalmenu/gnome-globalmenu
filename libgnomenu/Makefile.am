@@ -2,7 +2,6 @@ SUBDIRS = .
 SUBDIRS += tests
 SUBDIRS += gtk 
 SUBDIRS += server 
-SUBDIRS += navigator
 AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \

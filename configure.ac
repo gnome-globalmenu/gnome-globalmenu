@@ -86,8 +86,7 @@ Makefile
 libgnomenu/Makefile
 libgnomenu/gtk/Makefile
 libgnomenu/server/Makefile
-libgnomenu/navigator/Makefile
+navigator/Makefile
 libgnomenu/tests/Makefile
-gtk-aqd/Makefile
 po/Makefile.in
 )
