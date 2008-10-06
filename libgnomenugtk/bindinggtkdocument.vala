@@ -77,6 +77,7 @@ namespace GnomenuGtk {
 					weak Gtk.Label l = find_menu_item_label(gtk);
 					if(l!= null) {
 						l.notify["label"] += item_property_notify;
+						gtk.set_data_full("old-label", l.ref(), g_object_unref);
 						values.append(l.label);
 					} else 
 						values.append("unknown");
@@ -95,7 +96,6 @@ namespace GnomenuGtk {
 					}
 					if(gtk is Gtk.ImageMenuItem) {
 						Gtk.ImageMenuItem i = gtk as Gtk.ImageMenuItem;
-						i.notify["image"] += item_image_notify;
 						if((i.image is Gtk.Image)) {
 							Gtk.Image image = i.image as Gtk.Image;
 							image.set_data("native-name", gtk.get_data("native-name"));
@@ -111,7 +111,9 @@ namespace GnomenuGtk {
 									values.append(image.stock);
 								break;
 							}
+							i.set_data_full("old-image", image.ref(), g_object_unref);
 						}
+						i.notify["image"] += item_image_notify;
 					}
 				}
 			}
@@ -136,12 +138,27 @@ namespace GnomenuGtk {
 			if(!is_last) return;
 			if(object is Gtk.MenuItem) {
 				weak Gtk.Label label = find_menu_item_label(object as Gtk.Widget);
-				if(label != null) label.notify["label"] -= item_property_notify;
+				if(label != null) {
+					/*
+					label.notify["label"] -= item_property_notify; VALA BUG
+					*/
+					label.notify -= item_property_notify;
+				}
+			}
+			if(object is Gtk.ImageMenuItem) {
+				weak Gtk.Image image = ((object as Gtk.ImageMenuItem).image as Gtk.Image);
+				if(image != null) {
+					/*
+					image.notify["icon-name"] -= item_property_notify;
+					image.notify["stock"] -= item_property_notify; VALA BUG
+					*/
+					image.notify -= item_property_notify; 
+				}
 			}
 			unbind_widget(object as Gtk.Widget);
 			weak string name = (string) object.get_data("native-name");
 			if(name != null) {
-				message("GtkWidget %s is removed", name);
+				debug("GtkWidget %s is removed: %u", name, object.ref_count);
 				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
 				weak Gnomenu.Document.Widget node = lookup(name) as Gnomenu.Document.Widget;
 				if(node != null){
@@ -155,9 +172,10 @@ namespace GnomenuGtk {
 			object_remove_toggle_ref(object, toggle_ref_notify, this);
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
+			debug("item_property_notify %s( %s).%s", (string) w.get_data("native-name"), w.get_type().name(), pspec.name);
 			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
 			if(node == null) {
-				warning("no xml node found for widget %s", (string) w.get_data("native-name"));
+				warning("no xml node found for widget %s( %s)", (string) w.get_data("native-name"), w.get_type().name());
 				return;
 			}
 			string val;
@@ -178,10 +196,23 @@ namespace GnomenuGtk {
 		}
 		private void item_label_set(Gtk.Widget w, Gtk.Label? l) {
 			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
-			if(l!= null) {
-				l.notify["label"] -= item_property_notify;
-				l.notify["label"] += item_property_notify;
-				node.set("label", l.label);
+			if(node != null) {
+				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
+				if(l != old_label) {
+					if(old_label != null) {
+						old_label.set_data("native-name", null);
+						/*
+						old_label.notify["label"] -= item_property_notify;
+						*/
+						old_label.notify -= item_property_notify;
+					}
+					if(l!= null) {
+						l.notify["label"] += item_property_notify;
+						node.set("label", l.label);
+						w.set_data_full("old-label", l.ref(), g_object_unref);
+					} else 
+						w.set_data("old-label", null);
+				}
 			}
 		}
 		private void item_image_notify(Gtk.Widget w, ParamSpec pspec) {
@@ -189,17 +220,31 @@ namespace GnomenuGtk {
 			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
 			if(w != null) {
 				Gtk.Image image = item.image as Gtk.Image;
-				if(image != null) {
-					image.set_data("native-name", w.get_data("native-name"));
-					image.notify["icon-name"] += item_property_notify;
-					image.notify["stock"] += item_property_notify;
-					switch(image.storage_type) {
-						case Gtk.ImageType.ICON_NAME:
-							w.set("icon-name", image.icon_name);
-						break;
-						case Gtk.ImageType.STOCK:
-							w.set("icon-stock", image.stock);
-						break;
+				weak Gtk.Image old_image = (Gtk.Image) item.get_data("old-image");
+				if(image != old_image) {
+					if(old_image != null) {
+						old_image.set_data("native-name", null);
+						/*
+						old_image.notify["icon-name"] -= item_property_notify;
+						old_image.notify["stock"] -= item_property_notify;
+						*/
+						old_image.notify -= item_property_notify; /*Vala bug detailed signal not removed*/
+					}
+					if(image != null) {
+						image.set_data("native-name", w.get_data("native-name"));
+						image.notify["icon-name"] += item_property_notify;
+						image.notify["stock"] += item_property_notify;
+						switch(image.storage_type) {
+							case Gtk.ImageType.ICON_NAME:
+								w.set("icon-name", image.icon_name);
+							break;
+							case Gtk.ImageType.STOCK:
+								w.set("icon-stock", image.stock);
+							break;
+						}
+						item.set_data_full("old-image", image.ref(), g_object_unref);
+					} else {
+						item.set_data("old-image", null);
 					}
 				}
 			}
