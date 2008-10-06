@@ -24,8 +24,12 @@ namespace Gnomenu {
 					document.removed += document_removed;
 					foreach(weak XML.Node child in document.root.children) {
 						if(child is Document.Widget) {
-							if((child as Document.Widget).tag == "item") {
+							switch((child as Document.Widget).tag) {
+								case "item":
+								case "check":
+								case "imageitem":
 								this.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+								break;
 							}
 						}
 					}
@@ -35,6 +39,25 @@ namespace Gnomenu {
 		public MenuView(Document? document) {
 			this.document = document;
 			this.local = true;
+		}
+		private Gdk.EventExpose __tmp__event;
+		construct {
+			this.expose_event += (widget, event)=> {
+				if(0 != (widget.get_flags() & (Gtk.WidgetFlags.MAPPED | Gtk.WidgetFlags.VISIBLE))) {
+					Gtk.paint_flat_box(widget.style,
+							widget.window, (Gtk.StateType) widget.state,
+							Gtk.ShadowType.NONE,
+							event.area,
+							widget, null, 0, 0, -1, -1);
+
+					__tmp__event = event;
+					(widget as GtkCompat.Container).forall (expose_child);
+				}
+				return true;
+			};
+		}
+		private void expose_child(Gtk.Widget widget) {
+			this.propagate_expose(widget, __tmp__event);
 		}
 		private weak Gtk.Widget create_widget(Document.Widget node) {
 			Gtk.Widget rt;
@@ -48,6 +71,7 @@ namespace Gnomenu {
 						if(child is Document.Widget) {
 							switch((child as Document.Widget).tag){
 								case "item":
+								case "imageitem":
 								case "check":
 								gtk.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
 								break;
@@ -58,6 +82,7 @@ namespace Gnomenu {
 				break;
 				case "item":
 				case "check":
+				case "imageitem":
 					string label = node.get("label");
 					Gtk.MenuItem gtk;
 					switch(label) {
@@ -85,6 +110,12 @@ namespace Gnomenu {
 								gtk = new Gtk.MenuItem.with_mnemonic(node.get("label"));
 								gtk.activate += menu_item_activated;
 								string[] p = {"visible", "sensitive", "no-show-all", "label"};
+								update_properties(gtk, node, p);
+							break;
+							case "imageitem":
+								gtk = new Gtk.ImageMenuItem.with_mnemonic(node.get("label"));
+								gtk.activate += menu_item_activated;
+								string[] p = {"visible", "sensitive", "no-show-all", "label", /*"icon-name", IconTheme differs!*/ "icon-stock"};
 								update_properties(gtk, node, p);
 							break;
 						}
@@ -128,6 +159,7 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
+					case "imageitem":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = create_widget(node);
 					break;
@@ -156,6 +188,7 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
+					case "imageitem":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
 						pgtk.submenu = null;
 					break;
@@ -197,6 +230,14 @@ namespace Gnomenu {
 						else
 							gtk.set(prop, false, null);
 					break;
+					case "icon-name":
+					case "icon-stock":
+						if(node.get(prop) != null) {
+							Gtk.Image image = new Gtk.Image.from_icon_name(
+										node.get(prop), Gtk.IconSize.MENU);
+							(gtk as Gtk.ImageMenuItem).image = image;
+						}
+					break;
 				}
 				if(gtk is Gtk.MenuItem) {
 					(gtk as Gtk.MenuItem).activate += menu_item_activated;
@@ -211,6 +252,7 @@ namespace Gnomenu {
 					break;
 					case "item":
 					case "check":
+					case "imageitem":
 						Gtk.MenuItem gtk = (Gtk.MenuItem) node.get_data("gtk");
 						update_property(gtk, node, prop);
 					break;

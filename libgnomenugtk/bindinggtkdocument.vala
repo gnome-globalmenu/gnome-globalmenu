@@ -93,6 +93,26 @@ namespace GnomenuGtk {
 						names.append("inconsistent");
 						values.append(c.inconsistent?"true":"false");
 					}
+					if(gtk is Gtk.ImageMenuItem) {
+						Gtk.ImageMenuItem i = gtk as Gtk.ImageMenuItem;
+						i.notify["image"] += item_image_notify;
+						if((i.image is Gtk.Image)) {
+							Gtk.Image image = i.image as Gtk.Image;
+							image.set_data("native-name", gtk.get_data("native-name"));
+							image.notify["icon-name"] += item_property_notify;
+							image.notify["stock"] += item_property_notify;
+							switch(image.storage_type) {
+								case Gtk.ImageType.ICON_NAME:
+									names.append("icon-name");
+									values.append(image.icon_name);
+								break;
+								case Gtk.ImageType.STOCK:
+									names.append("icon-stock");
+									values.append(image.stock);
+								break;
+							}
+						}
+					}
 				}
 			}
 			string[] anames = new string[1];
@@ -162,6 +182,26 @@ namespace GnomenuGtk {
 				l.notify["label"] -= item_property_notify;
 				l.notify["label"] += item_property_notify;
 				node.set("label", l.label);
+			}
+		}
+		private void item_image_notify(Gtk.Widget w, ParamSpec pspec) {
+			Gtk.ImageMenuItem item = w as Gtk.ImageMenuItem;
+			weak Gnomenu.Document.Widget node = lookup((string)w.get_data("native-name")) as Gnomenu.Document.Widget;
+			if(w != null) {
+				Gtk.Image image = item.image as Gtk.Image;
+				if(image != null) {
+					image.set_data("native-name", w.get_data("native-name"));
+					image.notify["icon-name"] += item_property_notify;
+					image.notify["stock"] += item_property_notify;
+					switch(image.storage_type) {
+						case Gtk.ImageType.ICON_NAME:
+							w.set("icon-name", image.icon_name);
+						break;
+						case Gtk.ImageType.STOCK:
+							w.set("icon-stock", image.stock);
+						break;
+					}
+				}
 			}
 		}
 	}

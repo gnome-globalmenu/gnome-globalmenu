@@ -17,9 +17,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	construct {
 		menubar = new Gnomenu.MenuBar();
 		Gtk.Box box = new Gtk.HBox(false, 0);
-		Gtk.Label label = new Gtk.Label("label");
 		menubar.show_tabs = false;
-		box.pack_start_defaults(label);
 		box.pack_start_defaults(menubar);
 		this.add(box);
 		screen = WnckCompat.Screen.get_default();
@@ -30,7 +28,24 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 				menubar.switch(xid);
 			}
 		};
-		this.can_focus = false;
+		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		Gtk.rc_parse_string("""
+			style "globalmenu_event_box_style"
+			{
+			 	GtkWidget::focus-line-width=0
+			 	GtkWidget::focus-padding=0
+			}
+			style "globalmenu_menu_bar_style"
+			{
+				ythickness = 0
+				bg[NORMAL] = @bg_color
+				GtkMenuBar::shadow-type = none
+				GtkMenuBar::internal-padding = 0
+			}
+			class "GtkEventBox" style "globalmenu_event_box_style"
+			class "GtkMenuBar" style "globalmenu_menu_bar_style"
+"""
+);
 	}
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("");

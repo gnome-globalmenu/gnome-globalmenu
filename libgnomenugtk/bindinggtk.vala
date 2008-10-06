@@ -98,6 +98,8 @@ namespace GnomenuGtk {
 			type = "item";
 		if(widget is Gtk.CheckMenuItem)
 			type = "check";
+		if(widget is Gtk.ImageMenuItem)
+			type = "imageitem";
 		
 		Gnomenu.Document.Widget node = document().CreateWidget(type, name);
 		parent_node.insert(node, pos);

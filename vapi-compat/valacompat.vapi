@@ -214,6 +214,60 @@ namespace GtkCompat {
 		public virtual signal bool select_page (bool move_focus);
 		public virtual signal void switch_page (void* page, uint page_num);
 	}
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class Container : Gtk.Widget, Atk.Implementor, Gtk.Buildable {
+		public weak Gtk.Widget focus_child;
+		public uint need_resize;
+		public uint reallocate_redraws;
+		public uint has_focus_chain;
+		public void add_with_properties (Gtk.Widget widget, ...);
+		public void child_get (Gtk.Widget child, ...);
+		public void child_get_property (Gtk.Widget child, string property_name, GLib.Value value);
+		public void child_get_valist (Gtk.Widget child, string first_property_name, void* var_args);
+		public void child_set (Gtk.Widget child, ...);
+		public void child_set_property (Gtk.Widget child, string property_name, GLib.Value value);
+		public void child_set_valist (Gtk.Widget child, string first_property_name, void* var_args);
+		public static weak GLib.ParamSpec class_find_child_property (GLib.ObjectClass cclass, string property_name);
+		[CCode (cname = "gtk_container_class_install_child_property")]
+		public class void install_child_property (uint property_id, GLib.ParamSpec pspec);
+		public static weak GLib.ParamSpec class_list_child_properties (GLib.ObjectClass cclass, uint n_properties);
+		public void @foreach (Gtk.Callback callback);
+		public uint get_border_width ();
+		public weak GLib.List<Gtk.Widget> get_children ();
+		public bool get_focus_chain (GLib.List focusable_widgets);
+		public weak Gtk.Adjustment get_focus_hadjustment ();
+		public weak Gtk.Adjustment get_focus_vadjustment ();
+		public Gtk.ResizeMode get_resize_mode ();
+		public void propagate_expose (Gtk.Widget child, Gdk.EventExpose event);
+		public void resize_children ();
+		public void set_border_width (uint border_width);
+		public void set_focus_chain (GLib.List focusable_widgets);
+		public void set_focus_hadjustment (Gtk.Adjustment adjustment);
+		public void set_focus_vadjustment (Gtk.Adjustment adjustment);
+		public void set_reallocate_redraws (bool needs_redraws);
+		public void set_resize_mode (Gtk.ResizeMode resize_mode);
+		public void unset_focus_chain ();
+		public virtual GLib.Type child_type ();
+		[NoWrapper]
+		public virtual weak string composite_name (Gtk.Widget child);
+		public virtual void forall (Gtk.Callback callback);
+		[NoWrapper]
+		public virtual void get_child_property (Gtk.Widget child, uint property_id, GLib.Value value, GLib.ParamSpec pspec);
+		[NoWrapper]
+		public virtual void set_child_property (Gtk.Widget child, uint property_id, GLib.Value value, GLib.ParamSpec pspec);
+		public uint border_width { get; set; }
+		[NoAccessorMethod]
+		public Gtk.Widget child { set; }
+		public Gtk.ResizeMode resize_mode { get; set; }
+		[HasEmitter]
+		public virtual signal void add (Gtk.Widget widget);
+		[HasEmitter]
+		public virtual signal void check_resize ();
+		[HasEmitter]
+		public virtual signal void remove (Gtk.Widget widget);
+		[HasEmitter]
+		public virtual signal void set_focus_child (Gtk.Widget widget);
+	}
 
 
 }
