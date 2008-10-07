@@ -12,13 +12,16 @@ static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	private WnckCompat.Screen screen;
 	private Gnomenu.MenuBar menubar;
+	private Gtk.Layout fixed;
 	public Applet() {
 	}
 	construct {
 		menubar = new Gnomenu.MenuBar();
 		Gtk.Box box = new Gtk.HBox(false, 0);
+		fixed = new Gtk.Layout(null, null);
 		menubar.show_tabs = false;
-		box.pack_start_defaults(menubar);
+		fixed.put(menubar, 0, 0);
+		box.pack_start_defaults(fixed);
 		this.add(box);
 		screen = WnckCompat.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
