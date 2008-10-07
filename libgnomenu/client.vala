@@ -23,7 +23,10 @@ namespace Gnomenu {
 			uint r;
 			do {
 				string str = rand.next_int().to_string().strip();
-				bus = "org.gnome.GlobalMenu.Applications." + Environment.get_prgname() + "-" + str;
+				string appname = Environment.get_prgname();
+				strcanon(appname, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
+				if(appname[0] >= '0' && appname[0] <='9') appname = "_"+appname;
+				bus = "org.gnome.GlobalMenu.Applications." + appname + "-" + str;
 				message("Obtaining BUS name: %s", bus);
 				r = dbus.RequestName (bus, (uint) 0);
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);

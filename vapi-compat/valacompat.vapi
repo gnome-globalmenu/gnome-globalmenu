@@ -8,6 +8,7 @@ namespace GLib {
 		public weak string insert_len(void * buffer, ulong len);
 		public void clear();
 	}
+	public static weak string strcanon(string s, string valid_chars, char substitutor);
 
 [CCode (cname = "g_object_class_install_property")]
 public static void object_class_install_property  (ObjectClass oclass,
