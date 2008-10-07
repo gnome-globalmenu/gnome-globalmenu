@@ -44,6 +44,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			}
 			class "GtkEventBox" style "globalmenu_event_box_style"
 			class "GtkMenuBar" style "globalmenu_menu_bar_style"
+			class "GnomenuMenuBar" style "globalmenu_menu_bar_style"
 """
 );
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
