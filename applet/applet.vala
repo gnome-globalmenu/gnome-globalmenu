@@ -46,6 +46,25 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			class "GtkMenuBar" style "globalmenu_menu_bar_style"
 """
 );
+		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
+			Gtk.Style style = this.menubar.get_style().clone();
+			switch(bgtype){
+				case Panel.AppletBackgroundType.NO_BACKGROUND:
+					this.menubar.set_style(null);
+					this.menubar.queue_draw();
+					return;
+				break;
+				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
+					style.bg_pixmap[(int)StateType.NORMAL] = null;
+					style.bg[(int)StateType.NORMAL] = color;
+				break;
+				case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
+					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
+				break;
+			}
+			this.menubar.set_style(style);
+			this.menubar.queue_draw();
+		};
 	}
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("");

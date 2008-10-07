@@ -24,6 +24,7 @@ AM_VALAC_FLAGS = \
 	--pkg gnomenu  \
 	--pkg gmarkupdoc  \
 	--pkg wnckcompat  \
+	--pkg panelappletcompat \
 	$(NULL)
 	
 BUILT_SOURCES = .vala.stamp

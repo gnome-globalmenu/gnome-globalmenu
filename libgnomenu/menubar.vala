@@ -59,6 +59,7 @@ namespace Gnomenu {
 						}
 					}
 					this.remove_page_by_xid(xid);
+					view.set_style(this.style);
 					this.append_page(view, null);
 					menu_hash.insert(xid, view);
 				}
@@ -72,9 +73,21 @@ namespace Gnomenu {
 			conn = Bus.get(DBus.BusType.SESSION);
 			menu_hash = new HashTable<string, MenuView>.full(str_hash, str_equal, g_free, g_object_unref);
 			bus_hash = new HashTable<string, string>.full(str_hash, str_equal, g_free, g_free);
-			this.append_page(new Gtk.Label("No menu"), null);
+			Gtk.EventBox dummy = new Gtk.EventBox();
+			dummy.add(new Gtk.Label("no menu"));
+			this.append_page(dummy, null);
 			//this.show_tabs = false;
 			this.show_border = false;
+			this.style_set += (widget, style)=> {
+				int n = this.get_n_pages();
+				for(int i = 0; i<n ;i++) {
+					this.get_nth_page(i).set_style(this.style);
+				}
+			};
+			int n = this.get_n_pages();
+			for(int i = 0; i<n ;i++) {
+				this.get_nth_page(i).set_style(this.style);
+			}
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
