@@ -5,7 +5,7 @@ using Gnomenu;
 using XML;
 using DBus;
 namespace Gnomenu {
-	public class MenuBar : GtkCompat.Notebook {
+	public class MenuBar : Gtk.Notebook {
 		private RemoteDocument serverdoc;
 		private DBus.Connection conn;
 		private HashTable<string, MenuView> menu_hash;
@@ -14,7 +14,7 @@ namespace Gnomenu {
 		}
 		private void remove_page_by_xid(string xid) {
 			weak MenuView view = menu_hash.lookup(xid);
-			int num = this.page_num(view);
+			int num = (this as GtkCompat.Notebook).page_num(view);
 			if(num >= 0) {
 				this.remove_page(num);
 			}
@@ -64,7 +64,7 @@ namespace Gnomenu {
 					menu_hash.insert(xid, view);
 				}
 			}
-			int num = this.page_num(menu_hash.lookup(xid));
+			int num = (this as GtkCompat.Notebook).page_num(menu_hash.lookup(xid));
 			if(num != -1) this.set_current_page(num);
 			else this.set_current_page(0);
 		}
