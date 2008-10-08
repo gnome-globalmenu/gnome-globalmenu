@@ -1,6 +1,7 @@
 using GLib;
+using GLibCompat;
 namespace XML {
-	public abstract class Node: Object {
+	public abstract class Node: GLib.Object {
 		private bool disposed;
 		protected int freezed;
 		protected weak Node _parent;
@@ -71,7 +72,7 @@ namespace XML {
 		~Node() {
 		}
 	}
-	public class Section: Object, Document {
+	public class Section: GLib.Object, Document {
 		private Document _document;
 		public weak Document document  {
 			get { return _document;} 
@@ -87,7 +88,7 @@ namespace XML {
 		public weak XML.Node set_root {
 			construct {
 				_root = value;
-				object_add_toggle_ref(_root, toggle_ref_notify, this);
+				(_root as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
 			}
 		}
 		public Section(Document document, XML.Node root) {
@@ -98,7 +99,7 @@ namespace XML {
 			if(!disposed) {
 				disposed = true;
 				if(!invalid)
-					object_remove_toggle_ref(_root, toggle_ref_notify, this);
+					(_root as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, this);
 			}
 		}
 		private bool is_inside(XML.Node node) {
@@ -138,14 +139,15 @@ namespace XML {
 			};
 			pseudo_root = new Document.Root(document);
 		}
-		private void toggle_ref_notify(GLib.Object object, bool is_last) {
+		private static void toggle_ref_notify(void* data, GLib.Object object, bool is_last) {
 			if(!is_last) return;
-			object_remove_toggle_ref(object, toggle_ref_notify, this);
-			invalid = true;
-			_root = pseudo_root;
+			Section t = (Section) data;
+			(object as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, t);
+			t.invalid = true;
+			t._root = t.pseudo_root;
 		}
 	}
-	public interface Document: Object {
+	public interface Document: GLib.Object {
 		private static StringChunk strings = null;
 		public abstract weak XML.Node root {get;}
 		public virtual Document.Text CreateText(string text) {

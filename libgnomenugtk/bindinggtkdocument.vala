@@ -130,12 +130,11 @@ namespace GnomenuGtk {
 			int id = Singleton.instance().unique;
 			name = S("%s%d".printf(widget.get_type().name(), id));
 			widget.set_data("native-name", name);
-			object_add_toggle_ref(widget, toggle_ref_notify, this);
+			(widget as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
 			dict_nw.insert(name, widget);
 			return name;
 		}
-		private void toggle_ref_notify(GLib.Object object, bool is_last){
-			if(!is_last) return;
+		private void disconnect_signals(GLib.Object object) {
 			if(object is Gtk.MenuItem) {
 				weak Gtk.Label label = find_menu_item_label(object as Gtk.Widget);
 				if(label != null) {
@@ -155,12 +154,18 @@ namespace GnomenuGtk {
 					image.notify -= item_property_notify; 
 				}
 			}
+
+		}
+		private static void toggle_ref_notify(void* data, GLib.Object object, bool is_last){
+			if(!is_last) return;
+			Document _this = (Document) data;
+			_this.disconnect_signals(object);
 			unbind_widget(object as Gtk.Widget);
 			weak string name = (string) object.get_data("native-name");
 			if(name != null) {
 				debug("GtkWidget %s is removed: %u", name, object.ref_count);
-				dict_nw.remove(name); // because ~WidgetNode is not always invoked?
-				weak Gnomenu.Document.Widget node = lookup(name) as Gnomenu.Document.Widget;
+				_this.dict_nw.remove(name); // because ~WidgetNode is not always invoked?
+				weak Gnomenu.Document.Widget node = _this.lookup(name) as Gnomenu.Document.Widget;
 				if(node != null){
 					if(node.parent == null) {
 						assert(false);
@@ -169,7 +174,7 @@ namespace GnomenuGtk {
 				}
 			}
 			object.set_data("native-name", null);
-			object_remove_toggle_ref(object, toggle_ref_notify, this);
+			(object as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, _this);
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 			debug("item_property_notify %s( %s).%s", (string) w.get_data("native-name"), w.get_type().name(), pspec.name);
