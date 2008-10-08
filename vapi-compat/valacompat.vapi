@@ -130,6 +130,10 @@ namespace GtkCompat {
 	public class Container : Gtk.Widget, Atk.Implementor, Gtk.Buildable {
 		public virtual void forall (Gtk.Callback callback);
 	}
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class Widget : Gtk.Object, Atk.Implementor, Gtk.Buildable {
+		public virtual signal void style_set (Gtk.Style? previous_style);
+	}
 
 
 }

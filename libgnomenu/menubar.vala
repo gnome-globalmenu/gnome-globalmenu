@@ -79,7 +79,7 @@ namespace Gnomenu {
 			this.append_page(dummy, null);
 			//this.show_tabs = false;
 			this.show_border = false;
-			this.style_set += (widget, style)=> {
+			(this as GtkCompat.Widget).style_set += (widget, style)=> {
 				int n = this.get_n_pages();
 				for(int i = 0; i<n ;i++) {
 					this.get_nth_page(i).set_style(this.style);

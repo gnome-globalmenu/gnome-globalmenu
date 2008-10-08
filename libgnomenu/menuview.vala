@@ -60,7 +60,8 @@ namespace Gnomenu {
 				req.height = 0;
 			};
 			this.size_allocate +=(widget, allocation) => {
-				message("%d %d", allocation.width, allocation.height);
+				// do nothing;
+				return;
 			};
 		}
 		private void expose_child(Gtk.Widget widget) {
