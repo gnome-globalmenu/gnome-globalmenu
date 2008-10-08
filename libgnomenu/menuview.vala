@@ -55,6 +55,13 @@ namespace Gnomenu {
 				}
 				return true;
 			};
+			this.size_request += (widget, req) => {
+				req.width = 0;
+				req.height = 0;
+			};
+			this.size_allocate +=(widget, allocation) => {
+				message("%d %d", allocation.width, allocation.height);
+			};
 		}
 		private void expose_child(Gtk.Widget widget) {
 			this.propagate_expose(widget, __tmp__event);
