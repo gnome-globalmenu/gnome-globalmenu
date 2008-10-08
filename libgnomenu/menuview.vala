@@ -115,7 +115,7 @@ namespace Gnomenu {
 							case "imageitem":
 								gtk = new Gtk.ImageMenuItem.with_mnemonic(node.get("label"));
 								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "no-show-all", "label", /*"icon-name", IconTheme differs!*/ "icon-stock"};
+								string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock"};
 								update_properties(gtk, node, p);
 							break;
 						}
@@ -231,9 +231,15 @@ namespace Gnomenu {
 							gtk.set(prop, false, null);
 					break;
 					case "icon-name":
-					case "icon-stock":
 						if(node.get(prop) != null) {
 							Gtk.Image image = new Gtk.Image.from_icon_name(
+										node.get(prop), Gtk.IconSize.MENU);
+							(gtk as Gtk.ImageMenuItem).image = image;
+						}
+					break;
+					case "icon-stock":
+						if(node.get(prop) != null) {
+							Gtk.Image image = new Gtk.Image.from_stock(
 										node.get(prop), Gtk.IconSize.MENU);
 							(gtk as Gtk.ImageMenuItem).image = image;
 						}

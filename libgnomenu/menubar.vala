@@ -75,6 +75,7 @@ namespace Gnomenu {
 			bus_hash = new HashTable<string, string>.full(str_hash, str_equal, g_free, g_free);
 			Gtk.EventBox dummy = new Gtk.EventBox();
 			dummy.add(new Gtk.Label("no menu"));
+			dummy.set_style(this.style);
 			this.append_page(dummy, null);
 			//this.show_tabs = false;
 			this.show_border = false;

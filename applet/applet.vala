@@ -18,7 +18,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		menubar = new Gnomenu.MenuBar();
 		Gtk.Box box = new Gtk.HBox(false, 0);
 		menubar.show_tabs = false;
-		box.pack_start_defaults(menubar);
+		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 		screen = WnckCompat.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
