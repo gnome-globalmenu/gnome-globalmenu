@@ -48,3 +48,6 @@ libgnomenu_la_LIBADD = \
 		$(NULL)
 
 EXTRA_DIST = libgnomenu.vala.stamp $(libgnomenu_la_VALASOURCES)
+
+vapidir = $(VALA_VAPI_DIR)
+dist_vapi_DATA = gnomenu.vapi

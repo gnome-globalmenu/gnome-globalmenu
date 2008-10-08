@@ -35,3 +35,6 @@ libgmarkupdoc_la_LIBADD = \
 		$(NULL)
 
 EXTRA_DIST = libgmarkupdoc.vala.stamp $(libgmarkupdoc_la_VALASOURCES)
+
+vapidir = $(VALA_VAPI_DIR)
+dist_vapi_DATA = gmarkupdoc.vapi

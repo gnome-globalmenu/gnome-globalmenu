@@ -55,6 +55,9 @@ AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir fo
 
 dnl end:applet
 
+VALA_VAPI_DIR="$datadir/vala/vapi"
+AC_SUBST(VALA_VAPI_DIR)
+
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
 AC_SUBST(GETTEXT_PACKAGE)
