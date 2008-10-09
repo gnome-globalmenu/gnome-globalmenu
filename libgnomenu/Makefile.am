@@ -3,7 +3,6 @@ NULL =
 AM_VALAC_FLAGS =  \
 	$(GNOMENU_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
-	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--pkg gmarkupdoc \
 	--pkg gtkcompat \
 	$(NULL)
@@ -11,12 +10,15 @@ AM_VALAC_FLAGS =  \
 AM_CPPFLAGS = \
 	-g \
 	-I$(top_srcdir)/libgmarkupdoc \
-	-I$(top_builddir)/libgmarkupdoc \
 	$(GNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	$(NULL)
 
-BUILT_SOURCES = libgnomenu.vala.stamp
+BUILT_SOURCES = \
+	libgnomenu.vala.stamp \
+	$(libgnomenu_la_VALASOURCES:.vala=.c) \
+	$(libgnomenu_la_VALASOURCES:.vala=.h) \
+	$(NULL)
 
 libgnomenudir = $(libdir)
 libgnomenu_LTLIBRARIES = \
@@ -45,7 +47,9 @@ libgnomenu_la_LIBADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
-EXTRA_DIST = libgnomenu.vala.stamp $(libgnomenu_la_VALASOURCES)
+EXTRA_DIST = \
+	 $(BUILT_SOURCES) \
+	 $(libgnomenu_la_VALASOURCES)
 
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = gnomenu.vapi

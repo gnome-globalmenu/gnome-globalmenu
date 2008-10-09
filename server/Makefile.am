@@ -20,8 +20,11 @@ AM_VALAC_FLAGS = \
 	--pkg=gmarkupdoc  \
 	$(NULL)
 
-BUILT_SOURCES = .vala.stamp
-
+BUILT_SOURCES = \
+	.vala.stamp \
+	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.c) \
+	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.h) \
+	$(NULL)
 
 org_gnome_GlobalMenu_Server_VALASOURCES = \
 	org.gnome.GlobalMenu.Server.vala \
@@ -53,5 +56,9 @@ org_gnome_GlobalMenu_Server_LDADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp $(org_gnome_GlobalMenu_Server_VALASOURCES) $(service_in_files)
+EXTRA_DIST = \
+	$(BUILT_SOURCES) \
+	$(service_in_files) \
+	$(org_gnome_GlobalMenu_Server_VALASOURCES) \
+	$(NULL)
 DISTCLEANFILES = $(service_DATA)

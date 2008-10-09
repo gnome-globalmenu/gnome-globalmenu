@@ -5,22 +5,22 @@ AM_CPPFLAGS = \
 	$(GNOMENU_NAVIGATOR_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
-	-I$(top_builddir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
-	-I$(top_builddir)/libgnomenu \
 	$(NULL)
 
 AM_VALAC_FLAGS = \
 	$(GNOMENU_NAVIGATOR_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
-	--vapidir=$(top_builddir)/libmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
-	--vapidir=$(top_builddir)/libgnomenu  \
 	--pkg gnomenu  \
 	--pkg gmarkupdoc  \
 	$(NULL)
 	
-BUILT_SOURCES = .vala.stamp
+BUILT_SOURCES = \
+	.vala.stamp \
+	$(gnomenu_navigator_VALASOURCES:.vala=.c) \
+	$(gnomenu_navigator_VALASOURCES:.vala=.h) \
+	$(NULL)
 
 gnomenu_navigator_VALASOURCES = \
 	navigator.vala \
@@ -46,4 +46,4 @@ gnomenu_navigator_LDADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp	$(gnomenu_navigator_VALASOURCES)
+EXTRA_DIST = $(BUILT_SOURCES) $(gnomenu_navigator_VALASOURCES)

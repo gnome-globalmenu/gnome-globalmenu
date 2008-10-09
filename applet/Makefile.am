@@ -5,9 +5,7 @@ AM_CPPFLAGS = \
 	$(GLOBALMENU_PANELAPPLET_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
-	-I$(top_builddir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
-	-I$(top_builddir)/libgnomenu \
 	-DPREFIX=\"$(prefix)\" \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\" \
@@ -18,16 +16,18 @@ AM_CPPFLAGS = \
 AM_VALAC_FLAGS = \
 	$(GLOBALMENU_PANELAPPLET_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
-	--vapidir=$(top_builddir)/libmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
-	--vapidir=$(top_builddir)/libgnomenu  \
 	--pkg gnomenu  \
 	--pkg gmarkupdoc  \
 	--pkg wnckcompat  \
 	--pkg panelappletcompat \
 	$(NULL)
 	
-BUILT_SOURCES = .vala.stamp
+BUILT_SOURCES = \
+	.vala.stamp \
+	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \
+	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.h) \
+	$(NULL)
 
 GlobalMenu_PanelApplet_VALASOURCES = \
 	applet.vala \
@@ -60,5 +60,9 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
-EXTRA_DIST = .vala.stamp $(GlobalMenu_PanelApplet_VALASOURCES) $(server_in_files)
+EXTRA_DIST = \
+	$(BUILT_SOURCES) \
+	$(GlobalMenu_PanelApplet_VALASOURCES) \
+	$(server_in_files) \
+	$(NULL)
 DISTCLEANFILES = $(server_DATA)

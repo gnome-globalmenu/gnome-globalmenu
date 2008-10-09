@@ -42,14 +42,21 @@ libgmarkupdoc_dbus_la_VALASOURCES = \
 		$(NULL)
 
 BUILT_SOURCES = \
+	gmarkupdoc.vapi \
 	gmarkupdoc.h \
 	gmarkupdoc.c \
+   	gmarkupdoc-base.vapi \
 	libgmarkupdoc-base.vala.stamp \
-	libgmarkupdoc-named.vala.stamp \
+	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.c) \
+	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.h) \
+	gmarkupdoc-dbus.vapi \
 	libgmarkupdoc-dbus.vala.stamp \
-	$(libgmarkupdoc_base_la_SOURCES) \
-	$(libgmarkupdoc_dbus_la_SOURCES) \
-	$(libgmarkupdoc_named_la_SOURCES) \
+	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.c) \
+	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
+	gmarkupdoc-named.vapi \
+	libgmarkupdoc-named.vala.stamp \
+	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.c) \
+	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.h) \
 	$(NULL)
 
 libgmarkupdoc_base_la_SOURCES = \
@@ -70,6 +77,7 @@ libgmarkupdoc_named_la_SOURCES = \
 		$(libgmarkupdoc_named_la_VALASOURCES:.vala=.c) \
 		$(libgmarkupdoc_named_la_VALASOURCES:.vala=.h) \
 		$(NULL)
+libgmarkupdoc_named_la_CFLAGS = $(GMARKUPDOC_NAMED_CFLAGS)
 libgmarkupdoc_named_la_LIBADD = $(GMARKUPDOC_NAMED_LIBS)
 
 gmarkupdoc-base.vapi libgmarkupdoc-base.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES)
@@ -107,16 +115,12 @@ libgmarkupdoc_la_LIBADD = \
 		$(NULL)
 
 EXTRA_DIST =  \
-	gmarkupdoc.h \
-	gmarkupdoc.c \
-	libgmarkupdoc-base.vala.stamp \
-	libgmarkupdoc-dbus.vala.stamp \
-	libgmarkupdoc-named.vala.stamp \
+	$(BUILT_SOURCES) \
 	$(libgmarkupdoc_base_la_VALASOURCES) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES) \
 	$(libgmarkupdoc_named_la_VALASOURCES) \
 	$(NULL)
-
+DISTCLEANFILES = gmarkupdoc.c gmarkupdoc.h
 
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = \
