@@ -9,10 +9,10 @@ AM_VALAC_FLAGS =  \
 
 libgmarkupdocdir = $(libdir)
 libgmarkupdoc_LTLIBRARIES = \
-		libgmarkupdoc.la \
 		libgmarkupdoc-base.la \
 		libgmarkupdoc-named.la \
 		libgmarkupdoc-dbus.la \
+		libgmarkupdoc.la \
 		$(NULL)
 
 libgmarkupdoc_la_SOURCES = \
@@ -97,7 +97,7 @@ _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
 
 gmarkupdoc.c: Makefile
 	echo '#include "gmarkupdoc.h"' > $@
-	echo 'void * dummy = NULL;' >> $@
+	echo 'extern void * dummy = NULL;' >> $@
 gmarkupdoc.h: $(_HEADERS_) Makefile
 	echo '#ifndef _G_MARKUP_DOC_H_' > $@ ;
 	echo '#define _G_MARKUP_DOC_H_' >> $@ ;
