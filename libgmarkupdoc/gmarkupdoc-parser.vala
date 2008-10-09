@@ -2,7 +2,7 @@ using GLib;
 namespace GMarkupDoc {
 	public class Parser {
 		private weak Node current;
-		private Document document;
+		private DocumentModel document;
 		private enum ParseType {
 			CHILD, /*create a new child node*/
 			ROOT, /*create a new document*/
@@ -13,7 +13,7 @@ namespace GMarkupDoc {
 		private ParseType type;
 		private weak string propname;
 		public static MarkupParser parser_funcs;
-		public Parser(Document document){
+		public Parser(DocumentModel document){
 			this.document = document;
 			parser_funcs.start_element = StartElement;
 			parser_funcs.end_element = EndElement;
@@ -122,7 +122,7 @@ namespace GMarkupDoc {
 			return true;
 
 		}
-		private class TestDocument : Object, Document {
+		private class TestDocument : Object, DocumentModel {
 			private Root _root;
 			public GMarkupDoc.Node root { get {return _root;}}
 			public TestDocument() { }
@@ -131,7 +131,7 @@ namespace GMarkupDoc {
 			}
 		}
 		public static int test (string [] args){
-			Document document = new TestDocument();
+			DocumentModel document = new TestDocument();
 			Parser parser = new Parser(document);
 			parser.parse(
 """

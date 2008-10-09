@@ -1,7 +1,7 @@
 using GLib;
 using GLibCompat;
 namespace GMarkupDoc {
-	public interface Document: GLib.Object {
+	public interface DocumentModel: GLib.Object {
 		private static StringChunk strings = null;
 		public abstract weak Node root {get;}
 		public virtual Text CreateText(string text) {

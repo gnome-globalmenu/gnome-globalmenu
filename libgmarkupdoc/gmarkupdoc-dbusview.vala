@@ -2,8 +2,8 @@ using GLib;
 using Gdk;
 using Gtk;
 using DBus;
-using GMarkupDoc;
-namespace Gnomenu {
+
+namespace GMarkupDoc {
 	[DBus (name = "org.gnome.GlobalMenu.Document")]
 	public class DBusView:GLib.Object {
 		Connection conn;
@@ -22,28 +22,28 @@ namespace Gnomenu {
 
 			conn.register_object(path, this);
 			document.inserted += (f, p, o, i) => {
-				if(!(o is Document.Widget)) return;
-				weak Document.Widget node = o as Document.Widget;
+				if(!(o is Document.NamedTag)) return;
+				weak Document.NamedTag node = o as Document.NamedTag;
 				if(p == f.root) {
 					inserted("root", node.name, i);
 				} else {
-					weak Document.Widget parent_node = p as Document.Widget;
+					weak Document.NamedTag parent_node = p as Document.NamedTag;
 					inserted(parent_node.name, node.name, i);
 				}
 			};
 			document.removed += (f, p, o) => {
-				if(!(o is Document.Widget)) return;
-				weak Document.Widget node = o as Document.Widget;
+				if(!(o is Document.NamedTag)) return;
+				weak Document.NamedTag node = o as Document.NamedTag;
 				if(p == f.root) {
 					removed("root", node.name);
 				} else {
-					weak Document.Widget parent_node = p as Document.Widget;
+					weak Document.NamedTag parent_node = p as Document.NamedTag;
 					removed(parent_node.name, node.name);
 				}
 			};
 			document.updated += (f, o, prop) => {
-				if(!(o is Document.Widget)) return;
-				weak Document.Widget node = o as Document.Widget;
+				if(!(o is Document.NamedTag)) return;
+				weak Document.NamedTag node = o as Document.NamedTag;
 				updated(node.name, prop);
 			};
 		}
@@ -51,13 +51,13 @@ namespace Gnomenu {
 			return document.root.summary(level);
 		}
 		public string QueryNode(string name, int level = -1){
-			weak Document.Widget node = document.lookup(name) as Document.Widget;
+			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
 			if(node!= null)
 				return node.summary(level);
 			return "";
 		}
 		public void Activate(string name){
-			weak Document.Widget node = document.lookup(name) as Document.Widget;
+			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
 			if(node != null)
 				node.activate();
 			else 

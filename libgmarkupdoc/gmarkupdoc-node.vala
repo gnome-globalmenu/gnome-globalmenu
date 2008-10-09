@@ -15,8 +15,8 @@ namespace GMarkupDoc {
 		}
 		public signal void parent_set(Node? old_parent);
 		protected List<weak Node> children;
-		public weak Document document {get; construct;}
-		public Node (Document document){ this.document = document;}
+		public weak DocumentModel document {get; construct;}
+		public Node (DocumentModel document){ this.document = document;}
 		construct {
 			disposed = false;
 			freezed = 0;
@@ -72,7 +72,7 @@ namespace GMarkupDoc {
 		}
 	}
 	public class Root : Node {
-		public Root(Document document){
+		public Root(DocumentModel document){
 			this.document = document;
 		}
 		public override string summary(int level = 1) {
@@ -91,7 +91,7 @@ namespace GMarkupDoc {
 		public string text {
 			get; construct set;
 		}
-		public Text(Document document, string text) {
+		public Text(DocumentModel document, string text) {
 			this.document = document;
 			this.text = text;
 		}
@@ -103,7 +103,7 @@ namespace GMarkupDoc {
 		public string text {
 			get; construct set;
 		}
-		public Special(Document document, string text) {
+		public Special(DocumentModel document, string text) {
 			this.document = document;
 			this.text = text;
 		}
@@ -120,7 +120,7 @@ namespace GMarkupDoc {
 			}
 		}
 		private HashTable<weak string, string> props;
-		public Tag (Document document, string tag) {
+		public Tag (DocumentModel document, string tag) {
 			this.document = document;
 			this.tag = tag;
 		}

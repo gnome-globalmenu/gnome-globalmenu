@@ -1,26 +1,26 @@
 using GLib;
 using GLibCompat;
 namespace GMarkupDoc {
-	public class Section: GLib.Object, Document {
-		private Document _document;
-		public weak Document document  {
+	public class Section: GLib.Object, DocumentModel {
+		private DocumentModel _document;
+		public weak DocumentModel document  {
 			get { return _document;} 
 			construct {_document = value;}
 		}
-		private weak GMarkupDoc.Node _root;
-		private GMarkupDoc.Node pseudo_root; 
+		private weak Node _root;
+		private Node pseudo_root; 
 		private bool invalid;
 		private bool disposed;
-		public weak GMarkupDoc.Node root {
+		public weak Node root {
 			get {return _root;}
 		}
-		public weak GMarkupDoc.Node set_root {
+		public weak Node set_root {
 			construct {
 				_root = value;
 				(_root as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
 			}
 		}
-		public Section(Document document, GMarkupDoc.Node root) {
+		public Section(DocumentModel document, GMarkupDoc.Node root) {
 			this.document = document;
 			this.set_root = root;
 		}
@@ -31,8 +31,8 @@ namespace GMarkupDoc {
 					(_root as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, this);
 			}
 		}
-		private bool is_inside(GMarkupDoc.Node node) {
-			for(weak GMarkupDoc.Node n = node;
+		private bool is_inside(Node node) {
+			for(weak Node n = node;
 				n != null;
 				n = n.parent) {
 				if(n == root)

@@ -1,18 +1,16 @@
 using GLib;
 using Gtk;
-using Gnomenu;
-using GMarkupDoc;
 using DBus;
 
-namespace Gnomenu {
+namespace GMarkupDoc {
 	public class RemoteDocument: Document {
 		private Parser parser;
 		private dynamic DBus.Object remote;
 		private dynamic DBus.Connection conn;
 		public bool invalid {get; set;}
 		dynamic DBus.Object dbus;
-		private GMarkupDoc.Node _root;
-		public GMarkupDoc.Node root {
+		private Node _root;
+		public Node root {
 			get {
 				return _root;
 			}
@@ -26,7 +24,7 @@ namespace Gnomenu {
 		}
 		construct {
 			invalid = false;
-			_root = new GMarkupDoc.Root(this);
+			_root = new Root(this);
 			conn = Bus.get(DBus.BusType.SESSION);
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			dbus.NameOwnerChanged += name_owner_changed;
@@ -35,7 +33,7 @@ namespace Gnomenu {
 			remote.Inserted += remote_inserted;
 			remote.Removed += remote_removed;
 			remote.Updated += remote_updated;
-			parser = new GMarkupDoc.Parser(this);
+			parser = new Parser(this);
 			try {
 				string xml = remote.QueryRoot(0);
 				parser.parse(xml);
@@ -52,7 +50,7 @@ namespace Gnomenu {
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			if(invalid) return;
-			weak GMarkupDoc.Node parent = lookup(parentname);
+			weak Node parent = lookup(parentname);
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
@@ -66,13 +64,13 @@ namespace Gnomenu {
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			if(invalid) return;
-			weak GMarkupDoc.Node parent = lookup(parentname);
-			weak GMarkupDoc.Node node = lookup(nodename);
+			weak Node parent = lookup(parentname);
+			weak Node node = lookup(nodename);
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			if(invalid) return;
-			weak GMarkupDoc.Tag node = lookup(nodename) as GMarkupDoc.Tag;
+			weak Tag node = lookup(nodename) as Tag;
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {

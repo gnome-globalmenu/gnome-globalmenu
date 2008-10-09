@@ -1,9 +1,8 @@
 using GLib;
 using Gtk;
-using GMarkupDoc;
-namespace Gnomenu {
-	public class Document: GLib.Object, GMarkupDoc.Document, Gtk.TreeModel {
-		public class Widget:GMarkupDoc.Tag {
+namespace GMarkupDoc {
+	public class Document: GLib.Object, DocumentModel, Gtk.TreeModel {
+		public class NamedTag: Tag {
 			public Gtk.TreeIter iter;
 			public weak string name {
 				get {return get("name");}
@@ -18,15 +17,15 @@ namespace Gnomenu {
 				if(prop == "name" && name != null)
 					(document as Document).dict.insert(name, this);
 			}
-			private Widget(Document document, string tag) {
+			private NamedTag(Document document, string tag) {
 				this.document = document;
 				this.tag = document.S(tag);
 			}
 			construct {
 				this.parent_set += (o, old) => {
 					if(this.parent == null) return;
-					if(this.parent is Widget) {
-						(document as Document).treestore.insert(out this.iter, (this.parent as Widget).iter, this.parent.index(this));
+					if(this.parent is NamedTag) {
+						(document as Document).treestore.insert(out this.iter, (this.parent as NamedTag).iter, this.parent.index(this));
 					} else {
 						(document as Document).treestore.insert(out this.iter, null, 0);
 					}
@@ -38,25 +37,25 @@ namespace Gnomenu {
 				(document as Document).dict.remove(name);
 				(this.document as Document).treestore.remove(this.iter);
 			}
-			~Widget(){
-				//debug("Widget %s is removed", name);
+			~NamedTag(){
+				//debug("NamedTag %s is removed", name);
 			}
 			public virtual void activate() {
 				(document as Document).activated(this);
-				//debug("Widget %s is activated", name);
+				//debug("NamedTag %s is activated", name);
 			}
 		}
 		public Gtk.TreeStore treestore;
-		private GMarkupDoc.Root _root;
-		public GMarkupDoc.Node root {get {return _root;}}
-		private HashTable <weak string, weak Widget> dict;
+		private Root _root;
+		public Node root {get {return _root;}}
+		private HashTable <weak string, weak NamedTag> dict;
 		construct {
-			dict = new HashTable<weak string, weak GMarkupDoc.Tag>(str_hash, str_equal);
-			_root = new GMarkupDoc.Root(this);
+			dict = new HashTable<weak string, weak Tag>(str_hash, str_equal);
+			_root = new Root(this);
 			treestore = new Gtk.TreeStore(1, typeof(constpointer));
 			this.updated += (o, node) => {
-				if(node is Widget) {
-					weak Widget w = node as Widget;
+				if(node is NamedTag) {
+					weak NamedTag w = node as NamedTag;
 					row_changed(this.treestore.get_path(w.iter), w.iter);
 				}
 			};
@@ -66,18 +65,18 @@ namespace Gnomenu {
 			treestore.row_inserted += (o, p, i) => { row_inserted(p, i);};
 			treestore.rows_reordered += (o, p, i, n) => {rows_reordered(p, i, n);};
 		}
-		public virtual GMarkupDoc.Tag CreateTag(string tag) {
-			GMarkupDoc.Tag t = new Widget(this, tag);
+		public virtual Tag CreateTag(string tag) {
+			Tag t = new NamedTag(this, tag);
 			return t;
 		}
-		public virtual weak GMarkupDoc.Node lookup(string name) { 
+		public virtual weak Node lookup(string name) { 
 			/* returning root */
 			if(name == "root") {
 				return root;
 			}
 			return dict.lookup(name);
 		}
-		public signal void activated(Widget node);
+		public signal void activated(NamedTag node);
 		public GLib.Type get_column_type (int index_) {
 			return treestore.get_column_type(index_);
 		}

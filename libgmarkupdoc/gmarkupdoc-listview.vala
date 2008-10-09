@@ -1,9 +1,7 @@
 using GLib;
 using Gtk;
-using Gnomenu;
-using GMarkupDoc;
 
-namespace Gnomenu {
+namespace GMarkupDoc {
 	[CCode (cname="gtk_tree_view_insert_column_with_data_func")]
 	public extern int gtk_tree_view_insert_column_with_data_func(
 		Gtk.TreeView tw, int pos, 
@@ -32,7 +30,7 @@ namespace Gnomenu {
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
-					weak GMarkupDoc.Tag node;
+					weak Tag node;
 					model.get(iter, 0, out node, -1);
 					weak string text = null;
 					text = node.get("label");
@@ -52,18 +50,18 @@ namespace Gnomenu {
 				}, null);
 			gtk_tree_view_insert_column_with_data_func (treeview, 1, "GMarkup", new Gtk.CellRendererText(), 
 				(tree_column, cell, model, iter) => {
-					weak GMarkupDoc.Node node;
+					weak Node node;
 					model.get(iter, 0, out node, -1);
 					(cell as Gtk.CellRendererText).text = node.summary();
 				}, null);
 			treeview.row_activated +=(treeview, path, column) => {
 				Gtk.TreeModel model = treeview.model;
-				weak GMarkupDoc.Node node;
+				weak Node node;
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
-				if(node is Document.Widget) {
-					(node as Document.Widget).activate();
+				if(node is Document.NamedTag) {
+					(node as Document.NamedTag).activate();
 				}
 			};
 		}
