@@ -22,7 +22,7 @@ namespace Gnomenu {
 		}
 		public void switch(string xid) {
 			bool need_new_menu_view = false;
-			weak GMarkupDoc.Document.Tag node = serverdoc.lookup(xid) as GMarkupDoc.Document.Tag;
+			weak GMarkupDoc.Tag node = serverdoc.lookup(xid) as GMarkupDoc.Tag;
 			if(node == null) {
 				this.remove_page_by_xid(xid);
 				bus_hash.remove(xid);
@@ -46,13 +46,13 @@ namespace Gnomenu {
 				dynamic DBus.Object client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
 				debug("widget_name %s", widget_name);
-				node = clientdoc.lookup(widget_name) as GMarkupDoc.Document.Tag;
+				node = clientdoc.lookup(widget_name) as GMarkupDoc.Tag;
 				if(node != null) {
 					MenuView view = new MenuView(null);
 					view.visible = true;
 					foreach(weak GMarkupDoc.Node c in node.children) {
-						if(!(c is GMarkupDoc.Document.Tag)) continue;
-						if((c as GMarkupDoc.Document.Tag).tag == "menubar") {
+						if(!(c is GMarkupDoc.Tag)) continue;
+						if((c as GMarkupDoc.Tag).tag == "menubar") {
 							debug("menubar found");
 							GMarkupDoc.Section section = new GMarkupDoc.Section(clientdoc, c);
 							view.document = section;

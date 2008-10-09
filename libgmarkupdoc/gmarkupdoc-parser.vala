@@ -31,7 +31,7 @@ namespace GMarkupDoc {
 			switch(parser.type) {
 				case ParseType.ROOT:
 				case ParseType.CHILD:
-					Document.Tag node = parser.document.CreateTagWithAttributes(element_name,
+					Tag node = parser.document.CreateTagWithAttributes(element_name,
 						names,
 						values
 						);
@@ -47,7 +47,7 @@ namespace GMarkupDoc {
 					if(parser.first) {
 						for(int i=0; i< names.length; i++) {
 							if(names[i] == parser.propname)
-								(parser.current as Document.Tag).set(parser.propname, values[i]);
+								(parser.current as Tag).set(parser.propname, values[i]);
 						}
 						parser.first = false;
 					}
@@ -65,7 +65,7 @@ namespace GMarkupDoc {
 			weak Parser parser = (Parser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
 			string newtext = text.ndup(text_len);
-			Document.Text node = parser.document.CreateText(newtext);
+			GMarkupDoc.Text node = parser.document.CreateText(newtext);
 			parser.current.append(node);
 		}
 		
@@ -73,7 +73,7 @@ namespace GMarkupDoc {
 			weak Parser parser = (Parser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
 			string newtext = passthrough_text.ndup(text_len);
-			Document.Special node = parser.document.CreateSpecial(newtext);
+			Special node = parser.document.CreateSpecial(newtext);
 			parser.current.append(node);
 		}
 		
@@ -107,7 +107,7 @@ namespace GMarkupDoc {
 			}
 			return true;
 		}
-		public bool update_tag(Document.Tag node, string propname, string foo) {
+		public bool update_tag(Tag node, string propname, string foo) {
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			type = ParseType.UPDATE;
 			current = node;
@@ -123,11 +123,11 @@ namespace GMarkupDoc {
 
 		}
 		private class TestDocument : Object, Document {
-			private Document.Root _root;
+			private Root _root;
 			public GMarkupDoc.Node root { get {return _root;}}
 			public TestDocument() { }
 			construct {
-				_root = new Document.Root(this);
+				_root = new Root(this);
 			}
 		}
 		public static int test (string [] args){

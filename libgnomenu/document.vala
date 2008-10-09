@@ -3,7 +3,7 @@ using Gtk;
 using GMarkupDoc;
 namespace Gnomenu {
 	public class Document: GLib.Object, GMarkupDoc.Document, Gtk.TreeModel {
-		public class Widget:GMarkupDoc.Document.Tag {
+		public class Widget:GMarkupDoc.Tag {
 			public Gtk.TreeIter iter;
 			public weak string name {
 				get {return get("name");}
@@ -47,12 +47,12 @@ namespace Gnomenu {
 			}
 		}
 		public Gtk.TreeStore treestore;
-		private GMarkupDoc.Document.Root _root;
+		private GMarkupDoc.Root _root;
 		public GMarkupDoc.Node root {get {return _root;}}
 		private HashTable <weak string, weak Widget> dict;
 		construct {
-			dict = new HashTable<weak string, weak GMarkupDoc.Document.Tag>(str_hash, str_equal);
-			_root = new GMarkupDoc.Document.Root(this);
+			dict = new HashTable<weak string, weak GMarkupDoc.Tag>(str_hash, str_equal);
+			_root = new GMarkupDoc.Root(this);
 			treestore = new Gtk.TreeStore(1, typeof(constpointer));
 			this.updated += (o, node) => {
 				if(node is Widget) {
@@ -66,8 +66,8 @@ namespace Gnomenu {
 			treestore.row_inserted += (o, p, i) => { row_inserted(p, i);};
 			treestore.rows_reordered += (o, p, i, n) => {rows_reordered(p, i, n);};
 		}
-		public virtual GMarkupDoc.Document.Tag CreateTag(string tag) {
-			GMarkupDoc.Document.Tag t = new Widget(this, tag);
+		public virtual GMarkupDoc.Tag CreateTag(string tag) {
+			GMarkupDoc.Tag t = new Widget(this, tag);
 			return t;
 		}
 		public virtual weak GMarkupDoc.Node lookup(string name) { 

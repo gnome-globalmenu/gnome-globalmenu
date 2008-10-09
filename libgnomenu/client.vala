@@ -62,7 +62,7 @@ namespace Gnomenu {
 			if(node == null) {
 				string[] names = {"name"};
 				string[] values = {name};
-				GMarkupDoc.Document.Tag node = document.CreateTagWithAttributes("widget", names, values);
+				GMarkupDoc.Tag node = document.CreateTagWithAttributes("widget", names, values);
 				parent_node.insert(node, pos);
 			}
 		}

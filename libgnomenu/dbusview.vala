@@ -71,7 +71,7 @@ namespace Gnomenu {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Document document = new Document();
-			GMarkupDoc.Parser parser = new Parser(document);
+			GMarkupDoc.Parser parser = new GMarkupDoc.Parser(document);
 			DBusView c = new DBusView(document, "/org/gnome/GlobalMenu/Document");
 			parser.parse(
 """

@@ -26,8 +26,8 @@ public class Server:Gnomenu.DBusView {
 		List<weak GMarkupDoc.Node> to_remove;
 
 		foreach (weak GMarkupDoc.Node node in document.root.children) {
-			if(node is GMarkupDoc.Document.Tag) {
-				weak GMarkupDoc.Document.Tag tagnode = node as GMarkupDoc.Document.Tag;
+			if(node is GMarkupDoc.Tag) {
+				weak GMarkupDoc.Tag tagnode = node as GMarkupDoc.Tag;
 				if(tagnode.get("bus") == bus) {
 					to_remove.append(tagnode);
 				}
@@ -37,11 +37,11 @@ public class Server:Gnomenu.DBusView {
 			document.root.remove(node);
 		}
 	}
-	private weak GMarkupDoc.Document.Tag? find_node_by_xid(string xid) {
-		return document.lookup(xid) as GMarkupDoc.Document.Tag;
+	private weak GMarkupDoc.Tag? find_node_by_xid(string xid) {
+		return document.lookup(xid) as GMarkupDoc.Tag;
 	}
 	public void RegisterWindow (string client_bus, string xid) {
-		GMarkupDoc.Document.Tag node = find_node_by_xid(xid);
+		GMarkupDoc.Tag node = find_node_by_xid(xid);
 		if(node!=null) {
 			if(node.get("bus") == client_bus) {
 				return;
@@ -59,7 +59,7 @@ public class Server:Gnomenu.DBusView {
 		message("register window %s %s", client_bus, xid);
 	}
 	public void RemoveWindow (string client_bus, string xid) {
-		GMarkupDoc.Document.Tag node= find_node_by_xid(xid);
+		GMarkupDoc.Tag node= find_node_by_xid(xid);
 		message("remove window %s %s", client_bus, xid);
 		if(node != null)
 			if(node.get("bus") == client_bus)

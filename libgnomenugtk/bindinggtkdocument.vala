@@ -30,7 +30,7 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
-		public override GMarkupDoc.Document.Tag CreateTag(string tag) {
+		public override GMarkupDoc.Tag CreateTag(string tag) {
 			return new Widget(this, tag);
 		}
 		private void list_to_array(List<weak string>? l, ref string[] array){

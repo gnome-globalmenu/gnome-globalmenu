@@ -32,7 +32,7 @@ namespace Gnomenu {
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
-					weak GMarkupDoc.Document.Tag node;
+					weak GMarkupDoc.Tag node;
 					model.get(iter, 0, out node, -1);
 					weak string text = null;
 					text = node.get("label");

@@ -15,8 +15,11 @@ libgmarkupdoc_LTLIBRARIES = \
 		libgmarkupdoc.la
 
 libgmarkupdoc_la_VALASOURCES = \
-		xmlparser.vala \
-		xml.vala \
+		gmarkupdoc.vala \
+		gmarkupdoc-document.vala \
+		gmarkupdoc-node.vala \
+		gmarkupdoc-section.vala \
+		gmarkupdoc-parser.vala \
 		$(NULL)
 
 

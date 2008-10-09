@@ -26,7 +26,7 @@ namespace Gnomenu {
 		}
 		construct {
 			invalid = false;
-			_root = new GMarkupDoc.Document.Root(this);
+			_root = new GMarkupDoc.Root(this);
 			conn = Bus.get(DBus.BusType.SESSION);
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			dbus.NameOwnerChanged += name_owner_changed;
@@ -72,7 +72,7 @@ namespace Gnomenu {
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			if(invalid) return;
-			weak GMarkupDoc.Document.Tag node = lookup(nodename) as GMarkupDoc.Document.Tag;
+			weak GMarkupDoc.Tag node = lookup(nodename) as GMarkupDoc.Tag;
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
