@@ -1,6 +1,0 @@
-#! /bin/sh
-echo The svn version is `svnversion`. Press any key to edit the .spec file.
-read
-vim *.spec
-cp *.patch ~/rpmbuild/SOURCES
-rpmbuild -ba *.spec

@@ -1,2 +1,0 @@
-#!/bin/sh
-env LD_LIBRARY_PATH=../libgnomenu/.libs:gtk+-aqd/gtk/.libs $*
