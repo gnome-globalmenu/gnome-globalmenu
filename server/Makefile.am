@@ -24,7 +24,6 @@ BUILT_SOURCES = .vala.stamp
 
 
 org_gnome_GlobalMenu_Server_VALASOURCES = \
-	server.vala \
 	org.gnome.GlobalMenu.Server.vala \
 	$(NULL)
 
