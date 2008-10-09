@@ -4,6 +4,8 @@ AM_CPPFLAGS = \
 	-g \
 	$(LIBGNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
+	-I$(top_srcdir)/libgmarkupdoc-utils \
+	-I$(top_builddir)/libgmarkupdoc-utils \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
@@ -14,10 +16,13 @@ AM_VALAC_FLAGS = \
 	$(LIBGNOMENU_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
 	--vapidir=$(top_builddir)/libmarkupdoc  \
+	--vapidir=$(top_srcdir)/libgmarkupdoc-utils  \
+	--vapidir=$(top_builddir)/libmarkupdoc-utils  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
 	--vapidir=$(top_builddir)/libgnomenu  \
 	--pkg gnomenu  \
 	--pkg gmarkupdoc  \
+	--pkg gmarkupdoc-utils  \
 	$(NULL)
 	
 BUILT_SOURCES = .vala.stamp
