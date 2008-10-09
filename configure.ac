@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, 0.5)
+AC_INIT(gnome-globalmenu, [0.6], [rainwoodman@gmail.com], [gnome-globalmenu] )
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 GNOME_COMMON_INIT
@@ -8,14 +8,6 @@ GNOME_MAINTAINER_MODE_DEFINES
 
 IT_PROG_INTLTOOL([0.35.0])
 
-LIBGNOMENU_LT_VERSION=0:0:1
-AC_SUBST(LIBGNOMENU_LT_VERSION)
-
-LIBGNOMENU_VERSION=0x00050001
-
-AC_DEFINE_UNQUOTED([LIBGNOMENU_VERSION], $LIBGNOMENU_VERSION, [Version])
-AC_SUBST(LIBGNOMENU_VERSION)
-
 AC_ISC_POSIX
 AC_PROG_CC
 AM_PROG_CC_STDC
@@ -23,87 +15,64 @@ AC_HEADER_STDC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
-dnl begin: tracing
-AC_MSG_CHECKING(--enable-tracing arguement)
-AC_ARG_ENABLE(tracing,
-	[	--enable-tracing Enable many debugging information (1,2,no)],
-	[	enable_tracing=$enableval ],
-	[	enable_tracing="1"	])
-AC_MSG_RESULT($enable_tracing)
+AC_PATH_PROG(VALAC_BIN, valac, valac, [`pwd`/vala$PATH_SEPARATOR$PATH])
+VALAC='$(VALAC_BIN) $(VALAC_FLAGS)'
+VALAC_FLAGS='--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'
+AC_SUBST(VALAC_BIN)
+AC_SUBST(VALAC)
+AC_SUBST(VALAC_FLAGS)
+AC_SUBST(AM_VALAC_FLAGS)
 
-if test "$enable_tracing" == "no"; then
-	AC_DEFINE([ENABLE_TRACING], 0, [enable tracing])
-fi
-if test "$enable_tracing" == "1"; then
-	AC_DEFINE([ENABLE_TRACING], 1, [enable tracing])
-fi
-if test "$enable_tracing" == "2"; then
-	AC_DEFINE([ENABLE_TRACING], 2, [enable tracing])
-fi
-if test "$enable_tracing" == "3"; then
-	AC_DEFINE([ENABLE_TRACING], 3, [enable tracing])
-fi
-dnl end:tracing
+dnl begin: GMarkupDoc - base
+PKG_CHECK_MODULES(GMARKUPDOC_BASE, [glib-2.0])
+AC_SUBST(GMARKUPDOC_BASE_CFLAGS)
+AC_SUBST(GMARKUPDOC_BASE_LIBS)
+dnl begin: GMarkupDoc - named
+PKG_CHECK_MODULES(GMARKUPDOC_NAMED, [glib-2.0, gtk+-2.0])
+AC_SUBST(GMARKUPDOC_NAMED_CFLAGS)
+AC_SUBST(GMARKUPDOC_NAMED_LIBS)
+GMARKUPDOC_NAMED_VALA_PKGS="--pkg gtk+-2.0"
+AC_SUBST(GMARKUPDOC_NAMED_VALA_PKGS)
+dnl begin: GMarkupDoc - dbus
+PKG_CHECK_MODULES(GMARKUPDOC_DBUS, [glib-2.0, gtk+-2.0, dbus-glib-1])
+AC_SUBST(GMARKUPDOC_DBUS_CFLAGS)
+AC_SUBST(GMARKUPDOC_DBUS_LIBS)
+GMARKUPDOC_DBUS_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
+AC_SUBST(GMARKUPDOC_DBUS_VALA_PKGS)
 
-dnl begin:libgnomenu
+dnl begin: Gnomenu
+PKG_CHECK_MODULES(GNOMENU, [glib-2.0 dbus-glib-1 gtk+-2.0])
+AC_SUBST(GNOMENU_CFLAGS)
+AC_SUBST(GNOMENU_LIBS)
+GNOMENU_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
+AC_SUBST(GNOMENU_VALA_PKGS)
 
-PKG_CHECK_MODULES(LIBGNOMENU, [gtk+-2.0 >= 2.10 gdk-2.0])
-PKG_CHECK_MODULES(GNOMENU_SERVER, [gtk+-2.0 >= 2.10 gdk-2.0])
-
-PKG_CHECK_MODULES(TEST_SUITE, [gtk+-2.0 >= 2.10 gdk-2.0 libglade-2.0])
-
-AC_SUBST(LIBGNOMENU_CFLAGS)
-AC_SUBST(LIBGNOMENU_LIBS)
-AC_SUBST(GNOMENU_SERVER_CFLAGS)
-AC_SUBST(GNOMENU_SERVER_LIBS)
-AC_SUBST(TEST_SUITE_CFLAGS)
-AC_SUBST(TEST_SUITE_LIBS)
-dnl end:libgnomenu
-
-dnl begin:libgtkhotkey
-PKG_CHECK_MODULES(GTK_HOTKEY, [glib-2.0 >= 2.15.6 gobject-2.0 >= 2.15.6 gio-2.0 >= 2.15.6 gtk+-2.0 >= 2.12])
-	AC_SUBST(GTK_HOTKEY_CFLAGS)
-	AC_SUBST(GTK_HOTKEY_LIBS)
-dnl end:
-
-dnl begin: gnome-globalmenu-applet
+dnl begin:applet
 AC_MSG_CHECKING(--enable-gnome-applet argument)
 AC_ARG_ENABLE(gnome-applet,
 	[	--enable-gnome-applet	Include gnome-applet interface ],
 	[	enable_gnome_applet=$enableval ],
 	[	enable_gnome_applet="yes" ])
-AC_DEFINE([ENABLE_GNOME_APPLET], [], [enable gnome applet])
-AM_CONDITIONAL([ENABLE_GNOME_APPLET], [test "$enable_gnome_applet" = "yes" ])
+AC_DEFINE([ENABLE_PANEL_APPLET], [], [enable gnome applet])
+AM_CONDITIONAL([ENABLE_PANEL_APPLET], [test "$enable_gnome_applet" = "yes" ])
 AC_MSG_RESULT($enable_gnome_applet)
-if test "$enable_gnome_applet" = "yes"; then
-	PKG_CHECK_MODULES(GNOME_GLOBALMENU_APPLET, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libpanelapplet-2.0 bonobo-activation-2.0, libglade-2.0, libgnome-menu, libgnomeui-2.0, gnome-desktop-2.0])
-	AC_SUBST(GNOME_GLOBALMENU_APPLET_CFLAGS)
-	AC_SUBST(GNOME_GLOBALMENU_APPLET_LIBS)
-	AC_DEFINE(ENABLE_GNOME_APPLET)
-	BONOBO_SERVER_FILES_PATH=`pkg-config --define-variable=prefix=\$prefix --variable=libdir bonobo-activation-2.0`/bonobo/servers
-	AC_SUBST(BONOBO_SERVER_FILES_PATH)
-fi
-dnl end:gnome-globalemnu-applet
 
-dnl begin:xfce-globalmenu-plugin
-AC_MSG_CHECKING(--enable-xfce-plugin argument)
-AC_ARG_ENABLE(xfce-plugin,
-	[	--enable-xfce-plugin	Include xfce-plugin interface ],
-	[	enable_xfce_plugin=$enableval ],
-	[	enable_xfce_plugin="no" ])
-AC_DEFINE([ENABLE_XFCE_PLUGIN], [], [enable xfce plugin])
-AM_CONDITIONAL([ENABLE_XFCE_PLUGIN], [test "$enable_xfce_plugin" = "yes" ])
-AC_MSG_RESULT($enable_xfce_plugin)
-if test "$enable_xfce_plugin" = "yes"; then
-	PKG_CHECK_MODULES(XFCE_GLOBALMENU_PLUGIN, [gtk+-2.0 >= 2.10, gdk-2.0, libwnck-1.0, libglade-2.0, libxfce4panel-1.0])
-	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_CFLAGS)
-	AC_SUBST(XFCE_GLOBALMENU_PLUGIN_LIBS)
-	AC_DEFINE(ENABLE_XFCE_PLUGIN)
-	XFCE_DESKTOP_FILES_PATH=`pkg-config --variable=desktopdatadir libxfce4panel-1.0`
-	AC_SUBST(XFCE_DESKTOP_FILES_PATH)
-	AC_MSG_RESULT(XFCE_DESKTOP_FILES_PATH);
+if test "$enable_gnome_applet" = "yes"; then
+PKG_CHECK_MODULES(GLOBALMENU_PANELAPPLET, [glib-2.0 dbus-glib-1 gtk+-2.0 libwnck-1.0 libpanelapplet-2.0])
 fi
-dnl end:xfce-globalmenu-plugin
+AC_SUBST(GLOBALMENU_PANELAPPLET_CFLAGS)
+AC_SUBST(GLOBALMENU_PANELAPPLET_LIBS)
+GLOBALMENU_PANELAPPLET_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg libpanelapplet-2.0"
+AC_SUBST(GLOBALMENU_PANELAPPLET_VALA_PKGS)
+
+BONOBO_SERVER_DIR="$libdir/bonobo/servers"
+AC_SUBST(BONOBO_SERVER_DIR)
+AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir for BONOBO is])
+
+dnl end:applet
+
+VALA_VAPI_DIR="$datadir/vala/vapi"
+AC_SUBST(VALA_VAPI_DIR)
 
 dnl begin:gettext
 GETTEXT_PACKAGE=gnome-globalmenu
@@ -115,6 +84,24 @@ GNOME_GLOBALMENU_LOCALEDIR=[${datadir}/locale]
 AC_SUBST(GNOME_GLOBALMENU_LOCALEDIR)
 dnl end:gettext
 
+dnl org.gnome.GlobalMenu.Server
+PKG_CHECK_MODULES(ORG_GNOME_GLOBALMENU_SERVER, [glib-2.0 dbus-glib-1 gtk+-2.0])
+AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_CFLAGS)
+AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_LIBS)
+ORG_GNOME_GLOBALMENU_SERVER_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
+AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_VALA_PKGS)
+
+DBUS_SERVICES_DIR="$datadir/dbus-1/services"
+AC_SUBST(DBUS_SERVICES_DIR)
+AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
+
+dnl gnomenu-navigator
+PKG_CHECK_MODULES(GNOMENU_NAVIGATOR, [glib-2.0 dbus-glib-1 gtk+-2.0])
+AC_SUBST(GNOMENU_NAVIGATOR_CFLAGS)
+AC_SUBST(GNOMENU_NAVIGATOR_LIBS)
+GNOMENU_NAVIGATOR_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
+AC_SUBST(GNOMENU_NAVIGATOR_VALA_PKGS)
+
 AM_GCONF_SOURCE_2
 
 dnl begin: glade
@@ -122,32 +109,16 @@ dnl end: glade
 
 GTK_DOC_CHECK([1.0])
 GNOME_DOC_INIT
-dnl if test "$enable_gtk_doc" = "yes" ; then
-dnl	AC_SUBST(DIA)
-dnl	AC_CHECK_PROGS(DIA, dia)
-dnl	if test x$DIA = "x" ; then
-dnl		AC_MSG_ERROR([dia is needed to build the doc])
-dnl	fi
-dnl fi
 
 AC_OUTPUT(
-[
 Makefile
+vapi-compat/Makefile
+libgmarkupdoc/Makefile
 libgnomenu/Makefile
-libgnomenu/test.sh
-libgtkhotkey/Makefile
+libgnomenugtk/Makefile
+server/Makefile
+navigator/Makefile
+tests/Makefile
+applet/Makefile
 po/Makefile.in
-gtk+-aqd/Makefile
-doc/Makefile
-doc/reference/Makefile
-doc/reference/libgnomenu/Makefile
-doc/reference/libgtkhotkey/Makefile
-libgnomenu/libgnomenu.pc
-gnome-applet/Makefile
-xfce-plugin/Makefile
-test/Makefile
-],
-[
-chmod +x libgnomenu/test.sh
-]
 )

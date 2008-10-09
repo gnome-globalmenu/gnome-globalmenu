@@ -22,10 +22,7 @@ cat gnome-globalmenu.spec.tmpl | \
 sed 's/@SVNVERSION@/'$version'/' | \
 sed 's/@RELEASE@/'$dist'/' >  gnome-globalmenu.spec
 make dist
-cp *.tar.gz $RPMDEVROOT/SOURCES/
+cp gnome-globalmenu-0.6.tar.gz $RPMDEVROOT/SOURCES/
 rpmbuild -ba *.spec && \
-(
-cd $RPMDEVROOT/RPMS/$uname/; 
-tar -cjvf - *global*$version-$dist*.rpm *gnomenu*$version-$dist*.rpm
-) > fedora-packages-0.4.svn$version-$dist-$uname.tar.bz2
 rm gnome-globalmenu.spec
+cp gnome-globalmenu-0.6.tar.gz gnome-globalmenu-0.6.svn$version.tar.gz

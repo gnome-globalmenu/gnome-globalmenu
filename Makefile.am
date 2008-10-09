@@ -1,23 +1,22 @@
-#
-DISTCHECK_CONFIGURE_FLAGS == --enable-gtk-doc
-SUBDIRS = libgnomenu libgtkhotkey test gtk+-aqd po xfce-plugin gnome-applet
+NULL =
+SUBDIRS = vapi-compat libgmarkupdoc libgnomenu server navigator libgnomenugtk applet tests po
 
-SUBDIRS += doc
+AM_CPPFLAGS = \
+		-include $(CONFIG_HEADER) \
+		$(NULL)
 
-gnome_globalmenu_docdir = ${docdir}
-gnome_globalmenu_doc_DATA = \
-    README\
-    COPYING\
-    AUTHORS\
-    ChangeLog\
-    INSTALL\
-    NEWS
-EXTRA_DIST = intltool-extract.in intltool-merge.in intltool-update.in
-DISTCLEANFILES = intltool-extract intltool-merge intltool-update po/.intltool-merge-cache
+EXTRA_DIST = \
+	intltool-extract.in \
+	intltool-update.in \
+	intltool-merge.in \
+	$(NULL)
 
-dist-hook:
-	for specfile in *.spec.in; do \
-        if test -f $$specfile; then \
-            cp -p $$specfile $(distdir); \
-        fi \
-    done
+DISTCLEANFILES = \
+	intltool-extract \
+	intltool-update \
+	intltool-merge \
+	po/.intltool-merge-cache \
+	$(NULL)
+
+any:
+	echo $(VALAC) $(GNOMENU_SERVICE_VALA_PKGS)

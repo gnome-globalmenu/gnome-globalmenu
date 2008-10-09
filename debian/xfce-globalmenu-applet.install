@@ -1,5 +1,0 @@
-debian/tmp/usr/lib/libgnomenu.so*
-debian/tmp/etc
-debian/tmp/usr/lib/gnome2-globalmenu-applet/xfce-globalmenu-plugin
-debian/tmp/usr/share/xfce4/panel-plugins
-debian/tmp/usr/share/gnome-globalmenu

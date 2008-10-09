@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.gnome.GlobalMenu.Server
+Exec=@LOCATION@/org.gnome.GlobalMenu.Server

@@ -1,58 +1,76 @@
-#
+NULL = 
 
-AM_CFLAGS = -g $(LIBGNOMENU_CFLAGS)
-AM_CFLAGS += -DSYSCONFDIR=\"$(sysconfdir)\"
+AM_VALAC_FLAGS =  \
+	$(GNOMENU_VALA_PKGS) \
+	--vapidir=$(top_srcdir)/libgmarkupdoc \
+	--pkg gmarkupdoc \
+	--pkg gtkcompat \
+	$(NULL)
 
-moduledir = $(libdir)
+AM_CPPFLAGS = \
+	-g \
+	-I$(top_srcdir)/libgmarkupdoc \
+	$(GNOMENU_CFLAGS) \
+	-include $(CONFIG_HEADER) \
+	$(NULL)
 
-module_LTLIBRARIES = libgnomenu.la
+BUILT_SOURCES = \
+	gnomenu.h \
+	libgnomenu.vala.stamp \
+	$(libgnomenu_la_VALASOURCES:.vala=.c) \
+	$(libgnomenu_la_VALASOURCES:.vala=.h) \
+	$(NULL)
 
-bin_PROGRAMS = gnomenu-server gnomenu-call
-LDADD = libgnomenu.la
+libgnomenudir = $(libdir)
+libgnomenu_LTLIBRARIES = \
+		libgnomenu.la
+
+libgnomenu_la_VALASOURCES = \
+		gnomenu-client.vala \
+		gnomenu-menuview.vala \
+		gnomenu-menubar.vala \
+		gnomenu-server.vala \
+		$(NULL)
+
 
 libgnomenu_la_SOURCES = \
-	ipcserverbase.c \
-	ipcserverbase.h \
-	ipcserver.c \
-	ipcserver.h \
-	ipcdispatcher.c \
-	ipcdispatcher.h \
-	ipcclient.c \
-	ipcclient.h \
-	ipccommand.c \
-	ipccommand.h \
-	ipcevent.c \
-	ipcevent.h \
-	ipceventsink.c \
-	ipceventsink.h \
-	ipceventsource.c \
-	ipceventsource.h \
-	ipcutils.c \
-	ipcutils.h \
-	ipc.h  \
-	binding-gtk.h \
-	binding-gtk.c \
-	main.c 
-
-libgnomenu_la_LDFLAGS = \
-	-g \
-	-version-info=$(LIBGNOMENU_LT_VERSION) \
-	-no-undefined \
-	-export-dynamics
-
-libgnomenu_la_LIBADD = $(LIBGNOMENU_LIBS)
-
-$(libgnomenu_la_OBJECTS) : $(BUILT_SOURCES)
+		$(libgnomenu_la_VALASOURCES:.vala=.c) \
+		$(libgnomenu_la_VALASOURCES:.vala=.h) \
+		$(NULL)
 
 
-libgnomenuincludedir = $(includedir)/libgnomenu
-libgnomenuinclude_HEADERS =
+gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
+	$(VALAC) -C --library gnomenu $^
+	touch $@
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libgnomenu.pc
+libgnomenu_la_LIBADD = \
+		$(GNOMENU_LIBS) \
+		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
+		$(NULL)
 
-EXTRA_DIST = ipccommand.dtd
+_HEADERS_ = \
+		$(libgnomenu_la_VALASOURCES:.vala=.h)
 
-CLEANFILES = $(BUILT_SOURCES)
+gnomenu.h: $(_HEADERS_) Makefile
+	echo '#ifndef _GNOMENU_H_' > $@ ;
+	echo '#define _GNOMENU_H_' >> $@ ;
+	for i in $(_HEADERS_); do \
+		echo '#include "'$$i'"' >> $@ ;\
+	done;
+	echo '#endif' >> $@ ;
 
-dist-hook:
+EXTRA_DIST = \
+	 $(BUILT_SOURCES) \
+	 $(libgnomenu_la_VALASOURCES)
+
+DISTCLEANFILES = gnomenu.h
+
+vapidir = $(VALA_VAPI_DIR)
+dist_vapi_DATA = gnomenu.vapi
+
+headerdir = $(includedir)/libgnomenu
+dist_header_DATA = \
+	gnomenu.h \
+	$(_HEADERS_) \
+	$(NULL)
+
