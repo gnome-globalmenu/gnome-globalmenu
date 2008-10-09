@@ -1,6 +1,5 @@
 using GLib;
 using Gtk;
-using XML;
 using Gnomenu;
 using Wnck;
 using WnckCompat;

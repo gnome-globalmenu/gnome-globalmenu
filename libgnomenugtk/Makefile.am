@@ -6,8 +6,6 @@ AM_CPPFLAGS = \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
-	-I$(top_srcdir)/libgmarkupdoc-utils \
-	-I$(top_builddir)/libgmarkupdoc-utils \
 	-I$(top_srcdir)/libgnomenu \
 	-I$(top_builddir)/libgnomenu \
 	$(NULL)
@@ -15,12 +13,9 @@ AM_VALAC_FLAGS =\
 	$(LIBGNOMENU_VALA_PKGS) \
  	--vapidir=$(top_srcdir)/libgmarkupdoc \
  	--vapidir=$(top_builddir)/libgmarkupdoc \
- 	--vapidir=$(top_srcdir)/libgmarkupdoc-utils \
- 	--vapidir=$(top_builddir)/libgmarkupdoc-utils \
  	--vapidir=$(top_srcdir)/libgnomenu \
  	--vapidir=$(top_builddir)/libgnomenu \
 	--pkg=gmarkupdoc \
-	--pkg=gmarkupdoc-utils \
 	--pkg=gnomenu \
 	$(NULL)
 
