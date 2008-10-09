@@ -3,7 +3,7 @@ using Gdk;
 using Gtk;
 using Gnomenu;
 using GtkAQD;
-using XML;
+using GMarkupDoc;
 
 namespace GnomenuGtk {
 	[CCode (cname = "_patch_menu_bar")]
@@ -77,7 +77,7 @@ namespace GnomenuGtk {
 		weak string name = document().wrap(widget);
 		if(document().lookup(name) != null) return;
 
-		weak XML.Node parent_node;
+		weak GMarkupDoc.Node parent_node;
 		if(parent_widget == null) {
 			parent_node = document().root;
 		}

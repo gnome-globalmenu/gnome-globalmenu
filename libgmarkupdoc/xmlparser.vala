@@ -1,5 +1,5 @@
 using GLib;
-namespace XML {
+namespace GMarkupDoc {
 	public class Parser {
 		private weak Node current;
 		private Document document;
@@ -124,7 +124,7 @@ namespace XML {
 		}
 		private class TestDocument : Object, Document {
 			private Document.Root _root;
-			public XML.Node root { get {return _root;}}
+			public GMarkupDoc.Node root { get {return _root;}}
 			public TestDocument() { }
 			construct {
 				_root = new Document.Root(this);

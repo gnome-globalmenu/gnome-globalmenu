@@ -2,12 +2,12 @@ using GLib;
 using Gtk;
 using Gnomenu;
 using GtkAQD;
-using XML;
+using GMarkupDoc;
 
 namespace Gnomenu {
 	public class MenuView : GtkAQD.MenuBar {
-		private XML.Document? _document;
-		public weak XML.Document? document {
+		private GMarkupDoc.Document? _document;
+		public weak GMarkupDoc.Document? document {
 			get {
 				return _document;
 			} set {
@@ -22,7 +22,7 @@ namespace Gnomenu {
 					document.inserted += document_inserted;
 					document.updated += document_updated;
 					document.removed += document_removed;
-					foreach(weak XML.Node child in document.root.children) {
+					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is Document.Widget) {
 							switch((child as Document.Widget).tag) {
 								case "item":
@@ -75,7 +75,7 @@ namespace Gnomenu {
 			switch(node.tag) {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
-					foreach(weak XML.Node child in node.children) {
+					foreach(weak GMarkupDoc.Node child in node.children) {
 						if(child is Document.Widget) {
 							switch((child as Document.Widget).tag){
 								case "item":
@@ -129,7 +129,7 @@ namespace Gnomenu {
 						}
 						break;
 					}
-					foreach(weak XML.Node child in node.children) {
+					foreach(weak GMarkupDoc.Node child in node.children) {
 						if(child is Document.Widget) {
 							if((child as Document.Widget).tag == "menu")
 								gtk.submenu = create_widget(child as Document.Widget);
@@ -151,7 +151,7 @@ namespace Gnomenu {
 				this.remove(w);
 			}
 		}
-		private void document_inserted(XML.Document document, XML.Node p, XML.Node n, int pos) {
+		private void document_inserted(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
 			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(p == document.root ) {
@@ -174,7 +174,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		private void document_removed(XML.Document document, XML.Node p, XML.Node n) {
+		private void document_removed(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
 			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(p == document.root) {
@@ -257,7 +257,7 @@ namespace Gnomenu {
 					(gtk as Gtk.MenuItem).activate += menu_item_activated;
 				}
 		}
-		private void document_updated(XML.Document document, XML.Node n, string prop) {
+		private void document_updated(GMarkupDoc.Document document, GMarkupDoc.Node n, string prop) {
 			if(!(n is Document.Widget)) return;
 			weak Document.Widget node = n as Document.Widget;
 			if(node != null) {

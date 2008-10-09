@@ -1,6 +1,6 @@
 using GLib;
 using GLibCompat;
-namespace XML {
+namespace GMarkupDoc {
 	public abstract class Node: GLib.Object {
 		private bool disposed;
 		protected int freezed;
@@ -78,20 +78,20 @@ namespace XML {
 			get { return _document;} 
 			construct {_document = value;}
 		}
-		private weak XML.Node _root;
-		private XML.Node pseudo_root; 
+		private weak GMarkupDoc.Node _root;
+		private GMarkupDoc.Node pseudo_root; 
 		private bool invalid;
 		private bool disposed;
-		public weak XML.Node root {
+		public weak GMarkupDoc.Node root {
 			get {return _root;}
 		}
-		public weak XML.Node set_root {
+		public weak GMarkupDoc.Node set_root {
 			construct {
 				_root = value;
 				(_root as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
 			}
 		}
-		public Section(Document document, XML.Node root) {
+		public Section(Document document, GMarkupDoc.Node root) {
 			this.document = document;
 			this.set_root = root;
 		}
@@ -102,8 +102,8 @@ namespace XML {
 					(_root as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, this);
 			}
 		}
-		private bool is_inside(XML.Node node) {
-			for(weak XML.Node n = node;
+		private bool is_inside(GMarkupDoc.Node node) {
+			for(weak GMarkupDoc.Node n = node;
 				n != null;
 				n = n.parent) {
 				if(n == root)
@@ -149,7 +149,7 @@ namespace XML {
 	}
 	public interface Document: GLib.Object {
 		private static StringChunk strings = null;
-		public abstract weak XML.Node root {get;}
+		public abstract weak GMarkupDoc.Node root {get;}
 		public virtual Document.Text CreateText(string text) {
 			return new Document.Text(this, text);
 		}

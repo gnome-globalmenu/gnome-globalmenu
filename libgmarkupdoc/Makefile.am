@@ -38,3 +38,5 @@ EXTRA_DIST = libgmarkupdoc.vala.stamp $(libgmarkupdoc_la_VALASOURCES)
 
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = gmarkupdoc.vapi
+headerdir = $(includedir)/libgmarkupdoc
+dist_header_DATA = $(libgmarkupdoc_la_VALASOURCES:%.vala=%.h)

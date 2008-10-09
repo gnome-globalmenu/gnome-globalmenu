@@ -1,7 +1,7 @@
 using GLib;
 using Gtk;
 using DBus;
-using XML;
+using GMarkupDoc;
 using Gnomenu;
 
 [DBus (name = "org.gnome.GlobalMenu.Server")]
@@ -23,25 +23,25 @@ public class Server:Gnomenu.DBusView {
 	}
 	private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 		if(new_owner != "") return;
-		List<weak XML.Node> to_remove;
+		List<weak GMarkupDoc.Node> to_remove;
 
-		foreach (weak XML.Node node in document.root.children) {
-			if(node is XML.Document.Tag) {
-				weak XML.Document.Tag tagnode = node as XML.Document.Tag;
+		foreach (weak GMarkupDoc.Node node in document.root.children) {
+			if(node is GMarkupDoc.Document.Tag) {
+				weak GMarkupDoc.Document.Tag tagnode = node as GMarkupDoc.Document.Tag;
 				if(tagnode.get("bus") == bus) {
 					to_remove.append(tagnode);
 				}
 			}
 		}
-		foreach(weak XML.Node node in to_remove) {
+		foreach(weak GMarkupDoc.Node node in to_remove) {
 			document.root.remove(node);
 		}
 	}
-	private weak XML.Document.Tag? find_node_by_xid(string xid) {
-		return document.lookup(xid) as XML.Document.Tag;
+	private weak GMarkupDoc.Document.Tag? find_node_by_xid(string xid) {
+		return document.lookup(xid) as GMarkupDoc.Document.Tag;
 	}
 	public void RegisterWindow (string client_bus, string xid) {
-		XML.Document.Tag node = find_node_by_xid(xid);
+		GMarkupDoc.Document.Tag node = find_node_by_xid(xid);
 		if(node!=null) {
 			if(node.get("bus") == client_bus) {
 				return;
@@ -59,7 +59,7 @@ public class Server:Gnomenu.DBusView {
 		message("register window %s %s", client_bus, xid);
 	}
 	public void RemoveWindow (string client_bus, string xid) {
-		XML.Document.Tag node= find_node_by_xid(xid);
+		GMarkupDoc.Document.Tag node= find_node_by_xid(xid);
 		message("remove window %s %s", client_bus, xid);
 		if(node != null)
 			if(node.get("bus") == client_bus)

@@ -1,7 +1,7 @@
 using GLib;
 using Gtk;
 using Gnomenu;
-using XML;
+using GMarkupDoc;
 
 namespace Gnomenu {
 	[CCode (cname="gtk_tree_view_insert_column_with_data_func")]
@@ -32,7 +32,7 @@ namespace Gnomenu {
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
-					weak XML.Document.Tag node;
+					weak GMarkupDoc.Document.Tag node;
 					model.get(iter, 0, out node, -1);
 					weak string text = null;
 					text = node.get("label");
@@ -50,15 +50,15 @@ namespace Gnomenu {
 					else
 						cell.background = "white";
 				}, null);
-			gtk_tree_view_insert_column_with_data_func (treeview, 1, "XML", new Gtk.CellRendererText(), 
+			gtk_tree_view_insert_column_with_data_func (treeview, 1, "GMarkup", new Gtk.CellRendererText(), 
 				(tree_column, cell, model, iter) => {
-					weak XML.Node node;
+					weak GMarkupDoc.Node node;
 					model.get(iter, 0, out node, -1);
 					(cell as Gtk.CellRendererText).text = node.summary();
 				}, null);
 			treeview.row_activated +=(treeview, path, column) => {
 				Gtk.TreeModel model = treeview.model;
-				weak XML.Node node;
+				weak GMarkupDoc.Node node;
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);

@@ -2,7 +2,7 @@ using GLib;
 using Gdk;
 using Gtk;
 using DBus;
-using XML;
+using GMarkupDoc;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:DBusView {
@@ -40,7 +40,7 @@ namespace Gnomenu {
 		}
 
 		private weak Document.Widget? find_window_by_xid(string xid) {
-			foreach (weak XML.Node node in document.root.children) {
+			foreach (weak GMarkupDoc.Node node in document.root.children) {
 				if(node is Document.Widget) {
 					weak Document.Widget widget = node as Document.Widget;
 					if(widget.get("xid") == xid) {
@@ -51,8 +51,8 @@ namespace Gnomenu {
 			return null;
 		}
 		private void add_widget(string? parent, string name, int pos = -1) {
-			weak XML.Node node = document.lookup(name);
-			weak XML.Node parent_node;
+			weak GMarkupDoc.Node node = document.lookup(name);
+			weak GMarkupDoc.Node parent_node;
 			if(parent == null) {
 				parent_node = document.root;
 			}
@@ -62,7 +62,7 @@ namespace Gnomenu {
 			if(node == null) {
 				string[] names = {"name"};
 				string[] values = {name};
-				XML.Document.Tag node = document.CreateTagWithAttributes("widget", names, values);
+				GMarkupDoc.Document.Tag node = document.CreateTagWithAttributes("widget", names, values);
 				parent_node.insert(node, pos);
 			}
 		}

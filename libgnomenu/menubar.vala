@@ -2,7 +2,7 @@ using GLib;
 using Gtk;
 using GtkCompat;
 using Gnomenu;
-using XML;
+using GMarkupDoc;
 using DBus;
 namespace Gnomenu {
 	public class MenuBar : Gtk.Notebook {
@@ -22,7 +22,7 @@ namespace Gnomenu {
 		}
 		public void switch(string xid) {
 			bool need_new_menu_view = false;
-			weak XML.Document.Tag node = serverdoc.lookup(xid) as XML.Document.Tag;
+			weak GMarkupDoc.Document.Tag node = serverdoc.lookup(xid) as GMarkupDoc.Document.Tag;
 			if(node == null) {
 				this.remove_page_by_xid(xid);
 				bus_hash.remove(xid);
@@ -46,15 +46,15 @@ namespace Gnomenu {
 				dynamic DBus.Object client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
 				debug("widget_name %s", widget_name);
-				node = clientdoc.lookup(widget_name) as XML.Document.Tag;
+				node = clientdoc.lookup(widget_name) as GMarkupDoc.Document.Tag;
 				if(node != null) {
 					MenuView view = new MenuView(null);
 					view.visible = true;
-					foreach(weak XML.Node c in node.children) {
-						if(!(c is XML.Document.Tag)) continue;
-						if((c as XML.Document.Tag).tag == "menubar") {
+					foreach(weak GMarkupDoc.Node c in node.children) {
+						if(!(c is GMarkupDoc.Document.Tag)) continue;
+						if((c as GMarkupDoc.Document.Tag).tag == "menubar") {
 							debug("menubar found");
-							XML.Section section = new XML.Section(clientdoc, c);
+							GMarkupDoc.Section section = new GMarkupDoc.Section(clientdoc, c);
 							view.document = section;
 						}
 					}

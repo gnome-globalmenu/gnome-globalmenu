@@ -1,7 +1,7 @@
 using GLib;
 using DBus;
 using Gnomenu;
-using XML;
+using GMarkupDoc;
 using GtkAQD;
 
 namespace GnomenuGtk {
@@ -30,7 +30,7 @@ namespace GnomenuGtk {
 		construct {
 			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
 		}
-		public override XML.Document.Tag CreateTag(string tag) {
+		public override GMarkupDoc.Document.Tag CreateTag(string tag) {
 			return new Widget(this, tag);
 		}
 		private void list_to_array(List<weak string>? l, ref string[] array){
@@ -43,7 +43,7 @@ namespace GnomenuGtk {
 		}
 		public Gnomenu.Document.Widget CreateWidget(string type, string name) {
 			{
-				weak XML.Node node = lookup(name);
+				weak GMarkupDoc.Node node = lookup(name);
 				if(node != null) return node as Gnomenu.Document.Widget;
 			}
 			weak Gtk.Widget gtk = dict_nw.lookup(name);

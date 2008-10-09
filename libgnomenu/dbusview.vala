@@ -2,7 +2,7 @@ using GLib;
 using Gdk;
 using Gtk;
 using DBus;
-using XML;
+using GMarkupDoc;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Document")]
 	public class DBusView:GLib.Object {
@@ -71,7 +71,7 @@ namespace Gnomenu {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Document document = new Document();
-			XML.Parser parser = new Parser(document);
+			GMarkupDoc.Parser parser = new Parser(document);
 			DBusView c = new DBusView(document, "/org/gnome/GlobalMenu/Document");
 			parser.parse(
 """

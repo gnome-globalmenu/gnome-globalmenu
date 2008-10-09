@@ -1,6 +1,6 @@
 using GLib;
 using Gtk;
-using XML;
+using GMarkupDoc;
 using Gnomenu;
 
 
@@ -33,7 +33,7 @@ public class Navigator :Gtk.Window{
 			RemoteDocument doc = new Gnomenu.RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
 			doc.activated += (docu, node) => {
 				if(node.tag == "menubar") {
-					XML.Section section = new XML.Section(docu, node);
+					GMarkupDoc.Section section = new GMarkupDoc.Section(docu, node);
 					viewer2.document = section;
 				}
 			};
