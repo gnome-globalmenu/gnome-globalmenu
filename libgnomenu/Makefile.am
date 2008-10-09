@@ -15,6 +15,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 BUILT_SOURCES = \
+	gnomenu.h \
 	libgnomenu.vala.stamp \
 	$(libgnomenu_la_VALASOURCES:.vala=.c) \
 	$(libgnomenu_la_VALASOURCES:.vala=.h) \
@@ -47,9 +48,29 @@ libgnomenu_la_LIBADD = \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 
+_HEADERS_ = \
+		$(libgnomenu_la_VALASOURCES:.vala=.h)
+
+gnomenu.h: $(_HEADERS_) Makefile
+	echo '#ifndef _GNOMENU_H_' > $@ ;
+	echo '#define _GNOMENU_H_' >> $@ ;
+	for i in $(_HEADERS_); do \
+		echo '#include "'$$i'"' >> $@ ;\
+	done;
+	echo '#endif' >> $@ ;
+
 EXTRA_DIST = \
 	 $(BUILT_SOURCES) \
 	 $(libgnomenu_la_VALASOURCES)
 
+DISTCLEANFILES = gnomenu.h
+
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = gnomenu.vapi
+
+headerdir = $(includedir)/libgnomenu
+dist_header_DATA = \
+	gnomenu.h \
+	$(_HEADERS_) \
+	$(NULL)
+

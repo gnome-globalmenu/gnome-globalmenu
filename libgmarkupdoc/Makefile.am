@@ -132,6 +132,6 @@ dist_vapi_DATA = \
 headerdir = $(includedir)/libgmarkupdoc
 dist_header_DATA = \
 	gmarkupdoc.h \
-	$(_HEADERS_)
+	$(_HEADERS_) \
 	$(NULL)
 
