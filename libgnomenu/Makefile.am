@@ -22,10 +22,10 @@ libgnomenu_LTLIBRARIES = \
 		libgnomenu.la
 
 libgnomenu_la_VALASOURCES = \
-		client.vala \
-		menuview.vala \
-		menubar.vala \
-		server.vala \
+		gnomenu-client.vala \
+		gnomenu-menuview.vala \
+		gnomenu-menubar.vala \
+		gnomenu-server.vala \
 		$(NULL)
 
 
