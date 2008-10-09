@@ -87,7 +87,6 @@ AC_OUTPUT(
 Makefile
 vapi-compat/Makefile
 libgmarkupdoc/Makefile
-libgmarkupdoc-utils/Makefile
 libgnomenu/Makefile
 libgnomenugtk/Makefile
 server/Makefile
