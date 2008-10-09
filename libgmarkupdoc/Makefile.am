@@ -35,7 +35,7 @@ libgmarkupdoc_base_la_VALASOURCES = \
 		$(NULL)
 
 libgmarkupdoc_named_la_VALASOURCES = \
-		gmarkupdoc-nameddocument.vala \
+		gmarkupdoc-document.vala \
 		gmarkupdoc-listview.vala \
 		$(NULL)
 
