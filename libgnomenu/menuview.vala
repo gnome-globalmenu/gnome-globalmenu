@@ -1,8 +1,7 @@
 using GLib;
 using Gtk;
-using Gnomenu;
-using GtkAQD;
 using GMarkupDoc;
+using GtkAQD;
 
 namespace Gnomenu {
 	public class MenuView : GtkAQD.MenuBar {
@@ -23,12 +22,12 @@ namespace Gnomenu {
 					document.updated += document_updated;
 					document.removed += document_removed;
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
-						if(child is Document.Widget) {
-							switch((child as Document.Widget).tag) {
+						if(child is Document.NamedTag) {
+							switch((child as Document.NamedTag).tag) {
 								case "item":
 								case "check":
 								case "imageitem":
-								this.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+								this.append(create_widget(child as Document.NamedTag) as Gtk.MenuItem);
 								break;
 							}
 						}
@@ -67,7 +66,7 @@ namespace Gnomenu {
 		private void expose_child(Gtk.Widget widget) {
 			this.propagate_expose(widget, __tmp__event);
 		}
-		private weak Gtk.Widget create_widget(Document.Widget node) {
+		private weak Gtk.Widget create_widget(Document.NamedTag node) {
 			Gtk.Widget rt;
 			weak Gtk.Widget gtk = (Gtk.Widget) node.get_data("gtk");
 			//debug("creating node %s", node.name);
@@ -76,12 +75,12 @@ namespace Gnomenu {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
 					foreach(weak GMarkupDoc.Node child in node.children) {
-						if(child is Document.Widget) {
-							switch((child as Document.Widget).tag){
+						if(child is Document.NamedTag) {
+							switch((child as Document.NamedTag).tag){
 								case "item":
 								case "imageitem":
 								case "check":
-								gtk.append(create_widget(child as Document.Widget) as Gtk.MenuItem);
+								gtk.append(create_widget(child as Document.NamedTag) as Gtk.MenuItem);
 								break;
 							}
 						}
@@ -130,9 +129,9 @@ namespace Gnomenu {
 						break;
 					}
 					foreach(weak GMarkupDoc.Node child in node.children) {
-						if(child is Document.Widget) {
-							if((child as Document.Widget).tag == "menu")
-								gtk.submenu = create_widget(child as Document.Widget);
+						if(child is Document.NamedTag) {
+							if((child as Document.NamedTag).tag == "menu")
+								gtk.submenu = create_widget(child as Document.NamedTag);
 						}
 					}
 
@@ -152,13 +151,13 @@ namespace Gnomenu {
 			}
 		}
 		private void document_inserted(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
-			if(!(n is Document.Widget)) return;
-			weak Document.Widget node = n as Document.Widget;
+			if(!(n is Document.NamedTag)) return;
+			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root ) {
 				this.insert(create_widget(node) as Gtk.MenuItem, pos);
 				return;
 			}
-			weak Document.Widget parent = p as Document.Widget;
+			weak Document.NamedTag parent = p as Document.NamedTag;
 			if(parent != null && node != null) {
 				switch(parent.tag) {
 					case "menu":
@@ -175,13 +174,13 @@ namespace Gnomenu {
 			}
 		}
 		private void document_removed(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
-			if(!(n is Document.Widget)) return;
-			weak Document.Widget node = n as Document.Widget;
+			if(!(n is Document.NamedTag)) return;
+			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root) {
 				this.remove((Gtk.Widget)node.get_data("gtk"));
 				return;
 			}
-			weak Document.Widget parent = p as Document.Widget;
+			weak Document.NamedTag parent = p as Document.NamedTag;
 			if(parent != null && node != null) {
 				switch(parent.tag) {
 					case "menubar":
@@ -204,16 +203,16 @@ namespace Gnomenu {
 			}
 		}
 		private void menu_item_activated (Gtk.MenuItem o) {
-			weak Document.Widget widget = (Document.Widget) o.get_data("node");
+			weak Document.NamedTag widget = (Document.NamedTag) o.get_data("node");
 			if(widget != null);
 				widget.activate();
 		}
-		private void update_properties(Gtk.Widget gtk, Document.Widget node, string[] props) {
+		private void update_properties(Gtk.Widget gtk, Document.NamedTag node, string[] props) {
 			foreach(weak string s in props) {
 				update_property(gtk, node, s);
 			}
 		}
-		private void update_property(Gtk.Widget gtk, Document.Widget node, string prop) {
+		private void update_property(Gtk.Widget gtk, Document.NamedTag node, string prop) {
 				if(gtk is Gtk.MenuItem) {
 					(gtk as Gtk.MenuItem).activate -= menu_item_activated;
 				}
@@ -258,8 +257,8 @@ namespace Gnomenu {
 				}
 		}
 		private void document_updated(GMarkupDoc.Document document, GMarkupDoc.Node n, string prop) {
-			if(!(n is Document.Widget)) return;
-			weak Document.Widget node = n as Document.Widget;
+			if(!(n is Document.NamedTag)) return;
+			weak Document.NamedTag node = n as Document.NamedTag;
 			if(node != null) {
 				switch(node.tag) {
 					case "menu":

@@ -1,5 +1,6 @@
 using GLib;
 using Gtk;
+using GMarkupDoc;
 using Gnomenu;
 using DBus;
 namespace POSIX {
@@ -36,11 +37,11 @@ public class Application {
 			}
 		}
 		MainLoop loop = new MainLoop(null, false);
-		Gnomenu.Document document = new Gnomenu.Document();
+		Document document = new Document();
 		Server c = new Server(document);
 		if(viewer) {
 			Gtk.Window window = new Window(Gtk.WindowType.TOPLEVEL);
-			window.add(new Gnomenu.ListView(document));
+			window.add(new ListView(document));
 			window.show_all();
 		}
 		loop.run();

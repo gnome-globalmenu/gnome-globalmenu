@@ -14,7 +14,7 @@ public class Navigator :Gtk.Window{
 		type = Gtk.WindowType.TOPLEVEL;
 	}
 	construct {
-		server = new Gnomenu.RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
+		server = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 		server_viewer = new ListView(server);
 		viewer = new ListView(null);
 		viewer2 = new MenuView(null);
@@ -30,10 +30,10 @@ public class Navigator :Gtk.Window{
 		server.activated += (docu, node)=> {
 			string bus = node.get("bus");
 			print("attatch to bus %s", bus);
-			RemoteDocument doc = new Gnomenu.RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
+			RemoteDocument doc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
 			doc.activated += (docu, node) => {
 				if(node.tag == "menubar") {
-					GMarkupDoc.Section section = new GMarkupDoc.Section(docu, node);
+					Section section = new Section(docu, node);
 					viewer2.document = section;
 				}
 			};

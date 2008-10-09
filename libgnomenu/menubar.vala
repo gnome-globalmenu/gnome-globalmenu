@@ -69,7 +69,7 @@ namespace Gnomenu {
 			else this.set_current_page(0);
 		}
 		construct {
-			serverdoc = new Gnomenu.RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
+			serverdoc = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 			conn = Bus.get(DBus.BusType.SESSION);
 			menu_hash = new HashTable<string, MenuView>.full(str_hash, str_equal, g_free, g_object_unref);
 			bus_hash = new HashTable<string, string>.full(str_hash, str_equal, g_free, g_free);

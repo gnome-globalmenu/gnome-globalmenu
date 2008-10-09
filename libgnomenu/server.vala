@@ -8,7 +8,7 @@ namespace Gnomenu {
 	public class Server:DBusView {
 		Connection conn;
 		dynamic DBus.Object dbus;
-		public Server(Gnomenu.Document document) {
+		public Server(Document document) {
 			this.document = document;
 			this.path = "/org/gnome/GlobalMenu/Server";
 		}

@@ -1,8 +1,8 @@
 using GLib;
 using Gdk;
 using Gtk;
-using Gnomenu;
 using GtkAQD;
+using Gnomenu;
 using GMarkupDoc;
 
 namespace GnomenuGtk {
@@ -101,7 +101,7 @@ namespace GnomenuGtk {
 		if(widget is Gtk.ImageMenuItem)
 			type = "imageitem";
 		
-		Gnomenu.Document.Widget node = document().CreateWidget(type, name);
+		Document.Widget node = document().CreateWidget(type, name);
 		parent_node.insert(node, pos);
 
 		if(widget is Gtk.MenuShell) {
@@ -156,7 +156,7 @@ namespace GnomenuGtk {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
 		message("unbinding menu %s to %s", menu_name, window_name);
-		weak Gnomenu.Document.Widget node =document().lookup(menu_name) as Gnomenu.Document.Widget;
+		weak Document.Widget node =document().lookup(menu_name) as Document.Widget;
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}
 }

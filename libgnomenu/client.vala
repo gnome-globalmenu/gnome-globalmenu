@@ -32,17 +32,17 @@ namespace Gnomenu {
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
 		}
 		public string QueryXID(string xid) {
-			weak Document.Widget node = find_window_by_xid(xid);
+			weak Document.NamedTag node = find_window_by_xid(xid);
 			if(node != null) {
 				return node.name;
 			}
 			return "";
 		}
 
-		private weak Document.Widget? find_window_by_xid(string xid) {
+		private weak Document.NamedTag? find_window_by_xid(string xid) {
 			foreach (weak GMarkupDoc.Node node in document.root.children) {
-				if(node is Document.Widget) {
-					weak Document.Widget widget = node as Document.Widget;
+				if(node is Document.NamedTag) {
+					weak Document.NamedTag widget = node as Document.NamedTag;
 					if(widget.get("xid") == xid) {
 						return widget;
 					}
@@ -67,7 +67,7 @@ namespace Gnomenu {
 			}
 		}
 		private void remove_widget(string name) {
-			weak Document.Widget node = document.lookup(name) as Document.Widget;
+			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
 			if(node != null) {
 				assert(node.parent != null);
 				node.parent.remove(node);
@@ -76,7 +76,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void register_window(string name, string xid) {
-			weak Document.Widget node = document.lookup(name) as Document.Widget;
+			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -88,7 +88,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void unregister_window(string name) {
-			weak Document.Widget node = document.lookup(name) as Document.Widget;
+			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
