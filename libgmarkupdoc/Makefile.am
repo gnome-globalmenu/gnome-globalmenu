@@ -28,7 +28,7 @@ libgmarkupdoc_la_VALASOURCES = \
 		$(NULL)
 
 libgmarkupdoc_base_la_VALASOURCES = \
-		gmarkupdoc-document.vala \
+		gmarkupdoc-documentmodel.vala \
 		gmarkupdoc-node.vala \
 		gmarkupdoc-section.vala \
 		gmarkupdoc-parser.vala \
