@@ -22,9 +22,9 @@ AM_VALAC_FLAGS =\
 BUILT_SOURCES = libgnomenugtk.vala.stamp
 
 libgnomenugtk_la_VALASOURCES = \
-	bindinggtk.vala \
-	bindinggtksingleton.vala \
-	bindinggtkdocument.vala  \
+	gnomenugtk.vala \
+	gnomenugtk-singleton.vala \
+	gnomenugtk-document.vala  \
 	$(NULL)
 
 libgnomenugtkdir = $(libdir)
@@ -35,7 +35,7 @@ libgnomenugtk_LTLIBRARIES = \
 libgnomenugtk_la_SOURCES = \
 	$(libgnomenugtk_la_VALASOURCES:.vala=.c) \
 	$(libgnomenugtk_la_VALASOURCES:.vala=.h) \
-	bindinggtk-c.c \
+	utils.c \
 	$(NULL)
 
 gnomenugtk.vapi libgnomenugtk.vala.stamp: $(libgnomenugtk_la_VALASOURCES)
