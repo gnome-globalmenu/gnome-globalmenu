@@ -1,17 +1,18 @@
 NULL = 
 
 AM_VALAC_FLAGS =  \
-	$(LIBGNOMENU_VALA_PKGS) \
+	$(GNOMENU_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
 	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--pkg gmarkupdoc \
+	--pkg gtkcompat \
 	$(NULL)
 
 AM_CPPFLAGS = \
 	-g \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
-	$(LIBGNOMENU_CFLAGS) \
+	$(GNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	$(NULL)
 
@@ -40,7 +41,7 @@ gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
 	touch $@
 
 libgnomenu_la_LIBADD = \
-		$(LIBGNOMENU_LIBS) \
+		$(GNOMENU_LIBS) \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
 

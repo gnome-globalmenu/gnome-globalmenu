@@ -6,9 +6,9 @@ $(NULL)
 
 CLASSES = 
 CLASSES += GMarkupDoc_Parser 
+CLASSES += GMarkupDoc_RemoteDocument
+CLASSES += GMarkupDoc_DBusView
 CLASSES += Gnomenu_Client
-CLASSES += Gnomenu_RemoteDocument
-CLASSES += Gnomenu_DBusView
 CLASSES += Gnomenu_MenuBar
 
 noinst_PROGRAMS = lowercname $(CLASSES)

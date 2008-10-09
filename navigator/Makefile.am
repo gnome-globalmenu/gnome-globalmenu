@@ -2,7 +2,7 @@ NULL =
 
 AM_CPPFLAGS = \
 	-g \
-	$(LIBGNOMENU_CFLAGS) \
+	$(GNOMENU_NAVIGATOR_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS = \
-	$(LIBGNOMENU_VALA_PKGS) \
+	$(GNOMENU_NAVIGATOR_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
 	--vapidir=$(top_builddir)/libmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
@@ -41,7 +41,7 @@ gnomenu_navigator_SOURCES = \
 	touch $@
 
 gnomenu_navigator_LDADD = \
-		$(LIBGNOMENU_LIBS) \
+		$(GNOMENU_NAVIGATOR_LIBS) \
 		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)

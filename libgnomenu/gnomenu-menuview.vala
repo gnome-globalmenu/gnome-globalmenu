@@ -1,10 +1,9 @@
 using GLib;
 using Gtk;
 using GMarkupDoc;
-using GtkAQD;
 
 namespace Gnomenu {
-	public class MenuView : GtkAQD.MenuBar {
+	public class MenuView : Gtk.MenuBar {
 		private GMarkupDoc.Document? _document;
 		public weak GMarkupDoc.Document? document {
 			get {
@@ -37,10 +36,10 @@ namespace Gnomenu {
 		}
 		public MenuView(Document? document) {
 			this.document = document;
-			this.local = true;
 		}
 		private Gdk.EventExpose __tmp__event;
 		construct {
+			this.set("local", true, null);
 			this.expose_event += (widget, event)=> {
 				if(0 != (widget.get_flags() & (Gtk.WidgetFlags.MAPPED | Gtk.WidgetFlags.VISIBLE))) {
 					Gtk.paint_flat_box(widget.style,

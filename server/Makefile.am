@@ -2,7 +2,7 @@ NULL =
 
 AM_CPPFLAGS = \
 	-g \
-	$(LIBGNOMENU_CFLAGS) \
+	$(ORG_GNOME_GLOBALMENU_SERVER_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS = \
-	$(LIBGNOMENU_VALA_PKGS) \
+	$(ORG_GNOME_GLOBALMENU_SERVER_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc \
 	--vapidir=$(top_builddir)/libgmarkupdoc \
 	--vapidir=$(top_srcdir)/libgnomenu \
@@ -48,7 +48,7 @@ org_gnome_GlobalMenu_Server_SOURCES = \
 	touch $@
 
 org_gnome_GlobalMenu_Server_LDADD = \
-		$(LIBGNOMENU_LIBS) \
+		$(ORG_GNOME_GLOBALMENU_SERVER_LIBS) \
 		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)

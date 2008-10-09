@@ -2,7 +2,7 @@ NULL =
 
 AM_CPPFLAGS = \
 	-g \
-	$(GLOBAL_MENU_APPLET_CFLAGS) \
+	$(GLOBALMENU_PANELAPPLET_CFLAGS) \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_builddir)/libgmarkupdoc \
@@ -16,7 +16,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS = \
-	$(GLOBAL_MENU_APPLET_VALA_PKGS) \
+	$(GLOBALMENU_PANELAPPLET_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
 	--vapidir=$(top_builddir)/libmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
@@ -55,7 +55,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	touch $@
 
 GlobalMenu_PanelApplet_LDADD = \
-		$(GLOBAL_MENU_APPLET_LIBS) \
+		$(GLOBALMENU_PANELAPPLET_LIBS) \
 		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
 		$(NULL)
