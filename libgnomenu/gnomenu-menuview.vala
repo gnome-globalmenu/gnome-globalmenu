@@ -20,6 +20,7 @@ namespace Gnomenu {
 					document.inserted += document_inserted;
 					document.updated += document_updated;
 					document.removed += document_removed;
+					document.root.set_data("gtk", this);
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is Document.NamedTag) {
 							switch((child as Document.NamedTag).tag) {
@@ -66,10 +67,9 @@ namespace Gnomenu {
 			this.propagate_expose(widget, __tmp__event);
 		}
 		private weak Gtk.Widget create_widget(Document.NamedTag node) {
-			Gtk.Widget rt;
-			weak Gtk.Widget gtk = (Gtk.Widget) node.get_data("gtk");
+			weak Gtk.Widget _gtk = (Gtk.Widget) node.get_data("gtk");
 			//debug("creating node %s", node.name);
-			if(gtk != null) return gtk;
+			if(_gtk != null) return _gtk;
 			switch(node.tag) {
 				case "menu":
 					Gtk.MenuShell gtk = new Gtk.Menu();
@@ -84,7 +84,9 @@ namespace Gnomenu {
 							}
 						}
 					}
-					rt = gtk;
+					gtk.set_data("node", node);
+					node.set_data_full("gtk", gtk.ref(), g_object_unref);
+					message("gtk ref_count = %u", gtk.ref_count);
 				break;
 				case "item":
 				case "check":
@@ -133,20 +135,21 @@ namespace Gnomenu {
 								gtk.submenu = create_widget(child as Document.NamedTag);
 						}
 					}
+					gtk.set_data("node", node);
+					node.set_data_full("gtk", gtk.ref(), g_object_unref);
+					message("gtk ref_count = %u", gtk.ref_count);
 
-					rt = gtk;
 				break;
 				default:
 				debug("skipping tag %s", node.tag);
 				break;
 			}
-			rt.set_data("node", node);
-			node.set_data_full("gtk", rt.ref(), g_object_unref);
-			return rt;
+			return (Gtk.Widget) (node.get_data("gtk"));
 		}
 		private void clean() {
-			foreach(weak Gtk.Widget w in this.get_children()){
-				this.remove(w);
+			weak List<weak Gtk.Widget> l = this.get_children();
+			foreach(weak Gtk.Widget w in l){
+				w.destroy();
 			}
 		}
 		private void document_inserted(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
@@ -173,35 +176,21 @@ namespace Gnomenu {
 				}
 			}
 		}
-		private void document_removed(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
-			message("removed %s from %s", n.name, p.name);
-			if(!(n is Document.NamedTag)) return;
-			weak Document.NamedTag node = n as Document.NamedTag;
-			if(p == document.root) {
-				message("removing from root");
-				this.remove((Gtk.Widget)node.get_data("gtk"));
-				return;
-			}
-			weak Document.NamedTag parent = p as Document.NamedTag;
+		private void document_removed(DocumentModel document, GMarkupDoc.Node parent, GMarkupDoc.Node node) {
+			if(!(node is Document.NamedTag)) return;
+			message("removed %s from %s", node.name, parent.name);
 			if(parent != null && node != null) {
-				switch(parent.tag) {
-					case "menubar":
-					case "menu":
-						weak Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
-						weak Gtk.MenuItem gtk = (Gtk.MenuItem)node.get_data("gtk");
-						if(gtk != null && gtk.submenu != null) {
-							gtk.submenu.popdown();
-							gtk.submenu = null;
-						}
-						pgtk.remove((Gtk.Widget)node.get_data("gtk"));
-					break;
-					case "item":
-					case "check":
-					case "imageitem":
-						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
-						pgtk.submenu = null;
-					break;
+				weak Gtk.Widget pgtk = (Gtk.Widget) parent.get_data("gtk");
+				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
+				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
+					message("removing from menushell");
+					gtk.destroy();
 				}
+				if(pgtk is Gtk.MenuItem && (gtk is Gtk.MenuShell)) {
+					(pgtk as Gtk.MenuItem).submenu = null;
+				}
+				message("gtk ref_count = %u", gtk.ref_count);
+				node.set_data("gtk", null);
 			}
 		}
 		private void menu_item_activated (Gtk.MenuItem o) {

@@ -64,13 +64,14 @@ namespace GMarkupDoc {
 			invalid = false;
 			document.updated += (d, n, prop) => {
 				//message("%s", is_inside(n).to_string());
-				if(is_inside(n)) this.updated(n, prop);
+				if(!this.invalid && is_inside(n)) this.updated(n, prop);
 			};
 			document.inserted += (d, p, n, pos) => {
-				if(is_inside(p)) this.inserted(p, n, pos);
+				if(!this.invalid && is_inside(p)) this.inserted(p, n, pos);
 			};
 			document.removed += (d, p, n) => {
-				if(is_inside(p)) this.removed(p, n);
+//				message(" %s is_inside %s, = %s", p.name, this.root.name, is_inside(p).to_string());
+				if(!this.invalid && is_inside(p)) this.removed(p, n);
 			};
 			pseudo_root = new Root(document);
 		}
