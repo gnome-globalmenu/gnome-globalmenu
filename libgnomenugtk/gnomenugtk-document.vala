@@ -98,7 +98,7 @@ namespace GnomenuGtk {
 						Gtk.ImageMenuItem i = gtk as Gtk.ImageMenuItem;
 						if((i.image is Gtk.Image)) {
 							Gtk.Image image = i.image as Gtk.Image;
-							image.set_data("native-name", gtk.get_data("native-name"));
+							set_native_name(image, get_native_name(gtk));
 							image.notify["icon-name"] += item_property_notify;
 							image.notify["stock"] += item_property_notify;
 							switch(image.storage_type) {
@@ -125,12 +125,12 @@ namespace GnomenuGtk {
 			return node;
 		}
 		public weak string wrap(Gtk.Widget widget) {
-			weak string name = (string)widget.get_data("native-name");
+			weak string name = get_native_name(widget);
 			if(name != null) return name;
 			int id = Singleton.instance().unique;
 			name = S("%s%d".printf(widget.get_type().name(), id));
-			widget.set_data("native-name", name);
-			(widget as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
+			set_native_name(widget, name);
+			widget.weak_ref(weak_ref_notify, this);
 			dict_nw.insert(name, widget);
 			return name;
 		}
@@ -157,12 +157,11 @@ namespace GnomenuGtk {
 			}
 
 		}
-		private static void toggle_ref_notify(void* data, GLib.Object object, bool is_last){
-			if(!is_last) return;
+		private static void weak_ref_notify(void* data, GLib.Object object){
 			Document _this = (Document) data;
 			_this.disconnect_signals(object);
 			unbind_widget(object as Gtk.Widget);
-			weak string name = (string) object.get_data("native-name");
+			weak string name = get_native_name(object);
 			if(name != null) {
 				debug("GtkWidget %s is removed: %u", name, object.ref_count);
 				_this.dict_nw.remove(name); // because ~WidgetNode is not always invoked?
@@ -174,14 +173,19 @@ namespace GnomenuGtk {
 					node.parent.remove(node);
 				}
 			}
-			object.set_data("native-name", null);
-			(object as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, _this);
+			set_native_name(object, null);
+		}
+		private static weak string get_native_name(GLib.Object? w) {
+			return (string) ((GLibCompat.constpointer)w).get_data("native-name");
+		}
+		private static void set_native_name(GLib.Object? w, string? name) {
+			((GLibCompat.constpointer)w).set_data("native-name", (void*) name);
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
-			debug("item_property_notify %s( %s).%s", (string) w.get_data("native-name"), w.get_type().name(), pspec.name);
-			weak Document.Widget node = lookup((string)w.get_data("native-name")) as Document.Widget;
+			debug("item_property_notify %s( %s).%s", get_native_name(w), w.get_type().name(), pspec.name);
+			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
 			if(node == null) {
-				warning("no xml node found for widget %s( %s)", (string) w.get_data("native-name"), w.get_type().name());
+				warning("no xml node found for widget %s( %s)", get_native_name(w), w.get_type().name());
 				return;
 			}
 			string val;
@@ -201,12 +205,12 @@ namespace GnomenuGtk {
 			node.set(pspec.name, val);
 		}
 		private void item_label_set(Gtk.Widget w, Gtk.Label? l) {
-			weak Document.Widget node = lookup((string)w.get_data("native-name")) as Document.Widget;
+			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
 			if(node != null) {
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
 				if(l != old_label) {
 					if(old_label != null) {
-						old_label.set_data("native-name", null);
+						set_native_name(old_label, null);
 						/*
 						old_label.notify["label"] -= item_property_notify;
 						*/
@@ -223,13 +227,13 @@ namespace GnomenuGtk {
 		}
 		private void item_image_notify(Gtk.Widget w, ParamSpec pspec) {
 			Gtk.ImageMenuItem item = w as Gtk.ImageMenuItem;
-			weak Document.Widget node = lookup((string)w.get_data("native-name")) as Document.Widget;
+			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
 			if(w != null) {
 				Gtk.Image image = item.image as Gtk.Image;
 				weak Gtk.Image old_image = (Gtk.Image) item.get_data("old-image");
 				if(image != old_image) {
 					if(old_image != null) {
-						old_image.set_data("native-name", null);
+						set_native_name(old_image, null);
 						/*
 						old_image.notify["icon-name"] -= item_property_notify;
 						old_image.notify["stock"] -= item_property_notify;
@@ -237,7 +241,7 @@ namespace GnomenuGtk {
 						old_image.notify -= item_property_notify; /*Vala bug detailed signal not removed*/
 					}
 					if(image != null) {
-						image.set_data("native-name", w.get_data("native-name"));
+						set_native_name(image, get_native_name(w));
 						image.notify["icon-name"] += item_property_notify;
 						image.notify["stock"] += item_property_notify;
 						switch(image.storage_type) {
@@ -255,23 +259,23 @@ namespace GnomenuGtk {
 				}
 			}
 		}
-	}
-	private weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {
-		Queue<weak Gtk.Widget> q = new Queue<weak Gtk.Widget>();
-		q.push_tail(widget);
-		while(!q.is_empty()) {
-			weak Gtk.Widget w = q.pop_head();
-			if(w is Gtk.Container) {
-				weak List<weak Gtk.Widget> children = (w as Gtk.Container).get_children();
-				foreach(weak Gtk.Widget child in children){
-					q.push_tail(child);
+		private static weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {
+			Queue<weak Gtk.Widget> q = new Queue<weak Gtk.Widget>();
+			q.push_tail(widget);
+			while(!q.is_empty()) {
+				weak Gtk.Widget w = q.pop_head();
+				if(w is Gtk.Container) {
+					weak List<weak Gtk.Widget> children = (w as Gtk.Container).get_children();
+					foreach(weak Gtk.Widget child in children){
+						q.push_tail(child);
+					}
+				}
+				if(w is Gtk.Label) {
+					set_native_name(w, get_native_name(widget));
+					return w as Gtk.Label;
 				}
 			}
-			if(w is Gtk.Label) {
-				w.set_data("native-name", widget.get_data("native-name"));
-				return w as Gtk.Label;
-			}
+			return null;
 		}
-		return null;
 	}
 }
