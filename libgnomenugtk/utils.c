@@ -170,6 +170,8 @@ _size_request (GtkWidget      *widget,
 			   GtkRequisition *requisition)
 {
   if(!g_object_get_data(widget, "is-local")) {
+	  requisition->width = 0;
+	  requisition->height = 0;
 	  return ;
   }
   old_size_request(widget, requisition);
