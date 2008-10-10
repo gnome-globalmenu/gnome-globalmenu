@@ -23,7 +23,7 @@ namespace GMarkupDoc {
 		public weak Node set_root {
 			construct {
 				_root = value;
-				(_root as GLibCompat.Object).add_toggle_ref(toggle_ref_notify, this);
+				_root.weak_ref(weak_ref_notify, this);
 			}
 		}
 		public Section(DocumentModel document, GMarkupDoc.Node root) {
@@ -34,7 +34,7 @@ namespace GMarkupDoc {
 			if(!disposed) {
 				disposed = true;
 				if(!invalid)
-					(_root as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, this);
+					_root.weak_unref(weak_ref_notify, this);
 			}
 		}
 		private bool is_inside(Node node) {
@@ -75,10 +75,8 @@ namespace GMarkupDoc {
 			};
 			pseudo_root = new Root(document);
 		}
-		private static void toggle_ref_notify(void* data, GLib.Object object, bool is_last) {
-			if(!is_last) return;
+		private static void weak_ref_notify(void* data, GLib.Object object) {
 			Section t = (Section) data;
-			(object as GLibCompat.Object).remove_toggle_ref(toggle_ref_notify, t);
 			t.invalid = true;
 			t._root = t.pseudo_root;
 		}
