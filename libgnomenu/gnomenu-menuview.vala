@@ -4,8 +4,8 @@ using GMarkupDoc;
 
 namespace Gnomenu {
 	public class MenuView : Gtk.MenuBar {
-		private GMarkupDoc.Document? _document;
-		public weak GMarkupDoc.Document? document {
+		private DocumentModel? _document;
+		public weak DocumentModel? document {
 			get {
 				return _document;
 			} set {
@@ -34,7 +34,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		public MenuView(Document? document) {
+		public MenuView(DocumentModel? document) {
 			this.document = document;
 		}
 		private Gdk.EventExpose __tmp__event;
@@ -149,7 +149,8 @@ namespace Gnomenu {
 				this.remove(w);
 			}
 		}
-		private void document_inserted(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
+		private void document_inserted(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
+			message("inserted");
 			if(!(n is Document.NamedTag)) return;
 			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root ) {
@@ -172,7 +173,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		private void document_removed(GMarkupDoc.Document document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
+		private void document_removed(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
 			if(!(n is Document.NamedTag)) return;
 			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root) {
@@ -255,7 +256,7 @@ namespace Gnomenu {
 					(gtk as Gtk.MenuItem).activate += menu_item_activated;
 				}
 		}
-		private void document_updated(GMarkupDoc.Document document, GMarkupDoc.Node n, string prop) {
+		private void document_updated(DocumentModel document, GMarkupDoc.Node n, string prop) {
 			if(!(n is Document.NamedTag)) return;
 			weak Document.NamedTag node = n as Document.NamedTag;
 			if(node != null) {
