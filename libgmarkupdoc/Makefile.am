@@ -80,14 +80,8 @@ libgmarkupdoc_named_la_SOURCES = \
 libgmarkupdoc_named_la_CFLAGS = $(GMARKUPDOC_NAMED_CFLAGS)
 libgmarkupdoc_named_la_LIBADD = $(GMARKUPDOC_NAMED_LIBS)
 
-gmarkupdoc-base.vapi libgmarkupdoc-base.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES)
-	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) --library gmarkupdoc-base  $^
-	touch $@
-gmarkupdoc-named.vapi libgmarkupdoc-named.vala.stamp: $(libgmarkupdoc_named_la_VALASOURCES) gmarkupdoc-base.vapi
-	$(VALAC) -C $(GMARKUPDOC_NAMED_VALA_PKGS) --library gmarkupdoc-named  $^
-	touch $@
-gmarkupdoc-dbus.vapi libgmarkupdoc-dbus.vala.stamp: $(libgmarkupdoc_dbus_la_VALASOURCES) gmarkupdoc-named.vapi gmarkupdoc-base.vapi
-	$(VALAC) -C $(GMARKUPDOC_DBUS_VALA_PKGS) --library gmarkupdoc-dbus $^
+gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_named_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
+	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_NAMED_VALA_PKGS) --library gmarkupdoc $^
 	touch $@
 
 _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
@@ -105,8 +99,6 @@ gmarkupdoc.h: $(_HEADERS_) Makefile
 		echo '#include "'$$i'"' >> $@ ;\
 	done;
 	echo '#endif' >> $@ ;
-gmarkupdoc.vapi: gmarkupdoc-base.vapi gmarkupdoc-dbus.vapi gmarkupdoc-named.vapi
-	cat $^ > $@
 
 libgmarkupdoc_la_LIBADD = \
 		libgmarkupdoc-base.la \
@@ -125,9 +117,6 @@ DISTCLEANFILES = gmarkupdoc.c gmarkupdoc.h
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = \
 	gmarkupdoc.vapi \
-	gmarkupdoc-base.vapi \
-	gmarkupdoc-dbus.vapi \
-	gmarkupdoc-named.vapi \
 	$(NULL)
 headerdir = $(includedir)/libgmarkupdoc
 dist_header_DATA = \
