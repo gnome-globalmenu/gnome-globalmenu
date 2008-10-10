@@ -45,15 +45,12 @@ BUILT_SOURCES = \
 	gmarkupdoc.vapi \
 	gmarkupdoc.h \
 	gmarkupdoc.c \
-   	gmarkupdoc-base.vapi \
 	libgmarkupdoc-base.vala.stamp \
 	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.c) \
 	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.h) \
-	gmarkupdoc-dbus.vapi \
 	libgmarkupdoc-dbus.vala.stamp \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.c) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
-	gmarkupdoc-named.vapi \
 	libgmarkupdoc-named.vala.stamp \
 	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.c) \
 	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.h) \
