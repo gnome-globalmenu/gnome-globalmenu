@@ -51,7 +51,7 @@ libgnomenu_la_LIBADD = \
 _HEADERS_ = \
 		$(libgnomenu_la_VALASOURCES:.vala=.h)
 
-gnomenu.h: $(_HEADERS_) Makefile
+gnomenu.h: Makefile
 	echo '#ifndef _GNOMENU_H_' > $@ ;
 	echo '#define _GNOMENU_H_' >> $@ ;
 	for i in $(_HEADERS_); do \
