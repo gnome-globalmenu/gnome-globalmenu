@@ -17,6 +17,18 @@ namespace GMarkupDoc {
 		protected List<weak Node> children;
 		public weak DocumentModel document {get; construct;}
 		public Node (DocumentModel document){ this.document = document;}
+		private weak string _name;
+		public weak string name {
+			get {return _name;}
+			set {
+				if(name == value) return;
+				if(name != null)
+					document.dict.remove(name);
+				_name = document.S(value);
+				if(name != null)
+					document.dict.insert(name, this);
+			}
+		}
 		construct {
 			disposed = false;
 			freezed = 0;
@@ -61,6 +73,8 @@ namespace GMarkupDoc {
 				disposed = true;
 				remove_all();
 			}
+			if(name != null)
+				document.dict.remove(name);
 		}
 		public void freeze() {
 			freezed++;
@@ -74,6 +88,9 @@ namespace GMarkupDoc {
 	public class Root : Node {
 		public Root(DocumentModel document){
 			this.document = document;
+		}
+		construct {
+			this.name = "root";
 		}
 		public override string summary(int level = 1) {
 			StringBuilder sb = new StringBuilder("");
@@ -138,8 +155,10 @@ namespace GMarkupDoc {
 				props.remove(prop);
 			else 
 				props.insert(document.S(prop), val);
+			if(prop == document.name_attr)
+				this.name = val;
 			if(freezed <= 0)
-			document.updated(this, prop);
+				document.updated(this, prop);
 		}
 		public virtual void unset(string prop) {
 			set(prop, null);

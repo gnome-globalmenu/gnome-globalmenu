@@ -7,6 +7,12 @@ namespace GMarkupDoc {
 			get { return _document;} 
 			construct {_document = value;}
 		}
+		public weak HashTable dict {
+			get { return _document.dict; }
+		}
+		public weak string name_attr {
+			get { return _document.name_attr; }
+		}
 		private weak Node _root;
 		private Node pseudo_root; 
 		private bool invalid;

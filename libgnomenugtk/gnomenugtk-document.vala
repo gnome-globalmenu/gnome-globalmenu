@@ -136,6 +136,7 @@ namespace GnomenuGtk {
 		}
 		private void disconnect_signals(GLib.Object object) {
 			if(object is Gtk.MenuItem) {
+				(object as Gtk.MenuItem).notify -= item_property_notify;
 				weak Gtk.Label label = find_menu_item_label(object as Gtk.Widget);
 				if(label != null) {
 					/*

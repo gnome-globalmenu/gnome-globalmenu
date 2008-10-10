@@ -4,6 +4,8 @@ namespace GMarkupDoc {
 	public interface DocumentModel: GLib.Object {
 		private static StringChunk strings = null;
 		public abstract weak Node root {get;}
+		public abstract weak HashTable<weak string, weak Node> dict {get;}
+		public abstract weak string name_attr {get;}
 		public virtual Text CreateText(string text) {
 			return new Text(this, text);
 		}

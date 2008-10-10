@@ -174,9 +174,11 @@ namespace Gnomenu {
 			}
 		}
 		private void document_removed(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n) {
+			message("removed %s from %s", n.name, p.name);
 			if(!(n is Document.NamedTag)) return;
 			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root) {
+				message("removing from root");
 				this.remove((Gtk.Widget)node.get_data("gtk"));
 				return;
 			}

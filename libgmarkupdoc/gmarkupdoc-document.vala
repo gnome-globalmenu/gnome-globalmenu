@@ -4,19 +4,6 @@ namespace GMarkupDoc {
 	public class Document: GLib.Object, DocumentModel, Gtk.TreeModel {
 		public class NamedTag: Tag {
 			public Gtk.TreeIter iter;
-			public weak string name {
-				get {return get("name");}
-				set {
-					set("name", value);
-				}
-			}
-			public override void set(string prop, string? val) {
-				if(prop == "name" && name != null)
-					(document as Document).dict.remove(name);
-				base.set(prop, val);
-				if(prop == "name" && name != null)
-					(document as Document).dict.insert(name, this);
-			}
 			private NamedTag(Document document, string tag) {
 				this.document = document;
 				this.tag = document.S(tag);
@@ -34,7 +21,6 @@ namespace GMarkupDoc {
 			}
 			public override void dispose() {
 				base.dispose();
-				(document as Document).dict.remove(name);
 				(this.document as Document).treestore.remove(this.iter);
 			}
 			~NamedTag(){
@@ -47,10 +33,12 @@ namespace GMarkupDoc {
 		}
 		public Gtk.TreeStore treestore;
 		private Root _root;
-		public Node root {get {return _root;}}
-		private HashTable <weak string, weak NamedTag> dict;
+		private HashTable <weak string, weak NamedTag> _dict;
+		public weak Node root {get {return _root;}}
+		public weak HashTable<weak string, weak Node> dict { get{return _dict;} }
+		public weak string name_attr {get {return S("name");}}
 		construct {
-			dict = new HashTable<weak string, weak Tag>(str_hash, str_equal);
+			_dict = new HashTable<weak string, weak Tag>(str_hash, str_equal);
 			_root = new Root(this);
 			treestore = new Gtk.TreeStore(1, typeof(constpointer));
 			this.updated += (o, node) => {
@@ -70,10 +58,6 @@ namespace GMarkupDoc {
 			return t;
 		}
 		public virtual weak Node lookup(string name) { 
-			/* returning root */
-			if(name == "root") {
-				return root;
-			}
 			return dict.lookup(name);
 		}
 		public signal void activated(NamedTag node);
