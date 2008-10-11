@@ -11,12 +11,16 @@ namespace GtkCompat {
 	}
 	[CCode (cheader_filename = "gtk/gtk.h")]
 	public class Container : Gtk.Widget, Atk.Implementor, Gtk.Buildable {
-		public virtual void forall (Gtk.Callback callback);
+		[CCode (cname = "gtk_container_forall")]
+		public void forall_children (Gtk.Callback callback);
+		public virtual void forall (bool include_internals, Callback callback, void* data);
 	}
 	[CCode (cheader_filename = "gtk/gtk.h")]
 	public class Widget : Gtk.Object, Atk.Implementor, Gtk.Buildable {
 		public virtual signal void style_set (Gtk.Style? previous_style);
+		public virtual signal void hierarchy_changed (Gtk.Widget? old_toplevel);
 	}
 
+	public static delegate void Callback(Gtk.Widget widget, void * data);
 
 }

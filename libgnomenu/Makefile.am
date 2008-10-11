@@ -41,6 +41,8 @@ libgnomenu_la_SOURCES = \
 
 gnomenu.vapi libgnomenu.vala.stamp: $(libgnomenu_la_VALASOURCES)
 	$(VALAC) -C --library gnomenu $^
+	sed -e 's/GtkCompat/Gtk/g' gnomenu.vapi > gnomenu.vapi.edited
+	mv gnomenu.vapi.edited gnomenu.vapi
 	touch $@
 
 libgnomenu_la_LIBADD = \

@@ -46,6 +46,10 @@ public class Navigator :Gtk.Window{
 
 		Navigator nav = new Navigator();
 		nav.show_all();
+		nav.delete_event += (widget) => {
+			Gtk.main_quit();
+			return false;
+		};
 		loop.run();
 		return 0;	
 	}

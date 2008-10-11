@@ -3,8 +3,9 @@ using Gtk;
 using GMarkupDoc;
 
 namespace Gnomenu {
-	public class MenuView : Gtk.MenuBar {
+	public class MenuView : GtkCompat.Container {
 		private DocumentModel? _document;
+		private Gtk.MenuBar menubar;
 		public weak DocumentModel? document {
 			get {
 				return _document;
@@ -20,14 +21,14 @@ namespace Gnomenu {
 					document.inserted += document_inserted;
 					document.updated += document_updated;
 					document.removed += document_removed;
-					document.root.set_data("gtk", this);
+					document.root.set_data("gtk", this.menubar);
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is Document.NamedTag) {
 							switch((child as Document.NamedTag).tag) {
 								case "item":
 								case "check":
 								case "imageitem":
-								this.append(create_widget(child as Document.NamedTag) as Gtk.MenuItem);
+								this.menubar.append(create_widget(child as Document.NamedTag) as Gtk.MenuItem);
 								break;
 							}
 						}
@@ -38,10 +39,17 @@ namespace Gnomenu {
 		public MenuView(DocumentModel? document) {
 			this.document = document;
 		}
+		~MenuView() {
+			message("menuview is finalized");
+		}
 		private Gdk.EventExpose __tmp__event;
 		construct {
-			this.set("local", true, null);
-			this.expose_event += (widget, event)=> {
+			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
+			this.menubar = new Gtk.MenuBar();
+			this.menubar.visible = true;
+			this.menubar.set("local", true, null);
+			this.menubar.set_parent(this);
+			this.menubar.expose_event += (widget, event)=> {
 				if(0 != (widget.get_flags() & (Gtk.WidgetFlags.MAPPED | Gtk.WidgetFlags.VISIBLE))) {
 					Gtk.paint_flat_box(widget.style,
 							widget.window, (Gtk.StateType) widget.state,
@@ -50,21 +58,36 @@ namespace Gnomenu {
 							widget, null, 0, 0, -1, -1);
 
 					__tmp__event = event;
-					(widget as GtkCompat.Container).forall (expose_child);
+					(widget as GtkCompat.Container).forall_children (expose_child);
 				}
 				return true;
 			};
+/*
+			this.expose_event += (widget, event) => {
+				menubar.send_expose((Gdk.Event)event);
+			};
+*/
 			this.size_request += (widget, req) => {
+				this.menubar.size_request(req);
 				req.width = 0;
 				req.height = 0;
 			};
 			this.size_allocate +=(widget, allocation) => {
 				// do nothing;
+				message("width %d, height %d, x %d, y %d", allocation.width, allocation.height, allocation.x, allocation.y);
+				this.menubar.size_allocate(allocation);
 				return;
 			};
 		}
+		
+		private override void forall (bool include_internals, GtkCompat.Callback callback, void* data) {
+			if(include_internals) {
+				callback(this.menubar, data);
+			}
+		}
+
 		private void expose_child(Gtk.Widget widget) {
-			this.propagate_expose(widget, __tmp__event);
+			this.menubar.propagate_expose(widget, __tmp__event);
 		}
 		private weak Gtk.Widget create_widget(Document.NamedTag node) {
 			weak Gtk.Widget _gtk = (Gtk.Widget) node.get_data("gtk");
@@ -86,7 +109,6 @@ namespace Gnomenu {
 					}
 					gtk.set_data("node", node);
 					node.set_data_full("gtk", gtk.ref(), g_object_unref);
-					message("gtk ref_count = %u", gtk.ref_count);
 				break;
 				case "item":
 				case "check":
@@ -137,17 +159,20 @@ namespace Gnomenu {
 					}
 					gtk.set_data("node", node);
 					node.set_data_full("gtk", gtk.ref(), g_object_unref);
-					message("gtk ref_count = %u", gtk.ref_count);
-
 				break;
 				default:
 				debug("skipping tag %s", node.tag);
 				break;
 			}
-			return (Gtk.Widget) (node.get_data("gtk"));
+			weak Gtk.Widget rt = (Gtk.Widget) (node.get_data("gtk"));
+			rt.destroy += (widget) => {
+				Document.NamedTag node = (Document.NamedTag) widget.get_data("node");
+				node.set_data("gtk", null);
+			};
+			return rt;
 		}
 		private void clean() {
-			weak List<weak Gtk.Widget> l = this.get_children();
+			weak List<weak Gtk.Widget> l = this.menubar.get_children();
 			foreach(weak Gtk.Widget w in l){
 				w.destroy();
 			}
@@ -157,7 +182,7 @@ namespace Gnomenu {
 			if(!(n is Document.NamedTag)) return;
 			weak Document.NamedTag node = n as Document.NamedTag;
 			if(p == document.root ) {
-				this.insert(create_widget(node) as Gtk.MenuItem, pos);
+				this.menubar.insert(create_widget(node) as Gtk.MenuItem, pos);
 				return;
 			}
 			weak Document.NamedTag parent = p as Document.NamedTag;
