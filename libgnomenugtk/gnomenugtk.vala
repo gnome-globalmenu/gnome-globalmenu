@@ -4,6 +4,7 @@ using Gtk;
 using GtkAQD;
 using Gnomenu;
 using GMarkupDoc;
+using DBus;
 
 namespace GnomenuGtk {
 	[CCode (cname = "_patch_menu_bar")]
@@ -33,15 +34,26 @@ namespace GnomenuGtk {
 	}
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		message("module loaded");
+		DBus.Connection conn;
+		try {
+			conn = Bus.get(DBus.BusType.SESSION);
+		} catch (GLib.Error e) {
+			message("%s", e.message);
+			conn = null;
+		}
+		if(conn == null) {
+			message("DBus is unavailable. GlobalMenu is disabled.");
+			return;
+		}
 		if(Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null) {
-			message("GTK_MENUBAR_NO_MAC is set. Skipping the application");
+			message("GTK_MENUBAR_NO_MAC is set. GlobalMenu is disabled");
+			return;
 		}
 		switch(Environment.get_prgname()) {
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
 			case "gdm-user-switch-applet":
-			message("Quirks are found. Skipping the application");
+			message("GlobalMenu is disabled");
 			return;
 			break;
 		}
@@ -51,6 +63,7 @@ namespace GnomenuGtk {
 		patch_menu_item();
 		patch_menu_shell();
 		patch_menu_bar();
+		message("GlobalMenu is enabled");
 	}
 	private weak Client client() {
 		return Singleton.instance().client;

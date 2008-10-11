@@ -1,5 +1,4 @@
 using GLib;
-using DBus;
 using Gnomenu;
 using GMarkupDoc;
 using GtkAQD;
