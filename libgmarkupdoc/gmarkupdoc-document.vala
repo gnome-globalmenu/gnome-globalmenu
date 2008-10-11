@@ -57,7 +57,8 @@ namespace GMarkupDoc {
 			Tag t = new NamedTag(this, tag);
 			return t;
 		}
-		public virtual weak Node lookup(string name) { 
+		public virtual weak Node? lookup(string? name) { 
+			if(name == null) return null;
 			return dict.lookup(name);
 		}
 		public signal void activated(NamedTag node);
