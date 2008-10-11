@@ -6,6 +6,7 @@ namespace Gnomenu {
 	public class MenuView : GtkCompat.Container {
 		private DocumentModel? _document;
 		private Gtk.MenuBar menubar;
+		private Gtk.Widget arrow_button;
 		public weak DocumentModel? document {
 			get {
 				return _document;
@@ -62,26 +63,40 @@ namespace Gnomenu {
 				}
 				return true;
 			};
-/*
-			this.expose_event += (widget, event) => {
-				menubar.send_expose((Gdk.Event)event);
-			};
-*/
+			this.arrow_button = new Gtk.ToggleButton.with_label(">");
+			this.arrow_button.set_parent(this);
 			this.size_request += (widget, req) => {
 				this.menubar.size_request(req);
-				req.width = 0;
-				req.height = 0;
+				this.arrow_button.size_request(req);
 			};
 			this.size_allocate +=(widget, allocation) => {
-				// do nothing;
-				message("width %d, height %d, x %d, y %d", allocation.width, allocation.height, allocation.x, allocation.y);
-				this.menubar.size_allocate(allocation);
+				Gdk.Rectangle arrow_alloc = allocation;
+				Gdk.Rectangle menubar_alloc = allocation;
+				Gtk.Requisition arrow_req;
+				Gtk.Requisition menubar_req;
+
+				this.menubar.get_child_requisition(out menubar_req);
+				this.arrow_button.get_child_requisition(out arrow_req);
+				
+				if(menubar_req.width > allocation.width) {
+					arrow_alloc.width = arrow_req.width;
+					menubar_alloc.width -= arrow_req.width;
+					arrow_alloc.x = menubar_alloc.width + allocation.x;
+					this.arrow_button.size_allocate(arrow_alloc);
+					this.arrow_button.visible = true;
+				} else {
+					this.arrow_button.visible = false;
+				}
+				this.menubar.size_allocate(menubar_alloc);
 				return;
 			};
 		}
-		
+	    private void dump_alloc(Gdk.Rectangle allocation) {
+				message("width %d, height %d, x %d, y %d", allocation.width, allocation.height, allocation.x, allocation.y);
+		}	
 		private override void forall (bool include_internals, GtkCompat.Callback callback, void* data) {
 			if(include_internals) {
+				callback(this.arrow_button, data);
 				callback(this.menubar, data);
 			}
 		}
