@@ -65,10 +65,12 @@ namespace GnomenuGtk {
 		}
 	}
 	private void child_remove(Gtk.Widget widget, Gtk.Widget c) {
+		message("child_remove");
 		unbind_widget(c); /*This might be not so useful, since the node is removed when 
 									the MenuShell is disposed*/
 	}
 	private void child_insert(Gtk.Widget w, Gtk.Widget c, int pos) {
+		message("created widget at %d", pos);
 		bind_widget(c, w, pos);
 	}
 	private void bind_widget(Gtk.Widget widget, Gtk.Widget? parent_widget /*override parent widget*/= null, int pos = -1) {
@@ -121,6 +123,7 @@ namespace GnomenuGtk {
 			}
 			widget.notify["submenu"] += submenu_notify;
 		}
+		widget.weak_ref(weak_ref_notify, null);
 	}
 	protected void unbind_widget(Gtk.Widget widget) {
 		if(widget is Gtk.MenuShell) {
@@ -138,6 +141,10 @@ namespace GnomenuGtk {
 			}
 			widget.notify["submenu"] -= submenu_notify;
 		}
+		document().unwrap(widget);
+	}
+	private void weak_ref_notify(void* data, GLib.Object object){
+		unbind_widget(object as Gtk.Widget);
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
