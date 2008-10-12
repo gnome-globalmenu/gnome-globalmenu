@@ -3,12 +3,6 @@ using Gtk;
 using GtkCompat;
 
 namespace GMarkupDoc {
-	[CCode (cname="gtk_tree_view_insert_column_with_data_func")]
-	public extern int gtk_tree_view_insert_column_with_data_func(
-		Gtk.TreeView tw, int pos, 
-		string title, Gtk.CellRenderer cell, 
-		Gtk.TreeCellDataFunc func, 
-		GLib.DestroyNotify? dnotify);
 
 	public class ListView : GtkCompat.Container {
 		private Gtk.ScrolledWindow scroll;
@@ -49,7 +43,7 @@ namespace GMarkupDoc {
 			this.size_request += (widget, req) => {
 				scroll.size_request(req);
 			};
-			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
+			(treeview as GtkCompat.TreeView).insert_column_with_data_func (0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
 					weak Node node;
@@ -80,7 +74,7 @@ namespace GMarkupDoc {
 						cell.background = "white";
 					*/
 				}, null);
-			gtk_tree_view_insert_column_with_data_func (treeview, 1, "GMarkup", new Gtk.CellRendererText(), 
+			(treeview as GtkCompat.TreeView).insert_column_with_data_func (1, "GMarkup", new Gtk.CellRendererText(), 
 				(tree_column, cell, model, iter) => {
 					weak Node node;
 					model.get(iter, 0, out node, -1);

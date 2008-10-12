@@ -23,4 +23,11 @@ namespace GtkCompat {
 
 	public static delegate void Callback(Gtk.Widget widget, void * data);
 
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class TreeView : Gtk.Container, Atk.Implementor, Gtk.Buildable {
+		public int insert_column_with_data_func(int pos, 
+						string title, Gtk.CellRenderer cell, 
+						Gtk.TreeCellDataFunc func, 
+						GLib.DestroyNotify? dnotify);
+	}
 }
