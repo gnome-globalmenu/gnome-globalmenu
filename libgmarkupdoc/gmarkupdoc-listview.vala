@@ -3,8 +3,11 @@ using Gtk;
 using GtkCompat;
 
 namespace GMarkupDoc {
-
-	public class ListView : GtkCompat.Container {
+	public interface View: GLib.Object {
+		public abstract weak DocumentModel? document {get; set;}
+		public signal void activated(Node node, Quark quark);
+	}
+	public class ListView : GtkCompat.Container, View {
 		private Gtk.TreeView treeview;
 		private DocumentModel _document;
 		private Parser parser;
@@ -51,9 +54,17 @@ namespace GMarkupDoc {
 						</packing>
 					</child>
 					<child>
-						<object class = "GtkVBox" id = "vbox">
-							<child><object class = "GtkButton" id = "Add"/></child>
-							<child><object class = "GtkButton" id = "Remove"/></child>
+						<object class = "GtkHBox" id = "vbox">
+							<child>
+								<object class = "GtkButton" id = "add">
+									<property name ="label">Add</property>
+								</object>
+							</child>
+							<child>
+								<object class = "GtkButton" id = "remove">
+									<property name ="label">Remove</property>
+								</object>
+							</child>
 						</object>
 					</child>
 				</object>
@@ -130,8 +141,28 @@ namespace GMarkupDoc {
 				this.activated(node, 0);
 			//	adapter.activate(node, 0);
 			};
+			(get_widget("remove") as Gtk.Button).clicked += (widget) => {
+				Gtk.TreeSelection sel = treeview.get_selection();
+				weak Gtk.TreeModel model;
+				weak Gtk.TreeIter iter;
+				if(sel.get_selected(out model, out iter)) {
+					weak Node node;
+					model.get(iter, 0, out node, -1);
+					if(node.parent != null) node.parent.remove(node);
+				}
+				debug("remove");
+			};
+			(get_widget("add") as Gtk.Button).clicked += (widget) => {
+				Gtk.TreeSelection sel = treeview.get_selection();
+				weak Gtk.TreeModel model;
+				weak Gtk.TreeIter iter;
+				if(sel.get_selected(out model, out iter)) {
+					weak Node node;
+					model.get(iter, 0, out node, -1);
+					node.append(adapter.CreateTag("tag"));
+				}
+			};
 		}
-		public signal void activated(Node node, Quark detail);
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);

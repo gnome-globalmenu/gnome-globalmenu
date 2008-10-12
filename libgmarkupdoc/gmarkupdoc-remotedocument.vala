@@ -104,7 +104,7 @@ namespace GMarkupDoc {
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			RemoteDocument document = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
+			RemoteDocument document = new RemoteDocument("org.gnome.GlobalMenu.DocumentTest", "/org/gnome/GlobalMenu/Document");
 			ListView viewer = new ListView(document);
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 			window.add(viewer);

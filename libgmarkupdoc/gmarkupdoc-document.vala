@@ -9,9 +9,6 @@ namespace GMarkupDoc {
 		construct {
 			_dict = new HashTable<weak string, weak Node>(str_hash, str_equal);
 			_root = new Root(this);
-			this.activated += (document, node, detail) => {
-				debug("a node %s is activated", node.name);
-			};
 		}
 	}
 }
