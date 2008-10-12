@@ -78,7 +78,7 @@ libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS)
 
 gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_list_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
 	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
-	touch $@
+	touch gmarkupdoc.vapi libgmarkupdoc.vala.stamp
 
 _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:%.vala=%.h) \

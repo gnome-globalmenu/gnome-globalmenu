@@ -42,7 +42,7 @@ libgnomenugtk_la_SOURCES = \
 
 gnomenugtk.vapi libgnomenugtk.vala.stamp: $(libgnomenugtk_la_VALASOURCES) gtkaqd.vapi
 	$(VALAC) -C  $^
-	touch $@
+	touch gnomenugtk.vapi libgnomenugtk.vala.stamp
 
 libgnomenugtk_la_LIBADD = \
 		$(GNOMENU_LIBS) \
