@@ -135,14 +135,19 @@ namespace GnomenuGtk {
 			disconnect_signals(widget);
 			if(name != null) {
 				debug("GtkWidget %s is removed: %u", name, widget.ref_count);
-				this.dict_nw.remove(name); // because ~WidgetNode is not always invoked?
 				weak Document.Widget node = this.dict.lookup(name) as Document.Widget;
 				if(node != null){
 					if(node.parent == null) {
-						assert(false);
+					/* FIXME:This can happen because unwrap is usually called twice!
+                     * if the node is ref()ed, eg by the signal masharler,
+                     * althought the node is removed from parent, it can still be found.
+                     *   */
+						return;
 					}
+					debug("removing from parent");
 					node.parent.remove(node);
 				}
+				this.dict_nw.remove(name); // because ~WidgetNode is not always invoked?
 			}
 			set_native_name(widget, null);
 		}
