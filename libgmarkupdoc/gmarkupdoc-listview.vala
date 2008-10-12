@@ -52,9 +52,8 @@ namespace GMarkupDoc {
 					</child>
 					<child>
 						<object class = "GtkVBox" id = "vbox">
-							<child><object class = "GtkButton" id = "button1"/></child>
-							<child><object class = "GtkComboxBoxEntry" id = "prop_name"/></child>
-							<child><object class = "GtkEntry" id = "prop_value"/></child>
+							<child><object class = "GtkButton" id = "Add"/></child>
+							<child><object class = "GtkButton" id = "Remove"/></child>
 						</object>
 					</child>
 				</object>
@@ -127,6 +126,7 @@ namespace GMarkupDoc {
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
+				debug("treeview activated");
 				this.activated(node, 0);
 			//	adapter.activate(node, 0);
 			};

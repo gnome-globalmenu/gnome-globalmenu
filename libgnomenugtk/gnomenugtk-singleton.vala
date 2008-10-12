@@ -30,6 +30,10 @@ namespace GnomenuGtk {
 				window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 				window.accept_focus = false;
 				ListView viewer = new ListView(document);
+				viewer.activated += (viewer, node, detail) => {
+					viewer.document.activate(node, detail);
+					message("viewer activated");
+				};
 				window.add(viewer);
 				window.show_all();
 			}

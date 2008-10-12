@@ -225,6 +225,7 @@ namespace Gnomenu {
 				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
 				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
 					debug("removing from menushell");
+					(pgtk as Gtk.Container).remove(gtk);
 				}
 				if(pgtk is Gtk.MenuItem && (gtk is Gtk.MenuShell)) {
 					(pgtk as Gtk.MenuItem).submenu = null;
