@@ -41,7 +41,7 @@ namespace Gnomenu {
 			this.document = document;
 		}
 		~MenuView() {
-			message("menuview is finalized");
+			debug("menuview is finalized");
 		}
 		private Gdk.EventExpose __tmp__event;
 		construct {
@@ -92,7 +92,7 @@ namespace Gnomenu {
 			};
 		}
 	    private void dump_alloc(Gdk.Rectangle allocation) {
-				message("width %d, height %d, x %d, y %d", allocation.width, allocation.height, allocation.x, allocation.y);
+				debug("width %d, height %d, x %d, y %d", allocation.width, allocation.height, allocation.x, allocation.y);
 		}	
 		private override void forall (bool include_internals, GtkCompat.Callback callback, void* data) {
 			if(include_internals) {
@@ -193,7 +193,7 @@ namespace Gnomenu {
 			}
 		}
 		private void document_inserted(DocumentModel document, GMarkupDoc.Node p, GMarkupDoc.Node n, int pos) {
-			message("inserted");
+			debug("inserted");
 			if(!(n is GMarkupDoc.Tag)) return;
 			weak GMarkupDoc.Tag node = n as GMarkupDoc.Tag;
 			if(p == document.root ) {
@@ -218,18 +218,18 @@ namespace Gnomenu {
 		}
 		private void document_removed(DocumentModel document, GMarkupDoc.Node parent, GMarkupDoc.Node node) {
 			if(!(node is GMarkupDoc.Tag)) return;
-			message("removed %s from %s", node.name, parent.name);
+			debug("removed %s from %s", node.name, parent.name);
 			if(parent != null && node != null) {
 				weak Gtk.Widget pgtk = (Gtk.Widget) parent.get_data("gtk");
 				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
 				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
-					message("removing from menushell");
+					debug("removing from menushell");
 					gtk.destroy();
 				}
 				if(pgtk is Gtk.MenuItem && (gtk is Gtk.MenuShell)) {
 					(pgtk as Gtk.MenuItem).submenu = null;
 				}
-				message("gtk ref_count = %u", gtk.ref_count);
+				debug("gtk ref_count = %u", gtk.ref_count);
 				node.set_data("gtk", null);
 			}
 		}

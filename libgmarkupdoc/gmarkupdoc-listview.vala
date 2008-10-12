@@ -29,7 +29,6 @@ namespace GMarkupDoc {
 			if(include_internal) cb(scroll, data);
 		}
 		construct {
-			message("constructing the viewer");
 			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
 			treeview = new Gtk.TreeView();
 			scroll = new Gtk.ScrolledWindow(null, null);

@@ -1,7 +1,6 @@
 using GLib;
-using Gtk;
 using DBus;
-
+using Gtk;
 namespace GMarkupDoc {
 	public class RemoteDocument: Document {
 		private Parser parser;

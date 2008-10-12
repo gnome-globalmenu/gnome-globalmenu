@@ -17,7 +17,6 @@ namespace GnomenuGtk {
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
 		if(self is Gtk.MenuBar) {
-			message("%d = %d", (int) ihint.run_type, (int) SignalFlags.RUN_FIRST);
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 			Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
 			Gtk.Widget toplevel = self.get_toplevel();
@@ -40,7 +39,7 @@ namespace GnomenuGtk {
 		try {
 			conn = Bus.get(DBus.BusType.SESSION);
 		} catch (GLib.Error e) {
-			message("%s", e.message);
+			warning("%s", e.message);
 			conn = null;
 		}
 		if(conn == null) {
@@ -80,12 +79,12 @@ namespace GnomenuGtk {
 		}
 	}
 	private void child_remove(Gtk.Widget widget, Gtk.Widget c) {
-		message("child_remove");
+		debug("child_remove");
 		unbind_widget(c); /*This might be not so useful, since the node is removed when 
 									the MenuShell is disposed*/
 	}
 	private void child_insert(Gtk.Widget w, Gtk.Widget c, int pos) {
-		message("created widget at %d", pos);
+		debug("created widget at %d", pos);
 		bind_widget(c, w, pos);
 	}
 	private void bind_widget(Gtk.Widget widget, Gtk.Widget? parent_widget /*override parent widget*/= null, int pos = -1) {
@@ -164,7 +163,7 @@ namespace GnomenuGtk {
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		message("binding menu %s to %s", menu_name, window_name);
+		debug("binding menu %s to %s", menu_name, window_name);
 		bind_widget(window);
 		bind_widget(menu, window);
 		if(0 != (window.get_flags() & WidgetFlags.REALIZED)) {
@@ -183,7 +182,7 @@ namespace GnomenuGtk {
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
-		message("unbinding menu %s to %s", menu_name, window_name);
+		debug("unbinding menu %s to %s", menu_name, window_name);
 		weak Document.Widget node =document().dict.lookup(menu_name) as Document.Widget;
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}

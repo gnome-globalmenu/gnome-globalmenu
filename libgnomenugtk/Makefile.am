@@ -6,6 +6,7 @@ AM_CPPFLAGS = \
 	-include $(CONFIG_HEADER) \
 	-I$(top_srcdir)/libgmarkupdoc \
 	-I$(top_srcdir)/libgnomenu \
+	-DG_LOG_DOMAIN=\"GnomenuGTK\" \
 	$(NULL)
 AM_VALAC_FLAGS =\
 	$(GNOMENU_VALA_PKGS) \

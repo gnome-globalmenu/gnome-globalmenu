@@ -27,7 +27,7 @@ namespace Gnomenu {
 				((GLibCompat.String)appname).canon("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
 				if(appname[0] >= '0' && appname[0] <='9') appname = "_"+appname;
 				bus = "org.gnome.GlobalMenu.Applications." + appname + "-" + str;
-				message("Obtaining BUS name: %s", bus);
+				debug("Obtaining BUS name: %s", bus);
 				r = dbus.RequestName (bus, (uint) 0);
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
 		}

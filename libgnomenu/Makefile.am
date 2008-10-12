@@ -12,6 +12,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/libgmarkupdoc \
 	$(GNOMENU_CFLAGS) \
 	-include $(CONFIG_HEADER) \
+	-DG_LOG_DOMAIN=\"Gnomenu\" \
 	$(NULL)
 
 BUILT_SOURCES = \

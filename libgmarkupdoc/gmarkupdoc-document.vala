@@ -1,5 +1,4 @@
 using GLib;
-using Gtk;
 namespace GMarkupDoc {
 	public class Document: GLib.Object, DocumentModel {
 		private Root _root;
@@ -11,7 +10,7 @@ namespace GMarkupDoc {
 			_dict = new HashTable<weak string, weak Node>(str_hash, str_equal);
 			_root = new Root(this);
 			this.activated += (document, node, detail) => {
-				message("a node %s is activated", node.name);
+				debug("a node %s is activated", node.name);
 			};
 		}
 	}

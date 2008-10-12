@@ -1,6 +1,5 @@
 using GLib;
 using Gdk;
-using Gtk;
 using DBus;
 
 namespace GMarkupDoc {
@@ -50,7 +49,6 @@ namespace GMarkupDoc {
 		public signal void removed(string parent, string name);
 
 		public static int test(string[] args) {
-			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Document document = new Document();
 			GMarkupDoc.Parser parser = new GMarkupDoc.Parser(document);

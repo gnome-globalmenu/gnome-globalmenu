@@ -19,7 +19,7 @@ namespace Gnomenu {
 			
 			uint r = dbus.RequestName ("org.gnome.GlobalMenu.Server", (uint) 0);
 			assert(r == DBus.RequestNameReply.PRIMARY_OWNER);
-			message("server ready");
+			debug("server ready");
 		}
 		private void name_owner_changed(dynamic DBus.Object object, string bus, string old_owner, string new_owner){
 			if(new_owner != "") return;
@@ -56,11 +56,11 @@ namespace Gnomenu {
 			node.set("bus", client_bus);
 			node.unfreeze();
 			document.root.append(node);
-			message("register window %s %s", client_bus, xid);
+			debug("register window %s %s", client_bus, xid);
 		}
 		public void RemoveWindow (string client_bus, string xid) {
 			GMarkupDoc.Tag node= find_node_by_xid(xid);
-			message("remove window %s %s", client_bus, xid);
+			debug("remove window %s %s", client_bus, xid);
 			if(node != null)
 				if(node.get("bus") == client_bus)
 					document.root.remove(node);

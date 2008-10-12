@@ -1,6 +1,7 @@
 AM_CPPFLAGS = \
 	-g \
 	-include $(CONFIG_HEADER) \
+	-DG_LOG_DOMAIN=\"GMarkupDoc\" \
 	$(NULL)
 
 AM_VALAC_FLAGS =  \
