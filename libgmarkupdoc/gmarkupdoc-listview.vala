@@ -1,5 +1,6 @@
 using GLib;
 using Gtk;
+using GtkCompat;
 
 namespace GMarkupDoc {
 	[CCode (cname="gtk_tree_view_insert_column_with_data_func")]
@@ -9,7 +10,8 @@ namespace GMarkupDoc {
 		Gtk.TreeCellDataFunc func, 
 		GLib.DestroyNotify? dnotify);
 
-	public class ListView : Gtk.ScrolledWindow {
+	public class ListView : GtkCompat.Container {
+		private Gtk.ScrolledWindow scroll;
 		private Gtk.TreeView treeview;
 		private DocumentModel _document;
 		private DocumentTreeAdapter adapter;
@@ -29,10 +31,24 @@ namespace GMarkupDoc {
 		public ListView(DocumentModel? document) {
 			this.document = document;
 		}
+		private override void forall(bool include_internal, GtkCompat.Callback cb, void* data){
+			if(include_internal) cb(scroll, data);
+		}
 		construct {
 			message("constructing the viewer");
+			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
 			treeview = new Gtk.TreeView();
-			this.add(treeview);
+			scroll = new Gtk.ScrolledWindow(null, null);
+			scroll.visible = true;
+			treeview.visible = true;
+			scroll.add(treeview);
+			scroll.set_parent(this);
+			this.size_allocate += (widget, alloc) => {
+				scroll.size_allocate(alloc);
+			};
+			this.size_request += (widget, req) => {
+				scroll.size_request(req);
+			};
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;

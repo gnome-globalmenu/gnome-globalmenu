@@ -4,6 +4,7 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 AM_VALAC_FLAGS =  \
+	--pkg gtkcompat \
 	$(NULL)
 
 
@@ -78,6 +79,8 @@ libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS)
 
 gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_list_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
 	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
+	sed -e 's;GtkCompat.Container;Gtk.Container;g' gmarkupdoc.vapi > gmarkupdoc.vapi.new
+	mv gmarkupdoc.vapi.new gmarkupdoc.vapi
 	touch gmarkupdoc.vapi libgmarkupdoc.vala.stamp
 
 _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
