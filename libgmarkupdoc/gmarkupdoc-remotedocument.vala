@@ -29,7 +29,7 @@ namespace GMarkupDoc {
 			remote.Updated += remote_updated;
 			parser = new Parser(this);
 			try {
-				string xml = remote.QueryRoot(0);
+				string xml = remote.QueryRoot(-1);
 				parser.parse(xml);
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
@@ -83,7 +83,7 @@ namespace GMarkupDoc {
 				message("new owner of %s", bus);
 				this.root.remove_all();
 				try {
-					string xml = remote.QueryRoot(0);
+					string xml = remote.QueryRoot(-1);
 					parser.parse(xml);
 				} catch (GLib.Error e) {
 					warning("%s", e.message);

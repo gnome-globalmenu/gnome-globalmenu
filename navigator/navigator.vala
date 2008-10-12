@@ -18,13 +18,12 @@ public class Navigator :Gtk.Window{
 		server_viewer = new ListView(server);
 		viewer = new ListView(null);
 		viewer2 = new MenuView(null);
-		Gtk.Box hbox = new Gtk.HBox(false, 0);
+		Gtk.Paned vpan = new Gtk.VPaned();
 		Gtk.Box vbox = new Gtk.VBox(false, 0);
-		this.add(hbox);
-		hbox.pack_start_defaults(server_viewer);
-	
-		hbox.pack_start_defaults(vbox);
-		vbox.pack_start_defaults(viewer2);
+		this.add(vpan);
+		vpan.pack1(server_viewer, true, true);
+		vpan.pack2(vbox, true, false);
+		vbox.pack_start(viewer2, false, true, 0);
 		vbox.pack_start_defaults(viewer);
 		
 		server.activated += (docu, node, detail)=> {
