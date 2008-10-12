@@ -235,7 +235,7 @@ namespace Gnomenu {
 		}
 		private void menu_item_activated (Gtk.MenuItem o) {
 			weak GMarkupDoc.Tag widget = (GMarkupDoc.Tag) o.get_data("node");
-			if(widget != null);
+			if(widget != null)
 				document.activate(widget, 0);
 		}
 		private void update_properties(Gtk.Widget gtk, GMarkupDoc.Tag node, string[] props) {
