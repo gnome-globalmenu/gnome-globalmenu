@@ -21,8 +21,10 @@ namespace GnomenuGtk {
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 			Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
 			Gtk.Widget toplevel = self.get_toplevel();
-			old_toplevel = old_toplevel.get_ancestor(typeof(Gtk.Window));
-			toplevel = toplevel.get_ancestor(typeof(Gtk.Window));
+			if(old_toplevel is Gtk.Widget)
+				old_toplevel = old_toplevel.get_ancestor(typeof(Gtk.Window));
+			if(toplevel is Gtk.Widget)
+				toplevel = toplevel.get_ancestor(typeof(Gtk.Window));
 			if(old_toplevel != null) {
 				unbind_menu(old_toplevel, self);
 			}
@@ -165,7 +167,7 @@ namespace GnomenuGtk {
 		message("binding menu %s to %s", menu_name, window_name);
 		bind_widget(window);
 		bind_widget(menu, window);
-		if(0 != (window.get_flags() & WidgetFlags.TOPLEVEL)) {
+		if(0 != (window.get_flags() & WidgetFlags.REALIZED)) {
 			weak string window_name = document().wrap(window);
 			client().register_window(window_name, XWINDOW(window.window).to_string());
 		}
