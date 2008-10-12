@@ -41,7 +41,7 @@ public class Navigator :Gtk.Window{
 	}
 	public static int main(string[] args) {
 		Gtk.init(ref args);
-		MainLoop loop = new MainLoop(null, false);
+	//	MainLoop loop = new MainLoop(null, false);
 
 		Navigator nav = new Navigator();
 		nav.show_all();
@@ -49,7 +49,7 @@ public class Navigator :Gtk.Window{
 			Gtk.main_quit();
 			return false;
 		};
-		loop.run();
+		Gtk.main();
 		return 0;	
 	}
 
