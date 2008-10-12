@@ -46,18 +46,21 @@ namespace GMarkupDoc {
 			}
 			return false;	
 		}
-		public virtual Text CreateText(string text) {
+		public Text CreateText(string text) {
 			return document.CreateText(text);
 		}
-		public virtual Special CreateSpecial(string text) {
+		public Special CreateSpecial(string text) {
 			return document.CreateSpecial(text);
 		}
-		public virtual Tag CreateTag(string tag) {
+		public Tag CreateTag(string tag) {
 			return document.CreateTag(tag);
 		}
-		public virtual Tag CreateTagWithAttributes(string tag, 
+		public Tag CreateTagWithAttributes(string tag, 
 				string[] attr_names, string[] attr_values) {
 			return document.CreateTagWithAttributes(tag, attr_names, attr_values);
+		}
+		public void activate(Node node, Quark detail) {
+			this.document.activate(node, detail);
 		}
 		construct {
 			disposed = false;

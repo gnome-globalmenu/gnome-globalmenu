@@ -27,11 +27,11 @@ namespace GMarkupDoc {
 			if(strings == null) strings = new StringChunk(1024);
 			return strings.insert_const(s);
 		}
-		public signal void updated(Node node, string prop);
-		public signal void inserted(Node parent, Node node, int pos);
-		public signal void removed(Node parent, Node node);
-		public signal void activated(Node node, Quark detail);
-		public void activate(Node node, Quark detail) {
+		public abstract signal void updated(Node node, string prop);
+		public abstract signal void inserted(Node parent, Node node, int pos);
+		public abstract signal void removed(Node parent, Node node);
+		public abstract signal void activated(Node node, Quark detail);
+		public virtual void activate(Node node, Quark detail) {
 			this.activated(node, detail);
 		}
 		public virtual void transverse(Node node, TransverseFunc func) {

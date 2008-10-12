@@ -36,6 +36,7 @@ namespace GMarkupDoc {
 			this.activated += (document, node, detail) => {
 				try {
 					this.remote.Activate(node.name);
+					debug("activated");
 				} catch(GLib.Error e){
 					warning("%s", e.message);
 				}

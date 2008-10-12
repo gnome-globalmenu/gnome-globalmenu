@@ -41,8 +41,10 @@ namespace GMarkupDoc {
 		}
 		public void Activate(string name){
 			weak Node node = document.dict.lookup(name);
-			if(node != null)
+			message("activated %s", name);
+			if(node != null) {
 				this.document.activate(node, 0);
+			}
 		}
 		public signal void updated(string name, string prop);
 		public signal void inserted(string parent, string name, int pos);
