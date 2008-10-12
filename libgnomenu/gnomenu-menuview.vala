@@ -129,6 +129,7 @@ namespace Gnomenu {
 				case "check":
 				case "imageitem":
 					string label = node.get("label");
+					if(label == null) label = "";
 					Gtk.MenuItem gtk;
 					switch(label) {
 						case "&":
@@ -146,19 +147,19 @@ namespace Gnomenu {
 						default:
 						switch(node.tag) {
 							case "check":
-								gtk = new Gtk.CheckMenuItem.with_mnemonic(node.get("label"));
+								gtk = new Gtk.CheckMenuItem.with_mnemonic(label);
 								gtk.activate += menu_item_activated;
 								string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio"};
 								update_properties(gtk, node, p);
 							break;
 							case "item":
-								gtk = new Gtk.MenuItem.with_mnemonic(node.get("label"));
+								gtk = new Gtk.MenuItem.with_mnemonic(label);
 								gtk.activate += menu_item_activated;
 								string[] p = {"visible", "sensitive", "no-show-all", "label"};
 								update_properties(gtk, node, p);
 							break;
 							case "imageitem":
-								gtk = new Gtk.ImageMenuItem.with_mnemonic(node.get("label"));
+								gtk = new Gtk.ImageMenuItem.with_mnemonic(label);
 								gtk.activate += menu_item_activated;
 								string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock"};
 								update_properties(gtk, node, p);
@@ -224,19 +225,20 @@ namespace Gnomenu {
 				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
 				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
 					debug("removing from menushell");
-					gtk.destroy();
 				}
 				if(pgtk is Gtk.MenuItem && (gtk is Gtk.MenuShell)) {
 					(pgtk as Gtk.MenuItem).submenu = null;
 				}
 				debug("gtk ref_count = %u", gtk.ref_count);
-				node.set_data("gtk", null);
+				gtk.destroy();
 			}
 		}
 		private void menu_item_activated (Gtk.MenuItem o) {
 			weak GMarkupDoc.Tag widget = (GMarkupDoc.Tag) o.get_data("node");
-			if(widget != null)
+			if(widget != null) {
+				debug("activated");
 				document.activate(widget, 0);
+			}
 		}
 		private void update_properties(Gtk.Widget gtk, GMarkupDoc.Tag node, string[] props) {
 			foreach(weak string s in props) {
@@ -250,7 +252,9 @@ namespace Gnomenu {
 				switch(prop) {
 					case "label":
 						Gtk.Label label = (gtk as Gtk.Bin).get_child() as Gtk.Label;
-						label.label = node.get("label");
+						string label_text = node.get("label");
+						if(label_text == null) label_text = "";
+						label.label = label_text;
 					break;
 					case "visible":
 					case "sensitive":

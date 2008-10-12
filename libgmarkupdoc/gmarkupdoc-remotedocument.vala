@@ -46,6 +46,7 @@ namespace GMarkupDoc {
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			if(invalid) return;
 			weak Node parent = dict.lookup(parentname);
+			if(parent == null) return;
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
@@ -61,6 +62,7 @@ namespace GMarkupDoc {
 			if(invalid) return;
 			weak Node parent = dict.lookup(parentname);
 			weak Node node = dict.lookup(nodename);
+			if(parent == null || node == null) return;
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
