@@ -64,17 +64,21 @@ namespace GMarkupDoc {
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
-			string newtext = text.ndup(text_len);
-			GMarkupDoc.Text node = parser.document.CreateText(newtext);
-			parser.current.append(node);
+			if(text_len > 0) {
+				string newtext = text.ndup(text_len);
+				GMarkupDoc.Text node = parser.document.CreateText(newtext);
+				parser.current.append(node);
+			}
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
 			weak Parser parser = (Parser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
-			string newtext = passthrough_text.ndup(text_len);
-			Special node = parser.document.CreateSpecial(newtext);
-			parser.current.append(node);
+			if(text_len > 0) {
+				string newtext = passthrough_text.ndup(text_len);
+				Special node = parser.document.CreateSpecial(newtext);
+				parser.current.append(node);
+			}
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {

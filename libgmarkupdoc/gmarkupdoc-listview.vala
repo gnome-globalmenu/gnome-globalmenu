@@ -43,8 +43,12 @@ namespace GMarkupDoc {
 					if(text == null) {
 						if(node is Tag)
 							text = (node as Tag).tag;
-						else
-							text = "NONAME";
+						if(node is Text)
+							text = "TEXT";
+						if(node is Special)
+							text = "SPECAL";
+						if(node is Root)
+							text = "ROOT";
 					}
 					cell.text = text;
 					/*
@@ -64,7 +68,7 @@ namespace GMarkupDoc {
 				(tree_column, cell, model, iter) => {
 					weak Node node;
 					model.get(iter, 0, out node, -1);
-					(cell as Gtk.CellRendererText).text = node.summary();
+					(cell as Gtk.CellRendererText).text = "'" + node.summary() + "'";
 				}, null);
 			treeview.row_activated +=(treeview, path, column) => {
 				Gtk.TreeModel model = treeview.model;

@@ -9,11 +9,8 @@ namespace GMarkupDoc {
 				set{
 					Node old_parent = _parent;
 					_parent = value;
-					if(freezed <=0)
-					parent_set(old_parent);
 				}
 		}
-		public signal void parent_set(Node? old_parent);
 		protected List<weak Node> children;
 		public weak DocumentModel document {get; construct;}
 		public Node (DocumentModel document){ this.document = document;}
@@ -61,7 +58,6 @@ namespace GMarkupDoc {
 			if(freezed <= 0)
 			document.removed(this, node);
 			node.parent = null;
-			//message("ref count = %u", node.ref_count);
 			node.unref();
 		}
 		public int index(Node node) {
@@ -98,7 +94,7 @@ namespace GMarkupDoc {
 				return "";
 			else {
 				foreach(weak Node child in children){
-					sb.append_printf("%s", child.summary(level - 1));
+					sb.append_printf("%s", child.summary(level));
 				}
 			}
 			return sb.str;
