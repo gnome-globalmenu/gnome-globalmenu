@@ -46,8 +46,8 @@ namespace GMarkupDoc {
 				case ParseType.UPDATE:
 					if(parser.first) {
 						for(int i=0; i< names.length; i++) {
-							if(names[i] == parser.propname)
-								(parser.current as Tag).set(parser.propname, values[i]);
+							if(parser.propname == null || names[i] == parser.propname)
+								(parser.current as Tag).set(names[i], values[i]);
 						}
 						parser.first = false;
 					}
@@ -111,7 +111,7 @@ namespace GMarkupDoc {
 			}
 			return true;
 		}
-		public bool update_tag(Tag node, string propname, string foo) {
+		public bool update_tag(Tag node, string? propname, string foo) {
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			type = ParseType.UPDATE;
 			current = node;

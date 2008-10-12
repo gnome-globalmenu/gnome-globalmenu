@@ -3,28 +3,40 @@ using GLibCompat;
 namespace GMarkupDoc {
 	public interface DocumentModel: GLib.Object {
 		private static StringChunk strings = null;
+		private static uint unique;
 		public abstract weak Node root {get;}
 		public abstract weak HashTable<weak string, weak Node> dict {get;}
 		public abstract weak string name_attr {get;}
 		public virtual Text CreateText(string text) {
-			return new Text(this, text);
+			Text rt = new Text(this, text);
+			rt.name = S("TEXT" + unique.to_string());
+			unique++;
+			return rt;
 		}
+	
 		public virtual Special CreateSpecial(string text) {
-			return new Special(this, text);
+			Special rt =new Special(this, text);
+			rt.name =  S("SPECIAL" + unique.to_string());
+			unique++;
+			return rt;
 		}
 		public virtual Tag CreateTag(string tag) {
-			return new Tag(this, tag);
+			Tag rt = new Tag(this, tag);
+			rt.name = S("TAG" + unique.to_string());
+			unique++;
+			return rt;
 		}
 		public virtual Tag CreateTagWithAttributes(string tag, 
 				string[] attr_names, string[] attr_values) {
 			Tag t = CreateTag(tag);
-			t.freeze();
 			t.set_attributes(attr_names, attr_values);
-			t.unfreeze();
 			return t;
 		}
 		public virtual weak string S(string s) {
-			if(strings == null) strings = new StringChunk(1024);
+			if(strings == null) {
+				strings = new StringChunk(1024);
+				unique = 1;
+			}
 			return strings.insert_const(s);
 		}
 		public abstract signal void updated(Node node, string prop);

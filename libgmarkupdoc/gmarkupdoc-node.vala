@@ -2,13 +2,15 @@ using GLib;
 namespace GMarkupDoc {
 	public abstract class Node: GLib.Object {
 		private bool disposed;
-		protected int freezed;
+		protected int frozen;
 		protected weak Node _parent;
 		public weak Node parent {
 				get {return _parent;} 
-				set{
-					Node old_parent = _parent;
-					_parent = value;
+				set {_parent = value; 
+					if(parent != null)
+						this.unfreeze();
+					else
+						this.freeze();
 				}
 		}
 		protected List<weak Node> children;
@@ -28,7 +30,7 @@ namespace GMarkupDoc {
 		}
 		construct {
 			disposed = false;
-			freezed = 0;
+			frozen = 1;
 		}
 		public virtual string to_string () {
 			return summary(-1);
@@ -39,13 +41,11 @@ namespace GMarkupDoc {
 		public void insert(Node node, int pos) {
 			children.insert(node.ref() as Node, pos);
 			node.parent = this;
-			if(freezed <= 0)
 			document.inserted(this, node, pos);
 		}
 		public void remove_all() {
 			foreach(weak Node node in children) {
 				node.remove_all();
-				if(freezed <= 0)
 					document.removed(this, node);
 				node.parent = null;
 				node.unref();
@@ -55,7 +55,6 @@ namespace GMarkupDoc {
 		public void remove(Node node) {
 			node.remove_all();
 			children.remove(node);
-			if(freezed <= 0)
 			document.removed(this, node);
 			node.parent = null;
 			node.unref();
@@ -69,14 +68,16 @@ namespace GMarkupDoc {
 				disposed = true;
 				remove_all();
 			}
+		}
+		~Node() {
 			if(name != null)
 				document.dict.remove(name);
 		}
 		public void freeze() {
-			freezed++;
+			frozen++;
 		}
 		public void unfreeze() {
-			freezed--;
+			frozen--;
 		}	
 		~Node() {
 		}
@@ -153,7 +154,7 @@ namespace GMarkupDoc {
 				props.insert(document.S(prop), val);
 			if(prop == document.name_attr)
 				this.name = val;
-			if(freezed <= 0)
+			if(this.frozen <=0)
 				document.updated(this, prop);
 		}
 		public virtual void unset(string prop) {
