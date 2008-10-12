@@ -33,14 +33,14 @@ namespace GMarkupDoc {
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
-		}
-		public virtual void activate(Node node, Quark detail) {
-			try {
-				remote.Activate(node.name);
-			} catch(GLib.Error e){
-				warning("%s", e.message);
-			}
-			base.activate(node, detail);
+			this.activated += (document, node, detail) => {
+				try {
+					this.remote.Activate(node.name);
+				} catch(GLib.Error e){
+					warning("%s", e.message);
+				}
+
+			};
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			if(invalid) return;
