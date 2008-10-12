@@ -64,6 +64,7 @@ namespace GMarkupDoc {
 			weak Node node = dict.lookup(nodename);
 			if(parent == null || node == null) return;
 			parent.remove(node);
+			this.DestroyNode(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			if(invalid) return;
@@ -83,7 +84,7 @@ namespace GMarkupDoc {
 			if(bus != this.bus) return;
 			if(new_owner != "" && old_owner == "") {
 				message("new owner of %s", bus);
-				this.root.remove_all();
+				this.DestroyNode(root);
 				try {
 					string xml = remote.QueryRoot(-1);
 					parser.parse(xml);
@@ -95,7 +96,7 @@ namespace GMarkupDoc {
 			}
 			if(new_owner == "" && old_owner != "") {
 				message("owner of %s disappeared", bus);
-				this.root.remove_all();
+				this.DestroyNode(root);
 				invalid = true;
 				return;
 			}

@@ -126,20 +126,8 @@ namespace GMarkupDoc {
 			return true;
 
 		}
-		private class TestDocument : Object, DocumentModel {
-			private Root _root;
-			public weak GMarkupDoc.Node root { get {return _root;}}
-			public HashTable<weak string, Node> _dict;
-			public weak HashTable<weak string, weak Node> dict {get { return _dict;}}
-			public weak string name_attr {get { return S("name");}}
-			public TestDocument() { }
-			construct {
-				_root = new Root(this);
-				_dict = new HashTable<weak string, weak Node>(str_hash, str_equal);
-			}
-		}
 		public static int test (string [] args){
-			DocumentModel document = new TestDocument();
+			DocumentModel document = new Document();
 			Parser parser = new Parser(document);
 			parser.parse(
 """

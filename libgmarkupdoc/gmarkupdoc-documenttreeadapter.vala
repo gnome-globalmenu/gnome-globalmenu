@@ -10,14 +10,15 @@ namespace GMarkupDoc {
 			this.document = document;
 		}	
 		public weak Node root {get {return document.root;}}
+		public weak Node orphan {get {return document.orphan;}}
 		public weak HashTable<weak string, weak Node> dict { get{return document.dict;}}
 		public weak string name_attr {get {return document.name_attr;}}
-		construct {
-			this.tree = new Gtk.TreeStore(1, typeof(constpointer));
-			this.iterbox_hash = new HashTable<weak Node, weak TreeIterBox>.full(direct_hash, direct_equal, null, g_object_unref);
-			this.document.transverse(root, (node) => {
+		private void add_to_tree(Node node) {
+			this.document.transverse(node, (node) => {
 					TreeIterBox box = new TreeIterBox();
-					if(node == this.document.root) {
+					if(node == this.document.root ||
+					  node == this.document.orphan
+					) {
 						this.tree.insert(out box.iter, null, -1);
 					} else {
 						this.tree.insert(out box.iter, get_iterbox(node.parent).iter, node.parent.index(node));
@@ -25,12 +26,14 @@ namespace GMarkupDoc {
 					set_iterbox(node, box);
 					this.tree.set(box.iter, 0, node, -1);
 				});
+		}
+		construct {
+			this.tree = new Gtk.TreeStore(1, typeof(constpointer));
+			this.iterbox_hash = new HashTable<weak Node, weak TreeIterBox>.full(direct_hash, direct_equal, null, g_object_unref);
+			this.add_to_tree(root);
+			this.add_to_tree(orphan);
 			this.document.inserted += (document, parent, child, pos) => {
-				TreeIterBox box = new TreeIterBox();
-				weak TreeIterBox parent_iterbox = get_iterbox(parent);
-				this.tree.insert(out box.iter, parent_iterbox.iter, pos);
-				set_iterbox(child, box);
-				this.tree.set(box.iter, 0, child, -1);
+				this.add_to_tree(child);
 				this.inserted(parent, child, pos);
 			};
 			this.document.removed += (document, parent, child) => {

@@ -5,7 +5,8 @@ namespace GMarkupDoc {
 		private static StringChunk strings = null;
 		private static uint unique;
 		public abstract weak Node root {get;}
-		public abstract weak HashTable<weak string, weak Node> dict {get;}
+		public abstract weak Node orphan {get;}
+		public abstract weak HashTable<weak string, Node> dict {get;}
 		public abstract weak string name_attr {get;}
 		public virtual Text CreateText(string text) {
 			Text rt = new Text(this, text);
@@ -32,6 +33,15 @@ namespace GMarkupDoc {
 			t.set_attributes(attr_names, attr_values);
 			return t;
 		}
+		public virtual void DestroyNode(Node? node) {
+			assert(node.parent == orphan);
+			orphan.remove(node);
+			transverse(node, (node) => {
+				debug("%s  %u", node.name, node.ref_count);
+//				assert(node.ref_count == 1);
+				node.unref();
+			});
+		}
 		public virtual weak string S(string s) {
 			if(strings == null) {
 				strings = new StringChunk(1024);
@@ -51,10 +61,10 @@ namespace GMarkupDoc {
 			queue.push_head(node);
 			while(!queue.is_empty()) {
 				weak Node n = queue.pop_head();
-				func(n);
 				foreach(weak Node child in n.children) {
 					queue.push_tail(child);
 				}
+				func(n);
 			}
 		}
 		public delegate bool TransverseFunc(Node node);

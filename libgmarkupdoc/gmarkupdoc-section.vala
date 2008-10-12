@@ -17,9 +17,8 @@ namespace GMarkupDoc {
 		private Node pseudo_root; 
 		private bool invalid;
 		private bool disposed;
-		public weak Node root {
-			get {return _root;}
-		}
+		public weak Node root { get {return _root;} }
+		public weak Node orphan { get {return document.orphan;} }
 		public weak Node set_root {
 			construct {
 				_root = value;

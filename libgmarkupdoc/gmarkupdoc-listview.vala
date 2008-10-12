@@ -3,6 +3,39 @@ using Gtk;
 using GtkCompat;
 
 namespace GMarkupDoc {
+	private const string INTERFACE = """
+			<interface>
+				<object class = "GtkVPaned" id = "box">
+					<child>
+						<object class = "GtkScrolledWindow" id = "scroll">
+						</object>
+						<packing>
+							<property name = "resize">1</property>
+							<property name = "shrink">1</property>
+						</packing>
+					</child>
+					<child>
+						<object class = "GtkHBox" id = "vbox">
+							<child>
+								<object class = "GtkButton" id = "add">
+									<property name ="label">Add</property>
+								</object>
+							</child>
+							<child>
+								<object class = "GtkButton" id = "remove">
+									<property name ="label">Remove</property>
+								</object>
+							</child>
+							<child>
+								<object class = "GtkButton" id = "destroy">
+									<property name ="label">Destroy</property>
+								</object>
+							</child>
+						</object>
+					</child>
+				</object>
+			</interface>""";
+
 	public interface View: GLib.Object {
 		public abstract weak DocumentModel? document {get; set;}
 		public signal void activated(Node node, Quark quark);
@@ -42,34 +75,7 @@ namespace GMarkupDoc {
 		construct {
 			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
 			builder = new Gtk.Builder();
-			builder.add_from_string("""
-			<interface>
-				<object class = "GtkVPaned" id = "box">
-					<child>
-						<object class = "GtkScrolledWindow" id = "scroll">
-						</object>
-						<packing>
-							<property name = "resize">1</property>
-							<property name = "shrink">1</property>
-						</packing>
-					</child>
-					<child>
-						<object class = "GtkHBox" id = "vbox">
-							<child>
-								<object class = "GtkButton" id = "add">
-									<property name ="label">Add</property>
-								</object>
-							</child>
-							<child>
-								<object class = "GtkButton" id = "remove">
-									<property name ="label">Remove</property>
-								</object>
-							</child>
-						</object>
-					</child>
-				</object>
-			</interface>
-			""", -1);		
+			builder.add_from_string(INTERFACE, -1);
 			treeview = new Gtk.TreeView();
 			(get_widget("scroll") as Gtk.ScrolledWindow).add(treeview);
 			box = get_widget("box");
@@ -142,26 +148,30 @@ namespace GMarkupDoc {
 			//	adapter.activate(node, 0);
 			};
 			(get_widget("remove") as Gtk.Button).clicked += (widget) => {
-				Gtk.TreeSelection sel = treeview.get_selection();
-				weak Gtk.TreeModel model;
-				weak Gtk.TreeIter iter;
-				if(sel.get_selected(out model, out iter)) {
-					weak Node node;
-					model.get(iter, 0, out node, -1);
-					if(node.parent != null) node.parent.remove(node);
+				weak Node node = get_selected();
+				if(node != null && node.parent != null) {
+					node.parent.remove(node);
 				}
-				debug("remove");
 			};
 			(get_widget("add") as Gtk.Button).clicked += (widget) => {
-				Gtk.TreeSelection sel = treeview.get_selection();
-				weak Gtk.TreeModel model;
-				weak Gtk.TreeIter iter;
-				if(sel.get_selected(out model, out iter)) {
-					weak Node node;
-					model.get(iter, 0, out node, -1);
-					node.append(adapter.CreateTag("tag"));
-				}
+				weak Node node = get_selected();
+				if(node != null) node.append(document.CreateTag("tag"));
 			};
+			(get_widget("destroy") as Gtk.Button).clicked += (widget) => {
+				weak Node node = get_selected();
+				if(node != null) document.DestroyNode(node);
+			};
+		}
+		private weak Node? get_selected() {
+			Gtk.TreeSelection sel = treeview.get_selection();
+			weak Gtk.TreeModel model;
+			weak Gtk.TreeIter iter;
+			if(sel.get_selected(out model, out iter)) {
+				weak Node node;
+				model.get(iter, 0, out node, -1);
+				return node;
+			}
+			return null;
 		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
