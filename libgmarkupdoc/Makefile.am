@@ -10,7 +10,7 @@ AM_VALAC_FLAGS =  \
 libgmarkupdocdir = $(libdir)
 libgmarkupdoc_LTLIBRARIES = \
 		libgmarkupdoc-base.la \
-		libgmarkupdoc-named.la \
+		libgmarkupdoc-list.la \
 		libgmarkupdoc-dbus.la \
 		libgmarkupdoc.la \
 		$(NULL)
@@ -21,7 +21,7 @@ libgmarkupdoc_la_SOURCES = \
 		$(NULL)
 libgmarkupdoc_la_CFLAGS = \
 	$(GMARKUPDOC_BASE_CFLAGS) \
-	$(GMARKUPDOC_NAMED_CFLAGS) \
+	$(GMARKUPDOC_LIST_CFLAGS) \
 	$(GMARKUPDOC_DBUS_CFLAGS) \
 	$(NULL)
 libgmarkupdoc_base_la_VALASOURCES = \
@@ -29,10 +29,11 @@ libgmarkupdoc_base_la_VALASOURCES = \
 		gmarkupdoc-node.vala \
 		gmarkupdoc-section.vala \
 		gmarkupdoc-parser.vala \
+		gmarkupdoc-document.vala \
 		$(NULL)
 
-libgmarkupdoc_named_la_VALASOURCES = \
-		gmarkupdoc-document.vala \
+libgmarkupdoc_list_la_VALASOURCES = \
+		gmarkupdoc-documenttreeadapter.vala \
 		gmarkupdoc-listview.vala \
 		$(NULL)
 
@@ -45,15 +46,13 @@ BUILT_SOURCES = \
 	gmarkupdoc.vapi \
 	gmarkupdoc.h \
 	gmarkupdoc.c \
-	libgmarkupdoc-base.vala.stamp \
+	libgmarkupdoc.vala.stamp \
 	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.c) \
 	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.h) \
-	libgmarkupdoc-dbus.vala.stamp \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.c) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
-	libgmarkupdoc-named.vala.stamp \
-	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.c) \
-	$(libgmarkupdoc_named_la_VALASOURCES:.vala=.h) \
+	$(libgmarkupdoc_list_la_VALASOURCES:.vala=.c) \
+	$(libgmarkupdoc_list_la_VALASOURCES:.vala=.h) \
 	$(NULL)
 
 libgmarkupdoc_base_la_SOURCES = \
@@ -70,20 +69,20 @@ libgmarkupdoc_dbus_la_SOURCES = \
 libgmarkupdoc_dbus_la_CFLAGS = $(GMARKUPDOC_DBUS_CFLAGS)
 libgmarkupdoc_dbus_la_LIBADD = $(GMARKUPDOC_DBUS_LIBS)
 
-libgmarkupdoc_named_la_SOURCES = \
-		$(libgmarkupdoc_named_la_VALASOURCES:.vala=.c) \
-		$(libgmarkupdoc_named_la_VALASOURCES:.vala=.h) \
+libgmarkupdoc_list_la_SOURCES = \
+		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.c) \
+		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.h) \
 		$(NULL)
-libgmarkupdoc_named_la_CFLAGS = $(GMARKUPDOC_NAMED_CFLAGS)
-libgmarkupdoc_named_la_LIBADD = $(GMARKUPDOC_NAMED_LIBS)
+libgmarkupdoc_list_la_CFLAGS = $(GMARKUPDOC_LIST_CFLAGS)
+libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS)
 
-gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_named_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
-	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_NAMED_VALA_PKGS) --library gmarkupdoc $^
+gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_list_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
+	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
 	touch $@
 
 _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES:%.vala=%.h) \
-	$(libgmarkupdoc_named_la_VALASOURCES:%.vala=%.h) \
+	$(libgmarkupdoc_list_la_VALASOURCES:%.vala=%.h) \
 	$(NULL)
 
 gmarkupdoc.c: Makefile
@@ -99,7 +98,7 @@ gmarkupdoc.h: $(_HEADERS_) Makefile
 
 libgmarkupdoc_la_LIBADD = \
 		libgmarkupdoc-base.la \
-		libgmarkupdoc-named.la \
+		libgmarkupdoc-list.la \
 		libgmarkupdoc-dbus.la \
 		$(NULL)
 
@@ -107,7 +106,7 @@ EXTRA_DIST =  \
 	$(BUILT_SOURCES) \
 	$(libgmarkupdoc_base_la_VALASOURCES) \
 	$(libgmarkupdoc_dbus_la_VALASOURCES) \
-	$(libgmarkupdoc_named_la_VALASOURCES) \
+	$(libgmarkupdoc_list_la_VALASOURCES) \
 	$(NULL)
 DISTCLEANFILES = gmarkupdoc.c gmarkupdoc.h
 
