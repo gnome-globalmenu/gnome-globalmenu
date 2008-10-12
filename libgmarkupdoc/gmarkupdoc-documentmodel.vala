@@ -42,11 +42,12 @@ namespace GMarkupDoc {
 				node.unref();
 			});
 		}
-		public virtual weak string S(string s) {
+		public virtual weak string S(string? s) {
 			if(strings == null) {
 				strings = new StringChunk(1024);
 				unique = 1;
 			}
+			if(s == null) return null;
 			return strings.insert_const(s);
 		}
 		public abstract signal void updated(Node node, string prop);

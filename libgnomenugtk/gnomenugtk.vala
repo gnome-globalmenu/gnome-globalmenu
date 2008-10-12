@@ -72,38 +72,7 @@ namespace GnomenuGtk {
 	private weak Document document() {
 		return Singleton.instance().document;
 	}
-	private void submenu_notify(Gtk.Widget widget, ParamSpec pspec) {
-		weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
-		if(submenu != null) {
-			bind_widget(submenu, widget as Gtk.Widget);
-		}
-	}
-	private void child_remove(Gtk.Widget widget, Gtk.Widget c) {
-		debug("child_remove");
-		unbind_widget(c); /*This might be not so useful, since the node is removed when 
-									the MenuShell is disposed*/
-	}
-	private void child_insert(Gtk.Widget w, Gtk.Widget c, int pos) {
-		debug("created widget at %d", pos);
-		bind_widget(c, w, pos);
-	}
-	private void bind_widget(Gtk.Widget widget, Gtk.Widget? parent_widget /*override parent widget*/= null, int pos = -1) {
-		if(!(widget is Gtk.MenuItem)
-		&& !(widget is Gtk.MenuShell)
-		&& !(widget is Gtk.Window)) return;
-
-		weak string name = document().wrap(widget);
-		if(document().dict.lookup(name) != null) return;
-
-		weak GMarkupDoc.Node parent_node;
-		if(parent_widget == null) {
-			parent_node = document().root;
-		}
-		else {
-			weak string parent = document().wrap(parent_widget);
-			parent_node = document().dict.lookup(parent);
-		}
-
+	protected weak string translate_gtk_type(Gtk.Widget widget) {
 		weak string type;
 		type = "widget";
 		if(widget is Gtk.Window)
@@ -118,72 +87,74 @@ namespace GnomenuGtk {
 			type = "check";
 		if(widget is Gtk.ImageMenuItem)
 			type = "imageitem";
-		
-		Document.Widget node = document().CreateWidget(type, name);
-		parent_node.insert(node, pos);
-
-		if(widget is Gtk.MenuShell) {
-			weak List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();
-			foreach(weak Gtk.Widget child in children) {
-				bind_widget(child, widget, children.index(child));
-			}
-			(widget as GtkAQD.MenuShell).insert += child_insert;
-			(widget as GtkAQD.MenuShell).remove += child_remove;
-		}
-		if(widget is Gtk.MenuItem) {
-			weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
-			if(submenu != null) {
-				bind_widget(submenu, widget);
-			}
-			widget.notify["submenu"] += submenu_notify;
-		}
-		widget.weak_ref(weak_ref_notify, null);
+		return type;
 	}
-	protected void unbind_widget(Gtk.Widget widget) {
-		if(widget is Gtk.MenuShell) {
-			weak List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();
-			foreach(weak Gtk.Widget child in children) {
-				unbind_widget(child);
+	private void transverse(Gtk.Widget head, Document.Widget rel_root, int pos = -1) {
+		weak Gtk.Widget gtk = head;
+		weak Document.Widget node = document().wrap(gtk);
+		if(gtk is Gtk.MenuShell) {
+			rel_root.insert(node, pos);
+			foreach(weak Gtk.Widget child in (gtk as Gtk.Container).get_children()) {
+				transverse(child, node);
 			}
-			(widget as GtkAQD.MenuShell).insert -= child_insert;
-			(widget as GtkAQD.MenuShell).remove -= child_remove;
+			(gtk as GtkAQD.MenuShell).insert += child_insert;
+			(gtk as GtkAQD.MenuShell).remove += child_remove;
 		}
-		if(widget is Gtk.MenuItem) {
-			weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
+		if(gtk is Gtk.MenuItem) {
+			rel_root.insert(node, pos);
+			weak Gtk.Menu submenu = (gtk as Gtk.MenuItem).submenu;
 			if(submenu != null) {
-				unbind_widget(submenu);
+				transverse(submenu, node);
 			}
-			widget.notify["submenu"] -= submenu_notify;
+			gtk.notify["submenu"] += submenu_notify;
 		}
-		document().unwrap(widget);
 	}
-	private void weak_ref_notify(void* data, GLib.Object object){
-		unbind_widget(object as Gtk.Widget);
+	private void submenu_notify(Gtk.Widget widget, ParamSpec pspec) {
+		weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
+		weak Document.Widget node = document().wrap(widget);
+		List<weak Document.Widget> list = node.children.copy();
+		foreach(weak Document.Widget child in list) {
+			node.remove(child);
+		}
+		if(submenu != null) {
+			transverse(submenu, node);
+		}
+	}
+	private void child_remove(Gtk.Widget widget, Gtk.Widget child) {
+		weak Document.Widget node = document().wrap(widget);
+		weak Document.Widget child_node = document().wrap(child);
+		node.remove(child_node);
+	}
+	private void child_insert(Gtk.Widget widget, Gtk.Widget child, int pos) {
+		weak Document.Widget node = document().wrap(widget);
+		transverse(child, node, pos);
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		weak string window_name = document().wrap(window);
-		weak string menu_name = document().wrap(menu);
-		debug("binding menu %s to %s", menu_name, window_name);
-		bind_widget(window);
-		bind_widget(menu, window);
-		if(0 != (window.get_flags() & WidgetFlags.REALIZED)) {
-			weak string window_name = document().wrap(window);
-			client().register_window(window_name, XWINDOW(window.window).to_string());
+		weak Document.Widget node = document().wrap(window);
+		if(document().root.index(node) < 0) {
+			document().root.append(node);
+			if(0 != (window.get_flags() & WidgetFlags.REALIZED)) {
+				weak Document.Widget node = document().wrap(window);
+				client().register_window(node.name, XWINDOW(window.window).to_string());
+			}
+			window.realize += (window) => {
+				weak Document.Widget node = document().wrap(window);
+				client().register_window(node.name, XWINDOW(window.window).to_string());
+			};
+			window.unrealize += (window) => {
+				weak Document.Widget node = document().wrap(window);
+				client().unregister_window(node.name);
+			};
 		}
-		window.realize += (window) => {
-			weak string window_name = document().wrap(window);
-			client().register_window(window_name, XWINDOW(window.window).to_string());
-		};
-		window.unrealize += (window) => {
-			weak string window_name = document().wrap(window);
-			client().unregister_window(window_name);
-		};
+		weak Document.Widget menu_node = document().wrap(menu);
+		debug("binding menu %s to %s", menu_node.name, node.name);
+		/*TODO: transverse menu_node, adding children*/
+		transverse(menu, node);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		weak string window_name = document().wrap(window);
-		weak string menu_name = document().wrap(menu);
-		debug("unbinding menu %s to %s", menu_name, window_name);
-		weak Document.Widget node =document().dict.lookup(menu_name) as Document.Widget;
-		if(node != null && node.parent != null) node.parent.remove(node);
+		weak Document.Widget node = document().wrap(window);
+		weak Document.Widget menu_node = document().wrap(menu);
+		debug("unbinding menu %s to %s", menu_node.name, node.name);
+		node.remove(menu_node);
 	}
 }
