@@ -4,10 +4,9 @@ using GMarkupDoc;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class Document : GMarkupDoc.Document {
+	protected class Document : GMarkupDoc.Document, GMarkupDoc.DocumentModel {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		protected class Widget:GMarkupDoc.Document.NamedTag {
-			public Gtk.TreeIter iter;
+		protected class Widget:GMarkupDoc.Tag {
 			private Widget(Document document, string tag) {
 				this.document = document;
 				this.tag = document.S(tag);
@@ -15,21 +14,20 @@ namespace GnomenuGtk {
 			public override void dispose() {
 				base.dispose();
 			}
-			public override void activate() {
-				base.activate();
-				weak Gtk.Widget widget = (document as Document).dict_nw.lookup(this.get("name"));
+		}
+		public Document() {}
+		construct {
+			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
+			this.activated += (document, node, detail) => {
+				weak Gtk.Widget widget = (document as Document).dict_nw.lookup(node.name);
 				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
 				if(widget is GtkAQD.MenuBar) {
 					bool local = (widget as GtkAQD.MenuBar).local;
 					(widget as GtkAQD.MenuBar).local = !local;
 				}
-			}
+			};
 		}
-		public Document() {}
-		construct {
-			dict_nw = new HashTable<weak string, weak Gtk.Widget>(str_hash, str_equal);
-		}
-		public override GMarkupDoc.Tag CreateTag(string tag) {
+		public GMarkupDoc.Tag CreateTag(string tag) {
 			return new Widget(this, tag);
 		}
 		private void list_to_array(List<weak string>? l, ref string[] array){
@@ -42,7 +40,7 @@ namespace GnomenuGtk {
 		}
 		protected Document.Widget CreateWidget(string type, string name) {
 			{
-				weak GMarkupDoc.Node node = lookup(name);
+				weak GMarkupDoc.Node node = dict.lookup(name);
 				if(node != null) return node as Document.Widget;
 			}
 			weak Gtk.Widget gtk = dict_nw.lookup(name);
@@ -138,7 +136,7 @@ namespace GnomenuGtk {
 			if(name != null) {
 				debug("GtkWidget %s is removed: %u", name, widget.ref_count);
 				this.dict_nw.remove(name); // because ~WidgetNode is not always invoked?
-				weak Document.Widget node = this.lookup(name) as Document.Widget;
+				weak Document.Widget node = this.dict.lookup(name) as Document.Widget;
 				if(node != null){
 					if(node.parent == null) {
 						assert(false);
@@ -151,6 +149,7 @@ namespace GnomenuGtk {
 		private void disconnect_signals(GLib.Object object) {
 			if(object is Gtk.MenuItem) {
 				(object as Gtk.MenuItem).notify -= item_property_notify;
+				(object as GtkAQD.MenuItem).label_set -= item_label_set;
 				weak Gtk.Label label = find_menu_item_label(object as Gtk.Widget);
 				if(label != null) {
 					/*
@@ -160,6 +159,7 @@ namespace GnomenuGtk {
 				}
 			}
 			if(object is Gtk.ImageMenuItem) {
+				(object as Gtk.ImageMenuItem).notify -= item_image_notify;
 				weak Gtk.Image image = ((object as Gtk.ImageMenuItem).image as Gtk.Image);
 				if(image != null) {
 					/*
@@ -169,7 +169,6 @@ namespace GnomenuGtk {
 					image.notify -= item_property_notify; 
 				}
 			}
-
 		}
 		private static weak string get_native_name(GLib.Object? w) {
 			return (string) ((GLibCompat.constpointer)w).get_data("native-name");
@@ -179,7 +178,7 @@ namespace GnomenuGtk {
 		}
 		private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 			debug("item_property_notify %s( %s).%s", get_native_name(w), w.get_type().name(), pspec.name);
-			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
+			weak Document.Widget node = dict.lookup(get_native_name(w)) as Document.Widget;
 			if(node == null) {
 				warning("no xml node found for widget %s( %s)", get_native_name(w), w.get_type().name());
 				return;
@@ -201,7 +200,7 @@ namespace GnomenuGtk {
 			node.set(pspec.name, val);
 		}
 		private void item_label_set(Gtk.Widget w, Gtk.Label? l) {
-			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
+			weak Document.Widget node = dict.lookup(get_native_name(w)) as Document.Widget;
 			if(node != null) {
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
 				if(l != old_label) {
@@ -223,7 +222,7 @@ namespace GnomenuGtk {
 		}
 		private void item_image_notify(Gtk.Widget w, ParamSpec pspec) {
 			Gtk.ImageMenuItem item = w as Gtk.ImageMenuItem;
-			weak Document.Widget node = lookup(get_native_name(w)) as Document.Widget;
+			weak Document.Widget node = dict.lookup(get_native_name(w)) as Document.Widget;
 			if(w != null) {
 				Gtk.Image image = item.image as Gtk.Image;
 				weak Gtk.Image old_image = (Gtk.Image) item.get_data("old-image");

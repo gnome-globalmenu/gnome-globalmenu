@@ -30,6 +30,22 @@ namespace GMarkupDoc {
 		public signal void updated(Node node, string prop);
 		public signal void inserted(Node parent, Node node, int pos);
 		public signal void removed(Node parent, Node node);
+		public signal void activated(Node node, Quark detail);
+		public void activate(Node node, Quark detail) {
+			this.activated(node, detail);
+		}
+		public virtual void transverse(Node node, TransverseFunc func) {
+			Queue<weak Node> queue = new Queue<weak Node>();
+			queue.push_head(node);
+			while(!queue.is_empty()) {
+				weak Node n = queue.pop_head();
+				func(n);
+				foreach(weak Node child in n.children) {
+					queue.push_tail(child);
+				}
+			}
+		}
+		public delegate bool TransverseFunc(Node node);
 	}
 
 }

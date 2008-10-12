@@ -8,6 +8,7 @@ CLASSES =
 CLASSES += GMarkupDoc_Parser 
 CLASSES += GMarkupDoc_RemoteDocument
 CLASSES += GMarkupDoc_DBusView
+CLASSES += GMarkupDoc_ListView
 CLASSES += Gnomenu_Client
 CLASSES += Gnomenu_MenuBar
 

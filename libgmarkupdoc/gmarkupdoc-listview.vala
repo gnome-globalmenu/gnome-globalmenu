@@ -11,16 +11,22 @@ namespace GMarkupDoc {
 
 	public class ListView : Gtk.ScrolledWindow {
 		private Gtk.TreeView treeview;
-		private Document _document;
-		public weak Document? document {
+		private DocumentModel _document;
+		private DocumentTreeAdapter adapter;
+		public weak DocumentModel? document {
 			get {
 				return _document;
 			} set {
 				_document = value;
-				treeview.set_model(document);
+				if(document != null) {
+					adapter = new DocumentTreeAdapter(document);
+				} else
+					adapter = null;
+				treeview.set_model(adapter);
+				
 			}
 		}
-		public ListView(Document? document) {
+		public ListView(DocumentModel? document) {
 			this.document = document;
 		}
 		construct {
@@ -30,13 +36,18 @@ namespace GMarkupDoc {
 			gtk_tree_view_insert_column_with_data_func (treeview, 0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
-					weak Tag node;
+					weak Node node;
 					model.get(iter, 0, out node, -1);
 					weak string text = null;
-					text = node.get("label");
-					if(text == null) text = node.get("name");
-					if(text == null) text = node.tag;
+					text = node.name;
+					if(text == null) {
+						if(node is Tag)
+							text = (node as Tag).tag;
+						else
+							text = "NONAME";
+					}
 					cell.text = text;
+					/*
 					weak string visible = node.get("visible");
 					if(visible == "false") 
 						cell.foreground = "gray";
@@ -47,6 +58,7 @@ namespace GMarkupDoc {
 						cell.background = "red";
 					else
 						cell.background = "white";
+					*/
 				}, null);
 			gtk_tree_view_insert_column_with_data_func (treeview, 1, "GMarkup", new Gtk.CellRendererText(), 
 				(tree_column, cell, model, iter) => {
@@ -60,10 +72,32 @@ namespace GMarkupDoc {
 				Gtk.TreeIter iter;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
-				if(node is Document.NamedTag) {
-					(node as Document.NamedTag).activate();
-				}
+				adapter.activate(node, 0);
 			};
 		}
+		public static int test(string[] args) {
+			Gtk.init(ref args);
+			MainLoop loop = new MainLoop(null, false);
+			Document document = new Document();
+			GMarkupDoc.Parser parser = new GMarkupDoc.Parser(document);
+			ListView c = new ListView(document);
+			parser.parse(
+"""
+<html><title>title</title>
+<body name="body">
+<div name="header">
+	<h1> This is a header</h1>
+</div>
+<div name="content"></div>
+<div name="tail"></div>
+</body>
+""");
+			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
+			window.add(c);
+			window.show_all();
+			loop.run();
+			return 0;
+		}
+		
 	}
 }

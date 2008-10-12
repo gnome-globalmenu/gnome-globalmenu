@@ -10,7 +10,7 @@ namespace Gnomenu {
 		public string bus;
 		dynamic DBus.Object dbus;
 		dynamic DBus.Object server;
-		public Client(Document document) {
+		public Client(DocumentModel document) {
 			this.document = document;
 			this.path = "/org/gnome/GlobalMenu/Application";
 		}
@@ -32,32 +32,32 @@ namespace Gnomenu {
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
 		}
 		public string QueryXID(string xid) {
-			weak Document.NamedTag node = find_window_by_xid(xid);
+			weak GMarkupDoc.Node node = find_window_by_xid(xid);
 			if(node != null) {
 				return node.name;
 			}
 			return "";
 		}
 
-		private weak Document.NamedTag? find_window_by_xid(string xid) {
+		private weak GMarkupDoc.Node? find_window_by_xid(string xid) {
 			foreach (weak GMarkupDoc.Node node in document.root.children) {
-				if(node is Document.NamedTag) {
-					weak Document.NamedTag widget = node as Document.NamedTag;
-					if(widget.get("xid") == xid) {
-						return widget;
+				if(node is GMarkupDoc.Tag) {
+					weak GMarkupDoc.Tag tag = node as GMarkupDoc.Tag;
+					if(tag.get("xid") == xid) {
+						return tag;
 					}
 				}
 			}
 			return null;
 		}
 		private void add_widget(string? parent, string name, int pos = -1) {
-			weak GMarkupDoc.Node node = document.lookup(name);
+			weak GMarkupDoc.Node node = document.dict.lookup(name);
 			weak GMarkupDoc.Node parent_node;
 			if(parent == null) {
 				parent_node = document.root;
 			}
 			else {
-				parent_node = document.lookup(parent);
+				parent_node = document.dict.lookup(parent);
 			}
 			if(node == null) {
 				string[] names = {"name"};
@@ -67,7 +67,7 @@ namespace Gnomenu {
 			}
 		}
 		private void remove_widget(string name) {
-			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
+			weak GMarkupDoc.Node node = document.dict.lookup(name);
 			if(node != null) {
 				assert(node.parent != null);
 				node.parent.remove(node);
@@ -76,7 +76,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void register_window(string name, string xid) {
-			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
+			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -88,7 +88,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void unregister_window(string name) {
-			weak Document.NamedTag node = document.lookup(name) as Document.NamedTag;
+			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -103,7 +103,7 @@ namespace Gnomenu {
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			Document document = new Document();
+			DocumentModel document = new Document();
 			Client c = new Client(document);
 			c.add_widget(null, "window1");
 			c.add_widget(null, "window2");

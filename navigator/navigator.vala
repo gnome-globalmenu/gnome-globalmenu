@@ -27,12 +27,12 @@ public class Navigator :Gtk.Window{
 		vbox.pack_start_defaults(viewer2);
 		vbox.pack_start_defaults(viewer);
 		
-		server.activated += (docu, node)=> {
-			string bus = node.get("bus");
+		server.activated += (docu, node, detail)=> {
+			string bus = (node as GMarkupDoc.Tag).get("bus");
 			print("attatch to bus %s", bus);
 			RemoteDocument doc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
-			doc.activated += (docu, node) => {
-				if(node.tag == "menubar") {
+			doc.activated += (docu, node, detail) => {
+				if((node as GMarkupDoc.Tag).tag == "menubar") {
 					Section section = new Section(docu, node);
 					viewer2.document = section;
 				}

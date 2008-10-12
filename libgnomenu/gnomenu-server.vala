@@ -38,7 +38,7 @@ namespace Gnomenu {
 			}
 		}
 		private weak GMarkupDoc.Tag? find_node_by_xid(string xid) {
-			return document.lookup(xid) as GMarkupDoc.Tag;
+			return document.dict.lookup(xid) as GMarkupDoc.Tag;
 		}
 		public void RegisterWindow (string client_bus, string xid) {
 			GMarkupDoc.Tag node = find_node_by_xid(xid);

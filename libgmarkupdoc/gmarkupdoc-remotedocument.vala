@@ -9,12 +9,7 @@ namespace GMarkupDoc {
 		private dynamic DBus.Connection conn;
 		public bool invalid {get; set;}
 		dynamic DBus.Object dbus;
-		private Node _root;
-		public Node root {
-			get {
-				return _root;
-			}
-		}
+
 		public string path {get; construct;}
 		public string bus {get; construct;}
 		
@@ -24,7 +19,6 @@ namespace GMarkupDoc {
 		}
 		construct {
 			invalid = false;
-			_root = new Root(this);
 			conn = Bus.get(DBus.BusType.SESSION);
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			dbus.NameOwnerChanged += name_owner_changed;
@@ -40,17 +34,18 @@ namespace GMarkupDoc {
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
-			this.activated += (doc, node) => {
-				try {
-					remote.Activate(node.name);
-				} catch(GLib.Error e){
-					warning("%s", e.message);
-				}
-			};
+		}
+		public virtual void activate(Node node, Quark detail) {
+			try {
+				remote.Activate(node.name);
+			} catch(GLib.Error e){
+				warning("%s", e.message);
+			}
+			base.activate(node, detail);
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
 			if(invalid) return;
-			weak Node parent = lookup(parentname);
+			weak Node parent = dict.lookup(parentname);
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
@@ -64,13 +59,13 @@ namespace GMarkupDoc {
 		}
 		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
 			if(invalid) return;
-			weak Node parent = lookup(parentname);
-			weak Node node = lookup(nodename);
+			weak Node parent = dict.lookup(parentname);
+			weak Node node = dict.lookup(nodename);
 			parent.remove(node);
 		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			if(invalid) return;
-			weak Tag node = lookup(nodename) as Tag;
+			weak Tag node = dict.lookup(nodename) as Tag;
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {

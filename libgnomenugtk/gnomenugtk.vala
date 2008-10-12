@@ -92,7 +92,7 @@ namespace GnomenuGtk {
 		&& !(widget is Gtk.Window)) return;
 
 		weak string name = document().wrap(widget);
-		if(document().lookup(name) != null) return;
+		if(document().dict.lookup(name) != null) return;
 
 		weak GMarkupDoc.Node parent_node;
 		if(parent_widget == null) {
@@ -100,7 +100,7 @@ namespace GnomenuGtk {
 		}
 		else {
 			weak string parent = document().wrap(parent_widget);
-			parent_node = document().lookup(parent);
+			parent_node = document().dict.lookup(parent);
 		}
 
 		weak string type;
@@ -182,7 +182,7 @@ namespace GnomenuGtk {
 		weak string window_name = document().wrap(window);
 		weak string menu_name = document().wrap(menu);
 		message("unbinding menu %s to %s", menu_name, window_name);
-		weak Document.Widget node =document().lookup(menu_name) as Document.Widget;
+		weak Document.Widget node =document().dict.lookup(menu_name) as Document.Widget;
 		if(node != null && node.parent != null) node.parent.remove(node);
 	}
 }
