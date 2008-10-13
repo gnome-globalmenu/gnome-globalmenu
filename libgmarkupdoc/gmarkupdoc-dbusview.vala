@@ -20,27 +20,48 @@ namespace GMarkupDoc {
 					document.inserted -= document_inserted;
 					document.removed -= document_removed;
 					document.updated -= document_updated;
+					document.renamed -= document_renamed;
+					document.destroyed -= document_destroyed;
 				} 
 				_document = value;
 				if(document != null) {
 					document.inserted += document_inserted;
 					document.removed += document_removed;
 					document.updated += document_updated;
+					document.renamed += document_renamed;
+					document.destroyed += document_destroyed;
 				}
 			}
+		}
+		private void document_destroyed(DocumentModel document) {
+			this.document = null;
 		}
 		public DBusView(DocumentModel document, string object_path) {
 			this.document = document;
 			path = object_path;
 		}
 		private void document_inserted(DocumentModel document, Node parent, Node child, int pos) {
-			inserted(parent.name, child.name, pos);
+			if(parent != document.orphan) {
+				debug("inserted");
+				weak string type;
+				if(child is Tag) type = "tag";
+				if(child is Text) type = "text";
+				if(child is Special) type = "special";
+				inserted(type, parent.name, child.name, pos);
+			}
 		}
 		private void document_removed(DocumentModel document, Node parent, Node child) {
-			removed(parent.name, child.name);
+			if(parent != document.orphan)
+				removed(parent.name, child.name);
 		}
 		private void document_updated(DocumentModel document, Node node, string prop) {
 			updated(node.name, prop);
+		}
+		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
+			if(oldname!=null && newname !=null) {
+				debug("renamed %s to %s", oldname, newname);
+				renamed(oldname, newname);
+			}
 		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
@@ -61,13 +82,14 @@ namespace GMarkupDoc {
 			weak Node node = document.dict.lookup(name);
 			message("activated %s", name);
 			if(node != null) {
-				this.document.activated(node, 0);
 				this.activated(node, 0);
+				this.document.activate(node, 0);
 			}
 		}
 		public signal void updated(string name, string prop);
-		public signal void inserted(string parent, string name, int pos);
+		public signal void inserted(string type, string parent, string name, int pos);
 		public signal void removed(string parent, string name);
+		public signal void renamed(string oldname, string newname);
 
 		public static int test(string[] args) {
 			Gtk.init(ref args);

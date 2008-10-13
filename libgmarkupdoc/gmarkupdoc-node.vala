@@ -20,14 +20,17 @@ namespace GMarkupDoc {
 		public weak string name {
 			get {return _name;}
 			set {
-				this.ref();
 				if(name == value) return;
+				this.ref();
+				string oldname = name;
 				if(name != null)
 					document.dict.remove(name);
 				assert(value != null);
 				_name = document.S(value);
 				document.dict.insert(name, this); /*weird! vala automatically ref it!*/
 				this.unref();
+				debug("name changed from %s to %s", oldname, name);
+				document.renamed(this, oldname, name);
 			}
 		}
 		construct {
@@ -48,8 +51,8 @@ namespace GMarkupDoc {
 			document.inserted(this, node, pos);
 		}
 		public virtual void remove(Node node) {
-			children.remove(node);
 			document.removed(this, node);
+			children.remove(node);
 			document.orphan.append(node);
 		}
 		public int index(Node node) {
@@ -73,8 +76,6 @@ namespace GMarkupDoc {
 	public class Root : Node {
 		public Root(DocumentModel document){
 			this.document = document;
-		}
-		construct {
 			this.name = "root";
 		}
 		public override string summary(int level = 1) {
@@ -92,8 +93,6 @@ namespace GMarkupDoc {
 	public class Orphan : Root {
 		public Orphan(DocumentModel document){
 			this.document = document;
-		}
-		construct {
 			this.name = "Orphan";
 		}
 		public override void insert(Node child, int pos) {
@@ -160,14 +159,16 @@ namespace GMarkupDoc {
 			}
 		}
 		public virtual void set(string prop, string? val) {
-			if(val == null)
-				props.remove(prop);
-			else 
-				props.insert(document.S(prop), val);
-			if(prop == document.name_attr)
+			if(prop == document.name_attr) {
 				this.name = val;
-			if(this.frozen <=0)
-				document.updated(this, prop);
+			} else {
+				if(val == null)
+					props.remove(prop);
+				else 
+					props.insert(document.S(prop), val);
+				if(this.frozen <=0)
+					document.updated(this, prop);
+			}
 		}
 		public virtual void unset(string prop) {
 			set(prop, null);
@@ -180,6 +181,7 @@ namespace GMarkupDoc {
 				props = new HashTable<weak string, string>(str_hash, str_equal);
 			}
 			StringBuilder sb = new StringBuilder("");
+			sb.append_printf(" %s=\"%s\"", document.name_attr, this.name);
 			foreach(weak string key in props.get_keys()) {
 				string escaped = GLib.Markup.escape_text(props.lookup(key));
 				sb.append_printf(" %s=\"%s\"", key, escaped);

@@ -46,6 +46,11 @@ namespace GMarkupDoc {
 				this.tree.row_changed(tree.get_path(iter), iter);
 				this.updated(node, prop);
 			};
+			this.document.renamed += (document, node, oldname, newname) => {
+				Gtk.TreeIter iter = get_iterbox(node).iter;
+				this.tree.row_changed(tree.get_path(iter), iter);
+				this.renamed(node, oldname, newname);
+			};
 			tree.row_changed += (o, p, i) => { row_changed(p, i);};
 			tree.row_deleted += (o, p) => { row_deleted(p);};
 			tree.row_has_child_toggled += (o, p, i) => { row_has_child_toggled(p, i);};

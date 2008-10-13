@@ -12,9 +12,10 @@ namespace Gnomenu {
 				return _document;
 			} set {
 				if(_document != null) {
-					_document.inserted -= document_inserted;
-					_document.updated -= document_updated;
-					_document.removed -= document_removed;
+					document.inserted -= document_inserted;
+					document.updated -= document_updated;
+					document.removed -= document_removed;
+					document.destroyed -= document_destroyed;
 				}
 				_document = value;
 				clean();	
@@ -22,6 +23,7 @@ namespace Gnomenu {
 					document.inserted += document_inserted;
 					document.updated += document_updated;
 					document.removed += document_removed;
+					document.destroyed += document_destroyed;
 					document.root.set_data("gtk", this.menubar);
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is GMarkupDoc.Tag) {
@@ -36,6 +38,10 @@ namespace Gnomenu {
 					}
 				}
 			}
+		}
+		private void document_destroyed(DocumentModel document) {
+			this.document = null;
+			debug("view releases the document");
 		}
 		public MenuView(DocumentModel? document) {
 			this.document = document;
@@ -188,7 +194,7 @@ namespace Gnomenu {
 			return rt;
 		}
 		private void clean() {
-			weak List<weak Gtk.Widget> l = this.menubar.get_children();
+			List<weak Gtk.Widget> l = this.menubar.get_children().copy();
 			foreach(weak Gtk.Widget w in l){
 				w.destroy();
 			}

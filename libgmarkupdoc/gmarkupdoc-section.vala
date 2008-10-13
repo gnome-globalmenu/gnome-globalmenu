@@ -14,26 +14,25 @@ namespace GMarkupDoc {
 			get { return _document.name_attr; }
 		}
 		private weak Node _root;
-		private Node pseudo_root; 
-		private bool invalid;
 		private bool disposed;
+		private bool _root_dead;
 		public weak Node root { get {return _root;} }
-		public weak Node orphan { get {return document.orphan;} }
-		public weak Node set_root {
-			construct {
+		public weak Node fake_root { 
+			construct { 
 				_root = value;
 				_root.weak_ref(weak_ref_notify, this);
+				_root_dead = false;
 			}
 		}
+		public weak Node orphan { get {return document.orphan;} }
 		public Section(DocumentModel document, GMarkupDoc.Node root) {
 			this.document = document;
-			this.set_root = root;
+			this.fake_root = root;
 		}
-		public override void dispose() {
-			if(!disposed) {
+		private override void dispose(){
+			if(!disposed && !_root_dead) {
+				_root.weak_unref(weak_ref_notify, this);
 				disposed = true;
-				if(!invalid)
-					_root.weak_unref(weak_ref_notify, this);
 			}
 		}
 		private bool is_inside(Node node) {
@@ -63,24 +62,24 @@ namespace GMarkupDoc {
 		}
 		construct {
 			disposed = false;
-			invalid = false;
 			document.updated += (d, n, prop) => {
-				//message("%s", is_inside(n).to_string());
-				if(!this.invalid && is_inside(n)) this.updated(n, prop);
+				if(!_root_dead && is_inside(n)) this.updated(n, prop);
 			};
 			document.inserted += (d, p, n, pos) => {
-				if(!this.invalid && is_inside(p)) this.inserted(p, n, pos);
+				if(!_root_dead && is_inside(p)) this.inserted(p, n, pos);
 			};
 			document.removed += (d, p, n) => {
-//				message(" %s is_inside %s, = %s", p.name, this.root.name, is_inside(p).to_string());
-				if(!this.invalid && is_inside(p)) this.removed(p, n);
+				if(!_root_dead && is_inside(p)) this.removed(p, n);
 			};
-			pseudo_root = new Root(document);
+			document.renamed += (d, node, p, n) => {
+				if(!_root_dead && is_inside(node)) this.renamed(node, p, n);
+			};
 		}
-		private static void weak_ref_notify(void* data, GLib.Object object) {
-			Section t = (Section) data;
-			t.invalid = true;
-			t._root = t.pseudo_root;
+		private static void weak_ref_notify(void* data, GLib.Object node) {
+			Section _this = (Section) data;
+			_this._root_dead = true;
+			debug("A section is destroyed");
+			_this.destroyed();
 		}
 	}
 

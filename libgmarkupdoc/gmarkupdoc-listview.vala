@@ -51,10 +51,14 @@ namespace GMarkupDoc {
 			get {
 				return _document;
 			} set {
+				if(document != null) {
+					document.destroyed -= document_destroyed;
+				}
 				_document = value;
 				if(document != null) {
 					adapter = new DocumentTreeAdapter(document);
 					parser = new Parser(document);
+					document.destroyed += document_destroyed;
 				} else {
 					adapter = null;
 					parser = null;
@@ -62,6 +66,9 @@ namespace GMarkupDoc {
 				treeview.set_model(adapter);
 				
 			}
+		}
+		private void document_destroyed(DocumentModel document) {
+			this.document = null;
 		}
 		public ListView(DocumentModel? document) {
 			this.document = document;

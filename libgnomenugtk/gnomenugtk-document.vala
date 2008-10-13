@@ -184,7 +184,7 @@ namespace GnomenuGtk {
 			name = S("%s%d".printf(gtk.get_type().name(), id));
 			set_native_name(gtk, name);
 			Widget node = CreateTag("widget") as Widget;
-			node.name = name;
+			node.set("name", name);
 			node.gtk = gtk;
 			return node;
 		}

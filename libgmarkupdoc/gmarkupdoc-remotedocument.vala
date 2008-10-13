@@ -26,6 +26,7 @@ namespace GMarkupDoc {
 			remote.Inserted += remote_inserted;
 			remote.Removed += remote_removed;
 			remote.Updated += remote_updated;
+			remote.Renamed += remote_renamed;
 			parser = new Parser(this);
 			try {
 				string xml = remote.QueryRoot(-1);
@@ -36,6 +37,7 @@ namespace GMarkupDoc {
 			this.activated += (document, node, detail) => {
 				try {
 					this.remote.Activate(node.name);
+					assert(node == dict.lookup(node.name));
 					debug("activated");
 				} catch(GLib.Error e){
 					warning("%s", e.message);
@@ -43,17 +45,29 @@ namespace GMarkupDoc {
 
 			};
 		}
-		private void remote_inserted(dynamic DBus.Object remote, string parentname, string nodename, int pos) {
+		private void remote_inserted(dynamic DBus.Object remote, string type, string parentname, string nodename, int pos) {
 			if(invalid) return;
 			weak Node parent = dict.lookup(parentname);
+			debug("inserted %s %s", parentname, nodename);
 			if(parent == null) return;
 			try {
 				string s = remote.QueryNode(nodename, 0);
-				if(s == null) {
-					warning("remote document didn't reply");
-					return;
+				debug("%s inserted", s);
+				switch(type) {
+					case "tag":
+						parser.parse_child(parent, s, pos);
+					break;
+					case "text":
+						Node text = (this as DocumentModel).CreateText(s);
+						text.name = nodename;
+						parent.insert(text, pos);
+					break;
+					case "special":
+						Node special = (this as DocumentModel).CreateSpecial(s);
+						special.name = nodename;
+						parent.insert(special, pos);
+					break;
 				}
-				parser.parse_child(parent, s, pos);
 			} catch(GLib.Error e){
 				warning("%s", e.message);
 			}
@@ -66,16 +80,25 @@ namespace GMarkupDoc {
 			parent.remove(node);
 			this.DestroyNode(node);
 		}
+		private void remote_renamed(dynamic DBus.Object remote, string oldname, string newname) {
+			if(invalid) return;
+			debug("renamed %s to %s", oldname, newname);
+			weak Node node = dict.lookup(oldname);
+			if(node == null) return;
+			node.name = newname;
+		}
 		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
 			if(invalid) return;
-			weak Tag node = dict.lookup(nodename) as Tag;
+			weak Node node = dict.lookup(nodename);
 			try {
 				string s = remote.QueryNode(nodename, 0);
 				if(s == null) {
 					warning("remote document didn't reply");
 					return;
 				}
-				parser.update_tag(node, propname, s);
+				if(node is Tag) parser.update_tag(node as Tag, propname, s);
+				if(node is Text) (node as Text).text = s;
+				if(node is Special) (node as Special).text = s;
 			} catch(GLib.Error e){
 				warning("%s %s", e.domain.to_string(), e.message);
 			}
@@ -84,7 +107,6 @@ namespace GMarkupDoc {
 			if(bus != this.bus) return;
 			if(new_owner != "" && old_owner == "") {
 				message("new owner of %s", bus);
-				this.DestroyNode(root);
 				try {
 					string xml = remote.QueryRoot(-1);
 					parser.parse(xml);
@@ -96,7 +118,11 @@ namespace GMarkupDoc {
 			}
 			if(new_owner == "" && old_owner != "") {
 				message("owner of %s disappeared", bus);
-				this.DestroyNode(root);
+				List<weak Node> list = root.children.copy();
+				foreach(weak Node child in list) {
+					root.remove(child);
+					this.DestroyNode(child);
+				}
 				invalid = true;
 				return;
 			}
@@ -108,6 +134,9 @@ namespace GMarkupDoc {
 			RemoteDocument document = new RemoteDocument("org.gnome.GlobalMenu.DocumentTest", "/org/gnome/GlobalMenu/Document");
 			ListView viewer = new ListView(document);
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
+			viewer.activated += (viewer, node, detail) => {
+				viewer.document.activate(node, detail);
+			};
 			window.add(viewer);
 			window.show_all();
 			loop.run();
