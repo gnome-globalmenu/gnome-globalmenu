@@ -91,6 +91,8 @@ namespace GnomenuGtk {
 	}
 	private void transverse(Gtk.Widget head, Document.Widget rel_root, int pos = -1) {
 		weak Gtk.Widget gtk = head;
+		assert(gtk is Gtk.Widget);
+		assert(rel_root is Document.Widget);
 		weak Document.Widget node = document().wrap(gtk);
 		if(gtk is Gtk.MenuShell) {
 			rel_root.insert(node, pos);

@@ -179,7 +179,10 @@ namespace GnomenuGtk {
 		}
 		public weak Document.Widget wrap(Gtk.Widget gtk) {
 			weak string name = get_native_name(gtk);
-			if(name != null) return dict.lookup(name) as Document.Widget;
+			if(name != null) {
+				weak Document.Widget rt = dict.lookup(name) as Document.Widget;
+				if(rt != null) return rt;
+			}
 			int id = Singleton.instance().unique;
 			name = S("%s%d".printf(gtk.get_type().name(), id));
 			set_native_name(gtk, name);
