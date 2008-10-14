@@ -69,6 +69,10 @@ namespace Gnomenu {
 				}
 				return true;
 			};
+			(this as GtkCompat.Widget).style_set += (widget, style)=> {
+				this.arrow_button.set_style(this.style);
+				this.menubar.set_style(this.style);
+			};
 			this.arrow_button = new Gtk.ToggleButton.with_label(">");
 			this.arrow_button.set_parent(this);
 			this.size_request += (widget, req) => {

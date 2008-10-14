@@ -15,7 +15,9 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	public Applet() {
 	}
 	construct {
+		this.set_name("GlobalMenuPanelApplet");
 		menubar = new Gnomenu.MenuBar();
+		menubar.set_name("PanelMenuBar");
 		box = new Gtk.HBox(false, 0);
 		menubar.show_tabs = false;
 		box.pack_start(menubar, true, true, 0);
@@ -29,26 +31,8 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			}
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
-		Gtk.rc_parse_string("""
-			style "globalmenu_event_box_style"
-			{
-			 	GtkWidget::focus-line-width=0
-			 	GtkWidget::focus-padding=0
-			}
-			style "globalmenu_menu_bar_style"
-			{
-				ythickness = 0
-				bg[NORMAL] = @bg_color
-				GtkMenuBar::shadow-type = none
-				GtkMenuBar::internal-padding = 0
-			}
-			class "GtkEventBox" style "globalmenu_event_box_style"
-			class "GtkMenuBar" style "globalmenu_menu_bar_style"
-			class "GnomenuMenuBar" style "globalmenu_menu_bar_style"
-"""
-);
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
-			Gtk.Style style = this.menubar.get_style().clone();
+			Gtk.Style style = (this.menubar.get_style() as GtkCompat.Style).copy();
 			switch(bgtype){
 				case Panel.AppletBackgroundType.NO_BACKGROUND:
 					this.menubar.set_style(null);
@@ -72,6 +56,21 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		GLib.Object program = gnome_program_init_easy(
 			"GlobalMenu.PanelApplet",
 			"0.6", args, #context);
+		Gtk.rc_parse_string("""
+			style "globalmenu_event_box_style"
+			{
+			 	GtkWidget::focus-line-width=0
+			 	GtkWidget::focus-padding=0
+			}
+			style "globalmenu_menu_bar_style"
+			{
+				ythickness = 0
+				GtkMenuBar::shadow-type = none
+				GtkMenuBar::internal-padding = 0
+			}
+			class "GtkEventBox" style "globalmenu_event_box_style"
+			class "GnomenuMenuBar" style:highest "globalmenu_menu_bar_style"
+""");
 		int retval = Panel.Applet.factory_main(FACTORY_IID, typeof(Applet), 
 			(applet, iid) => {
 				if(iid == APPLET_IID) {

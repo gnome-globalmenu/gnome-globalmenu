@@ -30,4 +30,8 @@ namespace GtkCompat {
 						Gtk.TreeCellDataFunc func, 
 						GLib.DestroyNotify? dnotify);
 	}
+	[CCode (cheader_filename = "gtk/gtk.h")]
+	public class Style : GLib.Object {
+		public virtual Gtk.Style copy ();
+	}
 }

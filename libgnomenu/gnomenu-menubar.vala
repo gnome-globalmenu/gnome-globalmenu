@@ -77,7 +77,6 @@ namespace Gnomenu {
 			dummy.add(new Gtk.Label("no menu"));
 			dummy.set_style(this.style);
 			this.append_page(dummy, null);
-			//this.show_tabs = false;
 			this.show_border = false;
 			(this as GtkCompat.Widget).style_set += (widget, style)=> {
 				int n = this.get_n_pages();
@@ -106,7 +105,6 @@ namespace Gnomenu {
 				Gtk.Entry entry = (Gtk.Entry) button.get_data("entry");
 				menubar.switch(entry.get_text());
 			};
-//			window.accept_focus = false;
 			window.add(box);
 			box.pack_start_defaults(entry);
 			box.pack_start_defaults(button);

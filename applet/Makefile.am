@@ -18,6 +18,7 @@ AM_VALAC_FLAGS = \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
 	--pkg gnomenu  \
+	--pkg gtkcompat  \
 	--pkg gmarkupdoc  \
 	--pkg wnckcompat  \
 	--pkg panelappletcompat \
