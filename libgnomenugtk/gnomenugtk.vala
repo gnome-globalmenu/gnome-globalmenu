@@ -8,11 +8,11 @@ using DBus;
 
 namespace GnomenuGtk {
 	[CCode (cname = "_patch_menu_bar")]
-	private extern  void patch_menu_bar();
+	protected extern  void patch_menu_bar();
 	[CCode (cname = "_patch_menu_shell")]
-	private extern  void patch_menu_shell();
+	protected extern  void patch_menu_shell();
 	[CCode (cname = "_patch_menu_item")]
-	private extern  void patch_menu_item();
+	protected extern  void patch_menu_item();
 
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
