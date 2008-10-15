@@ -173,6 +173,11 @@ namespace GMarkupDoc {
 		public virtual void unset(string prop) {
 			set(prop, null);
 		}
+		public virtual void unset_all() {
+			props.remove_all();
+			if(this.frozen <=0)
+				document.updated(this, null);
+		}
 		public virtual weak string? get(string prop) {
 			return props.lookup(prop);
 		}

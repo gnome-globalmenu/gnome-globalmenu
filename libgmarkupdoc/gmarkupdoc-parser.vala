@@ -45,9 +45,21 @@ namespace GMarkupDoc {
 				break;
 				case ParseType.UPDATE:
 					if(parser.first) {
+						(parser.current).freeze();
+						if(parser.propname == null) {
+							(parser.current as Tag).unset_all();
+						} else {
+							(parser.current as Tag).unset(parser.propname);
+						}
 						for(int i=0; i< names.length; i++) {
 							if(parser.propname == null || names[i] == parser.propname)
 								(parser.current as Tag).set(names[i], values[i]);
+						}
+						(parser.current).unfreeze();
+						if(parser.propname == null) {
+							parser.document.updated(parser.current, null);
+						} else  {
+							parser.document.updated(parser.current, parser.propname);
 						}
 						parser.first = false;
 					}

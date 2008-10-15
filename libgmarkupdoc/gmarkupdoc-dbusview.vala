@@ -54,7 +54,7 @@ namespace GMarkupDoc {
 			if(parent != document.orphan)
 				removed(parent.name, child.name);
 		}
-		private void document_updated(DocumentModel document, Node node, string prop) {
+		private void document_updated(DocumentModel document, Node node, string? prop) {
 			updated(node.name, prop);
 		}
 		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
@@ -86,7 +86,7 @@ namespace GMarkupDoc {
 				this.document.activate(node, 0);
 			}
 		}
-		public signal void updated(string name, string prop);
+		public signal void updated(string name, string? prop);
 		public signal void inserted(string type, string parent, string name, int pos);
 		public signal void removed(string parent, string name);
 		public signal void renamed(string oldname, string newname);

@@ -50,7 +50,7 @@ namespace GMarkupDoc {
 			if(s == null) return null;
 			return strings.insert_const(s);
 		}
-		public abstract signal void updated(Node node, string prop);
+		public abstract signal void updated(Node node, string? prop);
 		public abstract signal void inserted(Node parent, Node node, int pos);
 		public abstract signal void removed(Node parent, Node node);
 		public abstract signal void renamed(Node node, string? oldname, string? newname);

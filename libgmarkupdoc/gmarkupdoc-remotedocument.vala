@@ -87,7 +87,7 @@ namespace GMarkupDoc {
 			if(node == null) return;
 			node.name = newname;
 		}
-		private void remote_updated(dynamic DBus.Object remote, string nodename, string propname) {
+		private void remote_updated(dynamic DBus.Object remote, string nodename, string? propname) {
 			if(invalid) return;
 			weak Node node = dict.lookup(nodename);
 			try {
