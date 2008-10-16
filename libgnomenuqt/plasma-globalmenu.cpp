@@ -23,10 +23,15 @@
  * */
 
 #include "plasma-globalmenu.h"
+
+#include <QApplication>
 #include <QPainter>
 #include <QFontMetrics>
 #include <QSizeF>
 #include <QMenuBar>
+#include <QStackedWidget>
+#include <QGraphicsProxyWidget>
+#include <QLabel>
 
 #include <KDebug>
 #include <plasma/svg.h>
@@ -35,27 +40,19 @@
 #include "app-document.h"
 #include "server.h"
 
-
-Server *server;
-
 PlasmaGlobalMenu::PlasmaGlobalMenu(QObject *parent, const QVariantList &args)
-	:Plasma::Applet(parent, args),
-	 m_svg(this),
-	 m_icon("document")
+	:Plasma::Applet(parent, args)
 {
-	m_svg.setImagePath("widgets/background");
 	setBackgroundHints(DefaultBackground);
 	resize(200, 200);
 
-	m_windowManager= KWindowSystem::self();
+	_windowManager= KWindowSystem::self();
 
-	connect(m_windowManager, SIGNAL(activeWindowChanged(WId)), 
+	connect(_windowManager, SIGNAL(activeWindowChanged(WId)), 
 				this, SLOT(onActiveWindowChanged(WId)));
 	
-	server = new Server("org.gnome.GlobalMenu.Server",
+	_server = new Server("org.gnome.GlobalMenu.Server",
 						"/org/gnome/GlobalMenu/Server");
-
-	//delete server;
 }
 
 PlasmaGlobalMenu::~PlasmaGlobalMenu()
@@ -65,57 +62,51 @@ PlasmaGlobalMenu::~PlasmaGlobalMenu()
 	} else {
 
 	}
+	delete _server;
 }
 
 void PlasmaGlobalMenu::init()
 {
-	if (m_icon.isNull()) {
-		setFailedToLaunch(true, "No world to say globalmenu");
-	}
-	m_frame = new QFrame();
-	m_vlayout = new QVBoxLayout();
-	m_button  = new QPushButton("haha");
-	m_webView = new QWebView();
+//	QMenuBar *menubar;
 
-	QMenuBar *menubar;
+//	menubar = server->queryByXID("71303200")->createMenuBar();
 
-	menubar = server->queryByXID("71303200")->createMenuBar();
-	m_vlayout->addWidget(menubar);
-	m_vlayout->addWidget(m_button);
-	m_vlayout->addWidget(m_webView);
+	_stackedWidget = new QStackedWidget;
+	_defaultWidget = createDefaultMenu();
+	_stackedWidget->addWidget(_defaultWidget);
 
-	m_frame->setLayout(m_vlayout);
-
-	m_widget = new QGraphicsProxyWidget(this);
-	m_widget->setWidget(m_frame);
-
-	m_webView->load(QUrl("file:///usr/share/ubuntu-artwork/home/index.html"));
-	m_webView->show();
-}
-
-void PlasmaGlobalMenu::paintInterface(QPainter *p,
-		const QStyleOptionGraphicsItem *option,
-		const QRect &contentsRect)
-{
-	p->setRenderHint(QPainter::SmoothPixmapTransform);
-	p->setRenderHint(QPainter::Antialiasing);
-
-	m_svg.resize((int)contentsRect.width(), (int)contentsRect.height());
-	m_svg.paint(p, (int)contentsRect.left(), (int)contentsRect.top());
-
-	p->drawPixmap(7, 0, m_icon.pixmap((int)contentsRect.width(), (int)contentsRect.width()-14));
-	p->save();
-	p->setPen(Qt::white);
-	p->drawText(contentsRect,
-				Qt::AlignBottom | Qt::AlignHCenter,
-				"GlobalMenu Plasmoid!");
-	p->restore();
+	_widget = new QGraphicsProxyWidget(this);
+	_widget->setWidget(_stackedWidget);
 }
 
 void PlasmaGlobalMenu::onActiveWindowChanged(WId xid)
 {
+	AppDocument *model;
 	qDebug() << "window changed" << xid;
+
+	QWidget *self = QApplication::activeWindow();
+
+	if (self && self->winId() == xid)
+		return;
+//	qDebug() << "winId" << QApplication::activeWindow()->winId() ;
+//
+	if(!(model = _server->queryByXID(QString::number(xid)))) {
+		_stackedWidget->setCurrentWidget(_defaultWidget);
+		return;
+	} 
+	
+	if (!_xidHash.contains(xid)) {
+		QMenuBar *menubar;
+		menubar = model->createMenuBar();
+		_stackedWidget->addWidget(menubar);
+		_xidHash.insert(xid, menubar);
+	} 
+	_stackedWidget->setCurrentWidget(_xidHash.value(xid));
 }
 
+QWidget* PlasmaGlobalMenu::createDefaultMenu()
+{
+	return new QLabel("hahaha");
+}
 
 #include "plasma-globalmenu.moc"

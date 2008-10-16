@@ -5,7 +5,6 @@ include(KDE4Defaults)
 find_package(Plasma REQUIRED)
 
 find_package(Qt4)
-#SET(QT_USE_QTWEBKIT 1)
 SET(QT_USE_QTDBUS 1)
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
@@ -15,10 +14,6 @@ include_directories(
 	${KDE4_INCLUDES}
 	#	${QT_QTDBUS_INCLUDE_DIR}
 	)
-
-IF (NOT QT_QTWEBKIT_FOUND)
-	MESSAGE(STATUS "Can't find QtWebkit")
-ENDIF(NOT QT_QTWEBKIT_FOUND)
 
 set(globalmenu_SRCS plasma-globalmenu.cpp server.cpp app-document.cpp)
 

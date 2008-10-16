@@ -55,7 +55,7 @@ Server::~Server()
 
 bool Server::isStarted()
 {
-
+	return _started;
 }
 
 void Server::parseDocument()
@@ -97,7 +97,9 @@ void Server::parseDocument()
 
 AppDocument* Server::queryByXID(const QString &xid)
 {
-	return _DocumentHash.value(xid);
+	if (_DocumentHash.contains(xid))
+		return _DocumentHash.value(xid);
+	else return NULL;
 }
 
 #include "server.moc"

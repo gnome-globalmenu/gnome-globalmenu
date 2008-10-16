@@ -4,17 +4,14 @@
 #include <KIcon>
 #include <Plasma/Applet>
 #include <Plasma/Svg>
-#include <QWebView>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QGraphicsProxyWidget>
-#include <QFrame>
 
 #include <kwindowsystem.h>
 
-#include "remote-document.h"
 
 class QSizeF;
+class Server;
+class QStackedWidget;
+class QGraphicsProxyWidget;
 
 class PlasmaGlobalMenu: public Plasma::Applet
 {
@@ -23,22 +20,17 @@ class PlasmaGlobalMenu: public Plasma::Applet
 		PlasmaGlobalMenu(QObject *parent, const QVariantList &args);
 		~PlasmaGlobalMenu();
 
-        void paintInterface(QPainter *painter,
-                                    const QStyleOptionGraphicsItem *option,
-                                    const QRect& contentsRect);
 		void init();
 
 	private:
-		Plasma::Svg m_svg;
-		KIcon m_icon;
-		QVBoxLayout *m_vlayout;
-		QWebView *m_webView;
-		QPushButton  *m_button;
-		QGraphicsProxyWidget *m_widget;
-		QFrame *m_frame;
-		KWindowSystem *m_windowManager;
+		QGraphicsProxyWidget *_widget;
+		KWindowSystem *_windowManager;
+		Server *_server;
+		QStackedWidget *_stackedWidget;
+		QHash<WId, QWidget*> _xidHash;
+		QWidget *_defaultWidget;
 
-		RemoteDocument *_rDoc;
+		QWidget* createDefaultMenu();
 	private slots:
 		void onActiveWindowChanged(WId xid);
 };

@@ -34,6 +34,8 @@
 #include <QAction>
 #include <QMenuBar>
 
+#include <KIcon>
+
 class AppModel {
 public:
 	AppModel(AppModel *parent = NULL) 
@@ -57,6 +59,10 @@ public:
 	inline void addProperty(const QString &name, const QString &value)
 	{
 		_properties.insert(name, value);
+	}
+
+	inline bool hasProperty(const QString &name) {
+		return _properties.contains(name);
 	}
 
 	inline QString getProperty(const QString &name) 
@@ -86,6 +92,33 @@ private:
 	AppModel *_parent;
 	QList<AppModel*> _children;
 };
+
+
+static QHash<QString, QString> _table;
+static bool isIconTableAdded;
+
+static void addIconEntries()
+{
+	if(isIconTableAdded)
+		return;
+	isIconTableAdded = true;
+
+	_table.insert("gtk-about", "");
+	_table.insert("gtk-close", "document-close");
+	_table.insert("gtk-quit", "document-quit");
+	_table.insert("gtk-open", "document-open");
+	_table.insert("gtk-save", "document-save");
+}
+
+static QIcon* iconFromGtkStock(const QString &stock)
+{
+	if(!isIconTableAdded)
+		addIconEntries();
+	if(!_table.contains(stock))
+		return new KIcon("");
+	else 
+		return new KIcon(_table[stock]);
+}
 
 
 AppDocument::AppDocument(QString service, QString path)
@@ -173,6 +206,22 @@ void AppDocument::parseDocument()
 						xml.attributes().value("no-show-all").toString());
 				newModel->addProperty("visible",
 						xml.attributes().value("visible").toString());
+			} else if (xml.name() == "check") {
+				newModel->addProperty("name",
+						xml.attributes().value("name").toString());
+				newModel->addProperty("inconsistent",
+						xml.attributes().value("inconsistent").toString());
+				newModel->addProperty("label",
+						xml.attributes().value("label").toString());
+				newModel->addProperty("no-show-all",
+						xml.attributes().value("no-show-all").toString());
+				newModel->addProperty("active",
+						xml.attributes().value("active").toString());
+				newModel->addProperty("draw-as-radio",
+						xml.attributes().value("draw-as-radio").toString());
+				newModel->addProperty("sensitive",
+						xml.attributes().value("sensitive").toString());
+				
 			}
 		} else if (xml.isEndElement()) {
 			currentModel = currentModel->parent();
@@ -201,13 +250,11 @@ void AppDocument::onUpdated(QString nodeName, QString propName)
 }
 
 void AppDocument::onNameOwnerChanged(QString bus, 
-										QString oldOwner, 
-										QString newOwner)
+									 QString oldOwner, 
+									 QString newOwner)
 {
 	qDebug() << bus << oldOwner << newOwner;
 }
-
-#if 1
 
 static bool isMenu(AppModel *model)
 {
@@ -230,23 +277,34 @@ QMenu* AppDocument::createMenu(QWidget *parent, AppModel *model)
 {
 	AppModel *menuModel;
 	QMenu *menu = NULL;
+	QString label;
 	menu = new QMenu(parent);
-	menu->setTitle(model->getProperty("label"));
-	// model itself is a item, and its first child should be a menu
+	
+	// model itself is a item which describ the label and icon, 
+	// and its first child should be a menu.
 	menuModel = model->children().first(); 
 	
 	if (menuModel->getProperty("tag") != "menu") {
 		qDebug() << __func__ << "Not a menu!!";
 		return NULL;
 	}
+
+
 	foreach(AppModel *child, menuModel->children())
 	{
 		if (isMenu(child)) {
 			menu->addMenu(createMenu(menu, child));
-		} else {
+		} else if (child->getProperty("name").startsWith("GtkTearoffMenuItem") &&
+					child->hasProperty("visible") &&
+					child->getProperty("visible") == "true") {
+			menu->setTearOffEnabled(true);
+		} else
 			menu->addAction(createAction(parent, child));
-		}
 	}
+
+	label = model->getProperty("label");
+	label.replace(QString("_"), QString("&"));
+	menu->setTitle(label);
 
 	return menu;
 }
@@ -258,10 +316,57 @@ QAction *AppDocument::createAction(QWidget *parent, AppModel *model)
 		return NULL;
 	}
 
-	// FIXME: add support for icons;
-	QAction *a = new QAction(model->getProperty("label"), parent);
+	QAction *a = NULL;
+	QString label = model->getProperty("label");
+
+	a = new QAction(parent);
+	a->setProperty("name", model->getProperty("name"));
+
+    if (label.startsWith("|")) {// separator
+		a->setSeparator(true);
+		return a;
+	}
+
+	label.replace(QString("_"), QString("&"));
+	a->setText(label);
+
+	if (model->hasProperty("visible") && model->getProperty("visible") == "false")
+		a->setVisible(false);
+
+	if (model->getProperty("tag") == "imageitem" && model->hasProperty("icon-stock"))
+	{
+		QString iconStock = model->getProperty("icon-stock");
+		QIcon *icon = iconFromGtkStock(iconStock);
+		a->setIcon(*icon);
+		delete icon;
+	}
+
+	if (model->getProperty("tag") == "check") 
+	{
+		a->setCheckable(true);
+		if (model->hasProperty("inconsistent") && model->getProperty("inconsistent") == "false")
+			qDebug() << __func__ << "inconsistent hasn't been implemented yet";
+
+		if (model->hasProperty("active") && model->getProperty("active") == "true")
+			a->setChecked(true);
+
+		if (model->hasProperty("draw-as-radio") && model->getProperty("draw-as-radio") == "true")
+			qDebug() << __func__ << "draw-as-radio hasn't been implemented yet";
+
+	}
+
+	connect(a, SIGNAL(triggered(bool)), this, SLOT(onActionTrigger(bool)));
 
 	return a;
+}
+
+void AppDocument::onActionTrigger(bool triggerred)
+{
+//	qDebug() << __func__ << triggerred << sender()->property("name").toString();
+	QString itemName = sender()->property("name").toString();
+	QDBusInterface DBusIface(_service, _path, 
+							  	"org.gnome.GlobalMenu.Document");
+	DBusIface.call("Activate", itemName);
 }
 
 QMenuBar* AppDocument::createMenuBar()
@@ -272,7 +377,6 @@ QMenuBar* AppDocument::createMenuBar()
 		return _menubar;
 
 	AppModel *child =  it->children().first()->children().first();
-	qDebug() << __func__ << ":" << child->getProperty("tag");
 	if (child->getProperty("tag") == "menubar") {
 		_menubar = new QMenuBar(NULL);
 		foreach(AppModel *cchild, child->children()) {
@@ -285,7 +389,6 @@ QMenuBar* AppDocument::createMenuBar()
 
 	return _menubar;
 }
-#endif
 
 
 

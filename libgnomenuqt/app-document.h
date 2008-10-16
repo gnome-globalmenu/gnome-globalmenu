@@ -62,6 +62,8 @@ private slots:
 	void onInserted(QString pathName, QString nodeName, int pos);
 	void onRemoved(QString parentName, QString nodeName);
 	void onUpdated(QString nodeName, QString propName);
+
+	void onActionTrigger(bool);
 };
 
 #endif /*__APP_DOCUMENT_H__ */
