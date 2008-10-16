@@ -100,6 +100,32 @@ namespace Gnomenu {
 			}
 
 		}
+		[DBus (visible = false)]
+		protected void set_default(string name) {
+			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
+			if(node != null) {
+				weak string xid = node.get("xid");
+				try {
+					server.SetDefault(node.get("xid"));
+				} catch(GLib.Error e) {
+					warning("%s", e.message);
+				}
+			}
+		}
+		[DBus (visible = false)]
+		protected void set_transient_for(string name, string parent_name) {
+			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
+			weak GMarkupDoc.Tag parent_node = document.dict.lookup(parent_name) as GMarkupDoc.Tag;
+			if(node != null && parent_node != null) {
+				weak string xid = node.get("xid");
+				node.set("transient-for", parent_node.name);
+				try {
+					server.SetTransientFor(node.get("xid"), parent_node.get("xid"));
+				} catch(GLib.Error e) {
+					warning("%s", e.message);
+				}
+			}
+		}
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);

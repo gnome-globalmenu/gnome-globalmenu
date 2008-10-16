@@ -20,6 +20,16 @@ namespace Gnomenu {
 			}
 			menu_hash.remove(xid);
 		}
+		private weak string? find_default() {
+			foreach(weak GMarkupDoc.Node node in serverdoc.root.children) {
+				if(node is GMarkupDoc.Tag)
+				if((node as GMarkupDoc.Tag).get("default") == "true") {
+					debug("Default is found");
+					return (node as GMarkupDoc.Tag).name;
+				}
+			}
+			return null;
+		}
 		public void switch(string xid) {
 			bool need_new_menu_view = false;
 			weak GMarkupDoc.Tag node = serverdoc.dict.lookup(xid) as GMarkupDoc.Tag;
@@ -27,8 +37,18 @@ namespace Gnomenu {
 				this.remove_page_by_xid(xid);
 				bus_hash.remove(xid);
 				this.set_current_page(0);
-				return;
 			}
+			if(node == null /* try default window*/) {
+				weak string xid = find_default();
+				if(xid != null) {
+					@switch(xid);
+					return;
+				}
+			}
+			if(node == null /*try transient for window*/) {
+				/*TODO*/
+			}
+			if(node == null) return;
 			weak string bus = node.get("bus");
 			debug("XID %s at BUS %s", xid, bus);
 			

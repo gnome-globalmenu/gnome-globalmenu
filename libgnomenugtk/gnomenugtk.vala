@@ -13,6 +13,8 @@ namespace GnomenuGtk {
 	protected extern  void patch_menu_shell();
 	[CCode (cname = "_patch_menu_item")]
 	protected extern  void patch_menu_item();
+	[CCode (cname = "gdk_window_get_is_desktop")]
+	protected extern bool gdk_window_get_is_desktop (Gdk.Window window);
 
 	private bool hook_func (SignalInvocationHint ihint, [CCode (array_length_pos = 1.9)] Value[] param_values) {
 		Gtk.Widget self = param_values[0].get_object() as Gtk.Widget;
@@ -131,23 +133,51 @@ namespace GnomenuGtk {
 		weak Document.Widget node = document().wrap(widget);
 		transverse(child, node, pos);
 	}
-	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
+	private void do_type_hint(Gtk.Widget window) {
+		weak Document.Widget node = document().wrap(window);
+		if((window as Gtk.Window).type_hint == Gdk.WindowTypeHint.DESKTOP) {
+			client().set_default(node.name);
+		}
+	}
+	private void do_realize(Gtk.Widget window) {
+		weak Document.Widget node = document().wrap(window);
+		client().register_window(node.name, XWINDOW(window.window).to_string());
+		if(gdk_window_get_is_desktop(window.window)) { 
+			/*workaround nautilus which doesn't use GDK to set the hint*/
+			client().set_default(node.name);
+		}
+	}
+	private void do_transient_for(Gtk.Widget window) {
+		weak Document.Widget node = document().wrap(window);
+		if((window as Gtk.Window).transient_for != null) {
+			weak Gtk.Widget parent_window = (window as Gtk.Window).transient_for;
+			bind_window(parent_window);
+			weak Document.Widget parent_node = document().wrap(parent_window);
+			client().set_transient_for(node.name, parent_node.name);
+		}
+	}
+	public void bind_window(Gtk.Widget window) {
 		weak Document.Widget node = document().wrap(window);
 		if(document().root.index(node) < 0) {
 			document().root.append(node);
-			if(0 != (window.get_flags() & WidgetFlags.REALIZED)) {
-				weak Document.Widget node = document().wrap(window);
-				client().register_window(node.name, XWINDOW(window.window).to_string());
-			}
-			window.realize += (window) => {
-				weak Document.Widget node = document().wrap(window);
-				client().register_window(node.name, XWINDOW(window.window).to_string());
-			};
+			if(0 != (window.get_flags() & WidgetFlags.REALIZED))
+				do_realize(window);
+			do_type_hint(window);
+			window.notify["type-hint"] += do_type_hint;
+			window.realize += do_realize;
 			window.unrealize += (window) => {
 				weak Document.Widget node = document().wrap(window);
 				client().unregister_window(node.name);
 			};
+			if((window as Gtk.Window).transient_for != null) {
+				do_transient_for(window);
+			}
+			window.notify["transient-for"] += do_transient_for;
 		}
+	}
+	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
+		bind_window(window);
+		weak Document.Widget node = document().wrap(window);
 		weak Document.Widget menu_node = document().wrap(menu);
 		debug("binding menu %s to %s", menu_node.name, node.name);
 		/*TODO: transverse menu_node, adding children*/

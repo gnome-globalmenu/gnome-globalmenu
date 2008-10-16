@@ -35,6 +35,7 @@ namespace Gnomenu {
 			}
 			foreach(weak GMarkupDoc.Node node in to_remove) {
 				document.root.remove(node);
+				document.DestroyNode(node);
 			}
 		}
 		private weak GMarkupDoc.Tag? find_node_by_xid(string xid) {
@@ -64,6 +65,21 @@ namespace Gnomenu {
 			if(node != null)
 				if(node.get("bus") == client_bus)
 					document.root.remove(node);
+		}
+		public void SetDefault (string xid) {
+			foreach (weak GMarkupDoc.Node node in document.root.children) {
+				if(node is GMarkupDoc.Tag) {
+					weak GMarkupDoc.Tag tagnode = node as GMarkupDoc.Tag;
+					if(tagnode.get("default") != null)
+						tagnode.set("default", null);
+				}
+			}
+			weak GMarkupDoc.Tag tag = find_node_by_xid(xid);
+			tag.set("default", "true");
+		}
+		public void SetTransientFor (string xid, string parent_xid) {
+			weak GMarkupDoc.Tag tag = find_node_by_xid(xid);
+			tag.set("transientfor", parent_xid);
 		}
 	}
 }

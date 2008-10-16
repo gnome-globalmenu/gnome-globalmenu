@@ -256,10 +256,11 @@ namespace Gnomenu {
 				update_property(gtk, node, s);
 			}
 		}
-		private void update_property(Gtk.Widget gtk, GMarkupDoc.Tag node, string prop) {
+		private void update_property(Gtk.Widget gtk, GMarkupDoc.Tag node, string? prop) {
 				if(gtk is Gtk.MenuItem) {
 					(gtk as Gtk.MenuItem).activate -= menu_item_activated;
 				}
+				/*TODO: if prop == NULL refresh everything.*/
 				switch(prop) {
 					case "label":
 						Gtk.Label label = (gtk as Gtk.Bin).get_child() as Gtk.Label;
@@ -302,7 +303,7 @@ namespace Gnomenu {
 					(gtk as Gtk.MenuItem).activate += menu_item_activated;
 				}
 		}
-		private void document_updated(DocumentModel document, GMarkupDoc.Node n, string prop) {
+		private void document_updated(DocumentModel document, GMarkupDoc.Node n, string? prop) {
 			if(!(n is GMarkupDoc.Tag)) return;
 			weak GMarkupDoc.Tag node = n as GMarkupDoc.Tag;
 			if(node != null) {

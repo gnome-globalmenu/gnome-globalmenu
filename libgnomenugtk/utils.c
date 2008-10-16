@@ -1,4 +1,8 @@
+#include <X11/Xatom.h>
+#include <gdk/gdkx.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
+
 #define PROP_LOCAL 9999
 typedef void (*SetPropertyFunc)(GObject * object, guint prop_id, const GValue * value, GParamSpec * pspes);
 typedef void (*GetPropertyFunc)(GObject * object, guint prop_id, const GValue * value, GParamSpec * pspes);
@@ -64,6 +68,44 @@ void _patch_menu_shell() {
 		  G_TYPE_NONE, 2, GTK_TYPE_WIDGET, G_TYPE_INT);
 	old_real_insert = menu_shell_klass->insert;
 	menu_shell_klass->insert = _real_insert;
+}
+gboolean gdk_window_get_is_desktop (GdkWindow * window) {
+	Display * display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default());
+	Atom atom;
+	atom = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", FALSE);
+	Atom ret_prop_type;
+	gint ret_format;
+	gint ret_nitems;
+	gint ret_bytes_after;
+	Atom * ret_data;	
+
+	gulong offset = 0;
+	gulong get_length = G_MAXLONG;
+	gboolean pdelete = False;
+	Atom propname = XInternAtom(display, "_NET_WM_WINDOW_TYPE", FALSE);
+	
+	if(Success == XGetWindowProperty (display,
+			    GDK_WINDOW_XWINDOW (window), 
+				propname,
+			    offset, get_length, pdelete,
+			    XA_ATOM, 
+				&ret_prop_type, 
+				&ret_format,
+			    &ret_nitems, 
+				&ret_bytes_after,
+			    &ret_data)) {
+		if(*ret_data == atom) {
+			XFree(ret_data);
+			g_warning("a desktop window");
+			return TRUE;
+		}
+		XFree(ret_data);
+		g_warning("not a desktop window");
+		return FALSE;
+	} else {
+		g_warning(" x prop failed");
+		return FALSE;
+	}
 }
 static gboolean menu_item_parent_set_hook(GSignalInvocationHint * hint,
 			int value_count, GValue values[], gpointer data) {
