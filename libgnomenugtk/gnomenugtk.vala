@@ -147,15 +147,6 @@ namespace GnomenuGtk {
 			client().set_default(node.name);
 		}
 	}
-	private void do_transient_for(Gtk.Widget window) {
-		weak Document.Widget node = document().wrap(window);
-		if((window as Gtk.Window).transient_for != null) {
-			weak Gtk.Widget parent_window = (window as Gtk.Window).transient_for;
-			bind_window(parent_window);
-			weak Document.Widget parent_node = document().wrap(parent_window);
-			client().set_transient_for(node.name, parent_node.name);
-		}
-	}
 	public void bind_window(Gtk.Widget window) {
 		weak Document.Widget node = document().wrap(window);
 		if(document().root.index(node) < 0) {
@@ -169,10 +160,6 @@ namespace GnomenuGtk {
 				weak Document.Widget node = document().wrap(window);
 				client().unregister_window(node.name);
 			};
-			if((window as Gtk.Window).transient_for != null) {
-				do_transient_for(window);
-			}
-			window.notify["transient-for"] += do_transient_for;
 		}
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
