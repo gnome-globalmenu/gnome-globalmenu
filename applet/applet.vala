@@ -53,11 +53,23 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			this.menubar.queue_draw();
 		};
 	}
+	private static bool verbose = false;
+	const OptionEntry[] options = {
+		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
+		{null}
+	};
 	public static int main(string[] args) {
-		GLib.OptionContext context = new GLib.OptionContext("");
+		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
+		context.set_help_enabled (true);
+		context.add_main_entries(options, null);
 		GLib.Object program = gnome_program_init_easy(
 			"GlobalMenu.PanelApplet",
 			"0.6", args, #context);
+		if(!verbose) {
+			LogFunc handler = (domain, level, message) => { };
+			Log.set_handler ("GMarkupDoc", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
+		}
 		Gtk.rc_parse_string("""
 			style "globalmenu_event_box_style"
 			{
