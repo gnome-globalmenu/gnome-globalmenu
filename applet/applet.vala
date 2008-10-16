@@ -26,6 +26,8 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
+				weak Wnck.Window transient_for = window.get_transient();
+				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
 				menubar.switch(xid);
 			}
