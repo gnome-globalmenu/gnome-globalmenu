@@ -87,13 +87,14 @@ namespace GnomenuGtk {
 			}
 			private void connect() {
 				this.tag = translate_gtk_type(gtk);
-				List<weak string> names;
-				List<weak string> values;
+				this.freeze();
 				if(gtk is Gtk.MenuItem) { 
 					connect_to_menu_item();
 					if(gtk is Gtk.CheckMenuItem) connect_to_check_menu_item();
 					if(gtk is Gtk.ImageMenuItem) connect_to_image_menu_item();
 				}
+				this.unfreeze();
+				this.document.updated(this, null);
 			}
 			private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 				debug("item_property_notify %s( %s).%s", this.name, w.get_type().name(), pspec.name);
