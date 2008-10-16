@@ -35,8 +35,25 @@ namespace GnomenuGtk {
 		} 
 		return true;
 	}
+	protected bool verbose = false;
+	protected  bool disabled = false;
+
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
+		disabled = (Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null)
+				  ||(Environment.get_variable("GNOMENU_DISABLED")!=null);
+		verbose = (Environment.get_variable("GNOMENU_VERBOSE")!=null);
+		
+		if(disabled) {
+			message("GTK_MENUBAR_NO_MAC or GNOMENU_DISABLED is set. GlobalMenu is disabled");
+			return;
+		}
+		if(!verbose) {
+			LogFunc handler = (domain, level, message) => { };
+			Log.set_handler ("GMarkupDoc", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_DEBUG, handler);
+		}
 		DBus.Connection conn;
 		try {
 			conn = Bus.get(DBus.BusType.SESSION);
@@ -48,15 +65,11 @@ namespace GnomenuGtk {
 			message("DBus is unavailable. GlobalMenu is disabled.");
 			return;
 		}
-		if(Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null) {
-			message("GTK_MENUBAR_NO_MAC is set. GlobalMenu is disabled");
-			return;
-		}
 		switch(Environment.get_prgname()) {
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
 			case "gdm-user-switch-applet":
-			message("GlobalMenu is disabled");
+			message("GlobalMenu is disabled for several programs");
 			return;
 			break;
 		}
