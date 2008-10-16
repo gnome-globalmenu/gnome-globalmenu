@@ -28,6 +28,9 @@ namespace Gnomenu {
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is GMarkupDoc.Tag) {
 							switch((child as GMarkupDoc.Tag).tag) {
+								case "separator":
+								case "tearoff":
+								case "check":
 								case "item":
 								case "check":
 								case "imageitem":
@@ -124,6 +127,8 @@ namespace Gnomenu {
 					foreach(weak GMarkupDoc.Node child in node.children) {
 						if(child is GMarkupDoc.Tag) {
 							switch((child as GMarkupDoc.Tag).tag){
+								case "separator":
+								case "tearoff":
 								case "item":
 								case "imageitem":
 								case "check":
@@ -135,46 +140,44 @@ namespace Gnomenu {
 					gtk.set_data("node", node);
 					node.set_data_full("gtk", gtk.ref(), g_object_unref);
 				break;
+				case "separator":
+				case "tearoff":
 				case "item":
 				case "check":
 				case "imageitem":
 					string label = node.get("label");
 					if(label == null) label = "";
 					Gtk.MenuItem gtk;
-					switch(label) {
-						case "&":
-						gtk = new Gtk.TearoffMenuItem();
-						gtk.activate += menu_item_activated;
-						string[] p = {"visible", "sensitive", "no-show-all"};
-						update_properties(gtk, node, p);
+					switch(node.tag) {
+						case "separator":
+							gtk = new Gtk.SeparatorMenuItem();
+							gtk.activate += menu_item_activated;
+							string[] p = {"visible", "sensitive", "no-show-all"};
+							update_properties(gtk, node, p);
 						break;
-						case "|":
-						gtk = new Gtk.SeparatorMenuItem();
-						gtk.activate += menu_item_activated;
-						string[] p = {"visible", "sensitive", "no-show-all"};
-						update_properties(gtk, node, p);
+						case "tearoff":
+							gtk = new Gtk.TearoffMenuItem();
+							gtk.activate += menu_item_activated;
+							string[] p = {"visible", "sensitive", "no-show-all"};
+							update_properties(gtk, node, p);
 						break;
-						default:
-						switch(node.tag) {
-							case "check":
-								gtk = new Gtk.CheckMenuItem.with_mnemonic(label);
-								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio"};
-								update_properties(gtk, node, p);
-							break;
-							case "item":
-								gtk = new Gtk.MenuItem.with_mnemonic(label);
-								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "no-show-all", "label"};
-								update_properties(gtk, node, p);
-							break;
-							case "imageitem":
-								gtk = new Gtk.ImageMenuItem.with_mnemonic(label);
-								gtk.activate += menu_item_activated;
-								string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock"};
-								update_properties(gtk, node, p);
-							break;
-						}
+						case "check":
+							gtk = new Gtk.CheckMenuItem.with_mnemonic(label);
+							gtk.activate += menu_item_activated;
+							string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio"};
+							update_properties(gtk, node, p);
+						break;
+						case "item":
+							gtk = new Gtk.MenuItem.with_mnemonic(label);
+							gtk.activate += menu_item_activated;
+							string[] p = {"visible", "sensitive", "no-show-all", "label"};
+							update_properties(gtk, node, p);
+						break;
+						case "imageitem":
+							gtk = new Gtk.ImageMenuItem.with_mnemonic(label);
+							gtk.activate += menu_item_activated;
+							string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock"};
+							update_properties(gtk, node, p);
 						break;
 					}
 					foreach(weak GMarkupDoc.Node child in node.children) {
@@ -311,6 +314,8 @@ namespace Gnomenu {
 					case "menu":
 					break;
 					case "item":
+					case "tearoff":
+					case "separator":
 					case "check":
 					case "imageitem":
 						Gtk.MenuItem gtk = (Gtk.MenuItem) node.get_data("gtk");

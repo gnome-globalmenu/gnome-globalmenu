@@ -84,6 +84,6 @@ namespace GtkAQD {
 		public virtual signal void toggle_size_allocate (int allocation);
 		[HasEmitter]
 		public virtual signal void toggle_size_request (void* requisition);
-		public signal void label_set(Gtk.Label? label);
+		public signal void label_set(Gtk.Widget? label);
 	}
 }

@@ -114,7 +114,8 @@ namespace GnomenuGtk {
 				}
 				this.set(pspec.name, val);
 			}
-			private void item_label_set(Gtk.Widget w, Gtk.Label? l) {
+			private void item_label_set(Gtk.Widget w, Gtk.Widget? l) {
+				if(!(l is Gtk.Label)) return;
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
 				if(l != old_label) {
 					if(old_label != null) {
@@ -126,7 +127,7 @@ namespace GnomenuGtk {
 					}
 					if(l!= null) {
 						l.notify["label"] += item_property_notify;
-						this.set("label", l.label);
+						this.set("label", (l as Gtk.Label).label);
 						w.set_data_full("old-label", l.ref(), g_object_unref);
 					} else 
 						w.set_data("old-label", null);

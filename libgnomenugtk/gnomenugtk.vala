@@ -89,6 +89,10 @@ namespace GnomenuGtk {
 			type = "check";
 		if(widget is Gtk.ImageMenuItem)
 			type = "imageitem";
+		if(widget is Gtk.SeparatorMenuItem)
+			type = "separator";
+		if(widget is Gtk.TearoffMenuItem)
+			type = "tearoff";
 		return type;
 	}
 	private void transverse(Gtk.Widget head, Document.Widget rel_root, int pos = -1) {
