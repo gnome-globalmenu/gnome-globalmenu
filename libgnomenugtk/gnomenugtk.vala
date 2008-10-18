@@ -102,8 +102,6 @@ namespace GnomenuGtk {
 			type = "check";
 		if(widget is Gtk.ImageMenuItem)
 			type = "imageitem";
-		if(widget is Gtk.SeparatorMenuItem)
-			type = "separator";
 		if(widget is Gtk.TearoffMenuItem)
 			type = "tearoff";
 		return type;

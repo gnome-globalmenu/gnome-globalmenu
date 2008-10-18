@@ -46,7 +46,6 @@ namespace GnomenuGtk {
 				set_bool_def("visible", item.visible, true);
 				set_bool_def("no-show-all", item.no_show_all, false);
 				set_bool_def("sensitive", item.sensitive, true);
-				if(gtk is Gtk.TearoffMenuItem) set("label", "&");
 				if(gtk is Gtk.SeparatorMenuItem) set("label", "|");
 				weak Gtk.Label l = find_menu_item_label(gtk);
 				if(l!= null) {
@@ -181,7 +180,9 @@ namespace GnomenuGtk {
 		construct {
 			this.activated += (document, node, detail) => {
 				weak Gtk.Widget widget = (node as Widget).gtk;
-				if(widget is Gtk.MenuItem) (widget as Gtk.MenuItem).activate();
+				if(widget is Gtk.TearoffMenuItem) return;
+				if(widget is Gtk.MenuItem) 
+					(widget as Gtk.MenuItem).activate();
 				if(widget is GtkAQD.MenuBar) {
 					bool local = (widget as GtkAQD.MenuBar).local;
 					(widget as GtkAQD.MenuBar).local = !local;
