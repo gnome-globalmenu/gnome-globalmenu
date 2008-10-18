@@ -53,6 +53,12 @@ namespace GnomenuGtk {
 					l.notify["label"] += item_property_notify;
 					gtk.set_data_full("old-label", l.ref(), g_object_unref);
 					set("label", l.label);
+					if(l is Gtk.AccelLabel) {
+						(l as Gtk.AccelLabel).refetch();
+						string s = (l as Gtk.AccelLabel).accel_string;
+						weak string trimmed = s.strip();	
+						if(trimmed.size() >0) set("accel", trimmed);
+					}
 				}
 				item.label_set += item_label_set;
 			}
@@ -129,6 +135,12 @@ namespace GnomenuGtk {
 						l.notify["label"] += item_property_notify;
 						this.set("label", (l as Gtk.Label).label);
 						w.set_data_full("old-label", l.ref(), g_object_unref);
+						if(l is Gtk.AccelLabel) {
+							(l as Gtk.AccelLabel).refetch();
+							string s = (l as Gtk.AccelLabel).accel_string;
+							weak string trimmed = s.strip();	
+							if(trimmed.size() >0) set("accel", trimmed);
+						}
 					} else 
 						w.set_data("old-label", null);
 				}

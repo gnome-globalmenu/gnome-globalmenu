@@ -164,19 +164,19 @@ namespace Gnomenu {
 						case "check":
 							gtk = new Gtk.CheckMenuItem.with_mnemonic(label);
 							gtk.activate += menu_item_activated;
-							string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio"};
+							string[] p = {"visible", "sensitive", "no-show-all", "label", "active", "inconsistent", "draw-as-radio", "accel"};
 							update_properties(gtk, node, p);
 						break;
 						case "item":
 							gtk = new Gtk.MenuItem.with_mnemonic(label);
 							gtk.activate += menu_item_activated;
-							string[] p = {"visible", "sensitive", "no-show-all", "label"};
+							string[] p = {"visible", "sensitive", "no-show-all", "label", "accel"};
 							update_properties(gtk, node, p);
 						break;
 						case "imageitem":
 							gtk = new Gtk.ImageMenuItem.with_mnemonic(label);
 							gtk.activate += menu_item_activated;
-							string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock"};
+							string[] p = {"visible", "sensitive", "no-show-all", "label", "icon-name","icon-stock", "accel"};
 							update_properties(gtk, node, p);
 						break;
 					}
@@ -266,10 +266,13 @@ namespace Gnomenu {
 				/*TODO: if prop == NULL refresh everything.*/
 				switch(prop) {
 					case "label":
+					case "accel":
 						Gtk.Label label = (gtk as Gtk.Bin).get_child() as Gtk.Label;
 						string label_text = node.get("label");
+						string accel_text = node.get("accel");
 						if(label_text == null) label_text = "";
-						label.label = label_text;
+						if(accel_text == null) label_text = "";
+						label.label = label_text + " - " + accel_text;
 					break;
 					case "visible":
 					case "sensitive":
