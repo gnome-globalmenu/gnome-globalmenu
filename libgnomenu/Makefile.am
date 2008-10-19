@@ -62,6 +62,10 @@ gnomenu.h: Makefile
 	done;
 	echo '#endif' >> $@ ;
 
+noinst_PROGRAMS = example
+example_LDADD = \
+		$(top_builddir)/libgnomenu/libgnomenu.la 
+
 EXTRA_DIST = \
 	 $(BUILT_SOURCES) \
 	 $(libgnomenu_la_VALASOURCES)
