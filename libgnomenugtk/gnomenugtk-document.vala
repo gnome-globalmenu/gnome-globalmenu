@@ -26,6 +26,7 @@ namespace GnomenuGtk {
 				if(_this.parent != _this.document.orphan) {
 					_this.parent.remove(_this);
 				}
+				set_native_name(object, null);
 				_this.document.DestroyNode(_this);
 				_this._gtk = null;
 			}
@@ -46,20 +47,30 @@ namespace GnomenuGtk {
 				set_bool_def("visible", item.visible, true);
 				set_bool_def("no-show-all", item.no_show_all, false);
 				set_bool_def("sensitive", item.sensitive, true);
-				if(gtk is Gtk.SeparatorMenuItem) set("label", "|");
-				weak Gtk.Label l = find_menu_item_label(gtk);
-				if(l!= null) {
-					l.notify["label"] += item_property_notify;
-					gtk.set_data_full("old-label", l.ref(), g_object_unref);
-					set("label", l.label);
-					if(l is Gtk.AccelLabel) {
-						(l as Gtk.AccelLabel).refetch();
-						string s = (l as Gtk.AccelLabel).accel_string;
-						weak string trimmed = s.strip();	
-						if(trimmed.size() >0) set("accel", trimmed);
+				if(gtk is Gtk.SeparatorMenuItem) {
+					set("label", "|");
+				} else {
+					weak Gtk.Widget l = find_menu_item_label(gtk);
+					if(l != null) {
+						if(l is Gtk.Label) {
+							l.notify["label"] += item_property_notify;
+							set("label", (l as Gtk.Label).label);
+							if(l is Gtk.AccelLabel) {
+								(l as Gtk.AccelLabel).refetch();
+								string s = (l as Gtk.AccelLabel).accel_string;
+								weak string trimmed = s.strip();	
+								if(trimmed.size() >0) set("accel", trimmed);
+							}
+						}
+						if(l is Gtk.Separator|| l is Gtk.SeparatorMenuItem) {
+							set("label", "|");
+						}
+						gtk.set_data_full("old-label", l.ref(), g_object_unref);
+					} else {
+						set("label", "|");
 					}
+					item.label_set += item_label_set;
 				}
-				item.label_set += item_label_set;
 			}
 			private void connect_to_check_menu_item() {
 				Gtk.CheckMenuItem c = gtk as Gtk.CheckMenuItem;
@@ -120,7 +131,6 @@ namespace GnomenuGtk {
 				this.set(pspec.name, val);
 			}
 			private void item_label_set(Gtk.Widget w, Gtk.Widget? l) {
-				if(!(l is Gtk.Label)) return;
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
 				if(l != old_label) {
 					if(old_label != null) {
@@ -140,8 +150,13 @@ namespace GnomenuGtk {
 							weak string trimmed = s.strip();	
 							if(trimmed.size() >0) set("accel", trimmed);
 						}
-					} else 
+						if(l is Gtk.Separator || l is Gtk.SeparatorMenuItem) {
+							set("label", "|");
+						}
+					} else  {
+						set("label", "|");
 						w.set_data("old-label", null);
+					}
 				}
 			}
 			private void item_image_notify(Gtk.Widget gtk, ParamSpec pspec) {
@@ -212,7 +227,7 @@ namespace GnomenuGtk {
 		private static void set_native_name(GLib.Object? w, string? name) {
 			((GLibCompat.constpointer)w).set_data("native-name", (void*) name);
 		}
-		private static weak Gtk.Label? find_menu_item_label(Gtk.Widget widget) {
+		private static weak Gtk.Widget? find_menu_item_label(Gtk.Widget widget) {
 			Queue<weak Gtk.Widget> q = new Queue<weak Gtk.Widget>();
 			q.push_tail(widget);
 			while(!q.is_empty()) {
@@ -225,8 +240,9 @@ namespace GnomenuGtk {
 				}
 				if(w is Gtk.Label) {
 					set_native_name(w, get_native_name(widget));
-					return w as Gtk.Label;
+					return w;
 				}
+				if(w is Gtk.Separator || w is Gtk.SeparatorMenuItem) return w;
 			}
 			return null;
 		}

@@ -123,7 +123,7 @@ static gboolean menu_item_parent_set_hook(GSignalInvocationHint * hint,
 				g_queue_push_tail(&queue, node->data);
 			}
 		}
-		if(GTK_IS_LABEL(head) || GTK_IS_SEPARATOR(head)) {
+		if(GTK_IS_LABEL(head) || GTK_IS_SEPARATOR(head)|| GTK_IS_SEPARATOR_MENU_ITEM(head)) {
 			g_queue_clear(&queue);
 			label = head;
 			break;

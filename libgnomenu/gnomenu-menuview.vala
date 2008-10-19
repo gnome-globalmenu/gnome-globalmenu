@@ -27,14 +27,7 @@ namespace Gnomenu {
 					document.root.set_data("gtk", this.menubar);
 					foreach(weak GMarkupDoc.Node child in document.root.children) {
 						if(child is GMarkupDoc.Tag) {
-							switch((child as GMarkupDoc.Tag).tag) {
-								case "check":
-								case "item":
-								case "check":
-								case "imageitem":
-								this.menubar.append(create_widget(child as GMarkupDoc.Tag) as Gtk.MenuItem);
-								break;
-							}
+							this.menubar.append(create_widget(child as GMarkupDoc.Tag, typeof(Gtk.MenuItem)) as Gtk.MenuItem);
 						}
 					}
 				}
@@ -115,7 +108,7 @@ namespace Gnomenu {
 		private void expose_child(Gtk.Widget widget) {
 			this.menubar.propagate_expose(widget, __tmp__event);
 		}
-		private weak Gtk.Widget create_widget(GMarkupDoc.Tag node) {
+		private weak Gtk.Widget create_widget(GMarkupDoc.Tag node, GLib.Type default_type) {
 			weak Gtk.Widget _gtk = (Gtk.Widget) node.get_data("gtk");
 			//debug("creating node %s", node.name);
 			if(_gtk != null) return _gtk;
@@ -124,14 +117,7 @@ namespace Gnomenu {
 					Gtk.MenuShell gtk = new Gtk.Menu();
 					foreach(weak GMarkupDoc.Node child in node.children) {
 						if(child is GMarkupDoc.Tag) {
-							switch((child as GMarkupDoc.Tag).tag){
-								case "item":
-								case "imageitem":
-								case "check":
-								case "tearoff":
-								gtk.append(create_widget(child as GMarkupDoc.Tag) as Gtk.MenuItem);
-								break;
-							}
+							gtk.append(create_widget(child as GMarkupDoc.Tag, typeof(Gtk.MenuItem)) as Gtk.MenuItem);
 						}
 					}
 					gtk.set_data("node", node);
@@ -178,14 +164,18 @@ namespace Gnomenu {
 					foreach(weak GMarkupDoc.Node child in node.children) {
 						if(child is GMarkupDoc.Tag) {
 							if((child as GMarkupDoc.Tag).tag == "menu")
-								gtk.submenu = create_widget(child as GMarkupDoc.Tag);
+								gtk.submenu = create_widget(child as GMarkupDoc.Tag, typeof(Gtk.Menu));
 						}
 					}
 					gtk.set_data("node", node);
 					node.set_data_full("gtk", gtk.ref(), g_object_unref);
 				break;
 				default:
-				debug("skipping tag %s", node.tag);
+					warning("skipping tag %s", node.tag);
+					Gtk.Widget gtk = new Gtk.Widget(default_type);
+					gtk.visible = true;
+					gtk.set_data("node", node);
+					node.set_data_full("gtk", gtk.ref(), g_object_unref);
 				break;
 			}
 			weak Gtk.Widget rt = (Gtk.Widget) (node.get_data("gtk"));
@@ -206,7 +196,7 @@ namespace Gnomenu {
 			if(!(n is GMarkupDoc.Tag)) return;
 			weak GMarkupDoc.Tag node = n as GMarkupDoc.Tag;
 			if(p == document.root ) {
-				this.menubar.insert(create_widget(node) as Gtk.MenuItem, pos);
+				this.menubar.insert(create_widget(node, typeof(Gtk.MenuItem)) as Gtk.MenuItem, pos);
 				return;
 			}
 			weak GMarkupDoc.Tag parent = p as GMarkupDoc.Tag;
@@ -214,14 +204,14 @@ namespace Gnomenu {
 				switch(parent.tag) {
 					case "menu":
 						Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
-						pgtk.insert(create_widget(node) as Gtk.MenuItem, pos);
+						pgtk.insert(create_widget(node, typeof(Gtk.MenuItem)) as Gtk.MenuItem, pos);
 					break;
 					case "item":
 					case "check":
 					case "imageitem":
 					case "tearoff":
 						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
-						pgtk.submenu = create_widget(node);
+						pgtk.submenu = create_widget(node, typeof(Gtk.Menu));
 					break;
 				}
 			}
@@ -232,6 +222,7 @@ namespace Gnomenu {
 			if(parent != null && node != null) {
 				weak Gtk.Widget pgtk = (Gtk.Widget) parent.get_data("gtk");
 				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
+				if(gtk == null) return;
 				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
 					debug("removing from menushell");
 					(pgtk as Gtk.Container).remove(gtk);
