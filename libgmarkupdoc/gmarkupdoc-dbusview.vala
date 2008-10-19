@@ -40,8 +40,15 @@ namespace GMarkupDoc {
 			this.document = document;
 			path = object_path;
 		}
+		private bool is_orphan(Node node) {
+			weak Node parent;
+			for(parent = node; parent != null; parent = parent.parent) {
+				if(parent == document.orphan) return true;
+			}
+			return false;
+		}
 		private void document_inserted(DocumentModel document, Node parent, Node child, int pos) {
-			if(parent != document.orphan) {
+			if(!is_orphan(parent)) {
 				debug("inserted");
 				weak string type;
 				if(child is Tag) type = "tag";
@@ -51,13 +58,15 @@ namespace GMarkupDoc {
 			}
 		}
 		private void document_removed(DocumentModel document, Node parent, Node child) {
-			if(parent != document.orphan)
+			if(!is_orphan(parent))
 				removed(parent.name, child.name);
 		}
 		private void document_updated(DocumentModel document, Node node, string? prop) {
-			updated(node.name, prop);
+			if(!is_orphan(node))
+				updated(node.name, prop);
 		}
 		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
+			if(!is_orphan(node))
 			if(oldname!=null && newname !=null) {
 				debug("renamed %s to %s", oldname, newname);
 				renamed(oldname, newname);
