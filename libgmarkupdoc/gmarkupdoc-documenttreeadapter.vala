@@ -45,13 +45,13 @@ namespace GMarkup {
 			};
 			this.document.updated += (document, node, prop) => {
 				Gtk.TreeIter iter = get_iterbox(node).iter;
-				this.tree.row_changed(tree.get_path(iter), iter);
 				this.updated(node, prop);
+				this.tree.row_changed(tree.get_path(iter), iter);
 			};
 			this.document.renamed += (document, node, oldname, newname) => {
 				Gtk.TreeIter iter = get_iterbox(node).iter;
-				this.tree.row_changed(tree.get_path(iter), iter);
 				this.renamed(node, oldname, newname);
+				this.tree.row_changed(tree.get_path(iter), iter);
 			};
 			tree.row_changed += (o, p, i) => { row_changed(p, i);};
 			tree.row_deleted += (o, p) => { row_deleted(p);};

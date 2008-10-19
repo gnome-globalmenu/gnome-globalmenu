@@ -12,6 +12,7 @@ namespace GMarkup {
 		}
 		private int pos;
 		private bool first;
+		private weak Node result;
 		private ParseType type;
 		private weak string propname;
 		public static MarkupParser parser_funcs;
@@ -39,8 +40,11 @@ namespace GMarkup {
 						);
 					if((parser.type == ParseType.CHILD) && parser.first) {
 						parser.first = false;
-						parser.current.insert(node, parser.pos);
-					} else
+						if(parser.current != null)
+							parser.current.insert(node, parser.pos);
+						message("ref_count = %u", node.ref_count);
+						parser.result = node;
+					} else if(parser.current != null)
 						parser.current.append(node);
 							
 					parser.current = node;
@@ -110,6 +114,21 @@ namespace GMarkup {
 				return false;
 			}
 			return true;
+		}
+		public Node? parse_tag (string foo) {
+			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
+			type = ParseType.CHILD;
+			current = null;
+			this.pos = -1;
+			this.first = true;
+			this.result = null;
+			try {
+				context.parse(foo, foo.size());
+			} catch(MarkupError e) {
+				warning("%s", e.message);
+				return null;
+			}
+			return result;
 		}
 		public bool parse_child(Node parent, string foo, int pos) {
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);

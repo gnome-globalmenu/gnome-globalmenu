@@ -57,7 +57,10 @@ namespace GMarkup {
 				debug("%s inserted", s);
 				switch(type) {
 					case "tag":
-						parser.parse_child(parent, s, pos);
+						Node tag = parser.parse_tag(s);
+						//message("tag %u", tag.ref_count);
+						parent.insert(tag, pos);
+						//parser.parse_child(parent, s, pos);
 					break;
 					case "text":
 						Node text = (this as DocumentModel).CreateText(s);
@@ -110,8 +113,9 @@ namespace GMarkup {
 			if(new_owner != "" && old_owner == "") {
 				message("new owner of %s", bus);
 				try {
-					string xml = remote.QueryRoot(-1);
-					parser.parse(xml);
+				//	string xml = remote.QueryRoot(-1);
+				//	parser.parse(xml);
+				// no need doing this. we can receive the signals.
 				} catch (GLib.Error e) {
 					warning("%s", e.message);
 				}
