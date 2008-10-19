@@ -5,10 +5,10 @@ $(top_builddir)/libgnomenu/libgnomenu.la \
 $(NULL)
 
 CLASSES = 
-CLASSES += GMarkupDoc_Parser 
-CLASSES += GMarkupDoc_RemoteDocument
-CLASSES += GMarkupDoc_DBusView
-CLASSES += GMarkupDoc_ListView
+CLASSES += GMarkup_DocumentParser 
+CLASSES += GMarkup_RemoteDocument
+CLASSES += GMarkup_DBusView
+CLASSES += GMarkup_ListView
 CLASSES += Gnomenu_Client
 CLASSES += Gnomenu_MenuBar
 

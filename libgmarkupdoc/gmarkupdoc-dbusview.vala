@@ -2,7 +2,8 @@ using GLib;
 using DBus;
 using Gtk;
 
-namespace GMarkupDoc {
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	[DBus (name = "org.gnome.GlobalMenu.Document")]
 	public class DBusView:GLib.Object, View {
 		Connection conn;
@@ -104,7 +105,7 @@ namespace GMarkupDoc {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Document document = new Document();
-			GMarkupDoc.Parser parser = new GMarkupDoc.Parser(document);
+			GMarkup.DocumentParser parser = new GMarkup.DocumentParser(document);
 			DBusView c = new DBusView(document, "/org/gnome/GlobalMenu/Document");
 			ListView l = new ListView(document);
 			c.dbus.RequestName("org.gnome.GlobalMenu.DocumentTest", (uint) 0);

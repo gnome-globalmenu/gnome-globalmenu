@@ -1,6 +1,8 @@
 using GLib;
-namespace GMarkupDoc {
-	public class Parser {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
+	public class DocumentParser {
 		private weak Node current;
 		private DocumentModel document;
 		private enum ParseType {
@@ -13,7 +15,7 @@ namespace GMarkupDoc {
 		private ParseType type;
 		private weak string propname;
 		public static MarkupParser parser_funcs;
-		public Parser(DocumentModel document){
+		public DocumentParser(DocumentModel document){
 			this.document = document;
 			parser_funcs.start_element = StartElement;
 			parser_funcs.end_element = EndElement;
@@ -23,7 +25,7 @@ namespace GMarkupDoc {
 		}
 		[NoArrayLength]
 		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
-			weak Parser parser = (Parser) user_data;
+			weak DocumentParser parser = (DocumentParser) user_data;
 			weak string[] names = attribute_names;
 			weak string[] values = attribute_values;
 			names.length = (int) strv_length(attribute_names);
@@ -68,23 +70,23 @@ namespace GMarkupDoc {
 		}
 		
 		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
-			weak Parser parser = (Parser) user_data;
+			weak DocumentParser parser = (DocumentParser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
 			parser.current = parser.current.parent;
 		}
 		
 		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
-			weak Parser parser = (Parser) user_data;
+			weak DocumentParser parser = (DocumentParser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
 			if(text_len > 0) {
 				string newtext = text.ndup(text_len);
-				GMarkupDoc.Text node = parser.document.CreateText(newtext);
+				GMarkup.Text node = parser.document.CreateText(newtext);
 				parser.current.append(node);
 			}
 		}
 		
 		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
-			weak Parser parser = (Parser) user_data;
+			weak DocumentParser parser = (DocumentParser) user_data;
 			if(parser.type == ParseType.UPDATE) return;
 			if(text_len > 0) {
 				string newtext = passthrough_text.ndup(text_len);
@@ -94,7 +96,7 @@ namespace GMarkupDoc {
 		}
 		
 		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {
-			weak Parser parser = (Parser) user_data;
+			weak DocumentParser parser = (DocumentParser) user_data;
 
 		}
 		public bool parse (string foo) {
@@ -140,7 +142,7 @@ namespace GMarkupDoc {
 		}
 		public static int test (string [] args){
 			DocumentModel document = new Document();
-			Parser parser = new Parser(document);
+			DocumentParser parser = new DocumentParser(document);
 			parser.parse(
 """
 <html><title>title</title>

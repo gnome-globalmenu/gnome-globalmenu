@@ -1,5 +1,7 @@
 using GLib;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public class Document: GLib.Object, DocumentModel {
 		private Root _root;
 		private Root _orphan;

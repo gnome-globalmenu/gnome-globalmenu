@@ -1,7 +1,7 @@
 using GLib;
 using Gtk;
 using Gnomenu;
-using GMarkupDoc;
+using GMarkup;
 namespace GnomenuGtk {
 
 	protected class Singleton {

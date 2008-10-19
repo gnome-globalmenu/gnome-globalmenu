@@ -1,5 +1,7 @@
 using GLib;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public abstract class Node: GLib.Object {
 		private bool disposed;
 		protected int frozen;

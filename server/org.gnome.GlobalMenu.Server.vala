@@ -1,6 +1,6 @@
 using GLib;
 using Gtk;
-using GMarkupDoc;
+using GMarkup;
 using Gnomenu;
 using DBus;
 namespace POSIX {

@@ -1,9 +1,11 @@
 using GLib;
 using DBus;
 using Gtk;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public class RemoteDocument: Document {
-		private Parser parser;
+		private DocumentParser parser;
 		private dynamic DBus.Object remote;
 		private dynamic DBus.Connection conn;
 		public bool invalid {get; set;}
@@ -27,7 +29,7 @@ namespace GMarkupDoc {
 			remote.Removed += remote_removed;
 			remote.Updated += remote_updated;
 			remote.Renamed += remote_renamed;
-			parser = new Parser(this);
+			parser = new DocumentParser(this);
 			try {
 				string xml = remote.QueryRoot(-1);
 				parser.parse(xml);

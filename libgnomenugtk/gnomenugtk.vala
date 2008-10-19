@@ -3,7 +3,7 @@ using Gdk;
 using Gtk;
 using GtkAQD;
 using Gnomenu;
-using GMarkupDoc;
+using GMarkup;
 using DBus;
 
 namespace GnomenuGtk {
@@ -50,7 +50,7 @@ namespace GnomenuGtk {
 		}
 		if(!verbose) {
 			LogFunc handler = (domain, level, message) => { };
-			Log.set_handler ("GMarkupDoc", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_DEBUG, handler);
 		}

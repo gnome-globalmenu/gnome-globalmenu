@@ -1,6 +1,8 @@
 using GLib;
 using Gtk;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public class DocumentTreeAdapter: GLib.Object, DocumentModel, Gtk.TreeModel {
 		private Gtk.TreeStore tree;
 		private DocumentModel _document;

@@ -1,5 +1,6 @@
 using GLib;
-using Gtk; using GMarkupDoc;
+using Gtk; 
+using GMarkup;
 using Gnomenu;
 
 
@@ -26,13 +27,13 @@ public class Navigator :Gtk.Window{
 		vbox.pack_start_defaults(viewer);
 		
 		server_viewer.activated += (server_viewer, node, detail)=> {
-			string bus = (node as GMarkupDoc.Tag).get("bus");
+			string bus = (node as GMarkup.Tag).get("bus");
 			print("attatch to bus %s", bus);
 			RemoteDocument doc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
 			viewer.document = doc;
 		};
 		viewer.activated += (viewer, node, detail) => {
-			if((node as GMarkupDoc.Tag).tag == "menubar") {
+			if((node as GMarkup.Tag).tag == "menubar") {
 				Section section = new Section(viewer.document, node);
 				viewer2.document = section;
 			}

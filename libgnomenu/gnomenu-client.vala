@@ -2,7 +2,7 @@ using GLib;
 using Gdk;
 using Gtk;
 using DBus;
-using GMarkupDoc;
+using GMarkup;
 namespace Gnomenu {
 	[DBus (name = "org.gnome.GlobalMenu.Client")]
 	public class Client:DBusView {
@@ -32,17 +32,17 @@ namespace Gnomenu {
 			} while(r != DBus.RequestNameReply.PRIMARY_OWNER);
 		}
 		public string QueryXID(string xid) {
-			weak GMarkupDoc.Node node = find_window_by_xid(xid);
+			weak GMarkup.Node node = find_window_by_xid(xid);
 			if(node != null) {
 				return node.name;
 			}
 			return "";
 		}
 
-		private weak GMarkupDoc.Node? find_window_by_xid(string xid) {
-			foreach (weak GMarkupDoc.Node node in document.root.children) {
-				if(node is GMarkupDoc.Tag) {
-					weak GMarkupDoc.Tag tag = node as GMarkupDoc.Tag;
+		private weak GMarkup.Node? find_window_by_xid(string xid) {
+			foreach (weak GMarkup.Node node in document.root.children) {
+				if(node is GMarkup.Tag) {
+					weak GMarkup.Tag tag = node as GMarkup.Tag;
 					if(tag.get("xid") == xid) {
 						return tag;
 					}
@@ -51,8 +51,8 @@ namespace Gnomenu {
 			return null;
 		}
 		private void add_widget(string? parent, string name, int pos = -1) {
-			weak GMarkupDoc.Node node = document.dict.lookup(name);
-			weak GMarkupDoc.Node parent_node;
+			weak GMarkup.Node node = document.dict.lookup(name);
+			weak GMarkup.Node parent_node;
 			if(parent == null) {
 				parent_node = document.root;
 			}
@@ -62,12 +62,12 @@ namespace Gnomenu {
 			if(node == null) {
 				string[] names = {"name"};
 				string[] values = {name};
-				GMarkupDoc.Tag node = document.CreateTagWithAttributes("widget", names, values);
+				GMarkup.Tag node = document.CreateTagWithAttributes("widget", names, values);
 				parent_node.insert(node, pos);
 			}
 		}
 		private void remove_widget(string name) {
-			weak GMarkupDoc.Node node = document.dict.lookup(name);
+			weak GMarkup.Node node = document.dict.lookup(name);
 			if(node != null) {
 				assert(node.parent != null);
 				node.parent.remove(node);
@@ -76,7 +76,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void register_window(string name, string xid) {
-			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
+			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -88,7 +88,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void unregister_window(string name) {
-			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
+			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -102,7 +102,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void set_default(string name) {
-			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
+			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -114,8 +114,8 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		protected void set_transient_for(string name, string parent_name) {
-			weak GMarkupDoc.Tag node = document.dict.lookup(name) as GMarkupDoc.Tag;
-			weak GMarkupDoc.Tag parent_node = document.dict.lookup(parent_name) as GMarkupDoc.Tag;
+			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
+			weak GMarkup.Tag parent_node = document.dict.lookup(parent_name) as GMarkup.Tag;
 			if(node != null && parent_node != null) {
 				weak string xid = node.get("xid");
 				node.set("transient-for", parent_node.name);

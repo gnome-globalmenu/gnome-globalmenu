@@ -1,6 +1,8 @@
 using GLib;
 using GLibCompat;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public class Section: GLib.Object, DocumentModel {
 		private DocumentModel _document;
 		public weak DocumentModel document  {
@@ -25,7 +27,7 @@ namespace GMarkupDoc {
 			}
 		}
 		public weak Node orphan { get {return document.orphan;} }
-		public Section(DocumentModel document, GMarkupDoc.Node root) {
+		public Section(DocumentModel document, GMarkup.Node root) {
 			this.document = document;
 			this.fake_root = root;
 		}

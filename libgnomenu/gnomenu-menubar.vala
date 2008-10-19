@@ -2,7 +2,7 @@ using GLib;
 using Gtk;
 using GtkCompat;
 using Gnomenu;
-using GMarkupDoc;
+using GMarkup;
 using DBus;
 namespace Gnomenu {
 	public class MenuBar : Gtk.Notebook {
@@ -21,18 +21,18 @@ namespace Gnomenu {
 			menu_hash.remove(xid);
 		}
 		private weak string? find_default() {
-			foreach(weak GMarkupDoc.Node node in serverdoc.root.children) {
-				if(node is GMarkupDoc.Tag)
-				if((node as GMarkupDoc.Tag).get("default") == "true") {
+			foreach(weak GMarkup.Node node in serverdoc.root.children) {
+				if(node is GMarkup.Tag)
+				if((node as GMarkup.Tag).get("default") == "true") {
 					debug("Default is found");
-					return (node as GMarkupDoc.Tag).name;
+					return (node as GMarkup.Tag).name;
 				}
 			}
 			return null;
 		}
 		public void switch(string xid) {
 			bool need_new_menu_view = false;
-			weak GMarkupDoc.Tag node = serverdoc.dict.lookup(xid) as GMarkupDoc.Tag;
+			weak GMarkup.Tag node = serverdoc.dict.lookup(xid) as GMarkup.Tag;
 			if(node == null) {
 				this.remove_page_by_xid(xid);
 				bus_hash.remove(xid);
@@ -66,15 +66,15 @@ namespace Gnomenu {
 				dynamic DBus.Object client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
 				debug("widget_name %s", widget_name);
-				node = clientdoc.dict.lookup(widget_name) as GMarkupDoc.Tag;
+				node = clientdoc.dict.lookup(widget_name) as GMarkup.Tag;
 				if(node != null) {
 					MenuView view = new MenuView(null);
 					view.visible = true;
-					foreach(weak GMarkupDoc.Node c in node.children) {
-						if(!(c is GMarkupDoc.Tag)) continue;
-						if((c as GMarkupDoc.Tag).tag == "menubar") {
+					foreach(weak GMarkup.Node c in node.children) {
+						if(!(c is GMarkup.Tag)) continue;
+						if((c as GMarkup.Tag).tag == "menubar") {
 							debug("menubar found");
-							GMarkupDoc.Section section = new GMarkupDoc.Section(clientdoc, c);
+							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
 							view.document = section;
 						}
 					}

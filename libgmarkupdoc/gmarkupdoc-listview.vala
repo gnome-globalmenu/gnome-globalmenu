@@ -2,7 +2,8 @@ using GLib;
 using Gtk;
 using GtkCompat;
 
-namespace GMarkupDoc {
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	private const string INTERFACE = """
 			<interface>
 				<object class = "GtkVPaned" id = "box">
@@ -43,7 +44,7 @@ namespace GMarkupDoc {
 	public class ListView : GtkCompat.Container, View {
 		private Gtk.TreeView treeview;
 		private DocumentModel _document;
-		private Parser parser;
+		private DocumentParser parser;
 		private DocumentTreeAdapter adapter;
 		private Gtk.Widget box;
 		private Gtk.Builder builder;
@@ -57,7 +58,7 @@ namespace GMarkupDoc {
 				_document = value;
 				if(document != null) {
 					adapter = new DocumentTreeAdapter(document);
-					parser = new Parser(document);
+					parser = new DocumentParser(document);
 					document.destroyed += document_destroyed;
 				} else {
 					adapter = null;
@@ -184,7 +185,7 @@ namespace GMarkupDoc {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
 			Document document = new Document();
-			GMarkupDoc.Parser parser = new GMarkupDoc.Parser(document);
+			GMarkup.DocumentParser parser = new GMarkup.DocumentParser(document);
 			ListView c = new ListView(document);
 			parser.parse(
 """

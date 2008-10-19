@@ -1,12 +1,12 @@
 using GLib;
 using Gnomenu;
-using GMarkupDoc;
+using GMarkup;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class Document : GMarkupDoc.Document, GMarkupDoc.DocumentModel {
+	protected class Document : GMarkup.Document, GMarkup.DocumentModel {
 		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		public class Widget:GMarkupDoc.Tag {
+		public class Widget:GMarkup.Tag {
 			private weak Gtk.Widget _gtk;
 			public Gtk.Widget gtk {
 				get {return _gtk;}
@@ -204,7 +204,7 @@ namespace GnomenuGtk {
 				}
 			};
 		}
-		public GMarkupDoc.Tag CreateTag(string tag) {
+		public GMarkup.Tag CreateTag(string tag) {
 			return new Widget(this);
 		}
 		public weak Document.Widget wrap(Gtk.Widget gtk) {

@@ -1,6 +1,8 @@
 using GLib;
 using GLibCompat;
-namespace GMarkupDoc {
+
+[CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
+namespace GMarkup {
 	public interface DocumentModel: GLib.Object {
 		private static StringChunk strings = null;
 		private static uint unique;

@@ -11,10 +11,11 @@ int main(){
 			continue;
 		}
 		if(isupper(valaname[i])) {
-			if(i >0 
+			if((i >0 
 			&& valaname[i-1] != '.' 
 			&& valaname[i-1] != '_' 
-			&& !isupper(valaname[i-1])) {
+			&& !isupper(valaname[i-1])) ||
+			i == 1 && valaname[0] == 'G') {
 				lowercname[j++] = '_';
 			} 
 		}
