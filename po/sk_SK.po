@@ -1,0 +1,109 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-globalmenu-0.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-03-14 01:34-0400\n"
+"PO-Revision-Date: 2008-09-11 16:50+0100\n"
+"Last-Translator: Matej Krajčovič <elbarto512@gmail.com>\n"
+"Language-Team: sk-SK <elbarto512@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Slovak\n"
+"X-Poedit-Country: SLOVAKIA\n"
+
+#: ../servers/main.c:62
+msgid "Show fancy control buttons for menu bars"
+msgstr "Zobraz vzorové kontrolné tlačidlá pre menu"
+
+#: ../servers/main.c:63
+msgid "No Stick to the workspace"
+msgstr "Neprilepiť na pracovnú plochu"
+
+#: ../servers/main.c:64
+msgid "No Always on top"
+msgstr "Nezapnúť \"Vždy navrchu\""
+
+#: ../servers/application.c:455
+msgid "translator_credits"
+msgstr "Matej Krajčovič"
+
+#: ../servers/application.c:462
+msgid "GNOME panel applet for Global Menu"
+msgstr "GNOME applet pre Global Menu"
+
+#.
+#. vim:ts=4:sw=4
+#.
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:1
+msgid "Global Menu Applet"
+msgstr "Global Menu applet"
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:2
+msgid "Global Menu applet Factory"
+msgstr "Global Menu applet továrňa"
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:3
+msgid "Global Menu applet factory"
+msgstr "Global Menu applet továrňa"
+
+#: ../servers/GNOME_GlobalMenuApplet.server.in.in.h:4
+msgid "Global Menu applet for GNOME"
+msgstr "Zásuvný modul Global Menu"
+
+#: ../servers/xfce-globalmenu-plugin.desktop.in.in.h:1
+msgid "Global Menu Plugin"
+msgstr "Global Menu Plugin"
+
+#: ../servers/xfce-globalmenu-plugin.desktop.in.in.h:2
+msgid "Placeholder for GTK+ application menu in XFCE Panel"
+msgstr "Miesto pre menu GTK+ aplikácií v XFCE panely"
+
+#: ../servers/application-gnome.c:138
+msgid "_About"
+msgstr "O programe"
+
+#: ../servers/application-gnome.c:139
+msgid "_Preferences"
+msgstr "Predvoľby"
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:1
+msgid "Show/Hide the icon of the active window"
+msgstr "Zobraziť/Skryť ikonu aktívneho okna"
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:2
+msgid "Show/Hide the title of the active application"
+msgstr "Zobraziť/Skryť názov aktívnej aplikácie"
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:3
+msgid "The Maximum length of title of the active application"
+msgstr "Maximálna dĺžka názvu aktívneho okna"
+
+#: ../servers/gnome-globalmenu-applet.schemas.in.h:4
+msgid "The font used to display the title of the active application"
+msgstr "Písmo použité na zobrazenie názvu aktívneho okna"
+
+#: ../servers/application.glade.h:1
+msgid "<b>Appearence</b>"
+msgstr "<b>Vzhľad</b>"
+
+#: ../servers/application.glade.h:2
+msgid "Display the _icon of the current window."
+msgstr "Zobraz ikonu aktuálneho okna."
+
+#: ../servers/application.glade.h:3
+msgid "Display the _title of the current application."
+msgstr "Zobraz názov aktuálnej aplikácie."
+
+#: ../servers/application.glade.h:4
+msgid "Maximum _width"
+msgstr "Maximálna šírka"
+
+#: ../servers/application.glade.h:5
+msgid "Preference"
+msgstr "Predvoľby"
+
+#: ../servers/application.glade.h:6
+msgid "_Font"
+msgstr "Písmo"
+
