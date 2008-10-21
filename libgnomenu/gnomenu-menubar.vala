@@ -8,12 +8,12 @@ namespace Gnomenu {
 	public class MenuBar : Gtk.Notebook {
 		private RemoteDocument serverdoc;
 		private DBus.Connection conn;
-		private HashTable<string, MenuView> menu_hash;
+		private HashTable<string, Gtk.Widget> menu_hash;
 		private HashTable<string, string> bus_hash;
 		public MenuBar() {
 		}
 		private void remove_page_by_xid(string xid) {
-			weak MenuView view = menu_hash.lookup(xid);
+			weak Gtk.Widget view = menu_hash.lookup(xid);
 			int num = (this as GtkCompat.Notebook).page_num(view);
 			if(num >= 0) {
 				this.remove_page(num);
@@ -68,20 +68,28 @@ namespace Gnomenu {
 				debug("widget_name %s", widget_name);
 				node = clientdoc.dict.lookup(widget_name) as GMarkup.Tag;
 				if(node != null) {
-					MenuView view = new MenuView(null);
-					view.visible = true;
+					Gtk.Box box = new Gtk.VBox(false, 0);
+					box.visible = true;
+					box.style_set += (box, style) => {
+						foreach (weak Gtk.Widget child in box.get_children()) {
+							child.set_style(style);
+						}
+					};
 					foreach(weak GMarkup.Node c in node.children) {
 						if(!(c is GMarkup.Tag)) continue;
 						if((c as GMarkup.Tag).tag == "menubar") {
+							MenuView view = new MenuView(null);
+							view.visible = true;
 							debug("menubar found");
 							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
 							view.document = section;
+							box.pack_start(view, true, true, 0);
 						}
 					}
 					this.remove_page_by_xid(xid);
-					view.set_style(this.style);
-					this.append_page(view, null);
-					menu_hash.insert(xid, view);
+					box.set_style(this.style);
+					this.append_page(box, null);
+					menu_hash.insert(xid, box);
 				}
 			}
 			int num = (this as GtkCompat.Notebook).page_num(menu_hash.lookup(xid));
@@ -91,7 +99,7 @@ namespace Gnomenu {
 		construct {
 			serverdoc = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 			conn = Bus.get(DBus.BusType.SESSION);
-			menu_hash = new HashTable<string, MenuView>.full(str_hash, str_equal, g_free, g_object_unref);
+			menu_hash = new HashTable<string, Gtk.Widget>.full(str_hash, str_equal, g_free, g_object_unref);
 			bus_hash = new HashTable<string, string>.full(str_hash, str_equal, g_free, g_free);
 			Gtk.EventBox dummy = new Gtk.EventBox();
 			dummy.add(new Gtk.Label("no menu"));
@@ -126,9 +134,9 @@ namespace Gnomenu {
 				menubar.switch(entry.get_text());
 			};
 			window.add(box);
-			box.pack_start_defaults(entry);
-			box.pack_start_defaults(button);
-			box.pack_start_defaults(menubar);
+			box.pack_start(entry, false, true, 0);
+			box.pack_start(button, false, true, 0);
+			box.pack_start(menubar, true, true, 0);
 			window.show_all();
 			loop.run();
 			return 0;
