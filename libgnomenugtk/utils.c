@@ -9,12 +9,14 @@ typedef void (*GetPropertyFunc)(GObject * object, guint prop_id, const GValue * 
 typedef void (*MapFunc) (GtkWidget    *widget);
 typedef void (*SizeRequestFunc) (GtkWidget      *widget, GtkRequisition *requisition);
 typedef void (*RealInsertFunc) (GtkMenuShell *menu_shell, GtkWidget    *child, gint          position);
+typedef gboolean (*CanActivateAccel) (GtkWidget *widget, guint      signal_id);
 
 static SetPropertyFunc old_set = NULL;
 static GetPropertyFunc old_get = NULL;
 static MapFunc old_map = NULL;
 static RealInsertFunc old_real_insert = NULL;
 static SizeRequestFunc old_size_request = NULL;
+static CanActivateAccel old_can_activate_accel = NULL;
 
 static void _set_property      (GObject             *object,
 					    guint                prop_id,
@@ -31,7 +33,10 @@ static void
 _real_insert (GtkMenuShell *menu_shell,
 			    GtkWidget    *child,
 			    gint          position);
+static gboolean _can_activate_accel (GtkWidget *widget,
+		                                    guint      signal_id);
 
+static GtkMenuShellClass * gtk_menu_bar_parent_class = NULL;
 
 static guint SignalIDInsert = 0;
 static guint SignalIDLabelSet = 0;
@@ -39,6 +44,7 @@ static guint SignalIDLabelSet = 0;
 void _patch_menu_bar() {
 	GObjectClass * klass =  g_type_class_ref(GTK_TYPE_MENU_BAR);
 	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
+	gtk_menu_bar_parent_class = g_type_class_peek_parent(klass);
 	g_object_class_install_property (klass,
 				   PROP_LOCAL,
 				   g_param_spec_boolean ("local",
@@ -50,10 +56,12 @@ void _patch_menu_bar() {
 	old_set = klass->set_property;	
 	old_map = widget_klass->map;
 	old_size_request = widget_klass->size_request;
+	old_can_activate_accel = widget_klass->can_activate_accel;
 	klass->set_property = _set_property;
 	klass->get_property = _get_property;
 	widget_klass->map = _map;
 	widget_klass->size_request = _size_request;
+	widget_klass->can_activate_accel = _can_activate_accel;
 }
 void _patch_menu_shell() {
 	GObjectClass * klass =  g_type_class_ref(GTK_TYPE_MENU_SHELL);
@@ -196,11 +204,13 @@ _get_property (GObject    *object,
       break;
     }
 }
+
 static void
 _map (GtkWidget    *widget) {
   
   if(!g_object_get_data(widget, "is-local")) {
 	  GTK_WIDGET_SET_FLAGS (widget, GTK_MAPPED);
+	  (* GTK_WIDGET_CLASS (gtk_menu_bar_parent_class)->map) (widget);
 	  if (!GTK_WIDGET_NO_WINDOW (widget))
 		gdk_window_hide (widget->window);
 	  return;
@@ -225,4 +235,9 @@ _real_insert (GtkMenuShell *menu_shell,
 {
 	old_real_insert(menu_shell, child, position);
 	g_signal_emit(menu_shell, SignalIDInsert, 0, child, position);
+}
+static gboolean _can_activate_accel (GtkWidget *widget,
+		                                    guint      signal_id)
+{
+	return GTK_WIDGET_IS_SENSITIVE (widget);
 }
