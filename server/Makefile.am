@@ -42,6 +42,7 @@ $(service_DATA): $(service_in_files) Makefile
 	sed -e "s|@LOCATION@|$(bindir)|" $< > $@
 
 org_gnome_GlobalMenu_Server_SOURCES = \
+	utils.c \
 	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.c) \
 	$(org_gnome_GlobalMenu_Server_VALASOURCES:.vala=.h) \
 	$(NULL)

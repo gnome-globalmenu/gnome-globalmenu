@@ -5,7 +5,7 @@ using Gnomenu;
 using DBus;
 namespace POSIX {
 const int SIGQUIT = 3;
-[CCode (cname = "kill")]
+[CCode (cname = "_kill")]
 public extern int kill(uint pid, int sig);
 }
 public class Application {
