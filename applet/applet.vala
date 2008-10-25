@@ -34,10 +34,11 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
-			Gtk.Style style = (this.menubar.get_style() as GtkCompat.Style).copy();
+			Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
 			switch(bgtype){
 				case Panel.AppletBackgroundType.NO_BACKGROUND:
-					this.menubar.set_style(null);
+					Gtk.Style def_style = Gtk.rc_get_style(this.menubar);
+					this.menubar.set_style(def_style);
 					this.menubar.queue_draw();
 					return;
 				break;
@@ -67,7 +68,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			"0.6", args, #context);
 		if(!verbose) {
 			LogFunc handler = (domain, level, message) => { };
-			Log.set_handler ("GMarkupDoc", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
 		}
 		Gtk.rc_parse_string("""

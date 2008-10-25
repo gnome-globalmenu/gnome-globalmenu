@@ -72,7 +72,7 @@ namespace Gnomenu {
 					box.visible = true;
 					(box as GtkCompat.Widget).style_set += (box, style) => {
 						foreach (weak Gtk.Widget child in (box as Gtk.Container).get_children()) {
-							child.set_style(style);
+							child.set_style((box as Gtk.Widget).style);
 						}
 					};
 					foreach(weak GMarkup.Node c in node.children) {
