@@ -12,16 +12,16 @@ namespace GnomenuGtk {
 				get {return _gtk;}
 				set {
 					if(gtk != null) 
-						gtk.weak_unref(weak_ref_notify, this);
+						gtk.weak_unref((WeakNotify)weak_ref_notify, this);
 					_gtk = value;
-					gtk.weak_ref(weak_ref_notify, this);
+					gtk.weak_ref((WeakNotify)weak_ref_notify, this);
 					connect();
 				}
 			}
 			private Widget(Document document) {
 				this.document = document;
 			}
-			private static void weak_ref_notify(void* data, GLib.Object object){
+			private static void weak_ref_notify(void* data, void* object){
 				Widget _this = (Widget) data;
 				if(_this.parent != _this.document.orphan) {
 					_this.parent.remove(_this);
@@ -212,7 +212,7 @@ namespace GnomenuGtk {
 		private static weak string get_native_name(GLib.Object? w) {
 			return (string) ((GLibCompat.constpointer)w).get_data("native-name");
 		}
-		private static void set_native_name(GLib.Object? w, string? name) {
+		private static void set_native_name(void* w, string? name) {
 			((GLibCompat.constpointer)w).set_data("native-name", (void*) name);
 		}
 		private static weak Gtk.Widget? find_menu_item_label(Gtk.Widget widget) {
