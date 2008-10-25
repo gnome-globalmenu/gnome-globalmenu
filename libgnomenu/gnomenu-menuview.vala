@@ -264,15 +264,24 @@ namespace Gnomenu {
 							break;
 						}
 						string accel_text = node.get("accel");
-						if(label_text == null) label_text = "";
-						if(accel_text != null) label_text = label_text + " - "+ accel_text;
-
+						StringBuilder builder = new StringBuilder("");
+						if(label_text != null) {
+							for(int i=0; label_text[i]!=0; i++) {
+								if(label_text[i]!='_') {
+									builder.append_unichar(label_text[i]);
+								}
+							}
+						}
+						if(accel_text != null) {
+							builder.append(" - "); 
+							builder.append(accel_text);
+						}
 						if(!(label is Gtk.Label)) {
 							(gtk as Gtk.Bin).remove(label);
-							label = new Gtk.Label(label_text);
+							label = new Gtk.Label(builder.str);
 							(gtk as Gtk.Bin).add(label);
 						} else 
-							(label as Gtk.Label).label = label_text;
+							(label as Gtk.Label).label = builder.str;
 					break;
 					case "visible":
 					case "sensitive":

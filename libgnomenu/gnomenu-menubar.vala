@@ -70,8 +70,8 @@ namespace Gnomenu {
 				if(node != null) {
 					Gtk.Box box = new Gtk.VBox(false, 0);
 					box.visible = true;
-					box.style_set += (box, style) => {
-						foreach (weak Gtk.Widget child in box.get_children()) {
+					(box as GtkCompat.Widget).style_set += (box, style) => {
+						foreach (weak Gtk.Widget child in (box as Gtk.Container).get_children()) {
 							child.set_style(style);
 						}
 					};
