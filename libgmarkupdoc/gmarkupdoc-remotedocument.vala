@@ -13,8 +13,36 @@ namespace GMarkup {
 
 		public string path {get; construct;}
 		public string bus {get; construct;}
-		
-		public RemoteDocument(string bus, string path) {
+		private static HashTable<weak DocumentAddress, weak RemoteDocument> documents;
+		private class DocumentAddress : GLib.Object {
+			public string bus;
+			public string path;
+			public static bool equal(DocumentAddress addr1, DocumentAddress addr2) {
+				return addr1.bus == addr2.bus && addr1.path == addr2.path;
+			}
+			public static uint hash(DocumentAddress addr) {
+				return str_hash(addr.bus + addr.path);
+			}
+		}
+		public static RemoteDocument connect(string bus, string path) {
+			DocumentAddress addr = new DocumentAddress();
+			addr.bus = bus;
+			addr.path = path;
+			if(documents == null) documents = new HashTable<weak DocumentAddress, weak RemoteDocument>.full((GLib.HashFunc)DocumentAddress.hash, (GLib.EqualFunc) DocumentAddress.equal, g_object_unref, g_object_unref);
+			RemoteDocument document = documents.lookup(addr);
+			if(document != null)
+				return document;
+			document = new RemoteDocument(bus, path);
+			documents.insert(addr.ref() as DocumentAddress, document.ref() as RemoteDocument);
+			return document;
+		}	
+		private override void dispose() {
+			DocumentAddress addr = new DocumentAddress();
+			addr.bus = bus;
+			addr.path = path;
+			documents.remove(addr);
+		}
+		private RemoteDocument(string bus, string path) {
 			this.path = path;
 			this.bus = bus;
 		}
@@ -102,13 +130,6 @@ namespace GMarkup {
 			if(bus != this.bus) return;
 			if(new_owner != "" && old_owner == "") {
 				message("new owner of %s", bus);
-				try {
-				//	string xml = remote.QueryRoot(-1);
-				//	parser.parse(xml);
-				// no need doing this. we can receive the signals.
-				} catch (GLib.Error e) {
-					warning("%s", e.message);
-				}
 				invalid = false;
 				return;
 			}
@@ -127,7 +148,7 @@ namespace GMarkup {
 		public static int test(string[] args) {
 			Gtk.init(ref args);
 			MainLoop loop = new MainLoop(null, false);
-			RemoteDocument document = new RemoteDocument("org.gnome.GlobalMenu.DocumentTest", "/org/gnome/GlobalMenu/Document");
+			RemoteDocument document = RemoteDocument.connect("org.gnome.GlobalMenu.DocumentTest", "/org/gnome/GlobalMenu/Document");
 			ListView viewer = new ListView(document);
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 			viewer.activated += (viewer, node) => {
