@@ -84,10 +84,15 @@ namespace Gnomenu {
 							debug("menubar found");
 							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
 							view.document = section;
-							view.set_data_full("xid", xid.ndup(xid.size()), g_free);
+							view.set_data("xid", view.document.S(xid));
 							view.activated += (view, node) => {
 								weak string xid = (string) view.get_data("xid");
-								this.client.Activate(xid, node.name);
+								message("shit %s", xid);
+								try {
+									this.client.Activate(xid, node.name);
+								} catch (GLib.Error e){
+									warning("%s", e.message);
+								}
 							};
 							box.pack_start(view, true, true, 0);
 						}

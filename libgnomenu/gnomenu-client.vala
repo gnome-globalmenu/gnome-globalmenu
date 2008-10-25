@@ -12,7 +12,7 @@ namespace Gnomenu {
 		dynamic DBus.Object server;
 		public Client(DocumentModel document) {
 			this.document = document;
-			this.path = "/org/gnome/GlobalMenu/Application";
+			path = "/org/gnome/GlobalMenu/Application";
 		}
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
