@@ -79,7 +79,7 @@ namespace GnomenuGtk {
 		patch_menu_item();
 		patch_menu_shell();
 		patch_menu_bar();
-		message("GlobalMenu is enabled");
+		debug("GlobalMenu is enabled");
 	}
 	private weak Client client() {
 		return Singleton.instance().client;
