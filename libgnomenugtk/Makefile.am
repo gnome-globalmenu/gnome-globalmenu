@@ -26,7 +26,7 @@ BUILT_SOURCES = \
 
 libgnomenugtk_la_VALASOURCES = \
 	gnomenugtk.vala \
-	gnomenugtk-singleton.vala \
+	gnomenugtk-client.vala \
 	gnomenugtk-document.vala  \
 	$(NULL)
 
