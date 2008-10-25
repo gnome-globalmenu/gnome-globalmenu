@@ -8,6 +8,8 @@ namespace Gnomenu {
 		private Gtk.MenuBar menubar;
 		private Gtk.Widget arrow_button;
 		public signal void activated(GMarkup.Node node);
+		private HashTable<weak GMarkup.Node, weak Gtk.Widget> dict_node_widget;
+
 		public weak DocumentModel? document {
 			get {
 				return _document;
@@ -25,7 +27,7 @@ namespace Gnomenu {
 					document.updated += document_updated;
 					document.removed += document_removed;
 					document.destroyed += document_destroyed;
-					document.root.set_data("gtk", this.menubar);
+					set_node_widget(document.root, this.menubar);
 					foreach(weak GMarkup.Node child in document.root.children) {
 						if(child is GMarkup.Tag) {
 							this.menubar.append(create_widget(child as GMarkup.Tag, typeof(Gtk.MenuItem)) as Gtk.MenuItem);
@@ -34,6 +36,17 @@ namespace Gnomenu {
 				}
 			}
 		}
+		private void set_node_widget(GMarkup.Node node, Gtk.Widget? widget) {
+			if(widget != null) {
+				dict_node_widget.insert(node, widget.ref() as Gtk.Widget);	
+			} else {
+				dict_node_widget.remove(node);
+			}
+		}
+		private weak Gtk.Widget? get_node_widget(GMarkup.Node node) {
+			return dict_node_widget.lookup(node);	
+		}
+
 		private void document_destroyed(DocumentModel document) {
 			this.document = null;
 			debug("view releases the document");
@@ -41,6 +54,8 @@ namespace Gnomenu {
 		public MenuView() { }
 		private Gdk.EventExpose __tmp__event;
 		construct {
+			this.dict_node_widget = new HashTable<weak GMarkup.Node, weak Gtk.Widget>.full(direct_hash, direct_equal, null, g_object_unref);
+
 			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
 			this.menubar = new Gtk.MenuBar();
 			this.menubar.visible = true;
@@ -105,7 +120,7 @@ namespace Gnomenu {
 			this.menubar.propagate_expose(widget, __tmp__event);
 		}
 		private weak Gtk.Widget create_widget(GMarkup.Tag node, GLib.Type default_type) {
-			weak Gtk.Widget _gtk = (Gtk.Widget) node.get_data("gtk");
+			weak Gtk.Widget _gtk = get_node_widget(node);
 			//debug("creating node %s", node.name);
 			if(_gtk != null) return _gtk;
 			switch(node.tag) {
@@ -117,7 +132,7 @@ namespace Gnomenu {
 						}
 					}
 					gtk.set_data("node", node);
-					node.set_data_full("gtk", gtk.ref(), g_object_unref);
+					set_node_widget(node, gtk);
 				break;
 				case "item":
 				case "check":
@@ -164,20 +179,20 @@ namespace Gnomenu {
 						}
 					}
 					gtk.set_data("node", node);
-					node.set_data_full("gtk", gtk.ref(), g_object_unref);
+					set_node_widget(node, gtk);
 				break;
 				default:
 					warning("skipping tag %s", node.tag);
 					Gtk.Widget gtk = new Gtk.Widget(default_type);
 					gtk.visible = true;
 					gtk.set_data("node", node);
-					node.set_data_full("gtk", gtk.ref(), g_object_unref);
+					set_node_widget(node, gtk);
 				break;
 			}
-			weak Gtk.Widget rt = (Gtk.Widget) (node.get_data("gtk"));
+			weak Gtk.Widget rt = get_node_widget(node);
 			rt.destroy += (widget) => {
 				GMarkup.Tag node = (GMarkup.Tag) widget.get_data("node");
-				node.set_data("gtk", null);
+				set_node_widget(node, null);
 			};
 			return rt;
 		}
@@ -199,14 +214,14 @@ namespace Gnomenu {
 			if(parent != null && node != null) {
 				switch(parent.tag) {
 					case "menu":
-						Gtk.MenuShell pgtk = (Gtk.MenuShell) p.get_data("gtk");
+						Gtk.MenuShell pgtk = (Gtk.MenuShell) get_node_widget(p);
 						pgtk.insert(create_widget(node, typeof(Gtk.MenuItem)) as Gtk.MenuItem, pos);
 					break;
 					case "item":
 					case "check":
 					case "imageitem":
 					case "tearoff":
-						Gtk.MenuItem pgtk = (Gtk.MenuItem) p.get_data("gtk");
+						Gtk.MenuItem pgtk = (Gtk.MenuItem) get_node_widget(p);
 						pgtk.submenu = create_widget(node, typeof(Gtk.Menu));
 					break;
 				}
@@ -216,8 +231,8 @@ namespace Gnomenu {
 			if(!(node is GMarkup.Tag)) return;
 			debug("removed %s from %s", node.name, parent.name);
 			if(parent != null && node != null) {
-				weak Gtk.Widget pgtk = (Gtk.Widget) parent.get_data("gtk");
-				weak Gtk.Widget gtk = (Gtk.Widget)node.get_data("gtk");
+				weak Gtk.Widget pgtk = get_node_widget(parent);
+				weak Gtk.Widget gtk = get_node_widget(node);
 				if(gtk == null) return;
 				if((pgtk is Gtk.MenuShell) && (gtk is Gtk.MenuItem)) {
 					debug("removing from menushell");
@@ -230,10 +245,10 @@ namespace Gnomenu {
 				gtk.destroy();
 			}
 		}
-		private void menu_item_activated (Gtk.MenuItem o) {
-			weak GMarkup.Tag widget = (GMarkup.Tag) o.get_data("node");
-			if(widget != null) {
-				this.activated(widget);
+		private void menu_item_activated (Gtk.MenuItem gtk) {
+			weak GMarkup.Tag node = (GMarkup.Tag) gtk.get_data("node");
+			if(node != null) {
+				this.activated(node);
 			}
 		}
 		private void update_properties(Gtk.Widget gtk, GMarkup.Tag node, string[] props) {
@@ -324,7 +339,7 @@ namespace Gnomenu {
 					case "check":
 					case "imageitem":
 					case "tearoff":
-						Gtk.MenuItem gtk = (Gtk.MenuItem) node.get_data("gtk");
+						Gtk.MenuItem gtk = (Gtk.MenuItem) get_node_widget(node);
 						update_property(gtk, node, prop);
 					break;
 				}
