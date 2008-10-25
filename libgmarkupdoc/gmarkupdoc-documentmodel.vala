@@ -8,7 +8,7 @@ namespace GMarkup {
 		private static uint unique;
 		public abstract weak Node root {get;}
 		public abstract weak Node orphan {get;}
-		public abstract weak HashTable<weak string, Node> dict {get;}
+		public abstract weak HashTable<weak string, weak Node> dict {get;}
 		public abstract weak string name_attr {get;}
 		public virtual Text CreateText(string text) {
 			Text rt = new Text(this, text);

@@ -29,7 +29,7 @@ namespace GMarkup {
 					document.dict.remove(name);
 				assert(value != null);
 				_name = document.S(value);
-				document.dict.insert(name, this); /*weird! vala automatically ref it!*/
+				document.dict.insert(name, this.ref() as GMarkup.Node);
 				this.unref();
 				debug("name changed from %s to %s", oldname, name);
 				document.renamed(this, oldname, name);
