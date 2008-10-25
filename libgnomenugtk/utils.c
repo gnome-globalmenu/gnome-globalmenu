@@ -104,14 +104,11 @@ gboolean gdk_window_get_is_desktop (GdkWindow * window) {
 			    &ret_data)) {
 		if(*ret_data == atom) {
 			XFree(ret_data);
-			g_warning("a desktop window");
 			return TRUE;
 		}
 		XFree(ret_data);
-		g_warning("not a desktop window");
 		return FALSE;
 	} else {
-		g_warning(" x prop failed");
 		return FALSE;
 	}
 }
