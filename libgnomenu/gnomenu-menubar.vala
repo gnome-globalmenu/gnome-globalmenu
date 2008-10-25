@@ -8,7 +8,6 @@ namespace Gnomenu {
 	public class MenuBar : Gtk.Notebook {
 		private RemoteDocument serverdoc;
 		private DBus.Connection conn;
-		private dynamic DBus.Object client;
 		private HashTable<string, Gtk.Widget> menu_hash;
 		private HashTable<string, string> bus_hash;
 		public MenuBar() {
@@ -63,6 +62,7 @@ namespace Gnomenu {
 				need_new_menu_view = true;
 			}
 			if(need_new_menu_view) {
+				dynamic DBus.Object client;
 				RemoteDocument clientdoc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
 				client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
@@ -85,11 +85,13 @@ namespace Gnomenu {
 							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
 							view.document = section;
 							view.set_data("xid", view.document.S(xid));
+							view.set_data_full("client", client.ref(), g_object_unref);
 							view.activated += (view, node) => {
+								dynamic DBus.Object client = (DBus.Object) view.get_data("client");
 								weak string xid = (string) view.get_data("xid");
 								message("shit %s", xid);
 								try {
-									this.client.Activate(xid, node.name);
+									client.Activate(xid, node.name);
 								} catch (GLib.Error e){
 									warning("%s", e.message);
 								}

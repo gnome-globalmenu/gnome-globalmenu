@@ -41,6 +41,7 @@ namespace Gnomenu {
 		public void Activate(string xid, string nodename) {
 			weak GMarkup.Node window = find_window_by_xid(xid);
 			weak GMarkup.Node node = this.document.dict.lookup(nodename);
+			if(node == null) warning("node: %s not found", nodename);
 			this.activated(window, node);
 		}
 		[DBus (visible = false)]
