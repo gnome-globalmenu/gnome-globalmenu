@@ -88,14 +88,7 @@ namespace GMarkup {
 				return node.summary(level);
 			return "";
 		}
-		public void Activate(string name){
-			weak Node node = document.dict.lookup(name);
-			message("activated %s", name);
-			if(node != null) {
-				this.activated(node, 0);
-				this.document.activate(node, 0);
-			}
-		}
+
 		public signal void updated(string name, string? prop);
 		public signal void inserted(string type, string parent, string name, int pos);
 		public signal void removed(string parent, string name);

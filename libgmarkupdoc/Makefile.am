@@ -29,6 +29,7 @@ libgmarkupdoc_la_CFLAGS = \
 libgmarkupdoc_base_la_VALASOURCES = \
 		gmarkupdoc-documentmodel.vala \
 		gmarkupdoc-node.vala \
+		gmarkupdoc-view.vala \
 		gmarkupdoc-section.vala \
 		gmarkupdoc-parser.vala \
 		gmarkupdoc-document.vala \

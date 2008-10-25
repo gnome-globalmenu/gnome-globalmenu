@@ -8,6 +8,7 @@ namespace Gnomenu {
 	public class MenuBar : Gtk.Notebook {
 		private RemoteDocument serverdoc;
 		private DBus.Connection conn;
+		private dynamic DBus.Object client;
 		private HashTable<string, Gtk.Widget> menu_hash;
 		private HashTable<string, string> bus_hash;
 		public MenuBar() {
@@ -63,7 +64,7 @@ namespace Gnomenu {
 			}
 			if(need_new_menu_view) {
 				RemoteDocument clientdoc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
-				dynamic DBus.Object client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
+				client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
 				debug("widget_name %s", widget_name);
 				node = clientdoc.dict.lookup(widget_name) as GMarkup.Tag;
@@ -78,11 +79,16 @@ namespace Gnomenu {
 					foreach(weak GMarkup.Node c in node.children) {
 						if(!(c is GMarkup.Tag)) continue;
 						if((c as GMarkup.Tag).tag == "menubar") {
-							MenuView view = new MenuView(null);
+							MenuView view = new MenuView();
 							view.visible = true;
 							debug("menubar found");
 							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
 							view.document = section;
+							view.set_data_full("xid", xid.ndup(xid.size()), g_free);
+							view.activated += (view, node) => {
+								weak string xid = (string) view.get_data("xid");
+								this.client.Activate(xid, node.name);
+							};
 							box.pack_start(view, true, true, 0);
 						}
 					}

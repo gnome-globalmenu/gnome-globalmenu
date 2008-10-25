@@ -7,6 +7,7 @@ namespace Gnomenu {
 		private DocumentModel? _document;
 		private Gtk.MenuBar menubar;
 		private Gtk.Widget arrow_button;
+		public signal void activated(GMarkup.Node node);
 		public weak DocumentModel? document {
 			get {
 				return _document;
@@ -37,12 +38,7 @@ namespace Gnomenu {
 			this.document = null;
 			debug("view releases the document");
 		}
-		public MenuView(DocumentModel? document) {
-			this.document = document;
-		}
-		~MenuView() {
-			debug("menuview is finalized");
-		}
+		public MenuView() { }
 		private Gdk.EventExpose __tmp__event;
 		construct {
 			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
@@ -237,8 +233,7 @@ namespace Gnomenu {
 		private void menu_item_activated (Gtk.MenuItem o) {
 			weak GMarkup.Tag widget = (GMarkup.Tag) o.get_data("node");
 			if(widget != null) {
-				debug("activated");
-				document.activate(widget, 0);
+				this.activated(widget);
 			}
 		}
 		private void update_properties(Gtk.Widget gtk, GMarkup.Tag node, string[] props) {

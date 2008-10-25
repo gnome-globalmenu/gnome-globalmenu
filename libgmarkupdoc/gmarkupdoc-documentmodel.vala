@@ -56,11 +56,8 @@ namespace GMarkup {
 		public abstract signal void inserted(Node parent, Node node, int pos);
 		public abstract signal void removed(Node parent, Node node);
 		public abstract signal void renamed(Node node, string? oldname, string? newname);
-		public abstract signal void activated(Node node, Quark detail);
 		public abstract signal void destroyed();
-		public virtual void activate(Node node, Quark detail) {
-			this.activated(node, detail);
-		}
+
 		public virtual void transverse(Node node, TransverseFunc func) {
 			Queue<weak Node> queue = new Queue<weak Node>();
 			queue.push_head(node);

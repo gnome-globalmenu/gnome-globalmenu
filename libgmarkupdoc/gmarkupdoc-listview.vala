@@ -37,10 +37,6 @@ namespace GMarkup {
 				</object>
 			</interface>""";
 
-	public interface View: GLib.Object {
-		public abstract weak DocumentModel? document {get; set;}
-		public signal void activated(Node node, Quark quark);
-	}
 	public class ListView : GtkCompat.Container, View {
 		private Gtk.TreeView treeview;
 		private DocumentModel _document;
@@ -80,6 +76,7 @@ namespace GMarkup {
 		private Gtk.Widget get_widget(string name) {
 			return builder.get_object(name) as Gtk.Widget;
 		}
+		public signal void activated(Node node);
 		construct {
 			this.set_flags(Gtk.WidgetFlags.NO_WINDOW);
 			builder = new Gtk.Builder();
@@ -152,8 +149,7 @@ namespace GMarkup {
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
 				debug("treeview activated");
-				this.activated(node, 0);
-			//	adapter.activate(node, 0);
+				this.activated(node);
 			};
 			(get_widget("remove") as Gtk.Button).clicked += (widget) => {
 				weak Node node = get_selected();

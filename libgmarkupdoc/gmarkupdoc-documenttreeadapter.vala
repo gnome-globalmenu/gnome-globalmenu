@@ -59,9 +59,6 @@ namespace GMarkup {
 			tree.row_inserted += (o, p, i) => { row_inserted(p, i);};
 			tree.rows_reordered += (o, p, i, n) => {rows_reordered(p, i, n);};
 		}
-		public void activate(Node node, Quark detail) {
-			this.document.activate(node, detail);
-		}
 		public GLib.Type get_column_type (int index_) {
 			return this.tree.get_column_type(index_);
 		}

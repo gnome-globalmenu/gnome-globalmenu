@@ -59,9 +59,6 @@ namespace GMarkup {
 				string[] attr_names, string[] attr_values) {
 			return document.CreateTagWithAttributes(tag, attr_names, attr_values);
 		}
-		public void activate(Node node, Quark detail) {
-			this.document.activate(node, detail);
-		}
 		construct {
 			disposed = false;
 			document.updated += (d, n, prop) => {

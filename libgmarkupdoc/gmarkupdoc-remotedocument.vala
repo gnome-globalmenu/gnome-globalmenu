@@ -36,16 +36,6 @@ namespace GMarkup {
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
-			this.activated += (document, node, detail) => {
-				try {
-					this.remote.Activate(node.name);
-					assert(node == dict.lookup(node.name));
-					debug("activated");
-				} catch(GLib.Error e){
-					warning("%s", e.message);
-				}
-
-			};
 		}
 		private void remote_inserted(dynamic DBus.Object remote, string type, string parentname, string nodename, int pos) {
 			if(invalid) return;
@@ -140,8 +130,8 @@ namespace GMarkup {
 			RemoteDocument document = new RemoteDocument("org.gnome.GlobalMenu.DocumentTest", "/org/gnome/GlobalMenu/Document");
 			ListView viewer = new ListView(document);
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
-			viewer.activated += (viewer, node, detail) => {
-				viewer.document.activate(node, detail);
+			viewer.activated += (viewer, node) => {
+				message("activated: %s", node.summary(0));
 			};
 			window.add(viewer);
 			window.show_all();

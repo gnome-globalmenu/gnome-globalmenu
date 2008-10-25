@@ -38,6 +38,13 @@ namespace Gnomenu {
 			}
 			return "";
 		}
+		public void Activate(string xid, string nodename) {
+			weak GMarkup.Node window = find_window_by_xid(xid);
+			weak GMarkup.Node node = this.document.dict.lookup(nodename);
+			this.activated(window, node);
+		}
+		[DBus (visible = false)]
+		public signal void activated(GMarkup.Node? window, GMarkup.Node? node);
 
 		private weak GMarkup.Node? find_window_by_xid(string xid) {
 			foreach (weak GMarkup.Node node in document.root.children) {

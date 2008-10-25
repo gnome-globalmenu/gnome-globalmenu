@@ -192,18 +192,6 @@ namespace GnomenuGtk {
 			}
 		}
 		public Document() {}
-		construct {
-			this.activated += (document, node, detail) => {
-				weak Gtk.Widget widget = (node as Widget).gtk;
-				if(widget is Gtk.TearoffMenuItem) return;
-				if(widget is Gtk.MenuItem) 
-					(widget as Gtk.MenuItem).activate();
-				if(widget is GtkAQD.MenuBar) {
-					bool local = (widget as GtkAQD.MenuBar).local;
-					(widget as GtkAQD.MenuBar).local = !local;
-				}
-			};
-		}
 		public GMarkup.Tag CreateTag(string tag) {
 			return new Widget(this);
 		}

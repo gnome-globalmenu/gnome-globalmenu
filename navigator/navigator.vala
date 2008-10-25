@@ -2,7 +2,7 @@ using GLib;
 using Gtk; 
 using GMarkup;
 using Gnomenu;
-
+using DBus;
 
 
 public class Navigator :Gtk.Window{
@@ -10,6 +10,7 @@ public class Navigator :Gtk.Window{
 	private ListView viewer;
 	private MenuView viewer2;
 	private RemoteDocument server;
+	private dynamic DBus.Object client;
 	public Navigator() {
 		type = Gtk.WindowType.TOPLEVEL;
 	}
@@ -17,7 +18,7 @@ public class Navigator :Gtk.Window{
 		server = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 		server_viewer = new ListView(server);
 		viewer = new ListView(null);
-		viewer2 = new MenuView(null);
+		viewer2 = new MenuView();
 		Gtk.Paned vpan = new Gtk.VPaned();
 		Gtk.Box vbox = new Gtk.VBox(false, 0);
 		this.add(vpan);
@@ -26,17 +27,24 @@ public class Navigator :Gtk.Window{
 		vbox.pack_start(viewer2, false, true, 0);
 		vbox.pack_start_defaults(viewer);
 		
-		server_viewer.activated += (server_viewer, node, detail)=> {
+		server_viewer.activated += (server_viewer, node)=> {
 			string bus = (node as GMarkup.Tag).get("bus");
 			print("attatch to bus %s", bus);
 			RemoteDocument doc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
+			DBus.Connection conn;
+			conn = Bus.get(DBus.BusType.SESSION);
+			this.client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 			viewer.document = doc;
 		};
-		viewer.activated += (viewer, node, detail) => {
+		viewer.activated += (viewer, node) => {
 			if((node as GMarkup.Tag).tag == "menubar") {
 				Section section = new Section(viewer.document, node);
 				viewer2.document = section;
 			}
+		};
+		viewer2.activated += (viewer2, node) => {
+			message("activated!");
+			this.client.Activate("NULL", node.name);
 		};
 	}
 	public static int main(string[] args) {
