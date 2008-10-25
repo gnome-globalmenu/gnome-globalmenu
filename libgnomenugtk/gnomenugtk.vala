@@ -82,10 +82,10 @@ namespace GnomenuGtk {
 		debug("GlobalMenu is enabled");
 	}
 	private weak Client client() {
-		return Singleton.instance().client;
+		return Client.instance();
 	}
 	private weak Document document() {
-		return Singleton.instance().document;
+		return Client.instance().document as Document;
 	}
 	protected weak string translate_gtk_type(Gtk.Widget widget) {
 		weak string type;

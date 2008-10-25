@@ -4,10 +4,8 @@ using Gnomenu;
 using GMarkup;
 namespace GnomenuGtk {
 
-	protected class Singleton {
-		static Singleton _instance;
-		public Client client;
-		public weak Document document;
+	protected class Client: Gnomenu.Client {
+		static Client _instance;
 		private int unique_id;
 		public int unique {
 			get {
@@ -16,9 +14,9 @@ namespace GnomenuGtk {
 			}
 		}
 		private Gtk.Window window;
-		public static Singleton instance() {
+		public static weak Client instance() {
 			if(_instance == null)
-				_instance = new Singleton();
+				_instance = new Client();
 			return _instance;
 		}
 		private static void activate_node(GMarkup.Node node) {
@@ -33,14 +31,14 @@ namespace GnomenuGtk {
 				}
 
 		}
-		private Singleton() {
-			Document document = new Document();
-			this.document = document;
-			client = new Client(document);
-			client.activated += (client, window, node) => {
+		private Client() {
+			this.document = new Document();
+			this.path = "/org/gnome/GlobalMenu/Application";
+		}
+		construct {
+			this.activated += (client, window, node) => {
 					activate_node(node);
 			};
-
 			unique_id = 99;
 			if(Environment.get_variable("GNOMENU_FUN") != null) {
 				window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);

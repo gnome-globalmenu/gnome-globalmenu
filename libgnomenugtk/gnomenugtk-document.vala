@@ -201,7 +201,7 @@ namespace GnomenuGtk {
 				weak Document.Widget rt = dict.lookup(name) as Document.Widget;
 				if(rt != null) return rt;
 			}
-			int id = Singleton.instance().unique;
+			int id = Client.instance().unique;
 			name = S("%s%d".printf(gtk.get_type().name(), id));
 			set_native_name(gtk, name);
 			Widget node = CreateTag("widget") as Widget;
