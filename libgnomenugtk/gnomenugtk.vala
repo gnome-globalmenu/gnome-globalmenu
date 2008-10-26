@@ -36,14 +36,36 @@ namespace GnomenuGtk {
 		return true;
 	}
 	protected bool verbose = false;
-	protected  bool disabled = false;
-
+	protected bool disabled = false;
+	protected GLib.OutputStream log_stream;
+	protected string application_name;
+	private void default_log_handler(string? domain, LogLevelFlags level, string message) {
+		TimeVal time;
+		time.get_current_time();
+		string s = "%.10ld | %.10s | %10s | %s\n".printf(time.tv_usec, application_name, domain, message);
+		log_stream.write(s, s.size(), null);
+	}
+	private void init_log() {
+		string log_file_name = Environment.get_variable("GNOMENU_LOG_FILE");
+		if(log_file_name != null) {
+			try {
+				GLib.File file = GLib.File.new_for_path(log_file_name);
+				log_stream = file.append_to(FileCreateFlags.NONE, null);
+			} catch (GLib.Error e) {
+				warning("Log file %s is not accessible. Fallback to stderr: %s", log_file_name, e.message);
+			}	
+		}
+		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
+		Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_MASK, default_log_handler);
+	}
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 		disabled = (Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null)
 				  ||(Environment.get_variable("GNOMENU_DISABLED")!=null);
 		verbose = (Environment.get_variable("GNOMENU_VERBOSE")!=null);
-		
+		application_name = Environment.get_prgname();
+		init_log();
+
 		if(disabled) {
 			message("GTK_MENUBAR_NO_MAC or GNOMENU_DISABLED is set. GlobalMenu is disabled");
 			return;
@@ -80,6 +102,8 @@ namespace GnomenuGtk {
 		patch_menu_shell();
 		patch_menu_bar();
 		debug("GlobalMenu is enabled");
+		Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_MASK, default_log_handler);
+		Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_MASK, default_log_handler);
 	}
 	private weak Client client() {
 		return Client.instance();

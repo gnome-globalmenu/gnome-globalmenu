@@ -47,6 +47,13 @@ AC_SUBST(GNOMENU_LIBS)
 GNOMENU_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
 AC_SUBST(GNOMENU_VALA_PKGS)
 
+dnl begin: GnomenuGTK
+PKG_CHECK_MODULES(GNOMENUGTK, [glib-2.0 dbus-glib-1 gtk+-2.0 gio-2.0 gio-unix-2.0])
+AC_SUBST(GNOMENUGTK_CFLAGS)
+AC_SUBST(GNOMENUGTK_LIBS)
+GNOMENUGTK_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg gio-2.0 --pkg gio-unix-2.0"
+AC_SUBST(GNOMENUGTK_VALA_PKGS)
+
 dnl begin:applet
 AC_MSG_CHECKING(--enable-gnome-applet argument)
 AC_ARG_ENABLE(gnome-applet,
