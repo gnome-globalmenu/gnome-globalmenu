@@ -15,7 +15,7 @@ public class Navigator :Gtk.Window{
 		type = Gtk.WindowType.TOPLEVEL;
 	}
 	construct {
-		server = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
+		server = RemoteDocument.connect("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 		server_viewer = new ListView(server);
 		viewer = new ListView(null);
 		viewer2 = new MenuView();
@@ -30,7 +30,7 @@ public class Navigator :Gtk.Window{
 		server_viewer.activated += (server_viewer, node)=> {
 			string bus = (node as GMarkup.Tag).get("bus");
 			print("attatch to bus %s", bus);
-			RemoteDocument doc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
+			RemoteDocument doc = RemoteDocument.connect(bus, "/org/gnome/GlobalMenu/Application");
 			DBus.Connection conn;
 			conn = Bus.get(DBus.BusType.SESSION);
 			this.client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
