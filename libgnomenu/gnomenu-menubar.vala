@@ -63,7 +63,7 @@ namespace Gnomenu {
 			}
 			if(need_new_menu_view) {
 				dynamic DBus.Object client;
-				RemoteDocument clientdoc = new RemoteDocument(bus, "/org/gnome/GlobalMenu/Application");
+				RemoteDocument clientdoc = RemoteDocument.connect(bus, "/org/gnome/GlobalMenu/Application");
 				client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 				string widget_name = client.QueryXID(xid);
 				debug("widget_name %s", widget_name);
@@ -110,7 +110,7 @@ namespace Gnomenu {
 			else this.set_current_page(0);
 		}
 		construct {
-			serverdoc = new RemoteDocument("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
+			serverdoc = RemoteDocument.connect("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
 			conn = Bus.get(DBus.BusType.SESSION);
 			menu_hash = new HashTable<string, Gtk.Widget>.full(str_hash, str_equal, g_free, g_object_unref);
 			bus_hash = new HashTable<string, string>.full(str_hash, str_equal, g_free, g_free);
