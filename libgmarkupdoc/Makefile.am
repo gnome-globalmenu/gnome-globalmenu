@@ -70,14 +70,18 @@ libgmarkupdoc_dbus_la_SOURCES = \
 		$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
 		$(NULL)
 libgmarkupdoc_dbus_la_CFLAGS = $(GMARKUPDOC_DBUS_CFLAGS)
-libgmarkupdoc_dbus_la_LIBADD = $(GMARKUPDOC_DBUS_LIBS)
-
+libgmarkupdoc_dbus_la_LIBADD = $(GMARKUPDOC_DBUS_LIBS)  \
+		libgmarkupdoc-base.la \
+		libgmarkupdoc-list.la \
+		$(NULL)
 libgmarkupdoc_list_la_SOURCES = \
 		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.c) \
 		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.h) \
 		$(NULL)
 libgmarkupdoc_list_la_CFLAGS = $(GMARKUPDOC_LIST_CFLAGS)
-libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS)
+libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS) \
+		libgmarkupdoc-base.la \
+		$(NULL)
 
 gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_list_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
 	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
