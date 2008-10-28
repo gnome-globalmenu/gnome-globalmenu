@@ -96,7 +96,8 @@ namespace GnomenuGtk {
 			return;
 			break;
 			default:
-				if(disabled_application_names.str(application_name)!=null){
+				if((disabled_application_names!=null) 
+					&& disabled_application_names.str(application_name)!=null){
 					message("GlobalMenu is disabled in GTK_MENUBAR_NO_MAC list");
 					return;
 				}
