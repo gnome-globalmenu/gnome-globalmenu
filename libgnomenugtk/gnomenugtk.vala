@@ -42,7 +42,7 @@ namespace GnomenuGtk {
 	private void default_log_handler(string? domain, LogLevelFlags level, string message) {
 		TimeVal time;
 		time.get_current_time();
-		string s = "%.10ld | %.10s | %10s | %s\n".printf(time.tv_usec, application_name, domain, message);
+		string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, application_name, domain, message);
 		log_stream.write(s, s.size(), null);
 	}
 	private void init_log() {
@@ -60,10 +60,11 @@ namespace GnomenuGtk {
 	}
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		disabled = (Environment.get_variable("GTK_MENUBAR_NO_MAC")!=null)
-				  ||(Environment.get_variable("GNOMENU_DISABLED")!=null);
+		string disabled_application_names = Environment.get_variable("GTK_MENUBAR_NO_MAC");
+		disabled = (Environment.get_variable("GNOMENU_DISABLED")!=null);
 		verbose = (Environment.get_variable("GNOMENU_VERBOSE")!=null);
 		application_name = Environment.get_prgname();
+	
 		init_log();
 
 		if(disabled) {
@@ -93,6 +94,12 @@ namespace GnomenuGtk {
 			case "gdm-user-switch-applet":
 			message("GlobalMenu is disabled for several programs");
 			return;
+			break;
+			default:
+				if(disabled_application_names.str(application_name)!=null){
+					message("GlobalMenu is disabled in GTK_MENUBAR_NO_MAC list");
+					return;
+				}
 			break;
 		}
 		typeof(Gtk.Widget).class_ref();
