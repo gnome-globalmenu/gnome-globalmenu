@@ -15,18 +15,12 @@ namespace GMarkup {
 		private weak Node result;
 		private ParseType type;
 		private weak string propname;
-		public static MarkupParser parser_funcs;
 		public DocumentParser(DocumentModel document){
 			this.document = document;
-			parser_funcs.start_element = StartElement;
-			parser_funcs.end_element = EndElement;
-			parser_funcs.text = Text;
-			parser_funcs.passthrough = Passthrough;
-			parser_funcs.error = Error;
 		}
 		[NoArrayLength]
-		private static void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values, void* user_data) throws MarkupError {
-			weak DocumentParser parser = (DocumentParser) user_data;
+		private void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values) {
+			weak DocumentParser parser = (DocumentParser) this;
 			weak string[] names = attribute_names;
 			weak string[] values = attribute_values;
 			names.length = (int) strv_length(attribute_names);
@@ -73,14 +67,14 @@ namespace GMarkup {
 			}
 		}
 		
-		private static void EndElement (MarkupParseContext context, string element_name, void* user_data) throws MarkupError{
-			weak DocumentParser parser = (DocumentParser) user_data;
+		private void EndElement (MarkupParseContext context, string element_name) {
+			weak DocumentParser parser = (DocumentParser) this;
 			if(parser.type == ParseType.UPDATE) return;
 			parser.current = parser.current.parent;
 		}
 		
-		private static void Text (MarkupParseContext context, string text, ulong text_len, void* user_data) throws MarkupError {
-			weak DocumentParser parser = (DocumentParser) user_data;
+		private void Text (MarkupParseContext context, string text, ulong text_len) {
+			weak DocumentParser parser = (DocumentParser) this;
 			if(parser.type == ParseType.UPDATE) return;
 			if(text_len > 0) {
 				string newtext = text.ndup(text_len);
@@ -89,8 +83,8 @@ namespace GMarkup {
 			}
 		}
 		
-		private static void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len, void* user_data) throws MarkupError {
-			weak DocumentParser parser = (DocumentParser) user_data;
+		private void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len) {
+			weak DocumentParser parser = (DocumentParser) this;
 			if(parser.type == ParseType.UPDATE) return;
 			if(text_len > 0) {
 				string newtext = passthrough_text.ndup(text_len);
@@ -99,11 +93,11 @@ namespace GMarkup {
 			}
 		}
 		
-		private static void Error (MarkupParseContext context, GLib.Error error, void* user_data) {
-			weak DocumentParser parser = (DocumentParser) user_data;
+		private static void Error (MarkupParseContext context, GLib.Error error) {
 
 		}
 		public bool parse (string foo) {
+			MarkupParser parser_funcs = { StartElement, EndElement, Text, Passthrough, Error};
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			current = document.root;
 			type = ParseType.ROOT;
@@ -116,6 +110,7 @@ namespace GMarkup {
 			return true;
 		}
 		public Node? parse_tag (string foo) {
+			MarkupParser parser_funcs = { StartElement, EndElement, Text, Passthrough, Error};
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			type = ParseType.CHILD;
 			current = null;
@@ -131,6 +126,7 @@ namespace GMarkup {
 			return result;
 		}
 		public bool parse_child(Node parent, string foo, int pos) {
+			MarkupParser parser_funcs = { StartElement, EndElement, Text, Passthrough, Error};
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			type = ParseType.CHILD;
 			this.pos = pos;
@@ -145,6 +141,7 @@ namespace GMarkup {
 			return true;
 		}
 		public bool update_tag(Tag node, string? propname, string foo) {
+			MarkupParser parser_funcs = { StartElement, EndElement, Text, Passthrough, Error};
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			type = ParseType.UPDATE;
 			current = node;

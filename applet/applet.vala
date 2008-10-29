@@ -4,15 +4,18 @@ using Gnomenu;
 using Wnck;
 using WnckCompat;
 using Panel;
+using PanelCompat;
+
 public extern GLib.Object gnome_program_init_easy(string name, string version,
 		string[] args, GLib.OptionContext #context);
-public class Applet : Panel.Applet{
+private class Applet : PanelCompat.Applet {
 static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
 	public Applet() {
+		int i = 0;
 	}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
