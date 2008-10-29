@@ -24,7 +24,7 @@ namespace Gnomenu {
 			do {
 				string str = rand.next_int().to_string().strip();
 				string appname = Environment.get_prgname();
-				((GLibCompat.String)appname).canon("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
+				appname.canon("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
 				if(appname[0] >= '0' && appname[0] <='9') appname = "_"+appname;
 				bus = "org.gnome.GlobalMenu.Applications." + appname + "-" + str;
 				debug("Obtaining BUS name: %s", bus);
