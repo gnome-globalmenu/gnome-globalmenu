@@ -108,8 +108,8 @@ rm -rf %{buildroot}
 %{_libdir}/libgmarkupdoc.la
 %{_libdir}/libgnomenu.a
 %{_libdir}/libgnomenu.la
-%{_libdir}/libgnomenugtk.a
-%{_libdir}/libgnomenugtk.la
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.a
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
 %{_libdir}/libgmarkupdoc-base.a
 %{_libdir}/libgmarkupdoc-base.la
 %{_libdir}/libgmarkupdoc-dbus.a
@@ -135,9 +135,10 @@ rm -rf %{buildroot}
 
 %files gtk
 %defattr(-, root, root)
-%{_libdir}/libgnomenugtk.so
-%{_libdir}/libgnomenugtk.so.0
-%{_libdir}/libgnomenugtk.so.0.0.0 
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so.0
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so.0.0.0
+
 
 %files applet
 %defattr(-, root, root)
@@ -149,6 +150,8 @@ rm -rf %{buildroot}
 %{_bindir}/gnomenu-navigator
 
 %changelog 
+* Sun Oct 7 2008 Feng Yu <rainwoodman@gmail.com>
+- installing libglobalmenu-gnome to gtk-2.0/modules
 * Sun Oct 7 2008 Feng Yu <rainwoodman@gmail.com>
 - Update to svn 1351
 - Divide into sub packages

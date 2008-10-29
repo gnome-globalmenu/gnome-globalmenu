@@ -19,41 +19,44 @@ AM_VALAC_FLAGS =\
 
 BUILT_SOURCES = \
 	gnomenugtk.vapi \
-	libgnomenugtk.vala.stamp  \
-	$(libgnomenugtk_la_VALASOURCES:.vala=.c) \
-	$(libgnomenugtk_la_VALASOURCES:.vala=.h) \
+	libglobalmenu_gnome.vala.stamp  \
+	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.c) \
+	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.h) \
 	$(NULL)
 
-libgnomenugtk_la_VALASOURCES = \
+libglobalmenu_gnome_la_VALASOURCES = \
 	gnomenugtk.vala \
 	gnomenugtk-client.vala \
 	gnomenugtk-document.vala  \
 	$(NULL)
 
-libgnomenugtkdir = $(GTK_MODULES_DIR)
-libgnomenugtk_LTLIBRARIES = \
-	libgnomenugtk.la \
+libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
+libglobalmenu_gnome_LTLIBRARIES = \
+	libglobalmenu-gnome.la \
 	$(NULL)
 
-libgnomenugtk_la_SOURCES = \
-	$(libgnomenugtk_la_VALASOURCES:.vala=.c) \
-	$(libgnomenugtk_la_VALASOURCES:.vala=.h) \
+libglobalmenu_gnome_la_SOURCES = \
+	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.c) \
+	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.h) \
 	utils.c \
 	$(NULL)
 
-gnomenugtk.vapi libgnomenugtk.vala.stamp: $(libgnomenugtk_la_VALASOURCES) gtkaqd.vapi
+gnomenugtk.vapi libglobalmenu_gnome.vala.stamp: $(libglobalmenu_gnome_la_VALASOURCES) gtkaqd.vapi
 	$(VALAC) -C  $^
-	touch gnomenugtk.vapi libgnomenugtk.vala.stamp
+	touch gnomenugtk.vapi libglobalmenu_gnome.vala.stamp
 
-libgnomenugtk_la_LIBADD = \
+libglobalmenu_gnome_la_LIBADD = \
 		$(GNOMENUGTK_LIBS) \
 		$(top_builddir)/libgnomenu/libgnomenu.la \
 		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
+		$(NULL)
+libglobalmenu_gnome_la_LDFLAGS = \
+		-module \
 		$(NULL)
 
 EXTRA_DIST = \
 	$(BUILT_SOURCES) \
 	gtkaqd.vapi \
-	$(libgnomenugtk_la_VALASOURCES) \
+	$(libglobalmenu_gnome_la_VALASOURCES) \
 	$(NULL)
 
