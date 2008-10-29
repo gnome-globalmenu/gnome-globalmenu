@@ -53,6 +53,9 @@ AC_SUBST(GNOMENUGTK_CFLAGS)
 AC_SUBST(GNOMENUGTK_LIBS)
 GNOMENUGTK_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg gio-2.0 --pkg gio-unix-2.0"
 AC_SUBST(GNOMENUGTK_VALA_PKGS)
+GTK_MODULES_DIR="$libdir/gtk-2.0/modules"
+AC_SUBST(GTK_MODULES_DIR)
+AC_DEFINE_UNQUOTED(GTK_MODULES_DIR, "$GTK_MODULES_DIR", [Where the gtk-2.0/modules dir is])
 
 dnl begin:applet
 AC_MSG_CHECKING(--enable-gnome-applet argument)

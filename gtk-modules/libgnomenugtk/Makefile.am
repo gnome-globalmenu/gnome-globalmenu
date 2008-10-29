@@ -30,7 +30,7 @@ libgnomenugtk_la_VALASOURCES = \
 	gnomenugtk-document.vala  \
 	$(NULL)
 
-libgnomenugtkdir = $(libdir)
+libgnomenugtkdir = $(GTK_MODULES_DIR)
 libgnomenugtk_LTLIBRARIES = \
 	libgnomenugtk.la \
 	$(NULL)
