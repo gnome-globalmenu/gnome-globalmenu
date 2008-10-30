@@ -1,6 +1,11 @@
 using GLib;
 [CCode (cprefix = "G", lower_case_cprefix = "g_", cheader_filename = "glib.h")]
 namespace GLibCompat {
+	[CCode (ref_function = "g_object_ref", unref_function = "g_object_unref", marshaller_type_name = "OBJECT", get_value_function = "g_value_get_object", set_value_function = "g_value_set_object", param_spec_function = "g_param_spec_object", cheader_filename = "glib-object.h")]
+	public class Object {
+		[CCode (cname = "g_object_notify")]
+		public void notify_property(string property);
+	}
 	[SimpleType]
 	[CCode (cname = "gconstpointer", cheader_filename = "glib.h", type_id = "G_TYPE_POINTER", marshaller_type_name = "POINTER", get_value_function = "g_value_get_pointer", set_value_function = "g_value_set_pointer", default_value = "NULL")]
 	public struct constpointer {

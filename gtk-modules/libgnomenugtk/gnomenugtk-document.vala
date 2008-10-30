@@ -80,6 +80,14 @@ namespace GnomenuGtk {
 				set_bool("active", c.active);
 				set_bool_def("draw-as-radio", c.draw_as_radio, false);
 				set_bool_def("inconsistent", c.inconsistent, false);
+				if(gtk is Gtk.RadioMenuItem) {
+					c.toggled += (gtk) => {
+						weak SList<weak Gtk.Widget> group = (gtk as Gtk.RadioMenuItem).get_group();
+						foreach (weak Gtk.Widget ww in group) {
+							(ww as GLibCompat.Object).notify_property("active");
+						}
+					};
+				}
 
 			}
 			private void connect_to_image_menu_item() {
@@ -114,21 +122,23 @@ namespace GnomenuGtk {
 			}
 			private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 				debug("item_property_notify %s( %s).%s", this.name, w.get_type().name(), pspec.name);
+				Type type = pspec.value_type;
+				weak string name = pspec.name;
 				string val;
-				if(pspec.value_type == typeof(string)) {
-					w.get(pspec.name, out val, null);
+				if(type == typeof(string)) {
+					w.get(name, out val, null);
 				}
-				if(pspec.value_type == typeof(bool)) {
+				if(type == typeof(bool)) {
 					bool b;
-					w.get(pspec.name, out b, null);
+					w.get(name, out b, null);
 					val = b.to_string();
 				}
-				if(pspec.value_type == typeof(int)) {
+				if(type == typeof(int)) {
 					int i;
-					w.get(pspec.name, out i, null);
+					w.get(name, out i, null);
 					val = i.to_string();
 				}
-				this.set(pspec.name, val);
+				this.set(name, val);
 			}
 			private void item_label_set(Gtk.Widget w, Gtk.Widget? l) {
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");

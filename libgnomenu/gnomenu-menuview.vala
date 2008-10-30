@@ -13,7 +13,8 @@ namespace Gnomenu {
 		public weak DocumentModel? document {
 			get {
 				return _document;
-			} set {
+			}
+			set {
 				if(_document != null) {
 					document.inserted -= document_inserted;
 					document.updated -= document_updated;

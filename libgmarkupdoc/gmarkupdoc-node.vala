@@ -51,11 +51,13 @@ namespace GMarkup {
 			node.parent = this;
 			this.children.insert(node, pos);
 			document.inserted(this, node, pos);
+			debug("inserted %s to %s at %d", node.name, this.name, pos);
 		}
 		public virtual void remove(Node node) {
 			document.removed(this, node);
 			children.remove(node);
 			document.orphan.append(node);
+			debug("removed %s from %s", node.name, this.name);
 		}
 		public int index(Node node) {
 			return children.index(node);
