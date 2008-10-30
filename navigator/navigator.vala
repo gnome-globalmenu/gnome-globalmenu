@@ -36,6 +36,7 @@ public class Navigator :Gtk.Window{
 			this.client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
 			viewer.document = doc;
 		};
+		// FIXME: set the xid..!!! 
 		viewer.activated += (viewer, node) => {
 			if((node as GMarkup.Tag).tag == "menubar") {
 				Section section = new Section(viewer.document, node);
