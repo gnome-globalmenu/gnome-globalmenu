@@ -66,8 +66,7 @@ namespace GMarkup {
 				updated(node.name, prop);
 		}
 		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
-			if(!is_orphan(node))
-			if(oldname!=null && newname !=null) {
+			if(!is_orphan(node)) {
 				renamed(oldname, newname);
 			}
 		}
