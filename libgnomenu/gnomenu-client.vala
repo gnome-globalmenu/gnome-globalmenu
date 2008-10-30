@@ -101,6 +101,7 @@ namespace Gnomenu {
 			weak GMarkup.Tag node = document.dict.lookup(windowname) as GMarkup.Tag;
 			GMarkup.Tag ref_node = document.CreateTag("ref");
 			ref_node.set("target", menubarname);
+			warning("%u", ref_node.ref_count);
 			node.append(ref_node);
 		}
 		[DBus (visible = false)]

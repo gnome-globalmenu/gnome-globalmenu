@@ -138,10 +138,10 @@ namespace GnomenuGtk {
 			type = "tearoff";
 		return type;
 	}
-	private void transverse(Gtk.Widget head, Document.Widget rel_root, int pos = -1) {
+	private void transverse(Gtk.Widget head, GMarkup.Node rel_root, int pos = -1) {
 		weak Gtk.Widget gtk = head;
 		assert(gtk is Gtk.Widget);
-		assert(rel_root is Document.Widget);
+		assert(rel_root is GMarkup.Node);
 		weak Document.Widget node = document().wrap(gtk);
 		if(gtk is Gtk.MenuShell) {
 			rel_root.insert(node, pos);
@@ -215,12 +215,14 @@ namespace GnomenuGtk {
 		weak Document.Widget menu_node = document().wrap(menu);
 		debug("binding menu %s to %s", menu_node.name, node.name);
 		/*TODO: transverse menu_node, adding children*/
-		transverse(menu, node);
+		transverse(menu, document().root);
+		client().attach_menu_bar(node.name, menu_node.name);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak Document.Widget node = document().wrap(window);
 		weak Document.Widget menu_node = document().wrap(menu);
 		debug("unbinding menu %s to %s", menu_node.name, node.name);
+		client().detach_menu_bar(node.name, menu_node.name);
 		node.remove(menu_node);
 	}
 }

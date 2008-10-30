@@ -218,8 +218,13 @@ namespace GnomenuGtk {
 			}
 		}
 		public Document() {}
+		private static int unique = 999;
 		public GMarkup.Tag CreateTag(string tag) {
-			return new Widget(this);
+			Tag rt = new Widget(this);
+			rt.tag = tag;
+			rt.name = S("WIDGET" + unique.to_string());
+			unique++;
+			return rt;
 		}
 		public weak Document.Widget wrap(Gtk.Widget gtk) {
 			weak string name = get_native_name(gtk);
