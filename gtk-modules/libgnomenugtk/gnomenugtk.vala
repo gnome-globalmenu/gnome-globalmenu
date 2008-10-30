@@ -56,7 +56,7 @@ namespace GnomenuGtk {
 			}	
 		}
 		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
-		Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_MASK, default_log_handler);
+		Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_MASK, default_log_handler);
 	}
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
@@ -75,7 +75,7 @@ namespace GnomenuGtk {
 			LogFunc handler = (domain, level, message) => { };
 			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_DEBUG, handler);
 		}
 		DBus.Connection conn;
 		try {
