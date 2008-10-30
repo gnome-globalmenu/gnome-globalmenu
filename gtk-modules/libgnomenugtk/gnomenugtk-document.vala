@@ -89,21 +89,29 @@ namespace GnomenuGtk {
 				}
 
 			}
+			private void connect_to_image(Gtk.Image image) {
+				set_native_name(image, this.name);
+				image.notify["icon-name"] += item_property_notify;
+				image.notify["stock"] += item_property_notify;
+				image.notify["file"] += item_property_notify;
+				switch(image.storage_type) {
+					case Gtk.ImageType.ICON_NAME:
+						this.set("icon-name", image.icon_name);
+					break;
+					case Gtk.ImageType.STOCK:
+						this.set("icon-stock", image.stock);
+					break;
+					default:
+						if(image.file != null) 
+							this.set("icon-file", image.file);
+					break;
+				}
+			}
 			private void connect_to_image_menu_item() {
 				Gtk.ImageMenuItem i = gtk as Gtk.ImageMenuItem;
 				if((i.image is Gtk.Image)) {
 					Gtk.Image image = i.image as Gtk.Image;
-					set_native_name(image, name);
-					image.notify["icon-name"] += item_property_notify;
-					image.notify["stock"] += item_property_notify;
-					switch(image.storage_type) {
-						case Gtk.ImageType.ICON_NAME:
-							set("icon-name", image.icon_name);
-						break;
-						case Gtk.ImageType.STOCK:
-							set("icon-stock", image.stock);
-						break;
-					}
+					connect_to_image(image);
 					i.set_data_full("old-image", image.ref(), g_object_unref);
 				}
 				i.notify["image"] += item_image_notify;
@@ -136,6 +144,19 @@ namespace GnomenuGtk {
 					int i;
 					w.get(name, out i, null);
 					val = i.to_string();
+				}
+				if(w is Gtk.Image) {
+					switch(pspec.name) {
+						case "icon-name":
+							name = "icon-name";
+						break;
+						case "stock":
+							name = "icon-stock";
+						break;
+						case "file":
+							name = "icon-file";
+						break;
+					}
 				}
 				this.set(name, val);
 			}
@@ -182,17 +203,7 @@ namespace GnomenuGtk {
 						old_image.notify -= item_property_notify; /*Vala bug detailed signal not removed*/
 					}
 					if(image != null) {
-						set_native_name(image, this.name);
-						image.notify["icon-name"] += item_property_notify;
-						image.notify["stock"] += item_property_notify;
-						switch(image.storage_type) {
-							case Gtk.ImageType.ICON_NAME:
-								this.set("icon-name", image.icon_name);
-							break;
-							case Gtk.ImageType.STOCK:
-								this.set("icon-stock", image.stock);
-							break;
-						}
+						connect_to_image(image);
 						item.set_data_full("old-image", image.ref(), g_object_unref);
 					} else {
 						item.set_data("old-image", null);
