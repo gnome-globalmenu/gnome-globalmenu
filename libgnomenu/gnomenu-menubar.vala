@@ -78,11 +78,20 @@ namespace Gnomenu {
 					};
 					foreach(weak GMarkup.Node c in node.children) {
 						if(!(c is GMarkup.Tag)) continue;
-						if((c as GMarkup.Tag).tag == "menubar") {
+						weak GMarkup.Node menu_bar_root;
+						switch((c as GMarkup.Tag).tag) {
+							case "ref":
+							string menu_bar_name = (c as GMarkup.Tag).get("target");
+							menu_bar_root = clientdoc.dict.lookup(menu_bar_name);
+							break;
+							case "menubar":
+							menu_bar_root = c;
+							break;
+						}
+						if(menu_bar_root != null) {
 							MenuView view = new MenuView();
 							view.visible = true;
-							debug("menubar found");
-							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
+							GMarkup.Section section = new GMarkup.Section(clientdoc, menu_bar_root);
 							view.document = section;
 							view.set_data("xid", view.document.S(xid));
 							view.set_data_full("client", client.ref(), g_object_unref);
