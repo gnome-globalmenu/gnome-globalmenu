@@ -16,7 +16,7 @@ noinst_PROGRAMS = lowercname $(CLASSES)
 BUILT_SOURCES = $(CLASSES:%=%.c)
 
 $(BUILT_SOURCES) : test.c lowercname
-	cpp -D__class_test=`echo $(@:%.c=%) | $(builddir)/lowercname`_test $< $@
+	cpp -D__class_test=`echo $(@:%.c=%) | ./lowercname`_test $< $@
 
 EXTRA_DIST = test.c $(BUILT_SOURCES)
 DISTCLEANFILES = $(BUILT_SOURCES)
