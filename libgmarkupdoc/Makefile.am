@@ -14,9 +14,10 @@ libgmarkupdoc_LTLIBRARIES = \
 		libgmarkupdoc-base.la \
 		libgmarkupdoc-list.la \
 		libgmarkupdoc-dbus.la \
-		libgmarkupdoc.la \
 		$(NULL)
-
+#
+#		libgmarkupdoc.la \
+##(NULL)
 libgmarkupdoc_la_SOURCES = \
 		gmarkupdoc.c \
 		gmarkupdoc.h \
@@ -110,6 +111,8 @@ libgmarkupdoc_la_LIBADD = \
 		libgmarkupdoc-list.la \
 		libgmarkupdoc-dbus.la \
 		$(NULL)
+
+$(NULL)
 
 EXTRA_DIST =  \
 	$(BUILT_SOURCES) \

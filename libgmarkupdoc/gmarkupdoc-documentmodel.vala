@@ -7,108 +7,131 @@ namespace GMarkup {
 	 * The document model for GMarkup. It is some kind of different from the DOM model.
 	 */
 	public interface DocumentModel: GLib.Object {
-		private static StringChunk strings = null;
-		private static uint unique;
 		/**
 		 * The root of the document.
 		 */
 		public abstract weak Node root {get;}
 		/**
-		 * The collection of all orphans. 
-		 * Orphans are newly created nodes or nodes that haven't been attached the the root.
-		 */
-		public abstract weak Node orphan {get;}
-		/**
 		 * The dictionary for looking up nodes from their names.
 		 */
-		public abstract weak HashTable<weak string, weak Node> dict {get;}
+		public abstract weak HashTable<int, weak Node> node_pool {get;}
+		public abstract int unique {get;}
+
+		public virtual weak Node createNode(NodeType type) {
+			Node rt = new Node(this, unique, type);
+			node_pool.insert(rt.id, rt.ref() as Node);
+			return node_pool.lookup(rt.id);
+		}
 		/**
-		 * The attribute used to determine the name of a node for a Tag .
-		 */
-		public abstract weak string name_attr {get;}
-		/**
-		 * Create a Node that contains text in the document. 
+		 * create a Node that contains text in the document. 
 		 *
-		 *   @return a newly created node; unref it when not used.
+		 *   @return a newly created node; never unref.
 		 */
-		public virtual Text CreateText(string text) {
-			Text rt = new Text(this, text);
-			rt.name = S("TEXT" + unique.to_string());
-			unique++;
+		public weak Node createText(string text) {
+			weak Node rt = createNode(NodeType.TEXT);
+			rt.name = "#TEXT";
+			rt.value = text;
 			return rt;
 		}
 		/**
-		 * Create a Node that contains special segments in the document. 
+		 * create a Node that contains special segments in the document. 
 		 * Example, <?xml ....?>
 		 *
-		 *   @return a newly created node; unref it when not used.
+		 *   @return a newly created node; never unref.
 		 */
-		public virtual Special CreateSpecial(string text) {
-			Special rt =new Special(this, text);
-			rt.name =  S("SPECIAL" + unique.to_string());
-			unique++;
+		public weak Node createSpecial(string text) {
+			weak Node rt = createNode(NodeType.SPECIAL);
+			rt.name = "#SPECIAL";
+			rt.value = text;
 			return rt;
 		}
 		/**
-		 * Create a Node that contains a tag in the document. 
+		 * create a Node that contains a tag in the document. 
 		 * Example, <body name="mybody"/>
 		 *	 @param tag  			'body' in our example;
-		 *   @return a newly created node; unref it when not used.
+		 *   @return a newly created node; never unref.
 		 */
-		public virtual Tag CreateTag(string tag) {
-			Tag rt = new Tag(this, tag);
-			rt.name = S("TAG" + unique.to_string());
-			unique++;
+		public weak Node createElement(string tag) {
+			weak Node rt = createNode(NodeType.ELEMENT);
+			rt.name = tag;
 			return rt;
 		}
-
 		/**
-		 * Create a Node that contains a tag in the document.
-		 * Merely a wrapper of { @link CreateTag }.
-		 * Example: <body name="mybody"/>
-		 *   @param tag     		'body' in our example;
-		 *   @param attr_names 	names of the attributes;
-		 *   @param attr_values values of the attributes;
+		 * find the node with the give id.
 		 *
-		 *   @return a newly created node; unref it when not used.
+		 *   @return an existing node. never unref it. null if not found.
 		 */
-		public virtual Tag CreateTagWithAttributes(string tag, 
-				string[] attr_names, string[] attr_values) {
-			Tag t = CreateTag(tag);
-			t.set_attributes(attr_names, attr_values);
-			return t;
+		public weak Node? getNode(int id) {
+			return node_pool.lookup(id);
+		}
+		/**
+		 * create a Node that contains a fragment
+		 * Example, <body name="mybody"/>
+		 *	 @param tag  			'body' in our example;
+		 *   @return a newly created node; unref when not used. Never destroy it.
+		 */
+		public Node createFragment() {
+			Node rt = new Node(this, -1,  NodeType.FRAGMENT);
+			rt.name = "#FRAGMENT";
+			return rt;
+		}
+		/**
+		 * create a Node for the document root; used for implementation.
+		 *
+		 *   @return a newly created node; unref when not used. Never destroy it.
+		 */
+		protected Node createRoot() {
+			Node rt = new Node(this, unique, NodeType.DOCUMENT);
+			rt.name = "#DOCUMENT";
+			rt.anchored = true;
+			node_pool.insert(rt.id, rt.ref() as Node);
+			return rt;
+		}
+		public Node createMeta() {
+			Node rt = new Node(this, -1, NodeType.META);
+			rt.name = "#META";
+			rt.anchored = false;
+			return rt;
+		}
+		/**
+		 * create a Pool for storing nodes; used for implementation
+		 *
+		 */
+		protected HashTable<int, weak Node> createPool(){
+			return new HashTable<int, weak Node>(direct_hash, direct_equal);
 		}
 		/**
 		 * Destroy a Node if it is not used in any context. In other words,
 		 * if it is a child of the orphan node.
          * Panic if the node is not a child of the orphan node.
 		 *
-		 *   @param node  		the node to be removed.
+		 *   @param node  		the node to be destroyed.
 		 *
 		 */
-		public virtual void DestroyNode(Node? node) {
-			assert(node.parent == orphan);
-			orphan.remove(node);
-			transverse(node, (node) => {
-				debug("%s  %u", node.name, node.ref_count);
-//				assert(node.ref_count == 1);
-				dict.remove(node.name);
+		public void destroyNode(Node? node, bool recursive = true) {
+			assert(node.parent == null);
+			if(recursive) 
+			node.transverse((node) => {
+				debug("%d  %u", node.id, node.ref_count);
+				if(node.ref_count != 1) {
+					warning("maybe leaking a node!");
+				}
+				node.document.node_pool.remove(node.id);
+				node.unref();
 			});
-		}
-		/**
-		 * Make a static string.
-		 *
-		 *	 @param s  		the string to be made static.
-		 *
-		 *   @return the static string. Never free it.
-		 */
-		public virtual weak string S(string? s) {
-			if(strings == null) {
-				strings = new StringChunk(1024);
-				unique = 1;
+			else {
+				node.document.node_pool.remove(node.id);
+				node.unref();
 			}
-			if(s == null) return null;
-			return strings.insert_const(s);
+		}
+		public void memcheck() {
+			node_pool.for_each((key, value) => {
+						weak Node node = (Node) value;
+						if(!node.anchored) 
+							critical("node %d %p %s is not anchored; but exist in pool with ref_count=%u",
+								node.id, node, node.name, node.ref_count
+								);
+					});
 		}
 		/**
 		 * Emitted when an attribute of a node is updated
@@ -123,7 +146,7 @@ namespace GMarkup {
 		 * 	 @param node 		the node
 		 * 	 @param pos 		the position where the insertion is made
 		 */
-		public abstract signal void inserted(Node parent, Node node, int pos);
+		public abstract signal void inserted(Node parent, Node node, Node? ref_node);
 		/**
 		 * Emitted when a node is removed from another node. 
 		 * Notice that the node is not destroyed by this removal.
@@ -131,30 +154,61 @@ namespace GMarkup {
 		 * 	 @param node 		the node
 		 */
 		public abstract signal void removed(Node parent, Node node);
-		/**
-		 * Emitted when a node is renamed.
-		 */
-		public abstract signal void renamed(Node node, string? oldname, string? newname);
-		public abstract signal void destroyed();
-
-		/**
-		 * Transverse the document tree from the given node.
-		 *
-		 * 	 @param node 		the begin of the trip.
-		 * 	 @param func 				the callback.
-		 */
-		public virtual void transverse(Node node, TransverseFunc func) {
-			Queue<weak Node> queue = new Queue<weak Node>();
-			queue.push_head(node);
-			while(!queue.is_empty()) {
-				weak Node n = queue.pop_head();
-				foreach(weak Node child in n.children) {
-					queue.push_tail(child);
+		public void change_id(Node node, int new_id) {
+			node_pool.remove(node.id);
+			node.id = new_id;
+			node_pool.insert(node.id, node);
+		}
+		public void mergeMeta(Node meta, Node ref_root, Node? ref_node) {
+			int meta_id;
+			string  meta_name;
+			weak Node meta_current;
+			List<weak Node> children = meta.children.copy();
+			foreach (weak Node node in children) {
+				message("meta = %s", node.name);
+				if(node.nodeType == NodeType.META) {
+					meta_id = node.get("id").to_int();
+					meta_name = node.get("name");
+					List<weak Node> children2 = node.children.copy();
+					foreach(weak Node child in children2) {
+						message("child = %s", child.name);
+						if(child.name == meta_name) {
+							Node oldNode;
+							oldNode = getNode(meta_id);
+							if(oldNode != null) {
+								message("old node = %s", oldNode.to_string());
+							}
+							if(oldNode != null && oldNode.anchored) {
+								/*replace properties for an anchored node*/
+								oldNode.clear();
+								oldNode.value = child.value;
+								oldNode.obtain_attributes(child);	
+								mergeMeta(child, oldNode, null);
+							}
+							if(oldNode != null && !oldNode.anchored) {
+							/*re id an unanchred node, then let the meta node take the id*/
+								message("old id is notanchored");
+								change_id(oldNode, unique);
+								oldNode = null;
+							}
+							if(oldNode == null) {
+								Node clone = child.clone();
+								clone.id = meta_id;
+								node_pool.insert(meta_id, clone.ref() as Node);
+								ref_root.insert(clone, ref_node);
+								mergeMeta(child, clone, null);
+							}
+						} 
+						node.remove(child);
+						destroyNode(child);
+					}
+					meta.remove(node);
+					node.unref();
+				} else {
+					meta.remove(node);
+					destroyNode(node);
 				}
-				func(n);
 			}
 		}
-		public delegate bool TransverseFunc(Node node);
 	}
-
 }

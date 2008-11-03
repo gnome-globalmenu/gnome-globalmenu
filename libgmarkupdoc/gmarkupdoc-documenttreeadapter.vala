@@ -8,19 +8,18 @@ namespace GMarkup {
 		private DocumentModel _document;
 		public weak DocumentModel document {get{return _document;} construct{_document = value;}}
 		private HashTable<weak Node, weak TreeIterBox> iterbox_hash;
+		public int unique {get{return _document.unique;}}
 		public DocumentTreeAdapter(DocumentModel document) {
 			this.document = document;
 		}	
 		public weak Node root {get {return document.root;}}
-		public weak Node orphan {get {return document.orphan;}}
-		public weak HashTable<weak string, weak Node> dict { get{return document.dict;}}
-		public weak string name_attr {get {return document.name_attr;}}
+		public weak HashTable node_pool { get{return document.node_pool;}}
+
 		private void add_to_tree(Node node) {
-			this.document.transverse(node, (node) => {
+			node.transverse((node) => {
+					message("%s", node.name);
 					TreeIterBox box = new TreeIterBox();
-					if(node == this.document.root ||
-					  node == this.document.orphan
-					) {
+					if(node == this.document.root) {
 						this.tree.insert(out box.iter, null, -1);
 					} else {
 						this.tree.insert(out box.iter, get_iterbox(node.parent).iter, node.parent.index(node));
@@ -33,10 +32,10 @@ namespace GMarkup {
 			this.tree = new Gtk.TreeStore(1, typeof(constpointer));
 			this.iterbox_hash = new HashTable<weak Node, weak TreeIterBox>.full(direct_hash, direct_equal, null, g_object_unref);
 			this.add_to_tree(root);
-			this.add_to_tree(orphan);
-			this.document.inserted += (document, parent, child, pos) => {
+			this.document.inserted += (document, parent, child, refnode) => {
+				message("inserted %s %s", parent.name, child.name);
 				this.add_to_tree(child);
-				this.inserted(parent, child, pos);
+				this.inserted(parent, child, refnode);
 			};
 			this.document.removed += (document, parent, child) => {
 				this.tree.remove(get_iterbox(child).iter);
@@ -46,11 +45,6 @@ namespace GMarkup {
 			this.document.updated += (document, node, prop) => {
 				Gtk.TreeIter iter = get_iterbox(node).iter;
 				this.updated(node, prop);
-				this.tree.row_changed(tree.get_path(iter), iter);
-			};
-			this.document.renamed += (document, node, oldname, newname) => {
-				Gtk.TreeIter iter = get_iterbox(node).iter;
-				this.renamed(node, oldname, newname);
 				this.tree.row_changed(tree.get_path(iter), iter);
 			};
 			tree.row_changed += (o, p, i) => { row_changed(p, i);};

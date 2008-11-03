@@ -14,6 +14,7 @@ namespace GMarkup {
 		public string path {get; construct;}
 		public string bus {get; construct;}
 		private static HashTable<weak DocumentAddress, weak RemoteDocument> documents;
+
 		private class DocumentAddress : GLib.Object {
 			public string bus;
 			public string path;
@@ -52,76 +53,52 @@ namespace GMarkup {
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 			dbus.NameOwnerChanged += name_owner_changed;
 
-			remote = conn.get_object(bus, path, "org.gnome.GlobalMenu.Document");
+			remote = conn.get_object(bus, path, "org.gnome.GlobalMenu.Document2");
 			remote.Inserted += remote_inserted;
 			remote.Removed += remote_removed;
 			remote.Updated += remote_updated;
-			remote.Renamed += remote_renamed;
 			parser = new DocumentParser(this);
 			try {
-				string xml = remote.QueryRoot(-1);
-				parser.parse(xml);
+				string meta_s = remote.QueryRoot();
+				Node meta = parser.parse(meta_s);
+				message("%s", meta.to_string());
+				mergeMeta(meta, root, null);
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
 		}
-		private void remote_inserted(dynamic DBus.Object remote, string type, string parentname, string nodename, int pos) {
+		private void remote_inserted(dynamic DBus.Object remote, int parent_id, int child_id, int refnode_id) {
 			if(invalid) return;
-			weak Node parent = dict.lookup(parentname);
-			debug("inserted %s %s", parentname, nodename);
+			weak Node parent = getNode(parent_id);
 			if(parent == null) return;
+			debug("inserted to %s %d", parent.name, child_id);
 			try {
-				string s = remote.QueryNode(nodename, 0);
-				debug("%s inserted", s);
-				switch(type) {
-					case "tag":
-						Node tag = parser.parse_tag(s);
-						//message("tag %u", tag.ref_count);
-						parent.insert(tag, pos);
-						//parser.parse_child(parent, s, pos);
-					break;
-					case "text":
-						Node text = (this as DocumentModel).CreateText(s);
-						text.name = nodename;
-						parent.insert(text, pos);
-					break;
-					case "special":
-						Node special = (this as DocumentModel).CreateSpecial(s);
-						special.name = nodename;
-						parent.insert(special, pos);
-					break;
-				}
+				string s = remote.QueryNodeRecursively(child_id);
+				weak Node refnode = getNode(refnode_id);
+				mergeMeta(parser.parse(s), parent, refnode);
 			} catch(GLib.Error e){
 				warning("%s", e.message);
 			}
 		}
-		private void remote_removed(dynamic DBus.Object remote, string parentname, string nodename) {
+		private void remote_removed(dynamic DBus.Object remote, int parent_id, int child_id) {
 			if(invalid) return;
-			weak Node parent = dict.lookup(parentname);
-			weak Node node = dict.lookup(nodename);
+			weak Node parent = getNode(parent_id);
+			weak Node node = getNode(child_id);
 			if(parent == null || node == null) return;
 			parent.remove(node);
-			this.DestroyNode(node);
+			this.destroyNode(node);
 		}
-		private void remote_renamed(dynamic DBus.Object remote, string oldname, string newname) {
+		private void remote_updated(dynamic DBus.Object remote, int id, string? propname) {
 			if(invalid) return;
-			debug("renamed %s to %s", oldname, newname);
-			weak Node node = dict.lookup(oldname);
-			if(node == null) return;
-			node.name = newname;
-		}
-		private void remote_updated(dynamic DBus.Object remote, string nodename, string? propname) {
-			if(invalid) return;
-			weak Node node = dict.lookup(nodename);
+			weak Node node = getNode(id);
 			try {
-				string s = remote.QueryNode(nodename, 0);
+				string s = remote.QueryNodeOnly(id);
 				if(s == null) {
 					warning("remote document didn't reply");
 					return;
 				}
-				if(node is Tag) parser.update_tag(node as Tag, propname, s);
-				if(node is Text) (node as Text).text = s;
-				if(node is Special) (node as Special).text = s;
+				Node meta = parser.parse(s);
+				mergeMeta(meta, root, null);
 			} catch(GLib.Error e){
 				warning("%s %s", e.domain.to_string(), e.message);
 			}
@@ -138,7 +115,7 @@ namespace GMarkup {
 				List<weak Node> list = root.children.copy();
 				foreach(weak Node child in list) {
 					root.remove(child);
-					this.DestroyNode(child);
+					this.destroyNode(child);
 				}
 				invalid = true;
 				return;
@@ -152,7 +129,7 @@ namespace GMarkup {
 			ListView viewer = new ListView(document);
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 			viewer.activated += (viewer, node) => {
-				message("activated: %s", node.summary(0));
+				message("activated: %s", node.name);
 			};
 			window.add(viewer);
 			window.show_all();

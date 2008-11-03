@@ -4,7 +4,7 @@ using Gtk;
 
 [CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
 namespace GMarkup {
-	[DBus (name = "org.gnome.GlobalMenu.Document")]
+	[DBus (name = "org.gnome.GlobalMenu.Document2")]
 	public class DBusView:GLib.Object, View {
 		Connection conn;
 		private DocumentModel _document;
@@ -21,75 +21,54 @@ namespace GMarkup {
 					document.inserted -= document_inserted;
 					document.removed -= document_removed;
 					document.updated -= document_updated;
-					document.renamed -= document_renamed;
-					document.destroyed -= document_destroyed;
 				} 
 				_document = value;
 				if(document != null) {
 					document.inserted += document_inserted;
 					document.removed += document_removed;
 					document.updated += document_updated;
-					document.renamed += document_renamed;
-					document.destroyed += document_destroyed;
 				}
 			}
-		}
-		private void document_destroyed(DocumentModel document) {
-			this.document = null;
 		}
 		public DBusView(DocumentModel document, string object_path) {
 			this.document = document;
 			path = object_path;
 		}
-		private bool is_orphan(Node node) {
-			weak Node parent;
-			for(parent = node; parent != null; parent = parent.parent) {
-				if(parent == document.orphan) return true;
-			}
-			return false;
-		}
-		private void document_inserted(DocumentModel document, Node parent, Node child, int pos) {
-			if(!is_orphan(parent)) {
-				weak string type;
-				if(child is Tag) type = "tag";
-				if(child is Text) type = "text";
-				if(child is Special) type = "special";
-				inserted(type, parent.name, child.name, pos);
-			}
+		private void document_inserted(DocumentModel document, Node parent, Node child, Node? refnode) {
+			inserted(parent.id, child.id, (refnode!=null)?refnode.id:-1);
 		}
 		private void document_removed(DocumentModel document, Node parent, Node child) {
-			if(!is_orphan(parent))
-				removed(parent.name, child.name);
+			removed(parent.id, child.id);
 		}
 		private void document_updated(DocumentModel document, Node node, string? prop) {
-			if(!is_orphan(node))
-				updated(node.name, prop);
+			updated(node.id, prop);
 		}
-		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
-			if(!is_orphan(node)) {
-				renamed(oldname, newname);
-			}
-		}
+
 		construct {
 			conn = Bus.get(DBus.BusType.SESSION);
 			dbus = conn.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus");
 
 			conn.register_object(path, this);
 		}
-		public string QueryRoot(int level = -1) {
-			return document.root.summary(level);
+		public string QueryRoot() {
+			return document.root.to_meta_string();
 		}
-		public string QueryNode(string name, int level = -1){
-			weak Node node = document.dict.lookup(name);
+		public string QueryNodeOnly(int id){
+			weak Node node = document.getNode(id);
 			if(node!= null)
-				return node.summary(level);
+				return node.to_meta_string(false);
+			return "";
+		}
+		public string QueryNodeRecursively(int id){
+			weak Node node = document.getNode(id);
+			if(node!= null)
+				return node.to_meta_string(true);
 			return "";
 		}
 
-		public signal void updated(string name, string? prop);
-		public signal void inserted(string type, string parent, string name, int pos);
-		public signal void removed(string parent, string name);
-		public signal void renamed(string oldname, string newname);
+		public signal void updated(int name, string? prop);
+		public signal void inserted(int parent, int name, int refnode);
+		public signal void removed(int parent, int name);
 
 		public static int test(string[] args) {
 			Gtk.init(ref args);
@@ -99,7 +78,7 @@ namespace GMarkup {
 			DBusView c = new DBusView(document, "/org/gnome/GlobalMenu/Document");
 			ListView l = new ListView(document);
 			c.dbus.RequestName("org.gnome.GlobalMenu.DocumentTest", (uint) 0);
-			parser.parse(
+			document.root.append(parser.parse(
 """
 <html><title>title</title>
 <body name="body">
@@ -109,7 +88,8 @@ namespace GMarkup {
 <div name="content"></div>
 <div name="tail"></div>
 </body>
-""");
+"""
+));
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 			window.add(l);
 			window.show_all();

@@ -28,8 +28,8 @@ namespace GMarkup {
 								</object>
 							</child>
 							<child>
-								<object class = "GtkButton" id = "destroy">
-									<property name ="label">Destroy</property>
+								<object class = "GtkButton" id = "check">
+									<property name ="label">Check</property>
 								</object>
 							</child>
 						</object>
@@ -49,14 +49,10 @@ namespace GMarkup {
 				return _document;
 			} 
 			set {
-				if(document != null) {
-					document.destroyed -= document_destroyed;
-				}
 				_document = value;
 				if(document != null) {
 					adapter = new DocumentTreeAdapter(document);
 					parser = new DocumentParser(document);
-					document.destroyed += document_destroyed;
 				} else {
 					adapter = null;
 					parser = null;
@@ -64,9 +60,6 @@ namespace GMarkup {
 				treeview.set_model(adapter);
 				
 			}
-		}
-		private void document_destroyed(DocumentModel document) {
-			this.document = null;
 		}
 		public ListView(DocumentModel? document) {
 			this.document = document;
@@ -93,36 +86,19 @@ namespace GMarkup {
 			this.size_request += (widget, req) => {
 				box.size_request(req);
 			};
-			(treeview as GtkCompat.TreeView).insert_column_with_data_func (0, "Title", new Gtk.CellRendererText(), 
+			(treeview as GtkCompat.TreeView).insert_column_with_data_func (0, "ID", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {
 					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
 					weak Node node;
 					model.get(iter, 0, out node, -1);
-					weak string text = null;
-					text = node.name;
-					if(text == null) {
-						if(node is Tag)
-							text = (node as Tag).tag;
-						if(node is Text)
-							text = "TEXT";
-						if(node is Special)
-							text = "SPECAL";
-						if(node is Root)
-							text = "ROOT";
-					}
-					cell.text = text;
-					/*
-					weak string visible = node.get("visible");
-					if(visible == "false") 
-						cell.foreground = "gray";
-					else
-						cell.foreground = "black";
-					weak string enabled = node.get("sensitive");
-					if(enabled == "false")
-						cell.background = "red";
-					else
-						cell.background = "white";
-					*/
+					cell.text = node.id.to_string();
+				}, null);
+			(treeview as GtkCompat.TreeView).insert_column_with_data_func (1, "Title", new Gtk.CellRendererText(), 
+				(tree_column, c, model, iter) => {
+					Gtk.CellRendererText cell = c as Gtk.CellRendererText;
+					weak Node node;
+					model.get(iter, 0, out node, -1);
+					cell.text = node.name;
 				}, null);
 			Gtk.CellRendererText render = new Gtk.CellRendererText();
 			render.edited += (render, spath, new_text) => {
@@ -132,17 +108,22 @@ namespace GMarkup {
 				weak Node node;
 				model.get_iter(out iter, path);
 				model.get(iter, 0, out node, -1);
-				message("%s", new_text);
-				parser.update_tag(node as Tag, null, new_text);
+				string meta_str = "<gmarkup:meta id=\"%d\" name=\"%s\">%s</gmarkup:meta>".printf(
+						node.id, node.name, new_text);
+				message("%s", meta_str);
+				Node meta = parser.parse(meta_str);
+				message("%s", meta.to_string());
+				document.mergeMeta(meta, document.root, null);
 			};
-			(treeview as GtkCompat.TreeView).insert_column_with_data_func (1, "GMarkup", render,
+			(treeview as GtkCompat.TreeView).insert_column_with_data_func (2, "GMarkup", render,
 				(tree_column, cell, model, iter) => {
 					weak Node node;
 					model.get(iter, 0, out node, -1);
-					(cell as Gtk.CellRendererText).text = node.summary();
+					(cell as Gtk.CellRendererText).text = node.to_string(false);
 					(cell as Gtk.CellRendererText).editable = true;
 					
 				}, null);
+
 			treeview.row_activated +=(treeview, path, column) => {
 				Gtk.TreeModel model = treeview.model;
 				weak Node node;
@@ -156,15 +137,15 @@ namespace GMarkup {
 				weak Node node = get_selected();
 				if(node != null && node.parent != null) {
 					node.parent.remove(node);
+					document.destroyNode(node);
 				}
 			};
 			(get_widget("add") as Gtk.Button).clicked += (widget) => {
 				weak Node node = get_selected();
-				if(node != null) node.append(document.CreateTag("tag"));
+				if(node != null) node.append(document.createElement("tag"));
 			};
-			(get_widget("destroy") as Gtk.Button).clicked += (widget) => {
-				weak Node node = get_selected();
-				if(node != null) document.DestroyNode(node);
+			(get_widget("check") as Gtk.Button).clicked += (widget) => {
+				document.memcheck();
 			};
 		}
 		private weak Node? get_selected() {
@@ -184,7 +165,7 @@ namespace GMarkup {
 			Document document = new Document();
 			GMarkup.DocumentParser parser = new GMarkup.DocumentParser(document);
 			ListView c = new ListView(document);
-			parser.parse(
+			Node fragment = parser.parse(
 """
 <html><title>title</title>
 <body name="body">
@@ -195,8 +176,13 @@ namespace GMarkup {
 <div name="tail"></div>
 </body>
 """);
+			document.root.append(fragment);
+			ListView s = new ListView(new Section(document, document.root.firstChild));
 			Gtk.Window window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
-			window.add(c);
+			Gtk.Box box = new Gtk.VBox(false, 0);
+			box.pack_start_defaults(c);
+			box.pack_start_defaults(s);
+			window.add(box);
 			window.show_all();
 			loop.run();
 			return 0;
