@@ -108,7 +108,7 @@ namespace GMarkup {
 		 *   @param node  		the node to be destroyed.
 		 *
 		 */
-		public void destroyNode(Node? node, bool recursive = true) {
+		public virtual void destroyNode(Node? node, bool recursive = true) {
 			assert(node.parent == null);
 			if(recursive) 
 			node.transverse((node) => {

@@ -11,23 +11,23 @@ AM_VALAC_FLAGS =  \
 
 libgmarkupdocdir = $(libdir)
 libgmarkupdoc_LTLIBRARIES = \
-		libgmarkupdoc-base.la \
-		libgmarkupdoc-list.la \
-		libgmarkupdoc-dbus.la \
+		libgmarkupdoc.la \
 		$(NULL)
-#
-#		libgmarkupdoc.la \
-##(NULL)
 libgmarkupdoc_la_SOURCES = \
-		gmarkupdoc.c \
 		gmarkupdoc.h \
+		$(base_VALASOURCES:.vala=.c) \
+		$(base_VALASOURCES:.vala=.h) \
+		$(dbus_VALASOURCES:.vala=.c) \
+		$(dbus_VALASOURCES:.vala=.h) \
+		$(list_VALASOURCES:.vala=.c) \
+		$(list_VALASOURCES:.vala=.h) \
 		$(NULL)
 libgmarkupdoc_la_CFLAGS = \
 	$(GMARKUPDOC_BASE_CFLAGS) \
 	$(GMARKUPDOC_LIST_CFLAGS) \
 	$(GMARKUPDOC_DBUS_CFLAGS) \
 	$(NULL)
-libgmarkupdoc_base_la_VALASOURCES = \
+base_VALASOURCES = \
 		gmarkupdoc-documentmodel.vala \
 		gmarkupdoc-node.vala \
 		gmarkupdoc-view.vala \
@@ -36,12 +36,12 @@ libgmarkupdoc_base_la_VALASOURCES = \
 		gmarkupdoc-document.vala \
 		$(NULL)
 
-libgmarkupdoc_list_la_VALASOURCES = \
+list_VALASOURCES = \
 		gmarkupdoc-documenttreeadapter.vala \
 		gmarkupdoc-listview.vala \
 		$(NULL)
 
-libgmarkupdoc_dbus_la_VALASOURCES = \
+dbus_VALASOURCES = \
 		gmarkupdoc-dbusview.vala \
 		gmarkupdoc-remotedocument.vala \
 		$(NULL)
@@ -51,40 +51,15 @@ BUILT_SOURCES = \
 	gmarkupdoc.h \
 	gmarkupdoc.c \
 	libgmarkupdoc.vala.stamp \
-	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.c) \
-	$(libgmarkupdoc_base_la_VALASOURCES:.vala=.h) \
-	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.c) \
-	$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
-	$(libgmarkupdoc_list_la_VALASOURCES:.vala=.c) \
-	$(libgmarkupdoc_list_la_VALASOURCES:.vala=.h) \
+	$(base_VALASOURCES:.vala=.c) \
+	$(base_VALASOURCES:.vala=.h) \
+	$(dbus_VALASOURCES:.vala=.c) \
+	$(dbus_VALASOURCES:.vala=.h) \
+	$(list_VALASOURCES:.vala=.c) \
+	$(list_VALASOURCES:.vala=.h) \
 	$(NULL)
 
-libgmarkupdoc_base_la_SOURCES = \
-		$(libgmarkupdoc_base_la_VALASOURCES:.vala=.c) \
-		$(libgmarkupdoc_base_la_VALASOURCES:.vala=.h) \
-		$(NULL)
-libgmarkupdoc_base_la_CFLAGS = $(GMARKUPDOC_BASE_CFLAGS)
-libgmarkupdoc_base_la_LIBADD = $(GMARKUPDOC_BASE_LIBS)
-
-libgmarkupdoc_dbus_la_SOURCES = \
-		$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.c) \
-		$(libgmarkupdoc_dbus_la_VALASOURCES:.vala=.h) \
-		$(NULL)
-libgmarkupdoc_dbus_la_CFLAGS = $(GMARKUPDOC_DBUS_CFLAGS)
-libgmarkupdoc_dbus_la_LIBADD = $(GMARKUPDOC_DBUS_LIBS)  \
-		libgmarkupdoc-base.la \
-		libgmarkupdoc-list.la \
-		$(NULL)
-libgmarkupdoc_list_la_SOURCES = \
-		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.c) \
-		$(libgmarkupdoc_list_la_VALASOURCES:.vala=.h) \
-		$(NULL)
-libgmarkupdoc_list_la_CFLAGS = $(GMARKUPDOC_LIST_CFLAGS)
-libgmarkupdoc_list_la_LIBADD = $(GMARKUPDOC_LIST_LIBS) \
-		libgmarkupdoc-base.la \
-		$(NULL)
-
-gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(libgmarkupdoc_base_la_VALASOURCES) $(libgmarkupdoc_list_la_VALASOURCES) $(libgmarkupdoc_dbus_la_VALASOURCES) 
+gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(base_VALASOURCES) $(list_VALASOURCES) $(dbus_VALASOURCES) 
 	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
 	sed -e 's;GtkCompat.Container;Gtk.Container;g' gmarkupdoc.vapi > gmarkupdoc.vapi.new
 	mv gmarkupdoc.vapi.new gmarkupdoc.vapi
@@ -95,9 +70,6 @@ _HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
 	$(libgmarkupdoc_list_la_VALASOURCES:%.vala=%.h) \
 	$(NULL)
 
-gmarkupdoc.c: Makefile
-	echo '#include "gmarkupdoc.h"' > $@
-	echo 'extern void * dummy = NULL;' >> $@
 gmarkupdoc.h: $(_HEADERS_) Makefile
 	echo '#ifndef _G_MARKUP_DOC_H_' > $@ ;
 	echo '#define _G_MARKUP_DOC_H_' >> $@ ;
@@ -107,9 +79,9 @@ gmarkupdoc.h: $(_HEADERS_) Makefile
 	echo '#endif' >> $@ ;
 
 libgmarkupdoc_la_LIBADD = \
-		libgmarkupdoc-base.la \
-		libgmarkupdoc-list.la \
-		libgmarkupdoc-dbus.la \
+		$(GMARKUPDOC_BASE_LIBS) \
+		$(GMARKUPDOC_LIST_LIBS) \
+		$(GMARKUPDOC_DBUS_LIBS) \
 		$(NULL)
 
 $(NULL)
@@ -120,7 +92,7 @@ EXTRA_DIST =  \
 	$(libgmarkupdoc_dbus_la_VALASOURCES) \
 	$(libgmarkupdoc_list_la_VALASOURCES) \
 	$(NULL)
-DISTCLEANFILES = gmarkupdoc.c gmarkupdoc.h
+DISTCLEANFILES = gmarkupdoc.h
 
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = \

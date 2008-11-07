@@ -3,13 +3,14 @@ using GLib;
 [CCode (cprefix = "GMarkup", lower_case_cprefix = "g_markup_")]
 namespace GMarkup {
 	public class DocumentParser {
-		private weak Node current;
+		private Queue<weak Node> queue;
 		private DocumentModel document;
 		public DocumentParser(DocumentModel document){
 			this.document = document;
 		}
 		[NoArrayLength]
 		private void StartElement (MarkupParseContext context, string element_name, string[] attribute_names, string[] attribute_values) {
+			weak Node current = queue.peek_head();
 			weak string[] names = attribute_names;
 			weak string[] values = attribute_values;
 			names.length = (int) strv_length(attribute_names);
@@ -23,7 +24,7 @@ namespace GMarkup {
 				}
 				node.thaw();
 				current.append(node.ref() as Node);
-				current = node;
+				queue.push_head(node);
 			}
 			else {
 				weak Node node;
@@ -34,25 +35,27 @@ namespace GMarkup {
 				}
 				node.thaw();
 				current.append(node);
-				current = node;
+				queue.push_head(node);
 			}
 		}
 		
 		private void EndElement (MarkupParseContext context, string element_name) {
-			current = current.parent;
+			queue.pop_head();
 		}
 		
 		private void Text (MarkupParseContext context, string text, ulong text_len) {
+			weak Node current = queue.peek_head();
 			if(text_len > 0) {
 				string newtext = text.ndup(text_len);
-				this.current.append(document.createText(newtext));
+				current.append(document.createText(newtext));
 			}
 		}
 		
 		private void Passthrough (MarkupParseContext context, string passthrough_text, ulong text_len) {
+			weak Node current = queue.peek_head();
 			if(text_len > 0) {
 				string newtext = passthrough_text.ndup(text_len);
-				this.current.append(document.createSpecial(newtext));
+				current.append(document.createSpecial(newtext));
 			}
 		}
 		
@@ -63,7 +66,8 @@ namespace GMarkup {
 			MarkupParser parser_funcs = { StartElement, EndElement, Text, Passthrough, Error};
 			MarkupParseContext context = new MarkupParseContext(parser_funcs, 0, (void*)this, null);
 			Node rt = document.createFragment();
-			current = rt;
+			queue = new Queue<weak Node>();
+			queue.push_head(rt);
 			try {
 				context.parse(foo, foo.size());
 			} catch (MarkupError e) {
@@ -78,6 +82,7 @@ namespace GMarkup {
 			DocumentParser parser = new DocumentParser(document);
 			Node segment = parser.parse(
 """
+<html/>
 <html><title>title</title>
 <body name="body">
 <div name="header">
@@ -86,6 +91,7 @@ namespace GMarkup {
 <div name="content"></div>
 <div name="tail"><br/></div>
 </body>
+</html>
 """
 			);
 			document.inserted += (d, node, child, ref_node) => {

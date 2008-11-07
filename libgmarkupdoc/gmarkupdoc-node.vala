@@ -217,7 +217,7 @@ namespace GMarkup {
 				dirty = false;
 			}
 		}	
-		public void set(string key, string? value) {
+		public virtual void set(string key, string? value) {
 			weak string old_value = get(key);
 			if(value == null) {
 				_attributes.remove_data(key);
@@ -230,7 +230,7 @@ namespace GMarkup {
 					dirty = true;
 			}
 		}
-		public weak string? get(string key) {
+		public virtual weak string? get(string key) {
 			return _attributes.get_data(key);	
 		}
 		/**
