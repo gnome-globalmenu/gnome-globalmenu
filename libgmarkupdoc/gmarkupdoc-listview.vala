@@ -47,8 +47,7 @@ namespace GMarkup {
 		public weak DocumentModel? document {
 			get {
 				return _document;
-			} 
-			set {
+			} set {
 				if(document != null) {
 					document.destroyed -= document_destroyed;
 				}

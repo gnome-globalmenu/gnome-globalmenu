@@ -9,10 +9,12 @@ static void realized(GtkWidget * window, GnomenuClient * client){
 	gnomenu_client_register_window(client, "mywindow", xid);
 	g_free(xid);
 }
-static void activated(GnomenuClient * client, GMarkupNode * window, GMarkupNode * node,  gpointer data){
+static void activated(GMarkupDocument * document, GMarkupNode * node, GQuark detail, gpointer data){
 	gchar * name = g_markup_node_get_name(node);
-	gchar * windowname = g_markup_node_get_name(window);
-	g_message("%s is clicked on window %s",name, windowname);
+
+	if(g_str_equal(name, "file")) {
+		g_message("File is clicked do file stuff");
+	}
 }
 int main(int argc, char* argv) {
 	gtk_init(&argc, &argv);
@@ -24,12 +26,11 @@ int main(int argc, char* argv) {
 	g_markup_document_parser_parse(parser, 
 			"<window name=\"mywindow\">"
 			"<menubar>"
-				"<item name=\"file\" label=\"_File\"/>"
-				"<item name=\"edit\" label=\"_Edit\"/>"
+			"<item name=\"file\" label=\"_File\"/>"
 			"</menubar>"
 			"</window>");
 	g_signal_connect(window, "realize", realized, client);
-	g_signal_connect(client, "activated", activated, NULL);
+	g_signal_connect(document, "activated", activated, NULL);
 	gtk_widget_show_all(window);
 	gtk_main();
 	return 0;

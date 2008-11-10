@@ -50,6 +50,7 @@ namespace GMarkup {
 		}
 		private void document_inserted(DocumentModel document, Node parent, Node child, int pos) {
 			if(!is_orphan(parent)) {
+				debug("inserted");
 				weak string type;
 				if(child is Tag) type = "tag";
 				if(child is Text) type = "text";
@@ -66,7 +67,9 @@ namespace GMarkup {
 				updated(node.name, prop);
 		}
 		private void document_renamed(DocumentModel document, Node node, string? oldname, string? newname) {
-			if(!is_orphan(node)) {
+			if(!is_orphan(node))
+			if(oldname!=null && newname !=null) {
+				debug("renamed %s to %s", oldname, newname);
 				renamed(oldname, newname);
 			}
 		}

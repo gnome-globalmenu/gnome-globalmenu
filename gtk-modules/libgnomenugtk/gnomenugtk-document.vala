@@ -56,9 +56,10 @@ namespace GnomenuGtk {
 							l.notify["label"] += item_property_notify;
 							set("label", (l as Gtk.Label).label);
 							if(l is Gtk.AccelLabel) {
-								l.notify["accel-widget"] += accel_label_notify;
-								l.notify["accel-closure"] += accel_label_notify;
-								accel_label_notify(l as Gtk.AccelLabel);
+								(l as Gtk.AccelLabel).refetch();
+								string s = (l as Gtk.AccelLabel).accel_string;
+								weak string trimmed = s.strip();	
+								if(trimmed.size() >0) set("accel", trimmed);
 							}
 						}
 						if(l is Gtk.Separator|| l is Gtk.SeparatorMenuItem) {
@@ -79,39 +80,23 @@ namespace GnomenuGtk {
 				set_bool("active", c.active);
 				set_bool_def("draw-as-radio", c.draw_as_radio, false);
 				set_bool_def("inconsistent", c.inconsistent, false);
-				if(gtk is Gtk.RadioMenuItem) {
-					c.toggled += (gtk) => {
-						weak SList<weak Gtk.Widget> group = (gtk as Gtk.RadioMenuItem).get_group();
-						foreach (weak Gtk.Widget ww in group) {
-							(ww as GLibCompat.Object).notify_property("active");
-						}
-					};
-				}
 
-			}
-			private void connect_to_image(Gtk.Image image) {
-				set_native_name(image, this.name);
-				image.notify["icon-name"] += item_property_notify;
-				image.notify["stock"] += item_property_notify;
-				image.notify["file"] += item_property_notify;
-				switch(image.storage_type) {
-					case Gtk.ImageType.ICON_NAME:
-						this.set("icon-name", image.icon_name);
-					break;
-					case Gtk.ImageType.STOCK:
-						this.set("icon-stock", image.stock);
-					break;
-					default:
-						if(image.file != null) 
-							this.set("icon-file", image.file);
-					break;
-				}
 			}
 			private void connect_to_image_menu_item() {
 				Gtk.ImageMenuItem i = gtk as Gtk.ImageMenuItem;
 				if((i.image is Gtk.Image)) {
 					Gtk.Image image = i.image as Gtk.Image;
-					connect_to_image(image);
+					set_native_name(image, name);
+					image.notify["icon-name"] += item_property_notify;
+					image.notify["stock"] += item_property_notify;
+					switch(image.storage_type) {
+						case Gtk.ImageType.ICON_NAME:
+							set("icon-name", image.icon_name);
+						break;
+						case Gtk.ImageType.STOCK:
+							set("icon-stock", image.stock);
+						break;
+					}
 					i.set_data_full("old-image", image.ref(), g_object_unref);
 				}
 				i.notify["image"] += item_image_notify;
@@ -129,36 +114,21 @@ namespace GnomenuGtk {
 			}
 			private void item_property_notify(Gtk.Widget w, ParamSpec pspec) {
 				debug("item_property_notify %s( %s).%s", this.name, w.get_type().name(), pspec.name);
-				Type type = pspec.value_type;
-				weak string name = pspec.name;
 				string val;
-				if(type == typeof(string)) {
-					w.get(name, out val, null);
+				if(pspec.value_type == typeof(string)) {
+					w.get(pspec.name, out val, null);
 				}
-				if(type == typeof(bool)) {
+				if(pspec.value_type == typeof(bool)) {
 					bool b;
-					w.get(name, out b, null);
+					w.get(pspec.name, out b, null);
 					val = b.to_string();
 				}
-				if(type == typeof(int)) {
+				if(pspec.value_type == typeof(int)) {
 					int i;
-					w.get(name, out i, null);
+					w.get(pspec.name, out i, null);
 					val = i.to_string();
 				}
-				if(w is Gtk.Image) {
-					switch(pspec.name) {
-						case "icon-name":
-							name = "icon-name";
-						break;
-						case "stock":
-							name = "icon-stock";
-						break;
-						case "file":
-							name = "icon-file";
-						break;
-					}
-				}
-				this.set(name, val);
+				this.set(pspec.name, val);
 			}
 			private void item_label_set(Gtk.Widget w, Gtk.Widget? l) {
 				weak Gtk.Label old_label = (Gtk.Label) w.get_data("old-label");
@@ -169,16 +139,16 @@ namespace GnomenuGtk {
 						old_label.notify["label"] -= item_property_notify;
 						*/
 						old_label.notify -= item_property_notify;
-						old_label.notify -= accel_label_notify;
 					}
 					if(l!= null) {
 						l.notify["label"] += item_property_notify;
 						this.set("label", (l as Gtk.Label).label);
 						w.set_data_full("old-label", l.ref(), g_object_unref);
 						if(l is Gtk.AccelLabel) {
-							l.notify["accel-widget"] += accel_label_notify;
-							l.notify["accel-closure"] += accel_label_notify;
-							accel_label_notify(l as Gtk.AccelLabel);
+							(l as Gtk.AccelLabel).refetch();
+							string s = (l as Gtk.AccelLabel).accel_string;
+							weak string trimmed = s.strip();	
+							if(trimmed.size() >0) set("accel", trimmed);
 						}
 						if(l is Gtk.Separator || l is Gtk.SeparatorMenuItem) {
 							set("label", "|");
@@ -203,28 +173,27 @@ namespace GnomenuGtk {
 						old_image.notify -= item_property_notify; /*Vala bug detailed signal not removed*/
 					}
 					if(image != null) {
-						connect_to_image(image);
+						set_native_name(image, this.name);
+						image.notify["icon-name"] += item_property_notify;
+						image.notify["stock"] += item_property_notify;
+						switch(image.storage_type) {
+							case Gtk.ImageType.ICON_NAME:
+								this.set("icon-name", image.icon_name);
+							break;
+							case Gtk.ImageType.STOCK:
+								this.set("icon-stock", image.stock);
+							break;
+						}
 						item.set_data_full("old-image", image.ref(), g_object_unref);
 					} else {
 						item.set_data("old-image", null);
 					}
 				}
 			}
-			private void accel_label_notify(Gtk.Widget gtk) {
-				(gtk as Gtk.AccelLabel).refetch();
-				string s = (gtk as Gtk.AccelLabel).accel_string;
-				weak string trimmed = s.strip();	
-				if(trimmed.size() >0) set("accel", trimmed);
-			}
 		}
 		public Document() {}
-		private static int unique = 999;
 		public GMarkup.Tag CreateTag(string tag) {
-			Tag rt = new Widget(this);
-			rt.tag = tag;
-			rt.name = S("WIDGET" + unique.to_string());
-			unique++;
-			return rt;
+			return new Widget(this);
 		}
 		public weak Document.Widget wrap(Gtk.Widget gtk) {
 			weak string name = get_native_name(gtk);

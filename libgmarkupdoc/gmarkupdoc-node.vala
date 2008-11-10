@@ -31,10 +31,8 @@ namespace GMarkup {
 				_name = document.S(value);
 				document.dict.insert(name, this.ref() as GMarkup.Node);
 				this.unref();
-				if(name != null && oldname != null) {
-					debug("name changed from %s to %s", oldname, name);
-					document.renamed(this, oldname, name); 
-				}
+				debug("name changed from %s to %s", oldname, name);
+				document.renamed(this, oldname, name);
 			}
 		}
 		construct {
@@ -53,13 +51,11 @@ namespace GMarkup {
 			node.parent = this;
 			this.children.insert(node, pos);
 			document.inserted(this, node, pos);
-			debug("inserted %s to %s at %d", node.name, this.name, pos);
 		}
 		public virtual void remove(Node node) {
 			document.removed(this, node);
 			children.remove(node);
 			document.orphan.append(node);
-			debug("removed %s from %s", node.name, this.name);
 		}
 		public int index(Node node) {
 			return children.index(node);

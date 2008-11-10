@@ -32,10 +32,10 @@ namespace GnomenuGtk {
 
 		}
 		private Client() {
+			this.document = new Document();
 			this.path = "/org/gnome/GlobalMenu/Application";
 		}
 		construct {
-			this.document = new Document();
 			this.activated += (client, window, node) => {
 					activate_node(node);
 			};
@@ -43,8 +43,7 @@ namespace GnomenuGtk {
 			if(Environment.get_variable("GNOMENU_FUN") != null) {
 				window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
 				window.accept_focus = false;
-				assert(this.document != null);
-				ListView viewer = new ListView(this.document);
+				ListView viewer = new ListView(document);
 				viewer.activated += (viewer, node) => {
 					activate_node(node);
 				};

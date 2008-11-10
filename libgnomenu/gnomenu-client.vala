@@ -24,7 +24,7 @@ namespace Gnomenu {
 			do {
 				string str = rand.next_int().to_string().strip();
 				string appname = Environment.get_prgname();
-				appname.canon("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
+				((GLibCompat.String)appname).canon("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", '_');
 				if(appname[0] >= '0' && appname[0] <='9') appname = "_"+appname;
 				bus = "org.gnome.GlobalMenu.Applications." + appname + "-" + str;
 				debug("Obtaining BUS name: %s", bus);
@@ -58,8 +58,32 @@ namespace Gnomenu {
 			}
 			return null;
 		}
+		private void add_widget(string? parent, string name, int pos = -1) {
+			weak GMarkup.Node node = document.dict.lookup(name);
+			weak GMarkup.Node parent_node;
+			if(parent == null) {
+				parent_node = document.root;
+			}
+			else {
+				parent_node = document.dict.lookup(parent);
+			}
+			if(node == null) {
+				string[] names = {"name"};
+				string[] values = {name};
+				GMarkup.Tag node = document.CreateTagWithAttributes("widget", names, values);
+				parent_node.insert(node, pos);
+			}
+		}
+		private void remove_widget(string name) {
+			weak GMarkup.Node node = document.dict.lookup(name);
+			if(node != null) {
+				assert(node.parent != null);
+				node.parent.remove(node);
+				node = null;
+			}
+		}
 		[DBus (visible = false)]
-		public void register_window(string name, string xid) {
+		protected void register_window(string name, string xid) {
 			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				node.set("xid", xid);
@@ -71,7 +95,7 @@ namespace Gnomenu {
 			}
 		}
 		[DBus (visible = false)]
-		public void unregister_window(string name) {
+		protected void unregister_window(string name) {
 			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				weak string xid = node.get("xid");
@@ -85,7 +109,7 @@ namespace Gnomenu {
 
 		}
 		[DBus (visible = false)]
-		public void set_default(string name) {
+		protected void set_default(string name) {
 			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
 			if(node != null) {
 				weak string xid = node.get("xid");
@@ -97,22 +121,17 @@ namespace Gnomenu {
 			}
 		}
 		[DBus (visible = false)]
-		public void attach_menu_bar(string windowname, string menubarname) {
-			weak GMarkup.Tag node = document.dict.lookup(windowname) as GMarkup.Tag;
-			GMarkup.Tag ref_node = document.CreateTag("ref");
-			ref_node.set("target", menubarname);
-			warning("%u", ref_node.ref_count);
-			node.append(ref_node);
-		}
-		[DBus (visible = false)]
-		public void detach_menu_bar(string windowname, string menubarname) {
-			weak GMarkup.Tag node = document.dict.lookup(windowname) as GMarkup.Tag;
-			foreach(weak GMarkup.Node child in node.children) {
-				if(child is GMarkup.Tag)
-					if((child as GMarkup.Tag).get("target") == menubarname) {
-						node.remove(child);
-						break;
-					}
+		protected void set_transient_for(string name, string parent_name) {
+			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
+			weak GMarkup.Tag parent_node = document.dict.lookup(parent_name) as GMarkup.Tag;
+			if(node != null && parent_node != null) {
+				weak string xid = node.get("xid");
+				node.set("transient-for", parent_node.name);
+				try {
+					server.SetTransientFor(node.get("xid"), parent_node.get("xid"));
+				} catch(GLib.Error e) {
+					warning("%s", e.message);
+				}
 			}
 		}
 		public static int test(string[] args) {
@@ -120,20 +139,13 @@ namespace Gnomenu {
 			MainLoop loop = new MainLoop(null, false);
 			DocumentModel document = new Document();
 			Client c = new Client(document);
-			DocumentParser parser = new DocumentParser(document);
-			parser.parse(
-"""
-		<window name="window1"/>
-		<window name="window2"/>
-		<menubar name="menubar">
-			<item name="file" label="file"/>
-		</menubar>
-""");
-			c.attach_menu_bar("window1", "menubar");
-			c.attach_menu_bar("window2", "menubar");
-			c.detach_menu_bar("window1", "menubar");
+			c.add_widget(null, "window1");
+			c.add_widget(null, "window2");
+			c.add_widget("window1", "menu1");
+			c.add_widget("window2", "menu2");
 			c.register_window("window1", "0000000");
 			c.register_window("window2", "0000001");
+//			c.remove_widget("window1");
 			loop.run();
 			return 0;
 		}

@@ -1,7 +1,6 @@
-AC_INIT(gnome-globalmenu, [0.6], [rainwoodman@gmail.com], [gnome-globalmenu])
+AC_INIT(gnome-globalmenu, [0.6], [rainwoodman@gmail.com], [gnome-globalmenu] )
 
-AM_INIT_AUTOMAKE([1.9 tar-ustar])
-
+AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 GNOME_COMMON_INIT
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
@@ -17,14 +16,10 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 
 AC_PATH_PROG(VALAC_BIN, valac, valac, [`pwd`/vala$PATH_SEPARATOR$PATH])
-AC_PATH_PROG(VALADOC_BIN, valadoc, valadoc, [`pwd`/vala$PATH_SEPARATOR$PATH])
-VALADOC='$(VALADOC_BIN) $(VALAC_FLAGS)'
 VALAC='$(VALAC_BIN) $(VALAC_FLAGS)'
 VALAC_FLAGS='--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'
 AC_SUBST(VALAC_BIN)
 AC_SUBST(VALAC)
-AC_SUBST(VALADOC_BIN)
-AC_SUBST(VALADOC)
 AC_SUBST(VALAC_FLAGS)
 AC_SUBST(AM_VALAC_FLAGS)
 
@@ -44,8 +39,6 @@ AC_SUBST(GMARKUPDOC_DBUS_CFLAGS)
 AC_SUBST(GMARKUPDOC_DBUS_LIBS)
 GMARKUPDOC_DBUS_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
 AC_SUBST(GMARKUPDOC_DBUS_VALA_PKGS)
-GMARKUPDOC_VALA_PKGS='$(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) $(GMAKRUPDOC_DBUS_VALA_PKGS)'
-AC_SUBST(GMARKUPDOC_VALA_PKGS)
 
 dnl begin: Gnomenu
 PKG_CHECK_MODULES(GNOMENU, [glib-2.0 dbus-glib-1 gtk+-2.0])
@@ -85,22 +78,6 @@ AC_SUBST(GLOBALMENU_PANELAPPLET_VALA_PKGS)
 BONOBO_SERVER_DIR="$libdir/bonobo/servers"
 AC_SUBST(BONOBO_SERVER_DIR)
 AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir for BONOBO is])
-
-dnl end:applet
-
-dnl begin:doc
-AC_MSG_CHECKING(--enable-vala-doc argument)
-AC_ARG_ENABLE(vala-doc,
-	[	--enable-vala-doc	Build vala doc ],
-	[	enable_vala_doc=$enableval ],
-	[	enable_vala_doc="no" ])
-AC_DEFINE([ENABLE_VALA_DOC], [], [Build Vala doc])
-AM_CONDITIONAL([ENABLE_VALA_DOC], [test "$enable_vala_doc" = "yes" ])
-AC_MSG_RESULT($enable_vala_doc)
-
-if test "$enable_vala_doc" = "yes"; then
-	echo ;
-fi
 
 dnl end:applet
 
@@ -148,7 +125,6 @@ Makefile
 vapi-compat/Makefile
 libgmarkupdoc/Makefile
 libgnomenu/Makefile
-reference/Makefile
 gtk-modules/Makefile
 gtk-modules/libgnomenugtk/Makefile
 server/Makefile

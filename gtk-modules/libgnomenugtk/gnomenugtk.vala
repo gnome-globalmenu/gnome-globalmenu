@@ -56,7 +56,7 @@ namespace GnomenuGtk {
 			}	
 		}
 		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
-		Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_MASK, default_log_handler);
+		Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_MASK, default_log_handler);
 	}
 	[CCode (cname="gtk_module_init")]
 	public void init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
@@ -75,7 +75,7 @@ namespace GnomenuGtk {
 			LogFunc handler = (domain, level, message) => { };
 			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_DEBUG, handler);
+			Log.set_handler ("GnomenuGTK", LogLevelFlags.LEVEL_DEBUG, handler);
 		}
 		DBus.Connection conn;
 		try {
@@ -138,10 +138,10 @@ namespace GnomenuGtk {
 			type = "tearoff";
 		return type;
 	}
-	private void transverse(Gtk.Widget head, GMarkup.Node rel_root, int pos = -1) {
+	private void transverse(Gtk.Widget head, Document.Widget rel_root, int pos = -1) {
 		weak Gtk.Widget gtk = head;
 		assert(gtk is Gtk.Widget);
-		assert(rel_root is GMarkup.Node);
+		assert(rel_root is Document.Widget);
 		weak Document.Widget node = document().wrap(gtk);
 		if(gtk is Gtk.MenuShell) {
 			rel_root.insert(node, pos);
@@ -215,14 +215,12 @@ namespace GnomenuGtk {
 		weak Document.Widget menu_node = document().wrap(menu);
 		debug("binding menu %s to %s", menu_node.name, node.name);
 		/*TODO: transverse menu_node, adding children*/
-		transverse(menu, document().root);
-		client().attach_menu_bar(node.name, menu_node.name);
+		transverse(menu, node);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 		weak Document.Widget node = document().wrap(window);
 		weak Document.Widget menu_node = document().wrap(menu);
 		debug("unbinding menu %s to %s", menu_node.name, node.name);
-		client().detach_menu_bar(node.name, menu_node.name);
 		node.remove(menu_node);
 	}
 }
