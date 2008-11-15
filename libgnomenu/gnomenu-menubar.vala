@@ -30,7 +30,7 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		public void switch(string xid) {
+		public string? switch(string xid) {
 			bool need_new_menu_view = false;
 			weak GMarkup.Tag node = serverdoc.dict.lookup(xid) as GMarkup.Tag;
 			if(node == null) {
@@ -42,13 +42,13 @@ namespace Gnomenu {
 				weak string xid = find_default();
 				if(xid != null) {
 					@switch(xid);
-					return;
+					return xid;
 				}
 			}
 			if(node == null /*try transient for window*/) {
 				/*TODO*/
 			}
-			if(node == null) return;
+			if(node == null) return null;
 			weak string bus = node.get("bus");
 			debug("XID %s at BUS %s", xid, bus);
 			
@@ -108,6 +108,7 @@ namespace Gnomenu {
 			int num = (this as GtkCompat.Notebook).page_num(menu_hash.lookup(xid));
 			if(num != -1) this.set_current_page(num);
 			else this.set_current_page(0);
+			return xid;
 		}
 		construct {
 			serverdoc = RemoteDocument.connect("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");
