@@ -8,6 +8,8 @@ using PanelCompat;
 
 public extern GLib.Object gnome_program_init_easy(string name, string version,
 		string[] args, GLib.OptionContext #context);
+
+
 private class Applet : PanelCompat.Applet {
 static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
@@ -16,32 +18,45 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	private Gtk.Label window_title;
 	private Gtk.Box box;
 	private Gtk.EventBox event_box;
+
 	public Applet() {
 		int i = 0;
 	}
-	private void change_background(Gtk.Widget widget) {
+	private bool changing_menubar_background;
+	private void change_menubar_background() {
+		changing_menubar_background = true;
+		Gtk.Widget widget = menubar;
 		Gtk.Style entire_style = get_style();
-		weak Gdk.Pixmap entire_bg = entire_style.bg_pixmap[(int)StateType.NORMAL];
+		Gdk.Pixmap entire_bg = entire_style.bg_pixmap[(int)StateType.NORMAL];
 		Gtk.Allocation allocation = widget.allocation;
+		Gtk.Style child_style = (widget.get_style() as GtkCompat.Style).copy();
 
+			message("%p %d %d %d %d %s", entire_bg, allocation.x, allocation.y, allocation.width, allocation.height, entire_style.bg[(int)StateType.NORMAL].to_string());
 		if(entire_bg != null) {
-			Gtk.Style style = widget.get_style();
 			Gdk.Pixmap child_bg = new Gdk.Pixmap(entire_bg, allocation.width, allocation.height, -1);
 			Gdk.GC gc = new Gdk.GC(child_bg);
 			child_bg.draw_drawable(gc, entire_bg, 
 						allocation.x, allocation.y, 
 						0, 0, 
-						allocation.width, allocation.height);
-			style.bg_pixmap[(int)StateType.NORMAL] = child_bg;
-			style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
-			widget.set_style(style);
-			widget.queue_draw();
+						-1, -1);
+			child_style.bg_pixmap[(int)StateType.NORMAL] = child_bg;
+			child_style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
 		} else {
-			style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
-			style.bg_pixmap[(int)StateType.NORMAL] = null;
-			widget.set_style(style);
-			widget.queue_draw();
+			child_style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
+			child_style.bg_pixmap[(int)StateType.NORMAL] = null;
 		}
+		widget.set_style(child_style);
+		widget.queue_draw();
+	}
+	private void change_window_title_format() {
+		/*FIXME: get these values from GConf*/
+		int window_title_max_width = 15;
+		string window_title_font_string = "bold";
+		window_title.max_width_chars = window_title_max_width;
+		Pango.FontDescription font = PangoCompat.FontDescription.from_string(window_title_font_string);
+		message("font %s", font.to_string());
+		Pango.Layout layout = window_title.get_layout();
+		layout.set_font_description(font);
 	}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
@@ -50,19 +65,26 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		menubar.show_tabs = false;
 
 		window_title = new Gtk.Label("");
-		window_title.use_markup = true;
 
 		box = new Gtk.HBox(false, 0);
 		box.pack_start(window_title, false, false, 0);
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 
-		menubar.size_allocate += change_background;
-		window_title.size_allocate += change_background;
 		screen = Wnck.Screen.get_default();
-		this.style_set += (applet, old_style) => {
-			change_background(window_title);
-			change_background(menubar);
+
+		menubar.size_allocate += (menubar, allocation) => {
+			message("size sset");
+			if(changing_menubar_background) {
+				changing_menubar_background = false;
+				return;
+			}
+			this.change_menubar_background();
+		};
+
+		(this as GtkCompat.Widget).style_set += (applet, old_style) => {
+			message("sytle sset");
+			this.change_menubar_background();
 		};
 		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
@@ -84,7 +106,9 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 						title = null;
 					}
 				}
-				window_title.label = title;
+				window_title.set_text(title);
+				change_window_title_format();
+				window_title.queue_resize();
 			}
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
@@ -103,6 +127,8 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 			}
 			this.set_style(style);
 		};
+
+		this.add_preferences("/schemas/apps/gnome-globalmenu-applet/prefs");
 	}
 	private static bool verbose = false;
 	const OptionEntry[] options = {

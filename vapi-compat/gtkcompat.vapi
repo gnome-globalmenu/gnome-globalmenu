@@ -35,3 +35,12 @@ namespace GtkCompat {
 		public virtual Gtk.Style copy ();
 	}
 }
+
+[CCode (cprefix = "Pango", lower_case_cprefix = "pango_")]
+namespace PangoCompat {
+	[Compact]
+	[CCode (copy_function = "pango_font_description_copy", cheader_filename = "pango/pango.h", free_function="pango_font_description_free")]
+	public class FontDescription {
+		public static Pango.FontDescription from_string (string str);
+	}
+}

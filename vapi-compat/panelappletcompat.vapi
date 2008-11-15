@@ -9,5 +9,11 @@ namespace PanelCompat {
 		[NoArrayLength]
 		public void setup_menu (string xml, BonoboUI.Verb[] verb_list, void* data);
 		public signal void change_background (AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap);
+
+		public void add_preferences(string schema_dir) throws GLib.Error;
+		public bool gconf_get_bool(string key) throws GLib.Error;
+		public void gconf_set_bool(string key) throws GLib.Error;
+		public int gconf_get_int(string key) throws GLib.Error;
+		public void gconf_set_int(string key) throws GLib.Error;
 	}
 }
