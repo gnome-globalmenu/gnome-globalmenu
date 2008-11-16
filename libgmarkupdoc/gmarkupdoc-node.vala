@@ -60,7 +60,7 @@ namespace GMarkup {
 		public int index(Node node) {
 			return children.index(node);
 		}
-		public abstract virtual string summary(int level = 0);
+		public abstract string summary(int level = 0);
 		protected override void dispose() {
 			if(!disposed){
 				disposed = true;
