@@ -6,41 +6,45 @@ using Gtk;
 namespace GMarkup {
 	[DBus (name = "org.gnome.GlobalMenu.Document2")]
 	public class DBusView:GLib.Object, View {
-		Connection conn;
-		private DocumentModel _document;
+		Connection _conn;
+		private Document _document;
 		dynamic DBus.Object dbus;
 		[DBus (visible = false)]
 		public string path {get; construct;}
 		[DBus (visible = false)]
-		public weak DocumentModel? document {
+		public weak Node? root {
 			get {
-				return _document;
+				return _root;
 			} 
 			set {
-				if(document != null) {
-					document.inserted -= document_inserted;
-					document.removed -= document_removed;
-					document.updated -= document_updated;
+				if(_root != null) {
+					_document.inserted -= document_inserted;
+					_document.removed -= document_removed;
+					_document.updated -= document_updated;
 				} 
-				_document = value;
-				if(document != null) {
-					document.inserted += document_inserted;
-					document.removed += document_removed;
-					document.updated += document_updated;
+				_root = value;
+				if(_root != null) {
+					_document = _root.document;
+					_document.inserted += document_inserted;
+					_document.removed += document_removed;
+					_document.updated += document_updated;
 				}
 			}
 		}
-		public DBusView(DocumentModel document, string object_path) {
-			this.document = document;
-			path = object_path;
+		public DBusView(Node root, string object_path) {
+			this.root = root;
+			this.path = object_path;
 		}
-		private void document_inserted(DocumentModel document, Node parent, Node child, Node? refnode) {
+		private void document_inserted(Document document, Node parent, Node child, Node? refnode) {
+			if(!_root.hasChild(parent)) return;
 			inserted(parent.id, child.id, (refnode!=null)?refnode.id:-1);
 		}
-		private void document_removed(DocumentModel document, Node parent, Node child) {
+		private void document_removed(Document document, Node parent, Node child) {
+			if(!_root.hasChild(parent)) return;
 			removed(parent.id, child.id);
 		}
-		private void document_updated(DocumentModel document, Node node, string? prop) {
+		private void document_updated(Document document, Node node, string? prop) {
+			if(!_root.hasChild(node)) return;
 			updated(node.id, prop);
 		}
 

@@ -4,8 +4,8 @@ using GLib;
 namespace GMarkup {
 	public class DocumentParser {
 		private Queue<weak Node> queue;
-		private DocumentModel document;
-		public DocumentParser(DocumentModel document){
+		private Document document;
+		public DocumentParser(Document document){
 			this.document = document;
 		}
 		[NoArrayLength]
@@ -78,7 +78,7 @@ namespace GMarkup {
 		
 		}
 		public static int test (string [] args){
-			DocumentModel document = new Document();
+			Document document = new Document();
 			DocumentParser parser = new DocumentParser(document);
 			Node segment = parser.parse(
 """
@@ -97,9 +97,9 @@ namespace GMarkup {
 			document.inserted += (d, node, child, ref_node) => {
 				message("inserted %s %s", node.name, child.name);
 			};
-			document.root.append(segment);
-			print("back to string %s\n", parser.document.root.to_string());
-			string meta = document.root.to_meta_string();
+			document.append(segment);
+			print("back to string %s\n", parser.document.to_string());
+			string meta = document.to_meta_string();
 			segment = parser.parse("""
 					<gmarkup:meta id="42" name="test">
 					<test>
@@ -110,8 +110,8 @@ namespace GMarkup {
 					</gmarkup:meta>
 					""");
 			print("segment %s\n", segment.to_string());
-			document.mergeMeta(segment, document.root, null);
-			print("back to string %s\n", parser.document.root.to_string());
+			document.mergeMeta(segment, document, null);
+			print("back to string %s\n", parser.document.to_string());
 			document.memcheck();
 			segment = parser.parse("""
 					<gmarkup:meta id="3" name="#TEXT"><test/>
@@ -119,8 +119,8 @@ namespace GMarkup {
 					""");
 			weak Node node = document.getNode(2);
 			print("node = %s", node.to_string());
-			document.mergeMeta(segment, document.root, null);
-			print("back to string %s\n", parser.document.root.to_string());
+			document.mergeMeta(segment, document, null);
+			print("back to string %s\n", parser.document.to_string());
 			document.memcheck();
 			return 0;
 		}

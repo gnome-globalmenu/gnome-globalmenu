@@ -28,10 +28,8 @@ libgmarkupdoc_la_CFLAGS = \
 	$(GMARKUPDOC_DBUS_CFLAGS) \
 	$(NULL)
 base_VALASOURCES = \
-		gmarkupdoc-documentmodel.vala \
 		gmarkupdoc-node.vala \
 		gmarkupdoc-view.vala \
-		gmarkupdoc-section.vala \
 		gmarkupdoc-parser.vala \
 		gmarkupdoc-document.vala \
 		$(NULL)
@@ -43,9 +41,9 @@ list_VALASOURCES = \
 
 dbus_VALASOURCES = \
 		gmarkupdoc-dbusview.vala \
-		gmarkupdoc-remotedocument.vala \
 		$(NULL)
-
+#		gmarkupdoc-remotedocument.vala \
+#
 BUILT_SOURCES = \
 	gmarkupdoc.vapi \
 	gmarkupdoc.h \

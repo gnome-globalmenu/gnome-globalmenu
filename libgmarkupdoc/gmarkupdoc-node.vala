@@ -57,7 +57,17 @@ namespace GMarkup {
 	public class Node: GLib.Object {
 		public NodeType nodeType {get; construct;}
 		public int id {get; construct set;}
-		public weak DocumentModel document {get; construct;}
+		public weak Document document {
+			get { 
+				if(nodeType == NodeType.DOCUMENT) {
+					return this as Document;
+				}
+				return _document;
+			}
+			construct {
+				_document = value;
+			}
+		}
 		public weak string value {get{return _value;} set{
 			weak string old_value = _value;
 			_value = value;
@@ -91,10 +101,11 @@ namespace GMarkup {
 		private weak Node _parent;
 		private string _value;
 		private List<weak Node> _children;
+		private weak Document _document;
 		private Quark _name;
 		private Datalist<weak string> _attributes;
 		public bool anchored;
-		public Node (DocumentModel document, int id, NodeType type){
+		public Node (Document document, int id, NodeType type){
 			this.document = document;
 			this.id = id;
 			this.nodeType = type;	
@@ -160,6 +171,22 @@ namespace GMarkup {
 			remove(old_node);
 			return old_node;
 		}
+		public int getPos(Node child_to_find) {
+			int i = 0;
+			foreach(weak Node child in this._children) {
+				if(child == child_to_find) {
+					return i;
+				}
+				i++;
+			}
+			return -1;
+		}
+		public weak Node? insertAtPos(Node node, int pos) {
+			weak Node ref_node = this._children.nth_data(pos);
+			if(pos == -1) ref_node = null;
+			return insert(node, ref_node);
+
+		}
 		public weak Node? insert(Node node, Node? ref_node) {
 			if(node.parent != null) {
 				message("%s", node.to_string(true));
@@ -201,6 +228,9 @@ namespace GMarkup {
 			debug("removed %s from %s", node.name, this.name);
 			return node;
 		}
+		public void removeAll() {
+			_children = null;	
+		}
 		public void clear() {
 			_attributes.clear();
 		}
@@ -232,6 +262,24 @@ namespace GMarkup {
 		}
 		public virtual weak string? get(string key) {
 			return _attributes.get_data(key);	
+		}
+		/**
+		 * Test if a node is a child of this node
+		 *
+		 *  @param strict      should this be considered as a child of itself?
+		 *
+		 *  @return  true if the node is a child or child-child or child-child-child...; false if not.
+		 */
+		public bool hasChild(Node to_be_test, bool strict = false) {
+			weak Node p = to_be_test;
+			if(strict) p = p.parent;
+			while( p != null ) {
+				if(p == this) {
+					return true;
+				}
+				p = p.parent;
+			}
+			return false;
 		}
 		/**
 		 * Transverse the document tree from the given node.
