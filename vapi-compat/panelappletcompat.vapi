@@ -13,6 +13,8 @@ namespace PanelCompat {
 		public void add_preferences(string schema_dir) throws GLib.Error;
 		public bool gconf_get_bool(string key) throws GLib.Error;
 		public void gconf_set_bool(string key) throws GLib.Error;
+		public weak string gconf_get_string(string key) throws GLib.Error;
+		public void gconf_set_string(string key, string value) throws GLib.Error;
 		public int gconf_get_int(string key) throws GLib.Error;
 		public void gconf_set_int(string key) throws GLib.Error;
 	}
