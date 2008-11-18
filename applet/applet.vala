@@ -31,12 +31,32 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		Gtk.Allocation allocation = widget.allocation;
 		Gtk.Style child_style = (widget.get_style() as GtkCompat.Style).copy();
 
-			message("%p %d %d %d %d %s", entire_bg, allocation.x, allocation.y, allocation.width, allocation.height, entire_style.bg[(int)StateType.NORMAL].to_string());
 		if(entire_bg != null) {
-			Gdk.Pixmap child_bg = new Gdk.Pixmap(entire_bg, allocation.width, allocation.height, -1);
+			int entire_width;
+			int entire_height;
+			int x;
+			int y;
+			int width;
+			int height;
+			entire_bg.get_size(out entire_width, out entire_height);
+			if(allocation.width > entire_width) {
+				x = 0;
+				width = entire_width;
+			} else {
+				x = allocation.width;
+				width = entire_width;	
+			}
+			if(allocation.height > entire_height) {
+				y = 0;
+				height = entire_height;
+			} else {
+				y = 0;
+				height = entire_height;
+			}
+			Gdk.Pixmap child_bg = new Gdk.Pixmap(entire_bg, width, height, -1);
 			Gdk.GC gc = new Gdk.GC(child_bg);
 			child_bg.draw_drawable(gc, entire_bg, 
-						allocation.x, allocation.y, 
+						x, y, 
 						0, 0, 
 						-1, -1);
 			child_style.bg_pixmap[(int)StateType.NORMAL] = child_bg;
@@ -83,7 +103,6 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		};
 
 		(this as GtkCompat.Widget).style_set += (applet, old_style) => {
-			message("sytle sset");
 			this.change_menubar_background();
 		};
 		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
