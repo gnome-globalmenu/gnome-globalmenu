@@ -1,3 +1,5 @@
+SUBDIRS = . tests
+
 AM_CPPFLAGS = \
 	-g \
 	-include $(CONFIG_HEADER) \
@@ -14,91 +16,73 @@ libgmarkupdoc_LTLIBRARIES = \
 		libgmarkupdoc.la \
 		$(NULL)
 libgmarkupdoc_la_SOURCES = \
-		gmarkupdoc.h \
-		$(base_VALASOURCES:.vala=.c) \
-		$(base_VALASOURCES:.vala=.h) \
-		$(dbus_VALASOURCES:.vala=.c) \
-		$(dbus_VALASOURCES:.vala=.h) \
-		$(list_VALASOURCES:.vala=.c) \
-		$(list_VALASOURCES:.vala=.h) \
+		$(VALASOURCES:.vala=.c) \
+		$(VALASOURCES:.vala=.h) \
 		$(NULL)
+
 libgmarkupdoc_la_CFLAGS = \
-	$(GMARKUPDOC_BASE_CFLAGS) \
-	$(GMARKUPDOC_LIST_CFLAGS) \
-	$(GMARKUPDOC_DBUS_CFLAGS) \
+	$(GMARKUPDOC_CFLAGS) \
 	$(NULL)
-base_VALASOURCES = \
-		gmarkupdoc-node.vala \
-		gmarkupdoc-view.vala \
-		gmarkupdoc-parser.vala \
-		gmarkupdoc-document.vala \
+
+VALASOURCES = \
+		dom-error.vala \
+		dom-node.vala \
+		dom-attr.vala \
+		dom-characterdata.vala \
+		dom-text.vala \
+		dom-extended.vala \
+		dom-comment.vala \
+		dom-element.vala \
+		dom-document.vala \
+		dom-documentfragment.vala \
 		$(NULL)
 
-list_VALASOURCES = \
-		gmarkupdoc-documenttreeadapter.vala \
-		gmarkupdoc-listview.vala \
-		$(NULL)
+NEED_PATCH = dom-comment.vala \
+			 dom-text.vala \
+			 dom-document.vala \
+			 dom-attr.vala \
+			 dom-element.vala \
+			 dom-documentfragment.vala \
+			 dom-extended.vala \
+			 $(NULL)
 
-dbus_VALASOURCES = \
-		gmarkupdoc-dbusview.vala \
-		$(NULL)
-#		gmarkupdoc-remotedocument.vala \
-#
 BUILT_SOURCES = \
 	gmarkupdoc.vapi \
-	gmarkupdoc.h \
-	gmarkupdoc.c \
-	libgmarkupdoc.vala.stamp \
-	$(base_VALASOURCES:.vala=.c) \
-	$(base_VALASOURCES:.vala=.h) \
-	$(dbus_VALASOURCES:.vala=.c) \
-	$(dbus_VALASOURCES:.vala=.h) \
-	$(list_VALASOURCES:.vala=.c) \
-	$(list_VALASOURCES:.vala=.h) \
+	gmarkupdoc.deps \
+	$(VALASOURCES:.vala=.c) \
+	$(VALASOURCES:.vala=.h) \
 	$(NULL)
 
-gmarkupdoc.vapi libgmarkupdoc.vala.stamp: $(base_VALASOURCES) $(list_VALASOURCES) $(dbus_VALASOURCES) 
-	$(VALAC) -C $(GMARKUPDOC_BASE_VALA_PKGS) $(GMARKUPDOC_DBUS_VALA_PKGS) $(GMARKUPDOC_LIST_VALA_PKGS) --library gmarkupdoc $^
+gmarkupdoc.vapi : $(VALASOURCES) 
+	$(VALAC) -C $(GMARKUPDOC_VALA_PKGS:%=--pkg=%) --library gmarkupdoc $^
 	sed -e 's;GtkCompat.Container;Gtk.Container;g' gmarkupdoc.vapi > gmarkupdoc.vapi.new
 	mv gmarkupdoc.vapi.new gmarkupdoc.vapi
-	touch gmarkupdoc.vapi libgmarkupdoc.vala.stamp
+	for i in $(NEED_PATCH:.vala=.c); do sed -e '/g_type_create_instance/d' $$i > $$i.new; mv $$i.new $$i; done;
+gmarkupdoc.deps :
+	for i in $(GMARKUPDOC_VALA_PKGS); do echo $$i; done > $@;
 
-_HEADERS_ = $(libgmarkupdoc_base_la_VALASOURCES:%.vala=%.h) \
-	$(libgmarkupdoc_dbus_la_VALASOURCES:%.vala=%.h) \
-	$(libgmarkupdoc_list_la_VALASOURCES:%.vala=%.h) \
+_HEADERS_ = $(VALASOURCES:%.vala=%.h) \
 	$(NULL)
 
-gmarkupdoc.h: $(_HEADERS_) Makefile
-	echo '#ifndef _G_MARKUP_DOC_H_' > $@ ;
-	echo '#define _G_MARKUP_DOC_H_' >> $@ ;
-	for i in $(_HEADERS_); do \
-		echo '#include "'$$i'"' >> $@ ;\
-	done;
-	echo '#endif' >> $@ ;
-
 libgmarkupdoc_la_LIBADD = \
-		$(GMARKUPDOC_BASE_LIBS) \
-		$(GMARKUPDOC_LIST_LIBS) \
-		$(GMARKUPDOC_DBUS_LIBS) \
+		$(GMARKUPDOC_LIBS) \
 		$(NULL)
-
-$(NULL)
+libgmarkupdoc_la_LDFLAGS = \
+		-no-undefined \
+		$(NULL)
 
 EXTRA_DIST =  \
 	$(BUILT_SOURCES) \
-	$(libgmarkupdoc_base_la_VALASOURCES) \
-	$(libgmarkupdoc_dbus_la_VALASOURCES) \
-	$(libgmarkupdoc_list_la_VALASOURCES) \
+	$(VALASOURCES) \
 	$(NULL)
-DISTCLEANFILES = gmarkupdoc.h
 
 vapidir = $(VALA_VAPI_DIR)
 dist_vapi_DATA = \
+	gmarkupdoc.deps \
 	gmarkupdoc.vapi \
 	$(NULL)
 headerdir = $(includedir)/libgmarkupdoc
 dist_header_DATA = \
-	gmarkupdoc.h \
 	$(_HEADERS_) \
 	$(NULL)
 
