@@ -58,6 +58,7 @@ gmarkupdoc.vapi : $(VALASOURCES)
 	sed -e 's;GtkCompat.Container;Gtk.Container;g' gmarkupdoc.vapi > gmarkupdoc.vapi.new
 	mv gmarkupdoc.vapi.new gmarkupdoc.vapi
 	for i in $(NEED_PATCH:.vala=.c); do sed -e '/g_type_create_instance/d' $$i > $$i.new; mv $$i.new $$i; done;
+	sed dom-node.h -e '/glong\ ref_count/d' > dom-node.h.new; mv dom-node.h.new dom-node.h
 gmarkupdoc.deps :
 	for i in $(GMARKUPDOC_VALA_PKGS); do echo $$i; done > $@;
 

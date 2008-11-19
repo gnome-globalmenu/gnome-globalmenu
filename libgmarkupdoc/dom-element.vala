@@ -11,13 +11,9 @@ namespace DOM {
 
 		public Gee.List<Node> getElementsByTagName(string tagname) {
 			Gee.ArrayList<Node> rt = new Gee.ArrayList<Node>();
-			foreach(Node child in childNodes) {
-				if(child is Element && (child as Element).tagName == tagname)
-					rt.add(child);
-			}
+			getElementsByTagName_r(tagname, rt);
 			return rt;
 		}
-
 		/******
 		 * Default value is not handled
 		 *****/
@@ -74,6 +70,14 @@ namespace DOM {
 		 */
 		public bool hasAttribute(string name) {
 			return attributes.contains(name);
+		}
+
+		private void getElementsByTagName_r(string tagname, Gee.List<Node> list) {
+			if(this.tagName == tagname) list.add(this);
+			foreach(Node child in childNodes) {
+				if(child is Element)
+					(child as Element).getElementsByTagName_r(tagname, list);
+			}
 		}
 	}
 }

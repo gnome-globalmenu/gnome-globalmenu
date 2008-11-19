@@ -3,6 +3,9 @@ VALASOURCES = \
 	test-error.vala \
 	test-text.vala \
 	test-node.vala \
+	test-documentfragment.vala \
+	test-element.vala \
+	test-memory.vala \
 	$(NULL)
 
 BINS=$(VALASOURCES:.vala=)
@@ -10,9 +13,7 @@ BINS=$(VALASOURCES:.vala=)
 #	test-attr.vala \
 #	test-extended.vala \
 #	test-comment.vala \
-#	test-element.vala \
 #	test-document.vala \
-#	test-documentfragment.vala \
 #	#(NULL)
 AM_CPPFLAGS = \
 	-g \
@@ -23,8 +24,10 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 BUILT_SOURCES = $(VALASOURCES:.vala=.c)
+
 SUFFIXES= .vala
 %.c: %.vala
 	$(VALAC) -C --vapidir=../ --pkg gmarkupdoc $^
+
 noinst_PROGRAMS = $(BINS)
 LDADD = ../libgmarkupdoc.la

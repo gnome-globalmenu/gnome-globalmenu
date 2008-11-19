@@ -22,10 +22,10 @@ namespace DOM {
 			nodeType = type;
 			nodeName = name;
 			_childNodes = new Gee.ArrayList<Node>();
-			_attributes = new Gee.HashMap<weak string, Attr>();
+			_attributes = new Gee.HashMap<weak string, Attr>(str_hash, str_equal, direct_equal);
 		}		
 		/* Node interface */
-		public Document ownerDocument { get; construct; }
+		public weak Document ownerDocument { get; construct; }
 
 		public Type nodeType {get; construct set;}
 		public weak string? nodeName { 
@@ -76,10 +76,18 @@ namespace DOM {
 			}	
 		}
 		
-		private Node _parentNode;
+		private weak Node _parentNode;
 
 		public Node insertBefore(Node newChild, Node? refChild) throws Exception {
 			check_document(newChild);
+			if(newChild.nodeType == Node.Type.DOCUMENT_FRAGMENT) {
+				foreach(Node node in newChild.childNodes) {
+					node._parentNode = null;
+					insertBefore(node, refChild);
+				}
+				newChild.childNodes.clear();
+				return newChild;
+			}
 			int index;
 			if(refChild == null) {
 				index = _childNodes.size;
@@ -128,6 +136,7 @@ namespace DOM {
 		}
 
 		/* private */
+		public long ref_count;
 		private Quark _nodeNameQuark;
 		private Gee.List<Node> _childNodes;
 		private Gee.Map<Attr> _attributes;

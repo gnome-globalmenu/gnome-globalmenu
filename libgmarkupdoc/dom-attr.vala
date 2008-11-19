@@ -30,6 +30,6 @@ namespace DOM {
 				return value == null;
 			}
 		}
-		public Element ownerElement {get; set;}
+		public weak Element ownerElement {get; set;}
 	}
 }
