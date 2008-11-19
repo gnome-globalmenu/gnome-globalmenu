@@ -1,0 +1,27 @@
+libgee 0.1.4
+============
+
+ * Update for Vala 0.3.3.
+
+libgee 0.1.3
+============
+
+ * More unit tests.
+ * Update for Vala 0.3.1.
+
+libgee 0.1.2
+============
+
+ * Add unit tests.
+ * Bug fixes.
+
+libgee 0.1.1
+============
+
+ * Add get_element_type method to Gee.Iterable.
+ * Update for Vala 0.1.6.
+
+libgee 0.1.0
+============
+
+ * Initial release.

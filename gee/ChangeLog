@@ -1,0 +1,163 @@
+2008-11-01  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: Post-release version bump
+
+2008-11-01  Jürg Billeter  <j@bitron.ch>
+
+	* NEWS: update for 0.1.4 release
+
+2008-05-30  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala:
+	* gee/hashset.vala:
+
+	Use [Compact] for the HashMap.Node and HashSet.Node classes
+
+2008-05-30  Jürg Billeter  <j@bitron.ch>
+
+	* tests/testarraylist.vala: remove invalid type tests as these
+	cause compile errors with recent Vala versions
+
+2008-05-07  Jürg Billeter  <j@bitron.ch>
+
+	* gee/Makefile.am:
+	* tests/Makefile.am:
+
+	Update build system to use valac -C,
+	patch by Jaap A. Haitsma, fixes bug 531224
+
+2008-05-01  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: Post-release version bump
+
+2008-05-01  Jürg Billeter  <j@bitron.ch>
+
+	* NEWS: update for 0.1.3 release
+
+2008-05-01  Jürg Billeter  <j@bitron.ch>
+
+	* tests/testarraylist.vala:
+	* tests/testhashmap.vala:
+	* tests/testhashset.vala:
+
+	Extend test suite, based on patch by Quikee
+
+2008-04-14  Jürg Billeter  <j@bitron.ch>
+
+	* gee/arraylist.vala, gee/hashmap.vala, gee/hashset.vala,
+	  gee/iterator.vala, gee/list.vala, gee/map.vala,
+	  gee/readonlycollection.vala, gee/readonlylist.vala,
+	  gee/readonlymap.vala, gee/readonlyset.vala: mark types as
+	  nullable where appropriate
+
+2008-04-13  Jürg Billeter  <j@bitron.ch>
+
+	* gee/arraylist.vala, gee/hashmap.vala, gee/hashset.vala,
+	  gee/readonlycollection.vala, gee/readonlylist.vala,
+	  gee/readonlymap.vala, gee/readonlyset.vala: remove deprecated
+	  syntax for construct parameters
+
+2008-04-13  Jürg Billeter  <j@bitron.ch>
+
+	* gee/arraylist.vala, gee/hashmap.vala, gee/hashset.vala: remove
+	  obsolete non-null type syntax
+
+2008-03-08  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: Post-release version bump
+
+2008-03-08  Jürg Billeter  <j@bitron.ch>
+
+	* NEWS: update for 0.1.2 release
+
+2008-03-08  Jürg Billeter  <j@bitron.ch>
+
+	* tests/Makefile.am: dist all source files
+
+2008-02-26  Jürg Billeter  <j@bitron.ch>
+
+	* Makefile.am, Makefile.decl, configure.ac, gee/Makefile.am,
+	  tests/Makefile.am, tests/testarraylist.vala,
+	  tests/testhashmap.vala, tests/testhashset.vala: add unit tests
+
+2008-02-26  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashset.vala: fix iterator, patch by Ali Sabil
+
+2008-02-05  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala, gee/readonlycollection.vala, gee/readonlylist.vala,
+	  gee/readonlymap.vala, gee/readonlyset.vala: remove unreachable
+	  return statements
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala, gee/hashset.vala: fix invalid variable initializers
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: Post-release version bump
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	* NEWS: update for 0.1.1 release
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	Update svn:ignore property.
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	* gee/arraylist.vala, gee/hashmap.vala, gee/hashset.vala,
+	  gee/iterable.vala, gee/readonlycollection.vala, gee/readonlylist.vala,
+	  gee/readonlyset.vala: add get_element_type method to Gee.Iterable
+
+2008-01-22  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala, gee/hashset.vala: remove unneeded type casts
+
+	* gee/Makefile.am: don't use filter function in makefiles as it's a
+	  GNU make extension
+
+2007-12-15  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala, gee/hashset.vala: update for vala trunk
+
+2007-11-03  Jürg Billeter  <j@bitron.ch>
+
+	* gee/Makefile.am: update for vala 0.1.4
+
+2007-09-07  Jürg Billeter  <j@bitron.ch>
+
+	* update license headers to the GNU Lesser General Public License,
+	  version 2.1 or later
+
+2007-08-30  Jürg Billeter  <j@bitron.ch>
+
+	* gee/hashmap.vala, gee/hashset.vala: replace reference-type structs
+	  by classes
+
+2007-08-30  Jürg Billeter  <j@bitron.ch>
+
+	* gee/arraylist.vala, gee/hashmap.vala, gee/hashset.vala,
+	  gee/iterable.vala, gee/iterator.vala, gee/list.vala, gee/map.vala,
+	  gee/readonlycollection.vala, gee/readonlylist.vala,
+	  gee/readonlymap.vala, gee/readonlyset.vala: explicitly subtype
+	  GLib.Object to support future versions of Vala
+
+2007-07-27  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: Post-release version bump
+
+2007-07-27  Jürg Billeter  <j@bitron.ch>
+
+	* NEWS: update for 0.1.0 release
+
+2007-07-27  Jürg Billeter  <j@bitron.ch>
+
+	* gee/Makefile.am: distribute gee.vala to fix build without valac
+
+2007-07-27  Jürg Billeter  <j@bitron.ch>
+
+	* configure.ac: fix package name
+
