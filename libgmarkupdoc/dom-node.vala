@@ -127,12 +127,13 @@ namespace DOM {
 		public bool hasChildNodes() { return _childNodes.size > 0; }
 
 		public virtual Node cloneNode(bool deep = false) {
-			/*FIXME*/
+			/*TODO: write this*/
+			/*FIXME: returing this is wrong*/
 			return this;	
 		}
 
 		public void normalize() {
-			
+			/*TODO: write this*/
 		}
 
 		/* private */

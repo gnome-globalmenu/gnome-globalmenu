@@ -24,10 +24,11 @@ namespace DOM {
 		public Attr createAttribute(string name) {
 			return new Attr(this, name);
 		}
-		/*
-		public Gee.List<weak Node> getElementsByTagName();
-		public Node getElementById(string id);
-*/
+		public Node getElementById(string id) {
+			/* TODO: write getElementById. */
+			/* FIXME: shouldn't return this */
+			return this;
+		}
 /*
    Not IMPLEMENTED.
 		public Node implemetation {get;}
