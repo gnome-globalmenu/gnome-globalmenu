@@ -6,10 +6,16 @@ namespace DOM {
 		public Document() {
 			base(null, Node.Type.DOCUMENT, "#document");
 			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
+			_childNodes = new Gee.ArrayList<weak Node>();
 		}
 		/* Document Interface */
 		public DocumentType documentType;
 		public Element documentElement;
+		public override Gee.List<weak Node> childNodes {
+			get {
+				return _childNodes;
+			}
+		}
 		public Element createElement(string tagName) {
 			return new Element(this, tagName);
 		}
@@ -36,6 +42,9 @@ namespace DOM {
 */
 		/* private */
 		private Gee.Map<weak string, weak Element> _id_map;			
+		private int object_built = 0;
+		private Gee.List<weak Node> _childNodes;
+
 		public void register_element (string id, Element? element) {
 			if(element == null) {
 				if(!_id_map.contains(id)) return;

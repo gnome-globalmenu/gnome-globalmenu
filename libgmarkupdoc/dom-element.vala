@@ -74,7 +74,7 @@ namespace DOM {
 
 		private void getElementsByTagName_r(string tagname, Gee.List<Node> list) {
 			if(this.tagName == tagname) list.add(this);
-			foreach(Node child in childNodes) {
+			foreach(Node child in _childNodes) {
 				if(child is Element)
 					(child as Element).getElementsByTagName_r(tagname, list);
 			}

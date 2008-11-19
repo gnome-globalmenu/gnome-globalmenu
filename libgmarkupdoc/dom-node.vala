@@ -25,7 +25,7 @@ namespace DOM {
 			_attributes = new Gee.HashMap<weak string, Attr>(str_hash, str_equal, direct_equal);
 		}		
 		/* Node interface */
-		public weak Document ownerDocument { get; construct; }
+		public Document ownerDocument { get; construct; }
 
 		public Type nodeType {get; construct set;}
 		public weak string? nodeName { 
@@ -38,40 +38,40 @@ namespace DOM {
 		}
 		public string? nodeValue { get; construct set;}
 
-		public Gee.List<Node> childNodes {get { return _childNodes;}}
+		public virtual Gee.List<Node> childNodes {get { return _childNodes;}}
 		public Gee.Map<weak string, Attr> attributes {get { return _attributes;}}
 
 		public Node parentNode { get { return _parentNode; }}
 
 		public Node? firstChild { 
 			get { 
-				if(_childNodes.size == 0) return null;
-				Node rt = _childNodes.get(0); 
+				if(childNodes.size == 0) return null;
+				Node rt = childNodes.get(0); 
 				return rt;
 			}
 		}
 		public Node? lastChild { 
 			get { 
-				if(_childNodes.size == 0) return null;
-				Node rt = _childNodes.get(_childNodes.size - 1);
+				if(childNodes.size == 0) return null;
+				Node rt = childNodes.get(childNodes.size - 1);
 				return rt;
 			}
 		}
 		public Node? previousSibling { 
 			get { 
 				if(_parentNode == null) return null;
-				int index = _parentNode._childNodes.index_of(this);
+				int index = _parentNode.childNodes.index_of(this);
 				if(index <= 0) return null;
-				Node rt = _parentNode._childNodes.get(index - 1);
+				Node rt = _parentNode.childNodes.get(index - 1);
 				return rt;
 			}
 		}
 		public Node? nextSibling {
 			get {
 				if(_parentNode == null) return null;
-				int index = _parentNode._childNodes.index_of(this);
-				if(index + 1 == _parentNode._childNodes.size) return null;
-				Node rt = _parentNode._childNodes.get(index + 1);
+				int index = _parentNode.childNodes.index_of(this);
+				if(index + 1 == _parentNode.childNodes.size) return null;
+				Node rt = _parentNode.childNodes.get(index + 1);
 				return rt;
 			}	
 		}
@@ -90,13 +90,13 @@ namespace DOM {
 			}
 			int index;
 			if(refChild == null) {
-				index = _childNodes.size;
+				index = childNodes.size;
 			} else {
 				check_document(refChild);
-				index = _childNodes.index_of(refChild);
+				index = childNodes.index_of(refChild);
 				if(index == -1) throw new Exception.NOT_FOUND_ERR("refChild not found");
 			}
-			_childNodes.insert(index, newChild);
+			childNodes.insert(index, newChild);
 			newChild._parentNode = this;
 			return newChild;
 		}
@@ -105,9 +105,9 @@ namespace DOM {
 			check_document(newChild);
 			check_document(oldChild);
 			Node oldChild_ref = oldChild; /*protect the oldChild from being freed by _childNodes*/
-			int index = _childNodes.index_of(oldChild);
+			int index = childNodes.index_of(oldChild);
 			if(index == -1) throw new Exception.NOT_FOUND_ERR("oldChild not found");
-			_childNodes.set(index, newChild);
+			childNodes.set(index, newChild);
 			newChild._parentNode = this;
 			oldChild_ref._parentNode = null;
 			return oldChild_ref;
@@ -119,12 +119,12 @@ namespace DOM {
 
 		public Node removeChild(Node oldChild) throws Exception {
 			Node oldChild_ref = oldChild;
-			if(!_childNodes.remove(oldChild)) throw new Exception.NOT_FOUND_ERR("oldChild not found");
+			if(!childNodes.remove(oldChild)) throw new Exception.NOT_FOUND_ERR("oldChild not found");
 			oldChild_ref._parentNode = null;
 			return oldChild_ref;
 		}
 
-		public bool hasChildNodes() { return _childNodes.size > 0; }
+		public bool hasChildNodes() { return childNodes.size > 0; }
 
 		public virtual Node cloneNode(bool deep = false) {
 			/*TODO: write this*/
@@ -139,8 +139,8 @@ namespace DOM {
 		/* private */
 		public long ref_count;
 		private Quark _nodeNameQuark;
-		private Gee.List<Node> _childNodes;
-		private Gee.Map<Attr> _attributes;
+		public Gee.List<Node> _childNodes;
+		public Gee.Map<Attr> _attributes;
 
 		private void check_document(Node node) throws Exception {
 			if(node.ownerDocument == this.ownerDocument) return;

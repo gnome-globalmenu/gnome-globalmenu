@@ -26,8 +26,12 @@ AM_CPPFLAGS = \
 BUILT_SOURCES = $(VALASOURCES:.vala=.c)
 
 SUFFIXES= .vala
-%.c: %.vala
+%.c: %.vala test.vala
 	$(VALAC) -C --vapidir=../ --pkg gmarkupdoc $^
+	if ! grep 'typedef void* GDataTestFunc' test.h; then \
+	sed test.h -e '10i\ typedef void* GDataTestFunc;' > test.h.new;  \
+	mv test.h.new test.h; \
+	fi;
 
 noinst_PROGRAMS = $(BINS)
-LDADD = ../libgmarkupdoc.la
+LDADD = ../libgmarkupdoc.la test.o
