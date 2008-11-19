@@ -6,6 +6,7 @@ VALASOURCES = \
 	test-documentfragment.vala \
 	test-element.vala \
 	test-memory.vala \
+	test-document.vala \
 	$(NULL)
 
 BINS=$(VALASOURCES:.vala=)
@@ -13,7 +14,6 @@ BINS=$(VALASOURCES:.vala=)
 #	test-attr.vala \
 #	test-extended.vala \
 #	test-comment.vala \
-#	test-document.vala \
 #	#(NULL)
 AM_CPPFLAGS = \
 	-g \
