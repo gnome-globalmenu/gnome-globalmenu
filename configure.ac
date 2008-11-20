@@ -26,6 +26,7 @@ AC_SUBST(GLIB_LIBS)
 AC_CONFIG_FILES([Makefile
 			gee/Makefile
            gee/gee/Makefile
+		   gee/dom-gee-1.0.pc
            gee/tests/Makefile
 		   dom/Makefile
 		   dom/dom-1.0.pc
