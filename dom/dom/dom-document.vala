@@ -4,9 +4,13 @@ using Gee;
 namespace DOM {
 	public class Document: Node {
 		public Document() {
+			Document.with_type_name("#");
+		}
+		public Document.with_type_name(string typename) {
 			base(null, Node.Type.DOCUMENT, "#document");
 			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
 			_weak_pointers = new Gee.HashSet<void**>();
+			documentType = new DocumentType(typename);
 		}
 		~Document() {
 			foreach(void** pointer in _weak_pointers) {
@@ -14,8 +18,17 @@ namespace DOM {
 			}
 		}
 		/* Document Interface */
-		public DocumentType documentType;
-		public Element documentElement;
+		public DocumentType documentType {get; construct;}
+		public Element? documentElement {
+			get {
+				foreach(Node child in childNodes) {
+					if(child.nodeType == Node.Type.ELEMENT) {
+						return child as Element;
+					}
+				}
+				return null;
+			}
+		}
 
 		public Element createElement(string tagName) {
 			return new Element(this, tagName);
