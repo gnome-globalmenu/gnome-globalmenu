@@ -8,6 +8,7 @@ VALASOURCES = \
 	test-element.vala \
 	test-memory.vala \
 	test-document.vala \
+	test-tostring.vala \
 	$(NULL)
 
 TEST_PROGS+=$(VALASOURCES:.vala=)
@@ -45,7 +46,7 @@ test.stamp: test.vapi
 	touch $@
 
 .vala.stamp:
-	$(VALAC) -C --vapidir=. --vapidir=$(top_srcdir)/gee/gee --vapidir=$(top_srcdir)/dom/dom --pkg dom-1.0 --pkg dom-gee-1.0 --pkg test $(@:.stamp=.vala);
+	$(VALAC) -C --vapidir=. --vapidir=$(top_srcdir)/gee/gee --vapidir=$(top_srcdir)/dom/dom --pkg dom-1.0 --pkg dom-gee-1.0 --pkg test $(@:.stamp=.vala)
 	touch $@
 
 noinst_PROGRAMS = $(TEST_PROGS)

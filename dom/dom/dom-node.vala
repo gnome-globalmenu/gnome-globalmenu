@@ -23,9 +23,17 @@ namespace DOM {
 			nodeName = name;
 			_childNodes = new Gee.ArrayList<Node>();
 			_attributes = new Gee.HashMap<weak string, Attr>(str_hash, str_equal, direct_equal);
+			if(owner != null) {
+				owner.add_weak_pointer(&_ownerDocument);
+			}
 		}		
+		~Node () {
+			if(ownerDocument != null) {
+				ownerDocument.remove_weak_pointer(&_ownerDocument);
+			}
+		}
 		/* Node interface */
-		public Document ownerDocument { get; construct; }
+		public weak Document ownerDocument { get; construct; }
 
 		public Type nodeType {get; construct set;}
 		public weak string? nodeName { 
@@ -133,7 +141,7 @@ namespace DOM {
 		}
 
 		/* private */
-		public long ref_count;
+		public long ref_count; /* disable this hack if Node is based on Object*/
 		private Quark _nodeNameQuark;
 		public Gee.List<Node> _childNodes;
 		public Gee.Map<Attr> _attributes;

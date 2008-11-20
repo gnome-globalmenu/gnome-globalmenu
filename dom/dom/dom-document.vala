@@ -6,16 +6,17 @@ namespace DOM {
 		public Document() {
 			base(null, Node.Type.DOCUMENT, "#document");
 			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
-			_childNodes = new Gee.ArrayList<weak Node>();
+			_weak_pointers = new Gee.HashSet<void**>();
+		}
+		~Document() {
+			foreach(void** pointer in _weak_pointers) {
+				*pointer = null;
+			}
 		}
 		/* Document Interface */
 		public DocumentType documentType;
 		public Element documentElement;
-		public override Gee.List<Node> childNodes {
-			get {
-				return _childNodes;
-			}
-		}
+
 		public Element createElement(string tagName) {
 			return new Element(this, tagName);
 		}
@@ -42,9 +43,7 @@ namespace DOM {
 */
 		/* private */
 		private Gee.Map<weak string, weak Element> _id_map;			
-		private int object_built = 0;
-
-		private Gee.List<weak Node> _childNodes;
+		private Gee.Set<void**> _weak_pointers;
 
 		public void register_element (string id, Element? element) {
 			if(element == null) {
@@ -58,6 +57,12 @@ namespace DOM {
 			if(_id_map.contains(id) &&
 				_id_map.get(id) == element);
 			_id_map.remove(id);
+		}
+		public void add_weak_pointer ( void** pointer ) {
+			_weak_pointers.add(pointer);
+		}
+		public void remove_weak_pointer ( void** pointer ) {
+			_weak_pointers.remove(pointer);
 		}
 	}
 }

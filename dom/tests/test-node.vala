@@ -14,8 +14,7 @@ class NodeTest: TestMan {
 
 			Element n2 = doc.createElement("n2");
 			doc.insertBefore(n2, n1);
-			assert(n1 is DOM.Node && n1.ref_count == 1);
-			assert(n2 is DOM.Node && n2.ref_count == 1);
+
 			assert(n2.nextSibling == n1);
 			assert(n1.previousSibling == n2);
 

@@ -24,7 +24,7 @@ namespace DOM {
 			} 
 			construct set {
 				if(is_id) {
-					if(_ownerElement != null) {
+					if(_ownerElement != null && ownerDocument != null) {
 						if(nodeValue != null)
 							ownerDocument.unregister_element(nodeValue, _ownerElement);
 						if(value != null)
@@ -44,7 +44,7 @@ namespace DOM {
 				return _ownerElement;
 			} set {
 				if(is_id) {
-					if(nodeValue != null) {
+					if(nodeValue != null && ownerDocument != null) {
 						if(_ownerElement != null)
 							ownerDocument.unregister_element(nodeValue, _ownerElement);
 						if(value != null)
@@ -60,7 +60,7 @@ namespace DOM {
 		public bool is_id { get; construct; }
 		~Attr() {
 			if(is_id) {
-				if(_ownerElement != null)
+				if(_ownerElement != null && ownerDocument != null)
 					ownerDocument.unregister_element(value, _ownerElement);
 			}
 		}
