@@ -26,24 +26,21 @@ namespace Gnomenu {
 			List<weak GMarkup.Node> to_remove;
 
 			foreach (weak GMarkup.Node node in document.root.children) {
-				if(node is GMarkup.Tag) {
-					weak GMarkup.Tag tagnode = node as GMarkup.Tag;
-					if(tagnode.get("bus") == bus) {
-						to_remove.append(tagnode);
-					}
+				if(node.get("bus") == bus) {
+					to_remove.append(node);
 				}
 			}
 			foreach(weak GMarkup.Node node in to_remove) {
 				document.root.remove(node);
-				document.DestroyNode(node);
+				document.destroyNode(node);
 			}
 		}
-		private weak GMarkup.Tag? find_node_by_xid(string xid) {
-			return document.dict.lookup(xid) as GMarkup.Tag;
+		private weak GMarkup.Node? find_node_by_xid(string xid) {
+			return (document as Document).getNodeByName(xid);
 		}
 		public void RegisterWindow (string client_bus, string xid) {
-			GMarkup.Tag node = find_node_by_xid(xid);
-			if(node!=null) {
+			weak GMarkup.Node node = find_node_by_xid(xid);
+			if(node != null) {
 				if(node.get("bus") == client_bus) {
 					return;
 				} else {
@@ -51,35 +48,29 @@ namespace Gnomenu {
 					document.root.remove(node);
 				}
 			}	
-			node = document.CreateTag("client");
+			node = document.createElement("client");
 			node.freeze();
-			node.set("name", xid);
-			node.set("bus", client_bus);
-			node.unfreeze();
+				node.set("name", xid);
+				node.set("bus", client_bus);
+			node.thaw();
 			document.root.append(node);
 			debug("register window %s %s", client_bus, xid);
 		}
 		public void RemoveWindow (string client_bus, string xid) {
-			GMarkup.Tag node= find_node_by_xid(xid);
+			weak GMarkup.Node node = find_node_by_xid(xid);
 			debug("remove window %s %s", client_bus, xid);
 			if(node != null)
-				if(node.get("bus") == client_bus)
+				if(node.get("bus") == client_bus) {
 					document.root.remove(node);
+					document.destroyNode(node);
+				}
 		}
 		public void SetDefault (string xid) {
 			foreach (weak GMarkup.Node node in document.root.children) {
-				if(node is GMarkup.Tag) {
-					weak GMarkup.Tag tagnode = node as GMarkup.Tag;
-					if(tagnode.get("default") != null)
-						tagnode.set("default", null);
-				}
+					node.set("default", null);
 			}
-			weak GMarkup.Tag tag = find_node_by_xid(xid);
-			tag.set("default", "true");
-		}
-		public void SetTransientFor (string xid, string parent_xid) {
-			weak GMarkup.Tag tag = find_node_by_xid(xid);
-			tag.set("transientfor", parent_xid);
+			weak GMarkup.Node node = find_node_by_xid(xid);
+			node.set("default", "true");
 		}
 	}
 }

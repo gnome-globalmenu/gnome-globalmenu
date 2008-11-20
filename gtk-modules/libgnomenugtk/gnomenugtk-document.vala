@@ -4,9 +4,8 @@ using GMarkup;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	protected class Document : GMarkup.Document, GMarkup.DocumentModel {
-		HashTable<weak string, weak Gtk.Widget> dict_nw;
-		public class Widget:GMarkup.Tag {
+	protected class Document : Gnomenu.Document {
+		public class Node:Gnomenu.Document.Node {
 			private weak Gtk.Widget _gtk;
 			public Gtk.Widget gtk {
 				get {return _gtk;}
@@ -18,11 +17,11 @@ namespace GnomenuGtk {
 					connect();
 				}
 			}
-			private Widget(Document document) {
-				this.document = document;
+			private Node(Document document, int unique, NodeType type) {
+				base(document, unique, type);
 			}
 			private static void weak_ref_notify(void* data, void* object){
-				Widget _this = (Widget) data;
+				Node _this = (Node) data;
 				if(_this.parent != _this.document.orphan) {
 					_this.parent.remove(_this);
 				}
@@ -219,23 +218,22 @@ namespace GnomenuGtk {
 		}
 		public Document() {}
 		private static int unique = 999;
-		public GMarkup.Tag CreateTag(string tag) {
-			Tag rt = new Widget(this);
-			rt.tag = tag;
-			rt.name = S("WIDGET" + unique.to_string());
-			unique++;
-			return rt;
+		public override weak GMarkup.Node createNode(NodeType type) {
+			GMarkup.Node rt = new Node(this, unique, type);
+			node_pool.insert(rt.id, rt.ref() as GMarkup.Node);
+			assert(node_pool.lookup(rt.id) != null);
+			return node_pool.lookup(rt.id);
 		}
-		public weak Document.Widget wrap(Gtk.Widget gtk) {
+		public weak Node wrap(Gtk.Widget gtk) {
 			weak string name = get_native_name(gtk);
 			if(name != null) {
-				weak Document.Widget rt = dict.lookup(name) as Document.Widget;
+				weak Node rt = getNodeByName(name) as Node;
 				if(rt != null) return rt;
 			}
 			int id = Client.instance().unique;
 			name = S("%s%d".printf(gtk.get_type().name(), id));
 			set_native_name(gtk, name);
-			Widget node = CreateTag("widget") as Widget;
+			Node node = CreateElement("widget") as Node;
 			node.set("name", name);
 			node.gtk = gtk;
 			return node;

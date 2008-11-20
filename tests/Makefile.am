@@ -1,16 +1,16 @@
 NULL = 
 LDADD =  \
 $(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
-$(top_builddir)/libgnomenu/libgnomenu.la \
 $(NULL)
-
+#$(top_builddir)/libgnomenu/libgnomenu.la \
+#
 CLASSES = 
 CLASSES += GMarkup_DocumentParser 
-CLASSES += GMarkup_RemoteDocument
-CLASSES += GMarkup_DBusView
+#CLASSES += GMarkup_RemoteDocument
+#CLASSES += GMarkup_DBusView
 CLASSES += GMarkup_ListView
-CLASSES += Gnomenu_Client
-CLASSES += Gnomenu_MenuBar
+#CLASSES += Gnomenu_Client
+#CLASSES += Gnomenu_MenuBar
 
 noinst_PROGRAMS = lowercname $(CLASSES)
 BUILT_SOURCES = $(CLASSES:%=%.c)

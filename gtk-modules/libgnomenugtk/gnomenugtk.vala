@@ -177,11 +177,11 @@ namespace GnomenuGtk {
 		node.remove(child_node);
 	}
 	private void child_insert(Gtk.Widget widget, Gtk.Widget child, int pos) {
-		weak Document.Widget node = document().wrap(widget);
+		weak GMarkup.Node node = document().wrap(widget);
 		transverse(child, node, pos);
 	}
 	private void do_type_hint(Gtk.Widget window) {
-		weak Document.Widget node = document().wrap(window);
+		weak GMarkup.Node node = document().wrap(window);
 		if((window as Gtk.Window).type_hint == Gdk.WindowTypeHint.DESKTOP) {
 			client().set_default(node.name);
 		}

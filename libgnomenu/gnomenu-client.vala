@@ -40,7 +40,7 @@ namespace Gnomenu {
 		}
 		public void Activate(string xid, string nodename) {
 			weak GMarkup.Node window = find_window_by_xid(xid);
-			weak GMarkup.Node node = this.document.dict.lookup(nodename);
+			weak GMarkup.Node node = (this.document as Document).getNodeByName(nodename);
 			if(node == null) warning("node: %s not found", nodename);
 			this.activated(window, node);
 		}
@@ -49,18 +49,15 @@ namespace Gnomenu {
 
 		private weak GMarkup.Node? find_window_by_xid(string xid) {
 			foreach (weak GMarkup.Node node in document.root.children) {
-				if(node is GMarkup.Tag) {
-					weak GMarkup.Tag tag = node as GMarkup.Tag;
-					if(tag.get("xid") == xid) {
-						return tag;
-					}
+				if(node.get("xid") == xid) {
+					return node;
 				}
 			}
 			return null;
 		}
 		[DBus (visible = false)]
 		public void register_window(string name, string xid) {
-			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
+			weak GMarkup.Node node = (document as Document).getNodeByName(name);
 			if(node != null) {
 				node.set("xid", xid);
 				try {
@@ -72,7 +69,7 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		public void unregister_window(string name) {
-			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
+			weak GMarkup.Node node = (document as Document).getNodeByName(name);
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -80,13 +77,13 @@ namespace Gnomenu {
 				} catch(GLib.Error e) {
 					warning("%s", e.message);
 				}
-				node.unset("xid");
+				node.set("xid", null);
 			}
 
 		}
 		[DBus (visible = false)]
 		public void set_default(string name) {
-			weak GMarkup.Tag node = document.dict.lookup(name) as GMarkup.Tag;
+			weak GMarkup.Node node = (document as Document).getNodeByName(name);
 			if(node != null) {
 				weak string xid = node.get("xid");
 				try {
@@ -98,21 +95,21 @@ namespace Gnomenu {
 		}
 		[DBus (visible = false)]
 		public void attach_menu_bar(string windowname, string menubarname) {
-			weak GMarkup.Tag node = document.dict.lookup(windowname) as GMarkup.Tag;
-			GMarkup.Tag ref_node = document.CreateTag("ref");
+			weak GMarkup.Node node = (document as Document).getNodeByName(windowname);
+			GMarkup.Node ref_node = document.createElement("ref");
 			ref_node.set("target", menubarname);
 			warning("%u", ref_node.ref_count);
 			node.append(ref_node);
 		}
 		[DBus (visible = false)]
 		public void detach_menu_bar(string windowname, string menubarname) {
-			weak GMarkup.Tag node = document.dict.lookup(windowname) as GMarkup.Tag;
+			weak GMarkup.Node node = (document as Document).getNodeByName(windowname);
 			foreach(weak GMarkup.Node child in node.children) {
-				if(child is GMarkup.Tag)
-					if((child as GMarkup.Tag).get("target") == menubarname) {
-						node.remove(child);
-						break;
-					}
+				if(child.get("target") == menubarname) {
+					node.remove(child);
+					document.destroyNode(child);
+					break;
+				}
 			}
 		}
 		public static int test(string[] args) {
@@ -121,19 +118,22 @@ namespace Gnomenu {
 			DocumentModel document = new Document();
 			Client c = new Client(document);
 			DocumentParser parser = new DocumentParser(document);
-			parser.parse(
+			GMarkup.Node fragment = parser.parse(
 """
-		<window name="window1"/>
-		<window name="window2"/>
+		<window name="window1"/><window name="window2"/>
 		<menubar name="menubar">
 			<item name="file" label="file"/>
 		</menubar>
-""");
+"""
+);
+			document.root.append(fragment);
+			/*
 			c.attach_menu_bar("window1", "menubar");
 			c.attach_menu_bar("window2", "menubar");
 			c.detach_menu_bar("window1", "menubar");
 			c.register_window("window1", "0000000");
 			c.register_window("window2", "0000001");
+			*/
 			loop.run();
 			return 0;
 		}

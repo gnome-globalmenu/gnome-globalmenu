@@ -10,7 +10,7 @@ AM_CPPFLAGS = \
 BUILT_SOURCES = gee.vala.stamp
 
 lib_LTLIBRARIES = \
-	libgee.la
+	libdom-gee.la \
 	$(NULL)
 
 libgee_la_VALASOURCES = \
@@ -29,30 +29,30 @@ libgee_la_VALASOURCES = \
 	set.vala \
 	$(NULL)
 
-libgee_la_SOURCES = \
+libdom_gee_la_SOURCES = \
 	gee.vala.stamp \
 	$(libgee_la_VALASOURCES:.vala=.c) \
 	$(libgee_la_VALASOURCES:.vala=.h) \
 	$(NULL)
 
-geeincludedir = $(includedir)/gee-1.0/gee
+geeincludedir = $(includedir)/dom-gee-1.0/gee
 
 geeinclude_HEADERS = \
 	$(libgee_la_VALASOURCES:.vala=.h) \
 	$(NULL)
 
-gee-1.0.vapi gee.vala.stamp: $(libgee_la_VALASOURCES)
-	$(VALAC) -C --basedir $(top_srcdir) --library gee-1.0 $^
+dom-gee-1.0.vapi gee.vala.stamp: $(libgee_la_VALASOURCES)
+	$(VALAC) -C --basedir $(top_srcdir) --library dom-gee-1.0 $^
 	touch $@
 
-libgee_la_LIBADD = \
+libdom_gee_la_LIBADD = \
 	$(GLIB_LIBS) \
 	$(NULL)
 
 vapidir = $(datadir)/vala/vapi
 
 dist_vapi_DATA = \
-	gee-1.0.vapi \
+	dom-gee-1.0.vapi \
 	$(NULL)
 
-EXTRA_DIST += $(libgee_la_VALASOURCES) gee-1.0.vapi gee.vala.stamp
+EXTRA_DIST += $(libgee_la_VALASOURCES) dom-gee-1.0.vapi gee.vala.stamp

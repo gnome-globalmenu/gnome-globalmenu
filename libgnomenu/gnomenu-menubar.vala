@@ -20,19 +20,18 @@ namespace Gnomenu {
 			}
 			menu_hash.remove(xid);
 		}
-		private weak string? find_default() {
+		private weak GMarkup.Node? find_default() {
 			foreach(weak GMarkup.Node node in serverdoc.root.children) {
-				if(node is GMarkup.Tag)
-				if((node as GMarkup.Tag).get("default") == "true") {
+				if(node.get("default") == "true") {
 					debug("Default is found");
-					return (node as GMarkup.Tag).name;
+					return node;
 				}
 			}
 			return null;
 		}
 		public void switch(string xid) {
 			bool need_new_menu_view = false;
-			weak GMarkup.Tag node = serverdoc.dict.lookup(xid) as GMarkup.Tag;
+			weak GMarkup.Node node = serverdoc.getNode(xid);
 			if(node == null) {
 				this.remove_page_by_xid(xid);
 				bus_hash.remove(xid);

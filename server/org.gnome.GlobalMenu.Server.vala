@@ -37,7 +37,7 @@ public class Application {
 			}
 		}
 		MainLoop loop = new MainLoop(null, false);
-		Document document = new Document();
+		Gnomenu.Document document = new Gnomenu.Document();
 		Server c = new Server(document);
 		if(viewer) {
 			Gtk.Window window = new Window(Gtk.WindowType.TOPLEVEL);

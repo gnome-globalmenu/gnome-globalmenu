@@ -8,10 +8,10 @@ SUBDIRS = \
 	$(NULL)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = gee-1.0.pc
+pkgconfig_DATA = dom-gee-1.0.pc
 
 EXTRA_DIST += \
 	MAINTAINERS \
-	gee-1.0.pc.in \
+	dom-gee-1.0.pc.in \
 	$(NULL)
 

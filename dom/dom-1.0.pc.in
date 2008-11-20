@@ -5,9 +5,9 @@ includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@
 
-Name: libgee
-Description: The GObject collection library
+Name: libdom
+Description: The GObject DOM library
 Version: @VERSION@
 Requires: glib-2.0 gobject-2.0
-Libs: -L${libdir} -lgee
-Cflags: -I${includedir}/gee-1.0
+Libs: -L${libdir} -ldom
+Cflags: -I${includedir}/dom-1.0

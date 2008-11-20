@@ -1,3 +1,7 @@
+include $(top_srcdir)/Makefile.decl
+gee_srcdir=$(top_srcdir)/gee
+dom_srcdir=$(top_srcdir)/dom
+
 NULL = 
 VALASOURCES = \
 	test-text.vala \
@@ -8,7 +12,7 @@ VALASOURCES = \
 	test-document.vala \
 	$(NULL)
 
-BINS=$(VALASOURCES:.vala=)
+TEST_PROGS=$(VALASOURCES:.vala=)
 #
 #	test-attr.vala \
 #	test-extended.vala \
@@ -16,10 +20,9 @@ BINS=$(VALASOURCES:.vala=)
 #	#(NULL)
 AM_CPPFLAGS = \
 	-g \
-	-include $(CONFIG_HEADER) \
-	-I../ \
-	-DG_LOG_DOMAIN=\"GMarkup\" \
-	$(GMARKUPDOC_CFLAGS) \
+	-I$(gee_srcdir)/gee \
+	-I$(dom_srcdir)/dom \
+	$(GLIB_CFLAGS) \
 	$(NULL)
 
 BUILT_SOURCES = test.vapi \
@@ -27,26 +30,24 @@ BUILT_SOURCES = test.vapi \
 		$(VALASOURCES:.vala=.h) \
 		.stamp
 
-noinst_LTLIBRARIES = libtest.la
+noinst_LIBRARIES = libtest.a
 
-libtest_la_SOURCES = test.c test.h
+libtest_a_SOURCES = test.c test.h
 
 test.vapi:	test.vala
 
 SUFFIXES = .vala
 test.vapi: test.vala
-	$(VALAC) -C --vapidir=../ --library test $^
+	$(VALAC) -C --library test $^
 	sed test.h -e '10i\ typedef void* GDataTestFunc;' > test.h.new; 
 	mv test.h.new test.h
 test.c: test.vala
 	echo ;
 
 %.c: %.vala
-	$(VALAC) -C --vapidir=. --vapidir=../ --pkg gmarkupdoc --pkg test $(@:.c=.vala);
+	$(VALAC) -C --vapidir=. --vapidir=$(gee_srcdir)/gee --vapidir=$(dom_srcdir)/dom --pkg dom-1.0 --pkg dom-gee-1.0 --pkg test $(@:.c=.vala);
 	touch $@
 
-noinst_PROGRAMS = $(BINS)
-LDADD = ../libgmarkupdoc.la libtest.la
+noinst_PROGRAMS = $(TEST_PROGS)
+LDADD = ../dom/libdom.la libtest.a
 
-tests: $(BINS)
-	gtester $(BINS)
