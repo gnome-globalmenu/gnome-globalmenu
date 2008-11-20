@@ -38,7 +38,7 @@ namespace DOM {
 		}
 		public string? nodeValue { get; construct set;}
 
-		public virtual Gee.List<weak Node> childNodes {get { return _childNodes;}}
+		public virtual Gee.List<Node> childNodes {get { return _childNodes;}}
 		public Gee.Map<weak string, Attr> attributes {get { return _attributes;}}
 
 		public Node parentNode { get { return _parentNode; }}
@@ -46,15 +46,13 @@ namespace DOM {
 		public Node? firstChild { 
 			get { 
 				if(childNodes.size == 0) return null;
-				Node rt = childNodes.get(0); 
-				return rt;
+				return childNodes.get_weak_ref(0); 
 			}
 		}
 		public Node? lastChild { 
 			get { 
 				if(childNodes.size == 0) return null;
-				Node rt = childNodes.get(childNodes.size - 1);
-				return rt;
+				return childNodes.get_weak_ref(childNodes.size - 1);
 			}
 		}
 		public Node? previousSibling { 
@@ -62,8 +60,7 @@ namespace DOM {
 				if(_parentNode == null) return null;
 				int index = _parentNode.childNodes.index_of(this);
 				if(index <= 0) return null;
-				Node rt = _parentNode.childNodes.get(index - 1);
-				return rt;
+				return _parentNode.childNodes.get_weak_ref(index - 1);
 			}
 		}
 		public Node? nextSibling {
@@ -71,8 +68,7 @@ namespace DOM {
 				if(_parentNode == null) return null;
 				int index = _parentNode.childNodes.index_of(this);
 				if(index + 1 == _parentNode.childNodes.size) return null;
-				Node rt = _parentNode.childNodes.get(index + 1);
-				return rt;
+				return _parentNode.childNodes.get_weak_ref(index + 1);
 			}	
 		}
 		

@@ -11,7 +11,7 @@ namespace DOM {
 		/* Document Interface */
 		public DocumentType documentType;
 		public Element documentElement;
-		public override Gee.List<weak Node> childNodes {
+		public override Gee.List<Node> childNodes {
 			get {
 				return _childNodes;
 			}

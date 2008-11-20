@@ -1,3 +1,7 @@
+This library has been modifed to support get_weak_ref.
+Other aspects are identical to the original libgee.
+
+
 libgee is a collection library providing GObject-based interfaces and
 classes for commonly used data structures.
 
