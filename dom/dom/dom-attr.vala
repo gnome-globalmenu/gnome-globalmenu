@@ -10,7 +10,11 @@ namespace DOM {
 	public class Attr : Node {
 		public Attr (Document owner, string name) {
 			base(owner, Node.Type.ATTRIBUTE, name);
-			this.isId = ownerDocument.documentType.isId(name);
+			if(ownerDocument != null && ownerDocument.documentType != null) {
+				this.isId = ownerDocument.documentType.isId(name);
+			} else
+				this.isId = false;
+
 			this.specified = false;
 		}
 		/* Attr Interface */
@@ -23,7 +27,7 @@ namespace DOM {
 		public override string? nodeValue {
 			get {
 				if(!specified) {
-					if(ownerElement != null && ownerDocument != null)
+					if(ownerElement != null && ownerDocument != null && ownerDocument.documentType != null)
 						return ownerDocument.documentType.default_attribute_value(ownerElement.tagName, name);
 					else
 						return "";

@@ -4,15 +4,28 @@ using Gee;
 namespace DOM {
 	public class Document: Node {
 		public Document() {
-			Document.with_type_name("#");
+			Document.full(null, null, new DocumentType("#documenttype", "", ""));
 		}
-		public Document.with_type_name(string typename) {
+		public Document.full(string? namespaceURI = null, string? qualifiedName = null, DocumentType? doctype = null) {
+			assert(namespaceURI == null); /*namespaceURI is not supported*/
 			base(null, Node.Type.DOCUMENT, "#document");
 			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
-			documentType = new DocumentType(typename);
+			documentType = doctype;
+			if(doctype != null) {
+				/*** 
+				 * NOTE: the ownerDocument of doctype is not set to this.
+				 *    I don't get the point why the spec requires it.
+				 * */
+			}
+			if(qualifiedName != null) {
+				Element element = createElement(qualifiedName);
+				appendChild(element);
+			}
 		}
 		/* Document Interface */
-		public DocumentType documentType {get; construct;}
+		public string documentURI {get; set;}
+
+		public DocumentType? documentType {get; construct;}
 		public Element? documentElement {
 			get {
 				foreach(Node child in childNodes) {

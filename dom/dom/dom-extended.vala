@@ -21,8 +21,10 @@ namespace DOM {
 	}
 
 	public class DocumentType : Node {
-		public DocumentType (string name) {
-			base(null, Node.Type.DOCUMENT_TYPE, name);
+		public DocumentType (string qualifiedName, string publicId, string systemId) {
+			base(null, Node.Type.DOCUMENT_TYPE, qualifiedName);
+			this.publicId = publicId;
+			this.systemId = systemId;
 		}
 		/* DocumentType Interface */
 		public string name {
@@ -30,8 +32,8 @@ namespace DOM {
 		}
 		public Gee.Map<weak string, Entity> entities;
 		public Gee.Map<weak string, Notation> notations;
-		public string publicId;
-		public string systemId;
+		public string publicId {get; construct;}
+		public string systemId {get; construct;}
 		public string internalSubset;
 
 		/* private */
