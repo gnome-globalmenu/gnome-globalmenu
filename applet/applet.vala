@@ -1,5 +1,6 @@
 using GLib;
 using Gtk;
+using Gdk;
 using Gnomenu;
 using Wnck;
 using WnckCompat;
@@ -8,133 +9,131 @@ using PanelCompat;
 
 public extern GLib.Object gnome_program_init_easy(string name, string version,
 		string[] args, GLib.OptionContext #context);
-
-
 private class Applet : PanelCompat.Applet {
 static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
-	private Gtk.Label window_title;
 	private Gtk.Box box;
-	private Gtk.EventBox event_box;
+
+	private Gtk.Label label;
+	private Gdk.Pixbuf icon;
+	private Gtk.EventBox eb;
+	static const string GCONF_ROOT_KEY = "/apps/gnome-globalmenu-applet";
 
 	public Applet() {
 		int i = 0;
 	}
-	private bool changing_menubar_background;
-	private void change_menubar_background() {
-		changing_menubar_background = true;
-		Gtk.Widget widget = menubar;
-		Gtk.Style entire_style = get_style();
-		Gdk.Pixmap entire_bg = entire_style.bg_pixmap[(int)StateType.NORMAL];
-		Gtk.Allocation allocation = widget.allocation;
-		Gtk.Style child_style = (widget.get_style() as GtkCompat.Style).copy();
 
-		if(entire_bg != null) {
-			int entire_width;
-			int entire_height;
-			int x;
-			int y;
-			int width;
-			int height;
-			entire_bg.get_size(out entire_width, out entire_height);
-			if(allocation.width > entire_width) {
-				x = 0;
-				width = entire_width;
-			} else {
-				x = allocation.width;
-				width = entire_width;	
-			}
-			if(allocation.height > entire_height) {
-				y = 0;
-				height = entire_height;
-			} else {
-				y = 0;
-				height = entire_height;
-			}
-			Gdk.Pixmap child_bg = new Gdk.Pixmap(entire_bg, width, height, -1);
-			Gdk.GC gc = new Gdk.GC(child_bg);
-			child_bg.draw_drawable(gc, entire_bg, 
-						x, y, 
-						0, 0, 
-						-1, -1);
-			child_style.bg_pixmap[(int)StateType.NORMAL] = child_bg;
-			child_style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
-		} else {
-			child_style.bg[(int)StateType.NORMAL] = entire_style.bg[(int)StateType.NORMAL];
-			child_style.bg_pixmap[(int)StateType.NORMAL] = null;
-		}
-		widget.set_style(child_style);
-		widget.queue_draw();
+	public static void message(string msg) {
+		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
+							    Gtk.DialogFlags.MODAL,
+							    Gtk.MessageType.INFO,
+							    Gtk.ButtonsType.OK,
+							    msg);
+		m.run();
+		m.destroy();
 	}
-	private void change_window_title_format() {
-		/*FIXME: get these values from GConf*/
-		int window_title_max_width = 15;
-		string window_title_font_string = "bold";
-		window_title.max_width_chars = window_title_max_width;
-		Pango.FontDescription font = PangoCompat.FontDescription.from_string(window_title_font_string);
-		message("font %s", font.to_string());
-		Pango.Layout layout = window_title.get_layout();
-		layout.set_font_description(font);
+	private void update_by_gconf() {
+
+	}
+	private void app_selected(Gtk.ImageMenuItem item) {
+		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
+			(item.user_data as Wnck.Window).minimize();
+			return;
+		}
+
+		// Ensure viewport visibility
+		int current_workspace_x = (item.user_data as Wnck.Window).get_workspace().get_viewport_x();
+		int current_workspace_y = (item.user_data as Wnck.Window).get_workspace().get_viewport_y();
+		int x,y,w,h;
+		(item.user_data as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+		(item.user_data as Wnck.Window).get_screen().move_viewport(current_workspace_x + x, current_workspace_y + y);
+		
+		(item.user_data as Wnck.Window).activate(Gtk.get_current_event_time());
+		(item.user_data as Wnck.Window).get_workspace().activate(Gtk.get_current_event_time());
+		(item.user_data as Wnck.Window).unminimize(Gtk.get_current_event_time());
+		
+		// ensure is on top
+		(item.user_data as Wnck.Window).make_above();
+		(item.user_data as Wnck.Window).unmake_above();
+
+		//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
+	}
+	private bool app_name_pressed(Gtk.EventBox eventbox, Gdk.EventButton event) {
+		if (event.button!=1) return false;
+		Gtk.Menu menu = new Gtk.Menu();
+		weak GLib.List<Wnck.Window> windows = screen.get_windows();
+		foreach(weak Wnck.Window window in windows) {
+			if (!window.is_skip_pager()) {
+				Gtk.ImageMenuItem mi;
+				mi = new Gtk.ImageMenuItem.with_label(window.get_name());
+				if (window.is_active()) (mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>");			
+				mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
+				mi.user_data = window;
+				mi.activate += app_selected;
+				mi.show_all();
+				menu.append(mi);
+			}
+		}
+		menu.show_all();
+		menu.popup(null, null, null, event.button, event.time);
+		return true;
 	}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
 		menubar = new Gnomenu.MenuBar();
 		menubar.set_name("PanelMenuBar");
+		box = new Gtk.HBox(false, 0);
 		menubar.show_tabs = false;
 
-		window_title = new Gtk.Label("");
+		string menu_definition = 
+		    "<popup name=\"button3\">" +
+		        "<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gnome-stock-about\"/>" +
+		    "</popup>";
 
-		box = new Gtk.HBox(false, 0);
-		box.pack_start(window_title, false, false, 0);
+		label = new Gtk.Label("<b>GlobalMenu</b>");
+		label.use_markup = true;
+		label.visible = true;
+			
+		eb = new EventBox();
+		eb.set_visible_window(true);
+		eb.set_size_request(label.width_request,label.height_request);
+		eb.add(label);
+		eb.button_press_event += app_name_pressed;
+		box.pack_start(eb, false, true, 0);
+
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
-
 		screen = Wnck.Screen.get_default();
-
-		menubar.size_allocate += (menubar, allocation) => {
-			message("size sset");
-			if(changing_menubar_background) {
-				changing_menubar_background = false;
-				return;
-			}
-			this.change_menubar_background();
-		};
-
-		(this as GtkCompat.Widget).style_set += (applet, old_style) => {
-			this.change_menubar_background();
-		};
 		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
-				xid = menubar.switch(xid);
-				string title;
-				if(xid != null)	{
-					weak Wnck.Window real_window = Wnck.Window.get(xid.to_ulong());
-					if(real_window != null) {
-						string app_name = real_window.get_application().get_icon_name();
-						title = real_window.get_icon_name();
-						if(app_name.size() < title.size()) {
-							title = app_name;
-						}
-					} else {
-						title = null;
-					}
-				}
-				window_title.set_text(title);
-				change_window_title_format();
-				window_title.queue_resize();
+				menubar.switch(xid);
+
+				string aname = "Desktop";
+				if (xid!=this.menubar.find_default()) aname = window.get_application().get_name();
+				label.set_markup ("<b>" + aname + " </b>");
 			}
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
-			Gtk.Style style = (Gtk.rc_get_style(this) as GtkCompat.Style).copy();
+			Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
 			switch(bgtype){
 				case Panel.AppletBackgroundType.NO_BACKGROUND:
+					//Gtk.Style def_style = Gtk.rc_get_style(this.menubar);
+					Gtk.Style def_style = Gtk.rc_get_style(this);
+					this.menubar.set_style(def_style);
+					this.menubar.queue_draw();
+
+					this.eb.set_style(def_style);
+					this.eb.queue_draw();
+
+					return;
 				break;
 				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
 					style.bg_pixmap[(int)StateType.NORMAL] = null;
@@ -144,10 +143,12 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
 				break;
 			}
-			this.set_style(style);
-		};
+			this.menubar.set_style(style);
+			this.menubar.queue_draw();
 
-		this.add_preferences("/schemas/apps/gnome-globalmenu-applet/prefs");
+			this.eb.set_style(style);
+			this.eb.queue_draw();
+		};
 	}
 	private static bool verbose = false;
 	const OptionEntry[] options = {

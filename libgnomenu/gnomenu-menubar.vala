@@ -20,7 +20,7 @@ namespace Gnomenu {
 			}
 			menu_hash.remove(xid);
 		}
-		private weak string? find_default() {
+		public weak string? find_default() {
 			foreach(weak GMarkup.Node node in serverdoc.root.children) {
 				if(node is GMarkup.Tag)
 				if((node as GMarkup.Tag).get("default") == "true") {
@@ -30,85 +30,85 @@ namespace Gnomenu {
 			}
 			return null;
 		}
-		public string? switch(string xid) {
+		public void switch(string xid) {
 			bool need_new_menu_view = false;
 			weak GMarkup.Tag node = serverdoc.dict.lookup(xid) as GMarkup.Tag;
-			if(node == null) {
-				this.remove_page_by_xid(xid);
-				bus_hash.remove(xid);
-				this.set_current_page(0);
-			}
-			if(node == null /* try default window*/) {
-				weak string xid = find_default();
-				if(xid != null) {
-					@switch(xid);
-					return xid;
+			
+			weak string bus="";
+			if(node != null) {
+				bus = node.get("bus");
+				debug("XID %s at BUS %s", xid, bus);
+				
+				if(bus_hash.lookup(xid) != bus) {
+					bus_hash.insert(xid, bus);
+					need_new_menu_view = true;
+					debug("BUS changed for XID");
 				}
 			}
-			if(node == null /*try transient for window*/) {
-				/*TODO*/
-			}
-			if(node == null) return null;
-			weak string bus = node.get("bus");
-			debug("XID %s at BUS %s", xid, bus);
 			
-			if(bus_hash.lookup(xid) != bus) {
-				bus_hash.insert(xid, bus);
-				need_new_menu_view = true;
-				debug("BUS changed for XID");
-			}
 			if(menu_hash.lookup(xid) == null) {
 				debug("No menuview for this XID");
 				need_new_menu_view = true;
 			}
 			if(need_new_menu_view) {
-				dynamic DBus.Object client;
-				RemoteDocument clientdoc = RemoteDocument.connect(bus, "/org/gnome/GlobalMenu/Application");
-				client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
-				string widget_name = client.QueryXID(xid);
-				debug("widget_name %s", widget_name);
-				node = clientdoc.dict.lookup(widget_name) as GMarkup.Tag;
-				if(node != null) {
-					Gtk.Box box = new Gtk.VBox(false, 0);
-					box.visible = true;
-					(box as GtkCompat.Widget).style_set += (box, style) => {
-						foreach (weak Gtk.Widget child in (box as Gtk.Container).get_children()) {
-							child.set_style((box as Gtk.Widget).style);
-						}
-					};
-					foreach(weak GMarkup.Node c in node.children) {
-						if(!(c is GMarkup.Tag)) continue;
-						if((c as GMarkup.Tag).tag == "menubar") {
-							MenuView view = new MenuView();
-							view.visible = true;
-							debug("menubar found");
-							GMarkup.Section section = new GMarkup.Section(clientdoc, c);
-							view.document = section;
-							view.set_data("xid", view.document.S(xid));
-							view.set_data_full("client", client.ref(), g_object_unref);
-							view.activated += (view, node) => {
-								dynamic DBus.Object client = (DBus.Object) view.get_data("client");
-								weak string xid = (string) view.get_data("xid");
-								message("shit %s", xid);
-								try {
-									client.Activate(xid, node.name);
-								} catch (GLib.Error e){
-									warning("%s", e.message);
-								}
-							};
-							box.pack_start(view, true, true, 0);
+				Gtk.Box box = new Gtk.HBox(false, 0);
+				box.visible = true;
+				(box as GtkCompat.Widget).style_set += (box, style) => {
+					foreach (weak Gtk.Widget child in (box as Gtk.Container).get_children()) {
+						child.set_style((box as Gtk.Widget).style);
+					}
+				};
+
+				if (node!=null) {
+					dynamic DBus.Object client;
+					RemoteDocument clientdoc = RemoteDocument.connect(bus, "/org/gnome/GlobalMenu/Application");
+					client = conn.get_object(bus, "/org/gnome/GlobalMenu/Application", "org.gnome.GlobalMenu.Client");
+					string widget_name = client.QueryXID(xid);
+					
+					debug("widget_name %s", widget_name);
+					node = clientdoc.dict.lookup(widget_name) as GMarkup.Tag;
+					if(node != null) {
+						foreach(weak GMarkup.Node c in node.children) {
+							
+							if(!(c is GMarkup.Tag)) continue;
+							if((c as GMarkup.Tag).tag == "menubar") {
+								MenuView view = new MenuView();
+								view.visible = true;
+								debug("menubar found");
+								GMarkup.Section section = new GMarkup.Section(clientdoc, c);
+								view.document = section;
+								view.set_data("xid", view.document.S(xid));
+								view.set_data_full("client", client.ref(), g_object_unref);
+								view.activated += (view, node) => {
+									dynamic DBus.Object client = (DBus.Object) view.get_data("client");
+									weak string xid = (string) view.get_data("xid");
+									message("shit %s", xid);
+									try {
+										client.Activate(xid, node.name);
+									} catch (GLib.Error e){
+										warning("%s", e.message);
+									}
+								};
+								box.pack_start(view, true, true, 0);
+							}
 						}
 					}
-					this.remove_page_by_xid(xid);
-					box.set_style(this.style);
-					this.append_page(box, null);
-					menu_hash.insert(xid, box);
+				} else {
+					Gtk.EventBox eb2 = new EventBox();
+					eb2.set_visible_window(true);
+
+					eb2.visible = true;
+					box.pack_start(eb2, true, true, 0);
+					box.visible = true;
 				}
+				this.remove_page_by_xid(xid);
+				box.set_style(this.style);
+				this.append_page(box, null);
+				menu_hash.insert(xid, box);
 			}
 			int num = (this as GtkCompat.Notebook).page_num(menu_hash.lookup(xid));
 			if(num != -1) this.set_current_page(num);
 			else this.set_current_page(0);
-			return xid;
 		}
 		construct {
 			serverdoc = RemoteDocument.connect("org.gnome.GlobalMenu.Server", "/org/gnome/GlobalMenu/Server");

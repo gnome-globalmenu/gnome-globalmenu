@@ -22,6 +22,8 @@ AM_VALAC_FLAGS = \
 	--pkg gmarkupdoc  \
 	--pkg wnckcompat  \
 	--pkg panelappletcompat \
+	--pkg gconf-2.0 \
+	--pkg gdk-2.0 \
 	$(NULL)
 	
 BUILT_SOURCES = \
