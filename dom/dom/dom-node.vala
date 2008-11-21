@@ -23,13 +23,20 @@ namespace DOM {
 			nodeName = name;
 			_childNodes = new Gee.ArrayList<Node>();
 			_attributes = new Gee.HashMap<weak string, Attr>(str_hash, str_equal, direct_equal);
+			_weak_pointers = new Gee.HashSet<void**>();
 			if(owner != null) {
-				owner.add_weak_pointer(&_ownerDocument);
+				owner.add_weak_pointer((void**)(&_ownerDocument));
 			}
 		}		
 		~Node () {
 			if(ownerDocument != null) {
-				ownerDocument.remove_weak_pointer(&_ownerDocument);
+				ownerDocument.remove_weak_pointer((void**)(&_ownerDocument));
+			}
+			if(parentNode != null) {
+				parentNode.remove_weak_pointer((void**)(&_parentNode));
+			}
+			foreach(void** pointer in _weak_pointers) {
+				*pointer = null;
 			}
 		}
 		/* Node interface */
@@ -86,7 +93,7 @@ namespace DOM {
 			check_document(newChild);
 			if(newChild.nodeType == Node.Type.DOCUMENT_FRAGMENT) {
 				foreach(Node node in newChild.childNodes) {
-					node._parentNode = null;
+					node.set_parent_node(null);
 					insertBefore(node, refChild);
 				}
 				newChild.childNodes.clear();
@@ -101,7 +108,7 @@ namespace DOM {
 				if(index == -1) throw new Exception.NOT_FOUND_ERR("refChild not found");
 			}
 			childNodes.insert(index, newChild);
-			newChild._parentNode = this;
+			newChild.set_parent_node(this);
 			return newChild;
 		}
 
@@ -112,8 +119,8 @@ namespace DOM {
 			int index = childNodes.index_of(oldChild);
 			if(index == -1) throw new Exception.NOT_FOUND_ERR("oldChild not found");
 			childNodes.set(index, newChild);
-			newChild._parentNode = this;
-			oldChild_ref._parentNode = null;
+			newChild.set_parent_node(this);
+			oldChild_ref.set_parent_node(null);
 			return oldChild_ref;
 		}
 
@@ -124,16 +131,15 @@ namespace DOM {
 		public Node removeChild(Node oldChild) throws Exception {
 			Node oldChild_ref = oldChild;
 			if(!childNodes.remove(oldChild)) throw new Exception.NOT_FOUND_ERR("oldChild not found");
-			oldChild_ref._parentNode = null;
+			oldChild_ref.set_parent_node(null);
 			return oldChild_ref;
 		}
 
 		public bool hasChildNodes() { return childNodes.size > 0; }
+		public bool hasAttriutes() { return attributes.size > 0; }
 
 		public virtual Node cloneNode(bool deep = false) {
-			/*TODO: write this*/
-			/*FIXME: returing this is wrong*/
-			return this;	
+			return this;
 		}
 
 		public void normalize() {
@@ -143,13 +149,27 @@ namespace DOM {
 		/* private */
 		public long ref_count; /* disable this hack if Node is based on Object*/
 		private Quark _nodeNameQuark;
-		public Gee.List<Node> _childNodes;
-		public Gee.Map<Attr> _attributes;
+		private Gee.List<Node> _childNodes;
+		private Gee.Map<Attr> _attributes;
+		private Gee.Set<void**> _weak_pointers;
 
 		private void check_document(Node node) throws Exception {
 			if(node.ownerDocument == this.ownerDocument) return;
 			if(this.nodeType == Node.Type.DOCUMENT && node.ownerDocument == this) return;
 			throw new Exception.WRONG_DOCUMENT_ERR("the node is from a differnt document");
+		}
+		public void add_weak_pointer ( void** pointer ) {
+			_weak_pointers.add(pointer);
+		}
+		public void remove_weak_pointer ( void** pointer ) {
+			_weak_pointers.remove(pointer);
+		}
+		private void set_parent_node(Node? parent) {
+			if(_parentNode != null) 
+				_parentNode.remove_weak_pointer((void**)(&_parentNode));
+			_parentNode = parent;
+			if(_parentNode != null) 
+				_parentNode.add_weak_pointer((void**)(&_parentNode));
 		}
 	}
 

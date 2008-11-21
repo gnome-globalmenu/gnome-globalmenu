@@ -51,10 +51,13 @@ namespace DOM {
 							ownerDocument.register_element(nodeValue, value);
 					}
 				}
+				if(_ownerElement != null) 
+					_ownerElement.remove_weak_pointer((void**)(&_ownerElement));
 				_ownerElement = value;
+				if(_ownerElement != null)
+					_ownerElement.add_weak_pointer((void**)(&_ownerElement));
 			}
 		}
-
 		/* private */
 		private weak Element _ownerElement;
 		public bool is_id { get; construct; }
@@ -62,6 +65,9 @@ namespace DOM {
 			if(is_id) {
 				if(_ownerElement != null && ownerDocument != null)
 					ownerDocument.unregister_element(value, _ownerElement);
+			}
+			if(_ownerElement != null) {
+				_ownerElement.remove_weak_pointer((void**)(&_ownerElement));
 			}
 		}
 	}

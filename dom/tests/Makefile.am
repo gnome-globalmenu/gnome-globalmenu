@@ -8,7 +8,7 @@ VALASOURCES = \
 	test-element.vala \
 	test-memory.vala \
 	test-document.vala \
-	test-tostring.vala \
+	test-serializer.vala \
 	$(NULL)
 
 TEST_PROGS+=$(VALASOURCES:.vala=)
