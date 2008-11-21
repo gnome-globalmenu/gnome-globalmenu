@@ -14,9 +14,7 @@ namespace DOM {
 			getElementsByTagName_r(tagname, rt);
 			return rt;
 		}
-		/******
-		 * Default value is not handled
-		 *****/
+
 		public weak string? getAttribute(string name) {
 			Attr attr = getAttributeNode(name);
 			return attr.value;
@@ -31,15 +29,15 @@ namespace DOM {
 			attributes.remove(name);
 		}
 
+		/**
+		 * FIXME: a new attr is always created even if it doesn't exist
+		 * */
 		public Attr getAttributeNode(string name) {
 			Attr attr = attributes.get(name);
 			if(attr == null) {
 				attr = ownerDocument.createAttribute(name);
-				try {
-					attr = setAttributeNode(attr);
-				} catch (GLib.Error e) {
-					critical("%s", e.message);
-				}
+				attributes.set(attr.name, attr);
+				attr.ownerElement = this;
 			}
 			return attr;
 		}
@@ -52,9 +50,6 @@ namespace DOM {
 			return attributes.get(newAttr.name);
 		}
 
-		/******
-		 * Default value is not immediately used to replace the removed attribute.
-		 */
 		public Attr removeAttributeNode(Attr oldAttr) throws Exception {
 			Attr oldAttr_ref = oldAttr;
 			if(!attributes.contains(oldAttr.name) ||

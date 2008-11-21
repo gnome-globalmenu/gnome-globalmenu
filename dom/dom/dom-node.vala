@@ -51,7 +51,7 @@ namespace DOM {
 				_nodeNameQuark = Quark.from_string(value);
 			}
 		}
-		public string? nodeValue { get; construct set;}
+		public virtual string? nodeValue { get; construct set;}
 
 		public virtual Gee.List<Node> childNodes {get { return _childNodes;}}
 		public Gee.Map<weak string, Attr> attributes {get { return _attributes;}}

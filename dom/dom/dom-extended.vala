@@ -33,5 +33,15 @@ namespace DOM {
 		public string publicId;
 		public string systemId;
 		public string internalSubset;
+
+		/* private */
+		public weak string? default_attribute_value(string element, string attr) {
+			/*FIXME: find a good position for this function and write it*/
+			return "";
+		}
+		public string id_attribute_name = "id";
+		public virtual bool isId(string name) {
+			return name == id_attribute_name;
+		}
 	}
 }

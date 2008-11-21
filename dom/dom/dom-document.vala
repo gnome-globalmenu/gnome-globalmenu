@@ -37,7 +37,7 @@ namespace DOM {
 			return new Comment(this, data);
 		}
 		public Attr createAttribute(string name) {
-			return new Attr(this, name, name == "id");
+			return new Attr(this, name);
 		}
 		public Element? getElementById(string id) {
 			return _id_map.get(id);

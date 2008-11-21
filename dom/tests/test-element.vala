@@ -6,7 +6,8 @@ class ElementTest:TestMan {
 		doc = new Document();
 		add("getAttribute", () => {
 			Element e1 = doc.createElement("e1");
-			assert(e1.getAttribute("p1") == null);
+			assert(e1.getAttribute("p1") == "");
+			assert(e1.getAttributeNode("p1").specified == false);
 			e1.setAttribute("p1", "v1");
 			assert(e1.getAttribute("p1") == "v1");
 		});
