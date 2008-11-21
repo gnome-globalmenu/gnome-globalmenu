@@ -61,13 +61,13 @@ namespace DOM {
 		public Node? firstChild { 
 			get { 
 				if(childNodes.size == 0) return null;
-				return childNodes.get_weak_ref(0); 
+				return childNodes.get(0); 
 			}
 		}
 		public Node? lastChild { 
 			get { 
 				if(childNodes.size == 0) return null;
-				return childNodes.get_weak_ref(childNodes.size - 1);
+				return childNodes.get(childNodes.size - 1);
 			}
 		}
 		public Node? previousSibling { 
@@ -75,7 +75,7 @@ namespace DOM {
 				if(_parentNode == null) return null;
 				int index = _parentNode.childNodes.index_of(this);
 				if(index <= 0) return null;
-				return _parentNode.childNodes.get_weak_ref(index - 1);
+				return _parentNode.childNodes.get(index - 1);
 			}
 		}
 		public Node? nextSibling {
@@ -83,14 +83,15 @@ namespace DOM {
 				if(_parentNode == null) return null;
 				int index = _parentNode.childNodes.index_of(this);
 				if(index + 1 == _parentNode.childNodes.size) return null;
-				return _parentNode.childNodes.get_weak_ref(index + 1);
+				return _parentNode.childNodes.get(index + 1);
 			}	
 		}
-		
+
 		private weak Node _parentNode;
 
 		public Node insertBefore(Node newChild, Node? refChild) throws Exception {
 			check_document(newChild);
+			check_hierarchy(newChild);
 			if(newChild.nodeType == Node.Type.DOCUMENT_FRAGMENT) {
 				foreach(Node node in newChild.childNodes) {
 					node.set_parent_node(null);
@@ -158,6 +159,23 @@ namespace DOM {
 			if(this.nodeType == Node.Type.DOCUMENT && node.ownerDocument == this) return;
 			throw new Exception.WRONG_DOCUMENT_ERR("the node is from a differnt document");
 		}
+		private void check_hierarchy(Node node) throws Exception {
+			switch(nodeType) {
+				case Node.Type.DOCUMENT:
+					if((this as Document).documentElement != null) 
+						throw new Exception.HIERARCHY_REQUEST_ERR("the document already has an element");
+					break;
+				case Node.Type.TEXT:
+				case Node.Type.COMMENT:
+					throw new Exception.HIERARCHY_REQUEST_ERR("no child is allowed for TEXT and COMMENT");
+					break;
+			}
+			if(node.nodeType == Node.Type.ATTRIBUTE) {
+				throw new Exception.HIERARCHY_REQUEST_ERR("attributes cannot be a child of any node");
+			}
+			if(is_anchestor(node))
+				throw new Exception.HIERARCHY_REQUEST_ERR("an anchester of current node cannot be also a child of it");
+		}
 		public void add_weak_pointer ( void** pointer ) {
 			_weak_pointers.add(pointer);
 		}
@@ -170,6 +188,13 @@ namespace DOM {
 			_parentNode = parent;
 			if(_parentNode != null) 
 				_parentNode.add_weak_pointer((void**)(&_parentNode));
+		}
+		private bool is_anchestor (Node node) {
+			weak Node p;
+			for(p = _parentNode; p != null; p = p._parentNode) {
+				if(p == node) return true;
+			}
+			return false;
 		}
 	}
 

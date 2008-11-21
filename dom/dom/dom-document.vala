@@ -3,20 +3,25 @@ using Gee;
 
 namespace DOM {
 	public class Document: Node {
-		public Document() {
-			Document.full(null, null, new DocumentType("#documenttype", "", ""));
-		}
-		public Document.full(string? namespaceURI = null, string? qualifiedName = null, DocumentType? doctype = null) {
-			assert(namespaceURI == null); /*namespaceURI is not supported*/
+		public Document(string? qualifiedName = null) {
 			base(null, Node.Type.DOCUMENT, "#document");
 			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
-			documentType = doctype;
-			if(doctype != null) {
-				/*** 
-				 * NOTE: the ownerDocument of doctype is not set to this.
-				 *    I don't get the point why the spec requires it.
-				 * */
+
+			documentType = new DocumentType("#documenttype", "", "");
+
+			if(qualifiedName != null) {
+				Element element = createElement(qualifiedName);
+				appendChild(element);
 			}
+		}
+		public Document.full(string? namespaceURI, string? qualifiedName, DocumentType? doctype) {
+			assert(namespaceURI == null);
+			assert(doctype == null);
+			base(null, Node.Type.DOCUMENT, "#document");
+			_id_map = new Gee.HashMap<weak string, weak Element>(str_hash, str_equal, direct_equal);
+
+			documentType = new DocumentType("#documenttype", "", "");
+
 			if(qualifiedName != null) {
 				Element element = createElement(qualifiedName);
 				appendChild(element);

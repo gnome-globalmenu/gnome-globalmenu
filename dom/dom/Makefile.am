@@ -29,14 +29,6 @@ libdom_la_VALASOURCES = \
 		dom-serializer.vala \
 	$(NULL)
 
-NEED_PATCH = dom-comment.vala \
-			 dom-text.vala \
-			 dom-document.vala \
-			 dom-attr.vala \
-			 dom-element.vala \
-			 dom-documentfragment.vala \
-			 dom-extended.vala \
-			 $(NULL)
 
 libdom_la_SOURCES = \
 	dom.vala.stamp \
@@ -52,10 +44,7 @@ dominclude_HEADERS = \
 
 dom-1.0.vapi dom.vala.stamp: $(libdom_la_VALASOURCES)
 	$(VALAC) -C --vapidir $(top_srcdir)/gee/gee --pkg dom-gee-1.0 --basedir $(top_srcdir)/dom --library dom-1.0 $^
-	sed -e 's;GtkCompat.Container;Gtk.Container;g' dom-1.0.vapi > dom-1.0.vapi.new
-	mv dom-1.0.vapi.new dom-1.0.vapi
-	for i in $(NEED_PATCH:.vala=.c); do sed -e '/g_type_create_instance/d' $$i > $$i.new; mv $$i.new $$i; done;
-	sed dom-node.h -e '/glong\ ref_count/d' > dom-node.h.new; mv dom-node.h.new dom-node.h
+	bash patch.sh 
 	touch $@
 
 libdom_la_LIBADD = \
@@ -69,4 +58,4 @@ dist_vapi_DATA = \
 	dom-1.0.vapi \
 	$(NULL)
 
-EXTRA_DIST += $(libdom_la_VALASOURCES) dom-1.0.vapi dom.vala.stamp
+EXTRA_DIST += $(libdom_la_VALASOURCES) dom-1.0.vapi dom.vala.stamp patch.sh
