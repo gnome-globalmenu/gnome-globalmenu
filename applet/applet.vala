@@ -38,6 +38,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	private void update_by_gconf() {
 
 	}
+
 	private void app_selected(Gtk.ImageMenuItem item) {
 		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
 			(item.user_data as Wnck.Window).minimize();
@@ -74,9 +75,10 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 				mi.user_data = window;
 				mi.activate += app_selected;
 				mi.show_all();
-				menu.append(mi);
+				menu.insert(mi, 0);
 			}
 		}
+		if (menu.get_children().length()==0) return true;
 		menu.show_all();
 		menu.popup(null, null, null, event.button, event.time);
 		return true;
