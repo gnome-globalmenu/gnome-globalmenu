@@ -10,8 +10,11 @@ using PanelCompat;
 public extern GLib.Object gnome_program_init_easy(string name, string version,
 		string[] args, GLib.OptionContext #context);
 private class Applet : PanelCompat.Applet {
-static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
-static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
+	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+	static const string APPLET_NAME = "Global Menu Panel Applet";
+	static const string APPLET_VERSION = "0.6";
+	static const string APPLET_ICON = "gnome-fs-home";
 
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
@@ -38,7 +41,18 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	private void update_by_gconf() {
 
 	}
-
+    	private static void on_about_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+        	var dialog = new Gtk.AboutDialog();
+        	dialog.program_name = APPLET_NAME;
+		dialog.version = APPLET_VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
+		dialog.website_label = "Project Home";
+		dialog.license = "GNU General Public License v2";
+		dialog.logo_icon_name = APPLET_ICON;
+        	dialog.run();
+        	dialog.destroy();
+    	}
 	private void app_selected(Gtk.ImageMenuItem item) {
 		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
 			(item.user_data as Wnck.Window).minimize();
@@ -94,6 +108,11 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		    "<popup name=\"button3\">" +
 		        "<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gnome-stock-about\"/>" +
 		    "</popup>";
+		var verb = BonoboUI.Verb ();
+		verb.cname = "About";
+		verb.cb = on_about_clicked;
+		var verbs = new BonoboUI.Verb[] { verb };
+		setup_menu (menu_definition, verbs, null);
 
 		label = new Gtk.Label("<b>GlobalMenu</b>");
 		label.use_markup = true;
@@ -163,7 +182,7 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		context.add_main_entries(options, null);
 		GLib.Object program = gnome_program_init_easy(
 			"GlobalMenu.PanelApplet",
-			"0.6", args, #context);
+			APPLET_VERSION, args, #context);
 		if(!verbose) {
 			LogFunc handler = (domain, level, message) => { };
 			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
