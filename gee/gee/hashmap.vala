@@ -91,16 +91,7 @@ public class Gee.HashMap<K,V> : Object, Map<K,V> {
 		return (*node != null);
 	}
 
-	public V? get (K key) {
-		Node<K,V>* node = (*lookup_node (key));
-		if (node != null) {
-			return node->value;
-		} else {
-			return null;
-		}
-	}
-
-	public weak V? get_weak_ref (K key) {
+	public weak V? get (K key) {
 		Node<K,V>* node = (*lookup_node (key));
 		if (node != null) {
 			return node->value;
@@ -261,17 +252,12 @@ public class Gee.HashMap<K,V> : Object, Map<K,V> {
 			return (_node != null);
 		}
 
-		public K? get () {
+		public weak K? get () {
 			assert (_stamp == _map._stamp);
 			assert (_node != null);
 			return _node.key;
 		}
 
-		public weak K? get_weak_ref () {
-			assert (_stamp == _map._stamp);
-			assert (_node != null);
-			return _node.key;
-		}
 	}
 
 	private class ValueCollection<K,V> : Object, Iterable<V>, Collection<V> {
@@ -350,17 +336,12 @@ public class Gee.HashMap<K,V> : Object, Map<K,V> {
 			return (_node != null);
 		}
 
-		public V? get () {
+		public weak V? get () {
 			assert (_stamp == _map._stamp);
 			assert (_node != null);
 			return _node.value;
 		}
 
-		public weak V? get_weak_ref () {
-			assert (_stamp == _map._stamp);
-			assert (_node != null);
-			return _node.value;
-		}
 	}
 }
 

@@ -2,7 +2,7 @@ using GLib;
 using Gee;
 
 namespace DOM {
-	public class Node {
+	public class Node : GLib.Object {
 		public enum Type {
 			ELEMENT,
 			ATTRIBUTE,
@@ -148,7 +148,7 @@ namespace DOM {
 		}
 
 		/* private */
-		public long ref_count; /* disable this hack if Node is based on Object*/
+//		public long ref_count; /* disable this hack if Node is based on Object*/
 		private Quark _nodeNameQuark;
 		private Gee.List<Node> _childNodes;
 		private Gee.Map<Attr> _attributes;

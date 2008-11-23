@@ -37,14 +37,7 @@ public interface Gee.Iterator<G> : GLib.Object {
 	 *
 	 * @return the current element in the iteration
 	 */
-	public abstract G? get ();
+	public abstract weak G? get ();
 
-	/**
-	 * Returns a weak reference to the current element in the iteration.
-	 *
-	 * @return a weak reference to the current element in the iteration
-	 */
-
-	public abstract weak G? get_weak_ref ();
 }
 

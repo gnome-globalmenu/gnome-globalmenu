@@ -64,20 +64,12 @@ public class Gee.ReadOnlyMap<K,V> : Object, Map<K,V> {
 		return _map.contains (key);
 	}
 
-	public V? get (K key) {
+	public weak V? get (K key) {
 		if (_map == null) {
 			return null;
 		}
 
 		return _map.get (key);
-	}
-
-	public weak V? get_weak_ref (K key) {
-		if (_map == null) {
-			return null;
-		}
-
-		return _map.get_weak_ref (key);
 	}
 
 	public void set (K key, V value) {

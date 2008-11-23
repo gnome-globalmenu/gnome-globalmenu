@@ -60,18 +60,7 @@ public interface Gee.Map<K,V> : GLib.Object {
 	 * @return    the value associated with the key, or null if the key
 	 *            couldn't be found
 	 */
-	public abstract V? get (K key);
-
-	/**
-	 * Returns a weak reference to the value of the specified key in this map.
-	 *
-	 * @param key the key whose value is to be retrieved
-	 *
-	 * @return    a weak reference to the value associated with the key, or null if the key
-	 *            couldn't be found
-	 */
-
-	public abstract weak V? get_weak_ref (K key);
+	public abstract weak V? get (K key);
 
 	/**
 	 * Inserts a new key and value into this map.

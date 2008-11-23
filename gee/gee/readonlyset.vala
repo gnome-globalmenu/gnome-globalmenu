@@ -77,13 +77,10 @@ public class Gee.ReadOnlySet<G> : Object, Iterable<G>, Collection<G>, Set<G> {
 			return false;
 		}
 
-		public G? get () {
+		public weak G? get () {
 			return null;
 		}
 
-		public weak G? get_weak_ref () {
-			return null;
-		}
 	}
 }
 

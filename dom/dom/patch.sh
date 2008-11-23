@@ -28,4 +28,5 @@ patch '/glong\ ref_count/d' dom-node.h
 
 patch '/return dom_node_insertBefore (self, newChild, NULL, &inner_error);/c 	return\ dom_node_insertBefore\ (self,\ newChild,\ NULL,\ error);' dom-node.c
 
-patch '/attr = ((DOMNode\*) (((DOMNode\*) (gee_iterator_get (attr_it)))));/c attr=dom_node_ref(gee_iterator_get(attr_it));' dom-visitor.c
+#patch '/attr = ((DOMNode\*) (((DOMNode\*) (gee_iterator_get (attr_it)))));/c attr=dom_node_ref(gee_iterator_get(attr_it));' dom-visitor.c
+patch '/attr = ((DOMNode\*) (((DOMNode\*) (gee_iterator_get (attr_it)))));/c attr=g_object_ref(gee_iterator_get(attr_it));' dom-visitor.c

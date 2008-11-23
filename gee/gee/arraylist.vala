@@ -68,13 +68,7 @@ public class Gee.ArrayList<G> : Object, Iterable<G>, Collection<G>, List<G> {
 		return -1;
 	}
 
-	public G? get (int index) {
-		assert (index >= 0 && index < _size);
-
-		return _items[index];
-	}
-
-	public weak G? get_weak_ref (int index) {
+	public weak G? get (int index) {
 		assert (index >= 0 && index < _size);
 
 		return _items[index];
@@ -184,7 +178,7 @@ public class Gee.ArrayList<G> : Object, Iterable<G>, Collection<G>, List<G> {
 			return (_index < _list._size);
 		}
 
-		public G? get () {
+		public weak G? get () {
 			assert (_stamp == _list._stamp);
 
 			if (_index < 0 || _index >= _list._size) {
@@ -194,15 +188,6 @@ public class Gee.ArrayList<G> : Object, Iterable<G>, Collection<G>, List<G> {
 			return _list.get (_index);
 		}
 
-		public weak G? get_weak_ref () {
-			assert (_stamp == _list._stamp);
-
-			if (_index < 0 || _index >= _list._size) {
-				return null;
-			}
-
-			return _list.get_weak_ref (_index);
-		}
 	}
 }
 

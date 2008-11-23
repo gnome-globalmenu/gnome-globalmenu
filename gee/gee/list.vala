@@ -31,16 +31,7 @@ public interface Gee.List<G> : Collection<G> {
 	 *
 	 * @return      the item at the specified index in the list
 	 */
-	public abstract G? get (int index);
-
-	/**
-	 * Returns a weak reference to the item at the specified index in this list.
-	 *
-	 * @param index zero-based index of the item to be returned
-	 *
-	 * @return      a weak reference to the item at the specified index in the list
-	 */
-	public abstract weak G? get_weak_ref (int index);
+	public abstract weak G? get (int index);
 
 	/**
 	 * Sets the item at the specified index in this list.

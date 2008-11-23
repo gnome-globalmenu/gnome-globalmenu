@@ -84,20 +84,12 @@ public class Gee.ReadOnlyList<G> : Object, Iterable<G>, Collection<G>, List<G> {
 		assert_not_reached ();
 	}
 
-	public G? get (int index) {
+	public weak G? get (int index) {
 		if (_list == null) {
 			return null;
 		}
 
 		return _list.get (index);
-	}
-
-	public weak G? get_weak_ref (int index) {
-		if (_list == null) {
-			return null;
-		}
-
-		return _list.get_weak_ref (index);
 	}
 
 	public void set (int index, G o) {
@@ -113,13 +105,10 @@ public class Gee.ReadOnlyList<G> : Object, Iterable<G>, Collection<G>, List<G> {
 			return false;
 		}
 
-		public G? get () {
+		public weak G? get () {
 			return null;
 		}
 
-		public weak G? get_weak_ref () {
-			return null;
-		}
 	}
 }
 

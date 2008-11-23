@@ -194,17 +194,12 @@ public class Gee.HashSet<G> : Object, Iterable<G>, Collection<G>, Set<G> {
 			return (_node != null);
 		}
 
-		public G? get () {
+		public weak G? get () {
 			assert (_stamp == _set._stamp);
 			assert (_node != null);
 			return _node.key;
 		}
 
-		public weak G? get_weak_ref () {
-			assert (_stamp == _set._stamp);
-			assert (_node != null);
-			return _node.key;
-		}
 	}
 }
 
