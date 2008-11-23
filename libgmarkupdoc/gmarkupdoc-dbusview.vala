@@ -51,7 +51,7 @@ namespace GMarkup {
 		private void document_inserted(DocumentModel document, Node parent, Node child, int pos) {
 			if(!is_orphan(parent)) {
 				debug("inserted");
-				weak string type;
+				weak string type = "";
 				if(child is Tag) type = "tag";
 				if(child is Text) type = "text";
 				if(child is Special) type = "special";
