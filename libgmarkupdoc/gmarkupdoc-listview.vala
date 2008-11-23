@@ -90,7 +90,7 @@ namespace GMarkup {
 				box.size_allocate(alloc);
 			};
 			this.size_request += (widget, req) => {
-				box.size_request(req);
+				box.size_request(out req);
 			};
 			(treeview as GtkCompat.TreeView).insert_column_with_data_func (0, "Title", new Gtk.CellRendererText(), 
 				(tree_column, c, model, iter) => {

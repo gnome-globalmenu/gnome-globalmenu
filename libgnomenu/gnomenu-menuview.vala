@@ -81,8 +81,8 @@ namespace Gnomenu {
 			this.arrow_button = new Gtk.ToggleButton.with_label(">");
 			this.arrow_button.set_parent(this);
 			this.size_request += (widget, req) => {
-				this.menubar.size_request(req);
-				this.arrow_button.size_request(req);
+				this.menubar.size_request(out req);
+				this.arrow_button.size_request(out req);
 			};
 			this.size_allocate +=(widget, allocation) => {
 				Gdk.Rectangle arrow_alloc = allocation;
