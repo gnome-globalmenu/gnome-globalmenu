@@ -22,7 +22,7 @@ private class Applet : PanelCompat.Applet {
 						"",
 						"Packaging:",
 						"sstasyuk <sstasyuk@gmail.com>",
-						"dwatson031 <dwatson031@gmail.com>",
+						"David Watson <dwatson031@gmail.com>",
 						"Valiant Wing <Valiant.Wing@gmail.com>"};
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
 	private Wnck.Screen screen;
