@@ -15,7 +15,16 @@ private class Applet : PanelCompat.Applet {
 	static const string APPLET_NAME = "Global Menu Panel Applet";
 	static const string APPLET_VERSION = "0.6";
 	static const string APPLET_ICON = "gnome-fs-home";
-
+	static const string[] APPLET_AUTHORS = {"Yu Feng <rainwoodman@gmail.com>",
+						"Mingxi Wu <fengshenx@gmail.com>",
+						"bis0n.lives <bis0n.lives@gmail.com>",
+						"Luca Viggiani <lviggiani@gmail.com>",
+						"",
+						"Packaging:",
+						"sstasyuk <sstasyuk@gmail.com>",
+						"dwatson031 <dwatson031@gmail.com>",
+						"Valiant Wing <Valiant.Wing@gmail.com>"};
+	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
@@ -50,6 +59,8 @@ private class Applet : PanelCompat.Applet {
 		dialog.website_label = "Project Home";
 		dialog.license = "GNU General Public License v2";
 		dialog.logo_icon_name = APPLET_ICON;
+		dialog.authors = APPLET_AUTHORS;
+		dialog.documenters = APPLET_ADOCUMENTERS;
         	dialog.run();
         	dialog.destroy();
     	}
