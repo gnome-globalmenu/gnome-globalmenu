@@ -15,7 +15,8 @@ private class Applet : PanelCompat.Applet {
 	static const string APPLET_NAME = "Global Menu Panel Applet";
 	static const string APPLET_VERSION = "0.6";
 	static const string APPLET_ICON = "gnome-fs-home";
-	static const string[] APPLET_AUTHORS = {"Yu Feng <rainwoodman@gmail.com>",
+	static const string[] APPLET_AUTHORS = {"Coding:",
+						"Yu Feng <rainwoodman@gmail.com>",
 						"Mingxi Wu <fengshenx@gmail.com>",
 						"bis0n.lives <bis0n.lives@gmail.com>",
 						"Luca Viggiani <lviggiani@gmail.com>",
@@ -50,20 +51,36 @@ private class Applet : PanelCompat.Applet {
 	private void update_by_gconf() {
 
 	}
-    	private static void on_about_clicked (BonoboUI.Component component,
+    private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-        	var dialog = new Gtk.AboutDialog();
-        	dialog.program_name = APPLET_NAME;
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
 		dialog.version = APPLET_VERSION;
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
 		dialog.website_label = "Project Home";
-		dialog.license = "GNU General Public License v2";
+		dialog.wrap_license = false;
+		dialog.license = GPL.Licenses.V3;
 		dialog.logo_icon_name = APPLET_ICON;
 		dialog.authors = APPLET_AUTHORS;
 		dialog.documenters = APPLET_ADOCUMENTERS;
-        	dialog.run();
-        	dialog.destroy();
-    	}
+       	dialog.run();
+       	dialog.destroy();
+    }
+    private static void on_help_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
+		dialog.version = APPLET_VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
+		dialog.website_label = "On-line help";
+		dialog.logo_icon_name = "gtk-help";
+       	dialog.run();
+       	dialog.destroy();
+    }
+    private static void on_preferences_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+       	message("Not yet available...");
+    }
 	private void app_selected(Gtk.ImageMenuItem item) {
 		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
 			(item.user_data as Wnck.Window).minimize();
@@ -117,12 +134,24 @@ private class Applet : PanelCompat.Applet {
 
 		string menu_definition = 
 		    "<popup name=\"button3\">" +
-		        "<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gnome-stock-about\"/>" +
+		        "<menuitem debuname=\"Preferences\" verb=\"Preferences\" _label=\"_Preferences\" pixtype=\"stock\" pixname=\"gtk-preferences\"/>" +
+		        "<menuitem debuname=\"Help\" verb=\"Help\" _label=\"_Help\" pixtype=\"stock\" pixname=\"gtk-help\"/>" +
+		     	"<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gtk-about\"/>" +
 		    "</popup>";
-		var verb = BonoboUI.Verb ();
-		verb.cname = "About";
-		verb.cb = on_about_clicked;
-		var verbs = new BonoboUI.Verb[] { verb };
+		    
+		var verbPreferences = BonoboUI.Verb ();
+		verbPreferences.cname = "Preferences";
+		verbPreferences.cb = on_preferences_clicked;
+		
+		var verbAbout = BonoboUI.Verb ();
+		verbAbout.cname = "About";
+		verbAbout.cb = on_about_clicked;
+		
+		var verbHelp = BonoboUI.Verb ();
+		verbHelp.cname = "Help";
+		verbHelp.cb = on_help_clicked;
+		
+		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
 		setup_menu (menu_definition, verbs, null);
 
 		label = new Gtk.Label("<b>GlobalMenu</b>");

@@ -17,6 +17,7 @@ AM_VALAC_FLAGS = \
 	$(GLOBALMENU_PANELAPPLET_VALA_PKGS) \
 	--vapidir=$(top_srcdir)/libgmarkupdoc  \
 	--vapidir=$(top_srcdir)/libgnomenu  \
+	--vapidir=$(top_srcdir)/applet  \
 	--pkg gnomenu  \
 	--pkg gtkcompat  \
 	--pkg gmarkupdoc  \
@@ -33,6 +34,7 @@ BUILT_SOURCES = \
 	$(NULL)
 
 GlobalMenu_PanelApplet_VALASOURCES = \
+	GPL.vala \
 	applet.vala \
 	$(NULL)
 
