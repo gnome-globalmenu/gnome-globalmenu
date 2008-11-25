@@ -30,6 +30,7 @@ private class Applet : PanelCompat.Applet {
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
 
+	private Gdk.EventExpose __tmp__event;
 	private Gtk.MenuBar mb_application;
 	private Gtk.MenuItem mi_application;
 
@@ -127,7 +128,9 @@ private class Applet : PanelCompat.Applet {
 			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>"); else
 			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + text + "</b>");
 	}
-	
+	private void expose_child(Gtk.Widget widget) {
+			mb_application.propagate_expose(widget, __tmp__event);
+		}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
 		menubar = new Gnomenu.MenuBar();
@@ -160,10 +163,23 @@ private class Applet : PanelCompat.Applet {
 		mb_application = new Gtk.MenuBar();
 		mi_application = new Gtk.MenuItem.with_label("GlobalMenu");
 		set_menu_item_label_bold(mi_application, "");
-		
-		mb_application.append(mi_application);
+
+		mb_application.add(mi_application);
 		mb_application.show_all();
-		
+		mb_application.expose_event += (widget, event)=> {
+				if(0 != (widget.get_flags() & (Gtk.WidgetFlags.MAPPED | Gtk.WidgetFlags.VISIBLE))) {
+					Gtk.paint_flat_box(widget.style,
+							widget.window, (Gtk.StateType) widget.state,
+							Gtk.ShadowType.NONE,
+							event.area,
+							widget, null, 0, 0, -1, -1);
+
+					__tmp__event = event;
+					(widget as GtkCompat.Container).forall_children (expose_child);
+				}
+				return true;
+			};
+			
 		box.pack_start(mb_application, false, true, 0);	
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
