@@ -30,9 +30,9 @@ private class Applet : PanelCompat.Applet {
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
 
-	private Gtk.Label label;
-	private Gdk.Pixbuf icon;
-	private Gtk.EventBox eb;
+	private Gtk.MenuBar mb_application;
+	private Gtk.MenuItem mi_application;
+
 	static const string GCONF_ROOT_KEY = "/apps/gnome-globalmenu-applet";
 
 	public Applet() {
@@ -59,7 +59,7 @@ private class Applet : PanelCompat.Applet {
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
 		dialog.website_label = "Project Home";
 		dialog.wrap_license = false;
-		dialog.license = GPL.Licenses.V3;
+		dialog.license = GPL.Licenses.V2;
 		dialog.logo_icon_name = APPLET_ICON;
 		dialog.authors = APPLET_AUTHORS;
 		dialog.documenters = APPLET_ADOCUMENTERS;
@@ -81,7 +81,7 @@ private class Applet : PanelCompat.Applet {
                                           void* user_data, string cname) {
        	message("Not yet available...");
     }
-	private void app_selected(Gtk.ImageMenuItem item) {
+	private void app_selected(Gtk.ImageMenuItem? item) {
 		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
 			(item.user_data as Wnck.Window).minimize();
 			return;
@@ -104,15 +104,15 @@ private class Applet : PanelCompat.Applet {
 
 		//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
 	}
-	private bool app_name_pressed(Gtk.EventBox eventbox, Gdk.EventButton event) {
-		if (event.button!=1) return false;
+
+	private void refresh_applications_list(Gtk.MenuItem? mi_parent) {
 		Gtk.Menu menu = new Gtk.Menu();
 		weak GLib.List<Wnck.Window> windows = screen.get_windows();
 		foreach(weak Wnck.Window window in windows) {
 			if (!window.is_skip_pager()) {
 				Gtk.ImageMenuItem mi;
 				mi = new Gtk.ImageMenuItem.with_label(window.get_name());
-				if (window.is_active()) (mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>");			
+				if (window.is_active()) set_menu_item_label_bold(mi, "");			
 				mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
 				mi.user_data = window;
 				mi.activate += app_selected;
@@ -120,11 +120,14 @@ private class Applet : PanelCompat.Applet {
 				menu.insert(mi, 0);
 			}
 		}
-		if (menu.get_children().length()==0) return true;
-		menu.show_all();
-		menu.popup(null, null, null, event.button, event.time);
-		return true;
+		mi_parent.submenu = menu;
 	}
+	private void set_menu_item_label_bold(Gtk.MenuItem? mi, string text) {
+		if (text == "")
+			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>"); else
+			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + text + "</b>");
+	}
+	
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
 		menubar = new Gnomenu.MenuBar();
@@ -154,17 +157,14 @@ private class Applet : PanelCompat.Applet {
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
 		setup_menu (menu_definition, verbs, null);
 
-		label = new Gtk.Label("<b>GlobalMenu</b>");
-		label.use_markup = true;
-		label.visible = true;
-			
-		eb = new EventBox();
-		eb.set_visible_window(true);
-		eb.set_size_request(label.width_request,label.height_request);
-		eb.add(label);
-		eb.button_press_event += app_name_pressed;
-		box.pack_start(eb, false, true, 0);
-
+		mb_application = new Gtk.MenuBar();
+		mi_application = new Gtk.MenuItem.with_label("GlobalMenu");
+		set_menu_item_label_bold(mi_application, "");
+		
+		mb_application.append(mi_application);
+		mb_application.show_all();
+		
+		box.pack_start(mb_application, false, true, 0);	
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 		screen = Wnck.Screen.get_default();
@@ -175,11 +175,18 @@ private class Applet : PanelCompat.Applet {
 				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
 				menubar.switch(xid);
-
+				
 				string aname = "Desktop";
 				if (xid!=this.menubar.find_default()) aname = window.get_application().get_name();
-				label.set_markup ("<b>" + aname + " </b>");
+				set_menu_item_label_bold(mi_application, aname);
 			}
+			refresh_applications_list(mi_application);
+		};
+		(screen as Wnck.Screen).window_closed += (window) => {
+			refresh_applications_list(mi_application);
+		};
+		(screen as Wnck.Screen).window_opened += (window) => {
+			refresh_applications_list(mi_application);
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
@@ -190,10 +197,10 @@ private class Applet : PanelCompat.Applet {
 					Gtk.Style def_style = Gtk.rc_get_style(this);
 					this.menubar.set_style(def_style);
 					this.menubar.queue_draw();
-
-					this.eb.set_style(def_style);
-					this.eb.queue_draw();
-
+				
+					this.mb_application.set_style(def_style);
+					this.mb_application.queue_draw();
+					
 					return;
 				break;
 				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
@@ -206,9 +213,9 @@ private class Applet : PanelCompat.Applet {
 			}
 			this.menubar.set_style(style);
 			this.menubar.queue_draw();
-
-			this.eb.set_style(style);
-			this.eb.queue_draw();
+					
+			this.mb_application.set_style(style);
+			this.mb_application.queue_draw();
 		};
 	}
 	private static bool verbose = false;
