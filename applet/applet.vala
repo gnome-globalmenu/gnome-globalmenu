@@ -30,9 +30,7 @@ private class Applet : PanelCompat.Applet {
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
 
-	private Gdk.EventExpose __tmp__event;
-	private Gtk.MenuBar mb_application;
-	private Gtk.MenuItem mi_application;
+	private PanelExtra.Switcher switcher;
 
 	static const string GCONF_ROOT_KEY = "/apps/gnome-globalmenu-applet";
 
@@ -82,55 +80,7 @@ private class Applet : PanelCompat.Applet {
                                           void* user_data, string cname) {
        	message("Not yet available...");
     }
-	private void app_selected(Gtk.ImageMenuItem? item) {
-		if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
-			(item.user_data as Wnck.Window).minimize();
-			return;
-		}
 
-		// Ensure viewport visibility
-		int current_workspace_x = (item.user_data as Wnck.Window).get_workspace().get_viewport_x();
-		int current_workspace_y = (item.user_data as Wnck.Window).get_workspace().get_viewport_y();
-		int x,y,w,h;
-		(item.user_data as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
-		(item.user_data as Wnck.Window).get_screen().move_viewport(current_workspace_x + x, current_workspace_y + y);
-		
-		(item.user_data as Wnck.Window).activate(Gtk.get_current_event_time());
-		(item.user_data as Wnck.Window).get_workspace().activate(Gtk.get_current_event_time());
-		(item.user_data as Wnck.Window).unminimize(Gtk.get_current_event_time());
-		
-		// ensure is on top
-		(item.user_data as Wnck.Window).make_above();
-		(item.user_data as Wnck.Window).unmake_above();
-
-		//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
-	}
-
-	private void refresh_applications_list(Gtk.MenuItem? mi_parent) {
-		Gtk.Menu menu = new Gtk.Menu();
-		weak GLib.List<Wnck.Window> windows = screen.get_windows();
-		foreach(weak Wnck.Window window in windows) {
-			if (!window.is_skip_pager()) {
-				Gtk.ImageMenuItem mi;
-				mi = new Gtk.ImageMenuItem.with_label(window.get_name());
-				if (window.is_active()) set_menu_item_label_bold(mi, "");			
-				mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
-				mi.user_data = window;
-				mi.activate += app_selected;
-				mi.show_all();
-				menu.insert(mi, 0);
-			}
-		}
-		mi_parent.submenu = menu;
-	}
-	private void set_menu_item_label_bold(Gtk.MenuItem? mi, string text) {
-		if (text == "")
-			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>"); else
-			(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + text + "</b>");
-	}
-	private void expose_child(Gtk.Widget widget) {
-			mb_application.propagate_expose(widget, __tmp__event);
-		}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
 		menubar = new Gnomenu.MenuBar();
@@ -160,27 +110,10 @@ private class Applet : PanelCompat.Applet {
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
 		setup_menu (menu_definition, verbs, null);
 
-		mb_application = new Gtk.MenuBar();
-		mi_application = new Gtk.MenuItem.with_label("GlobalMenu");
-		set_menu_item_label_bold(mi_application, "");
+		switcher = new PanelExtra.Switcher();
+		switcher.default_window = this.menubar.find_default();
+		box.pack_start(switcher, false, true, 0);
 
-		mb_application.add(mi_application);
-		mb_application.show_all();
-		mb_application.expose_event += (widget, event)=> {
-				if(0 != (widget.get_flags() & (Gtk.WidgetFlags.MAPPED | Gtk.WidgetFlags.VISIBLE))) {
-					Gtk.paint_flat_box(widget.style,
-							widget.window, (Gtk.StateType) widget.state,
-							Gtk.ShadowType.NONE,
-							event.area,
-							widget, null, 0, 0, -1, -1);
-
-					__tmp__event = event;
-					(widget as GtkCompat.Container).forall_children (expose_child);
-				}
-				return true;
-			};
-			
-		box.pack_start(mb_application, false, true, 0);	
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 		screen = Wnck.Screen.get_default();
@@ -191,18 +124,7 @@ private class Applet : PanelCompat.Applet {
 				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
 				menubar.switch(xid);
-				
-				string aname = "Desktop";
-				if (xid!=this.menubar.find_default()) aname = window.get_application().get_name();
-				set_menu_item_label_bold(mi_application, aname);
 			}
-			refresh_applications_list(mi_application);
-		};
-		(screen as Wnck.Screen).window_closed += (window) => {
-			refresh_applications_list(mi_application);
-		};
-		(screen as Wnck.Screen).window_opened += (window) => {
-			refresh_applications_list(mi_application);
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
@@ -214,8 +136,8 @@ private class Applet : PanelCompat.Applet {
 					this.menubar.set_style(def_style);
 					this.menubar.queue_draw();
 				
-					this.mb_application.set_style(def_style);
-					this.mb_application.queue_draw();
+					this.switcher.set_style(def_style);
+					this.switcher.queue_draw();
 					
 					return;
 				break;
@@ -230,8 +152,8 @@ private class Applet : PanelCompat.Applet {
 			this.menubar.set_style(style);
 			this.menubar.queue_draw();
 					
-			this.mb_application.set_style(style);
-			this.mb_application.queue_draw();
+			this.switcher.set_style(style);
+			this.switcher.queue_draw();
 		};
 	}
 	private static bool verbose = false;

@@ -34,6 +34,8 @@ BUILT_SOURCES = \
 	$(NULL)
 
 GlobalMenu_PanelApplet_VALASOURCES = \
+	panelextra-menubar.vala \
+	panelextra-switcher.vala \
 	GPL.vala \
 	applet.vala \
 	$(NULL)
