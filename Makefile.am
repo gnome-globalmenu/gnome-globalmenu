@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = gee dom
+SUBDIRS =
 
 AM_CPPFLAGS = \
 		$(NULL)
