@@ -1,14 +1,6 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
-# Check for Vala
-vala=`valac --version`
-if [ "$vala" != "Vala 0.5.1" ]; then
-	echo
-	echo "***Error: Vala 0.5.1 is required. Aborting."
-	echo
-	exit 1;
-fi
 
 #NOCONFIGURE=yes 
 USE_GNOME2_MACROS=1 USE_COMMON_DOC_BUILD=yes . gnome-autogen.sh

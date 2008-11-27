@@ -6,6 +6,25 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 GNOME_MAINTAINER_MODE_DEFINES
 
+AC_SUBST(VALA_VERSION, [0.5.1])
+
+# Check for Vala
+AC_CACHE_CHECK([checking for vala = $VALA_VERSION],
+		[ac_cv_path_VALACBIN],
+		[AC_PATH_PROGS_FEATURE_CHECK([VALACBIN], 
+			[valac valac [`pwd`/vala$PATH_SEPARATOR$PATH]],
+			[[
+			$ac_path_VALACBIN --version | grep $VALA_VERSION &&
+				ac_cv_path_VALACBIN=$ac_path_VALACBIN ac_path_VALACBIN_found=: 
+			]],
+			[AC_MSG_ERROR([could not find vala version $VALA_VERSION])]
+			)]
+		)
+AC_SUBST([VALACBIN], [$ac_cv_path_VALACBIN])
+AC_SUBST(AM_VALAC_FLAGS)
+AC_SUBST(VALAC_FLAGS, ['--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'])
+AC_SUBST(VALAC, ['$(VALACBIN) $(VALAC_FLAGS)'])
+
 IT_PROG_INTLTOOL([0.35.0])
 
 AC_ISC_POSIX
@@ -14,14 +33,6 @@ AM_PROG_CC_STDC
 AC_HEADER_STDC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
-
-AC_PATH_PROG(VALAC_BIN, valac, valac, [`pwd`/vala$PATH_SEPARATOR$PATH])
-VALAC='$(VALAC_BIN) $(VALAC_FLAGS)'
-VALAC_FLAGS='--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'
-AC_SUBST(VALAC_BIN)
-AC_SUBST(VALAC)
-AC_SUBST(VALAC_FLAGS)
-AC_SUBST(AM_VALAC_FLAGS)
 
 dnl begin: GMarkupDoc - base
 PKG_CHECK_MODULES(GMARKUPDOC_BASE, [glib-2.0])
