@@ -4,6 +4,9 @@ AM_INIT_AUTOMAKE([1.9 tar-ustar])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
 
+# maintainer mode
+AM_MAINTAINER_MODE
+
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
