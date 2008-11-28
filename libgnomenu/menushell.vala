@@ -1,7 +1,7 @@
 using Gtk;
 
 namespace Gnomenu {
-	public class MenuShell : Gtk.Widget {
+	public class MenuShell : Gtk.Container {
 		public int length {get{return _items_count;}}
 
 		public virtual bool selecting {
@@ -64,10 +64,18 @@ namespace Gnomenu {
 		public MenuItem set(int index, MenuItem item) {
 			assert(index >=0 && index < _items_count);
 			MenuItem old = _items[index];
-			old.parent = null;
+			old.unparent();
 			item.parent = this;
 			_items[index] = item;
 			return old;
+		}
+		public int index(MenuItem item) {
+			for(int i = 0; i < _items_count; i++) {
+				if(_items[i] == item) {
+					return i;
+				}
+			}	
+			return -1;
 		}
 		public bool has(int index) {
 			return (index >= 0 && index < _items_count);
@@ -81,26 +89,45 @@ namespace Gnomenu {
 			_items_count ++;
 			return item;
 		}
-		public void truncate(int length) {
-			assert(length >= 0 && length <= _items_count);
-			for(int i = length; i< _items_count; i++ ){
-				_items[i].parent = null;
+		public void truncate(int new_length) {
+			assert(new_length >= 0 && new_length <= _items_count);
+			for(int i = new_length; i< _items_count; i++ ){
+				_items[i].unparent();
 			}
-			_items_count = length;
+			_items_count = new_length;
 			for(int i = _items_count; i< _items.length; i++) {
 				_items[i] = null;
 			}
 		}
 
-
-
+/* GTK Container Interface */
+		/** this function is heavily patched by sed */
+		private override void forall(Gtk.Callback cb, void* data) {
+			bool include_internal;
+			for(int i = 0; i < _items_count; i++) {
+				cb(_items[i]);
+			}
+		}
+		private override void remove(Gtk.Widget child) {
+			for(int i = 0; i< _items_count; i++) {
+				if(_items[i] == child) {
+					_items[i].unparent();
+					_items[i] = null;
+					if( i < _items_count - 1) {
+						Memory.move(&_items[i], &_items[i+1], sizeof(MenuItem) * (_items_count - i - 1));
+					}
+					Memory.set(&_items[_items_count-1], 0, sizeof(MenuItem));
+					_items_count --;
+					break;
+				}
+			}
+		}
+		private override void add(Gtk.Widget child) {
+			append(child as MenuItem);
+		}
 /*GTK Widget Interface*/
 		private override bool expose_event (Gdk.EventExpose event) {
-			message("expose");
-			for(int i = 0; i < length; i++) {
-				get(i).paint(event.area);
-			}
-			return true;
+			return base.expose_event(event);
 		}
 		private override void realize() {
 			base.realize();
@@ -127,33 +154,42 @@ namespace Gnomenu {
 				event_window.move_resize(a.x, a.y, a.width, a.height);
 			}
 
+			int x = a.x;
+			int y = a.y;
 			for(int i = 0; i < length; i++) {
 				Gtk.Allocation ca;
+				Gtk.Requisition cr;
+				get(i).get_child_requisition(out cr);
+				ca.x = x;
+				ca.y = y;
+				ca.width = cr.width;
+				ca.height = cr.height;
 				if(this is MenuBar) {
-					ca.x = a.x + a.width * i / length;
-					ca.width = a.width / length;
+					x += ca.width;
 					ca.height = a.height;
-					ca.y = a.y;
 				}
 				if(this is Menu) {
-					ca.y = a.y + a.width * i / length;
-					ca.height = a.height / length;
+					y += ca.height;
 					ca.width = a.width;
-					ca.x = a.x;
-
 				}
-				this.get(i).allocation = ca;
+				this.get(i).size_allocate((Gdk.Rectangle)ca);
 			}
 		}
 		private override void size_request(out Gtk.Requisition r) {
 			message("size_request");
-			if(this is MenuBar) {
-				r.width = this.length * 50;
-				r.height = 10;
-			} 
-			if(this is Menu) {
-				r.height = this.length * 10;
-				r.width = 10;
+			r.width = 0;
+			r.height = 0;
+			for(int i = 0; i < length; i++) {
+				Gtk.Requisition cr;
+				(get(i) as Gtk.Widget).size_request(out cr);
+				if(this is MenuBar) {
+					r.width += cr.width;
+					r.height = cr.height > r.height? cr.height:r.height;
+				} 
+				if(this is Menu) {
+					r.height += cr.height;
+					r.width = cr.width > r.width? cr.width:r.width;
+				}
 			}
 		}
 		private override void map() {
@@ -198,7 +234,8 @@ namespace Gnomenu {
 
 			translate_event_pos(ref x, ref y);
 			weak MenuItem c = pos_to_item(x, y);
-			if(c.submenu == null) {
+
+			if(c!= null && c.submenu == null) {
 				c.activate();
 			}
 			return true;	
@@ -221,25 +258,40 @@ namespace Gnomenu {
 			return null;
 		}
 
-		private bool key_press_event(Gdk.EventKey event) {
+		private bool key_press_event(Gtk.Widget toplevel, Gdk.EventKey event) {
 			message("key %u", event.keyval);
-			uint LEFT = Gdk.keyval_from_name("LEFT");
-			uint RIGHT = Gdk.keyval_from_name("RIGHT");
-			uint UP = Gdk.keyval_from_name("UP");
-			uint DOWN = Gdk.keyval_from_name("DOWN");
-			if(event.keyval == LEFT) {
-
-			}
-			if(event.keyval == RIGHT) {
-
-			}
-			if(event.keyval == UP) {
-
-			}
-			if(event.keyval == DOWN) {
-
+			uint LEFT = Gdk.keyval_from_name("Left");
+			uint RIGHT = Gdk.keyval_from_name("Right");
+			uint UP = Gdk.keyval_from_name("Up");
+			uint DOWN = Gdk.keyval_from_name("Down");
+			if(selecting) {
+				int i = index(selected_item);
+				if(event.keyval == LEFT) {
+					i--;
+				}
+				if(event.keyval == RIGHT) {
+					i++;
+				}
+				if(event.keyval == UP) {
+					i--;
+				}
+				if(event.keyval == DOWN) {
+					i++;
+				}
+				selected_item = get(i);
 			}
 			return true;	
+		}
+
+		private override void hierarchy_changed(Gtk.Widget previous_toplevel) {
+			message("hierarchy changed");
+			if(previous_toplevel != null) {
+				previous_toplevel.key_press_event -= key_press_event;
+			}
+			weak Gtk.Widget toplevel = get_toplevel();
+			if(toplevel != null) {
+				toplevel.key_press_event += key_press_event;
+			}
 		}
 		protected Gdk.Window event_window;
 		private bool _selecting;

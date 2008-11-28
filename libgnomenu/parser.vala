@@ -18,6 +18,7 @@ namespace Gnomenu {
 			MarkupParseContext context = 
 				new MarkupParseContext(parser.functions, 0, parser, null);
 			context.parse(description, -1);
+			shell.truncate(parser.position);
 		}
 
 
@@ -47,17 +48,33 @@ namespace Gnomenu {
 					 * it should be false forever)*/
 					if(shell.has(position)) {
 						var item = shell.get(position);
-						/* do stuff, setup_item(attributes...?)*/
+						setup_item(item, attribute_names, attribute_values);
 					} else {
 						var item = new MenuItem();
-						/*setup_item(...) */
 						shell.append(item);
+						setup_item(item, attribute_names, attribute_values);
 					}
 					inside_item = true;
 				break;
 				default:
 					throw new MarkupError.UNKNOWN_ELEMENT("unkown element");
 			}
+		}
+		private void setup_item(MenuItem item, string[] attr_names, string[] attr_vals) {
+			weak string label;
+			weak string id;
+			g_markup_collect_attributes("item", attr_names, attr_vals, null,
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"label", &label, 
+					
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"id", &id,
+
+					GMarkupCollectType.INVALID
+					);
+			item.label = label;	
+			item.id = id;
+			item.visible = true;
 		}
 		private void end_element (MarkupParseContext context, string element_name) throws MarkupError {
 			switch(element_name) {

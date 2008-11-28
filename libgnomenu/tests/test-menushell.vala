@@ -16,7 +16,7 @@ namespace Gnomenu {
 				weak MenuItem ref_item = menu.append(item);
 				assert(ref_item == item);
 				item = null;
-				assert(ref_item.ref_count == 1);
+				assert(ref_item.ref_count == 2); /*1 from menushell, 1 from parent_set*/
 				
 			});
 			add("set", () => {
@@ -27,7 +27,7 @@ namespace Gnomenu {
 			});
 			add("get", () => {
 				weak MenuItem item_ref = menu.get(0);
-				assert(item_ref.ref_count == 2); /*1 from this.item, 1 from menu*/
+				assert(item_ref.ref_count == 3); /*1 from this.item, 1 from menu, 1 from parent_set*/
 				assert(item_ref == item);
 			});
 			add("length", () => {

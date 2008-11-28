@@ -2,46 +2,13 @@
 using Gtk;
 
 namespace Gnomenu {
-	public class MenuItem : GLib.Object {
+	public class MenuItem : Gtk.Widget {
 		public MenuItem() {}
-		public void paint(Gdk.Rectangle? area = null) {
-			switch(state) {
-				case StateType.NORMAL:
-					Gtk.paint_arrow	(parent.get_style(),
-							parent.get_parent_window(),
-							state,
-							ShadowType.NONE,
-							area,
-							parent,
-							null,
-							ArrowType.UP,
-							true, 
-							allocation.x,
-							allocation.y,
-							allocation.width,
-							allocation.height);
-				break;
-				case StateType.SELECTED:
-					Gtk.paint_arrow	(parent.get_style(),
-							parent.get_parent_window(),
-							state,
-							ShadowType.NONE,
-							area,
-							parent,
-							null,
-							ArrowType.DOWN,
-							true, 
-							allocation.x,
-							allocation.y,
-							allocation.width,
-							allocation.height);
-				break;
-			}
+		construct {
+			set_flags(WidgetFlags.NO_WINDOW);
 		}
 		public string id;
-		public MenuShell parent;
-		public StateType state;
-		public Gtk.Allocation allocation;
+		public string label;
 		public Menu submenu {
 			get {
 				return _submenu;
@@ -67,11 +34,11 @@ namespace Gnomenu {
 		}
 		public void activate() {
 			message("activate");
-			weak MenuShell p = this.parent;
+			weak MenuShell p = this.parent as MenuShell;
 			weak MenuItem i;
 			while(p is Menu) {
 				i = (p as Menu).item;
-				p = i.parent;
+				p = i.parent as MenuShell;
 			}
 			/*OK p is the MenuBar now*/
 			p.selecting = false;
@@ -92,9 +59,50 @@ namespace Gnomenu {
 				y += allocation.height;
 			}
 			if(parent is Menu) {
-				x += allocation.height;
+				x += allocation.width;
 			}
 		}
+
+		private override bool expose_event(Gdk.EventExpose event) {
+			switch(state) {
+				case StateType.NORMAL:
+					Gtk.paint_arrow	(style,
+							window,
+							(StateType)state,
+							ShadowType.NONE,
+							event.area,
+							parent,
+							null,
+							ArrowType.UP,
+							true, 
+							allocation.x,
+							allocation.y,
+							allocation.width,
+							allocation.height);
+				break;
+				case StateType.SELECTED:
+					Gtk.paint_arrow	(style,
+							window,
+							(StateType)state,
+							ShadowType.NONE,
+							event.area,
+							parent,
+							null,
+							ArrowType.DOWN,
+							true, 
+							allocation.x,
+							allocation.y,
+							allocation.width,
+							allocation.height);
+				break;
+			}
+			return false;
+		}
+		private override void size_request(out Gtk.Requisition r) {
+			r.width = 100;
+			r.height = 16;
+		}
 		private Menu _submenu;
+		private Pango.Layout layout;
 	}
 }

@@ -17,6 +17,7 @@ namespace Gnomenu {
 							null,
 							null,
 							Gdk.CURRENT_TIME);
+
 				} else {
 					Gdk.pointer_ungrab(Gdk.CURRENT_TIME);
 				}

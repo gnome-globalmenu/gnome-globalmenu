@@ -21,8 +21,9 @@ STAMP=gnomenu.vapi
 
 $(STAMP): $(VALASOURCES)
 	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES)
+	bash patch.sh
 
 BUILT_SOURCES = $(STAMP)
 
-EXTRA_DIST = $(STAMP) $(VALASOURCES)
+EXTRA_DIST = $(STAMP) $(VALASOURCES) patch.sh
 
