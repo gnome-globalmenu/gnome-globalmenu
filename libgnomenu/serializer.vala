@@ -2,15 +2,16 @@ using Gtk;
 
 namespace Gnomenu {
 	public class Serializer {
-		Serializer () {
-			this.sb = new StringBuilder("");
-		}	
-		public bool pretty_print;
-		public static string to_string(MenuShell shell) {
+		public static string to_string(MenuShell shell, bool pretty_print = false) {
 			var s = new Serializer();
+			s.pretty_print = pretty_print;
 			s.visit(shell);
 			return s.sb.str;
 		}
+
+		Serializer () {
+			this.sb = new StringBuilder("");
+		}	
 
 		private void visit(GLib.Object node) {
 			if(node is MenuShell) {
@@ -22,13 +23,13 @@ namespace Gnomenu {
 		}
 		private void visit_shell(MenuShell shell) {
 			int i;
-			if(shell.length > 0) {
+			if(((MenuShellHelper)shell).length() > 0) {
 				indent();
 				sb.append_printf("<menu>");
 				newline();
 				level++;
-				for(i = 0; i< shell.length; i++) {
-					visit(shell.get(i));
+				for(i = 0; i< ((MenuShellHelper)shell).length(); i++) {
+					visit(((MenuShellHelper)shell).get(i));
 				}
 				level--;
 				indent();
@@ -43,7 +44,9 @@ namespace Gnomenu {
 		private void visit_item(MenuItem item) {
 			if(item.submenu != null) {
 				indent();
-				sb.append_printf("<item>");
+				sb.append_printf("<item");
+				visit_item_attributes(item);
+				sb.append_c('>');
 				newline();
 				level++;
 				visit_shell(item.submenu);
@@ -53,13 +56,25 @@ namespace Gnomenu {
 				newline();
 			} else {
 				indent();
-				sb.append_printf("<item/>");
+				sb.append_printf("<item");
+				visit_item_attributes(item);
+				sb.append("/>");
 				newline();
 			}
 		}
+		private void visit_item_attributes(MenuItem item) {
+			weak string label_text = item.get_label();
+			if(label_text != null) {
+				sb.append_printf(" label=\"%s\"",
+					Markup.escape_text(label_text, -1));
+			}
+		}
+
 		private StringBuilder sb;
 		private int level;
 		private bool _newline;
+		private bool pretty_print;
+
 		private void indent() {
 			if(!pretty_print) return;
 			if(_newline) {

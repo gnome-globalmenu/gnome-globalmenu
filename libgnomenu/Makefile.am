@@ -2,11 +2,14 @@ NULL=
 SUBDIRS = . tests
 
 VALASOURCES=\
-	menushell.vala \
 	parser.vala \
 	serializer.vala \
+	helper.vala \
 	menubar.vala \
 	menuitem.vala \
+	$(NULL)
+
+	menushell.vala \
 	menu.vala \
 	$(NULL)
 noinst_LTLIBRARIES = libgnomenu.la
