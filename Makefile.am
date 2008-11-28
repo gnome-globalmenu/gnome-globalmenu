@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS =
+SUBDIRS = libgnomenu tests
 
 AM_CPPFLAGS = \
 		$(NULL)
