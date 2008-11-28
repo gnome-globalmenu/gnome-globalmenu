@@ -63,7 +63,7 @@ namespace Gnomenu {
 			}
 		}
 		private void visit_item_attributes(MenuItem item) {
-			weak string label_text = item.get_label();
+			weak string label_text = item.label;
 			if(label_text != null) {
 				sb.append_printf(" label=\"%s\"",
 					Markup.escape_text(label_text, -1));

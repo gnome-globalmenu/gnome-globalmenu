@@ -62,7 +62,7 @@ namespace Gnomenu {
 					} else {
 						var item = new MenuItem();
 						shell.append(item);
-						item.set_position(position);
+						item.position = position;
 						setup_item(item, attribute_names, attribute_values);
 						Signal.connect(item, "activate", (GLib.Callback) item_activate_handler, topmost);
 					}
@@ -87,7 +87,7 @@ namespace Gnomenu {
 					
 					GMarkupCollectType.INVALID
 					);
-			item.set_label(label);
+			item.label = label;
 			item.visible = true;
 		}
 		private void end_element (MarkupParseContext context, 
