@@ -9,7 +9,7 @@ SUFFIXES = .vala .stamp
 	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu $^
 	touch $@
 
-TEST_PROGS +=  test-parser test-menubar
+TEST_PROGS +=  $(VALASOURCES:.vala=)
 	
 #	test-menushell test-parser test-menubar
 noinst_PROGRAMS = $(TEST_PROGS)

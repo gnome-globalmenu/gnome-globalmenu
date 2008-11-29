@@ -85,6 +85,8 @@ private class Applet : Panel.Applet {
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
+				current_window = new Gnomenu.Window(window.get_xid());
+				current_window.realize();
 			}
 		};
 
@@ -227,6 +229,7 @@ private class Applet : Panel.Applet {
 		base.size_allocate(a);
 	}
 	private Wnck.Screen screen;
+	private Gnomenu.Window current_window;
 	private Gnomenu.MenuBar menubar;
 
 	private Label label; /*Replace with the selector later*/

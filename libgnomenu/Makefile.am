@@ -7,6 +7,7 @@ VALASOURCES=\
 	helper.vala \
 	menubar.vala \
 	menuitem.vala \
+	window.vala \
 	$(NULL)
 
 noinst_LTLIBRARIES = libgnomenu.la
