@@ -10,7 +10,8 @@ AM_CPPFLAGS = \
 	-DSYSCONFDIR=\"$(sysconfdir)\" \
 	-DDATADIR=\"$(datadir)\" \
 	-DLIBDIR=\"$(libdir)\" \
-	-DWNCK_I_KNOW_THIS_IS_UNSTABLE
+	-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
+	"-DWNCK_I_KNOW_THIS_IS_UNSTABLE"
 	$(NULL)
 
 AM_VALAC_FLAGS = \
@@ -23,6 +24,8 @@ AM_VALAC_FLAGS = \
 	--pkg gmarkupdoc  \
 	--pkg wnckcompat  \
 	--pkg panelappletcompat \
+	--pkg gnome-desktop-2.0 \
+	--pkg libgnome-menu \
 	--pkg gconf-2.0 \
 	--pkg gdk-2.0 \
 	$(NULL)
