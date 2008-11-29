@@ -50,7 +50,7 @@ private class Applet : Panel.Applet {
 </menu>
 """
 		);
-		add_menubar_from_string(
+		main_menubar = add_menubar_from_string(
 """
 <menu>
 	<item label="File">
@@ -87,6 +87,10 @@ private class Applet : Panel.Applet {
 				if(transient_for != null) window = transient_for;
 				current_window = new Gnomenu.Window(window.get_xid());
 				current_window.realize();
+				current_window.context_changed += (current_window) => {
+					Parser.parse(main_menubar, current_window.menu_context);
+				};
+				Parser.parse(main_menubar, current_window.menu_context);
 			}
 		};
 
@@ -230,7 +234,7 @@ private class Applet : Panel.Applet {
 	}
 	private Wnck.Screen screen;
 	private Gnomenu.Window current_window;
-	private Gnomenu.MenuBar menubar;
+	private Gnomenu.MenuBar main_menubar;
 
 	private Label label; /*Replace with the selector later*/
 
@@ -243,7 +247,7 @@ private class Applet : Panel.Applet {
 		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
 		{null}
 	};
-	private void add_menubar_from_string(string str) {
+	private Gnomenu.MenuBar add_menubar_from_string(string str) {
 		Gnomenu.MenuBar menubar = new Gnomenu.MenuBar();
 		menubar.visible = true;
 		menubar.set_name("PanelMenuBar");
@@ -251,6 +255,7 @@ private class Applet : Panel.Applet {
 
 		Parser.parse(menubar, str);
 		internal_children.append(menubar);
+		return menubar;
 	}
 	static const string STANDARD_PROPERTIES = "";
 	public static int main(string[] args) {

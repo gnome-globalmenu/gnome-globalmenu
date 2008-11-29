@@ -20,8 +20,8 @@ libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 
 STAMP=gnomenu.vapi
 
-$(STAMP): $(VALASOURCES) patch.sh markupparser.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES)
+$(STAMP): $(VALASOURCES) patch.sh markupparser.vapi gdk.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gdk --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES)
 	bash patch.sh
 
 BUILT_SOURCES = $(STAMP)
