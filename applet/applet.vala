@@ -9,7 +9,10 @@ using PanelCompat;
 
 public extern GLib.Object gnome_program_init_easy(string name, string version,
 		string[] args, GLib.OptionContext #context);
+public extern string* __get_task_name_by_pid(int pid);
+
 private class Applet : PanelCompat.Applet {
+	
 	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	static const string APPLET_NAME = "Global Menu Panel Applet";
@@ -80,6 +83,18 @@ private class Applet : PanelCompat.Applet {
                                           void* user_data, string cname) {
        	message("Not yet available...");
     }
+    
+    private string get_application_name(Wnck.Window window) {
+		string txt = __get_task_name_by_pid(window.get_application().get_pid());
+		if ((txt==null) || (txt=="")) return window.get_application().get_name();
+		
+		long co = txt.length-1;
+		while ((co>=0) && (txt.substring(co, 1)!="/")) {
+			co--;
+		}
+		txt = txt.substring(co+1,(txt.length-co-1));
+		return txt;
+	}
 
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
@@ -111,7 +126,6 @@ private class Applet : PanelCompat.Applet {
 		setup_menu (menu_definition, verbs, null);
 
 		switcher = new PanelExtra.Switcher();
-		switcher.default_window = this.menubar.find_default();
 		box.pack_start(switcher, false, true, 0);
 
 		box.pack_start(menubar, true, true, 0);
@@ -124,6 +138,10 @@ private class Applet : PanelCompat.Applet {
 				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
 				menubar.switch(xid);
+				
+				string aname = "Desktop";
+				if (window.get_xid().to_string()!=this.menubar.find_default()) aname = get_application_name(window);
+				switcher.set_label(aname);
 			}
 		};
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );

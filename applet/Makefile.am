@@ -55,6 +55,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \
 	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.h) \
 	applet-c.c \
+	task-utils-c.c \
 	$(NULL)
 
 .vala.stamp: $(GlobalMenu_PanelApplet_VALASOURCES)

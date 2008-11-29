@@ -6,7 +6,6 @@ namespace PanelExtra {
 	public class Switcher : PanelExtra.MenuBar {
 		private Gtk.MenuItem mi_application;
 		private Wnck.Screen screen;
-		public string default_window;
 		
 		private void app_selected(Gtk.ImageMenuItem? item) {
 			if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
@@ -53,6 +52,9 @@ namespace PanelExtra {
 				(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + (mi.child as Gtk.Label).text + "</b>"); else
 				(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + text + "</b>");
 		}
+		public void set_label(string text) {
+			set_menu_item_label_bold(mi_application, text);
+		}
 		public Switcher() { }
 		construct {
 			mi_application = new Gtk.MenuItem.with_label("GlobalMenu");
@@ -62,10 +64,6 @@ namespace PanelExtra {
 			
 			screen = Wnck.Screen.get_default();
 			(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
-				weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
-				string aname = "Desktop";
-				if (window.get_xid().to_string()!=this.default_window) aname = window.get_application().get_name();
-				set_menu_item_label_bold(mi_application, aname);
 				refresh_applications_list(mi_application);
 			};
 			(screen as Wnck.Screen).window_closed += (window) => {
