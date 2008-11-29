@@ -40,6 +40,7 @@ GlobalMenu_PanelApplet_VALASOURCES = \
 	panelextra-menubar.vala \
 	panelextra-switcher.vala \
 	GPL.vala \
+	GnomeMenuHelper.vala \
 	applet.vala \
 	$(NULL)
 

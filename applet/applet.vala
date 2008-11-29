@@ -34,7 +34,7 @@ private class Applet : PanelCompat.Applet {
 	private Gtk.Box box;
 
 	private PanelExtra.Switcher switcher;
-
+	private GLib.HashTable<string,string> switcher_dictionary;
 	static const string GCONF_ROOT_KEY = "/apps/gnome-globalmenu-applet";
 
 	public Applet() {
@@ -96,12 +96,14 @@ private class Applet : PanelCompat.Applet {
 		if ((txt==null) || (txt=="")) return window.get_application().get_name();
 		string ret = txt.chomp();
 		if (ret.substring(ret.length-4,4)==".exe") return remove_path(ret, "\\"); // is a wine program
-		
-		ret = remove_path(ret.split(" ")[0], "/");
 
+		ret = remove_path(ret.split(" ")[0], "/");
+			
 		switch(ret) {
 		case "mono":
 		case "python":
+		case "python2.5":
+		case "vmplayer":
 			return remove_path(txt.chomp().split(" ")[1], "/");
 			break;
 		case "wine":
@@ -143,6 +145,8 @@ private class Applet : PanelCompat.Applet {
 		switcher = new PanelExtra.Switcher();
 		box.pack_start(switcher, false, true, 0);
 
+		switcher_dictionary = GnomeMenuHelper.get_flat_list();
+		
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 		screen = Wnck.Screen.get_default();
@@ -156,6 +160,9 @@ private class Applet : PanelCompat.Applet {
 				
 				string aname = "Desktop";
 				if (window.get_xid().to_string()!=this.menubar.find_default()) aname = get_application_name(window);
+				if (switcher_dictionary.lookup(aname)!=null) 
+					aname = switcher_dictionary.lookup(aname); else
+					aname = window.get_name();
 				switcher.set_label(aname);
 			}
 		};
