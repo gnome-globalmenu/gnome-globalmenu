@@ -6,21 +6,23 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 GNOME_MAINTAINER_MODE_DEFINES
 
-AC_SUBST(VALA_VERSION, [0.5.1])
+AC_SUBST(VALA_REQUIRED, [0.5.1])
 
-# Check for Vala
-AC_CACHE_CHECK([checking for vala = $VALA_VERSION],
-		[ac_cv_path_VALACBIN],
-		[AC_PATH_PROGS_FEATURE_CHECK([VALACBIN], 
-			[valac valac [`pwd`/vala$PATH_SEPARATOR$PATH]],
-			[[
-			$ac_path_VALACBIN --version | grep $VALA_VERSION &&
-				ac_cv_path_VALACBIN=$ac_path_VALACBIN ac_path_VALACBIN_found=: 
-			]],
-			[AC_MSG_ERROR([could not find vala version $VALA_VERSION])]
-			)]
-		)
-AC_SUBST([VALACBIN], [$ac_cv_path_VALACBIN])
+AC_PATH_PROG(VALACBIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
+AC_SUBST(VALACBIN, [$ac_cv_path_VALACBIN])
+
+AC_CONFIG_COMMANDS_POST(
+		[
+		VALA_VERSION=`$VALACBIN --version`
+	   	echo $VALA_VERSION | grep $VALA_REQUIRED || \
+		AC_MSG_WARN([
+			This package works with VALA $VALA_REQUIRED;
+			Your have $VALA_VERSION installed;
+			You may experience compilation failure or
+			random runtime failurs.
+			])
+		])
+
 AC_SUBST(AM_VALAC_FLAGS)
 AC_SUBST(VALAC_FLAGS, ['--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'])
 AC_SUBST(VALAC, ['$(VALACBIN) $(VALAC_FLAGS)'])
