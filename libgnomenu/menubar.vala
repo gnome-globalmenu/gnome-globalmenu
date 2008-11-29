@@ -41,8 +41,12 @@ namespace Gnomenu {
 				_background.color = value.color;
 				switch(_background.type) {
 					case BackgroundType.NONE:
+						style = null;
+						RcStyle rc_style = new RcStyle();
+						modify_style(rc_style);
 					break;
 					case BackgroundType.COLOR:
+						modify_bg(StateType.NORMAL, _background.color);
 					break;
 					case BackgroundType.PIXMAP:
 					break;

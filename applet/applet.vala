@@ -91,14 +91,26 @@ private class Applet : Panel.Applet {
 		/*init panel*/
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 	}
-	private override void change_background(AppletBackgroundType type, ref Gdk.Color? color, Gdk.Pixmap? pixmap) {
+	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
+		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
+				bg.type = BackgroundType.NONE;
+				style = null;
+				RcStyle rc_style = new RcStyle();
+				modify_style (rc_style);
 			break;
 			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
+				bg.type = BackgroundType.COLOR;
+				bg.color = color;
+				modify_bg(StateType.NORMAL, color);
 			break;
 			case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
+				bg.type = BackgroundType.NONE;
 			break;
+		}
+		foreach(Gnomenu.MenuBar menubar in internal_children) {
+			menubar.background = bg;
 		}
 	}
 	private override void change_orient(AppletOrient orient) {
