@@ -146,6 +146,8 @@ private class Applet : PanelCompat.Applet {
 		box.pack_start(switcher, false, true, 0);
 
 		switcher_dictionary = GnomeMenuHelper.get_flat_list();
+		if (switcher_dictionary.lookup("nautilus")==null)
+			switcher_dictionary.insert("nautilus", "File Manager"); // To be removed when gconf will be available
 		
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
