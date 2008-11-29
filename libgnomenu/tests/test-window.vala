@@ -8,9 +8,9 @@ namespace Gnomenu {
 		Window test_window;
 		TestWindow() {
 			base("/Window");
-			test_window = new Window(WindowType.TOPLEVEL);
 
-			add("TestWithApplet", () => {
+			add("Native/Applet", () => {
+				test_window = new Window(WindowType.TOPLEVEL);
 				test_window.realize();
 				test_window.destroy += Gtk.main_quit;
 				test_window.property_changed += (window, property) => {
@@ -23,6 +23,16 @@ namespace Gnomenu {
 				test_window.set("_NET_GLOBALMENU_MENU_CONTEXT",
 					"""<menu><item label="See"/></menu>"""
 					);
+				Gtk.main();
+			});
+			add("Foreign", () => {
+				test_window = new Window.foreign(0x4a0000c);
+				Button btn = new Button.with_label("hello\nhhhh\n");
+				btn.visible = true;
+				btn.clicked += Gtk.main_quit;
+				test_window.add(btn);
+				test_window.show_all();
+
 				Gtk.main();
 			});
 		}

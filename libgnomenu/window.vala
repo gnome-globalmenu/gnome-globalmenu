@@ -21,9 +21,12 @@ namespace Gnomenu {
 			);
 			if(_native != 0) {
 				window = gdk_window_foreign_new(_native);
-				window.set_events((Gdk.EventMask)get_events());
-				set_flags(WidgetFlags.REALIZED);
-				window.set_user_data(this);
+				if(window != null) {
+					window.set_events((Gdk.EventMask)get_events());
+					set_flags(WidgetFlags.REALIZED);
+					window.set_user_data(this);
+					style.attach(window);
+				}
 			}
 			disposed = false;
 		}
@@ -76,19 +79,50 @@ namespace Gnomenu {
 		private ulong _native;
 		private string _menu_context;
 		private override void realize() {
-			if(native != 0) return;
+			if(native != 0) {
+				foreach(Widget child in get_children()) {
+					child.realize();
+				}
+				return;
+			}
 			base.realize();
 		}
 		private override void map() {
-			if(native != 0) return;
+			if(native != 0) {
+				add_events(Gdk.EventMask.EXPOSURE_MASK);
+				foreach(Widget child in get_children()) {
+					child.map();
+				}
+				return;
+			}
 			base.map();
 		}
 		private override void unmap() {
-			if(native != 0) return;
+			if(native != 0) {
+				foreach(Widget child in get_children()) {
+					child.unmap();
+				}
+				return;
+			}
 			base.unmap();
 		}
+		private override bool expose_event(Gdk.EventExpose event) {
+			if(native != 0) {
+				foreach(Widget child in get_children()) {
+					propagate_expose(child, event);
+				}
+				return true;
+			}
+			base.expose_event(event);
+			return false;
+		}
 		private override void unrealize() {
-			if(native != 0) return;
+			if(native != 0) {
+				foreach(Widget child in get_children()) {
+					child.unrealize();
+				}
+				return;
+			}
 			base.unrealize();
 		}
 		private override bool property_notify_event(Gdk.EventProperty event) {
