@@ -1,42 +1,14 @@
 NULL = 
 
-AM_CPPFLAGS = \
-	-g \
-	$(GLOBALMENU_PANELAPPLET_CFLAGS) \
-	-include $(CONFIG_HEADER) \
-	-I$(top_srcdir)/libgmarkupdoc \
-	-I$(top_srcdir)/libgnomenu \
-	-DPREFIX=\"$(prefix)\" \
-	-DSYSCONFDIR=\"$(sysconfdir)\" \
-	-DDATADIR=\"$(datadir)\" \
-	-DLIBDIR=\"$(libdir)\" \
-	-DWNCK_I_KNOW_THIS_IS_UNSTABLE
-	$(NULL)
+STAMP = vala-stamp
 
-AM_VALAC_FLAGS = \
-	$(GLOBALMENU_PANELAPPLET_VALA_PKGS) \
-	--vapidir=$(top_srcdir)/libgmarkupdoc  \
-	--vapidir=$(top_srcdir)/libgnomenu  \
-	--pkg gnomenu  \
-	--pkg gtkcompat  \
-	--pkg gmarkupdoc  \
-	--pkg wnckcompat  \
-	--pkg panelappletcompat \
-	$(NULL)
-	
-BUILT_SOURCES = \
-	.vala.stamp \
-	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \
-	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.h) \
-	$(NULL)
+BUILT_SOURCES = $(STAMP)
 
-GlobalMenu_PanelApplet_VALASOURCES = \
+VALASOURCES = \
 	applet.vala \
 	$(NULL)
 
-libexec_PROGRAMS = \
-	GlobalMenu.PanelApplet \
-	$(NULL)
+libexec_PROGRAMS = GlobalMenu.PanelApplet
 
 serverdir = $(BONOBO_SERVER_DIR)
 server_in_files = GlobalMenu_PanelApplet.server.in
@@ -46,24 +18,44 @@ $(server_DATA): $(server_in_files) Makefile
 	sed -e "s|@LOCATION@|$(libexecdir)|" $< > $@
 
 GlobalMenu_PanelApplet_SOURCES = \
-	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.c) \
-	$(GlobalMenu_PanelApplet_VALASOURCES:.vala=.h) \
-	applet-c.c \
+	$(VALASOURCES:.vala=.c) \
+	$(VALASOURCES:.vala=.h) \
 	$(NULL)
 
-.vala.stamp: $(GlobalMenu_PanelApplet_VALASOURCES)
-	$(VALAC) -C  $^
+
+$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
+	$(VALAC) -C --vapidir=. --vapidir=$(top_srcdir)/libgnomenu --pkg=gtk+-2.0 --pkg=libwnck-1.0 --pkg=libpanelapplet-2.0 --pkg=gnomenu $(VALASOURCES)
+	bash patch.sh
 	touch $@
 
 GlobalMenu_PanelApplet_LDADD = \
-		$(GLOBALMENU_PANELAPPLET_LIBS) \
-		$(top_builddir)/libgnomenu/libgnomenu.la \
-		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
+		$(GLIB_LIBS) \
+		$(GTK_LIBS) \
+		$(WNCK_LIBS) \
+		$(PANEL_LIBS) \
+		../libgnomenu/libgnomenu.la \
+		$(NULL)
+GlobalMenu_PanelApplet_CPPFLAGS = \
+		$(GLIB_CFLAGS) \
+		$(GTK_CFLAGS) \
+		$(WNCK_CFLAGS) \
+		$(PANEL_CFLAGS) \
+		-include $(CONFIG_HEADER) \
+		-DPREFIX=\"$(prefix)\" \
+		-DSYSCONFDIR=\"$(sysconfdir)\" \
+		-DDATADIR=\"$(datadir)\" \
+		-DLIBDIR=\"$(libdir)\" \
+		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		$(NULL)
 
 EXTRA_DIST = \
-	$(BUILT_SOURCES) \
+	$(STAMP) \
+	patch.sh \
+	libpanelapplet-2.0.vapi \
+	libpanelapplet-2.0.deps \
 	$(GlobalMenu_PanelApplet_VALASOURCES) \
 	$(server_in_files) \
 	$(NULL)
+
 DISTCLEANFILES = $(server_DATA)
+	

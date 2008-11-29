@@ -72,16 +72,21 @@ namespace Gnomenu {
 			window.modify_bg(StateType.NORMAL, color);
 			menubar = new MenuBar();
 			menubar.activate += activate;
-			box = new Gtk.HBox(false, 0);
-			Parser.parse( menubar, test1);
-			box.pack_start_defaults(new Label("hello"));
-			box.pack_start_defaults(menubar);
-			window.add(box);
 
 			add("usability", () => {
 					assert(window is Gtk.Window);
+				Parser.parse( menubar, test1);
+				window.add(menubar);
 				window.destroy += Gtk.main_quit;
 				window.show_all();		
+				Gtk.main();
+			});
+			add("Gravity", () => {
+				Parser.parse( menubar, test1);
+				menubar.gravity = Gravity.UP;
+				window.add(menubar);
+				window.destroy += Gtk.main_quit;
+				window.show_all();
 				Gtk.main();
 			});
 		}	

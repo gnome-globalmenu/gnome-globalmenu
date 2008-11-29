@@ -2,18 +2,11 @@ using GLib;
 using Gtk;
 using Gnomenu;
 using Wnck;
-using WnckCompat;
 using Panel;
-using PanelCompat;
 
-public extern GLib.Object gnome_program_init_easy(string name, string version,
-		string[] args, GLib.OptionContext #context);
-private class Applet : PanelCompat.Applet {
-static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
-static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
-	private Wnck.Screen screen;
-	private Gnomenu.MenuBar menubar;
-	private Gtk.Box box;
+private class Applet : Panel.Applet {
+	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
+	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 	public Applet() {
 		int i = 0;
 	}
@@ -22,53 +15,108 @@ static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
 		menubar = new Gnomenu.MenuBar();
 		menubar.set_name("PanelMenuBar");
 		box = new Gtk.HBox(false, 0);
-		menubar.show_tabs = false;
 		box.pack_start(menubar, true, true, 0);
+		Parser.parse(menubar,
+"""
+<menu>
+	<item label="File">
+		<menu>
+			<item label="New">
+				<menu>
+					<item label="Zombie"/>
+					<item label="Worm"/>
+				</menu>
+			</item>
+		</menu>
+	</item>
+	<item label="Edit">
+		<menu>
+			<item label="Shoot"/>
+			<item label="Run"/>
+		</menu>
+	</item>
+	<item label="Help">
+		<menu>
+			<item label="Police"/>
+			<item label="Army"/>
+		</menu>
+	</item>
+</menu>
+"""
+);
 		this.add(box);
+	
+	
+		/*init wnck*/
 		screen = Wnck.Screen.get_default();
-		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
-			weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
+		screen.active_window_changed += (screen, previous_window) => {
+			weak Wnck.Window window = screen.get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
-				string xid = window.get_xid().to_string();
-				menubar.switch(xid);
 			}
 		};
+
+		/*init panel*/
 		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
-		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
-			Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
-			switch(bgtype){
-				case Panel.AppletBackgroundType.NO_BACKGROUND:
-					Gtk.Style def_style = Gtk.rc_get_style(this.menubar);
-					this.menubar.set_style(def_style);
-					this.menubar.queue_draw();
-					return;
-				break;
-				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = null;
-					style.bg[(int)StateType.NORMAL] = color;
-				break;
-				case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
-				break;
-			}
-			this.menubar.set_style(style);
-			this.menubar.queue_draw();
-		};
 	}
+	private override void change_background(AppletBackgroundType type, ref Gdk.Color? color, Gdk.Pixmap? pixmap) {
+		switch(type){
+			case Panel.AppletBackgroundType.NO_BACKGROUND:
+			break;
+			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
+			break;
+			case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
+			break;
+		}
+	}
+	private override void change_orient(AppletOrient orient) {
+		switch(orient) {
+			case AppletOrient.UP:
+				menubar.gravity = Gravity.DOWN;
+				menubar.pack_direction = PackDirection.LTR;
+				menubar.child_pack_direction = PackDirection.LTR;
+			break;
+			case AppletOrient.DOWN:
+				menubar.gravity = Gravity.DOWN;
+				menubar.pack_direction = PackDirection.LTR;
+				menubar.child_pack_direction = PackDirection.LTR;
+			break;
+			case AppletOrient.LEFT:
+				menubar.gravity = Gravity.LEFT;
+				menubar.pack_direction = PackDirection.TTB;
+				menubar.child_pack_direction = PackDirection.TTB;
+			break;
+			case AppletOrient.RIGHT:
+				menubar.gravity = Gravity.RIGHT;
+				menubar.pack_direction = PackDirection.BTT;
+				menubar.child_pack_direction = PackDirection.BTT;
+			break;
+		}
+	
+	}
+	private Wnck.Screen screen;
+	private Gnomenu.MenuBar menubar;
+	private Gtk.Box box;
 	private static bool verbose = false;
 	const OptionEntry[] options = {
 		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
 		{null}
 	};
+	static const string STANDARD_PROPERTIES = "";
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
 		context.set_help_enabled (true);
 		context.add_main_entries(options, null);
-		GLib.Object program = gnome_program_init_easy(
-			"GlobalMenu.PanelApplet",
-			"0.6", args, #context);
+		Gnome.Program program = Gnome.Program.init (
+				"GlobalMenu.PanelApplet", "0.7", 
+				Gnome.libgnomeui_module, 
+				args, 
+				Gnome.PARAM_GOPTION_CONTEXT, context,
+				Gnome.CLIENT_PARAM_SM_CONNECT, false,
+				STANDARD_PROPERTIES,
+				null);
+
 		if(!verbose) {
 			LogFunc handler = (domain, level, message) => { };
 			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);

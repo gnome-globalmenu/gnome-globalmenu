@@ -9,9 +9,6 @@ VALASOURCES=\
 	menuitem.vala \
 	$(NULL)
 
-	menushell.vala \
-	menu.vala \
-	$(NULL)
 noinst_LTLIBRARIES = libgnomenu.la
 
 libgnomenu_la_SOURCES = $(VALASOURCES:.vala=.c) \
@@ -22,7 +19,7 @@ libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 
 STAMP=gnomenu.vapi
 
-$(STAMP): $(VALASOURCES)
+$(STAMP): $(VALASOURCES) patch.sh markupparser.vapi
 	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES)
 	bash patch.sh
 

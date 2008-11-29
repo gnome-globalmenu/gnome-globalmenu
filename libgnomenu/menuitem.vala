@@ -16,9 +16,7 @@ namespace Gnomenu {
 				weak Widget bin_child = get_child();
 				weak Label label_widget;
 				if(!(bin_child is Gtk.Label)) {
-					if(bin_child != null)
-						remove(bin_child);
-					add(new Label(""));
+					replace(new Label(""));
 					bin_child = get_child();
 					bin_child.visible = true;
 				}
@@ -59,5 +57,51 @@ namespace Gnomenu {
 			}
 		}
 		private string _path; /*merely a buffer*/
+		private Gravity _gravity;
+		public Gravity gravity {
+			get {
+				return _gravity;
+			}
+			set {
+				_gravity = value;
+				update_label_gravity();
+			}
+		}
+		private Widget? replace(Widget new_child) {
+			Widget old_child = get_child();
+			if(old_child != null) {
+				remove(old_child);
+			}
+			add(new_child);
+			return old_child;
+		}
+		private void update_label_gravity() {
+			double text_angle = 0;
+			switch(gravity) {
+				case Gravity.UP:
+					text_angle = 180;
+				break;
+				case Gravity.DOWN:
+					text_angle = 0;
+				break;
+				case Gravity.LEFT:
+					text_angle = 270;
+				break;
+				case Gravity.RIGHT:
+					text_angle = 90;
+				break;
+			}
+			Label label = get_child() as Label;
+			if(label != null) {
+				label.angle = text_angle;
+			}
+		}
+		private override void add(Gtk.Widget widget) {
+			base.add(widget);
+			if(widget is Label) {
+				update_label_gravity();
+			}
+		
+		}
 	}
 }
