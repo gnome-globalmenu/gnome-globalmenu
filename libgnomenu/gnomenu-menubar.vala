@@ -20,7 +20,7 @@ namespace Gnomenu {
 			}
 			menu_hash.remove(xid);
 		}
-		public weak string? find_default() {
+		private weak string? find_default() {
 			foreach(weak GMarkup.Node node in serverdoc.root.children) {
 				if(node is GMarkup.Tag)
 				if((node as GMarkup.Tag).get("default") == "true") {

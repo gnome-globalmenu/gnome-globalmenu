@@ -161,10 +161,12 @@ private class Applet : PanelCompat.Applet {
 				menubar.switch(xid);
 				
 				string aname = "Desktop";
-				if (window.get_xid().to_string()!=this.menubar.find_default()) aname = get_application_name(window);
-				if (switcher_dictionary.lookup(aname)!=null) 
-					aname = switcher_dictionary.lookup(aname); else
-					aname = window.get_name();
+				if (window.get_name() != "x-nautilus-desktop") {
+					aname = get_application_name(window);
+					if (switcher_dictionary.lookup(aname)!=null) 
+						aname = switcher_dictionary.lookup(aname); else
+						aname = window.get_name();
+				}
 				switcher.set_label(aname);
 			}
 		};
