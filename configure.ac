@@ -81,11 +81,11 @@ AM_CONDITIONAL([ENABLE_PANEL_APPLET], [test "$enable_gnome_applet" = "yes" ])
 AC_MSG_RESULT($enable_gnome_applet)
 
 if test "$enable_gnome_applet" = "yes"; then
-PKG_CHECK_MODULES(GLOBALMENU_PANELAPPLET, [glib-2.0 dbus-glib-1 gtk+-2.0 libwnck-1.0 libpanelapplet-2.0])
+PKG_CHECK_MODULES(GLOBALMENU_PANELAPPLET, [glib-2.0 dbus-glib-1 gtk+-2.0 libwnck-1.0 libpanelapplet-2.0 libgnome-menu])
 fi
 AC_SUBST(GLOBALMENU_PANELAPPLET_CFLAGS)
 AC_SUBST(GLOBALMENU_PANELAPPLET_LIBS)
-GLOBALMENU_PANELAPPLET_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg libpanelapplet-2.0"
+GLOBALMENU_PANELAPPLET_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg libpanelapplet-2.0 -pkg libgnome-menu"
 AC_SUBST(GLOBALMENU_PANELAPPLET_VALA_PKGS)
 
 BONOBO_SERVER_DIR="$libdir/bonobo/servers"
