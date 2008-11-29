@@ -41,7 +41,7 @@ namespace Gnomenu {
 		static string test2 =
 """
 <menu>
-	<item label="File">
+	<item label="File" font="bold">
 		<menu>
 			<item label="New"/>
 			<item label="Open"/>

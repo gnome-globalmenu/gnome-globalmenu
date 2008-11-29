@@ -41,7 +41,7 @@ private class Applet : Panel.Applet {
 		add_menubar_from_string(
 """
 <menu>
-	<item label="WindowSelector">
+	<item label="WindowSelector" font="bold">
 		<menu>
 			<item label="Notepad"/>
 			<item label="Terminal"/>

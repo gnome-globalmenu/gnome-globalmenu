@@ -26,6 +26,21 @@ namespace Gnomenu {
 			get;
 			set;
 		}
+		public string? font {
+			get {
+				return _font;
+			}
+			set {
+				_font = value;
+				weak Pango.FontDescription desc;
+				if(_font != null) 
+					desc = Pango.FontDescription.from_string(_font);
+				else 
+					desc = null;
+				weak Widget bin_child = get_child();
+				bin_child.modify_font(desc);
+			}
+		}
 		public string? label {
 			get {
 				weak Widget bin_child = get_child();
@@ -112,6 +127,7 @@ namespace Gnomenu {
 			}
 		}
 		private string _path; /*merely a buffer*/
+		private string _font;
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;

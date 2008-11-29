@@ -8,7 +8,7 @@ namespace Gnomenu {
 		string test2 =
 """
 <menu>
-	<item label="File">
+	<item label="File" font="Serif Bold 20">
 		<menu>
 			<item label="New" type="c" state="toggled"/>
 			<item label="Open" type="r" state="untoggled"/>

@@ -79,6 +79,7 @@ namespace Gnomenu {
 			weak string label;
 			weak string type;
 			weak string state;
+			weak string font;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 
@@ -86,12 +87,15 @@ namespace Gnomenu {
 					"type", &type, 
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"state", &state, 
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"font", &font, 
 					GMarkupCollectType.INVALID
 					);
 			item.label = label;
 			item.visible = true;
 			item.item_type = type;
 			item.item_state = state;
+			item.font = font;
 		}
 		private void end_element (MarkupParseContext context, 
 				string element_name) throws MarkupError {
