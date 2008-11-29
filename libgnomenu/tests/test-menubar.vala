@@ -13,9 +13,9 @@ namespace Gnomenu {
 <menu>
 	<item label="Go">
 		<menu>
-			<item label="Here"/>
-			<item label="There"/>
-			<item label="Where?"/>
+			<item label="Here" type="c"/>
+			<item label="There" type="i"/>
+			<item label="Where?" type="r"/>
 		</menu>
 	</item>
 	<item label="File">

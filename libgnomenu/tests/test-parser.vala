@@ -10,9 +10,9 @@ namespace Gnomenu {
 <menu>
 	<item label="File">
 		<menu>
-			<item label="New"/>
-			<item label="Open"/>
-			<item label="Close"/>
+			<item label="New" type="c" state="toggled"/>
+			<item label="Open" type="r" state="untoggled"/>
+			<item label="Close" type="r"/>
 		</menu>
 	</item>
 	<item label="Edit">

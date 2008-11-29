@@ -63,8 +63,8 @@ namespace Gnomenu {
 						var item = new MenuItem();
 						shell.append(item);
 						item.position = position;
+						item.menubar = topmost;
 						setup_item(item, attribute_names, attribute_values);
-						Signal.connect(item, "activate", (GLib.Callback) item_activate_handler, topmost);
 					}
 					inside_item = true;
 					item_has_submenu = false;
@@ -73,22 +73,25 @@ namespace Gnomenu {
 					throw new MarkupError.UNKNOWN_ELEMENT("unkown element");
 			}
 		}
-		private static void item_activate_handler(MenuItem item, MenuBar topmost) {
-			topmost.activate(item);
-		}
 		private void setup_item(MenuItem item, 
 				string[] attr_names, 
 				string[] attr_vals) {
 			weak string label;
-			weak string id;
+			weak string type;
+			weak string state;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 
-					
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"type", &type, 
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"state", &state, 
 					GMarkupCollectType.INVALID
 					);
 			item.label = label;
 			item.visible = true;
+			item.item_type = type;
+			item.item_state = state;
 		}
 		private void end_element (MarkupParseContext context, 
 				string element_name) throws MarkupError {

@@ -63,10 +63,17 @@ namespace Gnomenu {
 			}
 		}
 		private void visit_item_attributes(MenuItem item) {
-			weak string label_text = item.label;
-			if(label_text != null) {
+			if(item.label != null) {
 				sb.append_printf(" label=\"%s\"",
-					Markup.escape_text(label_text, -1));
+					Markup.escape_text(item.label, -1));
+			}
+			if(item.item_type != null) {
+				sb.append_printf(" type=\"%s\"",
+					Markup.escape_text(item.item_type, -1));
+			}
+			if(item.item_state != null) {
+				sb.append_printf(" type=\"%s\"",
+					Markup.escape_text(item.item_state, -1));
 			}
 		}
 
