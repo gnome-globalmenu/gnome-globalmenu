@@ -90,26 +90,31 @@ private class Applet : Panel.Applet {
 
 		/*init panel*/
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		set_background_widget(this);
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
 				bg.type = BackgroundType.NONE;
+				/*
 				style = null;
 				RcStyle rc_style = new RcStyle();
-				modify_style (rc_style);
+				modify_style (rc_style);*/
 			break;
 			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
 				bg.type = BackgroundType.COLOR;
 				bg.color = color;
-				modify_bg(StateType.NORMAL, color);
+//				modify_bg(StateType.NORMAL, color);
 			break;
 			case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
-				bg.type = BackgroundType.NONE;
+				bg.type = BackgroundType.PIXMAP;
+				bg.pixmap = pixmap;
 			break;
 		}
 		foreach(Gnomenu.MenuBar menubar in internal_children) {
+			bg.offset_x = menubar.allocation.x - allocation.x;
+			bg.offset_y = menubar.allocation.y - allocation.y;
 			menubar.background = bg;
 		}
 	}
@@ -165,7 +170,6 @@ private class Applet : Panel.Applet {
 				}
 			break;
 		}
-		message("%d, %d", r.width, r.height);
 	}
 	private override void map() {
 		base.map();
@@ -186,15 +190,6 @@ private class Applet : Panel.Applet {
 		rev_x = a.width;
 		rev_y = a.height;
 
-		/* Depends on NO_WINDOW or not.
-		x = a.x;
-		y = a.y;
-		rev_x = a.width + a.x;
-		rev_y = a.height + a.y;
-		*/
-		message("%d, %d, %d, %d",
-			a.x, a.y,
-			a.width, a.height);
 		foreach(Gnomenu.MenuBar menubar in internal_children) {
 			menubar.get_child_requisition(out cr);
 			switch(pack_direction) {
