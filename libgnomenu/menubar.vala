@@ -40,33 +40,34 @@ namespace Gnomenu {
 				return _background;
 			}
 			set {
-				switch(value.type) {
+				BackgroundType old_type = _background.type;
+				Gdk.Color old_color = _background.color;
+				_background.type = value.type;
+				_background.pixmap = value.pixmap;
+				_background.color = value.color;
+				_background.offset_x = value.offset_x;
+				_background.offset_y = value.offset_y;
+				switch(_background.type) {
 					case BackgroundType.NONE:
-						if(value.type != _background.type) {
+						if(old_type != _background.type) {
 							style = null;
 							RcStyle rc_style = new RcStyle();
 							modify_style(rc_style);
 						}
 					break;
 					case BackgroundType.COLOR:
-						if(value.type != _background.type
-						|| (value.type == _background.type
-						&& value.color.to_string() !=
+						if(old_type != _background.type
+						|| (old_type == _background.type
+						&& old_color.to_string() !=
 							_background.color.to_string())) {
-							modify_bg(StateType.NORMAL, value.color);
+							modify_bg(StateType.NORMAL, _background.color);
 						}
 					break;
 					case BackgroundType.PIXMAP:
-						_background.pixmap = value.pixmap;
-						_background.offset_x = value.offset_x;
-						_background.offset_y = value.offset_y;
 						reset_bg_pixmap();
 						queue_draw();
 					break;
 				}
-				_background.type = value.type;
-				_background.pixmap = value.pixmap;
-				_background.color = value.color;
 			}
 		}
 		public Gravity gravity {
@@ -83,14 +84,12 @@ namespace Gnomenu {
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
-				message("reset_bg_pixmap: %d %d", allocation.width, allocation.height);
 				Gdk.Pixmap pixmap = new Gdk.Pixmap(window, allocation.width, allocation.height, -1);
 				assert(window is Gdk.Drawable);
 				assert(pixmap is Gdk.Drawable);
 				Cairo.Context cairo = Gdk.cairo_create(pixmap);
 				assert(cairo != null);
 				assert(_background.pixmap is Gdk.Drawable);
-				message("offset: %d %d", _background.offset_x, _background.offset_y);
 				Gdk.cairo_set_source_pixmap(cairo, _background.pixmap, -_background.offset_x, -background.offset_y);
 				cairo.rectangle (0, 0, allocation.width, allocation.height);
 				cairo.fill();
