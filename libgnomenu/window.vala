@@ -9,71 +9,101 @@ namespace Gnomenu {
 				_native = value;
 			}
 		}
-		public Window(ulong native) {
+		public Window.foreign(ulong native) {
 			this.native= (ulong) native;
 		}
-		public string menu_context {
-			get {
-				_menu_context = Gnomenu.get_menu_context(window);
-				return _menu_context;
-			}
-			set {
-				_menu_context = value;
-				Gnomenu.set_menu_context(window, value);
-			}
+		public Window(WindowType type) {
+			type = type;
 		}
 		construct {
 			set_events(get_events() 
 			| Gdk.EventMask.PROPERTY_CHANGE_MASK
 			);
+			if(_native != 0) {
+				window = gdk_window_foreign_new(_native);
+				window.set_events((Gdk.EventMask)get_events());
+				set_flags(WidgetFlags.REALIZED);
+				window.set_user_data(this);
+			}
+			disposed = false;
 		}
-		public signal void context_changed();
+		public string menu_context {
+			get {
+				_menu_context = get("_NET_GLOBALMENU_MENU_CONTEXT");
+				return _menu_context;
+			}
+			set {
+				_menu_context = value;
+				set("_NET_GLOBALMENU_MENU_CONTEXT", value);
+			}
+		}
+		public string? get(string property_name) {
+			return get_by_atom(Gdk.Atom.intern(property_name, false));	
+		}
+		public void set(string property_name, string? value) {
+			set_by_atom(Gdk.Atom.intern(property_name, false), value);	
+		}
+		public string? get_by_atom(Gdk.Atom atom) {
+			string context;
+			Gdk.Atom actual_type;
+			int actual_format;
+			int actual_length;
+			gdk_property_get(window,
+				atom,
+				atom,
+				0, (ulong) long.MAX, false, 
+				out actual_type, 
+				out actual_format, 
+				out actual_length, 
+				out context);
+			return context;
+		}
+		public void set_by_atom(Gdk.Atom atom, string? value) {
+			if(value != null) {
+				gdk_property_change(window,
+					atom, atom,
+					8,
+					Gdk.PropMode.REPLACE,
+					value, 
+					(int) value.size() + 1
+				);
+			} else {
+				Gdk.property_delete(window, atom);
+			}
+		}
+		private bool disposed;
+		public signal void property_changed(string name);
 		private ulong _native;
 		private string _menu_context;
 		private override void realize() {
-			window = Gdk.Window.foreign_new((Gdk.NativeWindow)_native);
-			window.set_events((Gdk.EventMask)get_events());
-			set_flags(WidgetFlags.REALIZED);
-			window.set_user_data(this);
+			if(native != 0) return;
+			base.realize();
 		}
-		private override void map() { }
-		private override void unmap() { }
+		private override void map() {
+			if(native != 0) return;
+			base.map();
+		}
+		private override void unmap() {
+			if(native != 0) return;
+			base.unmap();
+		}
+		private override void unrealize() {
+			if(native != 0) return;
+			base.unrealize();
+		}
 		private override bool property_notify_event(Gdk.EventProperty event) {
-			if(event.atom == 
-			Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false)) {
-				context_changed();
-			}
+			property_changed(event.atom.name());
 			return false;
 		}
-	}
-	public string? get_menu_context(Gdk.Window window) {
-		string context;
-		Gdk.Atom actual_type;
-		int actual_format;
-		int actual_length;
-		gdk_property_get(window,
-			Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
-			Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
-			0, (ulong) long.MAX, false, 
-			out actual_type, 
-			out actual_format, 
-			out actual_length, 
-			out context);
-		return context;
-	}
-	public void set_menu_context(Gdk.Window window, string? context) {
-		if(context != null) {
-			gdk_property_change(window,
-				Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
-				Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
-				8,
-				Gdk.PropMode.REPLACE,
-				context, 
-				(int) context.size() + 1
-				);
-		} else {
-			Gdk.property_delete(window,
-				Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false));
+		private override void dispose () {
+			if(!disposed) {
+				disposed = true;
+				if(native != 0) {
+						window.set_user_data(null);
+						window = null;
+				}
+			}
+			base.dispose();
 		}
 	}
 }

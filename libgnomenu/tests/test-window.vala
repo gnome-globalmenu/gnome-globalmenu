@@ -5,18 +5,24 @@ using Gnomenu;
 
 namespace Gnomenu {
 	class TestWindow: TestMan {
-		Gtk.Window test_window;
+		Window test_window;
 		TestWindow() {
 			base("/Window");
-			test_window = new Gtk.Window(WindowType.TOPLEVEL);
+			test_window = new Window(WindowType.TOPLEVEL);
 
 			add("TestWithApplet", () => {
 				test_window.realize();
 				test_window.destroy += Gtk.main_quit;
-				set_menu_context(test_window.window,
+				test_window.property_changed += (window, property) => {
+					if(property == "_NET_GLOBALMENU_MENU_EVENT") {
+						message("menu item %s is activated",
+							window.get(property));
+					}
+				};
+				test_window.show_all();
+				test_window.set("_NET_GLOBALMENU_MENU_CONTEXT",
 					"""<menu><item label="See"/></menu>"""
 					);
-				test_window.show_all();
 				Gtk.main();
 			});
 		}

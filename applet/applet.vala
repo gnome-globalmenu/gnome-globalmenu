@@ -78,6 +78,12 @@ private class Applet : Panel.Applet {
 </menu>
 """
 		);
+		main_menubar.activate += (menubar, item) => {
+			if(current_window != null) {
+				current_window.set("_NET_GLOBALMENU_MENU_EVENT",
+					item.path);
+			}
+		};
 		/*init wnck*/
 		screen = Wnck.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
@@ -85,18 +91,33 @@ private class Applet : Panel.Applet {
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
-				current_window = new Gnomenu.Window(window.get_xid());
-				current_window.realize();
-				current_window.context_changed += (current_window) => {
-					Parser.parse(main_menubar, current_window.menu_context);
+				if(current_window != null) {
+					/* This is a weird way to free a window:
+					 * We have two reference counts for current_window
+					 * Destroy will release the one held by GTK,
+					 * and the assignment line below will release the one
+					 * held by us.
+					 * */
+					current_window.destroy();
+				}
+				current_window = new Gnomenu.Window.foreign(window.get_xid());
+				current_window.property_changed += (current_window, property) => {
+					if(property == "_NET_GLOBALMENU_MENU_CONTEXT")  {
+						update_main_menubar();
+					}
 				};
-				Parser.parse(main_menubar, current_window.menu_context);
+				update_main_menubar();
 			}
 		};
 
 		/*init panel*/
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
+	}
+	private void update_main_menubar() {
+		string context = current_window.get("_NET_GLOBALMENU_MENU_CONTEXT");
+		if(context != null)
+			Parser.parse(main_menubar, context);
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
