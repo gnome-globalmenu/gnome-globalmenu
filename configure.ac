@@ -18,18 +18,20 @@ AC_SUBST(LDFLAGS)
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
 
-AC_CACHE_CHECK([checking for vala = $VALA_REQUIRED],
-		[ac_cv_path_VALAC],
-		[AC_PATH_PROGS_FEATURE_CHECK([VALAC], 
-			[valac valac [`pwd`/vala$PATH_SEPARATOR$PATH]],
-			[[
-			$ac_path_VALAC --version | grep $VALA_REQUIRED &&
-				ac_cv_path_VALAC=$ac_path_VALAC ac_path_VALAC_found=: 
-			]],
-			[AC_MSG_ERROR([could not find vala version $VALA_REQUIRED])]
-			)]
-		)
+AC_PATH_PROG(VALAC, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 AC_SUBST(VALAC, [$ac_cv_path_VALAC])
+
+AC_CONFIG_COMMANDS_POST(
+		[
+		VALA_VERSION=`$VALAC --version`
+	   	echo $VALA_VERSION | grep $VALA_REQUIRED || \
+		AC_MSG_WARN([
+			This package works with VALA $VALA_REQUIRED;
+			Your have $VALA_VERSION installed;
+			You may experience compilation failure or
+			random runtime failurs.
+			])
+		])
 
 # check for modules
 
