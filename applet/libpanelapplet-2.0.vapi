@@ -26,7 +26,6 @@ namespace Panel {
 		[CCode (has_construct_function = false)]
 		public Applet ();
 		public string get_preferences_key ();
-		public void set_flags (AppletFlags flags);
 		public static int factory_main (string iid, GLib.Type applet_type, AppletFactoryCallback callback);
 		public void set_background_widget (Gtk.Widget widget);
 		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
@@ -35,6 +34,11 @@ namespace Panel {
 		public virtual signal void change_background (AppletBackgroundType type, ref Gdk.Color? color, Gdk.Pixmap? pixmap);
 		public virtual signal void change_orient (AppletOrient orient);
 		public virtual signal void change_size (uint size_hint);
+		public AppletOrient orient {get;}
+		public AppletFlags flags {get; set;}
+		public uint size {get;}
+		public bool locked_down {get;}
+		public void request_focus(uint32 timestamp);
 	}
 	[CCode (cprefix = "PANEL_APPLET_ORIENT_")]
 	public enum AppletOrient {

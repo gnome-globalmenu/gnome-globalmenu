@@ -7,16 +7,50 @@ using Panel;
 private class Applet : Panel.Applet {
 	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+	public PackDirection pack_direction {
+		get {
+			return _pack_direction;
+		}
+		set {
+			foreach(Gnomenu.MenuBar menubar in internal_children) {
+				menubar.pack_direction = value;
+				menubar.child_pack_direction = value;
+			}
+			_pack_direction = value;
+			queue_resize();
+		}
+	}
+	public Gnomenu.Gravity gravity {
+		get {
+			return _gravity;
+		}
+		set {
+			_gravity = value;
+			foreach(Gnomenu.MenuBar menubar in internal_children) {
+				menubar.gravity = value;
+			}
+			queue_draw();
+		}
+	}
 	public Applet() {
 		int i = 0;
 	}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
-		menubar = new Gnomenu.MenuBar();
-		menubar.set_name("PanelMenuBar");
-		box = new Gtk.HBox(false, 0);
-		box.pack_start(menubar, true, true, 0);
-		Parser.parse(menubar,
+
+		add_menubar_from_string(
+"""
+<menu>
+	<item label="WindowSelector">
+		<menu>
+			<item label="Notepad"/>
+			<item label="Terminal"/>
+		</menu>
+	</item>
+</menu>
+"""
+		);
+		add_menubar_from_string(
 """
 <menu>
 	<item label="File">
@@ -43,10 +77,7 @@ private class Applet : Panel.Applet {
 	</item>
 </menu>
 """
-);
-		this.add(box);
-	
-	
+		);
 		/*init wnck*/
 		screen = Wnck.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
@@ -58,7 +89,7 @@ private class Applet : Panel.Applet {
 		};
 
 		/*init panel*/
-		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 	}
 	private override void change_background(AppletBackgroundType type, ref Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		switch(type){
@@ -73,36 +104,144 @@ private class Applet : Panel.Applet {
 	private override void change_orient(AppletOrient orient) {
 		switch(orient) {
 			case AppletOrient.UP:
-				menubar.gravity = Gravity.DOWN;
-				menubar.pack_direction = PackDirection.LTR;
-				menubar.child_pack_direction = PackDirection.LTR;
+				gravity = Gravity.DOWN;
+				pack_direction = PackDirection.LTR;
 			break;
 			case AppletOrient.DOWN:
-				menubar.gravity = Gravity.DOWN;
-				menubar.pack_direction = PackDirection.LTR;
-				menubar.child_pack_direction = PackDirection.LTR;
+				gravity = Gravity.DOWN;
+				pack_direction = PackDirection.LTR;
 			break;
 			case AppletOrient.LEFT:
-				menubar.gravity = Gravity.LEFT;
-				menubar.pack_direction = PackDirection.TTB;
-				menubar.child_pack_direction = PackDirection.TTB;
+				gravity = Gravity.LEFT;
+				pack_direction = PackDirection.TTB;
 			break;
 			case AppletOrient.RIGHT:
-				menubar.gravity = Gravity.RIGHT;
-				menubar.pack_direction = PackDirection.BTT;
-				menubar.child_pack_direction = PackDirection.BTT;
+				gravity = Gravity.RIGHT;
+				pack_direction = PackDirection.BTT;
 			break;
 		}
-	
+	}
+	private override void forall(Gtk.Callback cb, void* data) {
+		bool include_internal;
+
+		if(include_internal) {
+			foreach(Gnomenu.MenuBar menubar in internal_children) {
+				cb(menubar);
+			}
+		}
+		base.forall(cb, data);
+	}
+	private override void size_request(out Requisition r) {
+		r.width = 0;
+		r.height = 0;
+		Requisition cr;
+		switch(pack_direction) {
+			case PackDirection.LTR:
+			case PackDirection.RTL:
+				foreach(Gnomenu.MenuBar menubar in internal_children) {
+					menubar.size_request(out cr);
+					r.width += cr.width;
+					r.height = r.height>cr.height?r.height:cr.height;
+				}
+			break;
+			case PackDirection.BTT:
+			case PackDirection.TTB:
+				foreach(Gnomenu.MenuBar menubar in internal_children) {
+					menubar.size_request(out cr);
+					r.height += cr.height;
+					r.width = r.width>cr.width?r.width:cr.width;
+				}
+			break;
+		}
+		message("%d, %d", r.width, r.height);
+	}
+	private override void map() {
+		base.map();
+		foreach(Gnomenu.MenuBar menubar in internal_children) {
+			menubar.map();
+		}
+	}
+	private override void size_allocate(Gdk.Rectangle a) {
+		allocation = (Allocation) a;
+		Requisition cr;
+		Allocation ca;
+		int x;
+		int y;
+		int rev_x;
+		int rev_y;
+		x = 0;
+		y = 0;
+		rev_x = a.width;
+		rev_y = a.height;
+
+		/* Depends on NO_WINDOW or not.
+		x = a.x;
+		y = a.y;
+		rev_x = a.width + a.x;
+		rev_y = a.height + a.y;
+		*/
+		message("%d, %d, %d, %d",
+			a.x, a.y,
+			a.width, a.height);
+		foreach(Gnomenu.MenuBar menubar in internal_children) {
+			menubar.get_child_requisition(out cr);
+			switch(pack_direction) {
+				case PackDirection.LTR:
+					ca.x = x;
+					ca.y = y;
+					ca.width = cr.width;
+					ca.height = a.height;
+					x += cr.width;
+				break;
+				case PackDirection.RTL:
+					ca.x = rev_x - cr.width;
+					ca.y = y;
+					ca.width = cr.width;
+					ca.height = a.height;
+					rev_x -= cr.width;
+				break;
+				case PackDirection.BTT:
+					ca.x = x;
+					ca.y = rev_y - cr.height;
+					ca.width = a.width;
+					ca.height = cr.height;
+					rev_y -= cr.height;
+				break;
+				case PackDirection.TTB:
+					ca.x = x;
+					ca.y = y;
+					ca.width = a.width;
+					ca.height = cr.height;
+					y += cr.height;
+				break;
+			}
+			menubar.size_allocate((Gdk.Rectangle)ca);
+		}
+		base.size_allocate(a);
 	}
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
-	private Gtk.Box box;
+
+	private Label label; /*Replace with the selector later*/
+
+	private PackDirection _pack_direction;
+	private Gnomenu.Gravity _gravity;
+
+	private List<weak Gnomenu.MenuBar> internal_children;
 	private static bool verbose = false;
 	const OptionEntry[] options = {
 		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
 		{null}
 	};
+	private void add_menubar_from_string(string str) {
+		Gnomenu.MenuBar menubar = new Gnomenu.MenuBar();
+		menubar.visible = true;
+		menubar.set_name("PanelMenuBar");
+		menubar.set_parent(this);
+
+		Parser.parse(menubar, str);
+		internal_children.append(menubar);
+	}
 	static const string STANDARD_PROPERTIES = "";
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
