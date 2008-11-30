@@ -1,9 +1,15 @@
+#include <string.h>
 #include <X11/Xatom.h>
-#include <gdk/gdkx.h>
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 
-gboolean gdk_window_get_is_desktop (GdkWindow * window) {
+void gdk_window_set_menu_context (GdkWindow * window, char* context ) {
+	GdkAtom atom = gdk_atom_intern("_NET_GLOBALMENU_MENU_CONTEXT", FALSE);
+	GdkAtom type = gdk_atom_intern("STRING", FALSE);
+	gdk_property_change(window, atom, type, 8, GDK_PROP_MODE_REPLACE, context, strlen(context));
+}
+gboolean gdk_window_get_desktop_hint (GdkWindow * window) {
 	Display * display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default());
 	Atom atom;
 	atom = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DESKTOP", FALSE);
@@ -37,39 +43,4 @@ gboolean gdk_window_get_is_desktop (GdkWindow * window) {
 	} else {
 		return FALSE;
 	}
-}
-static gboolean menu_item_parent_set_hook(GSignalInvocationHint * hint,
-			int value_count, GValue values[], gpointer data) {
-	GObject * self = g_value_get_object(&values[0]);
-	if(!GTK_IS_WIDGET(self)) return TRUE;
-	GtkWidget * label = NULL;
-	GQueue queue = G_QUEUE_INIT;
-	g_queue_push_tail(&queue, self);
-	while(!g_queue_is_empty(&queue)){
-		GtkWidget* head = g_queue_pop_head(&queue);
-		if(GTK_IS_CONTAINER(head)) {
-			GList * list = gtk_container_get_children(head);
-			GList * node;
-			for(node = list; node; node = node->next) {
-				g_queue_push_tail(&queue, node->data);
-			}
-		}
-		if(GTK_IS_LABEL(head) || GTK_IS_SEPARATOR(head)|| GTK_IS_SEPARATOR_MENU_ITEM(head)) {
-			g_queue_clear(&queue);
-			label = head;
-			break;
-		}
-	}
-	GObject * parent = gtk_widget_get_parent(self);
-	for(; parent; parent = gtk_widget_get_parent(parent)) {
-		if(GTK_IS_MENU_ITEM(parent)) {
-			if(label != g_object_get_data(parent, "label")) {
-				g_object_set_data(parent, "label", label);
-				//FOUND
-			}
-
-			break;
-		}
-	}
-	return TRUE;
 }

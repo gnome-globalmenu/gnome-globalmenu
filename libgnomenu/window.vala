@@ -49,11 +49,12 @@ namespace Gnomenu {
 		public string? get_by_atom(Gdk.Atom atom) {
 			string context;
 			Gdk.Atom actual_type;
+			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
 			int actual_format;
 			int actual_length;
 			gdk_property_get(window,
 				atom,
-				atom,
+				type,
 				0, (ulong) long.MAX, false, 
 				out actual_type, 
 				out actual_format, 
@@ -63,8 +64,9 @@ namespace Gnomenu {
 		}
 		public void set_by_atom(Gdk.Atom atom, string? value) {
 			if(value != null) {
+				Gdk.Atom type = Gdk.Atom.intern("STRING", false);
 				gdk_property_change(window,
-					atom, atom,
+					atom, type,
 					8,
 					Gdk.PropMode.REPLACE,
 					value, 
