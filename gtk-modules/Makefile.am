@@ -1,1 +1,1 @@
-SUBDIRS = libgnomenugtk
+SUBDIRS = globalmenu
