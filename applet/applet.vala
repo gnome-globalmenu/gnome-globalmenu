@@ -7,6 +7,46 @@ using Panel;
 private class Applet : Panel.Applet {
 	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+	static const string SELECTOR = 
+"""
+<menu>
+	<item label="%s" font="bold">
+		<menu>
+			<item label="Notepad"/>
+			<item label="Terminal"/>
+		</menu>
+	</item>
+</menu>
+""";
+	static const string MAIN_MENUBAR =
+"""
+<menu>
+	<item label="File">
+		<menu>
+			<item label="New">
+				<menu>
+					<item label="Zombie"/>
+					<item label="Worm"/>
+				</menu>
+			</item>
+		</menu>
+	</item>
+	<item label="Edit">
+		<menu>
+			<item label="Shoot"/>
+			<item label="Run"/>
+		</menu>
+	</item>
+	<item label="Help">
+		<menu>
+			<item label="Police"/>
+			<item label="Army"/>
+		</menu>
+	</item>
+</menu>
+""";
+
+
 	public PackDirection pack_direction {
 		get {
 			return _pack_direction;
@@ -38,46 +78,8 @@ private class Applet : Panel.Applet {
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
 
-		add_menubar_from_string(
-"""
-<menu>
-	<item label="WindowSelector" font="bold">
-		<menu>
-			<item label="Notepad"/>
-			<item label="Terminal"/>
-		</menu>
-	</item>
-</menu>
-"""
-		);
-		main_menubar = add_menubar_from_string(
-"""
-<menu>
-	<item label="File">
-		<menu>
-			<item label="New">
-				<menu>
-					<item label="Zombie"/>
-					<item label="Worm"/>
-				</menu>
-			</item>
-		</menu>
-	</item>
-	<item label="Edit">
-		<menu>
-			<item label="Shoot"/>
-			<item label="Run"/>
-		</menu>
-	</item>
-	<item label="Help">
-		<menu>
-			<item label="Police"/>
-			<item label="Army"/>
-		</menu>
-	</item>
-</menu>
-"""
-		);
+		selector = add_menubar_from_string(SELECTOR.printf("NONE"));
+		main_menubar = add_menubar_from_string(MAIN_MENUBAR);
 		main_menubar.activate += (menubar, item) => {
 			if(current_window != null) {
 				current_window.set("_NET_GLOBALMENU_MENU_EVENT",
@@ -91,6 +93,7 @@ private class Applet : Panel.Applet {
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
+				Parser.parse(selector, SELECTOR.printf(window.get_xid().to_string()));
 				if(current_window != null) {
 					/* This is a weird way to free a window:
 					 * We have two reference counts for current_window
@@ -256,6 +259,7 @@ private class Applet : Panel.Applet {
 	private Wnck.Screen screen;
 	private Gnomenu.Window current_window;
 	private Gnomenu.MenuBar main_menubar;
+	private Gnomenu.MenuBar selector;
 
 	private Label label; /*Replace with the selector later*/
 
