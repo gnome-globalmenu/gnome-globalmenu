@@ -2,12 +2,10 @@ using Gtk;
 using GtkAQD;
 
 namespace GnomenuGtk {
-	[CCode (cname = "_patch_menu_bar")]
+	[CCode (cname = "dyn_patch_menu_bar")]
 	protected extern  void patch_menu_bar();
-	[CCode (cname = "_patch_menu_shell")]
-	protected extern  void patch_menu_shell();
-	[CCode (cname = "_patch_menu_item")]
-	protected extern  void patch_menu_item();
+	[CCode (cname = "dyn_patch_widget")]
+	protected extern  void patch_widget();
 	[CCode (cname = "gdk_window_get_is_desktop")]
 	protected extern bool gdk_window_get_is_desktop (Gdk.Window window);
 
@@ -16,16 +14,17 @@ namespace GnomenuGtk {
 		if(self is Gtk.MenuBar) {
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 			Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
-			Gtk.Widget toplevel = self.get_toplevel();
-			if(old_toplevel is Gtk.Widget)
+			Gtk.Widget toplevel = self.get_toplevel() as Gtk.Widget;
+			if(old_toplevel != null) /* ENSURE we have the toplevel WINDOW */
 				old_toplevel = old_toplevel.get_ancestor(typeof(Gtk.Window));
-			if(toplevel is Gtk.Widget)
+			if(toplevel!= null)
 				toplevel = toplevel.get_ancestor(typeof(Gtk.Window));
+
 			if(old_toplevel != null) {
-				unbind_menu(old_toplevel, self);
+				//unbind_menu(old_toplevel, self);
 			}
 			if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.TOPLEVEL))) {
-				bind_menu(toplevel, self);
+				//bind_menu(toplevel, self);
 			}
 		} 
 		return true;
@@ -68,9 +67,7 @@ namespace GnomenuGtk {
 		}
 		if(!verbose) {
 			LogFunc handler = (domain, level, message) => { };
-			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_DEBUG, handler);
+			/*TODO: disable verbose output*/
 		}
 
 		switch(Environment.get_prgname()) {
@@ -88,12 +85,10 @@ namespace GnomenuGtk {
 				}
 			break;
 		}
-		typeof(Gtk.Widget).class_ref();
+		patch_widget();
+		patch_menu_bar();
 		uint signal_id = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 		Signal.add_emission_hook (signal_id, 0, hook_func, null);
-		patch_menu_item();
-		patch_menu_shell();
-		patch_menu_bar();
 		debug("GlobalMenu is enabled");
 		Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_MASK, default_log_handler);
 		Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_MASK, default_log_handler);
@@ -116,44 +111,5 @@ namespace GnomenuGtk {
 		if(widget is Gtk.TearoffMenuItem)
 			type = "tearoff";
 		return type;
-	}
-	private void transverse(Gtk.Widget head) {
-		weak Gtk.Widget gtk = head;
-		assert(gtk is Gtk.Widget);
-		if(gtk is Gtk.MenuShell) {
-			foreach(weak Gtk.Widget child in (gtk as Gtk.Container).get_children()) {
-				transverse(child);
-			}
-			(gtk as GtkAQD.MenuShell).insert += child_insert;
-			(gtk as GtkAQD.MenuShell).remove += child_remove;
-		}
-		if(gtk is Gtk.MenuItem) {
-			weak Gtk.Menu submenu = (gtk as Gtk.MenuItem).submenu;
-			if(submenu != null) {
-				transverse(submenu);
-			}
-			gtk.notify["submenu"] += submenu_notify;
-			(gtk as GtkAQD.MenuItem).label_set += item_label_set;
-		}
-	}
-	private void item_label_set(Gtk.Widget widget, Gtk.Widget? label) {
-	
-	}
-	private void submenu_notify(Gtk.Widget widget, ParamSpec pspec) {
-	}
-	private void child_remove(Gtk.Widget widget, Gtk.Widget child) {
-	}
-	private void child_insert(Gtk.Widget widget, Gtk.Widget child, int pos) {
-	}
-	private void do_realize(Gtk.Widget window) {
-		if(gdk_window_get_is_desktop(window.window)) { 
-			/*workaround nautilus which doesn't use GDK to set the hint*/
-		}
-	}
-	public void bind_window(Gtk.Widget window) {
-	}
-	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
-	}
-	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
 	}
 }
