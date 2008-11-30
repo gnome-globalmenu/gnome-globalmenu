@@ -7,7 +7,7 @@ BUILT_SOURCES = \
 	$(NULL)
 
 VALASOURCES = \
-	gnomenugtk.vala \
+	globalmenu.vala \
 	$(NULL)
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
@@ -18,7 +18,7 @@ lib_LTLIBRARIES = \
 libglobalmenu_gnome_la_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
-	utils.c \
+	globalmenu-helper.c \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) gtkaqd.vapi
