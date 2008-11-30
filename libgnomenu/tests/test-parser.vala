@@ -8,22 +8,22 @@ namespace Gnomenu {
 		string test2 =
 """
 <menu>
-	<item label="File" font="Serif Bold 20">
+	<item id="File" font="Serif Bold 20">
 		<menu>
-			<item label="New" type="c" state="toggled"/>
-			<item label="Open" type="r" state="untoggled"/>
-			<item label="Close" type="r"/>
+			<item id="New" label="New" type="c" state="toggled"/>
+			<item id="Open" label="Open" type="r" state="untoggled"/>
+			<item id="Close" label="Close" type="r"/>
 		</menu>
 	</item>
-	<item label="Edit">
+	<item id="Edit">
 		<menu>
-			<item label="Copy"/>
-			<item label="Paste"/>
+			<item id="Copy"/>
+			<item id="Paste"/>
 		</menu>
 	</item>
-	<item label="Help">
+	<item id="Help">
 		<menu>
-			<item label="About"/>
+			<item id="About"/>
 		</menu>
 	</item>
 </menu>

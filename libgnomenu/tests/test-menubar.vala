@@ -11,29 +11,29 @@ namespace Gnomenu {
 		static string test1 =
 """
 <menu>
-	<item label="Go">
+	<item id="Go">
 		<menu>
-			<item label="Here" type="c"/>
-			<item label="There" type="i"/>
-			<item label="Where?" type="r"/>
+			<item id="Here" type="c"/>
+			<item id="There" type="i"/>
+			<item id="Where?" type="r"/>
 		</menu>
 	</item>
-	<item label="File">
+	<item id="File">
 		<menu>
-			<item label="New"/>
-			<item label="Open"/>
-			<item label="Close"/>
+			<item id="New"/>
+			<item id="Open"/>
+			<item id="Close"/>
 		</menu>
 	</item>
-	<item label="Edit">
+	<item id="Edit">
 		<menu>
-			<item label="Copy"/>
-			<item label="Paste"/>
+			<item id="Copy"/>
+			<item id="Paste"/>
 		</menu>
 	</item>
-	<item label="Help">
+	<item id="Help">
 		<menu>
-			<item label="About"/>
+			<item id="About"/>
 		</menu>
 	</item>
 </menu>
@@ -41,24 +41,24 @@ namespace Gnomenu {
 		static string test2 =
 """
 <menu>
-	<item label="File" font="bold">
+	<item id="File" font="bold">
 		<menu>
-			<item label="New"/>
-			<item label="Open"/>
-			<item label="Close"/>
+			<item id="New"/>
+			<item id="Open"/>
+			<item id="Close"/>
 		</menu>
 	</item>
-	<item label="Edit">
+	<item id="Edit">
 		<menu>
-			<item label="Copy"/>
-			<item label="Paste"/>
-			<item label="Cut"/>
-			<item label="Find"/>
+			<item id="Copy"/>
+			<item id="Paste"/>
+			<item id="Cut"/>
+			<item id="Find"/>
 		</menu>
 	</item>
-	<item label="Help">
+	<item id="Help">
 		<menu>
-			<item label="About"/>
+			<item id="About"/>
 		</menu>
 	</item>
 </menu>

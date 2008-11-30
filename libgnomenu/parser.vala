@@ -80,6 +80,7 @@ namespace Gnomenu {
 			weak string type;
 			weak string state;
 			weak string font;
+			weak string id;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 
@@ -89,9 +90,12 @@ namespace Gnomenu {
 					"state", &state, 
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"font", &font, 
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"id", &id, 
 					GMarkupCollectType.INVALID
 					);
 			item.label = label;
+			item.id = id;
 			item.visible = true;
 			item.item_type = type;
 			item.item_state = state;

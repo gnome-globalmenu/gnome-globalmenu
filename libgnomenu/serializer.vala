@@ -79,6 +79,10 @@ namespace Gnomenu {
 				sb.append_printf(" font=\"%s\"",
 					Markup.escape_text(item.font, -1));
 			}
+			if(item.id != null) {
+				sb.append_printf(" id=\"%s\"",
+					Markup.escape_text(item.id, -1));
+			}
 		}
 
 		private StringBuilder sb;
