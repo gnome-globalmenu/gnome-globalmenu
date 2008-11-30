@@ -37,6 +37,8 @@ AC_CONFIG_COMMANDS_POST(
 
 GLIB_REQUIRED=2.10.0
 GTK_REQUIRED=2.12.0
+GIO_REQUIRED=2.12.0
+
 WNCK_REQUIRED=2.24.1
 PANEL_REQUIRED=2.24.1
 
@@ -56,6 +58,10 @@ PKG_CHECK_MODULES(PANEL, libpanelapplet-2.0 >= $PANEL_REQUIRED)
 AC_SUBST(PANEL_CFALGS)
 AC_SUBST(PANEL_LIBS)
 
+PKG_CHECK_MODULES(GIO, gio-2.0 >= $GIO_REQUIRED gio-unix-2.0 >= $GIO_REQUIRED)
+AC_SUBST(GIO_FLAGS)
+AC_SUBST(GIO_LIBS)
+
 # output
 
 AC_CONFIG_FILES(
@@ -64,6 +70,8 @@ AC_CONFIG_FILES(
 	libgnomenu/tests/Makefile
 	applet/Makefile
 	tests/Makefile
+	gtk-modules/Makefile
+	gtk-modules/globalmenu/Makefile
 	])
 
 AC_OUTPUT

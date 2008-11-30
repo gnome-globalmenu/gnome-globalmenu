@@ -1,10 +1,5 @@
-using GLib;
-using Gdk;
 using Gtk;
 using GtkAQD;
-using Gnomenu;
-using GMarkup;
-using DBus;
 
 namespace GnomenuGtk {
 	[CCode (cname = "_patch_menu_bar")]
@@ -77,17 +72,7 @@ namespace GnomenuGtk {
 			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
 			Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_DEBUG, handler);
 		}
-		DBus.Connection conn;
-		try {
-			conn = Bus.get(DBus.BusType.SESSION);
-		} catch (GLib.Error e) {
-			warning("%s", e.message);
-			conn = null;
-		}
-		if(conn == null) {
-			message("DBus is unavailable. GlobalMenu is disabled.");
-			return;
-		}
+
 		switch(Environment.get_prgname()) {
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
@@ -113,12 +98,6 @@ namespace GnomenuGtk {
 		Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_MASK, default_log_handler);
 		Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_MASK, default_log_handler);
 	}
-	private weak Client client() {
-		return Client.instance();
-	}
-	private weak Document document() {
-		return Client.instance().document as Document;
-	}
 	protected weak string translate_gtk_type(Gtk.Widget widget) {
 		weak string type;
 		type = "widget";
@@ -138,91 +117,43 @@ namespace GnomenuGtk {
 			type = "tearoff";
 		return type;
 	}
-	private void transverse(Gtk.Widget head, GMarkup.Node rel_root, int pos = -1) {
+	private void transverse(Gtk.Widget head) {
 		weak Gtk.Widget gtk = head;
 		assert(gtk is Gtk.Widget);
-		assert(rel_root is GMarkup.Node);
-		weak Document.Widget node = document().wrap(gtk);
 		if(gtk is Gtk.MenuShell) {
-			rel_root.insert(node, pos);
 			foreach(weak Gtk.Widget child in (gtk as Gtk.Container).get_children()) {
-				transverse(child, node);
+				transverse(child);
 			}
 			(gtk as GtkAQD.MenuShell).insert += child_insert;
 			(gtk as GtkAQD.MenuShell).remove += child_remove;
 		}
 		if(gtk is Gtk.MenuItem) {
-			rel_root.insert(node, pos);
 			weak Gtk.Menu submenu = (gtk as Gtk.MenuItem).submenu;
 			if(submenu != null) {
-				transverse(submenu, node);
+				transverse(submenu);
 			}
 			gtk.notify["submenu"] += submenu_notify;
+			(gtk as GtkAQD.MenuItem).label_set += item_label_set;
 		}
+	}
+	private void item_label_set(Gtk.Widget widget, Gtk.Widget? label) {
+	
 	}
 	private void submenu_notify(Gtk.Widget widget, ParamSpec pspec) {
-		weak Gtk.Menu submenu = (widget as Gtk.MenuItem).submenu;
-		weak Document.Widget node = document().wrap(widget);
-		List<weak Document.Widget> list = node.children.copy();
-		foreach(weak Document.Widget child in list) {
-			node.remove(child);
-		}
-		if(submenu != null) {
-			transverse(submenu, node);
-		}
 	}
 	private void child_remove(Gtk.Widget widget, Gtk.Widget child) {
-		weak Document.Widget node = document().wrap(widget);
-		weak Document.Widget child_node = document().wrap(child);
-		node.remove(child_node);
 	}
 	private void child_insert(Gtk.Widget widget, Gtk.Widget child, int pos) {
-		weak GMarkup.Node node = document().wrap(widget);
-		transverse(child, node, pos);
-	}
-	private void do_type_hint(Gtk.Widget window) {
-		weak GMarkup.Node node = document().wrap(window);
-		if((window as Gtk.Window).type_hint == Gdk.WindowTypeHint.DESKTOP) {
-			client().set_default(node.name);
-		}
 	}
 	private void do_realize(Gtk.Widget window) {
-		weak Document.Widget node = document().wrap(window);
-		client().register_window(node.name, XWINDOW(window.window).to_string());
 		if(gdk_window_get_is_desktop(window.window)) { 
 			/*workaround nautilus which doesn't use GDK to set the hint*/
-			client().set_default(node.name);
 		}
 	}
 	public void bind_window(Gtk.Widget window) {
-		weak Document.Widget node = document().wrap(window);
-		if(document().root.index(node) < 0) {
-			document().root.append(node);
-			if(0 != (window.get_flags() & WidgetFlags.REALIZED))
-				do_realize(window);
-			do_type_hint(window);
-			window.notify["type-hint"] += do_type_hint;
-			window.realize += do_realize;
-			window.unrealize += (window) => {
-				weak Document.Widget node = document().wrap(window);
-				client().unregister_window(node.name);
-			};
-		}
 	}
 	public void bind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		bind_window(window);
-		weak Document.Widget node = document().wrap(window);
-		weak Document.Widget menu_node = document().wrap(menu);
-		debug("binding menu %s to %s", menu_node.name, node.name);
-		/*TODO: transverse menu_node, adding children*/
-		transverse(menu, document().root);
-		client().attach_menu_bar(node.name, menu_node.name);
 	}
 	public void unbind_menu(Gtk.Widget window, Gtk.Widget menu) {
-		weak Document.Widget node = document().wrap(window);
-		weak Document.Widget menu_node = document().wrap(menu);
-		debug("unbinding menu %s to %s", menu_node.name, node.name);
-		client().detach_menu_bar(node.name, menu_node.name);
-		node.remove(menu_node);
 	}
 }

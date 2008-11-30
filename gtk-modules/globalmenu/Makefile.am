@@ -1,62 +1,43 @@
 NULL = 
 
-AM_CPPFLAGS = \
-	-g \
-	$(GNOMENUGTK_CFLAGS) \
-	-include $(CONFIG_HEADER) \
-	-I$(top_srcdir)/libgmarkupdoc \
-	-I$(top_srcdir)/libgnomenu \
-	-DG_LOG_DOMAIN=\"GlobalMenuModule\" \
-	$(NULL)
-AM_VALAC_FLAGS =\
-	$(GNOMENUGTK_VALA_PKGS) \
- 	--vapidir=$(top_srcdir)/libgmarkupdoc \
- 	--vapidir=$(top_srcdir)/libgnomenu \
-	--pkg=gmarkupdoc \
-	--pkg=gtkcompat \
-	--pkg=gnomenu \
-	$(NULL)
+STAMP = vala-stamp
 
 BUILT_SOURCES = \
-	gnomenugtk.vapi \
-	libglobalmenu_gnome.vala.stamp  \
-	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.c) \
-	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.h) \
+	$(STAMP) \
 	$(NULL)
 
-libglobalmenu_gnome_la_VALASOURCES = \
+VALASOURCES = \
 	gnomenugtk.vala \
-	gnomenugtk-client.vala \
-	gnomenugtk-document.vala  \
 	$(NULL)
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
-libglobalmenu_gnome_LTLIBRARIES = \
+lib_LTLIBRARIES = \
 	libglobalmenu-gnome.la \
 	$(NULL)
 
 libglobalmenu_gnome_la_SOURCES = \
-	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.c) \
-	$(libglobalmenu_gnome_la_VALASOURCES:.vala=.h) \
+	$(VALASOURCES:.vala=.c) \
+	$(VALASOURCES:.vala=.h) \
 	utils.c \
 	$(NULL)
 
-gnomenugtk.vapi libglobalmenu_gnome.vala.stamp: $(libglobalmenu_gnome_la_VALASOURCES) gtkaqd.vapi
-	$(VALAC) -C  $^
-	touch gnomenugtk.vapi libglobalmenu_gnome.vala.stamp
+$(STAMP): $(VALASOURCES) gtkaqd.vapi
+	$(VALAC) -C --pkg gtk+-2.0 --pkg gio-unix-2.0 $^
 
 libglobalmenu_gnome_la_LIBADD = \
-		$(GNOMENUGTK_LIBS) \
-		$(top_builddir)/libgnomenu/libgnomenu.la \
-		$(top_builddir)/libgmarkupdoc/libgmarkupdoc.la \
+		$(GLIB_LIBS) \
+		$(GTK_LIBS) \
+		$(GIO_LIBS) \
 		$(NULL)
 libglobalmenu_gnome_la_LDFLAGS = \
-		-module \
-		$(NULL)
+		-version-info 1:0:0 \
+		-release 0.7.0 \
+		-module
 
-EXTRA_DIST = \
-	$(BUILT_SOURCES) \
+libglobalmenu_gnome_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS)
+
+EXTRA_DIST = $(STAMP) \
 	gtkaqd.vapi \
-	$(libglobalmenu_gnome_la_VALASOURCES) \
+	$(VALASOURCES) \
 	$(NULL)
 
