@@ -48,7 +48,18 @@ GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
 	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
 static void _dyn_patch_label_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	g_message("label changed!");
+	dyn_patch_queue_changed(menubar, widget);
+}
+static void _dyn_patch_visible_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	dyn_patch_queue_changed(menubar, widget);
+}
+static void _dyn_patch_active_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	dyn_patch_queue_changed(menubar, widget);
+}
+static void _dyn_patch_inconsistent_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	dyn_patch_queue_changed(menubar, widget);
+}
+static void _dyn_patch_draw_as_radio_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	dyn_patch_queue_changed(menubar, widget);
 }
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
@@ -111,10 +122,25 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		g_signal_handlers_disconnect_by_func(widget, 
 				_dyn_patch_label_notify, 
 				menubar);
-	if(old && GTK_IS_MENU_ITEM(widget))
+	if(old && GTK_IS_MENU_ITEM(widget)) {
 		g_signal_handlers_disconnect_by_func(widget, 
 				_dyn_patch_submenu_notify, 
 				menubar);
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_visible_notify, 
+				menubar);
+	}
+	if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_draw_as_radio_notify, 
+				menubar);
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_inconsistent_notify, 
+				menubar);
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_active_notify, 
+				menubar);
+	}
 #endif
 	dyn_patch_set_menubar(widget, menubar);
 
@@ -149,6 +175,16 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(menubar && GTK_IS_MENU_ITEM(widget)) {
 		g_signal_connect(widget, "notify::label", 
 				_dyn_patch_submenu_notify, menubar);
+		g_signal_connect(widget, "notify::visible", 
+				_dyn_patch_visible_notify, menubar);
+	}
+	if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+		g_signal_connect(widget, "notify::active", 
+				_dyn_patch_active_notify, menubar);
+		g_signal_connect(widget, "notify::inconsistent", 
+				_dyn_patch_active_notify, menubar);
+		g_signal_connect(widget, "notify::draw-as-radio", 
+				_dyn_patch_active_notify, menubar);
 	}
 #endif
 }
