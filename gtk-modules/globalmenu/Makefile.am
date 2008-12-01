@@ -21,7 +21,6 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
 	globalmenu-helper.c \
-	dyn-patch.h \
 	dyn-patch-menubar.c \
 	dyn-patch-helper.h \
 	dyn-patch-helper.c \

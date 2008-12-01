@@ -1,35 +1,58 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch-helper.h"
+static GQuark __MENUBAR__ = 0;
+static GQuark __DIRTY__ = 0;
+static GQuark __OLD_SUBMENU__ = 0;
+static GQuark __ITEM__  =  0;
+static GQuark __LABEL_NOTIFY_CLOSURE__ = 0;
+static GQuark __SUBMENU_NOTIFY_CLOSURE__ = 0;
+static gulong SIGNAL_NOTIFY = 0;
+static GQuark DETAIL_SUBMENU = 0;
+static GQuark DETAIL_LABEL = 0;
+
+void dyn_patch_init () {
+	__MENUBAR__ = g_quark_from_string("__menubar__");
+	__DIRTY__ = g_quark_from_string("__dirty__");
+	__OLD_SUBMENU__ = g_quark_from_string("__old_submenu__");
+	__ITEM__ = g_quark_from_string("__item__");
+	__LABEL_NOTIFY_CLOSURE__ = g_quark_from_string("__label_notify_closure__");
+	__SUBMENU_NOTIFY_CLOSURE__ = g_quark_from_string("__submenu_notify_closure__");
+	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
+	DETAIL_SUBMENU = g_quark_from_string("submenu");
+	DETAIL_LABEL = g_quark_from_string("label");
+
+	dyn_patch_widget();
+	dyn_patch_menu_bar();
+}
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_signal_emit_by_name(menubar, "changed", 0, NULL);
 	g_message("Changed: %p", menubar);
-	g_object_set_data(menubar, "__dirty__", NULL);
+	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
 	return FALSE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
-	if(g_object_get_data(menubar, "__dirty__")) return;
-	g_object_set_data(menubar, "__dirty__", GINT_TO_POINTER(1));
-	g_idle_add_full(G_PRIORITY_HIGH_IDLE, _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
+	if(g_object_get_qdata((GObject*)menubar, __DIRTY__)) return;
+	g_object_set_qdata((GObject*) menubar, __DIRTY__, GINT_TO_POINTER(1));
+	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
 }
 
 void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(menubar != NULL) {
-		g_object_set_data_full(widget, "__menubar__", g_object_ref(menubar), g_object_unref);
+		g_object_set_qdata_full((GObject*) widget, __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	} else {
-		g_object_set_data(widget, "__menubar__", NULL);
+		g_object_set_qdata((GObject*) widget, __MENUBAR__, NULL);
 	}
 }
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
-	return g_object_get_data(widget, "__menubar__");
+	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
-static void _dyn_patch_label_changed(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+static void _dyn_patch_label_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	dyn_patch_queue_changed(menubar, widget);
 }
-static void _dyn_patch_submenu_changed(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	GtkWidget * old_submenu = g_object_get_data(widget, "__old_submenu__");
-	GtkWidget * submenu = gtk_menu_item_get_submenu(widget);
+static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	GtkWidget * old_submenu = g_object_get_qdata((GObject*) widget, __OLD_SUBMENU__);
+	GtkWidget * submenu = gtk_menu_item_get_submenu((GtkMenuItem*)widget);
 	g_message("submenu changed %p %p", widget, submenu);
 	if(submenu != old_submenu) {
 		if(old_submenu) {
@@ -37,9 +60,9 @@ static void _dyn_patch_submenu_changed(GtkWidget * widget, GParamSpec * pspec, G
 		}
 		if(submenu) {
 			dyn_patch_set_menubar_r(submenu, menubar);
-			g_object_set_data_full(widget, "__old_submenu__", g_object_ref(submenu), g_object_unref); 
+			g_object_set_qdata_full((GObject*) widget, __OLD_SUBMENU__, g_object_ref(submenu), g_object_unref); 
 		} else {
-			g_object_set_data(widget, "__old_submenu__", NULL); 
+			g_object_set_qdata((GObject*) widget, __OLD_SUBMENU__, NULL); 
 		}
 		/* although the property already hold a reference, 
 		 * we want to ensure old_submenu above is still alive
@@ -47,33 +70,85 @@ static void _dyn_patch_submenu_changed(GtkWidget * widget, GParamSpec * pspec, G
 		dyn_patch_queue_changed(menubar, widget);
 	}
 }
+#ifdef _USE_CLOSURES
+static GClosure * _dyn_patch_get_label_notify_closure(GtkMenuBar * menubar) {
+	GClosure * ret = g_object_get_qdata((GObject*) menubar, __LABEL_NOTIFY_CLOSURE__);
+	if(ret != NULL) return ret;
+	ret = g_cclosure_new_object((GCallback)_dyn_patch_label_notify, (GObject*) menubar);
+	g_closure_ref(ret);
+	g_closure_sink(ret);
+	g_object_set_qdata_full((GObject*) menubar, __LABEL_NOTIFY_CLOSURE__, ret, (GDestroyNotify)g_closure_unref);
+	return ret;
+}
+static GClosure * _dyn_patch_get_submenu_notify_closure(GtkMenuBar * menubar) {
+	GClosure * ret = g_object_get_qdata((GObject*) menubar, __SUBMENU_NOTIFY_CLOSURE__);
+	if(ret != NULL) return ret;
+	ret = g_cclosure_new_object((GCallback) _dyn_patch_submenu_notify, (GObject*) menubar);
+	g_closure_ref(ret);
+	g_closure_sink(ret);
+	g_object_set_qdata_full((GObject*)menubar, __SUBMENU_NOTIFY_CLOSURE__, ret, (GDestroyNotify) g_closure_unref);
+	return ret;
+}
+#endif
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
-	GtkWidget * old = dyn_patch_get_menubar(widget);
+	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
+#ifdef _USE_CLOSURES
 	if(old && GTK_IS_LABEL(widget))
-		g_signal_handlers_disconnect_by_func(widget, _dyn_patch_label_changed, old);
+		g_signal_handlers_disconnect_matched(widget, 
+				G_SIGNAL_MATCH_CLOSURE, 
+				SIGNAL_NOTIFY, DETAIL_LABEL, 
+				_dyn_patch_get_label_notify_closure(old), 
+				NULL, NULL);
 	if(old && GTK_IS_MENU_ITEM(widget))
-		g_signal_handlers_disconnect_by_func(widget, _dyn_patch_submenu_changed, old);
-
+		g_signal_handlers_disconnect_matched(widget, 
+				G_SIGNAL_MATCH_CLOSURE, 
+				SIGNAL_NOTIFY, DETAIL_SUBMENU, 
+				_dyn_patch_get_submenu_notify_closure(old), 
+				NULL, NULL);
+#else
+	if(old && GTK_IS_LABEL(widget))
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_label_notify, 
+				menubar);
+	if(old && GTK_IS_MENU_ITEM(widget))
+		g_signal_handlers_disconnect_by_func(widget, 
+				_dyn_patch_submenu_notify, 
+				menubar);
+#endif
 	dyn_patch_set_menubar(widget, menubar);
 
 	if(GTK_IS_CONTAINER(widget)) {
-		GList * children = gtk_container_get_children(widget);
+		GList * children = gtk_container_get_children((GtkContainer*)widget);
 		GList * node;
 		for(node = children; node; node = node->next) {
 			dyn_patch_set_menubar_r(node->data, menubar);
 		}
 	}
 	if(GTK_IS_MENU_ITEM(widget)) {
-		GtkWidget * submenu = gtk_menu_item_get_submenu(widget);
+		GtkWidget * submenu = gtk_menu_item_get_submenu((GtkMenuItem*)widget);
 		if(submenu) {
-			g_object_set_data_full(submenu, "__item__", g_object_ref(widget), g_object_unref);
+			g_object_set_qdata_full((GObject*) submenu, __ITEM__, g_object_ref(widget), g_object_unref);
 			dyn_patch_set_menubar_r(submenu, menubar);
 		}
 	}
-	if(menubar && GTK_IS_LABEL(widget)) 
-		g_signal_connect(widget, "notify::label", _dyn_patch_label_changed, menubar);
-	if(menubar && GTK_IS_MENU_ITEM(widget)) {
-		g_signal_connect(widget, "notify::submenu", _dyn_patch_submenu_changed, menubar);
+#ifdef _USE_CLOSURES
+	if(menubar && GTK_IS_LABEL(widget)) {
+		g_signal_connect_closure_by_id(widget, SIGNAL_NOTIFY, DETAIL_LABEL, 
+				_dyn_patch_get_label_notify_closure(menubar), FALSE);
 	}
+	if(menubar && GTK_IS_MENU_ITEM(widget)) {
+		g_signal_connect_closure_by_id(widget, SIGNAL_NOTIFY, DETAIL_SUBMENU, 
+				_dyn_patch_get_submenu_notify_closure(menubar), FALSE);
+	}
+#else
+	if(menubar && GTK_IS_LABEL(widget)) {
+		g_signal_connect(widget, "notify::label", 
+				_dyn_patch_label_notify, menubar);
+	}
+	if(menubar && GTK_IS_MENU_ITEM(widget)) {
+		g_signal_connect(widget, "notify::label", 
+				_dyn_patch_submenu_notify, menubar);
+	}
+#endif
 }
 

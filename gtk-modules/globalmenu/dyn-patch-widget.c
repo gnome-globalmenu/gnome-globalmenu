@@ -1,5 +1,4 @@
 #include <gtk/gtk.h>
-#include "dyn-patch.h"
 
 #include "dyn-patch-helper.h"
 

@@ -1,11 +1,8 @@
 using Gtk;
 using GtkAQD;
 namespace GnomenuGtk {
-	[CCode (cname = "dyn_patch_menu_bar")]
-	protected extern  void patch_menu_bar();
-	[CCode (cname = "dyn_patch_widget")]
-	protected extern  void patch_widget();
-
+	[CCode (cname = "dyn_patch_init")]
+	protected extern void dyn_patch_init();
 	[CCode (cname="gtk_module_init")]
 	public void module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 		string disabled_application_names = Environment.get_variable("GTK_MENUBAR_NO_MAC");
@@ -39,8 +36,7 @@ namespace GnomenuGtk {
 			break;
 		}
 
-		patch_widget();
-		patch_menu_bar();
+		dyn_patch_init();
 
 		add_emission_hooks();
 
