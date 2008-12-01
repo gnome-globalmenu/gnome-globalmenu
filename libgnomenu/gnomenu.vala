@@ -1,4 +1,7 @@
 namespace Gnomenu {
+	public const string NET_GLOBALMENU_MENU_CONTEXT = "_NET_GLOBALMENU_MENU_CONTEXT";
+	public const string NET_GLOBALMENU_MENU_EVENT = "_NET_GLOBALMENU_MENU_EVENT";
+
 	public enum MenuItemType {
 		NORMAL,
 		CHECK,

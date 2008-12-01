@@ -82,7 +82,7 @@ private class Applet : Panel.Applet {
 		main_menubar = add_menubar_from_string(MAIN_MENUBAR);
 		main_menubar.activate += (menubar, item) => {
 			if(current_window != null) {
-				current_window.set("_NET_GLOBALMENU_MENU_EVENT",
+				current_window.set(_NET_GLOBALMENU_MENU_EVENT,
 					item.path);
 			}
 		};
@@ -105,7 +105,7 @@ private class Applet : Panel.Applet {
 				}
 				current_window = new Gnomenu.Window.foreign(window.get_xid());
 				current_window.property_changed += (current_window, property) => {
-					if(property == "_NET_GLOBALMENU_MENU_CONTEXT")  {
+					if(property == _NET_GLOBALMENU_MENU_CONTEXT)  {
 						update_main_menubar();
 					}
 				};
@@ -118,7 +118,7 @@ private class Applet : Panel.Applet {
 		set_background_widget(this);
 	}
 	private void update_main_menubar() {
-		string context = current_window.get("_NET_GLOBALMENU_MENU_CONTEXT");
+		string context = current_window.get(_NET_GLOBALMENU_MENU_CONTEXT);
 		if(context != null)
 			Parser.parse(main_menubar, context);
 	}

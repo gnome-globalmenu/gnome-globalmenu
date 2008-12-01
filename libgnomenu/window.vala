@@ -32,12 +32,12 @@ namespace Gnomenu {
 		}
 		public string menu_context {
 			get {
-				_menu_context = get("_NET_GLOBALMENU_MENU_CONTEXT");
+				_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
 				return _menu_context;
 			}
 			set {
 				_menu_context = value;
-				set("_NET_GLOBALMENU_MENU_CONTEXT", value);
+				set(NET_GLOBALMENU_MENU_CONTEXT, value);
 			}
 		}
 		public string? get(string property_name) {

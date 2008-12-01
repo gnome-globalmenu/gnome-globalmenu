@@ -14,13 +14,13 @@ namespace Gnomenu {
 				test_window.realize();
 				test_window.destroy += Gtk.main_quit;
 				test_window.property_changed += (window, property) => {
-					if(property == "_NET_GLOBALMENU_MENU_EVENT") {
+					if(property == NET_GLOBALMENU_MENU_EVENT) {
 						message("menu item %s is activated",
 							window.get(property));
 					}
 				};
 				test_window.show_all();
-				test_window.set("_NET_GLOBALMENU_MENU_CONTEXT",
+				test_window.set(NET_GLOBALMENU_MENU_CONTEXT,
 					"""<menu><item label="See"/></menu>"""
 					);
 				Gtk.main();
