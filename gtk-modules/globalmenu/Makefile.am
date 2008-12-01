@@ -8,6 +8,7 @@ BUILT_SOURCES = \
 
 VALASOURCES = \
 	globalmenu.vala \
+	globalmenu-main.vala \
 	$(NULL)
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
@@ -28,6 +29,7 @@ libglobalmenu_gnome_la_SOURCES = \
 
 $(STAMP): $(VALASOURCES) gtkaqd.vapi
 	$(VALAC) -C --pkg gtk+-2.0 --pkg gio-unix-2.0 $^
+	touch $@
 
 libglobalmenu_gnome_la_LIBADD = \
 		$(GLIB_LIBS) \

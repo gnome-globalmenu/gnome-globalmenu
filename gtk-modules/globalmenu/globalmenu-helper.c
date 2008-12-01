@@ -7,7 +7,17 @@
 void gdk_window_set_menu_context (GdkWindow * window, char* context ) {
 	GdkAtom atom = gdk_atom_intern("_NET_GLOBALMENU_MENU_CONTEXT", FALSE);
 	GdkAtom type = gdk_atom_intern("STRING", FALSE);
-	gdk_property_change(window, atom, type, 8, GDK_PROP_MODE_REPLACE, context, strlen(context));
+	gdk_property_change(window, atom, type, 8, GDK_PROP_MODE_REPLACE, context, strlen(context)+1);
+}
+char * gdk_window_get_menu_event (GdkWindow * window) {
+	GdkAtom atom = gdk_atom_intern("_NET_GLOBALMENU_MENU_EVENT", FALSE);
+	GdkAtom type = gdk_atom_intern("STRING", FALSE);
+	GdkAtom actual_type = NULL;
+	gint actual_format;
+	gint actual_length;
+	char * rt = NULL;
+	gdk_property_get(window, atom, type, 0, G_MAXINT, FALSE, &actual_type, &actual_format, &actual_length, &rt);
+	return rt;
 }
 gboolean gdk_window_get_desktop_hint (GdkWindow * window) {
 	Display * display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default());
@@ -43,4 +53,9 @@ gboolean gdk_window_get_desktop_hint (GdkWindow * window) {
 	} else {
 		return FALSE;
 	}
+}
+
+GtkWindow * gtk_widget_get_toplevel_window(GtkWidget * widget) {
+	if(!GTK_IS_WIDGET(widget)) return NULL;
+	return gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 }
