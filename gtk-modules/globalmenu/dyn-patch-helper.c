@@ -26,9 +26,9 @@ void dyn_patch_init () {
 }
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
-	g_signal_emit_by_name(menubar, "changed", 0, NULL);
 	g_message("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
+	g_signal_emit_by_name(menubar, "changed", 0, NULL);
 	return FALSE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
@@ -48,6 +48,7 @@ GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
 	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
 static void _dyn_patch_label_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	g_message("label changed!");
 	dyn_patch_queue_changed(menubar, widget);
 }
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {

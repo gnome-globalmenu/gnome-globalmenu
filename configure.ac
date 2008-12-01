@@ -72,6 +72,7 @@ AC_CONFIG_FILES(
 	tests/Makefile
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
+	gtk-modules/globalmenu/tests/Makefile
 	])
 
 AC_OUTPUT

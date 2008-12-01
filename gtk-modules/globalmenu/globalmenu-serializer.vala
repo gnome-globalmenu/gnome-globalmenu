@@ -77,6 +77,13 @@ namespace GnomenuGtk {
 				}
 			}
 
+			if(menuitem.visible == false) {
+				sb.append(" visible=\"0\"");
+			}
+			if(menuitem.sensitive == false) {
+				sb.append(" sensitive=\"0\"");
+			}
+
 			if(menuitem.submenu == null) {
 				sb.append("/>");
 				linebreak();

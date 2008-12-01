@@ -10,6 +10,6 @@ public enum GMarkupCollectType {
 	STRING,
 	STRDUP,
 	BOOLEAN,
-	TRISATE,
+	TRISTATE,
 	OPTIONAL
 }

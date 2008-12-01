@@ -11,7 +11,7 @@ namespace Gnomenu {
 						0, int.MAX, 13, ParamFlags.READABLE));
 		}
 		construct {
-			add(new Label(""));
+			add(new Label("N/A"));
 			get_child().visible = true;
 		}
 		public MenuBar? menubar { get; set; }
@@ -66,7 +66,7 @@ namespace Gnomenu {
 				else
 					_path = position.to_string();
 
-				while(!(parent is MenuBar)) {
+				while(parent != null && !(parent is MenuBar)) {
 					item = (parent as Menu).get_attach_widget() as MenuItem;
 					if(item == null) break;
 					if(item.id != null) 
@@ -96,6 +96,7 @@ namespace Gnomenu {
 						add(new Label(""));
 						get_child().visible = true;
 						update_label_gravity();
+						update_label_text();
 					}
 				}
 				queue_resize();
@@ -192,12 +193,14 @@ namespace Gnomenu {
 			string text;
 			text = _label;
 			if(text == null)
-				text = _id;
-			if(text == null)
-				text = _position.to_string();
+				text = path;
+
 			Label label = get_child() as Label;
 			assert(label != null);
 			label.label = text;
+		}
+		private override void parent_set(Gtk.Widget old_parent) {
+			update_label_text();
 		}
 	}
 }

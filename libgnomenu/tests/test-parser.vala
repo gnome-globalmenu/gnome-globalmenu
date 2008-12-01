@@ -54,6 +54,23 @@ namespace Gnomenu {
 				Test.message("%s == %s", test1, Serializer.to_string(shell));
 				assert(test1 == Serializer.to_string(shell));
 			});
+			add("Evolution", () => {
+				string test3;
+				string test4;
+				FileUtils.get_contents("evo-nolabel.xml", out test3, null);
+				FileUtils.get_contents("evo.xml", out test4, null);
+				Parser.parse(shell, test3);
+				Parser.parse(shell, test3);
+				Parser.parse(shell, test3);
+				//Parser.parse(shell, test4);
+				Test.message("%s", Serializer.to_string(shell, true));
+				Window window = new Window(WindowType.TOPLEVEL);
+				window.add(shell);
+				shell.visible = true;
+				window.destroy += Gtk.main_quit;
+				window.show_all();
+				Gtk.main();
+			});
 		}
 	}
 	public static int main (string[] args) {
