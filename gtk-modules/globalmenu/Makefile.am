@@ -1,6 +1,6 @@
 NULL = 
-
-STAMP = vala-stamp
+SUBDIRS = . tests
+STAMP = globalmenu-gnome-private.vapi
 
 BUILT_SOURCES = \
 	$(STAMP) \
@@ -9,6 +9,7 @@ BUILT_SOURCES = \
 VALASOURCES = \
 	globalmenu.vala \
 	globalmenu-main.vala \
+	globalmenu-serializer.vala \
 	$(NULL)
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
@@ -28,8 +29,10 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) gtkaqd.vapi
-	$(VALAC) -C --vapidir=../../libgnomenu --pkg gtk+-2.0 --pkg gio-unix-2.0 --pkg gnomenu $^
+	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=../../libgnomenu --pkg gtk+-2.0 --pkg gio-unix-2.0 --pkg gnomenu --library=$(@:.vapi=) $^
 	touch $@
+$(STAMP:.vapi=.deps):
+	echo gnomenu > $@
 
 libglobalmenu_gnome_la_LIBADD = \
 		$(GLIB_LIBS) \
@@ -44,7 +47,7 @@ libglobalmenu_gnome_la_LDFLAGS = \
 
 libglobalmenu_gnome_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS)
 
-EXTRA_DIST = $(STAMP) \
+EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
 	gtkaqd.vapi \
 	$(VALASOURCES) \
 	$(NULL)

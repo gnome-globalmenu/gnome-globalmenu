@@ -29,11 +29,7 @@ namespace GnomenuGtk {
 			Gtk.Window toplevel = self.get_ancestor(typeof(Gtk.Window)) as Gtk.Window;
 			if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
 				gdk_window_set_menu_context(toplevel.window, 
-						"""<menu>
-							<item id="Hello"/>
-							<item id="FIXME" font="Serif Bold 20"/>
-							<item id="World"/>
-						</menu>"""
+						Serializer.to_string(self)
 						);
 			}
 		} 
