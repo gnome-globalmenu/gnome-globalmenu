@@ -1,19 +1,6 @@
-
 using Gtk;
 
 namespace Gnomenu {
-	public enum MenuItemType {
-		NORMAL,
-		CHECK,
-		RADIO,
-		IMAGE,
-		SEPARATOR,
-	}
-	public enum MenuItemState {
-		UNTOGGLED,
-		TOGGLED,
-		TRISTATE,
-	}
 	public class MenuItem : Gtk.MenuItem {
 		public MenuItem() { }
 		static construct {

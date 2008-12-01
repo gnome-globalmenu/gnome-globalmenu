@@ -1,17 +1,6 @@
 using Gtk;
 
 namespace Gnomenu {
-	public enum BackgroundType {
-		NONE,
-		COLOR,
-		PIXMAP
-	}
-	public enum Gravity { /*Text Gravity, differ from Gdk.Gravity*/
-		DOWN, 
-		UP, /*Rarely used: up-side-down!*/
-		LEFT,
-		RIGHT
-	}
 	public class Background {
 		public BackgroundType type;
 		public Gdk.Pixmap pixmap;
