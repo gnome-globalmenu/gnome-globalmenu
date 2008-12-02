@@ -10,6 +10,7 @@ VALASOURCES = \
 	globalmenu.vala \
 	globalmenu-main.vala \
 	globalmenu-serializer.vala \
+	globalmenu-locator.vala \
 	$(NULL)
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)

@@ -3,11 +3,11 @@ using Gtk;
 namespace GnomenuGtk {
 
 	class TestSerializer : TestMan {
+		MenuBar menubar;
 		TestSerializer () {
 			base("/GnomenuGTK/Serializer");
 
 			add("test", () => {
-				MenuBar menubar;
 				Menu menu;
 				MenuItem item;
 
@@ -23,6 +23,17 @@ namespace GnomenuGtk {
 				menu.append(new SeparatorMenuItem());
 				
 				message("%s", Serializer.to_string(menubar, true));
+			});
+			add("locator", () => {
+				assert(null != Locator.locate(menubar, "123:/0"));
+				assert(null != Locator.locate(menubar, "/0"));
+				assert(null != Locator.locate(menubar, "/1"));
+				assert(null != Locator.locate(menubar, "/2"));
+				assert(null != Locator.locate(menubar, "/2/0"));
+				assert(null != Locator.locate(menubar, "/2/1"));
+				assert(null == Locator.locate(menubar, "/3"));
+				assert(null == Locator.locate(menubar, "/3/3"));
+				assert(null == Locator.locate(menubar, "/2/3"));
 			});
 		}
 		public static int main(string[] args) {

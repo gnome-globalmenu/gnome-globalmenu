@@ -87,3 +87,6 @@ namespace GtkAQD {
 		public signal void label_set(Gtk.Widget? label);
 	}
 }
+
+public static delegate bool GSourceFunc(void * data);
+public uint g_timeout_add_full(int priority, uint internval, GSourceFunc func, void* data, GLib.DestroyNotify? notify);
