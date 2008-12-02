@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = libgnomenu tests applet gtk-modules
+SUBDIRS = tests libgnomenu applet gtk-modules
 
 AM_CPPFLAGS = \
 		$(NULL)
