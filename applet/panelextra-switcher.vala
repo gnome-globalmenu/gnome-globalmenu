@@ -4,7 +4,7 @@ using GMarkup;
 
 namespace PanelExtra {
 	public class Switcher : PanelExtra.MenuBar {
-		private Gtk.MenuItem mi_application;
+		private Gtk.ImageMenuItem mi_application;
 		private Wnck.Screen screen;
 		private int max_size;
 		
@@ -76,10 +76,13 @@ namespace PanelExtra {
 		public void set_label(string text) {
 			set_menu_item_label_bold(mi_application, text);
 		}
+		public void set_icon(Gtk.Widget icon) {
+			mi_application.set_image(icon);
+		}
 		public Switcher() { }
 		construct {
 			max_size = 45;
-			mi_application = new Gtk.MenuItem.with_label("GlobalMenu");
+			mi_application = new Gtk.ImageMenuItem.with_label("GlobalMenu");
 			set_menu_item_label_bold(mi_application, "");
 			this.add(mi_application);
 			this.show_all();

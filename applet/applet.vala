@@ -161,11 +161,14 @@ private class Applet : PanelCompat.Applet {
 				menubar.switch(xid);
 				
 				string aname = "Desktop";
-				if (window.get_name() != "x-nautilus-desktop") {
+				if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
 					aname = get_application_name(window);
 					if (switcher_dictionary.lookup(aname)!=null) 
 						aname = switcher_dictionary.lookup(aname); else
 						aname = window.get_name();
+					switcher.set_icon(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
+				} else {
+					switcher.set_icon(new Gtk.Image.from_icon_name("desktop", Gtk.IconSize.MENU));
 				}
 				switcher.set_label(aname);
 			}
