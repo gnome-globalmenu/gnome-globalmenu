@@ -1,23 +1,15 @@
 using GLib;
-using Gtk;
-using Gdk;
-using Gnomenu;
-using Wnck;
-using WnckCompat;
 using Panel;
 using PanelCompat;
-
-public extern GLib.Object gnome_program_init_easy(string name, string version,
-		string[] args, GLib.OptionContext #context);
+using Gtk;
 public extern string* __get_task_name_by_pid(int pid);
 
-private class Applet : PanelCompat.Applet {
-	
-	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
-	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
-	static const string APPLET_NAME = "Global Menu Panel Applet";
+public class GlobalMenuApplet : PanelCompat.Applet {
+	static GlobalMenuApplet the_applet;
+	static const string APPLET_NAME = "globalmenu-panel-applet";
 	static const string APPLET_VERSION = "0.6";
 	static const string APPLET_ICON = "gnome-fs-home";
+	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
 	static const string[] APPLET_AUTHORS = {"Coding:",
 						"Yu Feng <rainwoodman@gmail.com>",
 						"Mingxi Wu <fengshenx@gmail.com>",
@@ -28,19 +20,18 @@ private class Applet : PanelCompat.Applet {
 						"sstasyuk <sstasyuk@gmail.com>",
 						"David Watson <dwatson031@gmail.com>",
 						"Valiant Wing <Valiant.Wing@gmail.com>"};
+	
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
 	private Wnck.Screen screen;
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
-
 	private PanelExtra.Switcher switcher;
 	private GLib.HashTable<string,string> switcher_dictionary;
-	static const string GCONF_ROOT_KEY = "/apps/gnome-globalmenu-applet";
-
-	public Applet() {
-		int i = 0;
-	}
-
+	
+    public static bool factory (Panel.Applet applet, string iid) {
+        ((GlobalMenuApplet) applet).create ();
+        return true;
+    }
 	public static void message(string msg) {
 		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
 							    Gtk.DialogFlags.MODAL,
@@ -49,9 +40,6 @@ private class Applet : PanelCompat.Applet {
 							    msg);
 		m.run();
 		m.destroy();
-	}
-	private void update_by_gconf() {
-
 	}
     private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
@@ -81,7 +69,7 @@ private class Applet : PanelCompat.Applet {
     }
     private static void on_preferences_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-       	message("Not yet available...");
+       	message(the_applet.get_preferences_key());
     }
     private string remove_path(string txt, string separator) {
     	long co = txt.length-1;
@@ -112,9 +100,63 @@ private class Applet : PanelCompat.Applet {
 		}
 		return ret;
 	}
+	private void on_active_window_changed (WnckCompat.Screen screen, Wnck.Window? previous_window){
+		weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
+			if((window != previous_window) && (window is Wnck.Window)) {
+				weak Wnck.Window transient_for = window.get_transient();
+				if(transient_for != null) window = transient_for;
+				string xid = window.get_xid().to_string();
+				menubar.switch(xid);
+				
+				string aname = "Desktop";
+				if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
+					aname = get_application_name(window);
+					if (switcher_dictionary.lookup(aname)!=null) 
+						aname = switcher_dictionary.lookup(aname); else
+						aname = window.get_name();
+					switcher.set_icon(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
+				} else {
+					switcher.set_icon(new Gtk.Image.from_icon_name("desktop", Gtk.IconSize.MENU));
+				}
+				switcher.set_label(aname);
+			}
+	}
+    private void on_change_background (GlobalMenuApplet applet, Panel.AppletBackgroundType bgtype,
+                                       Gdk.Color? color, Gdk.Pixmap? pixmap) {
+        Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
+			switch(bgtype){
+				case Panel.AppletBackgroundType.NO_BACKGROUND:
+					Gtk.Style def_style = Gtk.rc_get_style(this);
+					this.menubar.set_style(def_style);
+					this.menubar.queue_draw();
+				
+					this.switcher.set_style(def_style);
+					this.switcher.queue_draw();
+					
+					return;
+				break;
+				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
+					style.bg_pixmap[(int)StateType.NORMAL] = null;
+					style.bg[(int)StateType.NORMAL] = color;
+				break;
+				case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
+					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
+				break;
+			}
+			this.menubar.set_style(style);
+			this.menubar.queue_draw();
+					
+			this.switcher.set_style(style);
+			this.switcher.queue_draw();
+    }
 
-	construct {
-		this.set_name("GlobalMenuPanelApplet");
+    private void create () {
+    	the_applet = this;
+		this.add_preferences(GCONF_SCHEMA_DIR);
+		
+    	this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+        change_background += on_change_background;
+
 		menubar = new Gnomenu.MenuBar();
 		menubar.set_name("PanelMenuBar");
 		box = new Gtk.HBox(false, 0);
@@ -147,80 +189,21 @@ private class Applet : PanelCompat.Applet {
 
 		switcher_dictionary = GnomeMenuHelper.get_flat_list();
 		if (switcher_dictionary.lookup("nautilus")==null)
-			switcher_dictionary.insert("nautilus", "File Manager"); // To be removed when gconf will be available
+			switcher_dictionary.insert("nautilus", "File Manager");
 		
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
 		screen = Wnck.Screen.get_default();
-		(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
-			weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
-			if((window != previous_window) && (window is Wnck.Window)) {
-				weak Wnck.Window transient_for = window.get_transient();
-				if(transient_for != null) window = transient_for;
-				string xid = window.get_xid().to_string();
-				menubar.switch(xid);
-				
-				string aname = "Desktop";
-				if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
-					aname = get_application_name(window);
-					if (switcher_dictionary.lookup(aname)!=null) 
-						aname = switcher_dictionary.lookup(aname); else
-						aname = window.get_name();
-					switcher.set_icon(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
-				} else {
-					switcher.set_icon(new Gtk.Image.from_icon_name("desktop", Gtk.IconSize.MENU));
-				}
-				switcher.set_label(aname);
-			}
-		};
-		this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
-		(this as PanelCompat.Applet).change_background += (applet, bgtype, color, pixmap) => {
-			Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
-			switch(bgtype){
-				case Panel.AppletBackgroundType.NO_BACKGROUND:
-					//Gtk.Style def_style = Gtk.rc_get_style(this.menubar);
-					Gtk.Style def_style = Gtk.rc_get_style(this);
-					this.menubar.set_style(def_style);
-					this.menubar.queue_draw();
-				
-					this.switcher.set_style(def_style);
-					this.switcher.queue_draw();
-					
-					return;
-				break;
-				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = null;
-					style.bg[(int)StateType.NORMAL] = color;
-				break;
-				case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
-				break;
-			}
-			this.menubar.set_style(style);
-			this.menubar.queue_draw();
-					
-			this.switcher.set_style(style);
-			this.switcher.queue_draw();
-		};
-	}
-	private static bool verbose = false;
-	const OptionEntry[] options = {
-		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
-		{null}
-	};
-	public static int main(string[] args) {
-		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
-		context.set_help_enabled (true);
-		context.add_main_entries(options, null);
-		GLib.Object program = gnome_program_init_easy(
-			"GlobalMenu.PanelApplet",
-			APPLET_VERSION, args, #context);
-		if(!verbose) {
-			LogFunc handler = (domain, level, message) => { };
-			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
-		}
-		Gtk.rc_parse_string("""
+		(screen as WnckCompat.Screen).active_window_changed += on_active_window_changed;
+		
+        show_all();
+    }
+
+    public static int main (string[] args) {
+        var program = Gnome.Program.init ("GlobalMenuApplet", "0.6", Gnome.libgnomeui_module,
+                                          args, "sm-connect", false);
+                                          
+        Gtk.rc_parse_string("""
 			style "globalmenu_event_box_style"
 			{
 			 	GtkWidget::focus-line-width=0
@@ -235,16 +218,8 @@ private class Applet : PanelCompat.Applet {
 			class "GtkEventBox" style "globalmenu_event_box_style"
 			class "GnomenuMenuBar" style:highest "globalmenu_menu_bar_style"
 """);
-		int retval = Panel.Applet.factory_main(FACTORY_IID, typeof(Applet), 
-			(applet, iid) => {
-				if(iid == APPLET_IID) {
-					applet.show_all();
-					return true;
-				} else return false;
-			}) ;	
-		return retval;
-	}
 
+        return Panel.Applet.factory_main ("OAFIID:GlobalMenu_PanelApplet_Factory",
+                                    typeof (GlobalMenuApplet), factory);
+    }
 }
-
-

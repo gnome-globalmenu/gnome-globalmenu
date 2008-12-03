@@ -74,7 +74,9 @@ namespace PanelExtra {
 				(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + text + "</b>");
 		}
 		public void set_label(string text) {
-			set_menu_item_label_bold(mi_application, text);
+			string txt = text;
+			if (text.length>max_size) txt = txt.substring(0, (max_size-3)) + "...";
+			set_menu_item_label_bold(mi_application, txt);
 		}
 		public void set_icon(Gtk.Widget icon) {
 			mi_application.set_image(icon);
