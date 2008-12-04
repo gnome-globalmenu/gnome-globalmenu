@@ -63,7 +63,7 @@ namespace PanelExtra {
 					if (!window.is_skip_pager()) {
 						Gtk.ImageMenuItem mi;
 						string txt = window.get_name();
-						if (txt.length>max_size) txt = txt.substring(0, (max_size-3)) + "...";
+						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
 						mi = new Gtk.ImageMenuItem.with_label(txt);
 						if (window.is_active()) set_menu_item_label_bold(mi, "");			
 						mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
