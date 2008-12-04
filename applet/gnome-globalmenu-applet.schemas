@@ -54,7 +54,7 @@
 			<key>/schemas/apps/globalmenu-panel-applet/prefs/title_max_width</key>
 			<owner>globalmenu-panel-applet</owner>
 			<type>int</type>
-			<default>45</default>
+			<default>30</default>
 			<locale name="C">
 				<short>The Maximum length of name of the active application</short>
 				<long></long>

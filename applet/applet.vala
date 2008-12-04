@@ -3,6 +3,7 @@ using Panel;
 using PanelCompat;
 using Gtk;
 public extern string* __get_task_name_by_pid(int pid);
+public extern int system(string? cmd);
 
 public class GlobalMenuApplet : PanelCompat.Applet {
 	static GlobalMenuApplet the_applet;
@@ -69,7 +70,7 @@ public class GlobalMenuApplet : PanelCompat.Applet {
     }
     private static void on_preferences_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-       	message(the_applet.get_preferences_key());
+       	system("gconf-editor " + the_applet.get_preferences_key() + " &");
     }
     private string remove_path(string txt, string separator) {
     	long co = txt.length-1;
@@ -149,10 +150,20 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 			this.switcher.set_style(style);
 			this.switcher.queue_draw();
     }
-
+	private void get_prefs() {
+		switcher.show_label = this.gconf_get_bool("show_name");
+		switcher.show_icon = this.gconf_get_bool("show_icon");
+		switcher.max_size = this.gconf_get_int("title_max_width");
+		switcher.show_window_actions = this.gconf_get_bool("show_window_actions");
+		switcher.show_window_list = this.gconf_get_bool("show_window_list");
+		switcher.refresh();
+	}
     private void create () {
     	the_applet = this;
 		this.add_preferences(GCONF_SCHEMA_DIR);
+		GConf.Client.get_default().value_changed += (key, value) => {
+			this.get_prefs();
+		};
 		
     	this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
         change_background += on_change_background;
@@ -197,6 +208,8 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 		(screen as WnckCompat.Screen).active_window_changed += on_active_window_changed;
 		
         show_all();
+        
+        get_prefs();
     }
 
     public static int main (string[] args) {
