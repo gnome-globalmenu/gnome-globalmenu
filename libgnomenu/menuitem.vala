@@ -13,6 +13,7 @@ namespace Gnomenu {
 		construct {
 			add(new Label("N/A"));
 			get_child().visible = true;
+			(get_child() as Label).use_underline = true;
 		}
 		public MenuBar? menubar { get; set; }
 		public int position {
@@ -94,6 +95,7 @@ namespace Gnomenu {
 				} else {
 					if(get_child() == null) {
 						add(new Label(""));
+						(get_child() as Label).use_underline = true;
 						get_child().visible = true;
 						update_label_gravity();
 						update_label_text();
@@ -154,27 +156,34 @@ namespace Gnomenu {
  			    "horizontal-padding", &horizontal_padding,
 				null);
 			ShadowType shadow_type = item_state_to_shadow_type(_item_state);
-			weak string detail = null;
 			switch(_item_type) {
 				case MenuItemType.CHECK:
-					detail = "check";
-				break;
-				case MenuItemType.RADIO:
-					detail = "option";
-				break;
-			}
-			if(detail != null)
-				Gtk.paint_option(style,
+					Gtk.paint_check(style,
 						window,
 						(StateType)state,
 						shadow_type,
 						event.area, 
 						this,
-						detail,
+						"check",
 						allocation.x,
 						allocation.y,
 						indicator_size,
 						indicator_size);
+				break;
+				case MenuItemType.RADIO:
+					Gtk.paint_option(style,
+						window,
+						(StateType)state,
+						shadow_type,
+						event.area, 
+						this,
+						"option",
+						allocation.x,
+						allocation.y,
+						indicator_size,
+						indicator_size);
+				break;
+			}
 			return false;
 		}
 
