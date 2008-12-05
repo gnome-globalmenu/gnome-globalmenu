@@ -11,9 +11,7 @@ namespace Gnomenu {
 						0, int.MAX, 13, ParamFlags.READABLE));
 		}
 		construct {
-			add(new Label("N/A"));
-			get_child().visible = true;
-			(get_child() as Label).use_underline = true;
+			create_label();
 		}
 		public MenuBar? menubar { get; set; }
 		public int position {
@@ -94,9 +92,7 @@ namespace Gnomenu {
 					remove(child);
 				} else {
 					if(get_child() == null) {
-						add(new Label(""));
-						(get_child() as Label).use_underline = true;
-						get_child().visible = true;
+						create_label();
 						update_label_gravity();
 						update_label_text();
 					}
@@ -210,6 +206,12 @@ namespace Gnomenu {
 		}
 		private override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();
+		}
+		private void create_label() {
+			add(new Label("N/A"));
+			get_child().visible = true;
+			(get_child() as Label).use_underline = true;
+			(get_child() as Label).set_alignment( (float)0.0, (float)0.5);
 		}
 	}
 }
