@@ -12,8 +12,8 @@ SUFFIXES = .vala .stamp
 TEST_PROGS +=  $(VALASOURCES:.vala=)
 	
 noinst_PROGRAMS = $(TEST_PROGS)
-AM_CPPFLAGS = $(GTK_CFLAGS) $(GLIB_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS)
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libglobalmenu-gnome.la $(top_builddir)/tests/libtestman.la
-EXTRA_DIST += $(STAMP) $(VALASOURCES)
+EXTRA_DIST += $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h)
 

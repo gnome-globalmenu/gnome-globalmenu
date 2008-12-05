@@ -13,8 +13,9 @@ TEST_PROGS +=  $(VALASOURCES:.vala=)
 	
 #	test-menushell test-parser test-menubar
 noinst_PROGRAMS = $(TEST_PROGS)
-AM_CPPFLAGS = $(GTK_CFLAGS) $(GLIB_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) -DSRCDIR=\"$(srcdir)\" $(GTK_CFLAGS) $(GLIB_CFLAGS)
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libgnomenu.la ../../tests/libtestman.la
-EXTRA_DIST += $(STAMP) $(VALASOURCES)
+# default rules doesn't include the .h files!
+EXTRA_DIST += $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h) evo-nolabel.xml evo.xml
 

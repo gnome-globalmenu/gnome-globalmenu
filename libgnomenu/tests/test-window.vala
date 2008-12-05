@@ -26,6 +26,8 @@ namespace Gnomenu {
 				Gtk.main();
 			});
 			add("Foreign", () => {
+				message("Test skipped");
+				return;
 				test_window = new Window.foreign(0x4a0000c);
 				Button btn = new Button.with_label("hello\nhhhh\n");
 				btn.visible = true;

@@ -13,7 +13,7 @@ VALASOURCES = \
 	globalmenu-locator.vala \
 	$(NULL)
 
-libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
+libglobalmenu_gnome_ladir = $(GTK_MODULES_DIR)
 lib_LTLIBRARIES = \
 	libglobalmenu-gnome.la \
 	$(NULL)
@@ -43,9 +43,10 @@ libglobalmenu_gnome_la_LDFLAGS = \
 		-version-info 1:0:0 \
 		-release 0.7.0 \
 		-no-undefined \
+		-export-dynamic \
 		-module
 
-libglobalmenu_gnome_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS)
+libglobalmenu_gnome_la_CPPFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS)
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
 	gtkaqd.vapi \

@@ -40,6 +40,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GTK_CFLAGS) \
 		$(WNCK_CFLAGS) \
 		$(PANEL_CFLAGS) \
+		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
 		-DPREFIX=\"$(prefix)\" \
 		-DSYSCONFDIR=\"$(sysconfdir)\" \
@@ -53,7 +54,7 @@ EXTRA_DIST = \
 	patch.sh \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
-	$(GlobalMenu_PanelApplet_VALASOURCES) \
+	$(VALASOURCES) \
 	$(server_in_files) \
 	$(NULL)
 
