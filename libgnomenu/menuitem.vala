@@ -11,7 +11,7 @@ namespace Gnomenu {
 						0, int.MAX, 13, ParamFlags.READABLE));
 		}
 		construct {
-			create_label();
+			create_labels();
 		}
 		public MenuBar? menubar { get; set; }
 		public int position {
@@ -41,6 +41,14 @@ namespace Gnomenu {
 			}
 		}
 
+		public string? accel_text {
+			get { return _accel_text; }
+			set {
+				if(_accel_text == value) return;
+				_accel_text = value;
+				update_label_text();
+			}
+		}
 		public string? font {
 			get { return _font; }
 			set {
@@ -92,7 +100,7 @@ namespace Gnomenu {
 					remove(child);
 				} else {
 					if(get_child() == null) {
-						create_label();
+						create_labels();
 						update_label_gravity();
 						update_label_text();
 					}
@@ -120,6 +128,7 @@ namespace Gnomenu {
 		private string _path; /*merely a buffer*/
 		private string _font;
 		private string _label;
+		private string _accel_text;
 		private string _id;
 		private int _position;
 		private Gravity _gravity;
@@ -189,7 +198,7 @@ namespace Gnomenu {
 		private void update_label_gravity() {
 			if(_item_type == MenuItemType.SEPARATOR) return;
 			double text_angle = gravity_to_text_angle(gravity);
-			Label label = get_child() as Label;
+			Label label = get_label_widget();
 			assert(label != null);
 			label.angle = text_angle;
 		}
@@ -200,18 +209,22 @@ namespace Gnomenu {
 			if(text == null)
 				text = path;
 
-			Label label = get_child() as Label;
+			Label label = get_label_widget();;
 			assert(label != null);
 			label.label = text;
 		}
 		private override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();
 		}
-		private void create_label() {
+		private void create_labels() {
 			add(new Label("N/A"));
 			get_child().visible = true;
 			(get_child() as Label).use_underline = true;
 			(get_child() as Label).set_alignment( (float)0.0, (float)0.5);
+		}
+		private weak Label? get_label_widget() {
+			weak Label label = get_child() as Label;
+			return label;
 		}
 	}
 }
