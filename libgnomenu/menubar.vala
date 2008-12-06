@@ -68,8 +68,13 @@ namespace Gnomenu {
 				}
 			}
 		}
+		public bool overflow {
+			get { return _overflow; }
+			set { _overflow = value; }
+		}
 		private Background _background;
 		private Gravity _gravity;
+		private bool _overflow;
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
@@ -110,8 +115,10 @@ namespace Gnomenu {
 		}
 		private override void size_request(out Requisition req) {
 			base.size_request(out req);
-	//		req.width = 0;
-	//		req.height = 0;
+			if(overflow) {
+				req.width = 0;
+				req.height = 0;
+			}
 		}
 		private override void insert(Widget child, int position) {
 			base.insert(child, position);

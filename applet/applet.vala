@@ -64,6 +64,7 @@ private class Applet : Panel.Applet {
 				current_window.emit_menu_event(item.path);
 			}
 		};
+		main_menubar.overflow = true;
 		/*init wnck*/
 		screen = Wnck.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
@@ -211,6 +212,7 @@ private class Applet : Panel.Applet {
 		rev_x = a.width;
 		rev_y = a.height;
 
+		Gnomenu.MenuBar last_child = internal_children.last().data;
 		foreach(Gnomenu.MenuBar menubar in internal_children) {
 			menubar.get_child_requisition(out cr);
 			switch(pack_direction) {
@@ -218,6 +220,9 @@ private class Applet : Panel.Applet {
 					ca.x = x;
 					ca.y = y;
 					ca.width = cr.width;
+					if(menubar == last_child) {
+						ca.width = a.width - x;
+					}
 					ca.height = a.height;
 					x += cr.width;
 				break;
@@ -225,21 +230,32 @@ private class Applet : Panel.Applet {
 					ca.x = rev_x - cr.width;
 					ca.y = y;
 					ca.width = cr.width;
+					if(menubar == last_child) {
+						ca.width = a.width - x;
+					}
 					ca.height = a.height;
 					rev_x -= cr.width;
+					x += cr.width;
 				break;
 				case PackDirection.BTT:
 					ca.x = x;
 					ca.y = rev_y - cr.height;
 					ca.width = a.width;
 					ca.height = cr.height;
+					if(menubar == last_child) {
+						ca.height = a.height - y;
+					}
 					rev_y -= cr.height;
+					y += cr.height;
 				break;
 				case PackDirection.TTB:
 					ca.x = x;
 					ca.y = y;
 					ca.width = a.width;
 					ca.height = cr.height;
+					if(menubar == last_child) {
+						ca.height = a.height - y;
+					}
 					y += cr.height;
 				break;
 			}
