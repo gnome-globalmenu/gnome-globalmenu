@@ -200,6 +200,16 @@ namespace Gnomenu {
 			double text_angle = gravity_to_text_angle(gravity);
 			Label label = get_label_widget();
 			assert(label != null);
+			switch(gravity) {
+				case Gravity.DOWN:
+				case Gravity.UP:
+					label.set_alignment( (float)0.0, (float)0.5);
+				break;
+				case Gravity.LEFT:
+				case Gravity.RIGHT:
+					label.set_alignment( (float)0.5, (float)0.0);
+				break;
+			}
 			label.angle = text_angle;
 		}
 		private void update_label_text() {
@@ -220,6 +230,7 @@ namespace Gnomenu {
 			add(new Label("N/A"));
 			get_child().visible = true;
 			(get_child() as Label).use_underline = true;
+			/*FIXME: perhaps calling update_label_gravity is better?*/
 			(get_child() as Label).set_alignment( (float)0.0, (float)0.5);
 		}
 		private weak Label? get_label_widget() {
