@@ -109,12 +109,12 @@ namespace Gnomenu {
 			if(sensitive != false)
 				sensitive = true;
 
-			item.label = label;
-			item.icon= icon;
 			item.id = id;
 			item.visible = visible;
 			item.sensitive = sensitive;
 			item.item_type = type;
+			item.label = label;
+			item.icon= icon;
 			item.item_state = state;
 			item.font = font;
 		}
