@@ -85,16 +85,16 @@ private class Applet : Panel.Applet {
 				}
 				current_window = new Gnomenu.Window.foreign(window.get_xid());
 
-				if(current_window.invalid || current_window.menu_context == null) {
+				if(current_window.invalid) {
 					current_window.destroy();
 					current_window = null; 
 					/*TODO: switch to default_window, and continue rather than return*/
 				}
-				if(current_window != null) 
+				if(current_window != null) {
 					current_window.menu_context_changed += (current_window) => {
 						update_main_menubar();
 					};
-
+				}
 				update_main_menubar();
 			}
 		};
