@@ -19,6 +19,7 @@ namespace Gnomenu {
 		construct {
 			set_events(get_events() 
 			| Gdk.EventMask.PROPERTY_CHANGE_MASK
+			| Gdk.EventMask.KEY_PRESS_MASK
 			);
 			if(_native != 0) {
 				window = gdk_window_foreign_new(_native);
@@ -140,6 +141,10 @@ namespace Gnomenu {
 			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_CONTEXT, false)) {
 				menu_context_changed();
 			}
+			return false;
+		}
+		private override bool key_press_event(Gdk.EventKey event) {
+			message("key_pressed");
 			return false;
 		}
 		private override void dispose () {
