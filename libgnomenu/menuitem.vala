@@ -119,6 +119,7 @@ namespace Gnomenu {
 					icon_widget = new Gtk.Image();
 					icon_widget.set_parent(this);
 					icon_widget.visible = true;
+					update_icon();
 				} else {
 					if(icon_widget != null) {
 						icon_widget.unparent();

@@ -29,10 +29,10 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) gtkaqd.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=../../libgnomenu --pkg gtk+-2.0 --pkg gio-unix-2.0 --pkg gnomenu --library=$(@:.vapi=) $^
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) $^
 	touch $@
 $(STAMP:.vapi=.deps):
-	echo gnomenu > $@
+	echo > $@
 
 libglobalmenu_gnome_la_LIBADD = \
 		$(GLIB_LIBS) \
