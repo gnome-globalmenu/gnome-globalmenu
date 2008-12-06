@@ -28,7 +28,7 @@ private class Applet : Panel.Applet {
 	static const string OVERFLOWER_TEMPLATE =
 """
 <menu>
-	<item type="a">
+	<item type="a" id="_arrow_">
 	%s
 	</item>
 </menu>
@@ -76,6 +76,16 @@ private class Applet : Panel.Applet {
 		overflower.activate += (menubar, item) => {
 			if(current_window == null) return;
 			string path = item.path;
+			if(item.id == "_arrow_") {
+				string overflown_menu = main_menubar.create_overflown_menu();
+				if(overflown_menu == null) {
+					overflown_menu = "<menu/>";
+				}
+				string overflower_context = OVERFLOWER_TEMPLATE.printf(overflown_menu);
+				message("%s", overflower_context);
+				Parser.parse(overflower, overflower_context);
+				return;
+			}
 			int slashes = 0;
 			StringBuilder sb = new StringBuilder("");
 			/***
@@ -138,14 +148,11 @@ private class Applet : Panel.Applet {
 			string context = current_window.menu_context;
 			if(context != null) {
 				Parser.parse(main_menubar, context);
-				string overflower_context = OVERFLOWER_TEMPLATE.printf(context);
-				Parser.parse(overflower, overflower_context);
 				return;
 			}
 		}
 		/* elseever */
 		main_menubar.remove_all();
-		overflower.remove_all();
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
