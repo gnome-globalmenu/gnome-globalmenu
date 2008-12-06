@@ -47,6 +47,19 @@ namespace Gnomenu {
 				return 0;
 		}
 	}
+	protected ArrowType gravity_to_arrow_type(Gravity g) {
+		switch(g) {
+			case Gravity.UP:
+				return ArrowType.UP;
+			case Gravity.LEFT:
+				return ArrowType.LEFT;
+			case Gravity.RIGHT:
+				return ArrowType.RIGHT;
+			case Gravity.DOWN:
+			default:
+				return ArrowType.DOWN;
+		}
+	}
 	protected ShadowType item_state_to_shadow_type(MenuItemState state) {
 		switch(state) {
 			case MenuItemState.TOGGLED:

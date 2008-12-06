@@ -14,6 +14,7 @@ namespace Gnomenu {
 			icon_size_lookup (IconSize.MENU, out icon_width, out icon_height);
 		}
 		construct {
+			_item_type = MenuItemType.NORMAL;
 			create_labels();
 		}
 		public MenuBar? menubar { get; set; }
@@ -103,17 +104,35 @@ namespace Gnomenu {
 			get { return item_type_to_string(_item_type); }
 			set construct {
 				MenuItemType new_type = item_type_from_string(value);
+				MenuItemType old_type = _item_type;
 				if(new_type == _item_type) return;
 				_item_type = new_type;
-				if(_item_type == MenuItemType.SEPARATOR) {
-					Widget child = get_child();
-					remove(child);
-				} else {
-					if(get_child() == null) {
-						create_labels();
-						update_label_gravity();
-						update_label_text();
-					}
+				switch(_item_type) {
+					case MenuItemType.SEPARATOR:
+						remove_child();
+					break;
+					case MenuItemType.NORMAL:
+					case MenuItemType.IMAGE:
+					case MenuItemType.CHECK:
+					case MenuItemType.RADIO:
+						if(old_type != MenuItemType.NORMAL
+						&& old_type != MenuItemType.IMAGE
+						&& old_type != MenuItemType.RADIO
+						&& old_type != MenuItemType.CHECK
+						) {
+							remove_child();
+							create_labels();
+							update_label_gravity();
+							update_label_text();
+						}
+					break;
+					case MenuItemType.ARROW:
+						if(old_type != MenuItemType.ARROW) {
+							remove_child();
+							create_arrow();
+							update_arrow_type();
+						}
+					break;
 				}
 				if(_item_type == MenuItemType.IMAGE) {
 					icon_widget = new Gtk.Image();
@@ -144,6 +163,7 @@ namespace Gnomenu {
 				if(_gravity == value) return;
 				_gravity = value;
 				update_label_gravity();
+				update_arrow_type();
 			}
 		}
 		private string _path; /*merely a buffer*/
@@ -251,7 +271,7 @@ namespace Gnomenu {
 			}
 		}
 		private void update_label_gravity() {
-			if(_item_type == MenuItemType.SEPARATOR) return;
+			if(!item_type_has_label(_item_type)) return;
 			double text_angle = gravity_to_text_angle(gravity);
 			Label label = get_label_widget();
 			assert(label != null);
@@ -268,7 +288,7 @@ namespace Gnomenu {
 			label.angle = text_angle;
 		}
 		private void update_label_text() {
-			if(_item_type == MenuItemType.SEPARATOR) return;
+			if(!item_type_has_label(_item_type)) return;
 			string text;
 			text = _label;
 			if(text == null)
@@ -286,6 +306,7 @@ namespace Gnomenu {
 			update_label_text();
 		}
 		private void create_labels() {
+			assert(item_type_has_label(_item_type));
 			add(new Label("N/A"));
 			get_child().visible = true;
 			(get_child() as Label).use_underline = true;
@@ -295,6 +316,19 @@ namespace Gnomenu {
 		private weak Label? get_label_widget() {
 			weak Label label = get_child() as Label;
 			return label;
+		}
+		private void remove_child() {
+			Gtk.Widget child = get_child();
+			if(child != null) remove(child);
+		}
+		private void create_arrow() {
+			assert(_item_type == MenuItemType.ARROW);
+			add(new Arrow(gravity_to_arrow_type(_gravity), ShadowType.NONE));
+			get_child().visible = true;
+		}
+		private void update_arrow_type() {
+			if(_item_type != MenuItemType.ARROW) return;
+			(get_child() as Arrow).set(gravity_to_arrow_type(_gravity), ShadowType.NONE);
 		}
 	}
 }

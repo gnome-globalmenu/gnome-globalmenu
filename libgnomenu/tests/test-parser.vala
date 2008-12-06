@@ -26,6 +26,7 @@ namespace Gnomenu {
 			<item id="About"/>
 		</menu>
 	</item>
+	<item type="a"/>
 </menu>
 """;
 		TestParser () {

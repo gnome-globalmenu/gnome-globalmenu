@@ -8,6 +8,7 @@ namespace Gnomenu {
 		RADIO,
 		IMAGE,
 		SEPARATOR,
+		ARROW,
 	}
 	public enum MenuItemState {
 		UNTOGGLED,
@@ -53,6 +54,9 @@ namespace Gnomenu {
 			case "image":
 			case "i":
 				return MenuItemType.IMAGE;
+			case "arrow":
+			case "a":
+				return MenuItemType.ARROW;
 			case "separator":
 			case "s":
 				return MenuItemType.SEPARATOR;
@@ -60,6 +64,14 @@ namespace Gnomenu {
 			default:
 				return MenuItemType.NORMAL;
 		}
+	}
+	protected bool item_type_has_label(MenuItemType type) {
+		if(type == MenuItemType.NORMAL
+		|| type == MenuItemType.IMAGE
+		|| type == MenuItemType.CHECK
+		|| type == MenuItemType.RADIO
+		) return true;
+		return false;	
 	}
 	protected weak string? item_type_to_string(MenuItemType type) {
 		switch(type) {
@@ -71,6 +83,8 @@ namespace Gnomenu {
 				return null;
 			case MenuItemType.IMAGE:
 				return "image";
+			case MenuItemType.ARROW:
+				return "arrow";
 			case MenuItemType.SEPARATOR:
 				return "separator";
 		}

@@ -36,6 +36,7 @@ namespace Gnomenu {
 			<item id="About"/>
 		</menu>
 	</item>
+	<item type="a"/>
 </menu>
 """;
 		static string test2 =
