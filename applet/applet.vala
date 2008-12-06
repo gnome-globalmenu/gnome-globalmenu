@@ -24,7 +24,14 @@ private class Applet : Panel.Applet {
 	<item label="Default Menu" font="bold"/>
 </menu>
 """;
-
+	static const string OVERFLOWER_TEMPLATE =
+"""
+<menu>
+	<item label="V" font="bold">
+	%s
+	</item>
+</menu>
+""";
 
 	public PackDirection pack_direction {
 		get {
@@ -64,7 +71,29 @@ private class Applet : Panel.Applet {
 				current_window.emit_menu_event(item.path);
 			}
 		};
-		main_menubar.overflow = true;
+		overflower = add_menubar_from_string(OVERFLOWER_TEMPLATE.printf(""));
+		overflower.activate += (menubar, item) => {
+			if(current_window == null) return;
+			string path = item.path;
+			int slashes = 0;
+			StringBuilder sb = new StringBuilder("");
+			/***
+			 * path = "00001234:/0/1/234/512";
+			 * sb =   "00001234:  /1/234/512";
+			 */
+			bool skip = false;
+			for(int i = 0; i < path.length; i++) {
+				if( path[i] == '/') {
+					slashes ++;
+				}
+				if(slashes != 1) 
+					sb.append_unichar(path[i]);
+			}
+			if(slashes > 1) {
+				message("sb.str = %s", sb.str);
+				current_window.emit_menu_event(sb.str);
+			}
+		};
 		/*init wnck*/
 		screen = Wnck.Screen.get_default();
 		screen.active_window_changed += (screen, previous_window) => {
@@ -92,10 +121,10 @@ private class Applet : Panel.Applet {
 				}
 				if(current_window != null) {
 					current_window.menu_context_changed += (current_window) => {
-						update_main_menubar();
+						update_menubar();
 					};
 				}
-				update_main_menubar();
+				update_menubar();
 			}
 		};
 
@@ -103,16 +132,19 @@ private class Applet : Panel.Applet {
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
 	}
-	private void update_main_menubar() {
+	private void update_menubar() {
 		if(current_window != null) {
 			string context = current_window.menu_context;
 			if(context != null) {
 				Parser.parse(main_menubar, context);
+				string overflower_context = OVERFLOWER_TEMPLATE.printf(context);
+				Parser.parse(overflower, overflower_context);
 				return;
 			}
 		}
 		/* elseever */
 		main_menubar.remove_all();
+		overflower.remove_all();
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
@@ -174,7 +206,9 @@ private class Applet : Panel.Applet {
 			case PackDirection.RTL:
 				foreach(Gnomenu.MenuBar menubar in internal_children) {
 					menubar.size_request(out cr);
-					r.width += cr.width;
+					if(menubar != main_menubar) {
+						r.width += cr.width;
+					}
 					r.height = r.height>cr.height?r.height:cr.height;
 				}
 			break;
@@ -182,7 +216,9 @@ private class Applet : Panel.Applet {
 			case PackDirection.TTB:
 				foreach(Gnomenu.MenuBar menubar in internal_children) {
 					menubar.size_request(out cr);
-					r.height += cr.height;
+					if(menubar != main_menubar) {
+						r.height += cr.height;
+					}
 					r.width = r.width>cr.width?r.width:cr.width;
 				}
 			break;
@@ -207,51 +243,54 @@ private class Applet : Panel.Applet {
 		rev_x = a.width;
 		rev_y = a.height;
 
-		Gnomenu.MenuBar last_child = internal_children.last().data;
 		foreach(Gnomenu.MenuBar menubar in internal_children) {
 			menubar.get_child_requisition(out cr);
 			switch(pack_direction) {
 				case PackDirection.LTR:
-					ca.x = x;
-					ca.y = y;
-					ca.width = cr.width;
-					if(menubar == last_child) {
-						ca.width = a.width - x;
+					if(menubar == main_menubar) {
+						ca.width = a.width - requisition.width;
+					} else {
+						ca.width = cr.width;
 					}
 					ca.height = a.height;
-					x += cr.width;
+					ca.x = x;
+					ca.y = y;
+					x += ca.width;
 				break;
 				case PackDirection.RTL:
-					ca.x = rev_x - cr.width;
-					ca.y = y;
-					ca.width = cr.width;
-					if(menubar == last_child) {
-						ca.width = a.width - x;
+					if(menubar == main_menubar) {
+						ca.width = a.width - requisition.width;
+					} else {
+						ca.width = cr.width;
 					}
+					ca.x = rev_x - ca.width;
+					ca.y = y;
 					ca.height = a.height;
-					rev_x -= cr.width;
-					x += cr.width;
+					rev_x -= ca.width;
+					x += ca.width;
 				break;
 				case PackDirection.BTT:
-					ca.x = x;
-					ca.y = rev_y - cr.height;
 					ca.width = a.width;
-					ca.height = cr.height;
-					if(menubar == last_child) {
-						ca.height = a.height - y;
+					if(menubar == main_menubar) {
+						ca.height = a.height - requisition.height;
+					} else {
+						ca.height = cr.height;
 					}
-					rev_y -= cr.height;
-					y += cr.height;
+					ca.x = x;
+					ca.y = rev_y - ca.height;
+					rev_y -= ca.height;
+					y += ca.height;
 				break;
 				case PackDirection.TTB:
+					ca.width = a.width;
+					if(menubar == main_menubar) {
+						ca.height = a.height - requisition.height;
+					} else {
+						ca.height = cr.height;
+					}
 					ca.x = x;
 					ca.y = y;
-					ca.width = a.width;
-					ca.height = cr.height;
-					if(menubar == last_child) {
-						ca.height = a.height - y;
-					}
-					y += cr.height;
+					y += ca.height;
 				break;
 			}
 			menubar.size_allocate((Gdk.Rectangle)ca);
@@ -261,6 +300,7 @@ private class Applet : Panel.Applet {
 	private Wnck.Screen screen;
 	private Gnomenu.Window current_window;
 	private Gnomenu.MenuBar main_menubar;
+	private Gnomenu.MenuBar overflower;
 	private Gnomenu.MenuBar selector;
 
 	private Label label; /*Replace with the selector later*/
