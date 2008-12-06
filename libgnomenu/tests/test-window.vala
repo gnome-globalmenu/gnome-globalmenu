@@ -13,16 +13,12 @@ namespace Gnomenu {
 				test_window = new Window(WindowType.TOPLEVEL);
 				test_window.realize();
 				test_window.destroy += Gtk.main_quit;
-				test_window.property_changed += (window, property) => {
-					if(property == NET_GLOBALMENU_MENU_EVENT) {
-						message("menu item %s is activated",
-							window.get(property));
-					}
+				test_window.menu_event += (window, path) => {
+						message("menu item %s is activated", path);
 				};
 				test_window.show_all();
-				test_window.set(NET_GLOBALMENU_MENU_CONTEXT,
-					"""<menu><item label="See"/></menu>"""
-					);
+				test_window.menu_context =
+					"""<menu><item label="See"/></menu>""";
 				Gtk.main();
 			});
 			add("Foreign", () => {
