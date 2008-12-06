@@ -10,4 +10,8 @@ EXTRA_DIST = \
 
 DISTCLEANFILES = \
 	$(NULL)
+rpm: dist
+	vim *.spec
+	cp *.tar.gz ~/rpmbuild/SOURCES
+	rpmbuild -bb *.spec
 
