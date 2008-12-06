@@ -7,6 +7,7 @@ using Panel;
 private class Applet : Panel.Applet {
 	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
+
 	static const string SELECTOR = 
 """
 <menu>
@@ -27,7 +28,7 @@ private class Applet : Panel.Applet {
 	static const string OVERFLOWER_TEMPLATE =
 """
 <menu>
-	<item label="V" font="bold">
+	<item type="a">
 	%s
 	</item>
 </menu>
