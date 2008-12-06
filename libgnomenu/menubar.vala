@@ -21,6 +21,8 @@ namespace Gnomenu {
 		public MenuBar() {}
 		construct {
 			_background = new Background();
+			overflow_button = new ToggleButton();
+			overflow_button.set_parent(this);
 		}
 		public signal void activate(MenuItem item);
 
@@ -75,6 +77,9 @@ namespace Gnomenu {
 		private Background _background;
 		private Gravity _gravity;
 		private bool _overflow;
+		private ToggleButton overflow_button;
+		private Requisition internal_requisition;
+
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
@@ -101,6 +106,11 @@ namespace Gnomenu {
 			bool need_reset_bg_pixmap = false;
 			int delta_x = allocation.x - a.x;
 			int delta_y = allocation.y - a.y;
+			Gdk.Rectangle oba;
+
+			Requisition obr;
+			overflow_button.get_child_requisition(out obr);
+
 			if(delta_x != 0 || delta_y != 0
 					|| a.width != allocation.width
 					|| a.height != allocation.height)
@@ -108,16 +118,70 @@ namespace Gnomenu {
 			
 			background.offset_x += delta_x;
 			background.offset_y += delta_y;
+			switch(pack_direction) {
+				case PackDirection.TTB:
+					if(a.height < internal_requisition.height) {
+						a.height -= obr.height;
+						oba.width = a.width;
+						oba.height = obr.height;
+						oba.y = a.height;
+						oba.x = 0;
+						overflow_button.visible = true;
+					} else {
+						overflow_button.visible = false;
+					}
+				break;
+				case PackDirection.BTT:
+					if(a.height < internal_requisition.height) {
+						a.y += obr.height;
+						a.height -= obr.height;
+						oba.width = a.width;
+						oba.height = obr.height;
+						oba.x = 0;
+						oba.y = 0;
+						overflow_button.visible = true;
+					} else {
+						overflow_button.visible = false;
+					}
+				break;
+				case PackDirection.LTR:
+					if(a.width < internal_requisition.width) {
+						a.width -= obr.width;
+						oba.height = a.height;
+						oba.width = obr.width;
+						oba.x = a.width;
+						oba.y = 0;
+						overflow_button.visible = true;
+					} else {
+						overflow_button.visible = false;
+					}
+				break;
+				case PackDirection.RTL:
+					if(a.width < internal_requisition.width) {
+						a.x += obr.width;
+						a.width -= obr.width;
+						oba.height = a.height;
+						oba.width = obr.width;
+						oba.x = 0;
+						oba.y = 0;
+						overflow_button.visible = true;
+					} else {
+						overflow_button.visible = false;
+					}
+				break;
+			}
 			base.size_allocate(a);
+			overflow_button.size_allocate(oba);
 			if(need_reset_bg_pixmap) {
 				reset_bg_pixmap();
 			}
 		}
 		private override void size_request(out Requisition req) {
-			base.size_request(out req);
+			base.size_request(out internal_requisition);
 			if(overflow) {
-				req.width = 0;
-				req.height = 0;
+				overflow_button.size_request(out req);
+			} else {
+				req = internal_requisition;
 			}
 		}
 		private override void insert(Widget child, int position) {
@@ -127,5 +191,13 @@ namespace Gnomenu {
 		public void remove_all() {
 			((MenuShellHelper)this).truncate(0);
 		}	
+		private override void forall(Gtk.Callback callback, void* data) {
+			/* NOTE: this function is patched. see patch.sh*/
+			bool include_internals = false;
+			if(include_internals) {
+				callback(overflow_button);
+			}
+			base.forall(callback, data);
+		}
 	}
 }
