@@ -21,28 +21,7 @@ private class Applet : Panel.Applet {
 	static const string MAIN_MENUBAR =
 """
 <menu>
-	<item label="File">
-		<menu>
-			<item label="New">
-				<menu>
-					<item label="Zombie"/>
-					<item label="Worm"/>
-				</menu>
-			</item>
-		</menu>
-	</item>
-	<item label="Edit">
-		<menu>
-			<item label="Shoot"/>
-			<item label="Run"/>
-		</menu>
-	</item>
-	<item label="Help">
-		<menu>
-			<item label="Police"/>
-			<item label="Army"/>
-		</menu>
-	</item>
+	<item label="Default Menu" font="bold"/>
 </menu>
 """;
 
@@ -82,8 +61,7 @@ private class Applet : Panel.Applet {
 		main_menubar = add_menubar_from_string(MAIN_MENUBAR);
 		main_menubar.activate += (menubar, item) => {
 			if(current_window != null) {
-				current_window.set(NET_GLOBALMENU_MENU_EVENT,
-					item.path);
+				current_window.emit_menu_event(item.path);
 			}
 		};
 		/*init wnck*/
@@ -102,13 +80,20 @@ private class Applet : Panel.Applet {
 					 * held by us.
 					 * */
 					current_window.destroy();
+					assert(current_window.ref_count == 1);
 				}
 				current_window = new Gnomenu.Window.foreign(window.get_xid());
-				current_window.property_changed += (current_window, property) => {
-					if(property == NET_GLOBALMENU_MENU_CONTEXT)  {
+
+				if(current_window.invalid || current_window.menu_context == null) {
+					current_window.destroy();
+					current_window = null; 
+					/*TODO: switch to default_window, and continue rather than return*/
+				}
+				if(current_window != null) 
+					current_window.menu_context_changed += (current_window) => {
 						update_main_menubar();
-					}
-				};
+					};
+
 				update_main_menubar();
 			}
 		};
@@ -118,9 +103,15 @@ private class Applet : Panel.Applet {
 		set_background_widget(this);
 	}
 	private void update_main_menubar() {
-		string context = current_window.get(NET_GLOBALMENU_MENU_CONTEXT);
-		if(context != null)
-			Parser.parse(main_menubar, context);
+		if(current_window != null) {
+			string context = current_window.menu_context;
+			if(context != null) {
+				Parser.parse(main_menubar, context);
+				return;
+			}
+		}
+		/* elseever */
+		main_menubar.remove_all();
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();

@@ -108,10 +108,17 @@ namespace Gnomenu {
 				reset_bg_pixmap();
 			}
 		}
+		private override void size_request(out Requisition req) {
+			base.size_request(out req);
+	//		req.width = 0;
+	//		req.height = 0;
+		}
 		private override void insert(Widget child, int position) {
 			base.insert(child, position);
 			(child as MenuItem).gravity = gravity;
 		}
-	
+		public void remove_all() {
+			((MenuShellHelper)this).truncate(0);
+		}	
 	}
 }

@@ -9,6 +9,7 @@ namespace Gnomenu {
 				_native = value;
 			}
 		}
+		public bool invalid {get {return window == null;}}
 		public Window.foreign(ulong native) {
 			this.native= (ulong) native;
 		}
@@ -30,7 +31,7 @@ namespace Gnomenu {
 			}
 			disposed = false;
 		}
-		public string menu_context {
+		public string? menu_context {
 			get {
 				_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
 				return _menu_context;
@@ -39,6 +40,9 @@ namespace Gnomenu {
 				_menu_context = value;
 				set(NET_GLOBALMENU_MENU_CONTEXT, value);
 			}
+		}
+		public void emit_menu_event (string path) {
+			set(NET_GLOBALMENU_MENU_EVENT, path);
 		}
 		public string? get(string property_name) {
 			return get_by_atom(Gdk.Atom.intern(property_name, false));	
@@ -77,7 +81,9 @@ namespace Gnomenu {
 			}
 		}
 		private bool disposed;
-		public signal void property_changed(string name);
+		public signal void menu_context_changed();
+		public signal void menu_event(string path);
+
 		private ulong _native;
 		private string _menu_context;
 		private override void realize() {
@@ -128,7 +134,12 @@ namespace Gnomenu {
 			base.unrealize();
 		}
 		private override bool property_notify_event(Gdk.EventProperty event) {
-			property_changed(event.atom.name());
+			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_EVENT, false)) {
+				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
+			}
+			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_CONTEXT, false)) {
+				menu_context_changed();
+			}
 			return false;
 		}
 		private override void dispose () {
