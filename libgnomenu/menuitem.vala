@@ -3,12 +3,15 @@ using Gtk;
 namespace Gnomenu {
 	public class MenuItem : Gtk.MenuItem {
 		public MenuItem() { }
+		static int icon_width;
+		static int icon_height;
 		static construct {
 			install_style_property(new 
 					ParamSpecInt("indicator-size", 
 						"Indicator Size",
 						"Size of check or radio indicator", 
 						0, int.MAX, 13, ParamFlags.READABLE));
+			icon_size_lookup (IconSize.MENU, out icon_width, out icon_height);
 		}
 		construct {
 			create_labels();
@@ -40,7 +43,14 @@ namespace Gnomenu {
 				update_label_text();
 			}
 		}
-
+		public string? icon {
+			get { return _icon; }
+			set {
+				if(_icon == value) return;
+				_icon = value;
+				update_icon();
+			}
+		}
 		public string? accel_text {
 			get { return _accel_text; }
 			set {
@@ -105,6 +115,16 @@ namespace Gnomenu {
 						update_label_text();
 					}
 				}
+				if(_item_type == MenuItemType.IMAGE) {
+					icon_widget = new Gtk.Image();
+					icon_widget.set_parent(this);
+					icon_widget.visible = true;
+				} else {
+					if(icon_widget != null) {
+						icon_widget.unparent();
+						icon_widget = null;
+					}
+				}
 				queue_resize();
 			}
 		}
@@ -128,22 +148,28 @@ namespace Gnomenu {
 		private string _path; /*merely a buffer*/
 		private string _font;
 		private string _label;
+		private string _icon;
 		private string _accel_text;
 		private string _id;
 		private int _position;
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
+		private Gtk.Image icon_widget;
 
 		private override void toggle_size_request(void* requisition) {
+			int toggle_spacing = 0;
+			int indicator_size = 0;
+			style_get("toggle-spacing", &toggle_spacing,
+				"indicator-size", &indicator_size, null);
 			switch(_item_type) {
 				case MenuItemType.CHECK:
 				case MenuItemType.RADIO:
-					int toggle_spacing = 0;
-					int indicator_size = 0;
-					style_get("toggle-spacing", &toggle_spacing,
-						"indicator-size", &indicator_size, null);
 					*((int*) requisition ) = indicator_size + toggle_spacing;
+				break;
+				case MenuItemType.IMAGE:
+				/*FIXME: BTT, TTB uses icon_height*/
+					*((int*) requisition ) = icon_width + toggle_spacing;
 				break;
 				default:
 					*((int*) requisition ) = 0;
@@ -161,6 +187,7 @@ namespace Gnomenu {
  			    "horizontal-padding", &horizontal_padding,
 				null);
 			ShadowType shadow_type = item_state_to_shadow_type(_item_state);
+			/*FIXME: alignment !*/
 			switch(_item_type) {
 				case MenuItemType.CHECK:
 					Gtk.paint_check(style,
@@ -191,9 +218,36 @@ namespace Gnomenu {
 			}
 			return false;
 		}
-
+		private override void forall(Gtk.Callback callback, void* data) {
+			/*see patch.sh! */
+			bool include_internals = false;
+			if(include_internals) {
+				if(_item_type == MenuItemType.IMAGE)
+					callback(icon_widget);
+			}
+			base.forall(callback, data);
+		}
 		private override void activate() {
 			menubar.activate(this);
+		}
+		private override void size_request(out Requisition req) {
+			if(_item_type == MenuItemType.IMAGE) {
+				Requisition icon_req;
+				icon_widget.size_request(out icon_req); /*Then throw it away*/
+			}
+			base.size_request(out req);	
+		}
+		private override void size_allocate(Gdk.Rectangle a) {
+			Gdk.Rectangle ca;
+			base.size_allocate(a);
+			if(_item_type == MenuItemType.IMAGE) {
+				/*FIXME: alignment !*/
+				ca.x = a.x;
+				ca.y = a.y;
+				ca.width = icon_width;
+				ca.height = icon_height;
+				icon_widget.size_allocate(ca);
+			}
 		}
 		private void update_label_gravity() {
 			if(_item_type == MenuItemType.SEPARATOR) return;
@@ -222,6 +276,10 @@ namespace Gnomenu {
 			Label label = get_label_widget();;
 			assert(label != null);
 			label.label = text;
+		}
+		private void update_icon() {
+			if(_item_type != MenuItemType.IMAGE) return;
+			icon_widget.set_from_stock(icon, IconSize.MENU);
 		}
 		private override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();

@@ -77,6 +77,7 @@ namespace Gnomenu {
 				string[] attr_names, 
 				string[] attr_vals) {
 			weak string label;
+			weak string icon;
 			weak string type;
 			weak string state;
 			weak string font;
@@ -94,6 +95,8 @@ namespace Gnomenu {
 					"font", &font, 
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"id", &id, 
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"icon", &icon, 
 					GMarkupCollectType.TRISTATE,
 					"visible", &visible, 
 					GMarkupCollectType.TRISTATE,
@@ -107,6 +110,7 @@ namespace Gnomenu {
 				sensitive = true;
 
 			item.label = label;
+			item.icon= icon;
 			item.id = id;
 			item.visible = visible;
 			item.sensitive = sensitive;

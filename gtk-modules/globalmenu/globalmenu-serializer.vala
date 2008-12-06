@@ -59,9 +59,17 @@ namespace GnomenuGtk {
 			if(menuitem is SeparatorMenuItem) 
 				sb.append(" type=\"s\"");
 
-			if(menuitem is ImageMenuItem)
-				sb.append(" type=\"i\"");
-
+			if(menuitem is ImageMenuItem) {
+				Image image = (menuitem as ImageMenuItem).image as Image;
+				if(image != null) {
+					if(image.storage_type == ImageType.STOCK) {
+						/*FIXME: only stock icons are supported! Do more!*/
+						sb.append(" type=\"i\"");
+						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
+								image.stock));
+					}
+				}
+			}
 			if(menuitem is CheckMenuItem) {
 				var checkmenuitem = menuitem as CheckMenuItem;
 				if(checkmenuitem.draw_as_radio) 
