@@ -126,6 +126,43 @@ namespace Gnomenu {
 			}
 			return null;
 		}
+		public string? create_overflown_menu() {
+			if(!overflown) return null;	
+			StringBuilder sb = new StringBuilder("");
+			sb.append("<menu>");
+			weak List<weak Widget> children = get_children();
+			foreach(weak Widget child in children) {
+				bool need_overflown_item = false;
+				Allocation a = child.allocation;
+				switch(pack_direction) {
+					case PackDirection.LTR:
+						if(a.x + a.width > allocation.width) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.RTL:
+						if(a.x < 0 ) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.BTT:
+						if(a.y < 0 ) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.TTB:
+						if(a.y < 0 ) {
+							need_overflown_item = true;
+						}
+					break;
+				}
+				if(need_overflown_item) {
+					sb.append(Serializer.to_string(child));
+				}	
+			}
+			sb.append("</menu>");
+			return sb.str;
+		}
 		private Background _background;
 		private Gravity _gravity;
 		private void reset_bg_pixmap() {

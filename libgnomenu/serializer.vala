@@ -64,24 +64,28 @@ namespace Gnomenu {
 		}
 		private void visit_item_attributes(MenuItem item) {
 			if(item.label != null) {
-				sb.append_printf(" label=\"%s\"",
-					Markup.escape_text(item.label, -1));
+				sb.append(Markup.printf_escaped(" label=\"%s\"", item.label));
 			}
 			if(item.item_type != null) {
-				sb.append_printf(" type=\"%s\"",
-					Markup.escape_text(item.item_type, -1));
+				sb.append(Markup.printf_escaped(" type=\"%s\"", item.item_type));
 			}
 			if(item.item_state != null) {
-				sb.append_printf(" type=\"%s\"",
-					Markup.escape_text(item.item_state, -1));
+				sb.append(Markup.printf_escaped(" state=\"%s\"", item.item_state));
 			}
 			if(item.font != null) {
-				sb.append_printf(" font=\"%s\"",
-					Markup.escape_text(item.font, -1));
+				sb.append(Markup.printf_escaped(" font=\"%s\"", item.font));
 			}
 			if(item.id != null) {
-				sb.append_printf(" id=\"%s\"",
-					Markup.escape_text(item.id, -1));
+				sb.append(Markup.printf_escaped(" id=\"%s\"", item.id));
+			}
+			if(item.visible == false) {
+				sb.append(" visible=\"false\"");
+			}
+			if(item.sensitive == false) {
+				sb.append(" sensitive=\"false\"");
+			}
+			if(item.icon != null) {
+				sb.append(Markup.printf_escaped(" icon=\"%s\"", item.icon));
 			}
 		}
 
