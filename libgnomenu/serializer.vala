@@ -2,10 +2,10 @@ using Gtk;
 
 namespace Gnomenu {
 	public class Serializer {
-		public static string to_string(MenuShell shell, bool pretty_print = false) {
+		public static string to_string(Gtk.Widget widget, bool pretty_print = false) {
 			var s = new Serializer();
 			s.pretty_print = pretty_print;
-			s.visit(shell);
+			s.visit(widget);
 			return s.sb.str;
 		}
 

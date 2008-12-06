@@ -90,6 +90,22 @@ namespace Gnomenu {
 				window.show_all();
 				Gtk.main();
 			});
+			add("Overflown", () => {
+				Parser.parse( menubar, test1);
+				menubar.gravity = Gravity.UP;
+				window.add(menubar);
+				window.set_size_request(10, 10);
+				window.destroy += Gtk.main_quit;
+				window.show_all();
+				assert(menubar.overflown == true);
+				Gtk.main();
+			});
+			add("get", () => {
+				Parser.parse( menubar, test1);
+				assert(menubar.get("/Go/Here") != null);
+				assert(menubar.get("/Go") != null);
+				assert(menubar.get("/Help/About") != null);
+			});
 		}	
 		public static int main (string[] args) {
 			Test.init(ref args);

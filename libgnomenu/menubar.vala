@@ -19,6 +19,23 @@ namespace Gnomenu {
 	}
 	public class MenuBar : Gtk.MenuBar {
 		public MenuBar() {}
+		const uint PROP_IMPORTANT = 1;
+		static construct {
+			/*FIXME: this is not awared yet
+			  override set_child_property
+			  get_child_property,
+			  gonna be messy
+			install_child_property (
+					PROP_IMPORTANT,
+					new ParamSpecBoolean("important", 
+						"Imporant",
+						"Whether this item should not be overflown if possible",
+						false,
+						ParamFlags.READABLE | ParamFlags.WRITABLE)
+					);
+			*/
+		
+		}
 		construct {
 			_background = new Background();
 		}
@@ -68,13 +85,49 @@ namespace Gnomenu {
 				}
 			}
 		}
-		public bool overflow {
-			get { return _overflow; }
-			set { _overflow = value; }
+		public bool overflown {
+			get { 
+				switch(pack_direction) {
+					case PackDirection.TTB:
+					case PackDirection.BTT:
+						return allocation.height< requisition.height;
+					case PackDirection.LTR:
+					case PackDirection.RTL:
+					default:
+						return allocation.width < requisition.width;
+				}
+			}
+		}
+		public MenuItem? get(string path) {
+			string[] tokens = path.split_set("/", -1);
+			tokens.length = (int) strv_length(tokens);
+			MenuShell shell = this;
+			weak string rev = tokens[0];
+			/*FIXME: check rev */
+			for(int i = 1; i < tokens.length; i++) {
+				weak string token = tokens[i];
+				weak List<weak Widget> children = shell.get_children();
+				MenuItem item;
+				foreach(weak Widget child in children) {
+					MenuItem child_item = child as MenuItem;
+					if(child_item != null) {
+						if(child_item.id == token
+						|| (child_item.id == null && 
+							child_item.position.to_string() == token)) {
+							item = child_item;
+							break;
+						}
+					}
+				}
+				if(i == tokens.length - 1 /*last token, maybe found*/) return item;	
+				if(item == null /*intermediate item is not found*/) return null; 
+				shell = item.submenu;
+				if(shell == null /*intermediate menu is not found*/) return null;
+			}
+			return null;
 		}
 		private Background _background;
 		private Gravity _gravity;
-		private bool _overflow;
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
@@ -115,10 +168,6 @@ namespace Gnomenu {
 		}
 		private override void size_request(out Requisition req) {
 			base.size_request(out req);
-			if(overflow) {
-				req.width = 0;
-				req.height = 0;
-			}
 		}
 		private override void insert(Widget child, int position) {
 			base.insert(child, position);
