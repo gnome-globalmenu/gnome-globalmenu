@@ -72,7 +72,7 @@ private class Applet : Panel.Applet {
 				current_window.emit_menu_event(item.path);
 			}
 		};
-		overflower = add_menubar_from_string(OVERFLOWER_TEMPLATE.printf(""));
+		overflower = add_menubar_from_string(OVERFLOWER_TEMPLATE.printf("<menu/>"));
 		overflower.activate += (menubar, item) => {
 			if(current_window == null) return;
 			string path = item.path;
@@ -140,16 +140,15 @@ private class Applet : Panel.Applet {
 		/*init panel*/
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
+
+	/* Key grab F10 (gtk-menu-bar-key)*/
 		
 		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
 		int keyval;
 		Gdk.ModifierType mods;
 		main_menubar.get_accel_key(out keyval, out mods);
-		if(!root_window.grab_key(keyval, mods)) {
-			warning("keygrab failure");
-		}
+		root_window.grab_key(keyval, mods);
 		root_window.key_press_event += (root_window, event) => {
-			message("keypress from grab: %s", Gdk.keyval_name(event.keyval));
 			uint keyval;
 			Gdk.ModifierType mods;
 			main_menubar.get_accel_key(out keyval, out mods);
@@ -158,8 +157,9 @@ private class Applet : Panel.Applet {
 				== (mods & Gtk.accelerator_get_default_mod_mask())) {
 				selector.select_first(true);
 				this.key_press_event(event);
-			}
 			return false;
+			}
+			return true;
 		};
 	}
 	private void update_menubar() {
@@ -322,6 +322,11 @@ private class Applet : Panel.Applet {
 			}
 			menubar.size_allocate((Gdk.Rectangle)ca);
 		}
+		if(main_menubar.overflown) {
+			overflower.visible = true;
+		} else {
+			overflower.visible = false;
+		}
 		base.size_allocate(a);
 	}
 	private Wnck.Screen screen;
@@ -352,6 +357,7 @@ private class Applet : Panel.Applet {
 		internal_children.append(menubar);
 		return menubar;
 	}
+	/* This variable is then removed by patch.sh */
 	static const string STANDARD_PROPERTIES = "";
 	public static int main(string[] args) {
 		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");

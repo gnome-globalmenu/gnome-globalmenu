@@ -82,6 +82,7 @@ namespace Gnomenu {
 			weak string state;
 			weak string font;
 			weak string id;
+			weak string accel;
 			weak bool sensitive;
 			weak bool visible;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
@@ -97,6 +98,8 @@ namespace Gnomenu {
 					"id", &id, 
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"icon", &icon, 
+					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+					"accel", &accel, 
 					GMarkupCollectType.TRISTATE,
 					"visible", &visible, 
 					GMarkupCollectType.TRISTATE,
@@ -110,6 +113,7 @@ namespace Gnomenu {
 				sensitive = true;
 
 			item.id = id;
+			item.accel_text = accel;
 			item.visible = visible;
 			item.sensitive = sensitive;
 			item.item_type = type;

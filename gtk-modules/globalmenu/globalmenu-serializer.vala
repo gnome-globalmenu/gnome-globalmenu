@@ -109,6 +109,14 @@ namespace GnomenuGtk {
 		}
 		private void visit_label(Label label) {
 			sb.append(Markup.printf_escaped(" label=\"%s\"", label.label));
+			if(label is AccelLabel) {
+				(label as AccelLabel).refetch();
+				string accel_string = (label as AccelLabel).accel_string;
+				accel_string.strip();
+				if(accel_string.length > 0 && accel_string != "-/-" /*refer to gtkaccellabel.c:802*/ ) {
+					sb.append(Markup.printf_escaped(" accel=\"%s\"", accel_string));
+				}
+			}
 		}
 
 		private MenuBar menubar;

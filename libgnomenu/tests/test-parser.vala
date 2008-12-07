@@ -8,11 +8,11 @@ namespace Gnomenu {
 		string test2 =
 """
 <menu>
-	<item id="File" font="Serif Bold 20">
+	<item id="File" font="Serif Bold 20" accel="Control+L">
 		<menu>
 			<item id="New" label="New" type="c" state="toggled"/>
 			<item id="Open" label="Open" type="r" state="untoggled"/>
-			<item id="Close" label="Close" type="r"/>
+			<item id="Close" label="Close" type="r" accel="Control+Q"/>
 		</menu>
 	</item>
 	<item id="Edit">

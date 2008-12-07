@@ -9,14 +9,20 @@ static gboolean maybe_grab_key(GdkWindow * grab_window, guint keyval, GdkModifie
 	gint n_keys = 0;
 	int i;
 	int min, max;
-	XDisplayKeycodes(GDK_DISPLAY_XDISPLAY(display), &min, &max);
-	gboolean rt = gdk_keymap_get_entries_for_keyval(NULL, keyval, &keys, &n_keys);
-	if(rt == FALSE) return FALSE;
+	gboolean rt;
+	if(keyval != 0) {
+		rt = gdk_keymap_get_entries_for_keyval(NULL, keyval, &keys, &n_keys);
+		if(rt == FALSE) return FALSE;
+	} else {
+		keys = g_new0(GdkKeymapKey, 1);
+		n_keys = 1;
+		keys[0].keycode = AnyKey;
+		keys[0].group = 0;
+	}
 	state &= ~(1 << 13 | 1 << 14);
 	for(i = 0; i < n_keys; i++) {
 		modifiers = state | (keys[i].group << 13);
 		gdk_error_trap_push();
-		g_message("keycode = %x, group = %d, modifies=%x", keys[i].keycode, keys[i].group, modifiers);
 		if(maybe) {
 			XGrabKey(GDK_DISPLAY_XDISPLAY(display), 
 					keys[i].keycode, modifiers,
@@ -32,10 +38,8 @@ static gboolean maybe_grab_key(GdkWindow * grab_window, guint keyval, GdkModifie
 		gdk_flush ();
 		int errcode = gdk_error_trap_pop();
 		if(errcode) {
-			g_message("errorcode = %d", errcode);
 			rt = FALSE;
 			break;
-		} else {
 		}
 	}
 	g_free(keys);

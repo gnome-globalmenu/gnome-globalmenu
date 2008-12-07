@@ -296,6 +296,9 @@ namespace Gnomenu {
 
 			Label label = get_label_widget();;
 			assert(label != null);
+			if(accel_text != null) {
+				text = text + " - " + accel_text;
+			}
 			label.label = text;
 		}
 		private void update_icon() {
