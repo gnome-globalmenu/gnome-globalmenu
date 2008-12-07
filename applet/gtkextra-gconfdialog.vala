@@ -61,13 +61,19 @@ namespace GtkExtra {
        					(widget as Gtk.SpinButton).value_changed += onSpinButtonValueChanged;
        					break;
 				}
-				widget.user_data = entry.key;
+				widget.user_data = entry;
 				
 				row.pack_start(new Gtk.EventBox(), true, true, 2);
 				row.pack_start(widget, false, false, 2);
 				
-				Gtk.Button button = new Gtk.Button.from_stock("gtk-clear");
+				Gtk.Button button = new Gtk.Button();
 				button.tooltip_text = "Resets to default value";
+				button.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.BUTTON));
+				button.user_data = widget;
+				button.clicked += onResetButtonPressed;
+				
+				row.pack_start(button, false, false, 2);
+				
        			vbox.pack_start(row, true, true, 2);
 			}
        		
@@ -75,11 +81,31 @@ namespace GtkExtra {
 		}
 		
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
-			Engine.get_default().set_bool((string)widget.user_data, widget.active);
+			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
+			Engine.get_default().set_bool(entry.key, widget.active);
 		}
 		
 		private void onSpinButtonValueChanged(Gtk.SpinButton widget) {
-			Engine.get_default().set_int((string)widget.user_data, (int)widget.value);
+			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
+			Engine.get_default().set_int(entry.key, (int)widget.value);
+		}
+		
+		private void onResetButtonPressed(Gtk.Button widget) {
+			Gtk.Widget target = (Gtk.Widget)widget.user_data;
+			weak GConf.Entry entry = (GConf.Entry)target.user_data;
+			string schema_name = entry.get_schema_name();
+			weak GConfCompat.Schema schema = (GConfCompat.Schema)Engine.get_default().get_schema(schema_name);
+			switch(schema.get_type()) {
+       			case ValueType.BOOL:
+       				(target as Gtk.CheckButton).active = schema.get_default_value().get_bool();
+       				break;
+       			case ValueType.STRING:
+       				(target as Gtk.Entry).text = schema.get_default_value().get_string();
+       				break;
+       			case ValueType.INT:
+       				(target as Gtk.SpinButton).value = schema.get_default_value().get_int();
+       				break;
+				}
 		}
 	}
 }
