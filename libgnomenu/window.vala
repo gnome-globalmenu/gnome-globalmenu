@@ -98,6 +98,12 @@ namespace Gnomenu {
 				Gdk.property_delete(window, atom);
 			}
 		}
+		public bool grab_key(uint keyval, Gdk.ModifierType state) {
+			return Gnomenu.grab_key(window, keyval, state);
+		}
+		public bool ungrab_key(uint keyval, Gdk.ModifierType state) {
+			return Gnomenu.ungrab_key(window, keyval, state);
+		}
 		private bool disposed;
 		public signal void menu_context_changed();
 		public signal void menu_event(string path);

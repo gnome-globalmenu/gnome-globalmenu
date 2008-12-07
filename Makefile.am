@@ -10,7 +10,9 @@ EXTRA_DIST = \
 
 DISTCLEANFILES = \
 	$(NULL)
-rpm: dist
+rpm: 
+	touch `find . -name '*.vala'`
+	make dist
 	vim *.spec
 	cp *.tar.gz ~/rpmbuild/SOURCES
 	rpmbuild -bb *.spec

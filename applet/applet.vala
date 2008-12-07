@@ -64,7 +64,7 @@ private class Applet : Panel.Applet {
 	}
 	construct {
 		this.set_name("GlobalMenuPanelApplet");
-
+		this.add_events(Gdk.EventMask.KEY_PRESS_MASK);
 		selector = add_menubar_from_string(SELECTOR.printf("NONE"));
 		main_menubar = add_menubar_from_string(MAIN_MENUBAR);
 		main_menubar.activate += (menubar, item) => {
@@ -142,6 +142,17 @@ private class Applet : Panel.Applet {
 		/*init panel*/
 		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
+		
+		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
+		uint keyval = Gdk.keyval_from_name("F10");
+		if(!root_window.grab_key(keyval, 0)) {
+			warning("keygrab failure");
+		}
+		root_window.key_press_event += (root_window, event) => {
+			message("keypress from grab: %s", Gdk.keyval_name(event.keyval));
+			main_menubar.select_first(true);
+			return false;
+		};
 	}
 	private void update_menubar() {
 		if(current_window != null) {
@@ -310,6 +321,7 @@ private class Applet : Panel.Applet {
 	private Gnomenu.MenuBar main_menubar;
 	private Gnomenu.MenuBar overflower;
 	private Gnomenu.MenuBar selector;
+	private Gnomenu.Window root_window;
 
 	private Label label; /*Replace with the selector later*/
 
