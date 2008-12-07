@@ -156,9 +156,28 @@ namespace Gnomenu {
 						}
 					break;
 				}
-				if(need_overflown_item) {
-					sb.append(Serializer.to_string(child));
-				}	
+				/* This is quirky. But it works
+				 * we first save the visibility flag of
+				 * the child,
+				 * then change it
+				 * our serializer will produce the visible=false
+				 * attribute.
+				 * then we restore it.
+				 *
+				 * Not thread safe.
+				 * */
+				bool vis = child.visible;
+				if(need_overflown_item && vis) {
+					child.set_flags(WidgetFlags.VISIBLE);
+				} else {
+					child.unset_flags(WidgetFlags.VISIBLE);
+				}
+				sb.append(Serializer.to_string(child));
+				if(vis) {
+					child.set_flags(WidgetFlags.VISIBLE);
+				} else {
+					child.unset_flags(WidgetFlags.VISIBLE);
+				}
 			}
 			sb.append("</menu>");
 			return sb.str;

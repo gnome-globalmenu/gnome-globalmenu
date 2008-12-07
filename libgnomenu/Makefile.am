@@ -8,6 +8,7 @@ INTERNAL = \
 	menubar.vala \
 	menuitem.vala \
 	window.vala \
+	keygrab.vala \
 	$(NULL)
 
 EXTERNAL = gnomenu.vala
@@ -18,7 +19,8 @@ libgnomenu_la_SOURCES = \
 						$(INTERNAL:.vala=.c) \
 						$(INTERNAL:.vala=.h) \
 						$(EXTERNAL:.vala=.c) \
-						$(EXTERNAL:.vala=.h)
+						$(EXTERNAL:.vala=.h) \
+						keygrab-ccode.c
 
 libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS)
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)
@@ -27,7 +29,7 @@ libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 INTERNAL_VAPI= gnomenu-private.vapi
 EXTERNAL_VAPI= gnomenu.vapi
 
-$(INTERNAL_VAPI): $(INTERNAL) patch.sh markupparser.vapi gdk.vapi $(EXTERNAL_VAPI)
+$(INTERNAL_VAPI): $(INTERNAL) patch.sh markupparser.vapi gdk.vapi $(EXTERNAL_VAPI) 
 	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gnomenu --pkg gdk --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(INTERNAL)
 	echo gnomenu > $(@:.vapi=.deps)
 	bash patch.sh
