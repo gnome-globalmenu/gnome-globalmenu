@@ -70,7 +70,10 @@ public class GlobalMenuApplet : PanelCompat.Applet {
     }
     private static void on_preferences_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-       	system("gconf-editor " + the_applet.get_preferences_key() + " &");
+       	//system("gconf-editor " + the_applet.get_preferences_key() + " &");
+		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(the_applet.get_preferences_key(), "Applet preferences");
+		gcd.run();
+		gcd.destroy();
     }
     private string remove_path(string txt, string separator) {
     	long co = txt.length-1;

@@ -6,8 +6,8 @@
             <type>bool</type>
             <default>FALSE</default>
             <locale name="C">
-				<short>Show/Hide the icon of the active window</short>
-				<long></long>
+				<short>Icon</short>
+				<long>Show/Hide the icon of the active window</long>
             </locale>
 	</schema>
 	<schema>
@@ -16,8 +16,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Show/Hide the name of the active application</short>
-			<long></long>
+			<short>Label</short>
+			<long>Show/Hide the name of the active application</long>
 		</locale>
 		</schema>
 		<schema>
@@ -26,8 +26,8 @@
 			<type>bool</type>
 			<default>TRUE</default>
 			<locale name="C">
-				<short>Uses active application lablel as application switcher</short>
-				<long></long>
+				<short>Window List</short>
+				<long>Uses active application lablel as application switcher</long>
 			</locale>
 		</schema>
 		<schema>
@@ -36,28 +36,18 @@
 			<type>bool</type>
 			<default>TRUE</default>
 			<locale name="C">
-				<short>Add window action menu entries to active application name menu</short>
-				<long></long>
+				<short>Window Actions</short>
+				<long>Add window action menu entries to active application name menu</long>
 			</locale>
 		</schema>
-		<!--<schema>
-			<key>/schemas/apps/globalmenu-panel-applet/prefs/title_font</key>
-			<owner>globalmenu-panel-applet</owner>
-			<type>string</type>
-			<default>Sans Bold</default>
-			<locale name="C">
-				<short>The font used to display the title of the active application</short>
-				<long></long>
-			</locale>
-		</schema>-->
 		<schema>
 			<key>/schemas/apps/globalmenu-panel-applet/prefs/title_max_width</key>
 			<owner>globalmenu-panel-applet</owner>
 			<type>int</type>
 			<default>30</default>
 			<locale name="C">
-				<short>The Maximum length of name of the active application</short>
-				<long></long>
+				<short>Max title length</short>
+				<long>The Maximum length of name of the active application</long>
 			</locale>
 		</schema>
 	</schemalist>

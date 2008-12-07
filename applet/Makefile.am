@@ -28,6 +28,7 @@ AM_VALAC_FLAGS = \
 	--pkg libgnome-menu \
 	--pkg gconf-2.0 \
 	--pkg gdk-2.0 \
+	--pkg gconfcompat \
 	$(NULL)
 	
 BUILT_SOURCES = \
@@ -39,6 +40,7 @@ BUILT_SOURCES = \
 GlobalMenu_PanelApplet_VALASOURCES = \
 	panelextra-menubar.vala \
 	panelextra-switcher.vala \
+	gtkextra-gconfdialog.vala \
 	GPL.vala \
 	GnomeMenuHelper.vala \
 	applet.vala \
