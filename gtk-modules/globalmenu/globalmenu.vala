@@ -50,20 +50,32 @@ namespace GnomenuGtk {
 		if(old_toplevel_window != null) {
 			old_toplevel_window.property_notify_event -= window_property_notify_event;
 			old_toplevel_window.set_data("__menubar__", null);
+			/*
 			uint source_id = (uint) old_toplevel_window.get_data("__keep_alive__");
 			Source.remove(source_id);
+			*/
 		}
 		if(toplevel_window != null) {
 			toplevel_window.set_data_full("__menubar__", self.ref(), g_object_unref);
 			toplevel_window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 			toplevel_window.property_notify_event += window_property_notify_event;
-			uint source_id = g_timeout_add_full(Priority.DEFAULT, 500,
+			/*
+			uint source_id = g_timeout_add_full(Priority.DEFAULT, 1000,
 					(data) => {
-						Gtk.Window window = data as Window;
-						window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
+						weak Gtk.Window window = data as Window;
+						if(window.ref_count == 1) {
+							message("The window is destroyed, no long need to keep an eye on PROPERTY_CHANGE_MASK. ");
+							return false;
+						}
+						if((window.get_events() 
+							& Gdk.EventMask.PROPERTY_CHANGE_MASK) == 0) {
+							message("Need to reset the event mask");
+						//	window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
+						}
 						return true;
 					}, toplevel_window.ref(), g_object_unref);
 			toplevel_window.set_data("__keep_alive__", (void*) source_id);
+			*/
 	  	} 
 		return true;
 	}
