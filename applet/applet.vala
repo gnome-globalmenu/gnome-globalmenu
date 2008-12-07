@@ -82,7 +82,6 @@ private class Applet : Panel.Applet {
 					overflown_menu = "<menu/>";
 				}
 				string overflower_context = OVERFLOWER_TEMPLATE.printf(overflown_menu);
-				message("%s", overflower_context);
 				Parser.parse(overflower, overflower_context);
 				return;
 			}
@@ -101,7 +100,6 @@ private class Applet : Panel.Applet {
 					sb.append_unichar(path[i]);
 			}
 			if(slashes > 1) {
-				message("sb.str = %s", sb.str);
 				current_window.emit_menu_event(sb.str);
 			}
 		};
@@ -144,13 +142,23 @@ private class Applet : Panel.Applet {
 		set_background_widget(this);
 		
 		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
-		uint keyval = Gdk.keyval_from_name("F10");
-		if(!root_window.grab_key(keyval, 0)) {
+		int keyval;
+		Gdk.ModifierType mods;
+		main_menubar.get_accel_key(out keyval, out mods);
+		if(!root_window.grab_key(keyval, mods)) {
 			warning("keygrab failure");
 		}
 		root_window.key_press_event += (root_window, event) => {
 			message("keypress from grab: %s", Gdk.keyval_name(event.keyval));
-			main_menubar.select_first(true);
+			uint keyval;
+			Gdk.ModifierType mods;
+			main_menubar.get_accel_key(out keyval, out mods);
+			if(event.keyval == keyval &&
+				(event.state & Gtk.accelerator_get_default_mod_mask())
+				== (mods & Gtk.accelerator_get_default_mod_mask())) {
+				selector.select_first(true);
+				this.key_press_event(event);
+			}
 			return false;
 		};
 	}

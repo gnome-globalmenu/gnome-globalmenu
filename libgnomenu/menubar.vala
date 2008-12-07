@@ -126,6 +126,14 @@ namespace Gnomenu {
 			}
 			return null;
 		}
+		public void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
+			Settings settings = get_settings();
+			weak string accel;
+		   	settings.get( "gtk_menu_bar_accel", &accel, null);
+			message("accel = %s", accel);
+			if(accel != null)
+				Gtk.accelerator_parse(accel, out keyval, out mods);
+		}
 		public string? create_overflown_menu() {
 			if(!overflown) return null;	
 			StringBuilder sb = new StringBuilder("");
