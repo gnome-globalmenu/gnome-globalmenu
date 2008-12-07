@@ -6,6 +6,7 @@ BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
+	main.vala \
 	$(NULL)
 
 libexec_PROGRAMS = GlobalMenu.PanelApplet

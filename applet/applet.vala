@@ -4,10 +4,9 @@ using Gnomenu;
 using Wnck;
 using Panel;
 
-private class Applet : Panel.Applet {
-	static const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
-	static const string APPLET_IID = "OAFIID:GlobalMenu_PanelApplet";
-
+public class Applet : Panel.Applet {
+	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
+	public static int instance_count = 0;
 	static const string SELECTOR = 
 """
 <menu>
@@ -62,7 +61,11 @@ private class Applet : Panel.Applet {
 	public Applet() {
 		int i = 0;
 	}
+	~Applet() {
+		instance_count--;
+	}
 	construct {
+		instance_count++;
 		this.set_name("GlobalMenuPanelApplet");
 		this.add_events(Gdk.EventMask.KEY_PRESS_MASK);
 		selector = add_menubar_from_string(SELECTOR.printf("NONE"));
@@ -162,16 +165,32 @@ private class Applet : Panel.Applet {
 			return true;
 		};
 	}
+
+	private Wnck.Screen screen;
+	private Gnomenu.Window current_window;
+	private Gnomenu.MenuBar main_menubar;
+	private Gnomenu.MenuBar overflower;
+	private Gnomenu.MenuBar selector;
+	private Gnomenu.Window root_window;
+
+	private Label label; /*Replace with the selector later*/
+
+	private PackDirection _pack_direction;
+	private Gnomenu.Gravity _gravity;
+
+	private List<weak Gnomenu.MenuBar> internal_children;
+
 	private void update_menubar() {
 		if(current_window != null) {
 			string context = current_window.menu_context;
 			if(context != null) {
 				Parser.parse(main_menubar, context);
+				main_menubar.show();
 				return;
 			}
 		}
 		/* elseever */
-		main_menubar.remove_all();
+		main_menubar.hide();
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
@@ -254,7 +273,9 @@ private class Applet : Panel.Applet {
 	private override void map() {
 		base.map();
 		foreach(Gnomenu.MenuBar menubar in internal_children) {
-			menubar.map();
+			if(menubar.visible) {
+				menubar.map();
+			}
 		}
 	}
 	private override void size_allocate(Gdk.Rectangle a) {
@@ -329,24 +350,6 @@ private class Applet : Panel.Applet {
 		}
 		base.size_allocate(a);
 	}
-	private Wnck.Screen screen;
-	private Gnomenu.Window current_window;
-	private Gnomenu.MenuBar main_menubar;
-	private Gnomenu.MenuBar overflower;
-	private Gnomenu.MenuBar selector;
-	private Gnomenu.Window root_window;
-
-	private Label label; /*Replace with the selector later*/
-
-	private PackDirection _pack_direction;
-	private Gnomenu.Gravity _gravity;
-
-	private List<weak Gnomenu.MenuBar> internal_children;
-	private static bool verbose = false;
-	const OptionEntry[] options = {
-		{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
-		{null}
-	};
 	private Gnomenu.MenuBar add_menubar_from_string(string str) {
 		Gnomenu.MenuBar menubar = new Gnomenu.MenuBar();
 		menubar.visible = true;
@@ -358,49 +361,6 @@ private class Applet : Panel.Applet {
 		return menubar;
 	}
 	/* This variable is then removed by patch.sh */
-	static const string STANDARD_PROPERTIES = "";
-	public static int main(string[] args) {
-		GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
-		context.set_help_enabled (true);
-		context.add_main_entries(options, null);
-		Gnome.Program program = Gnome.Program.init (
-				"GlobalMenu.PanelApplet", "0.7", 
-				Gnome.libgnomeui_module, 
-				args, 
-				Gnome.PARAM_GOPTION_CONTEXT, context,
-				Gnome.CLIENT_PARAM_SM_CONNECT, false,
-				STANDARD_PROPERTIES,
-				null);
-
-		if(!verbose) {
-			LogFunc handler = (domain, level, message) => { };
-			Log.set_handler ("GMarkup", LogLevelFlags.LEVEL_DEBUG, handler);
-			Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
-		}
-		Gtk.rc_parse_string("""
-			style "globalmenu_event_box_style"
-			{
-			 	GtkWidget::focus-line-width=0
-			 	GtkWidget::focus-padding=0
-			}
-			style "globalmenu_menu_bar_style"
-			{
-				ythickness = 0
-				GtkMenuBar::shadow-type = none
-				GtkMenuBar::internal-padding = 0
-			}
-			class "GtkEventBox" style "globalmenu_event_box_style"
-			class "GnomenuMenuBar" style:highest "globalmenu_menu_bar_style"
-""");
-		int retval = Panel.Applet.factory_main(FACTORY_IID, typeof(Applet), 
-			(applet, iid) => {
-				if(iid == APPLET_IID) {
-					applet.show_all();
-					return true;
-				} else return false;
-			}) ;	
-		return retval;
-	}
 
 }
 
