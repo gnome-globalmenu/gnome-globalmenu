@@ -22,7 +22,7 @@ libgnomenu_la_SOURCES = \
 						$(EXTERNAL:.vala=.h) \
 						keygrab-ccode.c
 
-libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS)
+libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)
 libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 

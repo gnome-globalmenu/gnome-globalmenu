@@ -7,6 +7,7 @@ AC_CONFIG_HEADERS(config.h)
 # maintainer mode
 AM_MAINTAINER_MODE
 
+
 # Checks for programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -16,11 +17,17 @@ AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
 
+# intl
+IT_PROG_INTLTOOL
+AM_GLIB_GNU_GETTEXT
+AC_DEFINE(GETTEXT_PACKAGE, ["gnome-globalmenu"], [gettext package])
+
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
-
 AC_PATH_PROG(VALAC, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
-AC_SUBST(VALAC, [$ac_cv_path_VALAC])
+
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake"
+VALAC="$VALAC $VALA_DEFAULT_PKGS"
 
 AC_CONFIG_COMMANDS_POST(
 		[
@@ -63,7 +70,7 @@ PKG_CHECK_MODULES(GIO, gio-2.0 >= $GIO_REQUIRED gio-unix-2.0 >= $GIO_REQUIRED)
 AC_SUBST(GIO_FLAGS)
 AC_SUBST(GIO_LIBS)
 
-# path
+# path: bad way; move them back to the Makefiles according to GNU rules?
 
 BONOBO_SERVER_DIR="$libdir/bonobo/servers"
 AC_SUBST(BONOBO_SERVER_DIR)
@@ -84,6 +91,11 @@ AC_CONFIG_FILES(
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile
+	po/Makefile.in
+	po/POTFILES
+	intltool-update
+	intltool-merge
+	intltool-extract
 	])
 
 AC_OUTPUT

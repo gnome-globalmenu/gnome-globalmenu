@@ -57,8 +57,10 @@ namespace GnomenuGtk {
 			sb.append("<item");
 			visit_container(menuitem);
 			
-			if(menuitem is SeparatorMenuItem) 
+			if(menuitem is SeparatorMenuItem
+			|| menuitem.get_child() == null) 
 				sb.append(" type=\"s\"");
+
 
 			if(menuitem is ImageMenuItem) {
 				Image image = (menuitem as ImageMenuItem).image as Image;

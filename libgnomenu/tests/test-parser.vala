@@ -58,8 +58,8 @@ namespace Gnomenu {
 			add("Evolution", () => {
 				string test3;
 				string test4;
-				FileUtils.get_contents(SRCDIR + "/evo-nolabel.xml", out test3, null);
-				FileUtils.get_contents(SRCDIR + "/evo.xml", out test4, null);
+				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/evo-nolabel.xml", out test3, null);
+				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/evo.xml", out test4, null);
 				Parser.parse(shell, test3);
 				Parser.parse(shell, test3);
 				Parser.parse(shell, test3);

@@ -5,7 +5,7 @@ const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 
 public bool verbose = false;
 const OptionEntry[] options = {
-	{"verbose", 'v',0, OptionArg.NONE, ref verbose, "Show debug messages from GMarkupDoc and Gnomenu", null},
+	{"verbose", 'v',0, OptionArg.NONE, ref verbose, N_("Show debug messages from GMarkupDoc and Gnomenu"), null},
 	{null}
 };
 
@@ -13,6 +13,7 @@ public int main(string[] args) {
 	GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
 	context.set_help_enabled (true);
 	context.add_main_entries(options, null);
+	weak string prefix = Config.PREFIX; /*Make sure the configmake.h is appended.*/
 	Gnome.Program program = Gnome.Program.init (
 			"GlobalMenu.PanelApplet", "0.7", 
 			Gnome.libgnomeui_module, 

@@ -43,10 +43,6 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(PANEL_CFLAGS) \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
-		-DPREFIX=\"$(prefix)\" \
-		-DSYSCONFDIR=\"$(sysconfdir)\" \
-		-DDATADIR=\"$(datadir)\" \
-		-DLIBDIR=\"$(libdir)\" \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		$(NULL)
 

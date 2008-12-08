@@ -27,8 +27,8 @@ namespace Gnomenu {
 		static construct {
 			install_style_property(new 
 					ParamSpecInt("indicator-size", 
-						"Indicator Size",
-						"Size of check or radio indicator", 
+						_("Indicator Size"),
+						_("Size of check or radio indicator"), 
 						0, int.MAX, 13, ParamFlags.READABLE));
 			icon_size_lookup (IconSize.MENU, out icon_width, out icon_height);
 		}

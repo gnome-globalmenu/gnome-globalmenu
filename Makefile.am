@@ -1,15 +1,27 @@
 NULL =
-SUBDIRS = tests libgnomenu applet gtk-modules
+SUBDIRS = tests libgnomenu applet gtk-modules po
 
 AM_CPPFLAGS = \
 		$(NULL)
 
 EXTRA_DIST = \
+	intltool-extract.in \
+	intltool-merge.in \
+	intltool-update.in \
 	patch.sh \
 	$(NULL)
 
 DISTCLEANFILES = \
+	intltool-extract \
+	intltool-merge \
+	intltool-update \
 	$(NULL)
+
+BUILT_SOURCES =
+
+CLEANFILES = 
+include $(top_srcdir)/Makefile.configmake
+
 rpm: 
 	touch `find . -name '*.vala'`
 	make dist
