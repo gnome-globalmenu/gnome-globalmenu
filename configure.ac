@@ -20,7 +20,9 @@ AC_SUBST(LDFLAGS)
 # intl
 IT_PROG_INTLTOOL
 AM_GLIB_GNU_GETTEXT
-AC_DEFINE(GETTEXT_PACKAGE, ["gnome-globalmenu"], [gettext package])
+GETTEXT_PACKAGE=gnome-globalmenu
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
+AC_SUBST(GETTEXT_PACKAGE)
 
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
@@ -92,10 +94,6 @@ AC_CONFIG_FILES(
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile
 	po/Makefile.in
-	po/POTFILES
-	intltool-update
-	intltool-merge
-	intltool-extract
 	])
 
 AC_OUTPUT
