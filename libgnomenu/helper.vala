@@ -13,26 +13,6 @@ namespace Gnomenu {
 		LEFT,
 		RIGHT
 	}
-	[Compact]
-	[CCode (has_type_id = false)]
-	protected class MenuShellHelper {
-		public weak MenuItem get(int index) {
-			return (this as Container).get_children().nth_data(index) as MenuItem;
-		}
-		public bool has(int index) {
-			weak List<weak Widget> children = (this as Container).get_children();
-			return index >= 0 && index < children.length();
-		}
-		public void truncate(int length) {
-			while((this as Container).get_children().length() > length) {
-				weak Widget child = (this as Container).get_children().last().data as Widget;
-				(this as Container).remove(child);
-			}
-		}
-		public uint length() {
-			return (this as Container).get_children().length();
-		}
-	}
 
 	protected double gravity_to_text_angle(Gravity g) {
 		switch(g) {
@@ -69,6 +49,32 @@ namespace Gnomenu {
 			case MenuItemState.TRISTATE:
 			default:
 				return ShadowType.ETCHED_IN;
+		}
+	}
+
+	/** 
+	 * MenuShellHelper needs to be written.
+	 * It has the potential to break in 
+	 * future vala releases.
+	 * */
+	[Compact]
+	[CCode (has_type_id = false)]
+	protected class MenuShellHelper {
+		public weak MenuItem get(int index) {
+			return (this as Container).get_children().nth_data(index) as MenuItem;
+		}
+		public bool has(int index) {
+			weak List<weak Widget> children = (this as Container).get_children();
+			return index >= 0 && index < children.length();
+		}
+		public void truncate(int length) {
+			while((this as Container).get_children().length() > length) {
+				weak Widget child = (this as Container).get_children().last().data as Widget;
+				(this as Container).remove(child);
+			}
+		}
+		public uint length() {
+			return (this as Container).get_children().length();
 		}
 	}
 }

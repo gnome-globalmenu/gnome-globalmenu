@@ -1,6 +1,9 @@
 using Gtk;
 
 namespace Gnomenu {
+	/**
+	 * convert the widget representation to xml representation.
+	 */
 	public class Serializer {
 		public static string to_string(Gtk.Widget widget, bool pretty_print = false) {
 			var s = new Serializer();

@@ -1,6 +1,25 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-static gboolean maybe_grab_key(GdkWindow * grab_window, guint keyval, GdkModifierType state, gboolean maybe) {
+
+/**
+ * maybe_grab_key:
+ *
+ * @grab_window: window to grab the key
+ * @keyval: the keyval (used extensively by Gtk). 0 for AnyKey.
+ * @state: modifier state (used extensively by Gtk)
+ * @maybe: TRUE to grab, FALSE to ungrab.
+ *
+ * This function grabs/ungrabs the key by calling XGrabKey.
+ * Before calling XGrabKey, the hardware keycodes are found
+ * by @gdk_keymap_get_entries_from_keyval.
+ *
+ * returns FALSE if there is an error. TRUE if OK.
+ */
+static gboolean maybe_grab_key (GdkWindow * grab_window, 
+				guint keyval, 
+				GdkModifierType state, 
+				gboolean maybe) {
+
 	GdkDisplay * display = gdk_drawable_get_display(grab_window);
 	g_assert(display);
 	g_assert(grab_window);

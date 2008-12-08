@@ -1,14 +1,21 @@
 using Gtk;
 
 namespace Gnomenu {
+	/**
+	 * Parser converts xml to widgets.
+	 *
+	 * A sub-parser is created if a sumne is encountered.
+	 */
 	public class Parser {
 		public static void parse(MenuBar menubar, string description) throws GLib.Error {
 			var parser = new Parser();
+			var timer = new Timer();
 			parser.shell = menubar;
 			parser.topmost = menubar;
 			MarkupParseContext context = 
 				new MarkupParseContext(parser.functions, 0, parser, null);
 			context.parse(description, -1);
+			message("Parser consumed: %lf", timer.elapsed(null));
 		}
 
 		Parser () {

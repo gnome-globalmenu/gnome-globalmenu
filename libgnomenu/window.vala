@@ -1,5 +1,21 @@
 using Gtk;
 namespace Gnomenu {
+	/**
+	 * The Window widget extends Gtk.Window widget.
+	 *
+	 * The Window widget is capable of wrapping a Gdk.Window
+	 * or a foreign native window.
+	 *
+	 * It adds methods to bind any string as a property of
+	 * the underlining Gdk.Window.
+	 *
+	 * It emits property-notify-event signal when any properties of the underlineing Gdk.Window
+	 * has changed.
+	 *
+	 * As convenient wrappers,
+	 * it also addes the menu-context property and menu-event signal.
+	 *
+	 */
 	public class Window : Gtk.Window {
 		public ulong native {
 			get {
@@ -13,6 +29,9 @@ namespace Gnomenu {
 			get;
 			construct;
 		}
+		/**
+		 * If the window is not realized (this.window == null)
+		 */
 		public bool invalid {get {return window == null;}}
 		public Window.foreign(ulong native) {
 			this.native = (ulong) native;
@@ -43,10 +62,15 @@ namespace Gnomenu {
 				window.set_events((Gdk.EventMask)get_events());
 				set_flags(WidgetFlags.REALIZED);
 				window.set_user_data(this);
+				/* To avoid a warning, 
+				 * perhaps it is problematic */
 				style.attach(window);
 			}
 			disposed = false;
 		}
+		/**
+		 * the xml representation of the menu of the window
+		 */
 		public string? menu_context {
 			get {
 				_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
@@ -57,6 +81,9 @@ namespace Gnomenu {
 				set(NET_GLOBALMENU_MENU_CONTEXT, value);
 			}
 		}
+		/**
+		 * emitted when a menu item is activated
+		 */
 		public void emit_menu_event (string path) {
 			set(NET_GLOBALMENU_MENU_EVENT, path);
 		}
@@ -98,15 +125,32 @@ namespace Gnomenu {
 				Gdk.property_delete(window, atom);
 			}
 		}
+		/**
+		 * globally grab a key to this window.
+		 *
+		 * return false if failed.
+		 */
 		public bool grab_key(uint keyval, Gdk.ModifierType state) {
 			return Gnomenu.grab_key(window, keyval, state);
 		}
+		/**
+		 * globally ungrab a grabbed a key to this window
+		 * return false if failed.
+		 */
 		public bool ungrab_key(uint keyval, Gdk.ModifierType state) {
 			return Gnomenu.ungrab_key(window, keyval, state);
 		}
-		private bool disposed;
+		/**
+		 * emitted when the menu context has changed.
+		 */
 		public signal void menu_context_changed();
+		/**
+		 * emitted when the a menu item is activated.
+		 * (Not useful in GlobalMenu.PanelApplet).
+		 */
 		public signal void menu_event(string path);
+
+		private bool disposed;
 
 		private ulong _native;
 		private string _menu_context;

@@ -1,12 +1,29 @@
 using Gtk;
 
 namespace Gnomenu {
+	/**
+	 *
+	 * 	This structure is used to represent a 'background' passed from
+	 * 	the panel library.
+	 * 	
+	 */
 	public class Background {
 		public BackgroundType type;
 		public Gdk.Pixmap pixmap;
 		public Gdk.Color color;
+		/**
+		 * the offset in x direction for clipping
+		 * the pixmap background
+		 */
 		public int offset_x;
+		/**
+		 * the offset in y direction for clipping
+		 * the pixmap background
+		 */
 		public int offset_y;
+		/**
+		 * @return a new backround which is identical to this one.
+		 */
 		public Background clone() {
 			Background rt = new Background();
 			rt.type = type;
@@ -17,6 +34,18 @@ namespace Gnomenu {
 			return rt;
 		}
 	}
+
+	/**
+	 * A fancy menubar used by GlobalMenu.PanelApplet;
+	 * Not the same as Gtk.MenuBar, Gnomenu.MenuBar also
+	 * explicityly acts as the toplevel menubar of
+	 * its logical descents.
+	 *
+	 * It supports changing the background,
+	 * getting an xml representation of the overflown items,
+	 * changing the text gravity,
+	 * looking up item (and subitems) by path.
+	 */
 	public class MenuBar : Gtk.MenuBar {
 		public MenuBar() {}
 		const uint PROP_IMPORTANT = 1;
@@ -39,8 +68,24 @@ namespace Gnomenu {
 		construct {
 			_background = new Background();
 		}
+		/**
+		 * This signal is emitted when a child item is activated
+		 */
 		public signal void activate(MenuItem item);
 
+		/**
+		 * To change the background of the menubar,
+		 * set this property.
+		 *
+		 * Notice that this property doesn't increase
+		 * the reference of the passed background object.
+		 * rather, it sets up the menubar background
+		 * according the passed value.
+		 *
+		 * therefore this property is a bad property.
+		 * It should actually be replace by
+		 * set_background and get_background.
+		 */
 		public Background background {
 			get {
 				return _background;
@@ -76,6 +121,11 @@ namespace Gnomenu {
 				}
 			}
 		}
+		/**
+		 * The text gravity of the menubar.
+		 * It also affects the text gravity of
+		 * the menu items in this menubar.
+		 */
 		public Gravity gravity {
 			get { return _gravity; }
 			set {
@@ -85,6 +135,9 @@ namespace Gnomenu {
 				}
 			}
 		}
+		/**
+		 * return true if the menubar has overflown items.
+		 */
 		public bool overflown {
 			get { 
 				switch(pack_direction) {
@@ -98,6 +151,18 @@ namespace Gnomenu {
 				}
 			}
 		}
+		/**
+		 * Look up a child item from a path.
+		 * The path is a string constructed by two parts:
+		 *
+		 * [rev:]/id/id/id
+		 *
+		 * where rev: is an integer stamp, and id can be either
+		 * the id property or the position of the menu item.
+		 *
+		 * return a strong reference of the menu item if found;
+		 * null if not.
+		 */
 		public MenuItem? get(string path) {
 			string[] tokens = path.split_set("/", -1);
 			tokens.length = (int) strv_length(tokens);
@@ -126,6 +191,11 @@ namespace Gnomenu {
 			}
 			return null;
 		}
+
+		/**
+		 * return the accelerator key combination for invoking menu bars
+		 * in GTK Settings. It is usually F10.
+		 */
 		public void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
 			Settings settings = get_settings();
 			weak string accel;
@@ -134,6 +204,13 @@ namespace Gnomenu {
 			if(accel != null)
 				Gtk.accelerator_parse(accel, out keyval, out mods);
 		}
+
+		/**
+		 * returns an xml representation of the overflown menubar.
+		 * The difference between the returned string and the
+		 * ordinary xml representation is that 
+		 * only overflown items are visible.
+		 */
 		public string? create_overflown_menu() {
 			if(!overflown) return null;	
 			StringBuilder sb = new StringBuilder("");
@@ -190,8 +267,18 @@ namespace Gnomenu {
 			sb.append("</menu>");
 			return sb.str;
 		}
+
+
+/* Private variables */
+		/**
+		 * Holding the background object
+		 */
 		private Background _background;
+		/**
+		 * Storing the text gravity
+		 */
 		private Gravity _gravity;
+
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {

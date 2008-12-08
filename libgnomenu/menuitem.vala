@@ -1,8 +1,27 @@
 using Gtk;
 
 namespace Gnomenu {
+	/**
+	 * fancy menu item used by GlobalMenu.PanelApplet
+	 *
+	 * Difference with Gtk.MenuItem:
+	 *
+	 * The various derived XXXMenuItem types are integrated
+	 * into Gnomenu.MenuItem to allow easier tranformation
+	 * from XML representation to Widgets.
+	 *
+	 * label and image are directly set on the MenuItem.
+	 * each item has an id,
+	 * associated with a position(after attached to a MenuShell)
+	 *
+	 * MenuItem also holds a back-reference to the toplevel 
+	 * menu bar. When an item is activated, the activated signal
+	 * on the menu bar is also invoked.
+	 * 
+	 */
 	public class MenuItem : Gtk.MenuItem {
 		public MenuItem() { }
+
 		static int icon_width;
 		static int icon_height;
 		static construct {
@@ -13,11 +32,24 @@ namespace Gnomenu {
 						0, int.MAX, 13, ParamFlags.READABLE));
 			icon_size_lookup (IconSize.MENU, out icon_width, out icon_height);
 		}
+
 		construct {
 			_item_type = MenuItemType.NORMAL;
 			create_labels();
 		}
+		/**
+		 * a back-reference to the toplevel menubar
+		 */
 		public MenuBar? menubar { get; set; }
+
+		/**
+		 * the position of the menu item in the menushell,
+		 * starting from 0.
+		 *
+		 * Notice that although this property is not readonly,
+		 * it should be change only by the MenuShell 
+		 * (perahsp also Parser)
+		 */
 		public int position {
 			get { return _position;} 
 			set {
@@ -27,6 +59,13 @@ namespace Gnomenu {
 				update_label_text();
 			}
 		}
+
+		/**
+		 * the id of the menu item.
+		 *
+		 * id is used to construct the path to uniquely represent
+		 * the item in the menubar.
+		 */
 		public string? id { 
 			get { return _id; }
 		   	set { 
@@ -36,6 +75,10 @@ namespace Gnomenu {
 				update_label_text();
 			}
 		}
+		/**
+		 * the label text in the item.
+		 *
+		 */
 		public string? label {
 			get { return _label; }
 			set {
@@ -44,6 +87,14 @@ namespace Gnomenu {
 				update_label_text();
 			}
 		}
+		/**
+		 * the icon in the item.
+		 * Notice that the specific meaning of 
+		 * the string is not yet defined.
+		 *
+		 * For now, it can be any of the Gtk stock item
+		 * names.
+		 */
 		public string? icon {
 			get { return _icon; }
 			set {
@@ -52,6 +103,12 @@ namespace Gnomenu {
 				update_icon();
 			}
 		}
+		/**
+		 * the text to describe the accelerator key combination.
+		 *
+		 * Notice that this is nothing more than a text.
+		 * The applet doesn't handle these accelerator keys.
+		 */
 		public string? accel_text {
 			get { return _accel_text; }
 			set {
@@ -60,6 +117,16 @@ namespace Gnomenu {
 				update_label_text();
 			}
 		}
+
+		/**
+		 * the font description of the label.
+		 * It can be any valid PangoFontDescription string.
+		 *
+		 * e.g "bold", "Sans Bold".
+		 *
+		 * Anything more than "Bold" is not recommend
+		 * since it interacts badly with themes.
+		 */
 		public string? font {
 			get { return _font; }
 			set {
@@ -74,9 +141,31 @@ namespace Gnomenu {
 				bin_child.modify_font(desc);
 			}
 		}
+
+		/**
+		 * Obtain the path of the this item.
+		 *
+		 * The path is constructed by backtracing the 
+		 * menu hierarch until reaching the toplevel menu bar.
+		 *
+		 * Notice that the [rev:] prefix in global menu specification
+		 * is not implemented (yet).
+		 *
+		 * Here are several examples of returned strings:
+		 *
+		 * /0/1/3/0
+		 *
+		 * /File/New/Message
+		 *
+		 * /0/New/Message
+		 *
+		 * 0/New/Message (If the toplevel menu bar is not found).
+		 *
+		 * The return value in the last case should 
+		 * probably be replaced by null.
+		 */
 		public string path {
 			get {
-				/* return: beginning with "/" if a menu bar is found. Not if not found.*/
 				MenuItem item = this;
 				MenuShell parent = item.parent as MenuShell;
 				if(id != null)
@@ -100,6 +189,14 @@ namespace Gnomenu {
 				return _path;
 			}
 		}
+
+		/**
+		 * set/get the type string of the item.
+		 * Valid values can be found in
+		 *
+		 * { @link item_type_to_string }
+		 *
+		 */
 		public string? item_type {
 			get { return item_type_to_string(_item_type); }
 			set construct {
@@ -148,6 +245,14 @@ namespace Gnomenu {
 				queue_resize();
 			}
 		}
+
+
+		/**
+		 * get/set the state of the item. It can be either triggled or not,
+		 * or in a tristate.
+		 *
+		 * { @link item_state_to_string }
+		 */
 		public string? item_state {
 			get { return item_state_to_string(_item_state); }
 			set {
@@ -197,6 +302,14 @@ namespace Gnomenu {
 				break;
 			}
 		}
+
+		/**
+		 *
+		 * The parent handler is first invoked.
+		 * Then the check box or the radio box
+		 * is drawn.
+		 *
+		 */
 		private override bool expose_event(Gdk.EventExpose event) {
 			base.expose_event(event);
 			int toggle_spacing = 0;
@@ -239,6 +352,18 @@ namespace Gnomenu {
 			}
 			return false;
 		}
+
+		/**
+		 * Overriding Gtk.Container.forall.
+		 *
+		 * There is a noterious problem in Vala Gtk bindings, causing
+		 * the ccode function differs from GtkContainerClass.forall.
+		 *
+		 * Therefore this function's ccode is patched with patch.sh
+		 * to avoid the problems. the dummy variable include_internals
+		 * should be kept here.
+		 *
+		 */
 		private override void forall(Gtk.Callback callback, void* data) {
 			/*see patch.sh! */
 			bool include_internals = false;
