@@ -46,7 +46,9 @@ libglobalmenu_gnome_la_LDFLAGS = \
 		-export-dynamic \
 		-module
 
-libglobalmenu_gnome_la_CPPFLAGS = -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS)
+libglobalmenu_gnome_la_CPPFLAGS = \
+	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS) \
+	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
 	gtkaqd.vapi \

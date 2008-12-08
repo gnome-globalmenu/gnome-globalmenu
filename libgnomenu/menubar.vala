@@ -116,7 +116,6 @@ namespace Gnomenu {
 					break;
 					case BackgroundType.PIXMAP:
 						reset_bg_pixmap();
-						queue_draw();
 					break;
 				}
 			}
@@ -279,7 +278,17 @@ namespace Gnomenu {
 		 */
 		private Gravity _gravity;
 
+		private override void style_set(Style old_style) {
+			base.style_set(old_style);
+			reset_bg_pixmap();
+		}
 		private void reset_bg_pixmap() {
+			/*
+			if(background.type != BackgroundType.PIXMAP) return;
+			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
+				// style = 
+				style.copy();
+			}*/
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
 				Gdk.Pixmap pixmap = new Gdk.Pixmap(window, allocation.width, allocation.height, -1);
@@ -291,15 +300,15 @@ namespace Gnomenu {
 				Gdk.cairo_set_source_pixmap(cairo, _background.pixmap, -_background.offset_x, -background.offset_y);
 				cairo.rectangle (0, 0, allocation.width, allocation.height);
 				cairo.fill();
-				/*style = */style.copy();
 				style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
 				style.attach(window);
 				style.set_background(window, StateType.NORMAL);
+				queue_draw();
 			}
 		}
 		private override void realize() {
 			base.realize();
-			reset_bg_pixmap();
+		//	reset_bg_pixmap();
 		}
 		private override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
@@ -316,6 +325,12 @@ namespace Gnomenu {
 			if(need_reset_bg_pixmap) {
 				reset_bg_pixmap();
 			}
+		}
+		private override bool expose_event(Gdk.EventExpose event) {
+			foreach(weak Widget child in get_children()) {
+				propagate_expose(child, event);
+			}
+			return false;
 		}
 		private override void size_request(out Requisition req) {
 			base.size_request(out req);

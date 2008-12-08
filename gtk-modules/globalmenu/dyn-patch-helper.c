@@ -1,4 +1,7 @@
 #include <gtk/gtk.h>
+/*
+ * _USE_CLOSURES doesn't help improving the performance.
+ * */
 
 static GQuark __MENUBAR__ = 0;
 static GQuark __DIRTY__ = 0;
@@ -10,6 +13,8 @@ static gulong SIGNAL_NOTIFY = 0;
 static GQuark DETAIL_SUBMENU = 0;
 static GQuark DETAIL_LABEL = 0;
 
+static GTimer * timer = NULL;
+static gulong buffered_changes = 0;
 void dyn_patch_init () {
 	__MENUBAR__ = g_quark_from_string("__menubar__");
 	__DIRTY__ = g_quark_from_string("__dirty__");
@@ -23,15 +28,23 @@ void dyn_patch_init () {
 
 	dyn_patch_widget();
 	dyn_patch_menu_bar();
+	timer = g_timer_new();
+	g_timer_stop(timer);
 }
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_message("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
 	g_signal_emit_by_name(menubar, "changed", 0, NULL);
+	g_message("_dyn_patch_set_menu_bar_r consumption: %lf, buffered_changes = %ld ", g_timer_elapsed(timer, NULL), buffered_changes);
+	buffered_changes = 0;
+
+	g_timer_reset(timer);
+	g_timer_stop(timer);
 	return FALSE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
+	buffered_changes++;
 	if(g_object_get_qdata((GObject*)menubar, __DIRTY__)) return;
 	g_object_set_qdata((GObject*) menubar, __DIRTY__, GINT_TO_POINTER(1));
 	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
@@ -103,6 +116,7 @@ static GClosure * _dyn_patch_get_submenu_notify_closure(GtkMenuBar * menubar) {
 }
 #endif
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
+	g_timer_continue(timer);
 	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
 #ifdef _USE_CLOSURES
 	if(old && GTK_IS_LABEL(widget))
@@ -142,6 +156,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 				menubar);
 	}
 #endif
+	g_timer_stop(timer);
 	dyn_patch_set_menubar(widget, menubar);
 
 	if(GTK_IS_CONTAINER(widget)) {
@@ -158,6 +173,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 			dyn_patch_set_menubar_r(submenu, menubar);
 		}
 	}
+	g_timer_continue(timer);
 #ifdef _USE_CLOSURES
 	if(menubar && GTK_IS_LABEL(widget)) {
 		g_signal_connect_closure_by_id(widget, SIGNAL_NOTIFY, DETAIL_LABEL, 
@@ -187,5 +203,6 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 				_dyn_patch_active_notify, menubar);
 	}
 #endif
+	g_timer_stop(timer);
 }
 

@@ -55,7 +55,7 @@ namespace GnomenuGtk {
 			}	
 		}
 		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
-		Log.set_handler ("GlobalMenuModule", LogLevelFlags.LEVEL_MASK, default_log_handler);
+		Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_MASK, default_log_handler);
 	}
 
 	protected bool verbose = false;

@@ -360,7 +360,6 @@ public class Applet : Panel.Applet {
 		internal_children.append(menubar);
 		return menubar;
 	}
-	/* This variable is then removed by patch.sh */
 
 }
 

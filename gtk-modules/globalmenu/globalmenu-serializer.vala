@@ -6,10 +6,12 @@ namespace GnomenuGtk {
 		}
 		public static string to_string(MenuBar menubar, bool pretty_print = false) {
 			Serializer s = new Serializer();
+			Timer timer = new Timer();
 			s.menubar = menubar;
 			s.pretty_print = pretty_print;
 			s.sb = new StringBuilder("");
 			s.visit(menubar);
+			message("Serializer consumption = %lf", timer.elapsed(null));
 			return s.sb.str;
 		}
 		private void visit(Widget widget) {
