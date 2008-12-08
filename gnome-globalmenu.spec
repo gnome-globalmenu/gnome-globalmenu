@@ -1,8 +1,8 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1719
+%define 	svn_version 	svn1720
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libglobalmenu-gnome.la
 %{_libdir}/libglobalmenu-gnome.so
 %{_libexecdir}/GlobalMenu.PanelApplet
+%{_datadir}/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
+%{_datadir}/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+
 
 
 %changelog
