@@ -264,6 +264,23 @@ namespace Gnomenu {
 				switch(prop) {
 					case "label":
 					case "accel":
+					/*
+					 * The label attribute stores the text in the label,
+					 * The accel attribute stores the accel key of the
+					 * menu item (a string, eg, "Control + A")
+					 *
+					 * If label or accel is updated, 
+					 * we construct a new label text with
+					 * this formula:
+					 *
+					 * label text = label + '-' + accel
+					 *
+					 * eg: "Select All - Control + A".
+					 *
+					 *
+					 * A special case of that if the label attribute 
+					 * is "|", then we are expecting a Separator menu item
+					 */
 						string label_text = node.get("label");
 						Gtk.Widget label = (gtk as Gtk.Bin).get_child();
 						if(label_text == "|") {
@@ -277,16 +294,35 @@ namespace Gnomenu {
 						StringBuilder builder = new StringBuilder("");
 						if(label_text != null) {
 							for(int i=0; label_text[i]!=0; i++) {
+								/* This is to skip the "_" character
+								 * Because we don't support the 
+								 * underlined shortcut for menu items
+								 * */
 								if(label_text[i]!='_') {
 									builder.append_unichar(label_text[i]);
 								}
 							}
 						}
 						if(accel_text != null) {
+							/*
+							 * Now we use the formula to append the
+							 * accel string to the label text.
+							 * */
 							builder.append(" - "); 
 							builder.append(accel_text);
 						}
 						if(!(label is Gtk.Label)) {
+							/*
+							 * If the current child of the menu item
+							 * is not a Label(ie, a separator?), 
+							 * we remove the child,
+							 * add a new GtkLabel as the child.
+							 *
+							 * FIXME: implement a AccelLabel widget
+							 * and fill the child with a 
+							 * AccelLabel width that properly 
+							 * align the accelerator strings!
+							 * */
 							(gtk as Gtk.Bin).remove(label);
 							label = new Gtk.Label(builder.str);
 							(gtk as Gtk.Bin).add(label);
