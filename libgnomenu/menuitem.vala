@@ -322,6 +322,20 @@ namespace Gnomenu {
 				null);
 			ShadowType shadow_type = item_state_to_shadow_type(_item_state);
 			/*FIXME: alignment !*/
+			int x;
+			int y;
+			int offset = (toggle_size - indicator_size)/2;
+			int spacing = toggle_spacing /2;
+			switch(get_direction()) {
+				case Gtk.TextDirection.LTR:
+					x = allocation.x + offset + spacing;
+					y = allocation.y + offset;
+				break;
+				case Gtk.TextDirection.RTL:
+					x = allocation.x + allocation.width - toggle_size - offset - spacing;
+					y = allocation.y + offset;
+				break;
+			}
 			switch(_item_type) {
 				case MenuItemType.CHECK:
 					Gtk.paint_check(style,
@@ -331,8 +345,8 @@ namespace Gnomenu {
 						event.area, 
 						this,
 						"check",
-						allocation.x,
-						allocation.y,
+						x,
+						y,
 						indicator_size,
 						indicator_size);
 				break;
@@ -344,8 +358,8 @@ namespace Gnomenu {
 						event.area, 
 						this,
 						"option",
-						allocation.x,
-						allocation.y,
+						x,
+						y,
 						indicator_size,
 						indicator_size);
 				break;
@@ -388,10 +402,25 @@ namespace Gnomenu {
 			base.size_allocate(a);
 			if(_item_type == MenuItemType.IMAGE) {
 				/*FIXME: alignment !*/
-				ca.x = a.x;
-				ca.y = a.y;
-				ca.width = icon_width;
-				ca.height = icon_height;
+				int toggle_spacing;
+				Requisition icon_req;
+				icon_widget.get_child_requisition(out icon_req);
+				style_get(
+					"toggle-spacing", &toggle_spacing,
+					null);
+				ca.width = icon_req.width;
+				ca.height = icon_req.height;
+				int xoffset = (toggle_size - icon_req.width + toggle_spacing)/2;
+				int yoffset = (toggle_size - icon_req.height)/2;
+				ca.y = a.y + yoffset;
+				switch(get_direction()) {
+					case Gtk.TextDirection.LTR:
+						ca.x = a.x + xoffset;
+					break;
+					case Gtk.TextDirection.RTL:
+						ca.x = a.x + a.width - ca.width - xoffset;
+					break;
+				}
 				icon_widget.size_allocate(ca);
 			}
 		}

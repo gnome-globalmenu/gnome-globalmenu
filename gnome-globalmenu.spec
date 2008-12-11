@@ -1,8 +1,8 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1720
+%define 	svn_version 	svn1723
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	3%{?dist}
+Release:	1%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -52,6 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Dec 10 2008 Feng Yu <rainwoodman@gmail.com>
+- RGBA support for popup menus
 * Sun Dec 5 2008 Feng Yu <rainwoodman@gmail.com>
 - update to 0.7
 - use the default vim template for spec files.

@@ -14,7 +14,7 @@ namespace Gnomenu {
 	<item id="Go">
 		<menu>
 			<item id="Here" type="c"/>
-			<item id="There" type="i"/>
+			<item id="There" type="i" icon="gtk-go-down"/>
 			<item id="Where?" type="r"/>
 		</menu>
 	</item>
