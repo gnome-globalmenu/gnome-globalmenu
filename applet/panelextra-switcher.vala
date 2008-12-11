@@ -175,14 +175,18 @@ namespace PanelExtra {
 			screen = Wnck.Screen.get_default();
 			(screen as WnckCompat.Screen).active_window_changed += (screen, previous_window) => {
 				refresh_applications_list(mi_application);
-				refresh_name((window as Wnck.Window));
+				weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
+				refresh_name(window);
 			};
 			(screen as Wnck.Screen).window_closed += (window) => {
 				refresh_applications_list(mi_application);
+				weak Wnck.Window awindow = Wnck.Screen.get_default().get_active_window();
+				refresh_name(awindow);
 			};
 			(screen as Wnck.Screen).window_opened += (window) => {
 				refresh_applications_list(mi_application);
-				refresh_name((window as Wnck.Window));
+				weak Wnck.Window awindow = Wnck.Screen.get_default().get_active_window();
+				refresh_name(awindow);
 			};
 		}
 	}

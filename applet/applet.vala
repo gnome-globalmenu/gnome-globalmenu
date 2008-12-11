@@ -82,6 +82,9 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 				menubar.switch(xid);
 			}
 	}
+	/*private override void size_allocate(Gdk.Rectangle a) {
+		//message("test");
+	}*/
     private void on_change_background (GlobalMenuApplet applet, Panel.AppletBackgroundType bgtype,
                                        Gdk.Color? color, Gdk.Pixmap? pixmap) {
         Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
