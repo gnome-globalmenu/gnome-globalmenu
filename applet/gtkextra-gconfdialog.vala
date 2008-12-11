@@ -10,7 +10,6 @@
  * 						string dislog_title: text to be shown on window title bar
  *
  * TODO: Only BOOL and INT data types are implemented. STRING is implemented only partially (read)
- * 		 "Restore default" button for each entry
  */
 
 using GLib;

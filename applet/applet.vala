@@ -2,7 +2,6 @@ using GLib;
 using Panel;
 using PanelCompat;
 using Gtk;
-public extern string* __get_task_name_by_pid(int pid);
 public extern int system(string? cmd);
 
 public class GlobalMenuApplet : PanelCompat.Applet {
@@ -27,7 +26,6 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 	private Gnomenu.MenuBar menubar;
 	private Gtk.Box box;
 	private PanelExtra.Switcher switcher;
-	private GLib.HashTable<string,string> switcher_dictionary;
 	
     public static bool factory (Panel.Applet applet, string iid) {
         ((GlobalMenuApplet) applet).create ();
@@ -75,35 +73,6 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 		gcd.run();
 		gcd.destroy();
     }
-    private string remove_path(string txt, string separator) {
-    	long co = txt.length-1;
-		while ((co>=0) && (txt.substring(co, 1)!=separator)) {
-			co--;
-		}
-		string ret = txt.substring(co+1,(txt.length-co-1));
-		return ret;
-	}
-    private string get_application_name(Wnck.Window window) {
-		string txt = __get_task_name_by_pid(window.get_application().get_pid());
-		if ((txt==null) || (txt=="")) return window.get_application().get_name();
-		string ret = txt.chomp();
-		if (ret.substring(ret.length-4,4)==".exe") return remove_path(ret, "\\"); // is a wine program
-
-		ret = remove_path(ret.split(" ")[0], "/");
-			
-		switch(ret) {
-		case "mono":
-		case "python":
-		case "python2.5":
-		case "vmplayer":
-			return remove_path(txt.chomp().split(" ")[1], "/");
-			break;
-		case "wine":
-			return window.get_application().get_name();
-			break;
-		}
-		return ret;
-	}
 	private void on_active_window_changed (WnckCompat.Screen screen, Wnck.Window? previous_window){
 		weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
@@ -111,18 +80,6 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 				if(transient_for != null) window = transient_for;
 				string xid = window.get_xid().to_string();
 				menubar.switch(xid);
-				
-				string aname = "Desktop";
-				if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
-					aname = get_application_name(window);
-					if (switcher_dictionary.lookup(aname)!=null) 
-						aname = switcher_dictionary.lookup(aname); else
-						aname = window.get_name();
-					switcher.set_icon(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
-				} else {
-					switcher.set_icon(new Gtk.Image.from_icon_name("desktop", Gtk.IconSize.MENU));
-				}
-				switcher.set_label(aname);
 			}
 	}
     private void on_change_background (GlobalMenuApplet applet, Panel.AppletBackgroundType bgtype,
@@ -200,10 +157,6 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 
 		switcher = new PanelExtra.Switcher();
 		box.pack_start(switcher, false, true, 0);
-
-		switcher_dictionary = GnomeMenuHelper.get_flat_list();
-		if (switcher_dictionary.lookup("nautilus")==null)
-			switcher_dictionary.insert("nautilus", "File Manager");
 		
 		box.pack_start(menubar, true, true, 0);
 		this.add(box);
