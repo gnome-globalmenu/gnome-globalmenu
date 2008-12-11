@@ -5,6 +5,7 @@ INTERNAL = \
 	helper.vala \
 	parser.vala \
 	serializer.vala \
+	menu.vala \
 	menubar.vala \
 	menuitem.vala \
 	window.vala \
