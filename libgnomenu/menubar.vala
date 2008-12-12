@@ -328,10 +328,30 @@ namespace Gnomenu {
 			}
 		}
 		private override bool expose_event(Gdk.EventExpose event) {
+			if((get_flags() & WidgetFlags.HAS_FOCUS) != 0) {
+				message("paint focus");
+				Gtk.paint_focus(style,
+						window,
+						(Gtk.StateType)state,
+						null,
+						this,
+						"menubar-applet",
+						0, 0, -1, -1);
+			}
 			foreach(weak Widget child in get_children()) {
 				propagate_expose(child, event);
 			}
 			return false;
+		}
+		private override bool focus_out_event (Gdk.EventFocus event) {
+			queue_draw();
+			//return base.focus_out_event(event);
+			return false;
+		}
+		private override bool focus_in_event (Gdk.EventFocus event) {
+			queue_draw();
+			return false;
+			//return base.focus_in_event(event);
 		}
 		private override void size_request(out Requisition req) {
 			base.size_request(out req);
