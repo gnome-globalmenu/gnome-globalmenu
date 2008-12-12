@@ -1,4 +1,7 @@
 #include <gtk/gtk.h>
+extern void dyn_patch_widget();
+extern void	dyn_patch_menu_shell();
+extern void	dyn_patch_menu_bar();
 /*
  * _USE_CLOSURES doesn't help improving the performance.
  * */
@@ -27,6 +30,7 @@ void dyn_patch_init () {
 	DETAIL_LABEL = g_quark_from_string("label");
 
 	dyn_patch_widget();
+	dyn_patch_menu_shell();
 	dyn_patch_menu_bar();
 	timer = g_timer_new();
 	g_timer_stop(timer);
@@ -50,15 +54,16 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
 }
 
+GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
+	if(GTK_IS_MENU_BAR(widget)) return widget;
+	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
+}
 void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(menubar != NULL) {
 		g_object_set_qdata_full((GObject*) widget, __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	} else {
 		g_object_set_qdata((GObject*) widget, __MENUBAR__, NULL);
 	}
-}
-GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
-	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
 static void _dyn_patch_label_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	dyn_patch_queue_changed(menubar, widget);
@@ -81,7 +86,7 @@ static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, Gt
 	g_message("submenu changed %p %p", widget, submenu);
 	if(submenu != old_submenu) {
 		if(old_submenu) {
-			dyn_patch_set_menubar_r(submenu, NULL);
+			dyn_patch_set_menubar_r(old_submenu, NULL);
 		}
 		if(submenu) {
 			dyn_patch_set_menubar_r(submenu, menubar);
@@ -95,67 +100,35 @@ static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, Gt
 		dyn_patch_queue_changed(menubar, widget);
 	}
 }
-#ifdef _USE_CLOSURES
-static GClosure * _dyn_patch_get_label_notify_closure(GtkMenuBar * menubar) {
-	GClosure * ret = g_object_get_qdata((GObject*) menubar, __LABEL_NOTIFY_CLOSURE__);
-	if(ret != NULL) return ret;
-	ret = g_cclosure_new_object((GCallback)_dyn_patch_label_notify, (GObject*) menubar);
-	g_closure_ref(ret);
-	g_closure_sink(ret);
-	g_object_set_qdata_full((GObject*) menubar, __LABEL_NOTIFY_CLOSURE__, ret, (GDestroyNotify)g_closure_unref);
-	return ret;
-}
-static GClosure * _dyn_patch_get_submenu_notify_closure(GtkMenuBar * menubar) {
-	GClosure * ret = g_object_get_qdata((GObject*) menubar, __SUBMENU_NOTIFY_CLOSURE__);
-	if(ret != NULL) return ret;
-	ret = g_cclosure_new_object((GCallback) _dyn_patch_submenu_notify, (GObject*) menubar);
-	g_closure_ref(ret);
-	g_closure_sink(ret);
-	g_object_set_qdata_full((GObject*)menubar, __SUBMENU_NOTIFY_CLOSURE__, ret, (GDestroyNotify) g_closure_unref);
-	return ret;
-}
-#endif
+
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
 	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
-#ifdef _USE_CLOSURES
-	if(old && GTK_IS_LABEL(widget))
-		g_signal_handlers_disconnect_matched(widget, 
-				G_SIGNAL_MATCH_CLOSURE, 
-				SIGNAL_NOTIFY, DETAIL_LABEL, 
-				_dyn_patch_get_label_notify_closure(old), 
-				NULL, NULL);
-	if(old && GTK_IS_MENU_ITEM(widget))
-		g_signal_handlers_disconnect_matched(widget, 
-				G_SIGNAL_MATCH_CLOSURE, 
-				SIGNAL_NOTIFY, DETAIL_SUBMENU, 
-				_dyn_patch_get_submenu_notify_closure(old), 
-				NULL, NULL);
-#else
-	if(old && GTK_IS_LABEL(widget))
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_label_notify, 
-				menubar);
-	if(old && GTK_IS_MENU_ITEM(widget)) {
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_submenu_notify, 
-				menubar);
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_visible_notify, 
-				menubar);
+	if(old != menubar) {
+		if(old && GTK_IS_LABEL(widget))
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_label_notify, 
+					menubar);
+		if(old && GTK_IS_MENU_ITEM(widget)) {
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_submenu_notify, 
+					menubar);
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_visible_notify, 
+					menubar);
+		}
+		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_draw_as_radio_notify, 
+					menubar);
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_inconsistent_notify, 
+					menubar);
+			g_signal_handlers_disconnect_by_func(widget, 
+					_dyn_patch_active_notify, 
+					menubar);
+		}
 	}
-	if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_draw_as_radio_notify, 
-				menubar);
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_inconsistent_notify, 
-				menubar);
-		g_signal_handlers_disconnect_by_func(widget, 
-				_dyn_patch_active_notify, 
-				menubar);
-	}
-#endif
 	g_timer_stop(timer);
 	dyn_patch_set_menubar(widget, menubar);
 
@@ -174,35 +147,26 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		}
 	}
 	g_timer_continue(timer);
-#ifdef _USE_CLOSURES
-	if(menubar && GTK_IS_LABEL(widget)) {
-		g_signal_connect_closure_by_id(widget, SIGNAL_NOTIFY, DETAIL_LABEL, 
-				_dyn_patch_get_label_notify_closure(menubar), FALSE);
+	if(menubar != old) {
+		if(menubar && GTK_IS_LABEL(widget)) {
+			g_signal_connect(widget, "notify::label", 
+					_dyn_patch_label_notify, menubar);
+		}
+		if(menubar && GTK_IS_MENU_ITEM(widget)) {
+			g_signal_connect(widget, "notify::submenu", 
+					_dyn_patch_submenu_notify, menubar);
+			g_signal_connect(widget, "notify::visible", 
+					_dyn_patch_visible_notify, menubar);
+		}
+		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+			g_signal_connect(widget, "notify::active", 
+					_dyn_patch_active_notify, menubar);
+			g_signal_connect(widget, "notify::inconsistent", 
+					_dyn_patch_inconsistent_notify, menubar);
+			g_signal_connect(widget, "notify::draw-as-radio", 
+					_dyn_patch_draw_as_radio_notify, menubar);
+		}
 	}
-	if(menubar && GTK_IS_MENU_ITEM(widget)) {
-		g_signal_connect_closure_by_id(widget, SIGNAL_NOTIFY, DETAIL_SUBMENU, 
-				_dyn_patch_get_submenu_notify_closure(menubar), FALSE);
-	}
-#else
-	if(menubar && GTK_IS_LABEL(widget)) {
-		g_signal_connect(widget, "notify::label", 
-				_dyn_patch_label_notify, menubar);
-	}
-	if(menubar && GTK_IS_MENU_ITEM(widget)) {
-		g_signal_connect(widget, "notify::submenu", 
-				_dyn_patch_submenu_notify, menubar);
-		g_signal_connect(widget, "notify::visible", 
-				_dyn_patch_visible_notify, menubar);
-	}
-	if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
-		g_signal_connect(widget, "notify::active", 
-				_dyn_patch_active_notify, menubar);
-		g_signal_connect(widget, "notify::inconsistent", 
-				_dyn_patch_inconsistent_notify, menubar);
-		g_signal_connect(widget, "notify::draw-as-radio", 
-				_dyn_patch_draw_as_radio_notify, menubar);
-	}
-#endif
 	g_timer_stop(timer);
 }
 

@@ -12,15 +12,15 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 	}
 	if(parent != NULL) 
 		menubar = dyn_patch_get_menubar(parent);
-	if(GTK_IS_MENU_BAR(parent))
-		menubar = parent;
 
 	GtkWidget * old = dyn_patch_get_menubar(widget);
-	if(old)
-		dyn_patch_queue_changed(old, widget);
-	dyn_patch_set_menubar_r(widget, menubar);
-	if(menubar) {
-		dyn_patch_queue_changed(menubar, widget);
+	if(old != menubar) {
+		dyn_patch_set_menubar_r(widget, menubar);
+		if(old)
+			dyn_patch_queue_changed(old, widget);
+		if(menubar) {
+			dyn_patch_queue_changed(menubar, widget);
+		}
 	}
 }
 

@@ -52,12 +52,11 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, size_request, (GtkWidget * widget, GtkRequisition * requisition)) {
+  _old_gtk_menu_bar_size_request(widget, requisition);
   if(!g_object_get_data(widget, "is-local")) {
 	  requisition->width = 0;
 	  requisition->height = 0;
-	  return ;
   }
-  _old_gtk_menu_bar_size_request(widget, requisition);
 }
 
 DEFINE_FUNC(gboolean, gtk_menu_bar, can_activate_accel, (GtkWidget * widget, guint signal_id)) {
