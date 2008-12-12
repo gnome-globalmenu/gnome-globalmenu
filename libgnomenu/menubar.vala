@@ -312,14 +312,14 @@ namespace Gnomenu {
 		}
 		private override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
-			int delta_x = allocation.x - a.x;
-			int delta_y = allocation.y - a.y;
+			int delta_x = a.x - allocation.x;
+			int delta_y = a.y - allocation.y;
 			if(delta_x != 0 || delta_y != 0
 					|| a.width != allocation.width
 					|| a.height != allocation.height)
 				need_reset_bg_pixmap = true;
 			
-			background.offset_x += delta_x;
+			background.offset_x += delta_x; 
 			background.offset_y += delta_y;
 			base.size_allocate(a);
 			if(need_reset_bg_pixmap) {
