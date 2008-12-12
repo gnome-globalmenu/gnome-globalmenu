@@ -308,7 +308,8 @@ namespace Gnomenu {
 		}
 		private override void realize() {
 			base.realize();
-		//	reset_bg_pixmap();
+			/* because it is possible that the bg is set before this widget is realized*/
+			reset_bg_pixmap();
 		}
 		private override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
