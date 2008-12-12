@@ -34,7 +34,18 @@ namespace GnomenuGtk {
 		} 
 		return true;
 	}
+	private void bonobo_plug_widget_hack(Gtk.Widget self) {
+		weak Gtk.Widget parent = self.parent;
+		while(parent is Gtk.Widget) {
+			weak string typename = parent.get_type().name();
+			if(typename.str("Bonobo")!= null) {
+				message("Hiding %s", typename);
+				parent.hide();
+			}
+			parent = parent.parent;
+		} 
 
+	}
 	private bool hierachy_changed_eh (SignalInvocationHint ihint, 
 			[CCode (array_length_pos = 1.9) ]
 			Value[] param_values
@@ -47,6 +58,7 @@ namespace GnomenuGtk {
 		Gtk.Window old_toplevel_window = gtk_widget_get_toplevel_window(old_toplevel);
 		Gtk.Window toplevel_window = gtk_widget_get_toplevel_window(self);
 
+		bonobo_plug_widget_hack(self);
 		if(old_toplevel_window != null) {
 			old_toplevel_window.property_notify_event -= window_property_notify_event;
 			old_toplevel_window.set_data("__menubar__", null);
