@@ -6,6 +6,7 @@ BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
+	menubars.vala \
 	main.vala \
 	$(NULL)
 
@@ -29,6 +30,10 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	bash patch.sh
 	touch $@
 
+GlobalMenu_PanelApplet_LDFLAGS = \
+		-g \
+		$(NULL)
+
 GlobalMenu_PanelApplet_LDADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
@@ -44,6 +49,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+		-g \
 		$(NULL)
 
 EXTRA_DIST = \
