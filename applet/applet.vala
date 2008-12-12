@@ -6,7 +6,6 @@ using Panel;
 
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
-	public static int instance_count = 0;
 	static const string SELECTOR = 
 """
 <menu>
@@ -22,17 +21,24 @@ public class Applet : Panel.Applet {
 	public Applet() {
 	}
 	~Applet() {
-		instance_count--;
 	}
+	static construct {
+		screen = Wnck.Screen.get_default();
+		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
+	}
+
 	construct {
-		instance_count++;
-		this.set_name("GlobalMenuPanelApplet");
-		this.add_events(Gdk.EventMask.KEY_PRESS_MASK);
+		set_name("GlobalMenuPanelApplet");
+		add_events(Gdk.EventMask.KEY_PRESS_MASK);
+
 		menubars = new MenuBars();
 		menubars.visible = true;
-		this.add(menubars);
+		add(menubars);
+
 		selector = menubars.selector;
+		/*Put stuff into the selector?*/
 		Parser.parse(selector, SELECTOR.printf("NONE"));
+		selector.visible = false; /* Because it is a dummy */
 
 		main_menubar = menubars.menubar;
 		main_menubar.activate += (menubar, item) => {
@@ -42,7 +48,33 @@ public class Applet : Panel.Applet {
 		};
 
 		/*init wnck*/
-		screen = Wnck.Screen.get_default();
+		init_wnck();
+
+	/* Key grab F10 (gtk-menu-bar-key)*/
+		grab_gtk_menu_bar_key();
+
+		/*init panel */
+		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		set_background_widget(this);
+		/* gconf stuff goes to a ::create method?*/
+		Gdk.Color color;
+		Gdk.Pixmap pixmap;
+		AppletBackgroundType bgtype;
+		bgtype = get_background(out color, out pixmap);
+		(this as Panel.Applet).change_background(bgtype, color, pixmap);
+	}
+
+	private static Wnck.Screen screen;
+	private Gnomenu.Window current_window;
+	private static Gnomenu.Window root_window;
+
+	private MenuBars menubars;
+	/*convenient names, should be replaced by direct access to menubars.xxxx*/
+	private Gnomenu.MenuBar main_menubar;
+	private Gnomenu.MenuBar overflower;
+	private Gnomenu.MenuBar selector;
+
+	private void init_wnck() {
 		screen.active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = screen.get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
@@ -52,7 +84,8 @@ public class Applet : Panel.Applet {
 				if(current_window != null) {
 					/* This is a weird way to free a window:
 					 * We have two reference counts for current_window
-					 * Destroy will release the one held by GTK,
+					 * Destroy will release the one held by GTK( including
+					 * all circular references),
 					 * and the assignment line below will release the one
 					 * held by us.
 					 * */
@@ -64,7 +97,10 @@ public class Applet : Panel.Applet {
 				if(current_window.invalid) {
 					current_window.destroy();
 					current_window = null; 
-					/*TODO: switch to default_window, and continue rather than return*/
+					/* TODO: switch to default_window, 
+					 * and continue rather than return
+					 * Need a little ccode to obtain the desktop
+					 * window.*/
 				}
 				if(current_window != null) {
 					current_window.menu_context_changed += (current_window) => {
@@ -74,14 +110,10 @@ public class Applet : Panel.Applet {
 				update_menubar();
 			}
 		};
-
-		/*init panel*/
-		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
-		set_background_widget(this);
-
-	/* Key grab F10 (gtk-menu-bar-key)*/
-		
-		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
+	
+	}
+	private void grab_gtk_menu_bar_key() {
+		/*FIXME: listen to changes in GTK_SETTINGS.*/
 		int keyval;
 		Gdk.ModifierType mods;
 		main_menubar.get_accel_key(out keyval, out mods);
@@ -93,24 +125,17 @@ public class Applet : Panel.Applet {
 			if(event.keyval == keyval &&
 				(event.state & Gtk.accelerator_get_default_mod_mask())
 				== (mods & Gtk.accelerator_get_default_mod_mask())) {
-				selector.select_first(true);
-				this.key_press_event(event);
-			return false;
+				/* We chain up to the toplevel key_press_event,
+				 * which is listened by all the menubars within
+				 * the applet*/
+				Gtk.Widget toplevel = get_toplevel();
+				if(toplevel != null) 
+					toplevel.key_press_event(event);
+				return false;
 			}
 			return true;
 		};
 	}
-
-	private Wnck.Screen screen;
-	private Gnomenu.Window current_window;
-	private Gnomenu.Window root_window;
-
-	private MenuBars menubars;
-	/*convenient names, should be replaced by direct access to menubars.xxxx*/
-	private Gnomenu.MenuBar main_menubar;
-	private Gnomenu.MenuBar overflower;
-	private Gnomenu.MenuBar selector;
-
 	private void update_menubar() {
 		if(current_window != null) {
 			string context = current_window.menu_context;
