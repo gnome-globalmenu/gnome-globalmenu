@@ -189,7 +189,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 				_dyn_patch_label_notify, menubar);
 	}
 	if(menubar && GTK_IS_MENU_ITEM(widget)) {
-		g_signal_connect(widget, "notify::label", 
+		g_signal_connect(widget, "notify::submenu", 
 				_dyn_patch_submenu_notify, menubar);
 		g_signal_connect(widget, "notify::visible", 
 				_dyn_patch_visible_notify, menubar);
@@ -198,9 +198,9 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		g_signal_connect(widget, "notify::active", 
 				_dyn_patch_active_notify, menubar);
 		g_signal_connect(widget, "notify::inconsistent", 
-				_dyn_patch_active_notify, menubar);
+				_dyn_patch_inconsistent_notify, menubar);
 		g_signal_connect(widget, "notify::draw-as-radio", 
-				_dyn_patch_active_notify, menubar);
+				_dyn_patch_draw_as_radio_notify, menubar);
 	}
 #endif
 	g_timer_stop(timer);
