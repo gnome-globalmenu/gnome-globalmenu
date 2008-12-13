@@ -65,10 +65,10 @@ namespace Gnomenu {
 </menu>
 """;
 
+		Gdk.Color color;
 		TestMenuBar () {
 			base("/MenuBar");
 			window = new Gtk.Window(WindowType.TOPLEVEL);
-			Gdk.Color color;
 			Gdk.Color.parse("#0000ff", out color);
 			window.modify_bg(StateType.NORMAL, color);
 			menubar = new MenuBar();
@@ -92,9 +92,13 @@ namespace Gnomenu {
 			});
 			add("Overflown", () => {
 				Parser.parse( menubar, test1);
+				menubar.modify_bg(StateType.NORMAL, color);
 				menubar.gravity = Gravity.UP;
+				menubar.activate += (bar, item) => {
+					message("%s", item.path);
+				};
 				window.add(menubar);
-				window.set_size_request(10, 10);
+				menubar.min_length = 20;
 				window.destroy += Gtk.main_quit;
 				window.show_all();
 				assert(menubar.overflown == true);

@@ -2,21 +2,30 @@ using GLib;
 using Gtk;
 using Gnomenu;
 
+private struct ChildPropBag {
+	public bool expand;
+}
+
 public class MenuBars: Gtk.Container {
-	static const string OVERFLOWER_TEMPLATE =
-"""
-<menu>
-	<item type="a" id="_arrow_">
-	%s
-	</item>
-</menu>
-""";
+	static const int PROP_EXPAND = 1234;
+	static construct {
+		install_child_property(PROP_EXPAND,
+				new ParamSpecBoolean(
+					"expand",
+					"Expand",
+					"the child will expand if set to true",
+					false,
+					ParamFlags.READABLE |
+					ParamFlags.WRITABLE
+					));
+	}
 	public PackDirection pack_direction {
 		get {
 			return _pack_direction;
 		}
 		set {
-			foreach(Gnomenu.MenuBar menubar in internal_children) {
+			if(_pack_direction == value) return;
+			foreach(Gnomenu.MenuBar menubar in children) {
 				menubar.pack_direction = value;
 				menubar.child_pack_direction = value;
 			}
@@ -29,8 +38,9 @@ public class MenuBars: Gtk.Container {
 			return _gravity;
 		}
 		set {
+			if(_gravity == value) return;
 			_gravity = value;
-			foreach(Gnomenu.MenuBar menubar in internal_children) {
+			foreach(Gnomenu.MenuBar menubar in children) {
 				menubar.gravity = value;
 			}
 			queue_draw();
@@ -39,85 +49,57 @@ public class MenuBars: Gtk.Container {
 	public Background background {
 		set {
 			Background bg = value.clone();
-			foreach(Gnomenu.MenuBar menubar in internal_children) {
+			foreach(Gnomenu.MenuBar menubar in children) {
 				bg.offset_x = menubar.allocation.x - allocation.x;
 				bg.offset_y = menubar.allocation.y - allocation.y;
 				menubar.background = bg;
 			}
 		}
 	}
-	public Gnomenu.MenuBar selector {
-		get {
-			return _selector;
-		}
-	}
-	public Gnomenu.MenuBar menubar {
-		get {
-			return _menubar;
-		}	
-	}
 	public MenuBars() {
 	}
 	construct {
 		set_flags(WidgetFlags.NO_WINDOW);
-		_selector = add_menubar();
-		_menubar = add_menubar();
-		_overflower = add_menubar();
-		Parser.parse(_overflower, OVERFLOWER_TEMPLATE.printf("<menu/>"));
-		_overflower.activate += (menubar, item) => {
-			string path = item.path;
-			if(item.id == "_arrow_") {
-				string overflown_menu = _menubar.create_overflown_menu();
-				if(overflown_menu == null) {
-					overflown_menu = "<menu/>";
-				}
-				string overflower_context = OVERFLOWER_TEMPLATE.printf(overflown_menu);
-				Parser.parse(_overflower, overflower_context);
-				return;
-			}
-			int slashes = 0;
-			StringBuilder sb = new StringBuilder("");
-			/***
-			 * path = "00001234:/0/1/234/512";
-			 * sb =   "00001234:  /1/234/512";
-			 */
-			bool skip = false;
-			for(int i = 0; i < path.length; i++) {
-				if( path[i] == '/') {
-					slashes ++;
-				}
-				if(slashes != 1) 
-					sb.append_unichar(path[i]);
-			}
-			if(slashes > 1) {
-				Gnomenu.MenuItem item = _menubar.get(sb.str);
-				if(item != null)
-					_menubar.activate(item);
-				else {
-					warning("MenuItem %s not found in the main menubar!", sb.str);
-				}
-			}
-		};
-
+		props = new HashTable<weak Widget, ChildPropBag*>.full(direct_hash, direct_equal,
+				null, free);
 	}
 
 	private Gnomenu.MenuBar _menubar;
-	private Gnomenu.MenuBar _overflower;
 	private Gnomenu.MenuBar _selector;
 
-
+	private HashTable<weak Widget, ChildPropBag*> props;
 	private PackDirection _pack_direction;
 	private Gnomenu.Gravity _gravity;
 
-	private List<weak Gnomenu.MenuBar> internal_children;
+	private List<weak Gnomenu.MenuBar> children;
 
 	private override void forall(Gtk.Callback cb, void* data) {
 		bool include_internal;
 
 		if(include_internal) {
-			foreach(Gnomenu.MenuBar menubar in internal_children) {
-				cb(menubar);
-			}
+
+		}
+		foreach(Gnomenu.MenuBar menubar in children) {
+			cb(menubar);
+		}
+	}
+	public override void add(Widget child) {
+		if(child is Gnomenu.MenuBar) {
+			children.append(child as Gnomenu.MenuBar);
+			child.set_parent(this);
+			props.insert(child, (ChildPropBag*)malloc(sizeof(ChildPropBag)));
+			(child as Gnomenu.MenuBar).pack_direction = pack_direction;
+			(child as Gnomenu.MenuBar).gravity = gravity;
+			child_set(child, "expand", false, null);
+			child.ref();
+		}
+	}
+	public override void remove(Widget child) {
+		if(child is Gnomenu.MenuBar) {
+			children.remove_all(child as Gnomenu.MenuBar);
+			child.unparent();
+			props.remove(child);
+			child.unref();
 		}
 	}
 	private override void size_request(out Requisition r) {
@@ -127,33 +109,24 @@ public class MenuBars: Gtk.Container {
 		switch(pack_direction) {
 			case PackDirection.LTR:
 			case PackDirection.RTL:
-				foreach(Gnomenu.MenuBar menubar in internal_children) {
+				foreach(Gnomenu.MenuBar menubar in children) {
 					menubar.size_request(out cr);
-					if(menubar != _menubar) {
-						r.width += cr.width;
-					}
 					r.height = r.height>cr.height?r.height:cr.height;
+					r.width += cr.width;
 				}
 			break;
 			case PackDirection.BTT:
 			case PackDirection.TTB:
-				foreach(Gnomenu.MenuBar menubar in internal_children) {
+				foreach(Gnomenu.MenuBar menubar in children) {
 					menubar.size_request(out cr);
-					if(menubar != _menubar) {
-						r.height += cr.height;
-					}
 					r.width = r.width>cr.width?r.width:cr.width;
+					r.height += cr.height;
 				}
 			break;
 		}
 	}
 	private override void map() {
 		base.map();
-		foreach(Gnomenu.MenuBar menubar in internal_children) {
-			if(menubar.visible) {
-				menubar.map();
-			}
-		}
 	}
 	private override void size_allocate(Gdk.Rectangle a) {
 		allocation = (Allocation) a;
@@ -168,12 +141,36 @@ public class MenuBars: Gtk.Container {
 		rev_x = a.width;
 		rev_y = a.height;
 
-		foreach(Gnomenu.MenuBar menubar in internal_children) {
+		int num_of_expands = 0;
+		int non_expand_a = 0;
+
+		foreach(Gnomenu.MenuBar menubar in children) {
+			bool expand;
+			child_get(menubar, "expand", &expand, null);
+			if(expand) num_of_expands++;
+			else {
+				menubar.get_child_requisition(out cr);
+				switch(pack_direction) {
+					case PackDirection.LTR:
+					case PackDirection.RTL:
+						non_expand_a += cr.width;
+					break;
+					case PackDirection.BTT:
+					case PackDirection.TTB:
+						non_expand_a += cr.height;
+					break;
+				}
+			}
+		}
+		foreach(Gnomenu.MenuBar menubar in children) {
+			bool expand;
 			menubar.get_child_requisition(out cr);
+			child_get(menubar, "expand", &expand, null);
 			switch(pack_direction) {
 				case PackDirection.LTR:
-					if(menubar == _menubar) {
-						ca.width = a.width - requisition.width;
+					if(expand) {
+						ca.width = (a.width - non_expand_a)/num_of_expands;
+						if(ca.width < 0) ca.width = 0;
 					} else {
 						ca.width = cr.width;
 					}
@@ -183,8 +180,9 @@ public class MenuBars: Gtk.Container {
 					x += ca.width;
 				break;
 				case PackDirection.RTL:
-					if(menubar == _menubar) {
-						ca.width = a.width - requisition.width;
+					if(expand) {
+						ca.width = (a.width - non_expand_a)/num_of_expands;
+						if(ca.width < 0) ca.width = 0;
 					} else {
 						ca.width = cr.width;
 					}
@@ -196,8 +194,9 @@ public class MenuBars: Gtk.Container {
 				break;
 				case PackDirection.BTT:
 					ca.width = a.width;
-					if(menubar == _menubar) {
-						ca.height = a.height - requisition.height;
+					if(expand) {
+						ca.height = (a.height - non_expand_a)/num_of_expands;
+						if(ca.height < 0) ca.height = 0;
 					} else {
 						ca.height = cr.height;
 					}
@@ -208,8 +207,9 @@ public class MenuBars: Gtk.Container {
 				break;
 				case PackDirection.TTB:
 					ca.width = a.width;
-					if(menubar == _menubar) {
-						ca.height = a.height - requisition.height;
+					if(expand) {
+						ca.height = (a.height - non_expand_a)/num_of_expands;
+						if(ca.height < 0) ca.height = 0;
 					} else {
 						ca.height = cr.height;
 					}
@@ -220,21 +220,30 @@ public class MenuBars: Gtk.Container {
 			}
 			menubar.size_allocate((Gdk.Rectangle)ca);
 		}
-		if(_menubar.overflown) {
-			_overflower.visible = true;
-		} else {
-			_overflower.visible = false;
-		}
 		base.size_allocate(a);
 	}
-	private Gnomenu.MenuBar add_menubar() {
-		Gnomenu.MenuBar menubar = new Gnomenu.MenuBar();
-		menubar.visible = true;
-		menubar.set_parent(this);
-
-		internal_children.append(menubar);
-		return menubar;
+	private override void get_child_property(Gtk.Widget child, uint id,
+			Value value, ParamSpec pspec) {
+		switch(id) {
+			case PROP_EXPAND:
+				ChildPropBag* prop = props.lookup(child);
+				value.set_boolean(prop->expand);
+			break;
+		}
 	}
-
+	private override void set_child_property(Gtk.Widget child, uint id,
+			Value value, ParamSpec pspec) {
+		switch(id) {
+			case PROP_EXPAND:
+				bool expand = value.get_boolean();
+				ChildPropBag* prop = props.lookup(child);
+				if(prop->expand != expand) {
+					prop->expand = expand;
+					queue_resize();
+				}
+			break;
+		}
+	
+	}
 
 }

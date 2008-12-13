@@ -1,5 +1,5 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1724
+%define 	svn_version 	svn1732
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -38,13 +38,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
-%{_libdir}/libglobalmenu-gnome-0.7.0.so.1.0.0
-%{_libdir}/libglobalmenu-gnome-0.7.0.so.1
-%{_libdir}/libglobalmenu-gnome.a
-%{_libdir}/libglobalmenu-gnome.la
-%{_libdir}/libglobalmenu-gnome.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so.1.0.0
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so.1
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.a
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
 %{_libexecdir}/GlobalMenu.PanelApplet
 %{_datadir}/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 %{_datadir}/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
