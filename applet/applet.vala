@@ -39,17 +39,18 @@ public class Applet : Panel.Applet {
 		/*Put stuff into the selector?*/
 		Parser.parse(selector, SELECTOR.printf("NONE"));
 		selector.visible = false; /* Because it is a dummy */
+		menubars.add(selector);
 
 		main_menubar = new Gnomenu.MenuBar();
+		main_menubar.min_length = 0;  /*Then it will have a overflown item*/
 		main_menubar.activate += (menubar, item) => {
 			if(current_window != null) {
 				current_window.emit_menu_event(item.path);
 			}
 		};
-		main_menubar.min_length = 0;
-		menubars.add(selector);
 		menubars.add(main_menubar);
-		menubars.child_set(main_menubar, "expand", true, null);	
+		menubars.child_set(main_menubar, "expand", true, null);	/*Let the main_menubar use the remaining space in the applet.*/
+
 		/*init wnck*/
 		init_wnck();
 

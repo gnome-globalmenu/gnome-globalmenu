@@ -194,6 +194,7 @@ namespace Gnomenu {
 					_overflown_menubar = null;
 				}
 				_min_length = value;
+				queue_resize();
 			}
 		}
 		
