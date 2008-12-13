@@ -47,7 +47,7 @@ public int main(string[] args) {
 	int retval = Panel.Applet.factory_main(FACTORY_IID, typeof(Applet), 
 		(applet, iid) => {
 			if(iid == Applet.IID) {
-				applet.show_all();
+				applet.show();
 				return true;
 			} else return false;
 		}) ;	

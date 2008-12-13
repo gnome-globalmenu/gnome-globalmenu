@@ -106,23 +106,21 @@ public class MenuBars: Gtk.Container {
 		r.width = 0;
 		r.height = 0;
 		Requisition cr;
-		switch(pack_direction) {
-			case PackDirection.LTR:
-			case PackDirection.RTL:
-				foreach(Gnomenu.MenuBar menubar in children) {
-					menubar.size_request(out cr);
-					r.height = r.height>cr.height?r.height:cr.height;
-					r.width += cr.width;
-				}
-			break;
-			case PackDirection.BTT:
-			case PackDirection.TTB:
-				foreach(Gnomenu.MenuBar menubar in children) {
-					menubar.size_request(out cr);
-					r.width = r.width>cr.width?r.width:cr.width;
-					r.height += cr.height;
-				}
-			break;
+		foreach(Gnomenu.MenuBar menubar in children) {
+			if(!menubar.visible) continue;
+			menubar.size_request(out cr);
+			switch(pack_direction) {
+				case PackDirection.LTR:
+				case PackDirection.RTL:
+						r.height = r.height>cr.height?r.height:cr.height;
+						r.width += cr.width;
+				break;
+				case PackDirection.BTT:
+				case PackDirection.TTB:
+						r.width = r.width>cr.width?r.width:cr.width;
+						r.height += cr.height;
+				break;
+			}
 		}
 	}
 	private override void map() {
@@ -145,6 +143,7 @@ public class MenuBars: Gtk.Container {
 		int non_expand_a = 0;
 
 		foreach(Gnomenu.MenuBar menubar in children) {
+			if(!menubar.visible) continue;
 			bool expand;
 			child_get(menubar, "expand", &expand, null);
 			if(expand) num_of_expands++;
@@ -164,6 +163,7 @@ public class MenuBars: Gtk.Container {
 		}
 		foreach(Gnomenu.MenuBar menubar in children) {
 			bool expand;
+			if(!menubar.visible) continue;
 			menubar.get_child_requisition(out cr);
 			child_get(menubar, "expand", &expand, null);
 			switch(pack_direction) {
