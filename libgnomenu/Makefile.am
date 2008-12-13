@@ -9,7 +9,7 @@ INTERNAL = \
 	menubar.vala \
 	menuitem.vala \
 	window.vala \
-	box.vala \
+	menubarbox.vala \
 	keygrab.vala \
 	$(NULL)
 

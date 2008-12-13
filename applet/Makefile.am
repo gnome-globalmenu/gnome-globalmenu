@@ -6,7 +6,6 @@ BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
-	menubars.vala \
 	main.vala \
 	$(NULL)
 

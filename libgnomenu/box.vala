@@ -1,5 +1,8 @@
 using Gtk;
-
+Don't use this file.
+/*****
+ * Deperacated
+ * ******/
 namespace Gnomenu {
 	public class Box: Gtk.Box {
 		public Box(){ }

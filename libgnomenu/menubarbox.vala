@@ -1,12 +1,11 @@
-using GLib;
 using Gtk;
-using Gnomenu;
 
+namespace Gnomenu {
 private struct ChildPropBag {
 	public bool expand;
 }
 
-public class MenuBars: Gtk.Container {
+public class MenuBarBox: Gtk.Container {
 	static const int PROP_EXPAND = 1234;
 	static construct {
 		install_child_property(PROP_EXPAND,
@@ -56,7 +55,7 @@ public class MenuBars: Gtk.Container {
 			}
 		}
 	}
-	public MenuBars() {
+	public MenuBarBox() {
 	}
 	construct {
 		set_flags(WidgetFlags.NO_WINDOW);
@@ -73,14 +72,13 @@ public class MenuBars: Gtk.Container {
 
 	private List<weak Gnomenu.MenuBar> children;
 
-	private override void forall(Gtk.Callback cb, void* data) {
-		bool include_internal;
-
+	private override void forall(Gtk.Callback callback, void* data) {
+		bool include_internal = false;
 		if(include_internal) {
 
 		}
 		foreach(Gnomenu.MenuBar menubar in children) {
-			cb(menubar);
+			callback(menubar);
 		}
 	}
 	public override void add(Widget child) {
@@ -102,7 +100,7 @@ public class MenuBars: Gtk.Container {
 			child.unref();
 		}
 	}
-	private override void size_request(out Requisition r) {
+	public override void size_request(out Requisition r) {
 		r.width = 0;
 		r.height = 0;
 		Requisition cr;
@@ -126,7 +124,7 @@ public class MenuBars: Gtk.Container {
 	private override void map() {
 		base.map();
 	}
-	private override void size_allocate(Gdk.Rectangle a) {
+	public override void size_allocate(Gdk.Rectangle a) {
 		allocation = (Allocation) a;
 		Requisition cr;
 		Allocation ca;
@@ -246,4 +244,5 @@ public class MenuBars: Gtk.Container {
 	
 	}
 
+}
 }

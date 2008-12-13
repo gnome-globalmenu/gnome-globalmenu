@@ -460,7 +460,7 @@ namespace Gnomenu {
 			unset_flags(WidgetFlags.MAPPED);
 			window.hide();
 		}
-		private override void size_allocate(Gdk.Rectangle a) {
+		public override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
 			int delta_x = a.x - allocation.x;
 			int delta_y = a.y - allocation.y;
@@ -564,7 +564,7 @@ namespace Gnomenu {
 			queue_draw();
 			return false;
 		}
-		private override void size_request(out Requisition req) {
+		public override void size_request(out Requisition req) {
 			base.size_request(out real_requisition);
 			req = real_requisition;
 			if(min_length >= 0) {

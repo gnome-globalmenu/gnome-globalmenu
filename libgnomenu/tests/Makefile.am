@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.decl
 
 
 
-VALASOURCES = test-box.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala
+VALASOURCES = test-grab.vala test-parser.vala  test-menubar.vala test-window.vala
 STAMP = $(VALASOURCES:.vala=.stamp)
 SUFFIXES = .vala .stamp
 .vala.stamp:

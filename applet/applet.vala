@@ -31,7 +31,7 @@ public class Applet : Panel.Applet {
 		set_name("GlobalMenuPanelApplet");
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
-		menubars = new MenuBars();
+		menubars = new MenuBarBox();
 		menubars.visible = true;
 		add(menubars);
 
@@ -72,10 +72,9 @@ public class Applet : Panel.Applet {
 	private Gnomenu.Window current_window;
 	private static Gnomenu.Window root_window;
 
-	private MenuBars menubars;
+	private MenuBarBox menubars;
 	/*convenient names, should be replaced by direct access to menubars.xxxx*/
 	private Gnomenu.MenuBar main_menubar;
-	private Gnomenu.MenuBar overflower;
 	private Gnomenu.MenuBar selector;
 
 	private void init_wnck() {
