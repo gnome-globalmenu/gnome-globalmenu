@@ -112,7 +112,11 @@ namespace GnomenuGtk {
 			}
 		}
 		private void visit_label(Label label) {
-			sb.append(Markup.printf_escaped(" label=\"%s\"", label.label));
+			string label_text = label.label;
+			label_text.strip();
+			if(label_text.length > 0) {
+				sb.append(Markup.printf_escaped(" label=\"%s\"", label_text));
+			}
 			if(label is AccelLabel) {
 				(label as AccelLabel).refetch();
 				string accel_string = (label as AccelLabel).accel_string;
