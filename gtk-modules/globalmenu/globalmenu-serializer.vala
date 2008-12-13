@@ -10,6 +10,7 @@ namespace GnomenuGtk {
 			s.menubar = menubar;
 			s.pretty_print = pretty_print;
 			s.sb = new StringBuilder("");
+			s.label_sb = new StringBuilder("");
 			s.visit(menubar);
 			message("Serializer consumption = %lf", timer.elapsed(null));
 			return s.sb.str;
@@ -55,8 +56,11 @@ namespace GnomenuGtk {
 			if(menuitem is TearoffMenuItem) return;
 			indent();
 			sb.append("<item");
+			label_sb.erase(0, -1);
 			visit_container(menuitem);
-			
+			if(label_sb.len > 0) {
+				sb.append(Markup.printf_escaped(" label=\"%s\"", label_sb.str));
+			}
 			if(menuitem is SeparatorMenuItem
 			|| menuitem.get_child() == null) 
 				sb.append(" type=\"s\"");
@@ -113,10 +117,7 @@ namespace GnomenuGtk {
 		}
 		private void visit_label(Label label) {
 			string label_text = label.label;
-			label_text.strip();
-			if(label_text.length > 0) {
-				sb.append(Markup.printf_escaped(" label=\"%s\"", label_text));
-			}
+			label_sb.append(label_text);
 			if(label is AccelLabel) {
 				(label as AccelLabel).refetch();
 				string accel_string = (label as AccelLabel).accel_string;
@@ -129,6 +130,7 @@ namespace GnomenuGtk {
 
 		private MenuBar menubar;
 		private StringBuilder sb;
+		private StringBuilder label_sb;
 		private bool pretty_print;
 		private int level;
 		private bool newline;
