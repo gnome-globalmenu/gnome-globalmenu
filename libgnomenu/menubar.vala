@@ -118,6 +118,9 @@ namespace Gnomenu {
 							style = null;
 							RcStyle rc_style = new RcStyle();
 							modify_style(rc_style);
+							if(_overflown_menubar != null) {
+								_overflown_menubar.background = value;
+							}
 						}
 					break;
 					case BackgroundType.COLOR:
@@ -126,6 +129,9 @@ namespace Gnomenu {
 						&& old_color.to_string() !=
 							_background.color.to_string())) {
 							modify_bg(StateType.NORMAL, _background.color);
+							if(_overflown_menubar != null) {
+								_overflown_menubar.background = value;
+							}
 						}
 					break;
 					case BackgroundType.PIXMAP:
