@@ -24,11 +24,6 @@ CLEANFILES =
 include $(top_srcdir)/Makefile.configmake
 include $(top_srcdir)/Makefile.licenses
 
-schemadir   = @GCONF_SCHEMA_FILE_DIR@
-schema_DATA = applet/gnome-globalmenu-applet.schemas
-
-install-data-local:
-	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(srcdir)/$(schema_DATA)
 
 rpm: 
 	touch `find . -name '*.vala'`

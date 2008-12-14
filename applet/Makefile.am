@@ -59,6 +59,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 EXTRA_DIST = \
 	$(STAMP) \
 	patch.sh \
+	gnome-globalmenu-applet.schemas \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
@@ -66,4 +67,13 @@ EXTRA_DIST = \
 	$(NULL)
 
 DISTCLEANFILES = $(server_DATA)
-	
+
+if GCONF_SCHEMAS_INSTALL
+schemadir   = @GCONF_SCHEMA_FILE_DIR@
+schema_DATA = gnome-globalmenu-applet.schemas
+
+install-data-local:
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(schema_DATA)
+else
+install-data-local:
+endif

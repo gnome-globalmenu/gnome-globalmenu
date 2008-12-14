@@ -13,5 +13,4 @@ licenses.vapi: $(LICENSES)
 	rm licenses.gir
 
 BUILT_SOURCES += licenses.vapi licenses.h
-CLEANFILES += licenses.vapi licenses.h
-EXTRA_DIST += $(LICENSES)
+EXTRA_DIST += $(LICENSES) licenses.vapi licenses.h

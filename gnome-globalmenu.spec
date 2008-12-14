@@ -1,5 +1,5 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1753
+%define 	svn_version 	svn1763
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -51,6 +51,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Dec 14 2008 Feng Yu <rainwoodman@gmail.com>
+- GConf for applet 
 * Sun Dec 10 2008 Feng Yu <rainwoodman@gmail.com>
 - RGBA support for popup menus
 * Sun Dec 5 2008 Feng Yu <rainwoodman@gmail.com>

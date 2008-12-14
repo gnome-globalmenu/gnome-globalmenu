@@ -14,7 +14,7 @@ public class GlobalMenuModule {
 	};
 
 	[CCode (cname = "dyn_patch_init")]
-	private static extern void dyn_patch_init();
+	public static extern void dyn_patch_init();
 
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
