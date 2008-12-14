@@ -26,6 +26,7 @@ namespace Panel {
 		[CCode (has_construct_function = false)]
 		public Applet ();
 		public string get_preferences_key ();
+		public void add_preferences(string schema_dir) throws GLib.Error;
 		public static int factory_main (string iid, GLib.Type applet_type, AppletFactoryCallback callback);
 		public void set_background_widget (Gtk.Widget widget);
 		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);

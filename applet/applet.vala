@@ -3,6 +3,7 @@ using Gtk;
 using Gnomenu;
 using Wnck;
 using Panel;
+using GConf;
 
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
@@ -77,6 +78,17 @@ public class Applet : Panel.Applet {
 	private Gnomenu.MenuBar main_menubar;
 	private Gnomenu.MenuBar selector;
 
+	/* to be removed */
+	public static void message(string msg) {
+		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
+							    Gtk.DialogFlags.MODAL,
+							    Gtk.MessageType.INFO,
+							    Gtk.ButtonsType.OK,
+							    msg);
+		m.run();
+		m.destroy();
+	}
+	
 	private void init_wnck() {
 		screen.active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = screen.get_active_window();
@@ -188,7 +200,47 @@ public class Applet : Panel.Applet {
 			break;
 		}
 	}
+	
+	static Applet the_applet;
+	static const string APPLET_NAME = "globalmenu-panel-applet";
+	static const string APPLET_VERSION = "0.6";
+	static const string APPLET_ICON = "gnome-fs-home";
+	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
+	static const string[] APPLET_AUTHORS = {"Coding:",
+						"Yu Feng <rainwoodman@gmail.com>",
+						"Mingxi Wu <fengshenx@gmail.com>",
+						"bis0n.lives <bis0n.lives@gmail.com>",
+						"Luca Viggiani <lviggiani@gmail.com>",
+						"",
+						"Packaging:",
+						"sstasyuk <sstasyuk@gmail.com>",
+						"David Watson <dwatson031@gmail.com>",
+						"Valiant Wing <Valiant.Wing@gmail.com>"};
+	
+	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
+	
+	private override void realize() {
+		base.realize();
+		
+		the_applet = this;
+		
+		/* Connect to gconf */
+		this.add_preferences(GCONF_SCHEMA_DIR);
+		GConf.Client.get_default().value_changed += (key, value) => {
+			this.get_prefs();
+		};
 
+	}
+	
+	private void get_prefs() {
+		message("Preferences have changed");
+		/*switcher.show_label = this.gconf_get_bool("show_name");
+		switcher.show_icon = this.gconf_get_bool("show_icon");
+		switcher.max_size = this.gconf_get_int("title_max_width");
+		switcher.show_window_actions = this.gconf_get_bool("show_window_actions");
+		switcher.show_window_list = this.gconf_get_bool("show_window_list");
+		switcher.refresh();*/
+	}
 }
 
 
