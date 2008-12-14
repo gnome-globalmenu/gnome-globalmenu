@@ -1,11 +1,11 @@
 using Gtk;
 
 namespace Gnomenu {
-private struct ChildPropBag {
-	public bool expand;
-}
 
 public class MenuBarBox: Gtk.Container {
+	private struct ChildPropBag {
+		public bool expand;
+	}
 	static const int PROP_EXPAND = 1234;
 	static construct {
 		install_child_property(PROP_EXPAND,
@@ -89,7 +89,6 @@ public class MenuBarBox: Gtk.Container {
 			(child as Gnomenu.MenuBar).pack_direction = pack_direction;
 			(child as Gnomenu.MenuBar).gravity = gravity;
 			child_set(child, "expand", false, null);
-			child.ref();
 		}
 	}
 	public override void remove(Widget child) {
@@ -97,7 +96,6 @@ public class MenuBarBox: Gtk.Container {
 			children.remove_all(child as Gnomenu.MenuBar);
 			child.unparent();
 			props.remove(child);
-			child.unref();
 		}
 	}
 	public override void size_request(out Requisition r) {
