@@ -5,9 +5,9 @@ namespace Gnomenu {
 	public class MenuLabel: Gtk.Container {
 		public MenuLabel() {
 			_accel_widget = new Label("");
-			_accel_widget.visible = true;
+			_accel_widget.visible = false;
 			_label_widget = new Label("");
-			_label_widget.visible = true;
+			_label_widget.visible = false;
 			_label_widget.use_underline = true;
 			add(_label_widget);
 			add(_accel_widget);
@@ -52,7 +52,9 @@ namespace Gnomenu {
 					_accel_widget.visible = false;
 				} else {
 					_accel_widget.label = value;
+					_accel_widget.visible = true;
 				}
+				queue_resize();
 			}
 		}
 		public string label {
@@ -66,7 +68,9 @@ namespace Gnomenu {
 					_label_widget.visible = false;
 				} else {
 					_label_widget.label = value;
+					_label_widget.visible = true;
 				}
+				queue_resize();
 			}
 		}
 
