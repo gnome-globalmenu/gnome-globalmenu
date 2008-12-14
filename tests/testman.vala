@@ -1,6 +1,8 @@
+using Gtk;
 
-public class TestMan :Object {
+public class TestMan : GLib.Object {
 	public string uri {get; construct; }
+	public Gtk.Window window;
 	public TestMan(string uri) {
 		this.uri = uri;
 	}
@@ -8,6 +10,18 @@ public class TestMan :Object {
 		Test.add_data_func(uri + "/" + name, func);
 	}
 	public void run() {
+		create_test_window();
 		Test.run();
+		window.destroy();
+		window = null;
+	}
+	public void create_test_window() {
+		window = new Gtk.Window(WindowType.TOPLEVEL);
+		window.delete_event += (window) => {
+			window.hide_on_delete();
+			Gtk.main_quit();
+			window.unrealize();
+			return true;
+		};
 	}
 }

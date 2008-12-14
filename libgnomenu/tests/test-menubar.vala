@@ -5,7 +5,6 @@ using Gnomenu;
 
 namespace Gnomenu {
 	class TestMenuBar : TestMan {
-		Gtk.Window window;
 		MenuBar menubar;
 		Box box;
 		static string test1 =
@@ -68,42 +67,39 @@ namespace Gnomenu {
 		Gdk.Color color;
 		TestMenuBar () {
 			base("/MenuBar");
-			window = new Gtk.Window(WindowType.TOPLEVEL);
-			Gdk.Color.parse("#0000ff", out color);
-			window.modify_bg(StateType.NORMAL, color);
-			menubar = new MenuBar();
-			menubar.activate += activate;
-
+			add("init", () => {
+				Gdk.Color.parse("#0000ff", out color);
+				window.modify_bg(StateType.NORMAL, color);
+				menubar = new MenuBar();
+				menubar.activate += activate;
+				menubar.visible = true;
+				window.add(menubar);
+			});
 			add("usability", () => {
 					assert(window is Gtk.Window);
 				Parser.parse( menubar, test1);
-				window.add(menubar);
-				window.destroy += Gtk.main_quit;
-				window.show_all();		
+				menubar.min_length = -1;
+				window.show();		
+				Gtk.main();
+			});
+			add("Overflown", () => {
+				Parser.parse( menubar, test1);
+				Parser.parse( menubar, test1);
+				menubar.modify_bg(StateType.NORMAL, color);
+				menubar.gravity = Gravity.UP;
+				menubar.min_length = 20;
+				window.resize(20, 20);
+				window.show();
+				assert(menubar.overflown == true);
 				Gtk.main();
 			});
 			add("Gravity", () => {
 				Parser.parse( menubar, test1);
 				menubar.gravity = Gravity.UP;
-				window.add(menubar);
-				window.destroy += Gtk.main_quit;
-				window.show_all();
+				window.show();
 				Gtk.main();
 			});
-			add("Overflown", () => {
-				Parser.parse( menubar, test1);
-				menubar.modify_bg(StateType.NORMAL, color);
-				menubar.gravity = Gravity.UP;
-				menubar.activate += (bar, item) => {
-					message("%s", item.path);
-				};
-				window.add(menubar);
-				menubar.min_length = 20;
-				window.destroy += Gtk.main_quit;
-				window.show_all();
-				assert(menubar.overflown == true);
-				Gtk.main();
-			});
+
 			add("get", () => {
 				Parser.parse( menubar, test1);
 				assert(menubar.get("/Go/Here") != null);

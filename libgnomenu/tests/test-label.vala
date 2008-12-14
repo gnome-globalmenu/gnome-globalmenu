@@ -4,29 +4,22 @@ using Gnomenu;
 
 namespace Gnomenu {
 	class TestLabel: TestMan {
-		Gtk.Window window;
+		MenuLabel label;
 		TestLabel () {
 			base("/MenuLabel");
-			window = new Gtk.Window(WindowType.TOPLEVEL);
-
-			add("usability", () => {
-				MenuLabel label = new MenuLabel();
+			add("init", () => {
+				label = new MenuLabel();
 				label.label = "hello";
 				label.accel = "Ctrl_L";
 				label.visible = true;
 				window.add(label);
-				window.destroy += Gtk.main_quit;
+			});
+			add("usability", () => {
 				window.show();		
 				Gtk.main();
 			});
 			add("Gravity", () => {
-				MenuLabel label = new MenuLabel();
-				label.label = "hello";
-				label.accel = "Ctrl_L";
-				label.visible = true;
 				label.gravity = Gravity.LEFT;
-				window.add(label);
-				window.destroy += Gtk.main_quit;
 				window.show();		
 				Gtk.main();
 			});
