@@ -7,8 +7,8 @@ BUILT_SOURCES = \
 	$(NULL)
 
 VALASOURCES = \
+	module-main.vala \
 	globalmenu.vala \
-	globalmenu-main.vala \
 	globalmenu-serializer.vala \
 	globalmenu-locator.vala \
 	$(NULL)
@@ -29,7 +29,7 @@ libglobalmenu_gnome_la_SOURCES = \
 	dyn-patch-widget.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES) gtkaqd.vapi
+$(STAMP): $(VALASOURCES)
 	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) $^
 	touch $@
 $(STAMP:.vapi=.deps):
@@ -52,7 +52,6 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
-	gtkaqd.vapi \
 	$(VALASOURCES) \
 	$(NULL)
 
