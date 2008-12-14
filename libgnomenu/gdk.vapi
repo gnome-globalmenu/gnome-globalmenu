@@ -15,4 +15,5 @@ public bool gdk_property_change (Gdk.Window window,
 		Gdk.PropMode mode,
 		string data,
 		int bytes_size);
-public Gdk.Window gdk_window_foreign_new(ulong native);
+public Gdk.Window? gdk_window_foreign_new(ulong native);
+public weak Gdk.Window? gdk_window_lookup(ulong native);

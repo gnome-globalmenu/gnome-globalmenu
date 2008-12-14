@@ -41,7 +41,7 @@ namespace Gnomenu {
 	   			shell = new MenuBar();
 				Parser.parse(shell, test2);
 				Test.message("%s", Serializer.to_string(shell, true));
-				Window window = new Window(WindowType.TOPLEVEL);
+				Gtk.Window window = new Gtk.Window(WindowType.TOPLEVEL);
 				window.add(shell);
 				shell.visible = true;
 				window.destroy += Gtk.main_quit;
@@ -66,7 +66,7 @@ namespace Gnomenu {
 				Parser.parse(shell, test3);
 				//Parser.parse(shell, test4);
 				Test.message("%s", Serializer.to_string(shell, true));
-				Window window = new Window(WindowType.TOPLEVEL);
+				Gtk.Window window = new Gtk.Window(WindowType.TOPLEVEL);
 				window.add(shell);
 				shell.visible = true;
 				window.destroy += Gtk.main_quit;

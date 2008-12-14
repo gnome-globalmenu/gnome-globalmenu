@@ -26,7 +26,7 @@ public class Applet : Panel.Applet {
 	}
 	static construct {
 		screen = Wnck.Screen.get_default();
-		root_window = new Gnomenu.Window.from_gdk_window(Gdk.get_default_root_window());
+		root_window = Gnomenu.Window.new_from_gdk_window(Gdk.get_default_root_window());
 	}
 
 	construct {
@@ -108,16 +108,7 @@ public class Applet : Panel.Applet {
 					current_window.destroy();
 					assert(current_window.ref_count == 1);
 				}
-				current_window = new Gnomenu.Window.foreign(window.get_xid());
-
-				if(current_window.invalid) {
-					current_window.destroy();
-					current_window = null; 
-					/* TODO: switch to default_window, 
-					 * and continue rather than return
-					 * Need a little ccode to obtain the desktop
-					 * window.*/
-				}
+				current_window = Gnomenu.Window.new_from_native(window.get_xid());
 				if(current_window != null) {
 					current_window.menu_context_changed += (current_window) => {
 						update_menubar();

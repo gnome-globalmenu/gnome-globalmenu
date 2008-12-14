@@ -7,7 +7,7 @@ namespace Gnomenu {
 			base("/Grab");
 
 			add("Grab", () => {
-				Gtk.Window root = new Window.from_gdk_window(Gdk.get_default_root_window());
+				Gtk.Window root = Window.new_from_gdk_window(Gdk.get_default_root_window());
 				window.show();
 
 				uint keyval = Gdk.keyval_from_name("F10");
