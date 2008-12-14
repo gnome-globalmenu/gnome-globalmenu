@@ -52,7 +52,7 @@ namespace Gnomenu {
 	static const string OVERFLOWER_TEMPLATE =
 """
 <menu>
-	<item type="a" id="_arrow_">
+	<item type="n" id="_arrow_">
 	%s
 	</item>
 </menu>
@@ -186,11 +186,12 @@ namespace Gnomenu {
 			get { return _min_length;}
 		   	set {
 				if(value >= 0 && _overflown_menubar == null) {
-
 					_overflown_menubar = create_overflown_menubar();
+					this.unrealize();
+					this.realize();
 				}
 				if(value < 0 && _overflown_menubar != null) {
-					_overflown_menubar.destroy();
+					_overflown_menubar.unparent();
 					_overflown_menubar = null;
 				}
 				_min_length = value;
@@ -342,10 +343,8 @@ namespace Gnomenu {
 		private MenuBar create_overflown_menubar() {
 			MenuBar menubar = new MenuBar();
 			menubar.set_parent(this);
-			menubar.set_parent_window(get_parent_window());
 			menubar.style = style;
 			Parser.parse(menubar,OVERFLOWER_TEMPLATE.printf("<menu/>"));
-			menubar.visible = true;
 			menubar.activate += (menubar, item) => {
 				string path = item.path;
 				if(item.id == "_arrow_") {
@@ -443,22 +442,10 @@ namespace Gnomenu {
 			reset_bg_pixmap();
 		}
 		private override void map() {
-			window.show();
-			set_flags(WidgetFlags.MAPPED);
-			foreach(Widget child in get_children()) {
-				child.map();
+			base.map();
+			if(_overflown_menubar != null && _overflown_menubar.visible) {
+				_overflown_menubar.map();
 			}
-			if(_overflown_menubar != null) {
-				if(overflown) {
-					_overflown_menubar.map();
-				} else {
-					_overflown_menubar.unmap();
-				}
-			}
-		}
-		private override void unmap() {
-			unset_flags(WidgetFlags.MAPPED);
-			window.hide();
 		}
 		public override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
@@ -479,9 +466,7 @@ namespace Gnomenu {
 				Requisition or;
 				_overflown_menubar.get_child_requisition(out or);
 				if(!overflown) {
-					if(0 != (_overflown_menubar.get_flags() & WidgetFlags.REALIZED)) {
-						(_overflown_menubar as Gtk.Widget).unmap();
-					}
+					_overflown_menubar.visible = false;
 				} else {
 					switch(pack_direction) {
 						case PackDirection.TTB:
@@ -523,12 +508,7 @@ namespace Gnomenu {
 				allocation = (Allocation) a;
 				if(overflown) {
 					_overflown_menubar.size_allocate(oa);
-					if(0 != (_overflown_menubar.get_flags() & WidgetFlags.REALIZED)) {
-					/*
-					   Should not use visible because it will queue resize
-					}*/
-						_overflown_menubar.map();
-					}
+					_overflown_menubar.visible = true;
 				}
 			} else  {
 				base.size_allocate(a);
@@ -552,7 +532,7 @@ namespace Gnomenu {
 				propagate_expose(child, event);
 			}
 			if(_overflown_menubar != null) {
-				propagate_expose(_overflown_menubar, event);
+			//	propagate_expose(_overflown_menubar, event);
 			}
 			return false;
 		}
