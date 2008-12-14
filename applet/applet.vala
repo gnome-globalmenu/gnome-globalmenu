@@ -4,6 +4,7 @@ using Gnomenu;
 using Wnck;
 using Panel;
 using GConf;
+public extern int system(string? cmd);
 
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
@@ -203,7 +204,7 @@ public class Applet : Panel.Applet {
 	
 	static Applet the_applet;
 	static const string APPLET_NAME = "globalmenu-panel-applet";
-	static const string APPLET_VERSION = "0.6";
+	static const string APPLET_VERSION = "0.7";
 	static const string APPLET_ICON = "gnome-fs-home";
 	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
 	static const string[] APPLET_AUTHORS = {"Coding:",
@@ -218,7 +219,7 @@ public class Applet : Panel.Applet {
 						"Valiant Wing <Valiant.Wing@gmail.com>"};
 	
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
-	
+		    
 	private override void realize() {
 		base.realize();
 		
@@ -229,11 +230,30 @@ public class Applet : Panel.Applet {
 		GConf.Client.get_default().value_changed += (key, value) => {
 			this.get_prefs();
 		};
-
+		
+		string applet_menu_xml = 
+		    "<popup name=\"button3\">" +
+		        "<menuitem debuname=\"Preferences\" verb=\"Preferences\" _label=\"_Preferences\" pixtype=\"stock\" pixname=\"gtk-preferences\"/>" +
+		        "<menuitem debuname=\"Help\" verb=\"Help\" _label=\"_Help\" pixtype=\"stock\" pixname=\"gtk-help\"/>" +
+		     	"<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gtk-about\"/>" +
+		    "</popup>";
+		    
+		var verbPreferences = BonoboUI.Verb ();
+		verbPreferences.cname = "Preferences";
+		verbPreferences.cb = on_preferences_clicked;
+		
+		var verbAbout = BonoboUI.Verb ();
+		verbAbout.cname = "About";
+		verbAbout.cb = on_about_clicked;
+		
+		var verbHelp = BonoboUI.Verb ();
+		verbHelp.cname = "Help";
+		verbHelp.cb = on_help_clicked;
+		
+		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
+		setup_menu (applet_menu_xml, verbs, null);
 	}
-	
 	private void get_prefs() {
-		message("Preferences have changed");
 		/*switcher.show_label = this.gconf_get_bool("show_name");
 		switcher.show_icon = this.gconf_get_bool("show_icon");
 		switcher.max_size = this.gconf_get_int("title_max_width");
@@ -241,6 +261,41 @@ public class Applet : Panel.Applet {
 		switcher.show_window_list = this.gconf_get_bool("show_window_list");
 		switcher.refresh();*/
 	}
+	private static void on_about_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
+		dialog.version = APPLET_VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
+		dialog.website_label = "Project Home";
+		dialog.wrap_license = false;
+		dialog.license = GPL.Licenses.V2;
+		dialog.logo_icon_name = APPLET_ICON;
+		dialog.authors = APPLET_AUTHORS;
+		dialog.documenters = APPLET_ADOCUMENTERS;
+		dialog.set_icon_name("gtk-about");
+       	dialog.run();
+       	dialog.destroy();
+    }
+    private static void on_help_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
+		dialog.version = APPLET_VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
+		dialog.website_label = "On-line help";
+		dialog.logo_icon_name = "gtk-help";
+		dialog.set_icon_name("gtk-help");
+       	dialog.run();
+       	dialog.destroy();
+    }
+    private static void on_preferences_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+       	system("gconf-editor " + the_applet.get_preferences_key() + " &");
+		/*GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(the_applet.get_preferences_key(), "Applet preferences");
+		gcd.run();
+		gcd.destroy();*/
+    }
 }
 
 
