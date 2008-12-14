@@ -194,8 +194,7 @@ public class Applet : Panel.Applet {
 	}
 	
 	static Applet the_applet;
-	static const string APPLET_NAME = "globalmenu-panel-applet";
-	static const string APPLET_VERSION = "0.7";
+	static const string APPLET_NAME = _("globalmenu-panel-applet");
 	static const string APPLET_ICON = "gnome-fs-home";
 	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
 	static const string[] APPLET_AUTHORS = {"Coding:",
@@ -222,12 +221,24 @@ public class Applet : Panel.Applet {
 			this.get_prefs();
 		};
 		
-		string applet_menu_xml = 
-		    "<popup name=\"button3\">" +
-		        "<menuitem debuname=\"Preferences\" verb=\"Preferences\" _label=\"_Preferences\" pixtype=\"stock\" pixname=\"gtk-preferences\"/>" +
-		        "<menuitem debuname=\"Help\" verb=\"Help\" _label=\"_Help\" pixtype=\"stock\" pixname=\"gtk-help\"/>" +
-		     	"<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gtk-about\"/>" +
-		    "</popup>";
+		string applet_menu_xml = _("""
+<popup name="button3">
+	<menuitem debuname="Preferences" 
+		verb="Preferences" 
+		_label="_Preferences" 
+		pixtype="stock" 
+		pixname="gtk-preferences"/>
+	<menuitem debuname="Help" 
+		verb="Help" 
+		_label="_Help" 
+		pixtype="stock" 
+		pixname="gtk-help"/>
+	<menuitem debuname="About" 
+		verb="About" _label="_About..." 
+		pixtype="stock" 
+		pixname="gtk-about"/>
+</popup>
+		""");
 		    
 		var verbPreferences = BonoboUI.Verb ();
 		verbPreferences.cname = "Preferences";
@@ -256,9 +267,9 @@ public class Applet : Panel.Applet {
                                           void* user_data, string cname) {
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
-		dialog.version = APPLET_VERSION;
+		dialog.version = Config.VERSION;
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
-		dialog.website_label = "Project Home";
+		dialog.website_label = _("Project Home");
 		dialog.wrap_license = false;
 		dialog.license = Licenses.GPLv2;
 		dialog.logo_icon_name = APPLET_ICON;
@@ -272,9 +283,9 @@ public class Applet : Panel.Applet {
                                           void* user_data, string cname) {
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
-		dialog.version = APPLET_VERSION;
+		dialog.version = Config.VERSION;
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
-		dialog.website_label = "On-line help";
+		dialog.website_label = _("On-line help");
 		dialog.logo_icon_name = "gtk-help";
 		dialog.set_icon_name("gtk-help");
        	dialog.run();

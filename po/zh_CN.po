@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-08 16:39-0500\n"
+"POT-Creation-Date: 2008-12-14 18:31-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -19,8 +19,93 @@ msgstr ""
 msgid "Size of check or radio indicator"
 msgstr ""
 
+#: ../gtk-modules/globalmenu/module-main.c:30
+msgid "Be verbose"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:30
+#, fuzzy
+msgid "Disable the Plugin"
+msgstr "公用菜单插件"
+
+#: ../gtk-modules/globalmenu/module-main.c:30
+msgid "File to save the log, default to stderr"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:64
+#, fuzzy
+msgid "- Global Menu plugin Module for GTK"
+msgstr "GNOME公用菜单小程序"
+
+#: ../gtk-modules/globalmenu/module-main.c:65
+msgid ""
+"These parameters should be supplied in environment GLOBALMENU_ARGS instead "
+"of the command line.\n"
+"NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
+"ignored\n"
+"by the plugin."
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:92
+#, fuzzy
+msgid "GlobalMenu is disabled"
+msgstr "公用菜单插件"
+
+#: ../gtk-modules/globalmenu/module-main.c:96
+#, fuzzy
+msgid "GlobalMenu is enabled"
+msgstr "公用菜单插件"
+
+#: ../gtk-modules/globalmenu/module-main.c:137
+#, c-format
+msgid "Log file %s is not accessible. Fallback to stderr. %s"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:193
+msgid "GlobalMenu is disabled for several programs"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:200
+msgid "GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"
+msgstr ""
+
 #: ../applet/main.c:23
 msgid "Show debug messages from GMarkupDoc and Gnomenu"
+msgstr ""
+
+#: ../applet/applet.c:37
+#, fuzzy
+msgid "globalmenu-panel-applet"
+msgstr "公用菜单小程序"
+
+#: ../applet/applet.c:355
+msgid ""
+"\n"
+"<popup name=\"button3\">\n"
+"\t<menuitem debuname=\"Preferences\" \n"
+"\t\tverb=\"Preferences\" \n"
+"\t\t_label=\"_Preferences\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-preferences\"/>\n"
+"\t<menuitem debuname=\"Help\" \n"
+"\t\tverb=\"Help\" \n"
+"\t\t_label=\"_Help\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-help\"/>\n"
+"\t<menuitem debuname=\"About\" \n"
+"\t\tverb=\"About\" _label=\"_About...\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-about\"/>\n"
+"</popup>\n"
+"\t\t"
+msgstr ""
+
+#: ../applet/applet.c:393
+msgid "Project Home"
+msgstr ""
+
+#: ../applet/applet.c:414
+msgid "On-line help"
 msgstr ""
 
 #~ msgid "Show fancy control buttons for menu bars"
@@ -38,20 +123,11 @@ msgstr ""
 #~ msgid "GNOME panel applet for Global Menu"
 #~ msgstr "GNOME 公用菜单小程序"
 
-#~ msgid "Global Menu Applet"
-#~ msgstr "公用菜单小程序"
-
 #~ msgid "Global Menu applet Factory"
 #~ msgstr "公用菜单小程序工厂"
 
 #~ msgid "Global Menu applet factory"
 #~ msgstr "公用菜单小程序工厂"
-
-#~ msgid "Global Menu applet for GNOME"
-#~ msgstr "GNOME公用菜单小程序"
-
-#~ msgid "Global Menu Plugin"
-#~ msgstr "公用菜单插件"
 
 #~ msgid "_About"
 #~ msgstr "关于(_A)"

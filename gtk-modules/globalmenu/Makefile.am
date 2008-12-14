@@ -49,6 +49,7 @@ libglobalmenu_gnome_la_LDFLAGS = \
 
 libglobalmenu_gnome_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS) \
+	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\

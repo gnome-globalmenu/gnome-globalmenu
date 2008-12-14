@@ -8,9 +8,9 @@ public class GlobalMenuModule {
 	private static GLib.OutputStream log_stream;
 
 	private static const OptionEntry [] options = {
-		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, "Be verbose", null},
-		{"disable", 'd', 0, OptionArg.NONE, ref disabled, "Disable the Plugin", null},
-		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, "File to save the log, default to stderr", null}
+		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
+		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
+		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to stderr"), null}
 	};
 
 	[CCode (cname = "dyn_patch_init")]
@@ -28,11 +28,11 @@ public class GlobalMenuModule {
 
 	private static void init (ref string [] args) {
 		if(is_quirky_app()) return;
-		OptionContext context = new OptionContext("- Global Menu plugin Module for GTK");
+		OptionContext context = new OptionContext(N_("- Global Menu plugin Module for GTK"));
 		context.set_description(
-"""These parameters should be supplied in environment GLOBALMENU_ARGS instead of the command line.
+_("""These parameters should be supplied in environment GLOBALMENU_ARGS instead of the command line.
 NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored
-by the plugin."""
+by the plugin.""")
 		);
 		context.set_ignore_unknown_options(false);
 		context.add_main_entries(options, null);
@@ -46,10 +46,10 @@ by the plugin."""
 
 
 		if(disabled) {
-			message("GlobalMenu is disabled");
+			message(_("GlobalMenu is disabled"));
 			return;
 		} else {
-			message("GlobalMenu is enabled");
+			message(_("GlobalMenu is enabled"));
 		}
 
 		prepare_log_file();
@@ -73,7 +73,7 @@ by the plugin."""
 				GLib.File file = GLib.File.new_for_path(log_file_name);
 				log_stream = file.append_to(FileCreateFlags.NONE, null);
 			} catch (GLib.Error e) {
-				warning("Log file %s is not accessible. Fallback to stderr: %s", log_file_name, e.message);
+				warning(_("Log file %s is not accessible. Fallback to stderr. %s"), log_file_name, e.message);
 			}	
 		}
 		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
@@ -99,13 +99,13 @@ by the plugin."""
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
 			case "gdm-user-switch-applet":
-			message("GlobalMenu is disabled for several programs");
+			message(_("GlobalMenu is disabled for several programs"));
 			return true;
 			break;
 			default:
 				if((disabled_application_names!=null) 
 					&& disabled_application_names.str(Environment.get_prgname())!=null){
-					message("GlobalMenu is disabled in GTK_MENUBAR_NO_MAC list");
+					message(_("GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"));
 					return true;
 				}
 			break;

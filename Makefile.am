@@ -22,6 +22,7 @@ BUILT_SOURCES =
 CLEANFILES = 
 
 include $(top_srcdir)/Makefile.configmake
+include $(top_srcdir)/Makefile.config
 include $(top_srcdir)/Makefile.licenses
 
 

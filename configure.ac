@@ -30,7 +30,7 @@ AC_SUBST(GETTEXT_PACKAGE)
 AC_SUBST(VALA_REQUIRED, [0.5.1])
 AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 
-VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses"
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses --pkg config"
 VALAC="$VALAC_BIN $VALA_DEFAULT_PKGS"
 AC_SUBST(VALAC)
 

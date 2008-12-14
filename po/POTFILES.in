@@ -1,3 +1,6 @@
 [encoding: UTF-8]
 libgnomenu/menuitem.c
+libgnomenu/menubarbox.c
+gtk-modules/globalmenu/module-main.c
 applet/main.c
+applet/applet.c
