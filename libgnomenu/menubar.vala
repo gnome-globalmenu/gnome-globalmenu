@@ -187,8 +187,10 @@ namespace Gnomenu {
 		   	set {
 				if(value >= 0 && _overflown_menubar == null) {
 					_overflown_menubar = create_overflown_menubar();
-					this.unrealize();
-					this.realize();
+					if((get_flags() & WidgetFlags.REALIZED) != 0) {
+						unrealize();
+						realize();
+					}
 				}
 				if(value < 0 && _overflown_menubar != null) {
 					_overflown_menubar.unparent();
