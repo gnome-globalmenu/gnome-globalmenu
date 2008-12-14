@@ -26,14 +26,15 @@ AC_SUBST(GETTEXT_PACKAGE)
 
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
-AC_PATH_PROG(VALAC, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
+AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 
-VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake"
-VALAC="$VALAC $VALA_DEFAULT_PKGS"
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses"
+VALAC="$VALAC_BIN $VALA_DEFAULT_PKGS"
+AC_SUBST(VALAC)
 
 AC_CONFIG_COMMANDS_POST(
 		[
-		VALA_VERSION=`$VALAC --version`
+		VALA_VERSION=`$VALAC_BIN --version`
 	   	echo $VALA_VERSION | grep $VALA_REQUIRED || \
 		AC_MSG_WARN([
 			This package works with VALA $VALA_REQUIRED;

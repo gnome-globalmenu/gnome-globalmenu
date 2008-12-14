@@ -20,7 +20,9 @@ DISTCLEANFILES = \
 BUILT_SOURCES =
 
 CLEANFILES = 
+
 include $(top_srcdir)/Makefile.configmake
+include $(top_srcdir)/Makefile.licenses
 
 schemadir   = @GCONF_SCHEMA_FILE_DIR@
 schema_DATA = applet/gnome-globalmenu-applet.schemas

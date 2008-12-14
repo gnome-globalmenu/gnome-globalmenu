@@ -75,7 +75,7 @@ public class Applet : Panel.Applet {
 	private static Gnomenu.Window root_window;
 
 	private MenuBarBox menubars;
-	/*convenient names, should be replaced by direct access to menubars.xxxx*/
+
 	private Gnomenu.MenuBar main_menubar;
 	private Gnomenu.MenuBar selector;
 
@@ -269,7 +269,7 @@ public class Applet : Panel.Applet {
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
 		dialog.website_label = "Project Home";
 		dialog.wrap_license = false;
-		dialog.license = GPL.Licenses.V2;
+		dialog.license = Licenses.GPLv2;
 		dialog.logo_icon_name = APPLET_ICON;
 		dialog.authors = APPLET_AUTHORS;
 		dialog.documenters = APPLET_ADOCUMENTERS;
