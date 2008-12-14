@@ -3,10 +3,23 @@ using Gtk;
 namespace Gnomenu {
 
 	public class MenuLabel: Gtk.Container {
+		public MenuLabel() {
+			_accel_widget = new Label("");
+			_accel_widget.visible = true;
+			_label_widget = new Label("");
+			_label_widget.visible = true;
+			_label_widget.use_underline = true;
+			add(_label_widget);
+			add(_accel_widget);
+			child_set(_accel_widget, "alignment", Pango.Alignment.RIGHT, null);
+			child_set(_accel_widget, "padding", 10, null);
+		}
 		private struct ChildPropBag {
 			public Pango.Alignment alignment;
+			public int padding;
 		}
 		static const int PROP_ALIGNMENT = 1234;
+		static const int PROP_PADDING = 1235;
 		static construct {
 			install_child_property(PROP_ALIGNMENT,
 					new ParamSpecEnum(
@@ -18,24 +31,45 @@ namespace Gnomenu {
 						ParamFlags.READABLE |
 						ParamFlags.WRITABLE
 				));
+			install_child_property(PROP_PADDING,
+					new ParamSpecInt(
+						"padding",
+						"Padding",
+						"the padding on left, both or right",
+						0, 1000, 0,
+						ParamFlags.READABLE |
+						ParamFlags.WRITABLE
+				));
 		}
 		public string accel {
 			get {
-				return _accel_widget.label;
+				return _accel;
 			}
 			set {
-				_accel_widget.label = value;
+				if(_accel == value) return;
+				_accel = value;
+				if(value ==  null) {
+					_accel_widget.visible = false;
+				} else {
+					_accel_widget.label = value;
+				}
+			}
+		}
+		public string label {
+			get {
+				return _label;
+			}
+			set {
+				if(_label == value) return;
+				_label = value;
+				if(value ==  null) {
+					_label_widget.visible = false;
+				} else {
+					_label_widget.label = value;
+				}
 			}
 		}
 
-		public string label {
-			get {
-				return _label_widget.label;
-			}
-			set {
-				_label_widget.label = value;
-			}
-		}
 		public Gravity gravity {
 			get {
 				return _gravity;
@@ -52,13 +86,6 @@ namespace Gnomenu {
 			props = new HashTable<weak Widget, ChildPropBag*>.full(direct_hash, direct_equal,
 				null, free);
 			set_flags(WidgetFlags.NO_WINDOW);
-			_accel_widget = new Label("");
-			_accel_widget.visible = true;
-			_label_widget = new Label("");
-			_label_widget.visible = true;
-			add(_label_widget);
-			add(_accel_widget);
-			child_set(_accel_widget, "alignment", Pango.Alignment.RIGHT, null);
 		}
 		public override void add(Widget child) {
 			if(!(child is Label)) {
@@ -67,7 +94,7 @@ namespace Gnomenu {
 			}
 			children.append(child as Label);
 			child.set_parent(this);
-			props.insert(child, (ChildPropBag*)malloc(sizeof(ChildPropBag)));
+			props.insert(child, (ChildPropBag*)malloc0(sizeof(ChildPropBag)));
 			update_label_gravity(child as Label);
 		}
 		public override void remove(Widget child) {
@@ -83,6 +110,8 @@ namespace Gnomenu {
 		}
 		private Label _label_widget;
 		private Label _accel_widget;
+		private string _label;
+		private string _accel;
 		private Gravity _gravity;
 
 		private List<weak Label> children;
@@ -93,7 +122,8 @@ namespace Gnomenu {
 
 			if(include_internals) {
 			}
-			foreach(Widget child in children) {
+			List<weak Label> copy = children.copy();
+			foreach(Widget child in copy) {
 				callback(child);
 			}
 		}
@@ -104,20 +134,21 @@ namespace Gnomenu {
 			foreach(Widget child in children) {
 				if(!child.visible) continue;
 				child.size_request(out cr);
+				int padding;
+				child_get(child, "padding", &padding, null);
 				switch(gravity) {
 					case Gravity.LEFT:
 					case Gravity.RIGHT:
 						r.width = r.width>cr.width?r.width:cr.width;
-						r.height += cr.height;
+						r.height += (cr.height + padding);
 					break;
 					case Gravity.UP:
 					case Gravity.DOWN:
 						r.height = r.height>cr.height?r.height:cr.height;
-						r.width += cr.width;
+						r.width += (cr.width + padding);
 					break;
 				}
 			}
-			message("%d %d", r.width, r.height);
 		}
 		private override void size_allocate(Gdk.Rectangle a) {
 			allocation = (Allocation)a;
@@ -145,6 +176,10 @@ namespace Gnomenu {
 			foreach(Widget child in children) {
 				if(!child.visible) continue;
 				child.get_child_requisition(out cr);
+				int padding;
+				child_get(child, "padding", &padding, null);
+				Pango.Alignment alignment;
+				child_get(child, "alignment", &alignment, null);
 				switch(gravity) {
 					case Gravity.LEFT:
 					case Gravity.RIGHT:
@@ -152,7 +187,17 @@ namespace Gnomenu {
 						ca.y = y;
 						ca.width = a.width;
 						ca.height = cr.height + expand/num_vis;
-						y += ca.height;
+						y += (ca.height + padding);
+						switch(alignment) {
+							case Pango.Alignment.LEFT:
+							break;	
+							case Pango.Alignment.RIGHT:
+								ca.y += padding;
+							break;	
+							case Pango.Alignment.CENTER:
+								ca.y += padding/2;
+							break;
+						}
 					break;
 					case Gravity.UP:
 					case Gravity.DOWN:
@@ -160,7 +205,17 @@ namespace Gnomenu {
 						ca.y = y;
 						ca.width = cr.width + expand/num_vis;
 						ca.height = a.height;
-						x += ca.width;
+						x += (ca.width + padding);
+						switch(alignment) {
+							case Pango.Alignment.LEFT:
+							break;	
+							case Pango.Alignment.RIGHT:
+								ca.x += padding;
+							break;	
+							case Pango.Alignment.CENTER:
+								ca.x += padding/2;
+							break;
+						}
 					break;
 				}
 				child.size_allocate(ca);
@@ -174,6 +229,11 @@ namespace Gnomenu {
 					assert(prop != null);
 					value.set_enum(prop->alignment);
 				break;
+				case PROP_PADDING:
+					ChildPropBag* prop = props.lookup(child);
+					assert(prop != null);
+					value.set_int(prop->padding);
+				break;
 			}
 		}
 		private override void set_child_property(Gtk.Widget child, uint id,
@@ -186,6 +246,15 @@ namespace Gnomenu {
 					if(prop->alignment != alignment) {
 						prop->alignment = alignment;
 						update_label_gravity(child as Label);
+					}
+				break;
+				case PROP_PADDING:
+					int padding = value.get_int();
+					ChildPropBag* prop = props.lookup(child);
+					assert(prop != null);
+					if(prop->padding != padding) {
+						prop->padding = padding;
+						queue_resize();
 					}
 				break;
 			}

@@ -52,7 +52,7 @@ namespace Gnomenu {
 	static const string OVERFLOWER_TEMPLATE =
 """
 <menu>
-	<item type="n" id="_arrow_">
+	<item type="a" id="_arrow_">
 	%s
 	</item>
 </menu>

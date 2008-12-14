@@ -31,15 +31,14 @@ namespace Gnomenu {
 """;
 		TestParser () {
 			base("/Parser");
-			add("create", () => {
-	   			shell = new MenuBar();
-			});
 			add("test1", () => {
+	   			shell = new MenuBar();
 				Parser.parse(shell, test1);
 				Test.message("%s == %s", test1, Serializer.to_string(shell));
 				assert(test1 == Serializer.to_string(shell));
 			});
 			add("test2/Show", () => {
+	   			shell = new MenuBar();
 				Parser.parse(shell, test2);
 				Test.message("%s", Serializer.to_string(shell, true));
 				Window window = new Window(WindowType.TOPLEVEL);
@@ -50,12 +49,14 @@ namespace Gnomenu {
 				Gtk.main();
 			});
 			add("Reuse", () => {
+	   			shell = new MenuBar();
 				Parser.parse(shell, test2);
 				Parser.parse(shell, test1);
 				Test.message("%s == %s", test1, Serializer.to_string(shell));
 				assert(test1 == Serializer.to_string(shell));
 			});
 			add("Evolution", () => {
+	   			shell = new MenuBar();
 				string test3;
 				string test4;
 				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/libgnomenu/tests/evo-nolabel.xml", out test3, null);

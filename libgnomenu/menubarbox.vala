@@ -77,7 +77,8 @@ public class MenuBarBox: Gtk.Container {
 		if(include_internal) {
 
 		}
-		foreach(Gnomenu.MenuBar menubar in children) {
+		List<weak Gnomenu.MenuBar> copy = children.copy();
+		foreach(Gnomenu.MenuBar menubar in copy) {
 			callback(menubar);
 		}
 	}
