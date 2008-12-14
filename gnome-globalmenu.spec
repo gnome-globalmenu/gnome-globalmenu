@@ -1,8 +1,8 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1763
+%define 	svn_version 	svn1764
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -14,6 +14,10 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{base_version}-%{release}-XXXXXXX)
 Requires:		gtk2
 Requires:		libwnck
 Requires:		gnome-panel
+Requires(pre): GConf2
+Requires(post): GConf2
+Requires(preun): GConf2
+
 
 %description
 GNOME Global Menu project aims to improve GNOME toward a Document Centric Desktop Environment. Global Menu is a menu bar shared with every window in this screen/session. This package extends GTK and gnome panel in a way such that Global Menu can be enabled on all GTK applications.
@@ -23,7 +27,7 @@ GNOME Global Menu project aims to improve GNOME toward a Document Centric Deskto
 
 
 %build
-%configure
+%configure --disable-schemas-install
 make %{?_smp_mflags}
 
 
@@ -35,6 +39,24 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%pre
+if [ "$1" -gt 1 ] ; then
+	export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+	gconftool-2 --makefile-uninstall-rule \
+	%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas >/dev/null || :
+fi
+
+%post
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-install-rule \
+		%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas > /dev/null || :
+
+%preun
+if [ "$1" -eq 0 ] ; then
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-uninstall-rule \
+		%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas > /dev/null || :
+		fi
 
 %files
 %defattr(-,root,root,-)
@@ -47,6 +69,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libexecdir}/GlobalMenu.PanelApplet
 %{_datadir}/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
 %{_datadir}/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
+%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas
+
 
 
 

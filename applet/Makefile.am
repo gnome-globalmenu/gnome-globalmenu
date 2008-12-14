@@ -68,9 +68,10 @@ EXTRA_DIST = \
 
 DISTCLEANFILES = $(server_DATA)
 
-if GCONF_SCHEMAS_INSTALL
 schemadir   = @GCONF_SCHEMA_FILE_DIR@
 schema_DATA = gnome-globalmenu-applet.schemas
+
+if GCONF_SCHEMAS_INSTALL
 
 install-data-local:
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(schema_DATA)

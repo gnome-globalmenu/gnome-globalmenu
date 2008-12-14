@@ -32,3 +32,5 @@ rpm:
 	cp *.tar.gz ~/rpmbuild/SOURCES
 	rpmbuild -bb *.spec
 
+rpm-fast:
+	rpmbuild -bb *.spec
