@@ -24,8 +24,8 @@ libglobalmenu_gnome_la_SOURCES = \
 	globalmenu-helper.c \
 	dyn-patch-menubar.c \
 	dyn-patch-menushell.c \
-	dyn-patch-helper.h \
-	dyn-patch-helper.c \
+	dyn-patch.h \
+	dyn-patch.c \
 	dyn-patch-widget.c \
 	$(NULL)
 

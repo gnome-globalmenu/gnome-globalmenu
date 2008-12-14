@@ -1,8 +1,7 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch-helper.h"
+#include "dyn-patch.h"
 
-extern guint SIGNAL_CHANGED;
 DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * child, int position)) {
 	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
 	_old_gtk_menu_shell_insert(shell, child, position);

@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch-helper.h"
+#include "dyn-patch.h"
 
 DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_parent)) {
 	GtkWidget * parent = widget->parent;
