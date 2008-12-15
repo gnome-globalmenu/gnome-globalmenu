@@ -91,6 +91,19 @@ public class Applet : Panel.Applet {
 	}
 	
 	private void init_wnck() {
+		screen.window_closed += (screen, window) => {
+			ulong xid = window.get_xid();
+			if(current_window != null && xid == current_window.xid) {
+				/* if the closed window is current window,
+				 * fallback to the desktop and
+				 * wait for the next active_window_changed event
+				 *
+				 * To solve the haunting menu bar of closed window
+				 * problem.
+				 * */
+				switch_to(find_desktop(screen)); 
+			}
+		};
 		screen.active_window_changed += (screen, previous_window) => {
 			weak Wnck.Window window = screen.get_active_window();
 			if((window != previous_window) && (window is Wnck.Window)) {
@@ -99,32 +112,49 @@ public class Applet : Panel.Applet {
 				switch(window.get_window_type()) {
 					case Wnck.WindowType.NORMAL:
 					case Wnck.WindowType.DESKTOP:
+						switch_to(window);
 					break;
 					default:
-					return;
+						/*Do nothing if it is a toolbox or so*/
+					break;
 				}
-				Parser.parse(selector, SELECTOR.printf(window.get_application().get_name()));
-				if(current_window != null) {
-					/* This is a weird way to free a window:
-					 * We have two reference counts for current_window
-					 * Destroy will release the one held by GTK( including
-					 * all circular references),
-					 * and the assignment line below will release the one
-					 * held by us.
-					 * */
-					current_window.destroy();
-					assert(current_window.ref_count == 1);
-				}
-				current_window = Gnomenu.Window.new_from_native(window.get_xid());
-				if(current_window != null) {
-					current_window.menu_context_changed += (current_window) => {
-						update_menubar();
-					};
-				}
-				update_menubar();
 			}
 		};
 	
+	}
+	private void switch_to(Wnck.Window? window) {
+		Parser.parse(selector, SELECTOR.printf(window.get_application().get_name()));
+		if(current_window != null) {
+			/* This is a weird way to free a window:
+			 * We have two reference counts for current_window
+			 * Destroy will release the one held by GTK( including
+			 * all circular references),
+			 * and the assignment line below will release the one
+			 * held by us.
+			 * */
+			current_window.destroy();
+			assert(current_window.ref_count == 1);
+			current_window = null;
+		}
+		if(window != null) {
+			current_window = Gnomenu.Window.new_from_native(window.get_xid());
+		}
+		if(current_window != null) {
+			current_window.menu_context_changed += (current_window) => {
+				update_menubar();
+			};
+		}
+		update_menubar();
+	}
+	private Wnck.Window? find_desktop(Wnck.Screen screen) {
+		weak List<weak Wnck.Window> windows = screen.get_windows();
+		foreach(weak Wnck.Window window in windows) {
+			if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
+				/*Vala should ref it*/
+				return window;
+			}
+		}
+		return null;
 	}
 	private void grab_gtk_menu_bar_key() {
 		/*FIXME: listen to changes in GTK_SETTINGS.*/
