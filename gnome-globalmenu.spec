@@ -2,7 +2,7 @@
 %define 	svn_version 	svn1771
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
