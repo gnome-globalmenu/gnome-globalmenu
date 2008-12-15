@@ -26,16 +26,22 @@ public class GlobalMenuModule {
 		init(ref real_args);
 	}
 
+	[CCode (cname="MY_")]
+	private static weak string _(string s) {
+		return dgettext(Config.GETTEXT_PACKAGE, s);
+	}
+
 	private static void init (ref string [] args) {
 		if(is_quirky_app()) return;
-		OptionContext context = new OptionContext(N_("- Global Menu plugin Module for GTK"));
+		
+		OptionContext context = new OptionContext(_("- Global Menu plugin Module for GTK"));
 		context.set_description(
-_("""These parameters should be supplied in environment GLOBALMENU_ARGS instead of the command line.
+_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
 NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored
 by the plugin.""")
 		);
 		context.set_ignore_unknown_options(false);
-		context.add_main_entries(options, null);
+		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
 		try {
 			context.parse(ref args);
 		} catch (Error e) {
@@ -64,8 +70,6 @@ by the plugin.""")
 
 		add_emission_hooks();
 
-
-	
 	}
 	private static void prepare_log_file() {
 		if(log_file_name != null) {

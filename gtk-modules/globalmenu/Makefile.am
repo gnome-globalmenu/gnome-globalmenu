@@ -29,8 +29,8 @@ libglobalmenu_gnome_la_SOURCES = \
 	dyn-patch-widget.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES)
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) $^
+$(STAMP): $(VALASOURCES) dgettext.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg dgettext  $(VALASOURCES)
 	touch $@
 $(STAMP:.vapi=.deps):
 	echo > $@
