@@ -53,6 +53,7 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
+	dgettext.vapi \
 	$(VALASOURCES) \
 	$(NULL)
 
