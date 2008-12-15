@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-14 21:39-0500\n"
+"POT-Creation-Date: 2008-12-15 11:38-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -72,11 +72,10 @@ msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr ""
 
 #: ../applet/applet.c:37
-#, fuzzy
 msgid "globalmenu-panel-applet"
 msgstr "全局菜单小程序"
 
-#: ../applet/applet.c:355
+#: ../applet/applet.c:366
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -116,10 +115,10 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:393
+#: ../applet/applet.c:404
 msgid "Project Home"
 msgstr "项目主页"
 
-#: ../applet/applet.c:414
+#: ../applet/applet.c:425
 msgid "On-line help"
 msgstr "在线帮助"

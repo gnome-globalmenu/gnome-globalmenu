@@ -24,7 +24,17 @@ IT_PROG_INTLTOOL
 AM_GLIB_GNU_GETTEXT
 GETTEXT_PACKAGE=gnome-globalmenu
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
+XGETTEXT_KEYWORDS="--keyword=_ --keyword=N_ --keyword=MY_"
 AC_SUBST(GETTEXT_PACKAGE)
+AC_CONFIG_COMMANDS_POST(
+		[
+		MF_IN_IN=po/Makefile.in.in
+		grep XGETTEXT_KEYWORDS $MF_IN_IN || {
+		AC_MSG_WARN(['Patching po/Makefile.in.in 
+			since glib-gettextize overwrites it.'])
+		echo 'XGETTEXT_KEYWORDS='"$XGETTEXT_KEYWORDS" >> po/Makefile.in.in
+		}
+		])
 
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
