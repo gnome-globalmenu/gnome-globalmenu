@@ -96,6 +96,13 @@ public class Applet : Panel.Applet {
 			if((window != previous_window) && (window is Wnck.Window)) {
 				weak Wnck.Window transient_for = window.get_transient();
 				if(transient_for != null) window = transient_for;
+				switch(window.get_window_type()) {
+					case Wnck.WindowType.NORMAL:
+					case Wnck.WindowType.DESKTOP:
+					break;
+					default:
+					return;
+				}
 				Parser.parse(selector, SELECTOR.printf(window.get_xid().to_string()));
 				if(current_window != null) {
 					/* This is a weird way to free a window:
