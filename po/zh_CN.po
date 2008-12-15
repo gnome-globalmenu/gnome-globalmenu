@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-08 16:39-0500\n"
+"POT-Creation-Date: 2008-12-14 21:39-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -13,78 +13,113 @@ msgstr ""
 
 #: ../libgnomenu/menuitem.c:819
 msgid "Indicator Size"
-msgstr ""
+msgstr "选项方框的大小"
 
 #: ../libgnomenu/menuitem.c:819
 msgid "Size of check or radio indicator"
+msgstr "选项方框的大小"
+
+#: ../gtk-modules/globalmenu/module-main.c:32
+msgid "Be verbose"
+msgstr "显示调试信息"
+
+#: ../gtk-modules/globalmenu/module-main.c:32
+msgid "Disable the Plugin"
+msgstr "禁用本插件"
+
+#: ../gtk-modules/globalmenu/module-main.c:32
+msgid "File to save the log, default to stderr"
+msgstr "保存调试信息的文件。默认为标准错误流(stderr)"
+
+#: ../gtk-modules/globalmenu/module-main.c:72
+msgid "- Global Menu plugin Module for GTK"
+msgstr "- 全局菜单 GTK 插件"
+
+#: ../gtk-modules/globalmenu/module-main.c:73
+msgid ""
+"These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
+"instead of the command line.\n"
+"NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
+"ignored\n"
+"by the plugin."
 msgstr ""
+"这些命令行参数应当在环境变量 GLOBALMENU_GNOME_ARGS 里设置。注意: 可以在 "
+"GTK_MENUBAR_NO_MAC 环境变量里提供禁用插件的应用程序列表。"
+
+#: ../gtk-modules/globalmenu/module-main.c:100
+msgid "GlobalMenu is disabled"
+msgstr "全局菜单插件被禁用"
+
+#: ../gtk-modules/globalmenu/module-main.c:104
+msgid "GlobalMenu is enabled"
+msgstr "全局菜单插件被启用"
+
+#: ../gtk-modules/globalmenu/module-main.c:145
+#, c-format
+msgid "Log file %s is not accessible. Fallback to stderr. %s"
+msgstr "日志文件 %s 不可写。将记录到标准错误输出流。%s"
+
+#: ../gtk-modules/globalmenu/module-main.c:201
+msgid "GlobalMenu is disabled for several programs"
+msgstr "对特定的程序全局菜单插件被强制禁用。"
+
+#: ../gtk-modules/globalmenu/module-main.c:208
+msgid "GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"
+msgstr "全局菜单被禁用，因为程序名字被列在 GTK_MENUBAR_NO_MAC 中。"
 
 #: ../applet/main.c:23
 msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr ""
 
-#~ msgid "Show fancy control buttons for menu bars"
-#~ msgstr "显示高级控制按钮"
+#: ../applet/applet.c:37
+#, fuzzy
+msgid "globalmenu-panel-applet"
+msgstr "全局菜单小程序"
 
-#~ msgid "No Stick to the workspace"
-#~ msgstr "不悬浮于活动工作区"
+#: ../applet/applet.c:355
+msgid ""
+"\n"
+"<popup name=\"button3\">\n"
+"\t<menuitem debuname=\"Preferences\" \n"
+"\t\tverb=\"Preferences\" \n"
+"\t\t_label=\"_Preferences\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-preferences\"/>\n"
+"\t<menuitem debuname=\"Help\" \n"
+"\t\tverb=\"Help\" \n"
+"\t\t_label=\"_Help\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-help\"/>\n"
+"\t<menuitem debuname=\"About\" \n"
+"\t\tverb=\"About\" _label=\"_About...\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-about\"/>\n"
+"</popup>\n"
+"\t\t"
+msgstr ""
+"\n"
+"<popup name=\"button3\">\n"
+"\t<menuitem debuname=\"Preferences\" \n"
+"\t\tverb=\"Preferences\" \n"
+"\t\t_label=\"首选项(_P)\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-preferences\"/>\n"
+"\t<menuitem debuname=\"Help\" \n"
+"\t\tverb=\"Help\" \n"
+"\t\t_label=\"帮助(_H)\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-help\"/>\n"
+"\t<menuitem debuname=\"About\" \n"
+"\t\tverb=\"About\" _label=\"关于(_A)...\" \n"
+"\t\tpixtype=\"stock\" \n"
+"\t\tpixname=\"gtk-about\"/>\n"
+"</popup>\n"
+"\t\t"
 
-#~ msgid "No Always on top"
-#~ msgstr "不置顶"
+#: ../applet/applet.c:393
+msgid "Project Home"
+msgstr "项目主页"
 
-#~ msgid "translator_credits"
-#~ msgstr "冯雨"
-
-#~ msgid "GNOME panel applet for Global Menu"
-#~ msgstr "GNOME 公用菜单小程序"
-
-#~ msgid "Global Menu Applet"
-#~ msgstr "公用菜单小程序"
-
-#~ msgid "Global Menu applet Factory"
-#~ msgstr "公用菜单小程序工厂"
-
-#~ msgid "Global Menu applet factory"
-#~ msgstr "公用菜单小程序工厂"
-
-#~ msgid "Global Menu applet for GNOME"
-#~ msgstr "GNOME公用菜单小程序"
-
-#~ msgid "Global Menu Plugin"
-#~ msgstr "公用菜单插件"
-
-#~ msgid "_About"
-#~ msgstr "关于(_A)"
-
-#~ msgid "_Preferences"
-#~ msgstr "偏好设定(_P)"
-
-#~ msgid "Show/Hide the icon of the active window"
-#~ msgstr "显示活动窗口的图标"
-
-#~ msgid "Show/Hide the title of the active application"
-#~ msgstr "显示活动应用程序的标题"
-
-#~ msgid "The Maximum length of title of the active application"
-#~ msgstr "活动应用程序标题的最大长度"
-
-#~ msgid "The font used to display the title of the active application"
-#~ msgstr "显示活动应用程序标题字体"
-
-#~ msgid "<b>Appearence</b>"
-#~ msgstr "<b>外观</b>"
-
-#~ msgid "Display the _icon of the current window."
-#~ msgstr "显示活动窗口的图标(_I)"
-
-#~ msgid "Display the _title of the current application."
-#~ msgstr "显示活动应用程序的标题(_T)"
-
-#~ msgid "Maximum _width"
-#~ msgstr "标题长度限制(_W)"
-
-#~ msgid "Preference"
-#~ msgstr "偏好设定"
-
-#~ msgid "_Font"
-#~ msgstr "字体(_F)"
+#: ../applet/applet.c:414
+msgid "On-line help"
+msgstr "在线帮助"

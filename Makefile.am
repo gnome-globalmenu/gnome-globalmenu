@@ -20,7 +20,11 @@ DISTCLEANFILES = \
 BUILT_SOURCES =
 
 CLEANFILES = 
+
 include $(top_srcdir)/Makefile.configmake
+include $(top_srcdir)/Makefile.config
+include $(top_srcdir)/Makefile.licenses
+
 
 rpm: 
 	touch `find . -name '*.vala'`
@@ -29,3 +33,5 @@ rpm:
 	cp *.tar.gz ~/rpmbuild/SOURCES
 	rpmbuild -bb *.spec
 
+rpm-fast:
+	rpmbuild -bb *.spec

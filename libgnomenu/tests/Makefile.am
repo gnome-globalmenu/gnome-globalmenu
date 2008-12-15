@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.decl
 
 
 
-VALASOURCES = test-grab.vala test-parser.vala  test-menubar.vala test-window.vala
+VALASOURCES = test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala
 STAMP = $(VALASOURCES:.vala=.stamp)
 SUFFIXES = .vala .stamp
 .vala.stamp:
@@ -11,7 +11,6 @@ SUFFIXES = .vala .stamp
 
 TEST_PROGS +=  $(VALASOURCES:.vala=)
 	
-#	test-menushell test-parser test-menubar
 noinst_PROGRAMS = $(TEST_PROGS)
 AM_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
 BUILT_SOURCES = $(STAMP)

@@ -3,7 +3,6 @@ NULL =
 STAMP = vala-stamp
 
 BUILT_SOURCES = $(STAMP)
-
 VALASOURCES = \
 	applet.vala \
 	main.vala \
@@ -25,9 +24,19 @@ GlobalMenu_PanelApplet_SOURCES = \
 
 
 $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
-	$(VALAC) -C --vapidir=. --vapidir=$(top_srcdir)/libgnomenu --pkg=gtk+-2.0 --pkg=libwnck-1.0 --pkg=libpanelapplet-2.0 --pkg=gnomenu-private $(VALASOURCES)
+	$(VALAC) -C --vapidir=. \
+	--vapidir=$(top_srcdir)/libgnomenu \
+	--pkg=gtk+-2.0 --pkg=libwnck-1.0 \
+	--pkg=libpanelapplet-2.0 \
+	--pkg=gnomenu-private \
+	--pkg=gconf-2.0 \
+	$(VALASOURCES)
 	bash patch.sh
 	touch $@
+
+GlobalMenu_PanelApplet_LDFLAGS = \
+		-g \
+		$(NULL)
 
 GlobalMenu_PanelApplet_LDADD = \
 		$(GLIB_LIBS) \
@@ -44,11 +53,13 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+		-g \
 		$(NULL)
 
 EXTRA_DIST = \
 	$(STAMP) \
 	patch.sh \
+	gnome-globalmenu-applet.schemas \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
@@ -56,4 +67,14 @@ EXTRA_DIST = \
 	$(NULL)
 
 DISTCLEANFILES = $(server_DATA)
-	
+
+schemadir   = @GCONF_SCHEMA_FILE_DIR@
+schema_DATA = gnome-globalmenu-applet.schemas
+
+if GCONF_SCHEMAS_INSTALL
+
+install-data-local:
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(schema_DATA)
+else
+install-data-local:
+endif

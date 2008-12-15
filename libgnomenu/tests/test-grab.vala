@@ -7,10 +7,8 @@ namespace Gnomenu {
 			base("/Grab");
 
 			add("Grab", () => {
-				Gtk.Window window = new Gtk.Window(WindowType.TOPLEVEL);
-				Gtk.Window root = new Window.from_gdk_window(Gdk.get_default_root_window());
-				window.destroy += Gtk.main_quit;
-				window.show_all();
+				Gtk.Window root = Window.new_from_gdk_window(Gdk.get_default_root_window());
+				window.show();
 
 				uint keyval = Gdk.keyval_from_name("F10");
 				if(false == grab_key(root.window, keyval, 0)) {

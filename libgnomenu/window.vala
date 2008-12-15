@@ -4,7 +4,7 @@ namespace Gnomenu {
 	 * The Window widget extends Gtk.Window widget.
 	 *
 	 * The Window widget is capable of wrapping a Gdk.Window
-	 * or a foreign native window.
+	 * or a is_foreign native window.
 	 *
 	 * It adds methods to bind any string as a property of
 	 * the underlining Gdk.Window.
@@ -17,55 +17,54 @@ namespace Gnomenu {
 	 *
 	 */
 	public class Window : Gtk.Window {
-		public ulong native {
-			get {
-				return _native;
-			}
-			construct {
-				_native = value;
-			}
-		}
-		public Gdk.Window gdk_window {
-			get;
-			construct;
-		}
 		/**
 		 * If the window is not realized (this.window == null)
 		 */
 		public bool invalid {get {return window == null;}}
-		public Window.foreign(ulong native) {
-			this.native = (ulong) native;
-		}
-		public Window.from_gdk_window(Gdk.Window window) {
-			this.gdk_window = window;
-		}
-		public Window(WindowType type) {
+		public bool is_foreign {get; construct; }
+		public Window (WindowType type) {
 			this.type = type;
+			is_foreign = false;
+		}
+		private Window.foreign() {
+			is_foreign = true;
+		}
+		public static Window? new_from_native(ulong native) {
+			Gdk.Window gdk_window;
+			gdk_window = gdk_window_lookup(native);
+			if(gdk_window == null ) {
+				gdk_window = gdk_window_foreign_new(native);
+			}
+			Window rt = new_from_gdk_window(gdk_window);
+			return rt;
+		}
+		public static Window? new_from_gdk_window(Gdk.Window window) {
+			bool _is_foreign;
+			_is_foreign = false;
+			if(window != null) {
+				if(
+					window.get_window_type() == Gdk.WindowType.FOREIGN ||
+					window.get_window_type() == Gdk.WindowType.ROOT
+				)
+				_is_foreign = true;
+			}
+			if(!_is_foreign) return null;
+
+			Window rt = new Window.foreign();
+			rt.set_events(rt.get_events() 
+			| Gdk.EventMask.PROPERTY_CHANGE_MASK
+			);
+			rt.window = window;
+			message("create: %p ref_count= %u", window, window.ref_count);
+			rt.window.set_events((Gdk.EventMask)rt.get_events());
+			rt.set_flags(WidgetFlags.REALIZED);
+			rt.window.set_user_data(rt);
+			/* To avoid a warning, 
+			 * perhaps it is problematic */
+			rt.style.attach(rt.window);
+			return rt;
 		}
 		construct {
-			_foreign = false;
-			set_events(get_events() 
-			| Gdk.EventMask.PROPERTY_CHANGE_MASK
-/*			| Gdk.EventMask.KEY_PRESS_MASK disable key_press_mask; 
- *			GDK has to use set_user_time on the event but 
- *			that function only works on non-foreign windows.*/
-			);
-			if(_native != 0) {
-				window = gdk_window_foreign_new(_native);
-				_foreign = true;
-			}
-			if(_gdk_window != null) {
-				window = _gdk_window;
-				_foreign = true;
-			}
-			if(!invalid) {
-				window.set_events((Gdk.EventMask)get_events());
-				set_flags(WidgetFlags.REALIZED);
-				window.set_user_data(this);
-				/* To avoid a warning, 
-				 * perhaps it is problematic */
-				style.attach(window);
-			}
 			disposed = false;
 		}
 		/**
@@ -154,54 +153,48 @@ namespace Gnomenu {
 
 		private ulong _native;
 		private string _menu_context;
-		private bool _foreign;
 		private override void realize() {
-			if(_foreign == true) {
-				foreach(Widget child in get_children()) {
-					child.realize();
-				}
-				return;
-			}
+			if(is_foreign) return;
 			base.realize();
 		}
-		private override void map() {
-			if(_foreign == true) {
-				add_events(Gdk.EventMask.EXPOSURE_MASK);
-				foreach(Widget child in get_children()) {
-					child.map();
-				}
-				return;
-			}
+		private override void map() { 
+			if(is_foreign) return; 
 			base.map();
-		}
-		private override void unmap() {
-			if(_foreign == true) {
-				foreach(Widget child in get_children()) {
-					child.unmap();
-				}
-				return;
-			}
+		} 
+		private override void unmap() { 
+			if(is_foreign) return;
 			base.unmap();
 		}
-		private override bool expose_event(Gdk.EventExpose event) {
-			if(_foreign == true) {
-				foreach(Widget child in get_children()) {
-					propagate_expose(child, event);
-				}
-				return true;
-			}
-			base.expose_event(event);
-			return false;
+		private override bool map_event(Gdk.Event event) {
+			/* Here we ignore the default Gtk.Window.map_event
+			 * there is a workaround in Gtk.Window.map_event:
+			 *
+			 * if the widget is not mapped, the wrapped Gdk.Window
+			 * is hiden.
+			 *
+			 * but for a foreign window, we never try to set the
+			 * mapped state of the widget. The workaround
+			 * will think there is a buggy wm, and 
+			 * hide the foreign window. 
+			 *
+			 * We don't expect that to happen. If the default handler
+			 * is not disabled for for foreign windows,
+			 * every time the workspace is switched a lot of windows
+			 * will disappear.
+			 */
+			if(is_foreign) return false;
+			return base.map_event(event);
 		}
+		private override bool expose_event(Gdk.EventExpose event) { 
+			if(is_foreign) return false;
+			return base.expose_event(event);
+		}
+
 		private override void unrealize() {
-			if(_foreign == true) {
-				foreach(Widget child in get_children()) {
-					child.unrealize();
-				}
-				return;
-			}
+			if(is_foreign) return;
 			base.unrealize();
 		}
+
 		private override bool property_notify_event(Gdk.EventProperty event) {
 			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_EVENT, false)) {
 				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
@@ -212,11 +205,13 @@ namespace Gnomenu {
 			return false;
 		}
 		private override void dispose () {
-			if(!disposed) {
-				disposed = true;
-				if(native != 0) {
-						window.set_user_data(null);
-						window = null;
+			if(is_foreign) {
+				if(!disposed) {
+					disposed = true;
+					window.set_user_data(null);
+					/*Don't destroy it ever*/
+					window = null;
+					unset_flags(WidgetFlags.REALIZED);
 				}
 			}
 			base.dispose();

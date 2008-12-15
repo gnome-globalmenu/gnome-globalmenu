@@ -1,0 +1,16 @@
+LICENSES = GPLv2 GPLv3 AUTHORS
+licenses.vapi: $(LICENSES)
+	echo 'namespace Licenses {' > licenses.vala
+	for i in $(LICENSES); do \
+		echo -n 'public static const string '$$i'="""'; >> licenses.vala \
+		cat $$i; \
+		echo '""";'; \
+	done >> licenses.vala ;
+	echo '}' >> licenses.vala
+	$(VALAC_BIN) -C --basedir=$(top_srcdir) --library=licenses licenses.vala
+	rm licenses.vala
+	rm licenses.c
+	rm licenses.gir
+
+BUILT_SOURCES += licenses.vapi licenses.h
+EXTRA_DIST += $(LICENSES) licenses.vapi licenses.h

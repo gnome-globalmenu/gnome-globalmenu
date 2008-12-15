@@ -7,8 +7,8 @@ BUILT_SOURCES = \
 	$(NULL)
 
 VALASOURCES = \
+	module-main.vala \
 	globalmenu.vala \
-	globalmenu-main.vala \
 	globalmenu-serializer.vala \
 	globalmenu-locator.vala \
 	$(NULL)
@@ -24,13 +24,13 @@ libglobalmenu_gnome_la_SOURCES = \
 	globalmenu-helper.c \
 	dyn-patch-menubar.c \
 	dyn-patch-menushell.c \
-	dyn-patch-helper.h \
-	dyn-patch-helper.c \
+	dyn-patch.h \
+	dyn-patch.c \
 	dyn-patch-widget.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES) gtkaqd.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) $^
+$(STAMP): $(VALASOURCES) dgettext.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg dgettext  $(VALASOURCES)
 	touch $@
 $(STAMP:.vapi=.deps):
 	echo > $@
@@ -49,10 +49,11 @@ libglobalmenu_gnome_la_LDFLAGS = \
 
 libglobalmenu_gnome_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS) \
+	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
-	gtkaqd.vapi \
+	dgettext.vapi \
 	$(VALASOURCES) \
 	$(NULL)
 
