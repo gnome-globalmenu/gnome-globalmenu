@@ -2,7 +2,7 @@
 %define 	svn_version 	svn1771
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -27,14 +27,15 @@ GNOME Global Menu project aims to improve GNOME toward a Document Centric Deskto
 
 
 %build
-%configure --disable-schemas-install
+%configure --disable-schemas-install --disable-static 
 make %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
-
+%find_lang %{name}
+rm -f $RPM_BUILD_ROOT/%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -58,18 +59,14 @@ gconftool-2 --makefile-uninstall-rule \
 		%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas > /dev/null || :
 		fi
 
-%files
+%files -f %{name}.lang
 %defattr(-,root,root,-)
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so.1.0.0
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so.1
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.a
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so
 %{_libexecdir}/GlobalMenu.PanelApplet
-%{_datadir}/locale/fr_FR/LC_MESSAGES/gnome-globalmenu.mo
-%{_datadir}/locale/zh_CN/LC_MESSAGES/gnome-globalmenu.mo
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas
+%{_datadir}/pixmaps/globalmenu.png
 
 
 

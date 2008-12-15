@@ -42,6 +42,7 @@ libglobalmenu_gnome_la_LIBADD = \
 		$(NULL)
 libglobalmenu_gnome_la_LDFLAGS = \
 		-version-info 1:0:0 \
+		-avoid-version \
 		-release 0.7.0 \
 		-no-undefined \
 		-export-dynamic \
