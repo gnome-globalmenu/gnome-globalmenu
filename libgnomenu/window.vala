@@ -22,6 +22,8 @@ namespace Gnomenu {
 		 */
 		public bool invalid {get {return window == null;}}
 		public bool is_foreign {get; construct; }
+		public ulong xid {get {return _xid;}}
+
 		public Window (WindowType type) {
 			this.type = type;
 			is_foreign = false;
@@ -51,6 +53,7 @@ namespace Gnomenu {
 			if(!_is_foreign) return null;
 
 			Window rt = new Window.foreign();
+			rt._xid = gdk_window_xid(window);
 			rt.set_events(rt.get_events() 
 			| Gdk.EventMask.PROPERTY_CHANGE_MASK
 			);
@@ -151,7 +154,7 @@ namespace Gnomenu {
 
 		private bool disposed;
 
-		private ulong _native;
+		private ulong _xid;
 		private string _menu_context;
 		private override void realize() {
 			if(is_foreign) return;

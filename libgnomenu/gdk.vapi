@@ -17,3 +17,5 @@ public bool gdk_property_change (Gdk.Window window,
 		int bytes_size);
 public Gdk.Window? gdk_window_foreign_new(ulong native);
 public weak Gdk.Window? gdk_window_lookup(ulong native);
+[CCode ( cname = "GDK_WINDOW_XID", cheader_filename="gdk/gdkx.h")]
+public ulong gdk_window_xid(Gdk.Window window);
