@@ -39,8 +39,8 @@ public class Applet : Panel.Applet {
 
 		selector = new Gnomenu.MenuBar();
 		/*Put stuff into the selector?*/
-		Parser.parse(selector, SELECTOR.printf("NONE"));
-		selector.visible = false; /* Because it is a dummy */
+		Parser.parse(selector, SELECTOR.printf("Globalmenu"));
+		selector.visible = true;
 		menubars.add(selector);
 
 		main_menubar = new Gnomenu.MenuBar();
@@ -103,7 +103,7 @@ public class Applet : Panel.Applet {
 					default:
 					return;
 				}
-				Parser.parse(selector, SELECTOR.printf(window.get_xid().to_string()));
+				Parser.parse(selector, SELECTOR.printf(window.get_application().get_name()));
 				if(current_window != null) {
 					/* This is a weird way to free a window:
 					 * We have two reference counts for current_window
@@ -202,7 +202,7 @@ public class Applet : Panel.Applet {
 	
 	static Applet the_applet;
 	static const string APPLET_NAME = _("globalmenu-panel-applet");
-	static const string APPLET_ICON = "gnome-fs-home";
+	static const string APPLET_ICON = "globalmenu";
 	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
 	static const string[] APPLET_AUTHORS = {"Coding:",
 						"Yu Feng <rainwoodman@gmail.com>",

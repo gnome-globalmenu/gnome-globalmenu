@@ -56,6 +56,10 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-g \
 		$(NULL)
 
+iconsdir = $(prefix)/share/pixmaps
+icons_DATA = globalmenu.png
+
+
 EXTRA_DIST = \
 	$(STAMP) \
 	patch.sh \
@@ -64,6 +68,7 @@ EXTRA_DIST = \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
 	$(server_in_files) \
+	$(icons_DATA) \
 	$(NULL)
 
 DISTCLEANFILES = $(server_DATA)
@@ -78,3 +83,5 @@ install-data-local:
 else
 install-data-local:
 endif
+
+

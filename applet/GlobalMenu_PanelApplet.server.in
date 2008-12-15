@@ -17,6 +17,6 @@
     </oaf_attribute>
     <oaf_attribute name="name" type="string" value="Global Menu Panel Applet"/>
     <oaf_attribute name="description" type="string" value="Global Menu Panel Applet"/>
-    <oaf_attribute name="panel:icon" type="string" value="gnome-fs-home"/>
+    <oaf_attribute name="panel:icon" type="string" value="globalmenu"/>
   </oaf_server>
 </oaf_info>
