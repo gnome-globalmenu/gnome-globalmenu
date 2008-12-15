@@ -55,6 +55,7 @@ namespace Gnomenu {
 			| Gdk.EventMask.PROPERTY_CHANGE_MASK
 			);
 			rt.window = window;
+			message("create: %p ref_count= %u", window, window.ref_count);
 			rt.window.set_events((Gdk.EventMask)rt.get_events());
 			rt.set_flags(WidgetFlags.REALIZED);
 			rt.window.set_user_data(rt);
@@ -157,17 +158,38 @@ namespace Gnomenu {
 			base.realize();
 		}
 		private override void map() { 
-			if(is_foreign) return;
+			if(is_foreign) return; 
 			base.map();
 		} 
 		private override void unmap() { 
 			if(is_foreign) return;
 			base.unmap();
 		}
+		private override bool map_event(Gdk.Event event) {
+			/* Here we ignore the default Gtk.Window.map_event
+			 * there is a workaround in Gtk.Window.map_event:
+			 *
+			 * if the widget is not mapped, the wrapped Gdk.Window
+			 * is hiden.
+			 *
+			 * but for a foreign window, we never try to set the
+			 * mapped state of the widget. The workaround
+			 * will think there is a buggy wm, and 
+			 * hide the foreign window. 
+			 *
+			 * We don't expect that to happen. If the default handler
+			 * is not disabled for for foreign windows,
+			 * every time the workspace is switched a lot of windows
+			 * will disappear.
+			 */
+			if(is_foreign) return false;
+			return base.map_event(event);
+		}
 		private override bool expose_event(Gdk.EventExpose event) { 
 			if(is_foreign) return false;
 			return base.expose_event(event);
 		}
+
 		private override void unrealize() {
 			if(is_foreign) return;
 			base.unrealize();
@@ -189,12 +211,10 @@ namespace Gnomenu {
 					window.set_user_data(null);
 					/*Don't destroy it ever*/
 					window = null;
+					unset_flags(WidgetFlags.REALIZED);
 				}
 			}
 			base.dispose();
-		}
-		private override void destroy() {
-			base.destroy();
 		}
 	}
 }
