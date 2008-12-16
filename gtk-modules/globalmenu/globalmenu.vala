@@ -20,6 +20,17 @@ namespace GnomenuGtk {
 
 		changed_hook_id = Signal.add_emission_hook(signal_id, 0, changed_eh, null);
 		hc_hook_id = Signal.add_emission_hook (signal_id_hc, 0, hierachy_changed_eh, null);
+
+		List<weak Window> toplevels = gtk_window_list_toplevels();
+		foreach(Window toplevel in toplevels) {
+			MenuBar menubar = find_menubar(toplevel);
+			if(menubar != null) {
+				bind_menubar_to_window(menubar, toplevel);
+				Signal.emit_by_name(menubar, "changed", 
+						typeof(Widget), menubar, null);
+				menubar.queue_resize();
+			}
+		}
 	}
 
 	protected void remove_emission_hooks() {
@@ -72,38 +83,35 @@ namespace GnomenuGtk {
 
 		bonobo_plug_widget_hack(self);
 		if(old_toplevel_window != null) {
-			old_toplevel_window.property_notify_event -= window_property_notify_event;
-			old_toplevel_window.set_data("__menubar__", null);
-			/*
-			uint source_id = (uint) old_toplevel_window.get_data("__keep_alive__");
-			Source.remove(source_id);
-			*/
+			unbind_menubar_from_window(self, old_toplevel_window);
 		}
 		if(toplevel_window != null) {
-			toplevel_window.set_data_full("__menubar__", self.ref(), g_object_unref);
-			toplevel_window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
-			toplevel_window.property_notify_event += window_property_notify_event;
-			/*
-			uint source_id = g_timeout_add_full(Priority.DEFAULT, 1000,
-					(data) => {
-						weak Gtk.Window window = data as Window;
-						if(window.ref_count == 1) {
-							message("The window is destroyed, no long need to keep an eye on PROPERTY_CHANGE_MASK. ");
-							return false;
-						}
-						if((window.get_events() 
-							& Gdk.EventMask.PROPERTY_CHANGE_MASK) == 0) {
-							message("Need to reset the event mask");
-						//	window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
-						}
-						return true;
-					}, toplevel_window.ref(), g_object_unref);
-			toplevel_window.set_data("__keep_alive__", (void*) source_id);
-			*/
+			bind_menubar_to_window(self, toplevel_window);
 	  	} 
 		return true;
 	}
 
+	private void unbind_menubar_from_window(MenuBar menubar, Window window) {
+		window.property_notify_event -= window_property_notify_event;
+		window.set_data("__menubar__", null);
+	}
+	private void bind_menubar_to_window(MenuBar menubar, Window window) {
+		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
+		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
+		window.property_notify_event += window_property_notify_event;
+	}
+
+	private MenuBar? find_menubar(Container widget) {
+		List<weak Widget> children = widget.get_children();
+		foreach(Widget child in children) {
+			if(child is MenuBar) return child as MenuBar;
+			if(child is Container) {
+				MenuBar menubar = find_menubar(child as Container);
+				if(menubar != null) return menubar;
+			}
+		}	
+		return null;
+	}
 	private bool window_property_notify_event (Window window, Gdk.EventProperty event) {
 		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false)) {
 			string path = gdk_window_get_menu_event(window.window);
