@@ -2,7 +2,6 @@
 
 #include "dyn-patch.h"
 
-static GObjectClass * klass;
 
 DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * child, int position)) {
 	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
@@ -22,8 +21,8 @@ DEFINE_FUNC(void, gtk_menu_shell, remove, (GtkMenuShell * shell, GtkWidget * chi
 	}
 }
 
-void dyn_patch_menu_shell() {
-	klass =  g_type_class_ref(GTK_TYPE_MENU_SHELL);
+void dyn_patch_menu_shell_patcher(GType menu_shell_type) {
+	GObjectClass * klass =  g_type_class_ref(menu_shell_type);
 	GtkContainerClass * container_klass = (GtkContainerClass*)klass;
 	GtkMenuShellClass * menu_shell_klass = (GtkMenuShellClass*)klass;
 
@@ -31,8 +30,8 @@ void dyn_patch_menu_shell() {
 	OVERRIDE(container_klass, gtk_menu_shell, remove);
 }
 
-void dyn_unpatch_menu_shell() {
-	klass =  g_type_class_ref(GTK_TYPE_MENU_SHELL);
+void dyn_patch_menu_shell_unpatcher(GType menu_shell_type) {
+	GObjectClass * klass =  g_type_class_ref(menu_shell_type);
 	GtkContainerClass * container_klass = (GtkContainerClass*)klass;
 	GtkMenuShellClass * menu_shell_klass = (GtkMenuShellClass*)klass;
 

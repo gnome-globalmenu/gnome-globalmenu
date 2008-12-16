@@ -1,10 +1,12 @@
 #include <gtk/gtk.h>
-extern void dyn_patch_widget();
-extern void	dyn_patch_menu_shell();
-extern void	dyn_patch_menu_bar();
-extern void dyn_unpatch_widget();
-extern void	dyn_unpatch_menu_shell();
-extern void	dyn_unpatch_menu_bar();
+#include "dyn-patch.h"
+extern void dyn_patch_widget_patcher();
+extern void	dyn_patch_menu_shell_patcher();
+extern void	dyn_patch_menu_bar_patcher();
+extern void dyn_patch_widget_unpatcher();
+extern void	dyn_patch_menu_shell_unpatcher();
+extern void	dyn_patch_menu_bar_unpatcher();
+
 /*
  * _USE_CLOSURES doesn't help improving the performance.
  * */
@@ -33,17 +35,21 @@ void dyn_patch_init () {
 	DETAIL_SUBMENU = g_quark_from_string("submenu");
 	DETAIL_LABEL = g_quark_from_string("label");
 
-	dyn_patch_widget();
-	dyn_patch_menu_shell();
-	dyn_patch_menu_bar();
+	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
+	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
+	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_patcher);
+
 	timer = g_timer_new();
 	g_timer_stop(timer);
 }
 void dyn_patch_uninit() {
 	g_timer_destroy(timer);
-	dyn_unpatch_widget();
-	dyn_unpatch_menu_shell();
-	dyn_unpatch_menu_bar();
+	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
+	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
+	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
+}
+void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
+	patcher(type);
 }
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_message("Changed: %p", menubar);

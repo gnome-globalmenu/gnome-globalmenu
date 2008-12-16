@@ -1,5 +1,6 @@
 #ifndef __DYN_PATCH_HELPER_H__
 #define __DYN_PATCH_HELPER_H__
+typedef void (*DynPatcherFunc)(GType type);
 void dyn_patch_init(void);
 void dyn_patch_uninit(void);
 
