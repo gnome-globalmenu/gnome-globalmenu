@@ -282,7 +282,7 @@ namespace Gnomenu {
 				update_arrow_type();
 			}
 		}
-
+		
 		private bool disposed;
 
 		private string _path; /*merely a buffer*/

@@ -8,17 +8,6 @@ public extern int system(string? cmd);
 
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
-	static const string SELECTOR = 
-"""
-<menu>
-	<item label="%s" font="bold">
-		<menu>
-			<item label="Notepad"/>
-			<item label="Terminal"/>
-		</menu>
-	</item>
-</menu>
-""";
 
 	public Applet() {
 	}
@@ -53,9 +42,8 @@ public class Applet : Panel.Applet {
 		menubars.visible = true;
 		add(menubars);
 
-		selector = new Gnomenu.MenuBar();
+		selector = new GnomenuExtra.Switcher();
 		/*Put stuff into the selector?*/
-		Parser.parse(selector, SELECTOR.printf("Globalmenu"));
 		selector.visible = true;
 		menubars.add(selector);
 
@@ -88,7 +76,7 @@ public class Applet : Panel.Applet {
 	private MenuBarBox menubars;
 	private bool disposed;
 	private Gnomenu.MenuBar main_menubar;
-	private Gnomenu.MenuBar selector;
+	private GnomenuExtra.Switcher selector;
 
 	/* to be removed */
 	public static void message(string msg) {
@@ -134,7 +122,7 @@ public class Applet : Panel.Applet {
 	
 	}
 	private void switch_to(Wnck.Window? window) {
-		Parser.parse(selector, SELECTOR.printf(window.get_application().get_name()));
+		selector.update(window);
 		if(current_window != null) {
 			/* This is a weird way to free a window:
 			 * We have two reference counts for current_window

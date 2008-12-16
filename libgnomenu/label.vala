@@ -86,6 +86,11 @@ namespace Gnomenu {
 				queue_resize();
 			}
 		}
+		public Gtk.Label? label_widget {
+			get {
+				return _label_widget;
+			}
+		}
 		construct {
 			props = new HashTable<weak Widget, ChildPropBag*>.full(direct_hash, direct_equal,
 				null, free);
