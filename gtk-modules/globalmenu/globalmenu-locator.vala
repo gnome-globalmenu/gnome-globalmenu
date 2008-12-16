@@ -1,6 +1,7 @@
 using Gtk;
 
 namespace GnomenuGtk {
+	[Compact]
 	public class Locator {
 		Locator() { }	
 		public static Gtk.MenuItem? locate (MenuBar menubar, string path) {

@@ -34,6 +34,14 @@ namespace GnomenuGtk {
 	}
 
 	protected void remove_emission_hooks() {
+		List<weak Window> toplevels = gtk_window_list_toplevels();
+		foreach(Window toplevel in toplevels) {
+			MenuBar menubar = find_menubar(toplevel);
+			if(menubar != null) {
+				unbind_menubar_from_window(menubar, toplevel);
+				menubar.queue_resize();
+			}
+		}
 		uint signal_id = Signal.lookup("changed", typeof(MenuBar));
 		uint signal_id_hc = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 

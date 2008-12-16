@@ -1,5 +1,6 @@
 using Gtk;
 namespace GnomenuGtk {
+	[Compact]
 	protected class Serializer {
 		Serializer () {
 		

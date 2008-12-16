@@ -1,6 +1,7 @@
 using Gtk;
 using GnomenuGtk;
 
+[Compact]
 public class GlobalMenuModule {
 	private static bool verbose = false;
 	private static bool disabled = false;
