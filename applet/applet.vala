@@ -349,7 +349,14 @@ public class Applet : Panel.Applet {
 
 		Applet _this = (Applet) user_data;
        	//system("gconf-editor " + _this.get_preferences_key() + " &");
-		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(_this.get_preferences_key(), "Applet preferences");
+		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(_this.get_preferences_key(),
+															"Applet preferences",
+															new string[]{
+																"show_icon",
+																"show_name",
+																"title_max_width",
+																"show_window_actions",
+																"show_window_list"});
 		gcd.run();
 		gcd.destroy();
     }
