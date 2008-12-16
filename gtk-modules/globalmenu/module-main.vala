@@ -16,6 +16,9 @@ public class GlobalMenuModule {
 	[CCode (cname = "dyn_patch_init")]
 	public static extern void dyn_patch_init();
 
+	[CCode (cname = "dyn_patch_uninit")]
+	public static extern void dyn_patch_uninit();
+
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 	
@@ -26,54 +29,17 @@ public class GlobalMenuModule {
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
-		message("Global Menu plugin Module is loaded");
-		string [] real_args;
-		string command_line = "globalmenu-gnome " 
-			+ Environment.get_variable("GLOBALMENU_GNOME_ARGS");
-		Shell.parse_argv(command_line, out real_args);
+		message(_("Global Menu plugin Module is loaded"));
 
-		init(ref real_args);
-		return null;
-	}
-
-	[CCode (cname="g_module_unload")]
-	public static void g_module_unload(Module module) {
-		Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_MASK, g_log_default_handler);
-		log_stream = null;
-		message("Global Menu plugin Module is unloaded");
-	}
-	
-	[CCode (cname="MY_")]
-	private static weak string _(string s) {
-		return dgettext(Config.GETTEXT_PACKAGE, s);
-	}
-
-	private static void init (ref string [] args) {
-		if(is_quirky_app()) return;
 		
-		OptionContext context = new OptionContext(_("- Global Menu plugin Module for GTK"));
-		context.set_description(
-_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
-NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored
-by the plugin.""")
-		);
-		context.set_ignore_unknown_options(true);
-		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
-		try {
-			context.parse(ref args);
-		} catch (Error e) {
-			warning("%s", e.message);
-			message("%s", context.get_help(false, null));
-		}
+		if(is_quirky_app()) disabled = true;
 
+		parse_args();
 
+		if(disabled) 
+			return _("Global Menu plugin is disabled");
 
-		if(disabled) {
-			message(_("GlobalMenu is disabled"));
-			return;
-		} else {
-			message(_("GlobalMenu is enabled"));
-		}
+		message(_("GlobalMenu is enabled"));
 
 		prepare_log_file();
 
@@ -83,8 +49,48 @@ by the plugin.""")
 			Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_INFO, empty_log_handler);
 		}
 
-
+		return null;
 	}
+
+	[CCode (cname="g_module_unload")]
+	public static void g_module_unload(Module module) {
+		remove_emission_hooks();
+		dyn_patch_uninit();
+
+		Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_MASK, g_log_default_handler);
+		log_stream = null;
+		message(_("Global Menu plugin Module is unloaded"));
+	}
+	
+	[CCode (cname="MY_")]
+	private static weak string _(string s) {
+		return dgettext(Config.GETTEXT_PACKAGE, s);
+	}
+
+	private static void parse_args() {
+		string [] args;
+		string command_line = "globalmenu-gnome " 
+			+ Environment.get_variable("GLOBALMENU_GNOME_ARGS");
+
+		Shell.parse_argv(command_line, out args);
+
+		OptionContext context = new OptionContext(
+				_("- Global Menu plugin Module for GTK"));
+		context.set_description(
+_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
+NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by the plugin.
+""")
+		);
+		context.set_ignore_unknown_options(true);
+		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
+		try {
+			context.parse(ref args);
+		} catch (Error e) {
+			warning("%s", e.message);
+			message("%s", context.get_help(false, null));
+		}
+	}
+
 	private static void prepare_log_file() {
 		if(log_file_name != null) {
 			try {
@@ -117,12 +123,10 @@ by the plugin.""")
 			case "gnome-panel":
 			case "GlobalMenu.PanelApplet":
 			case "gdm-user-switch-applet":
-			message(_("GlobalMenu is disabled for several programs"));
 			return true;
 			default:
 				if((disabled_application_names!=null) 
 					&& disabled_application_names.str(Environment.get_prgname())!=null){
-					message(_("GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"));
 					return true;
 				}
 			break;

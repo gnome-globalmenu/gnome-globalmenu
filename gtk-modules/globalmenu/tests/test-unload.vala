@@ -34,12 +34,16 @@ namespace GnomenuGtk {
 			if(module == null) {
 				module = Module.open(module_name, 
 						ModuleFlags.BIND_LOCAL | ModuleFlags.BIND_LAZY);
+				if(module == null) {
+					message("%s", Module.error());
+					return;
+				}
 				ModuleInitFunc init = null;
 				void* init_ptr;
 				module.symbol("gtk_module_init", out init_ptr);
 				init = (ModuleInitFunc) init_ptr;
 				message("gtk_module_init found: %p", init_ptr);
-				//init(0, NULL);
+				init(0, null);
 			}
 		}
 		private void unload_module(Button button) {

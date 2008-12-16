@@ -6,6 +6,7 @@
 
 static GtkMenuShellClass * _gtk_menu_bar_parent_class = NULL;
 guint SIGNAL_CHANGED = 0;
+static GObjectClass * klass;
 
 
 DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
@@ -64,30 +65,47 @@ DEFINE_FUNC(gboolean, gtk_menu_bar, can_activate_accel, (GtkWidget * widget, gui
 }
 
 void dyn_patch_menu_bar() {
-	GObjectClass * klass = g_type_class_ref(GTK_TYPE_MENU_BAR);
+	klass = g_type_class_ref(GTK_TYPE_MENU_BAR);
 	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
 	_gtk_menu_bar_parent_class = g_type_class_peek_parent(klass);
 
-	g_object_class_install_property (klass,
+	if(g_object_class_find_property (klass, "local") == NULL) {
+		g_object_class_install_property (klass,
 				   PROP_LOCAL,
 				   g_param_spec_boolean ("local",
  						      ("Local Menu or Global Menu"),
  						      ("Whether the menu is a local one"),
  						      FALSE,
  						      G_PARAM_READWRITE));
+	}
 
-	SIGNAL_CHANGED =
-		g_signal_new (("changed"),
-		  G_OBJECT_CLASS_TYPE (klass),
-		  G_SIGNAL_RUN_FIRST,
-		  0, 
-		  NULL, NULL,
-		  gtk_marshal_VOID__VOID,
-		  G_TYPE_NONE, 0);
-
+	SIGNAL_CHANGED = g_signal_lookup("changed", G_OBJECT_CLASS_TYPE (klass));
+	if (SIGNAL_CHANGED == 0) {
+		SIGNAL_CHANGED =
+			g_signal_new (("changed"),
+			  G_OBJECT_CLASS_TYPE (klass),
+			  G_SIGNAL_RUN_FIRST,
+			  0, 
+			  NULL, NULL,
+			  gtk_marshal_VOID__VOID,
+			  G_TYPE_NONE, 0);
+	}
+		
 	OVERRIDE(klass, gtk_menu_bar, get_property);
 	OVERRIDE(klass, gtk_menu_bar, set_property);
 	OVERRIDE(widget_klass, gtk_menu_bar, map);
 	OVERRIDE(widget_klass, gtk_menu_bar, can_activate_accel);
 	OVERRIDE(widget_klass, gtk_menu_bar, size_request);
+}
+void dyn_unpatch_menu_bar() {
+	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
+	_gtk_menu_bar_parent_class = g_type_class_peek_parent(klass);
+
+	RESTORE(klass, gtk_menu_bar, get_property);
+	RESTORE(klass, gtk_menu_bar, set_property);
+	RESTORE(widget_klass, gtk_menu_bar, map);
+	RESTORE(widget_klass, gtk_menu_bar, can_activate_accel);
+	RESTORE(widget_klass, gtk_menu_bar, size_request);
+	
+	g_type_class_unref(klass);
 }

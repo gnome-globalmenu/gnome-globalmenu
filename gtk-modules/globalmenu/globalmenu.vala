@@ -11,13 +11,25 @@ namespace GnomenuGtk {
 	[CCode (cname = "gdk_window_get_menu_event")]
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
+	protected ulong changed_hook_id;
+	protected ulong hc_hook_id;
+
 	protected void add_emission_hooks() {
 		uint signal_id = Signal.lookup("changed", typeof(MenuBar));
-		Signal.add_emission_hook (signal_id, 0, changed_eh, null);
 		uint signal_id_hc = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
-		Signal.add_emission_hook (signal_id_hc, 0, hierachy_changed_eh, null);
+
+		changed_hook_id = Signal.add_emission_hook(signal_id, 0, changed_eh, null);
+		hc_hook_id = Signal.add_emission_hook (signal_id_hc, 0, hierachy_changed_eh, null);
 	}
 
+	protected void remove_emission_hooks() {
+		uint signal_id = Signal.lookup("changed", typeof(MenuBar));
+		uint signal_id_hc = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
+
+		Signal.remove_emission_hook (signal_id, changed_hook_id);
+		Signal.remove_emission_hook (signal_id_hc, hc_hook_id);
+	
+	}
 	private bool changed_eh (SignalInvocationHint ihint, 
 			[CCode (array_length_pos = 1.9) ]
 			Value[] param_values

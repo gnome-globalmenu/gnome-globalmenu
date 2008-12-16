@@ -2,6 +2,8 @@
 
 #include "dyn-patch.h"
 
+static GObjectClass * klass;
+
 DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_parent)) {
 	GtkWidget * parent = widget->parent;
 	GtkWidget * menubar = NULL;
@@ -25,7 +27,14 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 }
 
 void dyn_patch_widget() {
-	GObjectClass * klass =  g_type_class_ref(GTK_TYPE_WIDGET);
+	klass =  g_type_class_ref(GTK_TYPE_WIDGET);
 	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
+
 	OVERRIDE(widget_klass, gtk_widget, parent_set);
+}
+void dyn_unpatch_widget() {
+	klass =  g_type_class_ref(GTK_TYPE_WIDGET);
+	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
+
+	RESTORE(widget_klass, gtk_widget, parent_set);
 }

@@ -2,6 +2,9 @@
 extern void dyn_patch_widget();
 extern void	dyn_patch_menu_shell();
 extern void	dyn_patch_menu_bar();
+extern void dyn_unpatch_widget();
+extern void	dyn_unpatch_menu_shell();
+extern void	dyn_unpatch_menu_bar();
 /*
  * _USE_CLOSURES doesn't help improving the performance.
  * */
@@ -18,6 +21,7 @@ static GQuark DETAIL_LABEL = 0;
 
 static GTimer * timer = NULL;
 static gulong buffered_changes = 0;
+
 void dyn_patch_init () {
 	__MENUBAR__ = g_quark_from_string("__menubar__");
 	__DIRTY__ = g_quark_from_string("__dirty__");
@@ -35,7 +39,12 @@ void dyn_patch_init () {
 	timer = g_timer_new();
 	g_timer_stop(timer);
 }
-
+void dyn_patch_uninit() {
+	g_timer_destroy(timer);
+	dyn_unpatch_widget();
+	dyn_unpatch_menu_shell();
+	dyn_unpatch_menu_bar();
+}
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_message("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
@@ -65,19 +74,7 @@ void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
 		g_object_set_qdata((GObject*) widget, __MENUBAR__, NULL);
 	}
 }
-static void _dyn_patch_label_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	dyn_patch_queue_changed(menubar, widget);
-}
-static void _dyn_patch_visible_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	dyn_patch_queue_changed(menubar, widget);
-}
-static void _dyn_patch_active_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	dyn_patch_queue_changed(menubar, widget);
-}
-static void _dyn_patch_inconsistent_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
-	dyn_patch_queue_changed(menubar, widget);
-}
-static void _dyn_patch_draw_as_radio_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+static void _dyn_patch_simple_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	dyn_patch_queue_changed(menubar, widget);
 }
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
@@ -107,25 +104,19 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(old != menubar) {
 		if(old && GTK_IS_LABEL(widget))
 			g_signal_handlers_disconnect_by_func(widget, 
-					_dyn_patch_label_notify, 
+					_dyn_patch_simple_notify, 
 					menubar);
 		if(old && GTK_IS_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_submenu_notify, 
 					menubar);
 			g_signal_handlers_disconnect_by_func(widget, 
-					_dyn_patch_visible_notify, 
+					_dyn_patch_simple_notify, 
 					menubar);
 		}
 		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
-					_dyn_patch_draw_as_radio_notify, 
-					menubar);
-			g_signal_handlers_disconnect_by_func(widget, 
-					_dyn_patch_inconsistent_notify, 
-					menubar);
-			g_signal_handlers_disconnect_by_func(widget, 
-					_dyn_patch_active_notify, 
+					_dyn_patch_simple_notify, 
 					menubar);
 		}
 	}
@@ -150,21 +141,21 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(menubar != old) {
 		if(menubar && GTK_IS_LABEL(widget)) {
 			g_signal_connect(widget, "notify::label", 
-					_dyn_patch_label_notify, menubar);
+					_dyn_patch_simple_notify, menubar);
 		}
 		if(menubar && GTK_IS_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::submenu", 
 					_dyn_patch_submenu_notify, menubar);
 			g_signal_connect(widget, "notify::visible", 
-					_dyn_patch_visible_notify, menubar);
+					_dyn_patch_simple_notify, menubar);
 		}
 		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::active", 
-					_dyn_patch_active_notify, menubar);
+					_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::inconsistent", 
-					_dyn_patch_inconsistent_notify, menubar);
+					_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::draw-as-radio", 
-					_dyn_patch_draw_as_radio_notify, menubar);
+					_dyn_patch_simple_notify, menubar);
 		}
 	}
 	g_timer_stop(timer);
