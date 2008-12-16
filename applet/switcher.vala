@@ -10,13 +10,6 @@ namespace GnomenuExtra {
 		
 		public Switcher() {
 			Parser.parse(this, TEMPLATE.printf("Global Menu Bar"));
-			forceBold(this.get("/0"));	/* TOFIX */
-		}
-		
-		/* This is a TEMPORARY workaround while waiting the issue in Gnomenu.MenuItem being fixed */
-		private void forceBold(Gnomenu.MenuItem mi) {
-			MenuLabel? menulabel = mi.get_child() as MenuLabel;
-			menulabel.label_widget.set_markup_with_mnemonic("<b>" + menulabel.label_widget.label + "</b>");
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
@@ -57,7 +50,6 @@ namespace GnomenuExtra {
 		public void update(Wnck.Window? window) {
 			_label = get_application_name(window);
 			Parser.parse(this, TEMPLATE.printf(_label));
-			forceBold(this.get("/0")); /* TOFIX */
 		}
 	}
 }
