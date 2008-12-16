@@ -86,10 +86,9 @@ public class MenuBarBox: Gtk.Container {
 		if(child is Gnomenu.MenuBar) {
 			children.append(child as Gnomenu.MenuBar);
 			child.set_parent(this);
-			props.insert(child, (ChildPropBag*)malloc(sizeof(ChildPropBag)));
+			props.insert(child, (ChildPropBag*)malloc0(sizeof(ChildPropBag)));
 			(child as Gnomenu.MenuBar).pack_direction = pack_direction;
 			(child as Gnomenu.MenuBar).gravity = gravity;
-			child_set(child, "expand", false, null);
 		}
 	}
 	public override void remove(Widget child) {

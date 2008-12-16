@@ -248,7 +248,7 @@ namespace Gnomenu {
 		 */
 		public void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
 			Settings settings = get_settings();
-			weak string accel;
+			string accel;
 		   	settings.get( "gtk_menu_bar_accel", &accel, null);
 			if(accel != null)
 				Gtk.accelerator_parse(accel, out keyval, out mods);

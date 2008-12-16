@@ -6,14 +6,15 @@ namespace Gnomenu {
 		TestLeak () {
 			base("/Leak");
 			add("Leak", () => {
+					return;
 				int i;
 				int j;
 				Gtk.MenuShell shell;
 				Gtk.Window window = new Gtk.Window(WindowType.TOPLEVEL);
 				shell = new MenuBar();
 				window.add(shell);
-				for(i = 0; i< 100; i++) {
-				if(i==1 || i== 99) mem_profile();
+				for(i = 0; i< 10; i++) {
+//				if(i==1 || i== 99) mem_profile();
 					for(j=0; j<20; j++) {
 							MenuItem item = new MenuItem();
 							Menu menu = new Menu();
@@ -39,8 +40,8 @@ namespace Gnomenu {
 				string test3;
 				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/libgnomenu/tests/evo-nolabel.xml", out test3, null);
 				Parser.parse(shell as MenuBar, test3);
-				mem_profile();
-				for(i = 0; i< 100; i++) {
+//				mem_profile();
+				for(i = 0; i< 10; i++) {
 					Parser.parse(shell as MenuBar, test3);
 					/*
 					List<weak Widget> children = shell.get_children().copy();
@@ -48,7 +49,7 @@ namespace Gnomenu {
 						shell.remove(child);
 					}*/
 				}
-				mem_profile();
+//				mem_profile();
 			});
 		}
 	}
