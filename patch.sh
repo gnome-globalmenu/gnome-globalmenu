@@ -11,6 +11,7 @@ function patch {
 		else
 			if cmp $i $i.new; then
 				echo noting was done.
+				exit 1;
 			else 
 				echo OK.
 			fi;
