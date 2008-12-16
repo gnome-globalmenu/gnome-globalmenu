@@ -1,5 +1,5 @@
 NULL = 
-SUBDIRS = .
+SUBDIRS = . tests
 STAMP = globalmenu-gnome-private.vapi
 
 BUILT_SOURCES = \

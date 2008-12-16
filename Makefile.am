@@ -1,5 +1,6 @@
 NULL =
-SUBDIRS = libgnomenu applet gtk-modules po
+SUBDIRS = tests libgnomenu applet gtk-modules po
+DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
 		$(NULL)
@@ -47,4 +48,5 @@ rpm:
 	rpmbuild -bb *.spec
 
 rpm-fast:
+	cp *.tar.gz ~/rpmbuild/SOURCES
 	rpmbuild -bb *.spec

@@ -26,6 +26,10 @@ public class GlobalMenuModule {
 		init(ref real_args);
 	}
 
+	[CCode (cname="g_module_unload")]
+	public static void g_module_unload(void* module) {
+		critical("module unloaded");
+	}
 	[CCode (cname="MY_")]
 	private static weak string _(string s) {
 		return dgettext(Config.GETTEXT_PACKAGE, s);

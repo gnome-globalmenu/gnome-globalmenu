@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-15 11:38-0500\n"
+"POT-Creation-Date: 2008-12-16 14:03-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -11,11 +11,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:819
+#: ../libgnomenu/menuitem.c:878
 msgid "Indicator Size"
 msgstr "选项方框的大小"
 
-#: ../libgnomenu/menuitem.c:819
+#: ../libgnomenu/menuitem.c:878
 msgid "Size of check or radio indicator"
 msgstr "选项方框的大小"
 
@@ -31,11 +31,11 @@ msgstr "禁用本插件"
 msgid "File to save the log, default to stderr"
 msgstr "保存调试信息的文件。默认为标准错误流(stderr)"
 
-#: ../gtk-modules/globalmenu/module-main.c:72
+#: ../gtk-modules/globalmenu/module-main.c:77
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- 全局菜单 GTK 插件"
 
-#: ../gtk-modules/globalmenu/module-main.c:73
+#: ../gtk-modules/globalmenu/module-main.c:78
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -46,24 +46,24 @@ msgstr ""
 "这些命令行参数应当在环境变量 GLOBALMENU_GNOME_ARGS 里设置。注意: 可以在 "
 "GTK_MENUBAR_NO_MAC 环境变量里提供禁用插件的应用程序列表。"
 
-#: ../gtk-modules/globalmenu/module-main.c:100
+#: ../gtk-modules/globalmenu/module-main.c:105
 msgid "GlobalMenu is disabled"
 msgstr "全局菜单插件被禁用"
 
-#: ../gtk-modules/globalmenu/module-main.c:104
+#: ../gtk-modules/globalmenu/module-main.c:109
 msgid "GlobalMenu is enabled"
 msgstr "全局菜单插件被启用"
 
-#: ../gtk-modules/globalmenu/module-main.c:145
+#: ../gtk-modules/globalmenu/module-main.c:152
 #, c-format
 msgid "Log file %s is not accessible. Fallback to stderr. %s"
 msgstr "日志文件 %s 不可写。将记录到标准错误输出流。%s"
 
-#: ../gtk-modules/globalmenu/module-main.c:201
+#: ../gtk-modules/globalmenu/module-main.c:208
 msgid "GlobalMenu is disabled for several programs"
 msgstr "对特定的程序全局菜单插件被强制禁用。"
 
-#: ../gtk-modules/globalmenu/module-main.c:208
+#: ../gtk-modules/globalmenu/module-main.c:221
 msgid "GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"
 msgstr "全局菜单被禁用，因为程序名字被列在 GTK_MENUBAR_NO_MAC 中。"
 
@@ -71,11 +71,11 @@ msgstr "全局菜单被禁用，因为程序名字被列在 GTK_MENUBAR_NO_MAC �
 msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr ""
 
-#: ../applet/applet.c:37
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr "全局菜单小程序"
 
-#: ../applet/applet.c:366
+#: ../applet/applet.c:469
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -115,10 +115,10 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:404
+#: ../applet/applet.c:515
 msgid "Project Home"
 msgstr "项目主页"
 
-#: ../applet/applet.c:425
+#: ../applet/applet.c:541
 msgid "On-line help"
 msgstr "在线帮助"
