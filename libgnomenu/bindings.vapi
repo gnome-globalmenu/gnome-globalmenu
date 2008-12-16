@@ -1,3 +1,15 @@
+/***
+ * Fixed in 0.5.2
+ * didn't work in 0.5.1
+ */
+public static GLib.List<weak Gtk.Widget> gtk_container_get_children(Gtk.Container container);
+
+/***
+ * Not working since 0.5.1
+ */
+public Gdk.Window? gdk_window_foreign_new(ulong native); 
+public weak Gdk.Window? gdk_window_lookup(ulong native);
+Pango.FontDescription pango_font_description_from_string (string str);
 public bool gdk_property_get (Gdk.Window window, 
 		Gdk.Atom property, 
 		Gdk.Atom type, 
@@ -15,12 +27,13 @@ public bool gdk_property_change (Gdk.Window window,
 		Gdk.PropMode mode,
 		string data,
 		int bytes_size);
-public Gdk.Window? gdk_window_foreign_new(ulong native);
-public weak Gdk.Window? gdk_window_lookup(ulong native);
+
+/***
+ * Missing 
+ */
 [CCode ( cname = "GDK_WINDOW_XID", cheader_filename="gdk/gdkx.h")]
 public ulong gdk_window_xid(Gdk.Window window);
 
-public static GLib.List<weak Gtk.Widget> gtk_container_get_children(Gtk.Container container);
 
 public static void g_markup_parse_context_push(GLib.MarkupParseContext context, GLib.MarkupParser parser, void* user_data);
 public static void* g_markup_parse_context_pop(GLib.MarkupParseContext context);
@@ -37,4 +50,3 @@ public enum GMarkupCollectType {
 	OPTIONAL
 }
 
-Pango.FontDescription pango_font_description_from_string (string str);

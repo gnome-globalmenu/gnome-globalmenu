@@ -1,8 +1,8 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1791
+%define 	svn_version 	svn1794
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -44,19 +44,19 @@ rm -rf $RPM_BUILD_ROOT
 if [ "$1" -gt 1 ] ; then
 	export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 	gconftool-2 --makefile-uninstall-rule \
-	%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas >/dev/null || :
+	%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas >/dev/null || :
 fi
 
 %post
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-install-rule \
-		%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas > /dev/null || :
+		%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas > /dev/null || :
 
 %preun
 if [ "$1" -eq 0 ] ; then
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-uninstall-rule \
-		%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas > /dev/null || :
+		%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas > /dev/null || :
 		fi
 
 %files -f %{name}.lang
@@ -65,13 +65,17 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so
 %{_libexecdir}/GlobalMenu.PanelApplet
-%{_sysconfdir}/gconf/schemas/gnome-globalmenu-applet.schemas
+%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png
 
 
 
 
 %changelog
+* Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
+- gnome-settings-daemon for the module. (gconf-key: apps/gnome-settings-daemon/gtk-modules)
+* Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
+- vala 0.5.2
 * Sun Dec 14 2008 Feng Yu <rainwoodman@gmail.com>
 - GConf for applet 
 * Sun Dec 10 2008 Feng Yu <rainwoodman@gmail.com>

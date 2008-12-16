@@ -1,5 +1,17 @@
+<?xml version="1.0"?>
 <gconfschemafile>
     <schemalist>
+		<schema>
+		  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome</key>
+		  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome</applyto>
+		  <owner>libglobalmenu-gnome</owner>
+		  <type>bool</type>
+		  <default>false</default>
+		  <locale name="C">
+			<short>GTK+ module for Global Menu</short>
+			<long>This key determines the GTK+ module to load for Global Menu.</long>
+		  </locale>
+		</schema>
         <schema>
             <key>/schemas/apps/globalmenu-panel-applet/prefs/show_icon</key>
             <owner>globalmenu-panel-applet</owner>
