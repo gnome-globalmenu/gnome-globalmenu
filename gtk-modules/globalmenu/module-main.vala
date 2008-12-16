@@ -19,17 +19,30 @@ public class GlobalMenuModule {
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 	
+		dyn_patch_init();
+
+		add_emission_hooks();
+	}
+
+	[CCode (cname="g_module_check_init")]
+	public static string? g_module_load(Module module) {
+		message("Global Menu plugin Module is loaded");
+		string [] real_args;
 		string command_line = "globalmenu-gnome " 
 			+ Environment.get_variable("GLOBALMENU_GNOME_ARGS");
-		string [] real_args;
 		Shell.parse_argv(command_line, out real_args);
+
 		init(ref real_args);
+		return null;
 	}
 
 	[CCode (cname="g_module_unload")]
-	public static void g_module_unload(void* module) {
-		critical("module unloaded");
+	public static void g_module_unload(Module module) {
+		Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_MASK, g_log_default_handler);
+		log_stream = null;
+		message("Global Menu plugin Module is unloaded");
 	}
+	
 	[CCode (cname="MY_")]
 	private static weak string _(string s) {
 		return dgettext(Config.GETTEXT_PACKAGE, s);
@@ -44,7 +57,7 @@ _("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS in
 NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored
 by the plugin.""")
 		);
-		context.set_ignore_unknown_options(false);
+		context.set_ignore_unknown_options(true);
 		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
 		try {
 			context.parse(ref args);
@@ -70,9 +83,6 @@ by the plugin.""")
 			Log.set_handler ("GlobalMenu", LogLevelFlags.LEVEL_INFO, empty_log_handler);
 		}
 
-		dyn_patch_init();
-
-		add_emission_hooks();
 
 	}
 	private static void prepare_log_file() {

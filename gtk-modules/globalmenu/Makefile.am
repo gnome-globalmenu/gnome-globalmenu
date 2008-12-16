@@ -29,8 +29,9 @@ libglobalmenu_gnome_la_SOURCES = \
 	dyn-patch-widget.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES) bindings.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings $(VALASOURCES)
+$(STAMP): $(VALASOURCES) bindings.vapi patch.sh
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings $(VALASOURCES)
+	bash patch.sh
 	touch $@
 $(STAMP:.vapi=.deps):
 	echo > $@
@@ -54,6 +55,7 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\"
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
+	 patch.sh \
 	bindings.vapi \
 	$(VALASOURCES) \
 	$(NULL)
