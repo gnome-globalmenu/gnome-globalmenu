@@ -242,17 +242,6 @@ namespace Gnomenu {
 			return null;
 		}
 
-		/**
-		 * return the accelerator key combination for invoking menu bars
-		 * in GTK Settings. It is usually F10.
-		 */
-		public void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
-			Settings settings = get_settings();
-			string accel;
-		   	settings.get( "gtk_menu_bar_accel", &accel, null);
-			if(accel != null)
-				Gtk.accelerator_parse(accel, out keyval, out mods);
-		}
 
 		/**
 		 * returns an xml representation of the overflown menubar.

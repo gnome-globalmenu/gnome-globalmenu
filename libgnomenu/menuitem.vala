@@ -34,8 +34,19 @@ namespace Gnomenu {
 		}
 
 		construct {
+			disposed = false;
 			_item_type = MenuItemType.NORMAL;
 			create_labels();
+		}
+		private override void dispose() {
+			if(!disposed) {
+				disposed = true;
+				if(icon_widget != null) {
+					icon_widget.unparent();
+					icon_widget = null;
+				}
+			}
+			base.dispose();
 		}
 		/**
 		 * a back-reference to the toplevel menubar
@@ -271,6 +282,9 @@ namespace Gnomenu {
 				update_arrow_type();
 			}
 		}
+
+		private bool disposed;
+
 		private string _path; /*merely a buffer*/
 		private string _font;
 		private string _label;

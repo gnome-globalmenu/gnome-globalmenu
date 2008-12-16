@@ -34,6 +34,10 @@ public class Applet : Panel.Applet {
 		base.dispose();	
 	}
 	~Applet() {
+		int keyval;
+		Gdk.ModifierType mods;
+		get_accel_key(out keyval, out mods);
+		root_window.ungrab_key(keyval, mods);
 	}
 	static construct {
 		screen = Wnck.Screen.get_default();
@@ -172,12 +176,12 @@ public class Applet : Panel.Applet {
 		/*FIXME: listen to changes in GTK_SETTINGS.*/
 		int keyval;
 		Gdk.ModifierType mods;
-		main_menubar.get_accel_key(out keyval, out mods);
+		get_accel_key(out keyval, out mods);
 		root_window.grab_key(keyval, mods);
 		root_window.key_press_event += (root_window, event) => {
 			uint keyval;
 			Gdk.ModifierType mods;
-			main_menubar.get_accel_key(out keyval, out mods);
+			get_accel_key(out keyval, out mods);
 			if(event.keyval == keyval &&
 				(event.state & Gtk.accelerator_get_default_mod_mask())
 				== (mods & Gtk.accelerator_get_default_mod_mask())) {
@@ -348,6 +352,17 @@ public class Applet : Panel.Applet {
 		gcd.run();
 		gcd.destroy();*/
     }
+	/**
+	 * return the accelerator key combination for invoking menu bars
+	 * in GTK Settings. It is usually F10.
+	 */
+	private static void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
+		Settings settings = Settings.get_default();
+		string accel;
+		settings.get("gtk_menu_bar_accel", &accel, null);
+		if(accel != null)
+			Gtk.accelerator_parse(accel, out keyval, out mods);
+	}
 }
 
 
