@@ -70,9 +70,11 @@ public class GlobalMenuModule {
 
 	private static void parse_args() {
 		string [] args;
-		string command_line = "globalmenu-gnome " 
-			+ Environment.get_variable("GLOBALMENU_GNOME_ARGS");
+		string env = Environment.get_variable("GLOBALMENU_GNOME_ARGS");
+		
+		if(env == null) return;
 
+		string command_line = "globalmenu-gnome " + env;
 		Shell.parse_argv(command_line, out args);
 
 		OptionContext context = new OptionContext(
