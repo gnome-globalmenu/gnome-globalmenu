@@ -2,11 +2,12 @@ include $(top_srcdir)/Makefile.decl
 
 
 
-VALASOURCES = test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala
+VALASOURCES = test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala test-leak.vala
 STAMP = $(VALASOURCES:.vala=.stamp)
 SUFFIXES = .vala .stamp
 .vala.stamp:
 	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu-private $^
+	bash patch.sh
 	touch $@
 
 TEST_PROGS +=  $(VALASOURCES:.vala=)
