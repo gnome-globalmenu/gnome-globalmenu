@@ -6,6 +6,7 @@ BUILT_SOURCES = $(STAMP)
 VALASOURCES = \
 	applet.vala \
 	main.vala \
+	gtkextra-gconfdialog.vala \
 	$(NULL)
 
 libexec_PROGRAMS = GlobalMenu.PanelApplet
@@ -26,10 +27,12 @@ GlobalMenu_PanelApplet_SOURCES = \
 $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
 	$(VALAC) -C --vapidir=. \
 	--vapidir=$(top_srcdir)/libgnomenu \
-	--pkg=gtk+-2.0 --pkg=libwnck-1.0 \
+	--pkg=gtk+-2.0 \
+	--pkg=libwnck-1.0 \
 	--pkg=libpanelapplet-2.0 \
 	--pkg=gnomenu-private \
 	--pkg=gconf-2.0 \
+	--pkg=gconfcompat \
 	$(VALASOURCES)
 	bash patch.sh
 	touch $@

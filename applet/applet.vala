@@ -348,10 +348,10 @@ public class Applet : Panel.Applet {
                                           void* user_data, string cname) {
 
 		Applet _this = (Applet) user_data;
-       	system("gconf-editor " + _this.get_preferences_key() + " &");
-		/*GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(the_applet.get_preferences_key(), "Applet preferences");
+       	//system("gconf-editor " + _this.get_preferences_key() + " &");
+		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(_this.get_preferences_key(), "Applet preferences");
 		gcd.run();
-		gcd.destroy();*/
+		gcd.destroy();
     }
 	/**
 	 * return the accelerator key combination for invoking menu bars

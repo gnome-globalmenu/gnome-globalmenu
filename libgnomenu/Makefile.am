@@ -1,5 +1,5 @@
 NULL=
-SUBDIRS = . tests
+SUBDIRS = .
 
 INTERNAL = \
 	helper.vala \
