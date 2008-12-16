@@ -63,16 +63,13 @@ public class MenuBarBox: Gtk.Container {
 				null, free);
 	}
 
-	private Gnomenu.MenuBar _menubar;
-	private Gnomenu.MenuBar _selector;
-
 	private HashTable<weak Widget, ChildPropBag*> props;
 	private PackDirection _pack_direction;
 	private Gnomenu.Gravity _gravity;
 
 	private List<weak Gnomenu.MenuBar> children;
 
-	private override void forall(Gtk.Callback callback, void* data) {
+	public override void forall(Gtk.Callback callback, void* data) {
 		bool include_internals = false;
 		if(include_internals) {
 
@@ -119,28 +116,24 @@ public class MenuBarBox: Gtk.Container {
 			}
 		}
 	}
-	private override void map() {
+	public override void map() {
 		base.map();
 	}
 	public override void size_allocate(Gdk.Rectangle a) {
 		allocation = (Allocation) a;
 		Requisition cr;
-		Allocation ca;
-		int x;
-		int y;
-		int rev_x;
-		int rev_y;
-		x = 0;
-		y = 0;
-		rev_x = a.width;
-		rev_y = a.height;
+		Allocation ca = {0, 0, 0, 0};
+ 		int x = 0;
+		int y = 0;
+		int rev_x = a.width;
+		int rev_y = a.height;
 
 		int num_of_expands = 0;
 		int non_expand_a = 0;
 
 		foreach(Gnomenu.MenuBar menubar in children) {
 			if(!menubar.visible) continue;
-			bool expand;
+			bool expand = false;
 			child_get(menubar, "expand", &expand, null);
 			if(expand) num_of_expands++;
 			else {
@@ -158,7 +151,7 @@ public class MenuBarBox: Gtk.Container {
 			}
 		}
 		foreach(Gnomenu.MenuBar menubar in children) {
-			bool expand;
+			bool expand = false;
 			if(!menubar.visible) continue;
 			menubar.get_child_requisition(out cr);
 			child_get(menubar, "expand", &expand, null);
@@ -218,7 +211,7 @@ public class MenuBarBox: Gtk.Container {
 		}
 		base.size_allocate(a);
 	}
-	private override void get_child_property(Gtk.Widget child, uint id,
+	public override void get_child_property(Gtk.Widget child, uint id,
 			Value value, ParamSpec pspec) {
 		switch(id) {
 			case PROP_EXPAND:
@@ -227,7 +220,7 @@ public class MenuBarBox: Gtk.Container {
 			break;
 		}
 	}
-	private override void set_child_property(Gtk.Widget child, uint id,
+	public override void set_child_property(Gtk.Widget child, uint id,
 			Value value, ParamSpec pspec) {
 		switch(id) {
 			case PROP_EXPAND:

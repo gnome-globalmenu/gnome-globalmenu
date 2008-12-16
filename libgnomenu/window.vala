@@ -156,19 +156,19 @@ namespace Gnomenu {
 
 		private ulong _xid;
 		private string _menu_context;
-		private override void realize() {
+		public override void realize() {
 			if(is_foreign) return;
 			base.realize();
 		}
-		private override void map() { 
+		public override void map() { 
 			if(is_foreign) return; 
 			base.map();
 		} 
-		private override void unmap() { 
+		public override void unmap() { 
 			if(is_foreign) return;
 			base.unmap();
 		}
-		private override bool map_event(Gdk.Event event) {
+		public override bool map_event(Gdk.Event event) {
 			/* Here we ignore the default Gtk.Window.map_event
 			 * there is a workaround in Gtk.Window.map_event:
 			 *
@@ -188,17 +188,17 @@ namespace Gnomenu {
 			if(is_foreign) return false;
 			return base.map_event(event);
 		}
-		private override bool expose_event(Gdk.EventExpose event) { 
+		public override bool expose_event(Gdk.EventExpose event) { 
 			if(is_foreign) return false;
 			return base.expose_event(event);
 		}
 
-		private override void unrealize() {
+		public override void unrealize() {
 			if(is_foreign) return;
 			base.unrealize();
 		}
 
-		private override bool property_notify_event(Gdk.EventProperty event) {
+		public override bool property_notify_event(Gdk.EventProperty event) {
 			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_EVENT, false)) {
 				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
 			}
@@ -207,7 +207,7 @@ namespace Gnomenu {
 			}
 			return false;
 		}
-		private override void dispose () {
+		public override void dispose () {
 			if(is_foreign) {
 				if(!disposed) {
 					disposed = true;

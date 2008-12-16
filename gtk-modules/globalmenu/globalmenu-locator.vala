@@ -7,13 +7,14 @@ namespace GnomenuGtk {
 			string[] tokens = path.split_set("/", -1);
 			tokens.length = (int) strv_length(tokens);
 			MenuShell shell = menubar;
+			/*
 			weak string rev = tokens[0];
-			/*FIXME: implement the revision */
+			FIXME: implement the revision */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
 				int position = token.to_int();
 				List<weak Widget> children = gtk_container_get_children(shell);
-				MenuItem item;
+				MenuItem item = null;
 				foreach(weak Widget child in children) {
 					if(child is TearoffMenuItem) continue;
 					if(position == 0) {

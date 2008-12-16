@@ -86,7 +86,7 @@ by the plugin.""")
 
 
 	private static void default_log_handler(string? domain, LogLevelFlags level, string message) {
-		TimeVal time;
+		TimeVal time = {0};
 		time.get_current_time();
 		string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, Environment.get_prgname(), domain, message);
 		log_stream.write(s, s.size(), null);
@@ -105,7 +105,6 @@ by the plugin.""")
 			case "gdm-user-switch-applet":
 			message(_("GlobalMenu is disabled for several programs"));
 			return true;
-			break;
 			default:
 				if((disabled_application_names!=null) 
 					&& disabled_application_names.str(Environment.get_prgname())!=null){

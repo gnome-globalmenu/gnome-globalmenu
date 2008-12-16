@@ -2,8 +2,10 @@
 
 source ../patch.sh
 
-patch '/parent_class)->expose_event/s/, [&]*_tmp[0-9])/)/g' window.c menuitem.c
-patch '/parent_class)->map_event/s/, &_tmp[0-9])/)/g' window.c
+if [ $VALA_VERSION == 0.5.1 ]; then
+	patch '/parent_class)->expose_event/s/, [&]*_tmp[0-9])/)/g' window.c menuitem.c
+	patch '/parent_class)->map_event/s/, &_tmp[0-9])/)/g' window.c
+fi;
 
 patch '/g_return_if_fail.*old_parent/d' menuitem.c
 patch 's/gboolean include_internals;//g;s/include_internals = FALSE;//g' menuitem.c menubar.c menubarbox.c label.c

@@ -38,7 +38,7 @@ namespace Gnomenu {
 			_item_type = MenuItemType.NORMAL;
 			create_labels();
 		}
-		private override void dispose() {
+		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
 				if(icon_widget != null) {
@@ -297,7 +297,7 @@ namespace Gnomenu {
 		private MenuItemState _item_state;
 		private Gtk.Image icon_widget;
 
-		private override void toggle_size_request(void* requisition) {
+		public override void toggle_size_request(void* requisition) {
 			int toggle_spacing = 0;
 			int indicator_size = 0;
 			style_get("toggle-spacing", &toggle_spacing,
@@ -324,7 +324,7 @@ namespace Gnomenu {
 		 * is drawn.
 		 *
 		 */
-		private override bool expose_event(Gdk.EventExpose event) {
+		public override bool expose_event(Gdk.EventExpose event) {
 			base.expose_event(event);
 			int toggle_spacing = 0;
 			int indicator_size = 0;
@@ -336,8 +336,8 @@ namespace Gnomenu {
 				null);
 			ShadowType shadow_type = item_state_to_shadow_type(_item_state);
 			/*FIXME: alignment !*/
-			int x;
-			int y;
+			int x = 0;
+			int y = 0;
 			int offset = (toggle_size - indicator_size)/2;
 			int spacing = toggle_spacing /2;
 			switch(get_direction()) {
@@ -392,7 +392,7 @@ namespace Gnomenu {
 		 * should be kept here.
 		 *
 		 */
-		private override void forall(Gtk.Callback callback, void* data) {
+		public override void forall(Gtk.Callback callback, void* data) {
 			/*see patch.sh! */
 			bool include_internals = false;
 			if(include_internals) {
@@ -401,22 +401,22 @@ namespace Gnomenu {
 			}
 			base.forall(callback, data);
 		}
-		private override void activate() {
+		public override void activate() {
 			menubar.activate(this);
 		}
-		private override void size_request(out Requisition req) {
+		public override void size_request(out Requisition req) {
 			if(_item_type == MenuItemType.IMAGE) {
 				Requisition icon_req;
 				icon_widget.size_request(out icon_req); /*Then throw it away*/
 			}
 			base.size_request(out req);	
 		}
-		private override void size_allocate(Gdk.Rectangle a) {
-			Gdk.Rectangle ca;
+		public override void size_allocate(Gdk.Rectangle a) {
+			Gdk.Rectangle ca = {0, 0, 0, 0};
 			base.size_allocate(a);
 			if(_item_type == MenuItemType.IMAGE) {
 				/*FIXME: alignment !*/
-				int toggle_spacing;
+				int toggle_spacing = 0;
 				Requisition icon_req;
 				icon_widget.get_child_requisition(out icon_req);
 				style_get(
@@ -454,7 +454,7 @@ namespace Gnomenu {
 			if(_item_type != MenuItemType.IMAGE) return;
 			icon_widget.set_from_stock(icon, IconSize.MENU);
 		}
-		private override void parent_set(Gtk.Widget old_parent) {
+		public override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();
 		}
 		private void create_labels() {

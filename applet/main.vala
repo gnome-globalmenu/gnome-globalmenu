@@ -1,5 +1,5 @@
 using Gtk;
-
+using Config;
 const string APPLET_STANDARD_PROPERTIES = ""; /* then replaced by patch.sh to GNOME_STANDARD_PROPERTies*/
 const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 
@@ -13,9 +13,8 @@ public int main(string[] args) {
 	GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
 	context.set_help_enabled (true);
 	context.add_main_entries(options, null);
-	weak string prefix = Config.PREFIX; /* Make sure the configmake.h is appended.*/
 	Gnome.Program program = Gnome.Program.init (
-			"GlobalMenu.PanelApplet", "0.7", 
+			"GlobalMenu.PanelApplet", Config.VERSION, 
 			Gnome.libgnomeui_module, 
 			args, 
 			Gnome.PARAM_GOPTION_CONTEXT, context,

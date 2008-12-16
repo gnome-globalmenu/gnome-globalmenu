@@ -37,7 +37,7 @@ namespace Gnomenu {
 		bool inside_item;
 		bool item_has_submenu;
 		Parser child_parser; /*to hold the ref count*/
-		string path;
+
 		private void start_element (MarkupParseContext context, 
 				string element_name, 
 				string[] attribute_names, 
@@ -83,15 +83,15 @@ namespace Gnomenu {
 		private void setup_item(MenuItem item, 
 				string[] attr_names, 
 				string[] attr_vals) {
-			weak string label;
-			weak string icon;
-			weak string type;
-			weak string state;
-			weak string font;
-			weak string id;
-			weak string accel;
-			weak bool sensitive;
-			weak bool visible;
+			weak string label = null;
+			weak string icon = null;
+			weak string type = null;
+			weak string state = null;
+			weak string font = null;
+			weak string id = null;
+			weak string accel = null;
+			weak bool sensitive = true;
+			weak bool visible = true;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 

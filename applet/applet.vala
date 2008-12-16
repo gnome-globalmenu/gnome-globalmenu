@@ -359,7 +359,7 @@ public class Applet : Panel.Applet {
 	 */
 	private static void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
 		Settings settings = Settings.get_default();
-		string accel;
+		string accel = null;
 		settings.get("gtk_menu_bar_accel", &accel, null);
 		if(accel != null)
 			Gtk.accelerator_parse(accel, out keyval, out mods);

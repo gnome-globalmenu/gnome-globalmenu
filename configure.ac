@@ -43,11 +43,12 @@ AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses --pkg config"
 VALAC="$VALAC_BIN $VALA_DEFAULT_PKGS"
 AC_SUBST(VALAC)
+VALA_VERSION=`$VALAC_BIN --version|sed -e 's/[Vala ]*//'`
+AC_SUBST(VALA_VERSION)
 
 AC_CONFIG_COMMANDS_POST(
 		[
-		VALA_VERSION=`$VALAC_BIN --version`
-	   	echo $VALA_VERSION | grep $VALA_REQUIRED || \
+	   	test x$VALA_VERSION == x$VALA_REQUIRED || 
 		AC_MSG_WARN([
 			This package works with VALA $VALA_REQUIRED;
 			Your have $VALA_VERSION installed;
@@ -107,6 +108,7 @@ AC_CONFIG_FILES(
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile
 	po/Makefile.in
+	patch.sh
 	])
 
 AC_OUTPUT

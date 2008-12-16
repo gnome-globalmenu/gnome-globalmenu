@@ -83,7 +83,7 @@ namespace Gnomenu {
 			 * fail to build due to a vala bug in 0.5.1*/
 			_min_length = -1;
 		}
-		private override void dispose() {
+		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
 				if(_overflown_menubar != null) {
@@ -228,12 +228,13 @@ namespace Gnomenu {
 			string[] tokens = path.split_set("/", -1);
 			tokens.length = (int) strv_length(tokens);
 			MenuShell shell = this;
+			/*
 			weak string rev = tokens[0];
-			/*FIXME: check rev */
+			FIXME: check rev */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
 				List<weak Widget> children = gtk_container_get_children(shell);
-				MenuItem item;
+				MenuItem item = null;
 				foreach(weak Widget child in children) {
 					MenuItem child_item = child as MenuItem;
 					if(child_item != null) {
@@ -337,7 +338,7 @@ namespace Gnomenu {
 
 		private bool disposed;
 
-		private override void style_set(Style old_style) {
+		public override void style_set(Style old_style) {
 			base.style_set(old_style);
 			if(_overflown_menubar != null) {
 				_overflown_menubar.style = style;
@@ -383,7 +384,6 @@ namespace Gnomenu {
 			 * path = "00001234:/0/1/234/512";
 			 * sb =   "00001234:  /1/234/512";
 			 */
-			bool skip = false;
 			for(int i = 0; i < path.length; i++) {
 				if( path[i] == '/') {
 					slashes ++;
@@ -421,7 +421,7 @@ namespace Gnomenu {
 				_overflown_menubar.background = bg;
 			}
 		}
-		private override void forall(Gtk.Callback callback, void* data) {
+		public override void forall(Gtk.Callback callback, void* data) {
 			bool include_internals = false;
 
 			if(include_internals) {
@@ -430,7 +430,7 @@ namespace Gnomenu {
 			}
 			base.forall(callback, data);
 		}
-		private override void realize() {
+		public override void realize() {
 			base.realize();
 			/* because it is possible that the bg is set before this widget is realized*/
 			if(_overflown_menubar != null) {
@@ -439,7 +439,7 @@ namespace Gnomenu {
 			}
 			reset_bg_pixmap();
 		}
-		private override void map() {
+		public override void map() {
 			base.map();
 			if(_overflown_menubar != null && _overflown_menubar.visible) {
 				_overflown_menubar.map();
@@ -459,7 +459,7 @@ namespace Gnomenu {
 			
 			allocation = (Allocation) a; /*To make 'overflown' happy*/
 			if(_overflown_menubar != null) {
-				Gdk.Rectangle oa;
+				Gdk.Rectangle oa = {0, 0, 0, 0};
 				Gdk.Rectangle ba = a;
 				Requisition or;
 				_overflown_menubar.get_child_requisition(out or);
@@ -516,7 +516,7 @@ namespace Gnomenu {
 				reset_bg_pixmap();
 			}
 		}
-		private override bool expose_event(Gdk.EventExpose event) {
+		public override bool expose_event(Gdk.EventExpose event) {
 			if((get_flags() & WidgetFlags.HAS_FOCUS) != 0) {
 				Gtk.paint_focus(style,
 						window,
@@ -534,11 +534,11 @@ namespace Gnomenu {
 			}
 			return false;
 		}
-		private override bool focus_out_event (Gdk.EventFocus event) {
+		public override bool focus_out_event (Gdk.EventFocus event) {
 			queue_draw();
 			return false;
 		}
-		private override bool focus_in_event (Gdk.EventFocus event) {
+		public override bool focus_in_event (Gdk.EventFocus event) {
 			queue_draw();
 			return false;
 		}
@@ -546,7 +546,7 @@ namespace Gnomenu {
 			base.size_request(out real_requisition);
 			req = real_requisition;
 			if(min_length >= 0) {
-				Requisition r;
+				Requisition r = {0, 0};
 				if(_overflown_menubar != null) {
 					_overflown_menubar.size_request(out r);
 				}
@@ -563,7 +563,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		private override void insert(Widget child, int position) {
+		public override void insert(Widget child, int position) {
 			base.insert(child, position);
 			(child as MenuItem).gravity = gravity;
 		}

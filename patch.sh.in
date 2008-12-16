@@ -1,5 +1,6 @@
 #! /bin/bash
 
+VALA_VERSION=@VALA_VERSION@
 
 function patch {
 	edit=$1;
