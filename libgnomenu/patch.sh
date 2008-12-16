@@ -11,4 +11,4 @@ patch '/g_return_if_fail.*old_parent/d' menuitem.c
 patch 's/gboolean include_internals;//g;s/include_internals = FALSE;//g' menuitem.c menubar.c menubarbox.c label.c
 patch 's/GtkCallback callback, void\* callback_target, void\* data/gboolean include_internals, GtkCallback callback, void* callback_target/g' menuitem.c menubar.c menubarbox.c label.c
 patch 's/callback, callback_target, data/include_internals, callback, callback_target/g' menuitem.c menubar.c
-patch 's/g_return_if_fail (old_style != NULL);//' menubar.c
+patch 's/g_return_if_fail (old_style != NULL);//' menubar.c label.c

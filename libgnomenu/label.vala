@@ -121,6 +121,11 @@ namespace Gnomenu {
 		private List<weak Label> children;
 		private HashTable<weak Widget, ChildPropBag*> props;
 
+		public override void style_set(Style old_style) {
+			foreach(weak Label child in children) {
+				child.style = style;
+			}
+		}
 		public override void forall(Gtk.Callback callback, void* data) {
 			bool include_internals = false;
 
