@@ -27,7 +27,7 @@ GNOME Global Menu project aims to improve GNOME toward a Document Centric Deskto
 
 
 %build
-%configure --disable-schemas-install --disable-static 
+%configure --disable-schemas-install --disable-static --disable-tests
 make %{?_smp_mflags}
 
 

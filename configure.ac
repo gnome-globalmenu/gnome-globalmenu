@@ -19,6 +19,15 @@ AC_SUBST(LDFLAGS)
 
 AM_GCONF_SOURCE_2
 
+# tests
+USE_TESTS=true
+AC_ARG_ENABLE(
+	[tests],
+	AC_HELP_STRING([--enable-tests], [enable tests, default is yes]),
+	[ test "x$enableval" == xno && USE_TESTS=false ],
+	[ USE_TESTS=true ])
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$USE_TESTS" == xtrue])
+
 # intl
 IT_PROG_INTLTOOL
 AM_GLIB_GNU_GETTEXT
