@@ -22,6 +22,7 @@ $(server_DATA): $(server_in_files) Makefile
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
+	task-utils-c.c \
 	$(NULL)
 
 
