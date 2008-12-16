@@ -143,9 +143,9 @@ namespace Gnomenu {
 			set {
 				if(_font == value) return;
 				_font = value;
-				weak Pango.FontDescription desc;
+				Pango.FontDescription desc;
 				if(_font != null) 
-					desc = Pango.FontDescription.from_string(_font);
+					desc = pango_font_description_from_string(_font);
 				else 
 					desc = null;
 				weak Widget bin_child = get_child();

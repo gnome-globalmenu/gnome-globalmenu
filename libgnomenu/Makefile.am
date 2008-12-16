@@ -32,15 +32,14 @@ libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 INTERNAL_VAPI= gnomenu-private.vapi
 EXTERNAL_VAPI= gnomenu.vapi
 
-$(INTERNAL_VAPI): $(INTERNAL) patch.sh markupparser.vapi gdk.vapi $(EXTERNAL_VAPI) gtk.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gnomenu --pkg gdk --pkg markupparser --pkg gtk+-2.0 --pkg gtk --library $(@:.vapi=) $(INTERNAL)
+$(INTERNAL_VAPI): $(INTERNAL) patch.sh $(EXTERNAL_VAPI) bindings.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gnomenu --pkg gtk+-2.0 --pkg bindings --library $(@:.vapi=) $(INTERNAL)
 	echo gnomenu > $(@:.vapi=.deps)
 	bash patch.sh
-$(EXTERNAL_VAPI): $(EXTERNAL) patch.sh markupparser.vapi gdk.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gdk --pkg markupparser --pkg gtk+-2.0 --library $(@:.vapi=) $(EXTERNAL)
-	bash patch.sh
+$(EXTERNAL_VAPI): $(EXTERNAL) patch.sh bindings.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gtk+-2.0 --pkg bindings --library $(@:.vapi=) $(EXTERNAL)
 
 BUILT_SOURCES = $(INTERNAL_VAPI) $(EXTERNAL_VAPI) $(INTERNAL_VAPI:.vapi=.deps)
 
-EXTRA_DIST = $(INTERNAL_VAPI) $(INTERNAL) $(EXTERNAL_VAPI) $(EXTERNAL) patch.sh gdk.vapi $(INTERNAL_VAPI:.vapi=.deps) markupparser.vapi gtk.vapi
+EXTRA_DIST = $(INTERNAL_VAPI) $(INTERNAL) $(EXTERNAL_VAPI) $(EXTERNAL) patch.sh $(INTERNAL_VAPI:.vapi=.deps) bindings.vapi
 

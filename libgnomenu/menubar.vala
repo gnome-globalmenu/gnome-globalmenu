@@ -396,12 +396,6 @@ namespace Gnomenu {
 			return null;
 		}
 		private void reset_bg_pixmap() {
-			/*
-			if(background.type != BackgroundType.PIXMAP) return;
-			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
-				// style = 
-				style.copy();
-			}*/
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
 				Gdk.Pixmap pixmap = new Gdk.Pixmap(window, allocation.width, allocation.height, -1);

@@ -73,8 +73,8 @@ public class MenuBarBox: Gtk.Container {
 	private List<weak Gnomenu.MenuBar> children;
 
 	private override void forall(Gtk.Callback callback, void* data) {
-		bool include_internal = false;
-		if(include_internal) {
+		bool include_internals = false;
+		if(include_internals) {
 
 		}
 		List<weak Gnomenu.MenuBar> copy = children.copy();
