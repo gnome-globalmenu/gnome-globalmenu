@@ -22,6 +22,17 @@ public class Applet : Panel.Applet {
 
 	public Applet() {
 	}
+	public override void dispose() {
+		if(!disposed) {
+			disposed = true;
+			set_background_widget(null);
+			if(current_window != null) {
+				current_window.destroy();
+				current_window = null;
+			}
+		}
+		base.dispose();	
+	}
 	~Applet() {
 	}
 	static construct {
@@ -30,6 +41,7 @@ public class Applet : Panel.Applet {
 	}
 
 	construct {
+		disposed = false;
 		set_name("GlobalMenuPanelApplet");
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
@@ -60,7 +72,7 @@ public class Applet : Panel.Applet {
 		grab_gtk_menu_bar_key();
 
 		/*init panel */
-		this.flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
 		/* gconf stuff goes to a ::create method?*/
 		Gdk.Color color;
@@ -75,7 +87,7 @@ public class Applet : Panel.Applet {
 	private static Gnomenu.Window root_window;
 
 	private MenuBarBox menubars;
-
+	private bool disposed;
 	private Gnomenu.MenuBar main_menubar;
 	private Gnomenu.MenuBar selector;
 
@@ -230,7 +242,6 @@ public class Applet : Panel.Applet {
 		}
 	}
 	
-	static Applet the_applet;
 	static const string APPLET_NAME = _("globalmenu-panel-applet");
 	static const string APPLET_ICON = "globalmenu";
 	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
@@ -249,8 +260,6 @@ public class Applet : Panel.Applet {
 		    
 	private override void realize() {
 		base.realize();
-		
-		the_applet = this;
 		
 		/* Connect to gconf */
 		this.add_preferences(GCONF_SCHEMA_DIR);
@@ -290,7 +299,7 @@ public class Applet : Panel.Applet {
 		verbHelp.cb = on_help_clicked;
 		
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
-		setup_menu (applet_menu_xml, verbs, null);
+		setup_menu (applet_menu_xml, verbs, this);
 	}
 	private void get_prefs() {
 		/*switcher.show_label = this.gconf_get_bool("show_name");
@@ -302,6 +311,7 @@ public class Applet : Panel.Applet {
 	}
 	private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
+		Applet _this = (Applet) user_data;
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		dialog.version = Config.VERSION;
@@ -318,6 +328,7 @@ public class Applet : Panel.Applet {
     }
     private static void on_help_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
+		Applet _this = (Applet) user_data;
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		dialog.version = Config.VERSION;
@@ -330,7 +341,9 @@ public class Applet : Panel.Applet {
     }
     private static void on_preferences_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-       	system("gconf-editor " + the_applet.get_preferences_key() + " &");
+
+		Applet _this = (Applet) user_data;
+       	system("gconf-editor " + _this.get_preferences_key() + " &");
 		/*GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(the_applet.get_preferences_key(), "Applet preferences");
 		gcd.run();
 		gcd.destroy();*/
