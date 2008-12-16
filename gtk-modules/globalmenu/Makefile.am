@@ -30,7 +30,7 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) dgettext.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg dgettext  $(VALASOURCES)
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg dgettext  --pkg gtk $(VALASOURCES)
 	touch $@
 $(STAMP:.vapi=.deps):
 	echo > $@
@@ -55,6 +55,7 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
 	dgettext.vapi \
+	gtk.vapi \
 	$(VALASOURCES) \
 	$(NULL)
 

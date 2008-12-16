@@ -61,20 +61,20 @@ namespace Gnomenu {
 	[CCode (has_type_id = false)]
 	protected class MenuShellHelper {
 		public weak MenuItem get(int index) {
-			return (this as Container).get_children().nth_data(index) as MenuItem;
+			return gtk_container_get_children(this as Container).nth_data(index) as MenuItem;
 		}
 		public bool has(int index) {
-			weak List<weak Widget> children = (this as Container).get_children();
+			List<weak Widget> children = gtk_container_get_children(this as Container);
 			return index >= 0 && index < children.length();
 		}
 		public void truncate(int length) {
-			while((this as Container).get_children().length() > length) {
-				weak Widget child = (this as Container).get_children().last().data as Widget;
+			while(gtk_container_get_children(this as Container).length() > length) {
+				weak Widget child = gtk_container_get_children(this as Container).last().data as Widget;
 				(this as Container).remove(child);
 			}
 		}
 		public uint length() {
-			return (this as Container).get_children().length();
+			return gtk_container_get_children(this as Container).length();
 		}
 	}
 }

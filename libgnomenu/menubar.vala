@@ -74,6 +74,7 @@ namespace Gnomenu {
 		
 		}
 		construct {
+			disposed = false;
 			_background = new Background();
 			/*This is quirky. min_length should be 
 			 * a 'constrcut set' property, and this 
@@ -81,6 +82,16 @@ namespace Gnomenu {
 			 * however then test-menubar will
 			 * fail to build due to a vala bug in 0.5.1*/
 			_min_length = -1;
+		}
+		private override void dispose() {
+			if(!disposed) {
+				disposed = true;
+				if(_overflown_menubar != null) {
+					_overflown_menubar.unparent();
+					_overflown_menubar = null;
+				}
+			}
+			base.dispose();
 		}
 		/**
 		 * This signal is emitted when a child item is activated
@@ -150,7 +161,7 @@ namespace Gnomenu {
 			set {
 				if(_gravity == value) return;
 				_gravity = value;
-				foreach(weak Widget child in get_children()) {
+				foreach(weak Widget child in gtk_container_get_children(this)) {
 					(child as MenuItem).gravity = value;
 				}
 				if(_overflown_menubar != null) {
@@ -221,7 +232,7 @@ namespace Gnomenu {
 			/*FIXME: check rev */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
-				weak List<weak Widget> children = shell.get_children();
+				List<weak Widget> children = gtk_container_get_children(shell);
 				MenuItem item;
 				foreach(weak Widget child in children) {
 					MenuItem child_item = child as MenuItem;
@@ -253,7 +264,7 @@ namespace Gnomenu {
 			if(!overflown) return null;
 			StringBuilder sb = new StringBuilder("");
 			sb.append("<menu>");
-			weak List<weak Widget> children = get_children();
+			List<weak Widget> children = gtk_container_get_children(this);
 			foreach(weak Widget child in children) {
 				bool need_overflown_item = false;
 				Allocation a = child.allocation;
@@ -323,6 +334,8 @@ namespace Gnomenu {
 		private Requisition real_requisition;
 
 		private Allocation real_allocation; /*minus the overflown*/
+
+		private bool disposed;
 
 		private override void style_set(Style old_style) {
 			base.style_set(old_style);
@@ -519,7 +532,7 @@ namespace Gnomenu {
 						"menubar-applet",
 						0, 0, -1, -1);
 			}
-			foreach(weak Widget child in get_children()) {
+			foreach(weak Widget child in gtk_container_get_children(this)) {
 				propagate_expose(child, event);
 			}
 			if(_overflown_menubar != null) {

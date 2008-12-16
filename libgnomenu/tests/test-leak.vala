@@ -24,6 +24,8 @@ namespace Gnomenu {
 							item.submenu = menu;
 							shell.append(item);
 					}
+					/*This is leaking. Vala's gtk binding says get_children is weak
+					 * but it turns out to be strong.*/
 					List<weak Widget> children = shell.get_children().copy();
 					foreach(weak Widget child in children) {
 						shell.remove(child);
@@ -43,11 +45,6 @@ namespace Gnomenu {
 //				mem_profile();
 				for(i = 0; i< 10; i++) {
 					Parser.parse(shell as MenuBar, test3);
-					/*
-					List<weak Widget> children = shell.get_children().copy();
-					foreach(weak Widget child in children) {
-						shell.remove(child);
-					}*/
 				}
 //				mem_profile();
 			});

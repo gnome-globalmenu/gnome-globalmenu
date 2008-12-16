@@ -12,7 +12,7 @@ namespace Gnomenu {
 			}
 			set {
 				if(_pack_direction == value) return;
-				foreach(Widget child in get_children()) {
+				foreach(Widget child in gtk_container_get_children(this)) {
 					if(child is MenuBar) {
 						(child as MenuBar).pack_direction = value;
 						(child as MenuBar).child_pack_direction = value;
@@ -28,7 +28,7 @@ namespace Gnomenu {
 			}
 			set {
 				_gravity = value;
-				foreach(Widget child in get_children()) {
+				foreach(Widget child in gtk_container_get_children(this)) {
 					if(child is MenuBar) 
 						(child as MenuBar).gravity = value;
 				}
@@ -38,7 +38,7 @@ namespace Gnomenu {
 		public Background background {
 			set {
 				Background bg = value.clone();
-				foreach(Widget child in get_children()) {
+				foreach(Widget child in gtk_container_get_children(this)) {
 					if(child is MenuBar) {
 						bg.offset_x = child.allocation.x - allocation.x;
 						bg.offset_y = child.allocation.y - allocation.y;
@@ -62,7 +62,7 @@ namespace Gnomenu {
 			switch(pack_direction) {
 				case PackDirection.LTR:
 				case PackDirection.RTL:
-					foreach(Widget child in get_children()) {
+					foreach(Widget child in gtk_container_get_children(this)) {
 						child.size_request(out cr);
 						r.width += cr.width;
 						r.height = r.height>cr.height?r.height:cr.height;
@@ -70,7 +70,7 @@ namespace Gnomenu {
 				break;
 				case PackDirection.BTT:
 				case PackDirection.TTB:
-					foreach(Widget child in get_children()) {
+					foreach(Widget child in gtk_container_get_children(this)) {
 						child.size_request(out cr);
 						r.height += cr.height;
 						r.width = r.width>cr.width?r.width:cr.width;
@@ -80,7 +80,7 @@ namespace Gnomenu {
 		}
 		private override void map() {
 			base.map();
-			foreach(Widget child in get_children()) {
+			foreach(Widget child in gtk_container_get_children(this)) {
 				if(child.visible) {
 					child.map();
 				}
@@ -99,7 +99,7 @@ namespace Gnomenu {
 			rev_x = a.width;
 			rev_y = a.height;
 
-			foreach(Widget child in get_children()) {
+			foreach(Widget child in gtk_container_get_children(this)) {
 				child.get_child_requisition(out cr);
 				switch(pack_direction) {
 					case PackDirection.LTR:

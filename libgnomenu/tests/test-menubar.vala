@@ -71,7 +71,7 @@ namespace Gnomenu {
 				Gdk.Color.parse("#0000ff", out color);
 				window.modify_bg(StateType.NORMAL, color);
 				menubar = new MenuBar();
-				menubar.activate += activate;
+		//		menubar.activate += activate;
 				menubar.visible = true;
 				window.add(menubar);
 			});
