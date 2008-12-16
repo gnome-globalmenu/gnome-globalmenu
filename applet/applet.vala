@@ -69,11 +69,6 @@ public class Applet : Panel.Applet {
 		menubars.add(main_menubar);
 		menubars.child_set(main_menubar, "expand", true, null);	/*Let the main_menubar use the remaining space in the applet.*/
 
-		/*init wnck*/
-		init_wnck();
-
-	/* Key grab F10 (gtk-menu-bar-key)*/
-		grab_gtk_menu_bar_key();
 
 		/*init panel */
 		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
@@ -304,6 +299,12 @@ public class Applet : Panel.Applet {
 		
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
 		setup_menu (applet_menu_xml, verbs, this);
+
+		/*init wnck*/
+		init_wnck();
+
+		/* Key grab F10 (gtk-menu-bar-key)*/
+		grab_gtk_menu_bar_key();
 	}
 	private void get_prefs() {
 		/*switcher.show_label = this.gconf_get_bool("show_name");
