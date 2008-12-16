@@ -195,7 +195,11 @@ public class Applet : Panel.Applet {
 		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
-				bg.type = BackgroundType.NONE;
+				bg.pixmap = this.style.bg_pixmap[(int)StateType.NORMAL];
+				bg.color = this.style.bg[(int)StateType.NORMAL];
+				if (bg.pixmap==null)
+					bg.type = BackgroundType.COLOR; else
+					bg.type = BackgroundType.PIXMAP;
 			break;
 			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
 				bg.type = BackgroundType.COLOR;
@@ -305,6 +309,7 @@ public class Applet : Panel.Applet {
 	private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
 		Applet _this = (Applet) user_data;
+		
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		dialog.version = Config.VERSION;
