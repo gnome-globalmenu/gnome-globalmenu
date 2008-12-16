@@ -49,7 +49,13 @@ void dyn_patch_uninit() {
 	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
 }
 void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
+	GType * children = g_type_children(type, NULL);
+	int i;
 	patcher(type);
+	for(i = 0; children[i]; i++) {
+		dyn_patch_type_r(children[i], patcher);
+	}
+	g_free(children);
 }
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_message("Changed: %p", menubar);

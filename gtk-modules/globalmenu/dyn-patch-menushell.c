@@ -31,11 +31,12 @@ void dyn_patch_menu_shell_patcher(GType menu_shell_type) {
 }
 
 void dyn_patch_menu_shell_unpatcher(GType menu_shell_type) {
-	GObjectClass * klass =  g_type_class_ref(menu_shell_type);
+	GObjectClass * klass =  g_type_class_peek(menu_shell_type);
 	GtkContainerClass * container_klass = (GtkContainerClass*)klass;
 	GtkMenuShellClass * menu_shell_klass = (GtkMenuShellClass*)klass;
 
 	RESTORE(menu_shell_klass, gtk_menu_shell, insert);
 	RESTORE(container_klass, gtk_menu_shell, remove);
+	g_type_class_unref(klass);
 }
 
