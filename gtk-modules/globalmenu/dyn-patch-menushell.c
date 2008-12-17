@@ -5,7 +5,10 @@
 
 DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * child, int position)) {
 	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
-	_old_gtk_menu_shell_insert(shell, child, position);
+	VFUNC_TYPE(gtk_menu_shell, insert) vfunc = CHAINUP(gtk_menu_shell, insert);
+	if(vfunc) {
+		vfunc(shell, child, position);
+	}
 	if(menubar) {
 		dyn_patch_set_menubar_r(child, menubar);
 		dyn_patch_queue_changed(menubar, child);
@@ -15,7 +18,8 @@ DEFINE_FUNC(void, gtk_menu_shell, remove, (GtkMenuShell * shell, GtkWidget * chi
 
 	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
 	dyn_patch_set_menubar_r(child, NULL);
-	_old_gtk_menu_shell_remove(shell, child);
+	VFUNC_TYPE(gtk_menu_shell, remove) vfunc = CHAINUP(gtk_menu_shell, remove);
+	if(vfunc) vfunc(shell, child);
 	if(menubar) {
 		dyn_patch_queue_changed(menubar, child);
 	}
@@ -26,8 +30,13 @@ void dyn_patch_menu_shell_patcher(GType menu_shell_type) {
 	GtkContainerClass * container_klass = (GtkContainerClass*)klass;
 	GtkMenuShellClass * menu_shell_klass = (GtkMenuShellClass*)klass;
 
-	OVERRIDE(menu_shell_klass, gtk_menu_shell, insert);
-	OVERRIDE(container_klass, gtk_menu_shell, remove);
+	if(menu_shell_type == GTK_TYPE_MENU_SHELL) {
+		OVERRIDE_SAVE(menu_shell_klass, gtk_menu_shell, insert);
+		OVERRIDE_SAVE(container_klass, gtk_menu_shell, remove);
+	} else {
+		OVERRIDE(menu_shell_klass, gtk_menu_shell, insert);
+		OVERRIDE(container_klass, gtk_menu_shell, remove);
+	}
 }
 
 void dyn_patch_menu_shell_unpatcher(GType menu_shell_type) {

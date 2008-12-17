@@ -29,7 +29,11 @@ void dyn_patch_widget_patcher(GType widget_type) {
 	GObjectClass * klass =  g_type_class_ref(widget_type);
 	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
 
-	OVERRIDE(widget_klass, gtk_widget, parent_set);
+	if(widget_type == GTK_TYPE_WIDGET) {
+		OVERRIDE_SAVE(widget_klass, gtk_widget, parent_set);
+	} else {
+		OVERRIDE(widget_klass, gtk_widget, parent_set);
+	}
 }
 
 void dyn_patch_widget_unpatcher(GType widget_type) {

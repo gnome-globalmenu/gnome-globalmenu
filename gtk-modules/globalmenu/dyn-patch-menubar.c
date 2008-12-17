@@ -18,7 +18,8 @@ DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
 		gdk_window_hide (widget->window);
 	  return;
   }
-  _old_gtk_menu_bar_map(widget);
+  VFUNC_TYPE(gtk_menu_bar, map) vfunc = CHAINUP(gtk_menu_bar, map);
+	if(vfunc) vfunc(widget);
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, const GValue * value, GParamSpec *pspec)) {
@@ -29,7 +30,10 @@ DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, 
 	  g_value_set_boolean (value, g_object_get_data(object, "is-local"));
 	  break;
     default:
-		_old_gtk_menu_bar_get_property(object, prop_id, value, pspec);
+	  {
+	  VFUNC_TYPE(gtk_menu_bar, get_property) vfunc = CHAINUP(gtk_menu_bar, get_property);
+	  if(vfunc) vfunc(object, prop_id, value, pspec);
+	  }
       break;
     }
 }
@@ -46,13 +50,18 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 	  gtk_widget_queue_resize(menubar);
 	  break;
     default:
-		_old_gtk_menu_bar_set_property(object, prop_id, value, pspec);
+	  {
+	  VFUNC_TYPE(gtk_menu_bar, set_property) vfunc = CHAINUP(gtk_menu_bar, set_property);
+	  if(vfunc) vfunc(object, prop_id, value, pspec);
+	  }
       break;
     }
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, size_request, (GtkWidget * widget, GtkRequisition * requisition)) {
-  _old_gtk_menu_bar_size_request(widget, requisition);
+  VFUNC_TYPE(gtk_menu_bar, size_request) vfunc = CHAINUP(gtk_menu_bar, size_request);
+  if(vfunc) vfunc(widget, requisition);
+
   if(!g_object_get_data(widget, "is-local")) {
 	  requisition->width = 0;
 	  requisition->height = 0;
@@ -69,6 +78,13 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 
 	if(menu_bar_type == GTK_TYPE_MENU_BAR) {
 		_gtk_menu_bar_parent_class = g_type_class_peek_parent(klass);
+
+		OVERRIDE_SAVE(klass, gtk_menu_bar, get_property);
+		OVERRIDE_SAVE(klass, gtk_menu_bar, set_property);
+		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, map);
+		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, can_activate_accel);
+		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, size_request);
+		
 		if(g_object_class_find_property (klass, "local") == NULL) {
 			g_object_class_install_property (klass,
 					   PROP_LOCAL,
@@ -90,13 +106,14 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 				  gtk_marshal_VOID__VOID,
 				  G_TYPE_NONE, 0);
 		}
-	}	
+	} else {	
 
-	OVERRIDE(klass, gtk_menu_bar, get_property);
-	OVERRIDE(klass, gtk_menu_bar, set_property);
-	OVERRIDE(widget_klass, gtk_menu_bar, map);
-	OVERRIDE(widget_klass, gtk_menu_bar, can_activate_accel);
-	OVERRIDE(widget_klass, gtk_menu_bar, size_request);
+		OVERRIDE(klass, gtk_menu_bar, get_property);
+		OVERRIDE(klass, gtk_menu_bar, set_property);
+		OVERRIDE(widget_klass, gtk_menu_bar, map);
+		OVERRIDE(widget_klass, gtk_menu_bar, can_activate_accel);
+		OVERRIDE(widget_klass, gtk_menu_bar, size_request);
+	}
 }
 void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
 	GObjectClass * klass = g_type_class_peek(menu_bar_type);

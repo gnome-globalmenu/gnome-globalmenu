@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 #include "dyn-patch.h"
+extern GtkMenuBar * gtk_window_find_menubar(GtkWidget * widget);
+
 extern void dyn_patch_widget_patcher();
 extern void	dyn_patch_menu_shell_patcher();
 extern void	dyn_patch_menu_bar_patcher();
@@ -7,6 +9,7 @@ extern void dyn_patch_widget_unpatcher();
 extern void	dyn_patch_menu_shell_unpatcher();
 extern void	dyn_patch_menu_bar_unpatcher();
 
+static void dyn_patch_type_r(GType type, DynPatcherFunc patcher);
 /*
  * _USE_CLOSURES doesn't help improving the performance.
  * */
@@ -23,6 +26,7 @@ static GQuark DETAIL_LABEL = 0;
 
 static GTimer * timer = NULL;
 static gulong buffered_changes = 0;
+static GHashTable * old_vfuncs = NULL;
 
 void dyn_patch_init () {
 	__MENUBAR__ = g_quark_from_string("__menubar__");
@@ -34,6 +38,7 @@ void dyn_patch_init () {
 	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
 	DETAIL_SUBMENU = g_quark_from_string("submenu");
 	DETAIL_LABEL = g_quark_from_string("label");
+	old_vfuncs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 
 	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
 	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
@@ -42,13 +47,38 @@ void dyn_patch_init () {
 	timer = g_timer_new();
 	g_timer_stop(timer);
 }
+
 void dyn_patch_uninit() {
+	GList * toplevels = gtk_window_list_toplevels();
+	GList * node;
+	for(node = toplevels; node; node = node->next) {
+		GtkWidget * toplevel = node->data;
+		GtkMenuBar * menubar = gtk_window_find_menubar(toplevel);
+		if(menubar) {
+			dyn_patch_set_menubar_r(menubar, NULL);
+		}
+	}
+	g_list_free(toplevels);
 	g_timer_destroy(timer);
-	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
-	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
+	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
+	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
+	g_hash_table_unref(old_vfuncs);
 }
-void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
+
+void dyn_patch_save_vfunc(const char * type, const char * name, gpointer vfunc) {
+	char * long_name = g_strdup_printf("%s_%s", type, name);
+	g_hash_table_insert(old_vfuncs, long_name, vfunc);
+}
+
+gpointer dyn_patch_load_vfunc(const char * type, const char * name) {
+	char * long_name = g_strdup_printf("%s_%s", type, name);
+	gpointer rt = g_hash_table_lookup(old_vfuncs, long_name);
+	g_free(long_name);
+	return rt;
+}
+
+static void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 	GType * children = g_type_children(type, NULL);
 	int i;
 	patcher(type);
@@ -57,6 +87,8 @@ void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 	}
 	g_free(children);
 }
+
+
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	g_message("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);

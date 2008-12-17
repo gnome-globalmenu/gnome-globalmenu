@@ -8,11 +8,6 @@ public class GlobalMenuModule {
 	private static string log_file_name;
 	private static GLib.OutputStream log_stream;
 
-	private static const OptionEntry [] options = {
-		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
-		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
-		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to stderr"), null}
-	};
 
 	[CCode (cname = "dyn_patch_init")]
 	public static extern void dyn_patch_init();
@@ -67,6 +62,13 @@ public class GlobalMenuModule {
 	private static weak string _(string s) {
 		return dgettext(Config.GETTEXT_PACKAGE, s);
 	}
+
+	private static const OptionEntry [] options = {
+		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
+		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
+		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to stderr"), null},
+		{null}
+	};
 
 	private static void parse_args() {
 		string [] args;
