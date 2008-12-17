@@ -10,6 +10,7 @@ namespace GnomenuExtra {
 		private int _max_size = 30;
 		private bool _show_icon = false;
 		private Gdk.Pixbuf _icon;
+		private Wnck.Window _window;
 		
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
 		private GLib.HashTable<string,string> program_list;
@@ -62,10 +63,9 @@ namespace GnomenuExtra {
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		public void update(Wnck.Window? window=null) {
-			if (window!=null) {
-				_label = get_application_name(window);
-			}
+		public void update(Wnck.Window? window=_window) {
+			_window = window;
+			_label = get_application_name(window);
 			Parser.parse(this, TEMPLATE.printf(cut_string(_label, _max_size)));
 			_icon = window.get_mini_icon();
 			show_icon = _show_icon;
