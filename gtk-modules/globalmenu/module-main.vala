@@ -5,6 +5,8 @@ using GnomenuGtk;
 public class GlobalMenuModule {
 	private static bool verbose = false;
 	private static bool disabled = false;
+	private static bool initialized = false;
+
 	private static string log_file_name;
 	private static GLib.OutputStream log_stream;
 	private static Quark domain;
@@ -17,16 +19,17 @@ public class GlobalMenuModule {
 
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
+		if(initialized) return;
+		initialized = true;
 		if(!disabled) {	
-		dyn_patch_init();
-		add_emission_hooks();
+			dyn_patch_init();
+			add_emission_hooks();
 		}
 	}
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
 		message(_("Global Menu plugin Module is loaded"));
-
 		domain = Quark.from_string("GlobalMenu");
 
 		if(is_quirky_app()) disabled = true;

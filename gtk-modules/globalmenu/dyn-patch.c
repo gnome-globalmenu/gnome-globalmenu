@@ -71,6 +71,7 @@ void dyn_patch_uninit() {
 	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
+
 	g_hash_table_unref(old_vfuncs);
 	g_hash_table_unref(classes);
 
@@ -108,6 +109,7 @@ static void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
+	GDK_THREADS_ENTER();
 	g_message("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
 	g_signal_emit_by_name(menubar, "changed", 0, NULL);
@@ -116,6 +118,7 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 
 	g_timer_reset(timer);
 	g_timer_stop(timer);
+	GDK_THREADS_LEAVE();
 	return FALSE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
