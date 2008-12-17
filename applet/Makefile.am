@@ -51,6 +51,7 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(GTK_LIBS) \
 		$(WNCK_LIBS) \
 		$(PANEL_LIBS) \
+		$(GMENU_LIBS) \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
@@ -58,6 +59,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GTK_CFLAGS) \
 		$(WNCK_CFLAGS) \
 		$(PANEL_CFLAGS) \
+		$(GMENU_CFLAGS) \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
 		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \

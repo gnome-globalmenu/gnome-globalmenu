@@ -1,8 +1,8 @@
 %define 	base_version 	0.6.9
-%define 	svn_version 	svn1817
+%define 	svn_version 	svn1820
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	4%{?dist}
+Release:	1%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -72,6 +72,8 @@ gconftool-2 --makefile-uninstall-rule \
 
 
 %changelog
+* Wed Dec 17 2008 Feng Yu <rainwoodman@gmail.com>
+- The module is ready for loaded/unloaded by GtkSettings. Because an issue with scim-bridge, the gconf key keeps disabling the module by default.
 * Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
 - gnome-settings-daemon for the module. (gconf-key: apps/gnome-settings-daemon/gtk-modules)
 * Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
