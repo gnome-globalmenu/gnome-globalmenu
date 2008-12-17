@@ -296,7 +296,7 @@ public class Applet : Panel.Applet {
 		init_wnck();
 
 		/* Key grab F10 (gtk-menu-bar-key)*/
-		grab_gtk_menu_bar_key();
+		//grab_gtk_menu_bar_key();
 	}
 	private void get_prefs() {
 		/*switcher.show_label = this.gconf_get_bool("show_name");

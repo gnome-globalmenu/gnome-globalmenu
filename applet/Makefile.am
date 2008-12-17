@@ -33,6 +33,8 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=libwnck-1.0 \
 	--pkg=libpanelapplet-2.0 \
 	--pkg=gnomenu-private \
+	--pkg=gnome-desktop-2.0 \
+	--pkg=libgnome-menu \
 	--pkg=gconf-2.0 \
 	--pkg=gconfcompat \
 	$(VALASOURCES)
@@ -57,6 +59,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(PANEL_CFLAGS) \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
+		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-g \
 		$(NULL)

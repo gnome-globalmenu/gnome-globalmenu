@@ -1,15 +1,19 @@
 using GLib;
 using Gnomenu;
 using Gtk;
+//using GnomeMenuHelper;
 public extern string* __get_task_name_by_pid(int pid);
 namespace GnomenuExtra {
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
+		private int max_size = 30;
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
+		private GLib.HashTable<string,string> program_list;
 		
 		public Switcher() {
 			Parser.parse(this, TEMPLATE.printf("Global Menu Bar"));
+			//program_list = GnomeMenuHelper.get_flat_list();
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
@@ -45,11 +49,19 @@ namespace GnomenuExtra {
 				return "Desktop";
 				
 			string process_name = get_process_name(window);
-			return process_name;
+			
+			/* TOFIX: replace with GnomeMenuHelper lookup */
+			return window.get_application().get_name();
+		}
+		private string cut_string(string txt, int max) {
+			if (max<1) return txt;
+			if (max<3) return "...";
+			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
+			return txt;
 		}
 		public void update(Wnck.Window? window) {
 			_label = get_application_name(window);
-			Parser.parse(this, TEMPLATE.printf(_label));
+			Parser.parse(this, TEMPLATE.printf(cut_string(_label, max_size)));
 		}
 	}
 }
