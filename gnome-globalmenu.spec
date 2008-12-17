@@ -14,6 +14,7 @@ BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{base_version}-%{release}-XXXXXXX)
 Requires:		gtk2
 Requires:		libwnck
 Requires:		gnome-panel
+
 Requires(pre): GConf2
 Requires(post): GConf2
 Requires(preun): GConf2
