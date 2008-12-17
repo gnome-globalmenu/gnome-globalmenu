@@ -26,7 +26,7 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 }
 
 void dyn_patch_widget_patcher(GType widget_type) {
-	GObjectClass * klass =  g_type_class_ref(widget_type);
+	GObjectClass * klass =  dyn_patch_hold_type(widget_type);
 	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
 
 	if(widget_type == GTK_TYPE_WIDGET) {
@@ -37,9 +37,11 @@ void dyn_patch_widget_patcher(GType widget_type) {
 }
 
 void dyn_patch_widget_unpatcher(GType widget_type) {
-	GObjectClass * klass =  g_type_class_peek(widget_type);
+	GObjectClass * klass =  g_type_class_ref(widget_type);
+	if(!klass) return;
 	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
 
 	RESTORE(widget_klass, gtk_widget, parent_set);
 	g_type_class_unref(klass);
+	dyn_patch_release_type(widget_type);
 }

@@ -73,7 +73,7 @@ DEFINE_FUNC(gboolean, gtk_menu_bar, can_activate_accel, (GtkWidget * widget, gui
 }
 
 void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
-	GObjectClass * klass = g_type_class_ref(menu_bar_type);
+	GObjectClass * klass = dyn_patch_hold_type(menu_bar_type);
 	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
 
 	if(menu_bar_type == GTK_TYPE_MENU_BAR) {
@@ -116,7 +116,8 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 	}
 }
 void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
-	GObjectClass * klass = g_type_class_peek(menu_bar_type);
+	GObjectClass * klass = g_type_class_ref(menu_bar_type);
+	if(!klass) return;
 	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
 
 	RESTORE(klass, gtk_menu_bar, get_property);
@@ -126,4 +127,5 @@ void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
 	RESTORE(widget_klass, gtk_menu_bar, size_request);
 	
 	g_type_class_unref(klass);
+	dyn_patch_release_type(menu_bar_type);
 }

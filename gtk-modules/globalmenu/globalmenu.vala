@@ -24,29 +24,32 @@ namespace GnomenuGtk {
 		changed_hook_id = Signal.add_emission_hook(signal_id, 0, changed_eh, null);
 		hc_hook_id = Signal.add_emission_hook (signal_id_hc, 0, hierachy_changed_eh, null);
 
-		List<weak Window> toplevels = gtk_window_list_toplevels();
-		foreach(Window toplevel in toplevels) {
-			MenuBar menubar = gtk_window_find_menubar(toplevel);
-			if(menubar != null) {
-				bind_menubar_to_window(menubar, toplevel);
-				Signal.emit_by_name(menubar, "changed", 
-						typeof(Widget), menubar, null);
-				menubar.queue_resize();
+		List<weak Widget> toplevels = gtk_window_list_toplevels();
+		foreach(Widget toplevel in toplevels) {
+			if(toplevel is Window) {
+				MenuBar menubar = gtk_window_find_menubar(toplevel as Container);
+				if(menubar != null) {
+					bind_menubar_to_window(menubar, toplevel as Window);
+					Signal.emit_by_name(menubar, "changed", 
+							typeof(Widget), menubar, null);
+					menubar.queue_resize();
+				}
 			}
-
 		}
 	}
 
 	protected void remove_emission_hooks() {
-		List<weak Window> toplevels = gtk_window_list_toplevels();
-		foreach(Window toplevel in toplevels) {
-			MenuBar menubar = find_menubar(toplevel);
-			if(menubar != null) {
-				unbind_menubar_from_window(menubar, toplevel);
-				menubar.queue_resize();
-			}
-			if((0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
-				gdk_window_set_menu_context(toplevel.window, null);
+		List<weak Widget> toplevels = gtk_window_list_toplevels();
+		foreach(Widget toplevel in toplevels) {
+			if(toplevel is Window) {
+				MenuBar menubar = find_menubar(toplevel as Container);
+				if(menubar != null) {
+					unbind_menubar_from_window(menubar, toplevel as Window);
+					menubar.queue_resize();
+				}
+				if((0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
+					gdk_window_set_menu_context(toplevel.window, null);
+				}
 			}
 		}
 		uint signal_id = Signal.lookup("changed", typeof(MenuBar));

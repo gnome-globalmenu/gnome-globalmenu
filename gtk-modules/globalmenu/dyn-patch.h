@@ -5,6 +5,8 @@ void dyn_patch_init(void);
 void dyn_patch_uninit(void);
 void dyn_patch_save_vfunc(const char * type, const char * name, gpointer vfunc);
 gpointer dyn_patch_load_vfunc(const char * type, const char * name);
+gpointer dyn_patch_hold_type(GType type);
+void dyn_patch_release_type(GType type);
 
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget);
 void dyn_patch_set_menubar_r(GtkWidget * head, GtkMenuBar * menubar);
