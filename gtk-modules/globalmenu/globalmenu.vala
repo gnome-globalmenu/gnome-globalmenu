@@ -7,7 +7,7 @@ namespace GnomenuGtk {
 	[CCode (cname = "gtk_widget_get_toplevel_window")]
 	protected extern weak Gtk.Window? gtk_widget_get_toplevel_window (Gtk.Widget widget);
 	[CCode (cname = "gdk_window_set_menu_context")]
-	protected extern void gdk_window_set_menu_context (Gdk.Window window, string context);
+	protected extern void gdk_window_set_menu_context (Gdk.Window window, string? context);
 	[CCode (cname = "gdk_window_get_menu_event")]
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
@@ -33,6 +33,7 @@ namespace GnomenuGtk {
 						typeof(Widget), menubar, null);
 				menubar.queue_resize();
 			}
+
 		}
 	}
 
@@ -43,6 +44,9 @@ namespace GnomenuGtk {
 			if(menubar != null) {
 				unbind_menubar_from_window(menubar, toplevel);
 				menubar.queue_resize();
+			}
+			if((0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
+				gdk_window_set_menu_context(toplevel.window, null);
 			}
 		}
 		uint signal_id = Signal.lookup("changed", typeof(MenuBar));

@@ -9,7 +9,10 @@
 void gdk_window_set_menu_context (GdkWindow * window, char* context ) {
 	GdkAtom atom = gdk_atom_intern(GNOMENU_NET_GLOBALMENU_MENU_CONTEXT, FALSE);
 	GdkAtom type = gdk_atom_intern("STRING", FALSE);
-	gdk_property_change(window, atom, type, 8, GDK_PROP_MODE_REPLACE, context, strlen(context)+1);
+	if(context != NULL) 
+		gdk_property_change(window, atom, type, 8, GDK_PROP_MODE_REPLACE, context, strlen(context)+1);
+	else 
+		gdk_property_delete(window, atom);
 }
 char * gdk_window_get_menu_event (GdkWindow * window) {
 	GdkAtom atom = gdk_atom_intern(GNOMENU_NET_GLOBALMENU_MENU_EVENT, FALSE);
