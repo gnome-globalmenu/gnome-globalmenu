@@ -298,11 +298,12 @@ public class Applet : Panel.Applet {
 		init_wnck();
 
 		/* Key grab F10 (gtk-menu-bar-key)*/
-		//grab_gtk_menu_bar_key();
+		grab_gtk_menu_bar_key();
 	}
 	private void get_prefs() {
 		selector.max_size = (this as PanelCompat.Applet).gconf_get_int("title_max_width");
 		selector.show_icon = (this as PanelCompat.Applet).gconf_get_bool("show_icon");
+		selector.show_label = (this as PanelCompat.Applet).gconf_get_bool("show_name");
 		/*switcher.show_label = this.gconf_get_bool("show_name");
 		switcher.show_icon = this.gconf_get_bool("show_icon");
 		switcher.max_size = this.gconf_get_int("title_max_width");

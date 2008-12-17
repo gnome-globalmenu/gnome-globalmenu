@@ -8,6 +8,7 @@ VALASOURCES = \
 	main.vala \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
+	gnomemenuhelper.vala \
 	$(NULL)
 
 libexec_PROGRAMS = GlobalMenu.PanelApplet

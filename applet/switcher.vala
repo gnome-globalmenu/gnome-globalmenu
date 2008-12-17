@@ -1,7 +1,7 @@
 using GLib;
 using Gnomenu;
 using Gtk;
-//using GnomeMenuHelper;
+using GnomeMenuHelper;
 public extern string* __get_task_name_by_pid(int pid);
 namespace GnomenuExtra {
 	
@@ -9,6 +9,7 @@ namespace GnomenuExtra {
 		private string _label;
 		private int _max_size = 30;
 		private bool _show_icon = false;
+		private bool _show_label = true;
 		private Gdk.Pixbuf _icon;
 		private Wnck.Window _window;
 		
@@ -16,8 +17,8 @@ namespace GnomenuExtra {
 		private GLib.HashTable<string,string> program_list;
 		
 		public Switcher() {
-			Parser.parse(this, TEMPLATE.printf("Global Menu Bar"));
-			//program_list = GnomeMenuHelper.get_flat_list();
+			Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
+			program_list = GnomeMenuHelper.get_flat_list();
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
@@ -54,21 +55,31 @@ namespace GnomenuExtra {
 				
 			string process_name = get_process_name(window);
 			
-			/* TOFIX: replace with GnomeMenuHelper lookup */
-			return window.get_application().get_name();
+			string ret;
+			if (program_list.lookup(process_name)!=null)
+				ret = program_list.lookup(process_name); else
+				ret = window.get_application().get_name();
+			return ret; 
 		}
 		private string cut_string(string txt, int max) {
 			if (max<1) return txt;
-			if (max<3) return "...";
+			if (max<=3) return "...";
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
 		public void update(Wnck.Window? window=_window) {
 			_window = window;
 			_label = get_application_name(window);
-			Parser.parse(this, TEMPLATE.printf(cut_string(_label, _max_size)));
+			if (_show_label) 
+				Parser.parse(this, TEMPLATE.replace("%s", cut_string(_label, _max_size))); else
+				Parser.parse(this, TEMPLATE.replace("%s", ""));
+				
 			_icon = window.get_mini_icon();
-			show_icon = _show_icon;
+			if (_show_icon)
+				this.get("/0").icon_pixbuf  = _icon; else
+				this.get("/0").item_type = "normal";
+				
+			this.visible = (_show_icon | _show_label);
 		}
 		public int max_size {
 			get { return _max_size; }
@@ -81,9 +92,14 @@ namespace GnomenuExtra {
 			get { return _show_icon; }
 			set {
 				_show_icon = value;
-				if (_show_icon)
-					this.get("/0").icon_pixbuf  = _icon; else
-					this.get("/0").item_type = "normal";
+				update();
+			}
+		}
+		public bool show_label {
+			get { return _show_label; }
+			set {
+				_show_label = value;
+				update();
 			}
 		}
 	}
