@@ -7,7 +7,7 @@ namespace GnomenuExtra {
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
-		private int max_size = 30;
+		private int _max_size = 30;
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
 		private GLib.HashTable<string,string> program_list;
 		
@@ -59,9 +59,18 @@ namespace GnomenuExtra {
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		public void update(Wnck.Window? window) {
-			_label = get_application_name(window);
-			Parser.parse(this, TEMPLATE.printf(cut_string(_label, max_size)));
+		public void update(Wnck.Window? window=null) {
+			if (window!=null) {
+				_label = get_application_name(window);
+			}
+			Parser.parse(this, TEMPLATE.printf(cut_string(_label, _max_size)));
+		}
+		public int max_size {
+			get { return _max_size; }
+			set {
+				_max_size = value;
+				update();
+			}
 		}
 	}
 }
