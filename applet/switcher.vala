@@ -8,6 +8,9 @@ namespace GnomenuExtra {
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
 		private int _max_size = 30;
+		private bool _show_icon = false;
+		private Gdk.Pixbuf _icon;
+		
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
 		private GLib.HashTable<string,string> program_list;
 		
@@ -64,12 +67,23 @@ namespace GnomenuExtra {
 				_label = get_application_name(window);
 			}
 			Parser.parse(this, TEMPLATE.printf(cut_string(_label, _max_size)));
+			_icon = window.get_mini_icon();
+			show_icon = _show_icon;
 		}
 		public int max_size {
 			get { return _max_size; }
 			set {
 				_max_size = value;
 				update();
+			}
+		}
+		public bool show_icon {
+			get { return _show_icon; }
+			set {
+				_show_icon = value;
+				if (_show_icon)
+					this.get("/0").icon_pixbuf  = _icon; else
+					this.get("/0").item_type = "normal";
 			}
 		}
 	}

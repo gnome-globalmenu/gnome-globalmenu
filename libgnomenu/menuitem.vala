@@ -283,6 +283,16 @@ namespace Gnomenu {
 			}
 		}
 		
+		/**
+		 * set icon from pixbuf
+		 */
+		public Gdk.Pixbuf icon_pixbuf {
+			set {
+				item_type = "image";
+				icon_widget.set_from_pixbuf(value);
+			}	
+		}
+		
 		private bool disposed;
 
 		private string _path; /*merely a buffer*/
@@ -425,7 +435,7 @@ namespace Gnomenu {
 				ca.width = icon_req.width;
 				ca.height = icon_req.height;
 				int xoffset = (toggle_size - icon_req.width + toggle_spacing)/2;
-				int yoffset = (toggle_size - icon_req.height)/2;
+				int yoffset = (toggle_size - icon_req.height + toggle_spacing / 2)/2;
 				ca.y = a.y + yoffset;
 				switch(get_direction()) {
 					case Gtk.TextDirection.LTR:

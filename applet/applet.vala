@@ -292,6 +292,8 @@ public class Applet : Panel.Applet {
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
 		setup_menu (applet_menu_xml, verbs, this);
 
+		get_prefs();
+
 		/*init wnck*/
 		init_wnck();
 
@@ -300,6 +302,7 @@ public class Applet : Panel.Applet {
 	}
 	private void get_prefs() {
 		selector.max_size = (this as PanelCompat.Applet).gconf_get_int("title_max_width");
+		selector.show_icon = (this as PanelCompat.Applet).gconf_get_bool("show_icon");
 		/*switcher.show_label = this.gconf_get_bool("show_name");
 		switcher.show_icon = this.gconf_get_bool("show_icon");
 		switcher.max_size = this.gconf_get_int("title_max_width");
