@@ -10,6 +10,8 @@ namespace GnomenuExtra {
 		private int _max_size = 30;
 		private bool _show_icon = false;
 		private bool _show_label = true;
+		private bool _show_window_list = true;
+		private bool _show_window_actions = true;
 		private Gdk.Pixbuf _icon;
 		private Wnck.Window _window;
 		
@@ -29,6 +31,59 @@ namespace GnomenuExtra {
 			}
 			string ret = txt.substring(co+1,(txt.length-co-1));
 			return ret;
+		}
+		private void app_selected(Gtk.ImageMenuItem? item) {
+			if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
+				(item.user_data as Wnck.Window).minimize();
+				return;
+			}
+
+			// Ensure viewport visibility
+			int current_workspace_x = (item.user_data as Wnck.Window).get_workspace().get_viewport_x();
+			int current_workspace_y = (item.user_data as Wnck.Window).get_workspace().get_viewport_y();
+			int x,y,w,h;
+			(item.user_data as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+			(item.user_data as Wnck.Window).get_screen().move_viewport(current_workspace_x + x, current_workspace_y + y);
+			
+			(item.user_data as Wnck.Window).activate(Gtk.get_current_event_time());
+			(item.user_data as Wnck.Window).get_workspace().activate(Gtk.get_current_event_time());
+			(item.user_data as Wnck.Window).unminimize(Gtk.get_current_event_time());
+			
+			// ensure is on top
+			(item.user_data as Wnck.Window).make_above();
+			(item.user_data as Wnck.Window).unmake_above();
+
+			//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
+		}
+		private void do_menu(Gnomenu.MenuItem? mi_parent, Wnck.Window window) {
+			Gtk.Menu menu = null;
+			
+			if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && (_show_window_actions))
+				menu = new Wnck.ActionMenu(window); else
+				if (_show_window_list) menu = new Gtk.Menu();
+			
+			if (_show_window_list) {
+				menu.insert(new Gtk.SeparatorMenuItem(), 0);
+				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+				foreach(weak Wnck.Window window in windows) {
+					if (!window.is_skip_pager()) {
+						Gtk.ImageMenuItem mi;
+						string txt = window.get_name();
+						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
+						mi = new Gtk.ImageMenuItem.with_label(txt);
+						if (window.is_active())
+							(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + txt + "</b>");
+						
+						mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
+						mi.user_data = window;
+						mi.activate += app_selected;
+						menu.insert(mi, 0);
+					}
+				}
+			}
+			
+			if (menu!=null) menu.show_all();
+			mi_parent.submenu = menu;
 		}
 		private string get_process_name(Wnck.Window window) {
 			string txt = __get_task_name_by_pid(window.get_application().get_pid());
@@ -72,6 +127,9 @@ namespace GnomenuExtra {
 		}
 		public void update(Wnck.Window? window=_window) {
 			_window = window;
+			this.visible = (_show_icon | _show_label);
+			if (!this.visible) return;
+			
 			_label = get_application_name(window);
 			if (_show_label) 
 				Parser.parse(this, TEMPLATE.replace("%s", cut_string(_label, _max_size))); else
@@ -82,7 +140,7 @@ namespace GnomenuExtra {
 				this.get("/0").icon_pixbuf  = _icon; else
 				this.get("/0").item_type = "normal";
 				
-			this.visible = (_show_icon | _show_label);
+			do_menu(this.get("/0"), window);
 		}
 		public int max_size {
 			get { return _max_size; }
@@ -102,6 +160,20 @@ namespace GnomenuExtra {
 			get { return _show_label; }
 			set {
 				_show_label = value;
+				update();
+			}
+		}
+		public bool show_window_list {
+			get { return _show_window_list; }
+			set {
+				_show_window_list = value;
+				update();
+			}
+		}
+		public bool show_window_actions {
+			get { return _show_window_actions; }
+			set {
+				_show_window_actions = value;
 				update();
 			}
 		}

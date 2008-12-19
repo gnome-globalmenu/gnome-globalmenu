@@ -39,6 +39,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=gconf-2.0 \
 	--pkg=gconfcompat \
 	--pkg=panelappletcompat \
+	--pkg=wnckcompat \
 	$(VALASOURCES)
 	bash patch.sh
 	touch $@
