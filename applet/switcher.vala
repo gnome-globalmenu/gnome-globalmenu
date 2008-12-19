@@ -54,11 +54,12 @@ namespace GnomenuExtra {
 				return "Desktop";
 				
 			string process_name = get_process_name(window);
+			if (process_name==null) return window.get_name();
 			
 			string ret;
 			if (program_list.lookup(process_name)!=null)
 				ret = program_list.lookup(process_name); else
-				ret = window.get_application().get_name();
+				ret = window.get_name();
 			return ret; 
 		}
 		private string cut_string(string txt, int max) {
