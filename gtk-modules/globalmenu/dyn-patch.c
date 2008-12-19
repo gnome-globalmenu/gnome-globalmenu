@@ -213,6 +213,8 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 					_dyn_patch_submenu_notify, menubar);
 			g_signal_connect(widget, "notify::visible", 
 					_dyn_patch_simple_notify, menubar);
+			g_signal_connect(widget, "notify::sensitive", 
+					_dyn_patch_simple_notify, menubar);
 		}
 		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::active", 
