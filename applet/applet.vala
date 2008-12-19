@@ -42,8 +42,7 @@ public class Applet : Panel.Applet {
 		menubars.visible = true;
 		add(menubars);
 
-		selector = new GnomenuExtra.Switcher();
-		/*Put stuff into the selector?*/
+		selector = new Switcher();
 		selector.visible = true;
 		menubars.add(selector);
 
@@ -61,7 +60,7 @@ public class Applet : Panel.Applet {
 		/*init panel */
 		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
-		/* gconf stuff goes to a ::create method?*/
+
 		Gdk.Color color;
 		Gdk.Pixmap pixmap;
 		AppletBackgroundType bgtype;
@@ -76,7 +75,7 @@ public class Applet : Panel.Applet {
 	private MenuBarBox menubars;
 	private bool disposed;
 	private Gnomenu.MenuBar main_menubar;
-	private GnomenuExtra.Switcher selector;
+	private Switcher selector;
 
 	/* to be removed */
 	public static void message(string msg) {
@@ -345,7 +344,7 @@ public class Applet : Panel.Applet {
 
 		Applet _this = (Applet) user_data;
        	//system("gconf-editor " + _this.get_preferences_key() + " &");
-		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(_this.get_preferences_key(),
+		GConfDialog gcd = new GConfDialog(_this.get_preferences_key(),
 															"Applet preferences",
 															new string[]{
 																"show_icon",

@@ -1,24 +1,25 @@
-/* GtkExtra.GConfDialog
+/*******************************
+ * GConfDialog
  * Author: Luca Viggiani
  * Version: 0.1
  * Date: 2009-12-07
  * License: GPL
- * Description: creates a gconf settings back end dialog automatically from a settings key root.
- * 				Usage: new GtkExtra.GConfDialog(string key, string dialog_title)
- * 				Params:
- * 						string key: the gconf key to connect to (i.e /apps/panel/applets/applet_46/prefs)
- * 						string dislog_title: text to be shown on window title bar
- *						string[] subkeys: used to choose the subkeys to hadle (comprising display order).
- * 										  if null all subkeys will be retieved.
+ * Description: creates a gconf settings back end dialog 
+ * 				automatically from a settings key root.
+ * Usage: new GConfDialog (string key, string dialog_title)
+ * Params:
+ * 	    string key: the gconf key to connect to (i.e /apps/panel/applets/applet_46/prefs)
+ * 		string dislog_title: text to be shown on window title bar
+ *		string[] subkeys: used to choose the subkeys to hadle (comprising display order).
+ * 			  if null all subkeys will be retieved.
  * 
  * TODO: Only BOOL and INT data types are implemented. STRING is implemented only partially (read)
- */
+ *******************************/
 
 using GLib;
 using Gtk;
 using GConf;
 
-namespace GtkExtra {
 	public class GConfDialog : Gtk.Dialog {
 		private string root_key;
 		public GConfDialog(string key, string dialog_title, string[] subkeys=null) {
@@ -121,4 +122,3 @@ namespace GtkExtra {
 				}
 		}
 	}
-}

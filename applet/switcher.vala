@@ -3,7 +3,6 @@ using Gnomenu;
 using Gtk;
 using GnomeMenuHelper;
 public extern string* __get_task_name_by_pid(int pid);
-namespace GnomenuExtra {
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
@@ -33,25 +32,31 @@ namespace GnomenuExtra {
 			return ret;
 		}
 		private void app_selected(Gtk.ImageMenuItem? item) {
-			if (((item.user_data as Wnck.Window).is_active()) && ((item.user_data as Wnck.Window).is_visible_on_workspace((item.user_data as Wnck.Window).get_workspace()))) {
-				(item.user_data as Wnck.Window).minimize();
+			Wnck.Window window = item.user_data as Wnck.Window;
+			Wnck.WorkSpace workspace = window.get_workspace();
+			if ((window.is_active()) 
+			&& (window.is_visible_on_workspace(workspace))) {
+				window.minimize();
 				return;
 			}
 
 			// Ensure viewport visibility
-			int current_workspace_x = (item.user_data as Wnck.Window).get_workspace().get_viewport_x();
-			int current_workspace_y = (item.user_data as Wnck.Window).get_workspace().get_viewport_y();
+			Wnck.Screen screen = window.get_screen();
+
+			int current_workspace_x = workspace.get_viewport_x();
+			int current_workspace_y = workspace.get_viewport_y();
 			int x,y,w,h;
 			(item.user_data as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
-			(item.user_data as Wnck.Window).get_screen().move_viewport(current_workspace_x + x, current_workspace_y + y);
+
+			screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
 			
-			(item.user_data as Wnck.Window).activate(Gtk.get_current_event_time());
-			(item.user_data as Wnck.Window).get_workspace().activate(Gtk.get_current_event_time());
-			(item.user_data as Wnck.Window).unminimize(Gtk.get_current_event_time());
+			window.activate(Gtk.get_current_event_time());
+			workspace.activate(Gtk.get_current_event_time());
+			window.unminimize(Gtk.get_current_event_time());
 			
 			// ensure is on top
-			(item.user_data as Wnck.Window).make_above();
-			(item.user_data as Wnck.Window).unmake_above();
+			window.make_above();
+			window.unmake_above();
 
 			//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
 		}
@@ -61,7 +66,7 @@ namespace GnomenuExtra {
 			if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && (_show_window_actions))
 				menu = new Wnck.ActionMenu(window); else
 				if (_show_window_list) menu = new Gtk.Menu();
-			
+				/* FIXME: Since it is a Gtk.Menu, some rgba tricks has to be added */	
 			if (_show_window_list) {
 				menu.insert(new Gtk.SeparatorMenuItem(), 0);
 				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
@@ -178,4 +183,3 @@ namespace GnomenuExtra {
 			}
 		}
 	}
-}
