@@ -33,7 +33,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		private void app_selected(Gtk.ImageMenuItem? item) {
 			Wnck.Window window = item.user_data as Wnck.Window;
-			Wnck.WorkSpace workspace = window.get_workspace();
+			Wnck.Workspace workspace = window.get_workspace();
 			if ((window.is_active()) 
 			&& (window.is_visible_on_workspace(workspace))) {
 				window.minimize();
