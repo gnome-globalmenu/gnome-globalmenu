@@ -407,6 +407,8 @@ namespace Gnomenu {
 				Gdk.cairo_set_source_pixmap(cairo, _background.pixmap, 
 						-(_background.offset_x + real_allocation.x - allocation.x), 
 						-(_background.offset_y + real_allocation.y - allocation.y));
+				weak Cairo.Pattern pattern = cairo.get_source();
+				pattern.set_extend(Cairo.Extend.REPEAT);
 				cairo.rectangle (0, 0, allocation.width, allocation.height);
 				cairo.fill();
 				style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
