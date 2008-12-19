@@ -19,6 +19,8 @@ namespace GnomenuExtra {
 		public Switcher() {
 			Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
 			program_list = GnomeMenuHelper.get_flat_list();
+			if (program_list.lookup("nautilus")==null)
+				program_list.insert("nautilus", "File Manager");
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
