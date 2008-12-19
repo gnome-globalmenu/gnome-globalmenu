@@ -32,14 +32,23 @@ namespace Panel {
 		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
 		[NoArrayLength]
 		public void setup_menu (string xml, BonoboUI.Verb[] verb_list, void* data);
+
 		public virtual signal void change_background (AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap);
 		public virtual signal void change_orient (AppletOrient orient);
 		public virtual signal void change_size (uint size_hint);
+
 		public AppletOrient orient {get;}
 		public AppletFlags flags {get; set;}
 		public uint size {get;}
 		public bool locked_down {get;}
 		public void request_focus(uint32 timestamp);
+
+		public bool gconf_get_bool(string key) throws GLib.Error;
+		public void gconf_set_bool(string key, bool value) throws GLib.Error;
+		public weak string gconf_get_string(string key) throws GLib.Error;
+		public void gconf_set_string(string key, string value) throws GLib.Error;
+		public int gconf_get_int(string key) throws GLib.Error;
+		public void gconf_set_int(string key) throws GLib.Error;
 	}
 	[CCode (cprefix = "PANEL_APPLET_ORIENT_")]
 	public enum AppletOrient {

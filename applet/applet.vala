@@ -303,11 +303,11 @@ public class Applet : Panel.Applet {
 		grab_gtk_menu_bar_key();
 	}
 	private void get_prefs() {
-		selector.max_size = (this as PanelCompat.Applet).gconf_get_int("title_max_width");
-		selector.show_icon = (this as PanelCompat.Applet).gconf_get_bool("show_icon");
-		selector.show_label = (this as PanelCompat.Applet).gconf_get_bool("show_name");
-		selector.show_window_actions = (this as PanelCompat.Applet).gconf_get_bool("show_window_actions");
-		selector.show_window_list = (this as PanelCompat.Applet).gconf_get_bool("show_window_list");
+		selector.max_size = gconf_get_int("title_max_width");
+		selector.show_icon = gconf_get_bool("show_icon");
+		selector.show_label = gconf_get_bool("show_name");
+		selector.show_window_actions = gconf_get_bool("show_window_actions");
+		selector.show_window_list = gconf_get_bool("show_window_list");
 	}
 	private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
