@@ -130,26 +130,38 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		public void update(Wnck.Window? window=_window) {
-			_window = window;
+		private void update() {
+
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
 			
-			_label = get_application_name(window);
+			if(current_window == null) return;
+			_label = get_application_name(current_window);
 			if (_show_label) 
 				Parser.parse(this, TEMPLATE.replace("%s", cut_string(_label, _max_size))); else
 				Parser.parse(this, TEMPLATE.replace("%s", ""));
 				
-			_icon = window.get_mini_icon();
+			_icon = current_window.get_mini_icon();
 			if (_show_icon)
 				this.get("/0").icon_pixbuf  = _icon; else
 				this.get("/0").item_type = "normal";
 				
-			do_menu(this.get("/0"), window);
+			do_menu(this.get("/0"), current_window);
+		}
+		public Wnck.Window? current_window {
+			get {
+				return _window ;
+			}
+			set {
+				_window = value;
+				/* always refresh !*/
+				update();
+			}
 		}
 		public int max_size {
 			get { return _max_size; }
 			set {
+				if(_max_size == value) return;
 				_max_size = value;
 				update();
 			}
@@ -157,6 +169,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		public bool show_icon {
 			get { return _show_icon; }
 			set {
+				if(_show_icon == value) return;
 				_show_icon = value;
 				update();
 			}
@@ -164,6 +177,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		public bool show_label {
 			get { return _show_label; }
 			set {
+				if(_show_label == value) return;
 				_show_label = value;
 				update();
 			}
@@ -171,6 +185,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		public bool show_window_list {
 			get { return _show_window_list; }
 			set {
+				if(_show_window_list == value) return;
 				_show_window_list = value;
 				update();
 			}
@@ -178,6 +193,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		public bool show_window_actions {
 			get { return _show_window_actions; }
 			set {
+				if(_show_window_actions == value) return;
 				_show_window_actions = value;
 				update();
 			}

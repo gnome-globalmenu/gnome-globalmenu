@@ -119,11 +119,10 @@ public class Applet : Panel.Applet {
 			}
 		};
 		screen.window_closed += (window) => {
-			selector.update(screen.get_active_window());
+			selector.current_window = screen.get_active_window();
 		};
 	}
 	private void switch_to(Wnck.Window? window) {
-		selector.update(window);
 		if(current_window != null) {
 			/* This is a weird way to free a window:
 			 * We have two reference counts for current_window
@@ -138,6 +137,7 @@ public class Applet : Panel.Applet {
 		}
 		if(window != null) {
 			current_window = Gnomenu.Window.new_from_native(window.get_xid());
+			selector.current_window = window;
 		}
 		if(current_window != null) {
 			current_window.menu_context_changed += (current_window) => {
