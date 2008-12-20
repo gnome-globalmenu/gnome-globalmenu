@@ -29,7 +29,7 @@ public class GlobalMenuModule {
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
-		message(_("Global Menu plugin Module is loaded"));
+		message(_("Global Menu plugin module is loaded"));
 		domain = Quark.from_string("GlobalMenu");
 
 		if(is_quirky_app()) disabled = true;
@@ -37,7 +37,7 @@ public class GlobalMenuModule {
 		parse_args();
 
 		if(!disabled) {
-			message(_("GlobalMenu is enabled"));
+			message(_("Global Menu is enabled"));
 
 			prepare_log_file();
 
@@ -59,13 +59,12 @@ public class GlobalMenuModule {
 		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
 		log_stream = null;
 		}
-		message(_("Global Menu plugin Module is unloaded"));
+		message(_("Global Menu plugin module is unloaded"));
 	}
 	
 	[CCode (cname="MY_")]
 	private static weak string _(string s) {
-//		return dgettext(Config.GETTEXT_PACKAGE, s);
-		return s;
+		return dgettext(Config.GETTEXT_PACKAGE, s);
 	}
 
 	private static const OptionEntry [] options = {
