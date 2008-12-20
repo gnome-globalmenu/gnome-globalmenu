@@ -4,3 +4,4 @@ libgnomenu/menubarbox.c
 gtk-modules/globalmenu/module-main.c
 applet/main.c
 applet/applet.c
+gnome-globalmenu.schemas.in

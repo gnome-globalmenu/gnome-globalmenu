@@ -9,7 +9,7 @@ EXTRA_DIST = \
 	intltool-extract.in \
 	intltool-merge.in \
 	intltool-update.in \
-	gnome-globalmenu.schemas \
+	gnome-globalmenu.schemas.in \
 	patch.sh \
 	$(NULL)
 
@@ -28,7 +28,9 @@ include $(top_srcdir)/Makefile.config
 include $(top_srcdir)/Makefile.licenses
 
 schemadir   = @GCONF_SCHEMA_FILE_DIR@
-schema_DATA = gnome-globalmenu.schemas
+schema_in_files = gnome-globalmenu.schemas.in
+schema_DATA = $(schema_in_files:.in=)
+@INTLTOOL_SCHEMAS_RULE@
 
 if GCONF_SCHEMAS_INSTALL
 
