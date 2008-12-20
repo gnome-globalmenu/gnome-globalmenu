@@ -2,7 +2,7 @@ NULL =
 
 STAMP = vala-stamp
 
-BUILT_SOURCES = $(STAMP)
+BUILT_SOURCES = $(STAMP) $(server_in_files)
 VALASOURCES = \
 	applet.vala \
 	main.vala \
@@ -14,10 +14,12 @@ VALASOURCES = \
 libexec_PROGRAMS = GlobalMenu.PanelApplet
 
 serverdir = $(BONOBO_SERVER_DIR)
+server_in_in_files = GlobalMenu_PanelApplet.server.in.in
 server_in_files = GlobalMenu_PanelApplet.server.in
 server_DATA = $(server_in_files:.server.in=.server)
+@INTLTOOL_SERVER_RULE@
 
-$(server_DATA): $(server_in_files) Makefile
+$(server_in_files): $(server_in_in_files) Makefile
 	sed -e "s|@LOCATION@|$(libexecdir)|" $< > $@
 
 GlobalMenu_PanelApplet_SOURCES = \
@@ -78,9 +80,9 @@ EXTRA_DIST = \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
-	$(server_in_files) \
+	$(server_in_in_files) \
 	$(icons_DATA) \
 	$(NULL)
 
-DISTCLEANFILES = $(server_DATA)
+DISTCLEANFILES = $(server_DATA) $(server_in_files)
 
