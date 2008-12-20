@@ -21,34 +21,46 @@ using Gtk;
 using GConf;
 
 	public class GConfDialog : Gtk.Dialog {
-		private string root_key;
-		public GConfDialog(string key, string dialog_title, string[] subkeys=null) {
+		public string root_key {get; construct;}
+
+		private GConf.Client _default_client;
+
+		public GConfDialog(string key, string dialog_title) {
 			root_key = key;
-			this.title = dialog_title;
-			this.set_icon_name("gtk-preferences");
-			
-			vbox.width_request = 320;
-			
-			weak GLib.SList<GConf.Entry> prefs = GConf.Engine.get_default().all_entries(key);
-			
+			title = dialog_title;
+			icon_name = "gtk-preferences";
+		}
+		public GConfDialog.with_subkeys(string key, string dialog_title, string[] subkeys) {
+			root_key = key;
+			title = dialog_title;
+			icon_name = "gtk-preferences";
 			if (subkeys==null) {
-       			foreach(weak GConf.Entry entry in prefs)
-       				addEntry(entry);
+				add_all_subkeys();
        		} else {
-       			for (int co=0; co<subkeys.length; co++) {
-       				foreach(weak GConf.Entry entry in prefs)
-       					if (entry.key == (key + "/" + subkeys[co]))
-       						addEntry(entry);
+				foreach(weak string subkey in subkeys) {
+					add_subkey(subkey);
 				}
 			}
-       		
-			vbox.show_all();
+		}
+		construct {
+			_default_client = GConf.Client.get_default();
+			vbox.width_request = 320;
+		}
+		public void add_all_subkeys() {
+			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(root_key);
+			foreach(weak GConf.Entry entry in prefs)
+				addEntry(entry);
+		}
+		public void add_subkey(string subkey) {
+			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(root_key);
+			foreach(weak GConf.Entry entry in prefs)
+				if (entry.key == (root_key + "/" + subkey))
+					addEntry(entry);
 		}
 		private void addEntry(GConf.Entry entry) {
 			Gtk.Box row = new Gtk.HBox(false, 0);
-       			
        		string schema_name = entry.get_schema_name();
-       		weak GConfCompat.Schema schema = (GConfCompat.Schema)Engine.get_default().get_schema(schema_name);
+       		weak GConfCompat.Schema schema = (GConfCompat.Schema)_default_client.get_schema(schema_name);
        			
        		Gtk.Image info = new Gtk.Image.from_stock("gtk-dialog-info", Gtk.IconSize.BUTTON);
        		info.tooltip_text = schema.get_long_desc();
@@ -62,17 +74,17 @@ using GConf;
        		switch(schema.get_type()) {
        			case ValueType.BOOL:
        				widget = new Gtk.CheckButton();
-       				(widget as Gtk.CheckButton).active = Engine.get_default().get_bool(entry.key);
+       				(widget as Gtk.CheckButton).active = _default_client.get_bool(entry.key);
        				(widget as Gtk.CheckButton).clicked += onCheckButtonActivated;
        				break;
        			case ValueType.STRING:
        				widget = new Gtk.Entry();
-       				(widget as Gtk.Entry).text = Engine.get_default().get_string(entry.key);
+       				(widget as Gtk.Entry).text = _default_client.get_string(entry.key);
        				/* TODO: connect changed signal to eventhandler */
        				break;
        			case ValueType.INT:
        				widget = new Gtk.SpinButton.with_range(-100, 100, 1);
-       				(widget as Gtk.SpinButton).value = Engine.get_default().get_int(entry.key);
+       				(widget as Gtk.SpinButton).value = _default_client.get_int(entry.key);
        				(widget as Gtk.SpinButton).value_changed += onSpinButtonValueChanged;
        				break;
        			default:
@@ -92,23 +104,24 @@ using GConf;
 				
 			row.pack_start(button, false, false, 2);
 				
+       		row.show_all();
        		vbox.pack_start(row, true, true, 2);
 		}
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
 			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
-			Engine.get_default().set_bool(entry.key, widget.active);
+			_default_client.set_bool(entry.key, widget.active);
 		}
 		
 		private void onSpinButtonValueChanged(Gtk.SpinButton widget) {
 			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
-			Engine.get_default().set_int(entry.key, (int)widget.value);
+			_default_client.set_int(entry.key, (int)widget.value);
 		}
 		
 		private void onResetButtonPressed(Gtk.Button widget) {
 			Gtk.Widget target = (Gtk.Widget)widget.user_data;
 			weak GConf.Entry entry = (GConf.Entry)target.user_data;
 			string schema_name = entry.get_schema_name();
-			weak GConfCompat.Schema schema = (GConfCompat.Schema)Engine.get_default().get_schema(schema_name);
+			weak GConfCompat.Schema schema = (GConfCompat.Schema)_default_client.get_schema(schema_name);
 			switch(schema.get_type()) {
        			case ValueType.BOOL:
        				(target as Gtk.CheckButton).active = schema.get_default_value().get_bool();
