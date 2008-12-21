@@ -42,6 +42,7 @@ libglobalmenu_gnome_la_LIBADD = \
 		$(GIO_LIBS) \
 		$(NULL)
 libglobalmenu_gnome_la_LDFLAGS = \
+		-g \
 		-version-info 1:0:0 \
 		-avoid-version \
 		-release 0.7.0 \
@@ -52,7 +53,8 @@ libglobalmenu_gnome_la_LDFLAGS = \
 libglobalmenu_gnome_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
-	  -DG_LOG_DOMAIN=\"GlobalMenu\"
+	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
+	  -g
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
 	 patch.sh \

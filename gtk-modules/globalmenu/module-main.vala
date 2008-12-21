@@ -19,17 +19,21 @@ public class GlobalMenuModule {
 
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		if(initialized) return;
-		initialized = true;
-		if(!disabled) {	
-			dyn_patch_init();
-			add_emission_hooks();
+		Gdk.threads_enter();
+		if(!initialized) {
+			initialized = true;
+			if(!disabled) {	
+				dyn_patch_init();
+				add_emission_hooks();
+			}
 		}
+		Gdk.threads_leave();
 	}
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
-		message(_("Global Menu plugin module is loaded"));
+		Gdk.threads_enter();
+		debug(_("Global Menu plugin module is loaded"));
 		domain = Quark.from_string("GlobalMenu");
 
 		if(is_quirky_app()) disabled = true;
@@ -37,21 +41,30 @@ public class GlobalMenuModule {
 		parse_args();
 
 		if(!disabled) {
-			message(_("Global Menu is enabled"));
+			debug(_("Global Menu is enabled"));
 
 			prepare_log_file();
 
 			if(!verbose) {
-				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MESSAGE, empty_log_handler);
+//				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MESSAGE, empty_log_handler);
 				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, empty_log_handler);
 				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_INFO, empty_log_handler);
 			}
 		}
+		/** make the module resident to avoid the rapid reloading issue
+		 * before we figure out why.
+		 *  Therefore after the gconf key for gtk-modules is changed,
+		 *  the user needs to relogin to clear global menu
+
+		module.make_resident();
+		*/
+		Gdk.threads_leave();
 		return null;
 	}
 
 	[CCode (cname="g_module_unload")]
 	public static void g_module_unload(Module module) {
+		Gdk.threads_enter();
 		if(!disabled) {
 		remove_emission_hooks();
 		dyn_patch_uninit();
@@ -59,7 +72,8 @@ public class GlobalMenuModule {
 		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
 		log_stream = null;
 		}
-		message(_("Global Menu plugin module is unloaded"));
+		debug(_("Global Menu plugin module is unloaded"));
+		Gdk.threads_leave();
 	}
 	
 	[CCode (cname="MY_")]
@@ -95,7 +109,7 @@ NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by 
 			context.parse(ref args);
 		} catch (Error e) {
 			warning("%s", e.message);
-			message("%s", context.get_help(false, null));
+			print("%s", context.get_help(false, null));
 		}
 	}
 
@@ -132,10 +146,14 @@ NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by 
 		 * static quarks which cause core dumps when 
 		 * the module is unloaded */
 
+		/* Try to figure this out by filtering out 
+		 * menubars in 'PanelApplet'
+		 * and sub classes of 'PanelMenuBar'
+		 * in globalmenu.vala
 		if(app_name == "gnome-panel"
-		|| app_name == "GlobalMenu.PanelApplet"
 		|| app_name == "gdm-user-switch-applet")
 			return true;
+		*/
 
 		if((disabled_application_names!=null) 
 		&& disabled_application_names.str(app_name)!=null)

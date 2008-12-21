@@ -9,7 +9,9 @@ guint SIGNAL_CHANGED = 0;
 
 
 DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
-  if(!g_object_get_data(widget, "is-local")) {
+	gboolean local = TRUE;
+	g_object_get(widget, "local", &local, NULL);
+  if(!local) {
 
 	  GTK_WIDGET_SET_FLAGS (widget, GTK_MAPPED);
 	  (* GTK_WIDGET_CLASS (_gtk_menu_bar_parent_class)->map) (widget);
@@ -27,7 +29,14 @@ DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, 
   switch (prop_id)
     {
 	case PROP_LOCAL:
-	  g_value_set_boolean (value, g_object_get_data(object, "is-local"));
+		{
+		gint val = GPOINTER_TO_INT(g_object_get_data(object, "is-local"));
+		gboolean prop_value = TRUE;
+		if(val == 0) prop_value = TRUE; /*default to true*/
+		if(val == 100) prop_value = TRUE;
+		if(val == -100) prop_value = FALSE;
+	  g_value_set_boolean (value, prop_value);
+		}
 	  break;
     default:
 	  {
@@ -41,10 +50,16 @@ DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, 
 DEFINE_FUNC(void, gtk_menu_bar, set_property, 
 	(GObject * object, guint prop_id, const GValue * value, GParamSpec *pspec)) {
   GtkMenuBar *menubar = GTK_MENU_BAR (object);
+  gboolean is_local;
   switch (prop_id)
     {
 	case PROP_LOCAL:
-	  g_object_set_data(object, "is-local", (gpointer) g_value_get_boolean (value));
+		is_local = g_value_get_boolean(value);
+		if(is_local) {
+		  g_object_set_data(object, "is-local", GINT_TO_POINTER(100));
+		} else {
+		  g_object_set_data(object, "is-local", GINT_TO_POINTER(-100));
+		}
 	  if(GTK_WIDGET_MAPPED (menubar))
 		  _gtk_menu_bar_map (menubar);
 	  gtk_widget_queue_resize(menubar);
@@ -59,13 +74,14 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, size_request, (GtkWidget * widget, GtkRequisition * requisition)) {
-  VFUNC_TYPE(gtk_menu_bar, size_request) vfunc = CHAINUP(gtk_menu_bar, size_request);
-  if(vfunc) vfunc(widget, requisition);
-
-  if(!g_object_get_data(widget, "is-local")) {
+	VFUNC_TYPE(gtk_menu_bar, size_request) vfunc = CHAINUP(gtk_menu_bar, size_request);
+	if(vfunc) vfunc(widget, requisition);
+	gboolean local = TRUE;
+	g_object_get(widget, "local", &local, NULL);
+	if(!local) {
 	  requisition->width = 0;
 	  requisition->height = 0;
-  }
+	}
 }
 
 DEFINE_FUNC(gboolean, gtk_menu_bar, can_activate_accel, (GtkWidget * widget, guint signal_id)) {
@@ -91,7 +107,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 					   g_param_spec_boolean ("local",
 								  ("Local Menu or Global Menu"),
 								  ("Whether the menu is a local one"),
-								  FALSE,
+								  TRUE,
 								  G_PARAM_READWRITE));
 		}
 

@@ -34,7 +34,7 @@ void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar);
 	}
 
 #define _OVERRIDE_NOCHECK( klass, type, method ) \
-		g_message("override %s->%s_%s from %p to %p",  \
+		g_debug("override %s->%s_%s from %p to %p",  \
 				G_OBJECT_CLASS_NAME(klass), \
 				#type, #method, \
 				klass->method, \
@@ -43,7 +43,7 @@ void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar);
 
 #define RESTORE( klass, type, method ) \
 	if(klass->method == VFUNC_NAME(type, method)) { \
-		g_message("restore %s->%s_%s from %p to %p",  \
+		g_debug("restore %s->%s_%s from %p to %p",  \
 				G_OBJECT_CLASS_NAME(klass), \
 				#type, #method, \
 				klass->method, \

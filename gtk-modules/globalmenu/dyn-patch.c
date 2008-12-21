@@ -31,8 +31,6 @@ static GHashTable * classes = NULL;
 static GHashTable * notifiers = NULL;
 void dyn_patch_init () {
 	
-	GDK_THREADS_ENTER();
-
 	__MENUBAR__ = g_quark_from_string("__menubar__");
 	__DIRTY__ = g_quark_from_string("__dirty__");
 	__OLD_SUBMENU__ = g_quark_from_string("__old_submenu__");
@@ -54,11 +52,9 @@ void dyn_patch_init () {
 	timer = g_timer_new();
 	g_timer_stop(timer);
 
-	GDK_THREADS_LEAVE();
 }
 
 void dyn_patch_uninit() {
-	GDK_THREADS_ENTER();
 	GList * toplevels = gtk_window_list_toplevels();
 	GList * node;
 	for(node = toplevels; node; node = node->next) {
@@ -78,7 +74,6 @@ void dyn_patch_uninit() {
 	g_hash_table_unref(old_vfuncs);
 	g_hash_table_unref(classes);
 
-	GDK_THREADS_LEAVE();
 }
 
 void dyn_patch_save_vfunc(const char * type, const char * name, gpointer vfunc) {
@@ -113,10 +108,10 @@ static void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	GDK_THREADS_ENTER();
-	g_message("Changed: %p", menubar);
+	g_debug("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
 	g_signal_emit_by_name(menubar, "changed", 0, NULL);
-	g_message("_dyn_patch_set_menu_bar_r consumption: %lf, buffered_changes = %ld ", g_timer_elapsed(timer, NULL), buffered_changes);
+	g_debug("_dyn_patch_set_menu_bar_r consumption: %lf, buffered_changes = %ld ", g_timer_elapsed(timer, NULL), buffered_changes);
 	buffered_changes = 0;
 
 	g_timer_reset(timer);
@@ -132,7 +127,6 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	return TRUE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
-	GDK_THREADS_ENTER();
 	guint source_id;
 	buffered_changes++;
 	/* if their is a pending notifier, do nothing. wait for that notifier
@@ -149,7 +143,6 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	} else {
 		/* should never get to here */
 	}
-	GDK_THREADS_LEAVE();
 }
 
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
@@ -169,7 +162,7 @@ static void _dyn_patch_simple_notify(GtkWidget * widget, GParamSpec * pspec, Gtk
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	GtkWidget * old_submenu = g_object_get_qdata((GObject*) widget, __OLD_SUBMENU__);
 	GtkWidget * submenu = gtk_menu_item_get_submenu((GtkMenuItem*)widget);
-	g_message("submenu changed %p %p", widget, submenu);
+	g_debug("submenu changed %p %p", widget, submenu);
 	if(submenu != old_submenu) {
 		if(old_submenu) {
 			dyn_patch_set_menubar_r(old_submenu, NULL);
