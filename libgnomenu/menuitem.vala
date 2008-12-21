@@ -431,14 +431,29 @@ namespace Gnomenu {
 		}
 		public override void size_request(out Requisition req) {
 			if(_item_type == MenuItemType.IMAGE) {
-				Requisition icon_req;
-				_image_widget.size_request(out icon_req); /*Then throw it away*/
+				Requisition image_req;
+				_image_widget.size_request(out image_req); 
+				/*Then throw it away*/
 			}
-			base.size_request(out req);	
+			if(_item_type == MenuItemType.ICON) {
+				_icon_widget.size_request(out req);
+				req.width += (int)border_width * 2;
+				req.height += (int)border_width * 2;
+			} else {
+				base.size_request(out req);	
+			}
 		}
 		public override void size_allocate(Gdk.Rectangle a) {
 			Gdk.Rectangle ca = {0, 0, 0, 0};
-			base.size_allocate(a);
+			if(_item_type == MenuItemType.ICON) {
+				ca.x = a.x + (int)border_width;
+				ca.y = a.y + (int)border_width;
+				ca.width = a.width - (int)border_width * 2;
+				ca.height = a.height - (int)border_width * 2;
+				_icon_widget.size_allocate(ca);
+			} else {
+				base.size_allocate(a);
+			}
 			if(_item_type == MenuItemType.IMAGE) {
 				/*FIXME: alignment !*/
 				int toggle_spacing = 0;
