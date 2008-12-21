@@ -190,12 +190,13 @@ static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, Gt
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
 	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
-	if(old != menubar) {
-		if(old && GTK_IS_LABEL(widget))
+	if(old && old != menubar) {
+		g_debug("Detaching hooks on %p of menubar %p", widget, old);
+		if(GTK_IS_LABEL(widget))
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 
 					old);
-		if(old && GTK_IS_MENU_ITEM(widget)) {
+		if(GTK_IS_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_submenu_notify, 
 					old);
@@ -203,7 +204,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 					_dyn_patch_simple_notify, 
 					old);
 		}
-		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+		if(GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 
 					old);
@@ -227,12 +228,13 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		}
 	}
 	g_timer_continue(timer);
-	if(menubar != old) {
-		if(menubar && GTK_IS_LABEL(widget)) {
+	if(menubar && menubar != old) {
+		g_debug("Registering hooks on %p of %p", widget, menubar);
+		if(GTK_IS_LABEL(widget)) {
 			g_signal_connect(widget, "notify::label", 
 					_dyn_patch_simple_notify, menubar);
 		}
-		if(menubar && GTK_IS_MENU_ITEM(widget)) {
+		if(GTK_IS_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::submenu", 
 					_dyn_patch_submenu_notify, menubar);
 			g_signal_connect(widget, "notify::visible", 
@@ -240,7 +242,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 			g_signal_connect(widget, "notify::sensitive", 
 					_dyn_patch_simple_notify, menubar);
 		}
-		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
+		if(GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::active", 
 					_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::inconsistent", 
