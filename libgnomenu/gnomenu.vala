@@ -9,6 +9,7 @@ namespace Gnomenu {
 		IMAGE,
 		SEPARATOR,
 		ARROW,
+		ICON,
 	}
 	public enum MenuItemState {
 		UNTOGGLED,
@@ -60,6 +61,8 @@ namespace Gnomenu {
 			case "separator":
 			case "s":
 				return MenuItemType.SEPARATOR;
+			case "icon":
+				return MenuItemType.ICON;
 			case null:
 			default:
 				return MenuItemType.NORMAL;
@@ -83,6 +86,8 @@ namespace Gnomenu {
 				return null;
 			case MenuItemType.IMAGE:
 				return "image";
+			case MenuItemType.ICON:
+				return "icon";
 			case MenuItemType.ARROW:
 				return "arrow";
 			case MenuItemType.SEPARATOR:

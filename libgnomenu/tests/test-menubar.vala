@@ -17,7 +17,7 @@ namespace Gnomenu {
 			<item id="Where?" type="r"/>
 		</menu>
 	</item>
-	<item id="File">
+	<item id="File" type="icon" icon="gtk-file">
 		<menu>
 			<item id="New"/>
 			<item id="Open"/>

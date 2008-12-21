@@ -41,9 +41,9 @@ namespace Gnomenu {
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
-				if(icon_widget != null) {
-					icon_widget.unparent();
-					icon_widget = null;
+				if(_image_widget != null) {
+					_image_widget.unparent();
+					_image_widget = null;
 				}
 			}
 			base.dispose();
@@ -111,7 +111,7 @@ namespace Gnomenu {
 			set {
 				if(_icon == value) return;
 				_icon = value;
-				update_icon();
+				update_image();
 			}
 		}
 		/**
@@ -240,16 +240,25 @@ namespace Gnomenu {
 							update_arrow_type();
 						}
 					break;
+					case MenuItemType.ICON:
+						if(old_type != MenuItemType.ICON) {
+							remove_child();
+							_icon_widget = new Gtk.Image();
+							_icon_widget.visible = true;
+							add(_icon_widget);
+							update_image();
+						}
+					break;
 				}
 				if(_item_type == MenuItemType.IMAGE) {
-					icon_widget = new Gtk.Image();
-					icon_widget.set_parent(this);
-					icon_widget.visible = true;
-					update_icon();
+					_image_widget = new Gtk.Image();
+					_image_widget.set_parent(this);
+					_image_widget.visible = true;
+					update_image();
 				} else {
-					if(icon_widget != null) {
-						icon_widget.unparent();
-						icon_widget = null;
+					if(_image_widget != null) {
+						_image_widget.unparent();
+						_image_widget = null;
 					}
 				}
 				queue_resize();
@@ -289,7 +298,7 @@ namespace Gnomenu {
 		public Gdk.Pixbuf icon_pixbuf {
 			set {
 				item_type = "image";
-				icon_widget.set_from_pixbuf(value);
+				image.set_from_pixbuf(value);
 			}	
 		}
 		
@@ -305,7 +314,17 @@ namespace Gnomenu {
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
-		private Gtk.Image icon_widget;
+		public Gtk.Image? image {
+			get {
+				if(_item_type == MenuItemType.IMAGE)
+					return _image_widget;
+				if(_item_type == MenuItemType.ICON)
+					return _icon_widget;
+				return null;
+			}
+		}
+		private Gtk.Image _image_widget;
+		private Gtk.Image _icon_widget;
 
 		public override void toggle_size_request(void* requisition) {
 			int toggle_spacing = 0;
@@ -407,7 +426,7 @@ namespace Gnomenu {
 			bool include_internals = false;
 			if(include_internals) {
 				if(_item_type == MenuItemType.IMAGE)
-					callback(icon_widget);
+					callback(_image_widget);
 			}
 			base.forall(callback, data);
 		}
@@ -417,7 +436,7 @@ namespace Gnomenu {
 		public override void size_request(out Requisition req) {
 			if(_item_type == MenuItemType.IMAGE) {
 				Requisition icon_req;
-				icon_widget.size_request(out icon_req); /*Then throw it away*/
+				_image_widget.size_request(out icon_req); /*Then throw it away*/
 			}
 			base.size_request(out req);	
 		}
@@ -428,7 +447,7 @@ namespace Gnomenu {
 				/*FIXME: alignment !*/
 				int toggle_spacing = 0;
 				Requisition icon_req;
-				icon_widget.get_child_requisition(out icon_req);
+				_image_widget.get_child_requisition(out icon_req);
 				style_get(
 					"toggle-spacing", &toggle_spacing,
 					null);
@@ -445,7 +464,7 @@ namespace Gnomenu {
 						ca.x = a.x + a.width - ca.width - xoffset;
 					break;
 				}
-				icon_widget.size_allocate(ca);
+				_image_widget.size_allocate(ca);
 			}
 		}
 		private void update_label_text() {
@@ -460,9 +479,10 @@ namespace Gnomenu {
 			label.label = text;
 			label.accel = accel_text;
 		}
-		private void update_icon() {
-			if(_item_type != MenuItemType.IMAGE) return;
-			icon_widget.set_from_stock(icon, IconSize.MENU);
+		private void update_image() {
+			if(_item_type != MenuItemType.IMAGE
+			&& _item_type != MenuItemType.ICON) return;
+			image.set_from_stock(icon, IconSize.MENU);
 		}
 		public override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();
