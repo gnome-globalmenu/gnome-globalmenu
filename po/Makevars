@@ -1,0 +1,2 @@
+top_builddir = ..
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_ --keyword=MY_

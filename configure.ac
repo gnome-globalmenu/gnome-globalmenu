@@ -1,20 +1,53 @@
-AC_INIT(gnome-globalmenu, [0.6], [rainwoodman@gmail.com], [gnome-globalmenu] )
+AC_INIT(gnome-globalmenu, [0.7.0], [rainwoodman@gmail.com], [gnome-globalmenu])
 
-AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
-GNOME_COMMON_INIT
-AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE([1.9 tar-ustar])
+AC_CONFIG_SRCDIR([Makefile.am])
+AC_CONFIG_HEADERS(config.h)
+
+# maintainer mode
 AM_MAINTAINER_MODE
-GNOME_MAINTAINER_MODE_DEFINES
 
+
+# Checks for programs.
+AC_PROG_CC
+AM_PROG_CC_C_O
+AC_LIBTOOL_DLOPEN
+AC_PROG_LIBTOOL
+AC_SUBST(CFLAGS)
+AC_SUBST(CPPFLAGS)
+AC_SUBST(LDFLAGS)
+
+AM_GCONF_SOURCE_2
+
+# tests
+USE_TESTS=true
+AC_ARG_ENABLE(
+	[tests],
+	AC_HELP_STRING([--enable-tests], [enable tests, default is yes]),
+	[ test "x$enableval" == xno && USE_TESTS=false ],
+	[ USE_TESTS=true ])
+AM_CONDITIONAL([ENABLE_TESTS], [test "x$USE_TESTS" == xtrue])
+
+# intl
+IT_PROG_INTLTOOL
+AM_GLIB_GNU_GETTEXT
+GETTEXT_PACKAGE=gnome-globalmenu
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
+AC_SUBST(GETTEXT_PACKAGE)
+
+# Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.1])
+AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 
-AC_PATH_PROG(VALACBIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
-AC_SUBST(VALACBIN, [$ac_cv_path_VALACBIN])
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses --pkg config"
+VALAC="$VALAC_BIN $VALA_DEFAULT_PKGS"
+AC_SUBST(VALAC)
+VALA_VERSION=`$VALAC_BIN --version|sed -e 's/[Vala ]*//'`
+AC_SUBST(VALA_VERSION)
 
 AC_CONFIG_COMMANDS_POST(
 		[
-		VALA_VERSION=`$VALACBIN --version`
-	   	echo $VALA_VERSION | grep $VALA_REQUIRED || \
+	   	test x$VALA_VERSION == x$VALA_REQUIRED || 
 		AC_MSG_WARN([
 			This package works with VALA $VALA_REQUIRED;
 			Your have $VALA_VERSION installed;
@@ -23,126 +56,63 @@ AC_CONFIG_COMMANDS_POST(
 			])
 		])
 
-AC_SUBST(AM_VALAC_FLAGS)
-AC_SUBST(VALAC_FLAGS, ['--vapidir=$(top_srcdir)/vapi-compat --pkg=valacompat $(AM_VALAC_FLAGS)'])
-AC_SUBST(VALAC, ['$(VALACBIN) $(VALAC_FLAGS)'])
+# check for modules
 
-IT_PROG_INTLTOOL([0.35.0])
+GLIB_REQUIRED=2.10.0
+GTK_REQUIRED=2.12.0
+GIO_REQUIRED=2.12.0
 
-AC_ISC_POSIX
-AC_PROG_CC
-AM_PROG_CC_STDC
-AC_HEADER_STDC
-AM_PROG_CC_C_O
-AC_PROG_LIBTOOL
+WNCK_REQUIRED=2.24.1
+PANEL_REQUIRED=2.24.1
+GMENU_REQUIRED=2.24.1
 
-dnl begin: GMarkupDoc - base
-PKG_CHECK_MODULES(GMARKUPDOC_BASE, [glib-2.0])
-AC_SUBST(GMARKUPDOC_BASE_CFLAGS)
-AC_SUBST(GMARKUPDOC_BASE_LIBS)
-dnl begin: GMarkupDoc - list
-PKG_CHECK_MODULES(GMARKUPDOC_LIST, [glib-2.0, gtk+-2.0])
-AC_SUBST(GMARKUPDOC_LIST_CFLAGS)
-AC_SUBST(GMARKUPDOC_LIST_LIBS)
-GMARKUPDOC_LIST_VALA_PKGS="--pkg gtk+-2.0"
-AC_SUBST(GMARKUPDOC_LIST_VALA_PKGS)
-dnl begin: GMarkupDoc - dbus
-PKG_CHECK_MODULES(GMARKUPDOC_DBUS, [glib-2.0, gtk+-2.0, dbus-glib-1])
-AC_SUBST(GMARKUPDOC_DBUS_CFLAGS)
-AC_SUBST(GMARKUPDOC_DBUS_LIBS)
-GMARKUPDOC_DBUS_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(GMARKUPDOC_DBUS_VALA_PKGS)
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gmodule-2.0 >= $GLIB_REQUIRED)
+AC_SUBST(GLIB_CFLAGS)
+AC_SUBST(GLIB_LIBS)
 
-dnl begin: Gnomenu
-PKG_CHECK_MODULES(GNOMENU, [glib-2.0 dbus-glib-1 gtk+-2.0])
-AC_SUBST(GNOMENU_CFLAGS)
-AC_SUBST(GNOMENU_LIBS)
-GNOMENU_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(GNOMENU_VALA_PKGS)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_REQUIRED)
+AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GTK_LIBS)
 
-dnl begin: GnomenuGTK
-PKG_CHECK_MODULES(GNOMENUGTK, [glib-2.0 dbus-glib-1 gtk+-2.0 gio-2.0 gio-unix-2.0])
-AC_SUBST(GNOMENUGTK_CFLAGS)
-AC_SUBST(GNOMENUGTK_LIBS)
-GNOMENUGTK_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg gio-2.0 --pkg gio-unix-2.0"
-AC_SUBST(GNOMENUGTK_VALA_PKGS)
-GTK_MODULES_DIR="$libdir/gtk-2.0/modules"
-AC_SUBST(GTK_MODULES_DIR)
-AC_DEFINE_UNQUOTED(GTK_MODULES_DIR, "$GTK_MODULES_DIR", [Where the gtk-2.0/modules dir is])
+PKG_CHECK_MODULES(WNCK, libwnck-1.0 >= $WNCK_REQUIRED)
+AC_SUBST(WNCK_CFLAGS)
+AC_SUBST(WNCK_LIBS)
 
-dnl begin:applet
-AC_MSG_CHECKING(--enable-gnome-applet argument)
-AC_ARG_ENABLE(gnome-applet,
-	[	--enable-gnome-applet	Include gnome-applet interface ],
-	[	enable_gnome_applet=$enableval ],
-	[	enable_gnome_applet="yes" ])
-AC_DEFINE([ENABLE_PANEL_APPLET], [], [enable gnome applet])
-AM_CONDITIONAL([ENABLE_PANEL_APPLET], [test "$enable_gnome_applet" = "yes" ])
-AC_MSG_RESULT($enable_gnome_applet)
+PKG_CHECK_MODULES(PANEL, libpanelapplet-2.0 >= $PANEL_REQUIRED)
+AC_SUBST(PANEL_CFALGS)
+AC_SUBST(PANEL_LIBS)
 
-if test "$enable_gnome_applet" = "yes"; then
-PKG_CHECK_MODULES(GLOBALMENU_PANELAPPLET, [glib-2.0 dbus-glib-1 gtk+-2.0 libwnck-1.0 libpanelapplet-2.0 libgnome-menu])
-fi
-AC_SUBST(GLOBALMENU_PANELAPPLET_CFLAGS)
-AC_SUBST(GLOBALMENU_PANELAPPLET_LIBS)
-GLOBALMENU_PANELAPPLET_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg libpanelapplet-2.0 --pkg libgnome-menu"
-AC_SUBST(GLOBALMENU_PANELAPPLET_VALA_PKGS)
+PKG_CHECK_MODULES(GIO, gio-2.0 >= $GIO_REQUIRED gio-unix-2.0 >= $GIO_REQUIRED)
+AC_SUBST(GIO_FLAGS)
+AC_SUBST(GIO_LIBS)
+
+PKG_CHECK_MODULES(GMENU, libgnome-menu >= $GMENU_REQUIRED)
+AC_SUBST(GMENU_FLAGS)
+AC_SUBST(GMENU_LIBS)
+
+# path: bad way; move them back to the Makefiles according to GNU rules?
 
 BONOBO_SERVER_DIR="$libdir/bonobo/servers"
 AC_SUBST(BONOBO_SERVER_DIR)
 AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir for BONOBO is])
 
-dnl end:applet
+GTK_MODULES_DIR="$libdir/gtk-2.0/modules"
+AC_SUBST(GTK_MODULES_DIR)
+AC_DEFINE_UNQUOTED(GTK_MODULES_DIR, "$GTK_MODULES_DIR", [Where the gtk-2.0/modules dir is])
 
-VALA_VAPI_DIR="$datadir/vala/vapi"
-AC_SUBST(VALA_VAPI_DIR)
+# output
 
-dnl begin:gettext
-GETTEXT_PACKAGE=gnome-globalmenu
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Define the gettext package to be used])
+AC_CONFIG_FILES(
+	[Makefile
+	libgnomenu/Makefile
+	libgnomenu/tests/Makefile
+	applet/Makefile
+	tests/Makefile
+	gtk-modules/Makefile
+	gtk-modules/globalmenu/Makefile
+	gtk-modules/globalmenu/tests/Makefile
+	po/Makefile.in
+	patch.sh
+	])
 
-AM_GLIB_GNU_GETTEXT
-GNOME_GLOBALMENU_LOCALEDIR=[${datadir}/locale]
-AC_SUBST(GNOME_GLOBALMENU_LOCALEDIR)
-dnl end:gettext
-
-dnl org.gnome.GlobalMenu.Server
-PKG_CHECK_MODULES(ORG_GNOME_GLOBALMENU_SERVER, [glib-2.0 dbus-glib-1 gtk+-2.0])
-AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_CFLAGS)
-AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_LIBS)
-ORG_GNOME_GLOBALMENU_SERVER_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(ORG_GNOME_GLOBALMENU_SERVER_VALA_PKGS)
-
-DBUS_SERVICES_DIR="$datadir/dbus-1/services"
-AC_SUBST(DBUS_SERVICES_DIR)
-AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for DBUS is])
-
-dnl gnomenu-navigator
-PKG_CHECK_MODULES(GNOMENU_NAVIGATOR, [glib-2.0 dbus-glib-1 gtk+-2.0])
-AC_SUBST(GNOMENU_NAVIGATOR_CFLAGS)
-AC_SUBST(GNOMENU_NAVIGATOR_LIBS)
-GNOMENU_NAVIGATOR_VALA_PKGS="--pkg dbus-glib-1 --pkg gtk+-2.0"
-AC_SUBST(GNOMENU_NAVIGATOR_VALA_PKGS)
-
-AM_GCONF_SOURCE_2
-
-dnl begin: glade
-dnl end: glade
-
-GTK_DOC_CHECK([1.0])
-GNOME_DOC_INIT
-
-AC_OUTPUT(
-Makefile
-vapi-compat/Makefile
-libgmarkupdoc/Makefile
-libgnomenu/Makefile
-gtk-modules/Makefile
-gtk-modules/libgnomenugtk/Makefile
-server/Makefile
-navigator/Makefile
-tests/Makefile
-applet/Makefile
-po/Makefile.in
-)
+AC_OUTPUT

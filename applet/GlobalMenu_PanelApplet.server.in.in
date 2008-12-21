@@ -1,0 +1,22 @@
+<oaf_info>
+  <oaf_server iid="OAFIID:GlobalMenu_PanelApplet_Factory" type="exe"
+    location="@LOCATION@/GlobalMenu.PanelApplet">
+    <oaf_attribute name="repo_ids" type="stringv">
+      <item value="IDL:Bonobo/GenericFactory:1.0"/>
+      <item value="IDL:Bonobo/Unknown:1.0"/>
+    </oaf_attribute>
+    <oaf_attribute name="name" type="string" _value="GlobalMenu.PanelApplet Factory"/>
+    <oaf_attribute name="description" type="string" _value="The factory to build GlobalMenu.PanelApplet objects"/>
+  </oaf_server>
+  <oaf_server iid="OAFIID:GlobalMenu_PanelApplet" type="factory"
+    location="OAFIID:GlobalMenu_PanelApplet_Factory">
+    <oaf_attribute name="repo_ids" type="stringv">
+      <item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
+      <item value="IDL:Bonobo/Control:1.0"/>
+      <item value="IDL:Bonobo/Unknown:1.0"/>
+    </oaf_attribute>
+    <oaf_attribute name="name" type="string" _value="Global Menu Panel Applet"/>
+    <oaf_attribute name="description" type="string" _value="Global Menu Panel Applet"/>
+    <oaf_attribute name="panel:icon" type="string" value="globalmenu"/>
+  </oaf_server>
+</oaf_info>

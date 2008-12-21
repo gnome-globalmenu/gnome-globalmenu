@@ -1,14 +1,241 @@
 using GLib;
-using Panel;
-using PanelCompat;
 using Gtk;
+using Gnomenu;
+using Wnck;
+using Panel;
+using GConf;
 public extern int system(string? cmd);
 
-public class GlobalMenuApplet : PanelCompat.Applet {
-	static GlobalMenuApplet the_applet;
-	static const string APPLET_NAME = "globalmenu-panel-applet";
-	static const string APPLET_VERSION = "0.6";
-	static const string APPLET_ICON = "gnome-fs-home";
+public class Applet : Panel.Applet {
+	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
+
+	public Applet() {
+	}
+	public override void dispose() {
+		if(!disposed) {
+			disposed = true;
+			set_background_widget(null);
+			if(current_window != null) {
+				current_window.destroy();
+				current_window = null;
+			}
+		}
+		base.dispose();	
+	}
+	~Applet() {
+		int keyval;
+		Gdk.ModifierType mods;
+		get_accel_key(out keyval, out mods);
+		root_window.ungrab_key(keyval, mods);
+	}
+	static construct {
+		screen = Wnck.Screen.get_default();
+		root_window = Gnomenu.Window.new_from_gdk_window(Gdk.get_default_root_window());
+	}
+
+	construct {
+		disposed = false;
+		set_name("GlobalMenuPanelApplet");
+		add_events(Gdk.EventMask.KEY_PRESS_MASK);
+
+		menubars = new MenuBarBox();
+		menubars.visible = true;
+		add(menubars);
+
+		selector = new Switcher();
+		selector.visible = true;
+		menubars.add(selector);
+
+		main_menubar = new Gnomenu.MenuBar();
+		main_menubar.min_length = 0;  /*Then it will have a overflown item*/
+		main_menubar.activate += (menubar, item) => {
+			if(current_window != null) {
+				current_window.emit_menu_event(item.path);
+			}
+		};
+		menubars.add(main_menubar);
+		menubars.child_set(main_menubar, "expand", true, null);	/*Let the main_menubar use the remaining space in the applet.*/
+
+
+		/*init panel */
+		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		set_background_widget(this);
+
+		Gdk.Color color;
+		Gdk.Pixmap pixmap;
+		AppletBackgroundType bgtype;
+		bgtype = get_background(out color, out pixmap);
+		(this as Panel.Applet).change_background(bgtype, color, pixmap);
+	}
+
+	private static Wnck.Screen screen;
+	private Gnomenu.Window current_window;
+	private static Gnomenu.Window root_window;
+
+	private MenuBarBox menubars;
+	private bool disposed;
+	private Gnomenu.MenuBar main_menubar;
+	private Switcher selector;
+
+	/* to be removed */
+	public static void message(string msg) {
+		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
+							    Gtk.DialogFlags.MODAL,
+							    Gtk.MessageType.INFO,
+							    Gtk.ButtonsType.OK,
+							    msg);
+		m.run();
+		m.destroy();
+	}
+	
+	private void init_wnck() {
+		screen.window_closed += (screen, window) => {
+			ulong xid = window.get_xid();
+			if(current_window != null && xid == current_window.xid) {
+				/* if the closed window is current window,
+				 * fallback to the desktop and
+				 * wait for the next active_window_changed event
+				 *
+				 * To solve the haunting menu bar of closed window
+				 * problem.
+				 * */
+				switch_to(find_desktop(screen)); 
+			}
+		};
+		screen.active_window_changed += (screen, previous_window) => {
+			weak Wnck.Window window = screen.get_active_window();
+			if((window != previous_window) && (window is Wnck.Window)) {
+				weak Wnck.Window transient_for = window.get_transient();
+				if(transient_for != null) window = transient_for;
+				switch(window.get_window_type()) {
+					case Wnck.WindowType.NORMAL:
+					case Wnck.WindowType.DESKTOP:
+						switch_to(window);
+					break;
+					default:
+						/*Do nothing if it is a toolbox or so*/
+					break;
+				}
+			}
+		};
+		screen.window_closed += (window) => {
+			selector.current_window = screen.get_active_window();
+		};
+	}
+	private void switch_to(Wnck.Window? window) {
+		if(current_window != null) {
+			/* This is a weird way to free a window:
+			 * We have two reference counts for current_window
+			 * Destroy will release the one held by GTK( including
+			 * all circular references),
+			 * and the assignment line below will release the one
+			 * held by us.
+			 * */
+			current_window.destroy();
+			assert(current_window.ref_count == 1);
+			current_window = null;
+		}
+		if(window != null) {
+			current_window = Gnomenu.Window.new_from_native(window.get_xid());
+			selector.current_window = window;
+		}
+		if(current_window != null) {
+			current_window.menu_context_changed += (current_window) => {
+				update_menubar();
+			};
+		}
+		update_menubar();
+	}
+	private Wnck.Window? find_desktop(Wnck.Screen screen) {
+		weak List<weak Wnck.Window> windows = screen.get_windows();
+		foreach(weak Wnck.Window window in windows) {
+			if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
+				/*Vala should ref it*/
+				return window;
+			}
+		}
+		return null;
+	}
+	private void grab_gtk_menu_bar_key() {
+		/*FIXME: listen to changes in GTK_SETTINGS.*/
+		int keyval;
+		Gdk.ModifierType mods;
+		get_accel_key(out keyval, out mods);
+		root_window.grab_key(keyval, mods);
+		root_window.key_press_event += (root_window, event) => {
+			uint keyval;
+			Gdk.ModifierType mods;
+			get_accel_key(out keyval, out mods);
+			if(event.keyval == keyval &&
+				(event.state & Gtk.accelerator_get_default_mod_mask())
+				== (mods & Gtk.accelerator_get_default_mod_mask())) {
+				/* We chain up to the toplevel key_press_event,
+				 * which is listened by all the menubars within
+				 * the applet*/
+				Gtk.Widget toplevel = get_toplevel();
+				if(toplevel != null) 
+					toplevel.key_press_event(event);
+				return false;
+			}
+			return true;
+		};
+	}
+	private void update_menubar() {
+		if(current_window != null) {
+			string context = current_window.menu_context;
+			if(context != null) {
+				Parser.parse(main_menubar, context);
+				main_menubar.show();
+				return;
+			}
+		}
+		/* elseever */
+		main_menubar.hide();
+	}
+	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
+		Background bg = new Background();
+		switch(type){
+			case Panel.AppletBackgroundType.NO_BACKGROUND:
+				bg.pixmap = this.style.bg_pixmap[(int)StateType.NORMAL];
+				bg.color = this.style.bg[(int)StateType.NORMAL];
+				if (bg.pixmap==null)
+					bg.type = BackgroundType.COLOR; else
+					bg.type = BackgroundType.PIXMAP;
+			break;
+			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
+				bg.type = BackgroundType.COLOR;
+				bg.color = color;
+			break;
+			case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
+				bg.type = BackgroundType.PIXMAP;
+				bg.pixmap = pixmap;
+			break;
+		}
+		menubars.background = bg;
+	}
+	private override void change_orient(AppletOrient orient) {
+		switch(orient) {
+			case AppletOrient.UP:
+				menubars.gravity = Gravity.DOWN;
+				menubars.pack_direction = PackDirection.LTR;
+			break;
+			case AppletOrient.DOWN:
+				menubars.gravity = Gravity.DOWN;
+				menubars.pack_direction = PackDirection.LTR;
+			break;
+			case AppletOrient.LEFT:
+				menubars.gravity = Gravity.LEFT;
+				menubars.pack_direction = PackDirection.TTB;
+			break;
+			case AppletOrient.RIGHT:
+				menubars.gravity = Gravity.RIGHT;
+				menubars.pack_direction = PackDirection.BTT;
+			break;
+		}
+	}
+	
+	static const string APPLET_NAME = _("globalmenu-panel-applet");
+	static const string APPLET_ICON = "globalmenu";
 	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
 	static const string[] APPLET_AUTHORS = {"Coding:",
 						"Yu Feng <rainwoodman@gmail.com>",
@@ -22,126 +249,34 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 						"Valiant Wing <Valiant.Wing@gmail.com>"};
 	
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
-	private Wnck.Screen screen;
-	private Gnomenu.MenuBar menubar;
-	private Gtk.Box box;
-	private PanelExtra.Switcher switcher;
-	
-    public static bool factory (Panel.Applet applet, string iid) {
-        ((GlobalMenuApplet) applet).create ();
-        return true;
-    }
-	public static void message(string msg) {
-		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
-							    Gtk.DialogFlags.MODAL,
-							    Gtk.MessageType.INFO,
-							    Gtk.ButtonsType.OK,
-							    msg);
-		m.run();
-		m.destroy();
-	}
-    private static void on_about_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-       	var dialog = new Gtk.AboutDialog();
-       	dialog.program_name = APPLET_NAME;
-		dialog.version = APPLET_VERSION;
-		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
-		dialog.website_label = "Project Home";
-		dialog.wrap_license = false;
-		dialog.license = GPL.Licenses.V2;
-		dialog.logo_icon_name = APPLET_ICON;
-		dialog.authors = APPLET_AUTHORS;
-		dialog.documenters = APPLET_ADOCUMENTERS;
-       	dialog.run();
-       	dialog.destroy();
-    }
-    private static void on_help_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-       	var dialog = new Gtk.AboutDialog();
-       	dialog.program_name = APPLET_NAME;
-		dialog.version = APPLET_VERSION;
-		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
-		dialog.website_label = "On-line help";
-		dialog.logo_icon_name = "gtk-help";
-       	dialog.run();
-       	dialog.destroy();
-    }
-    private static void on_preferences_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-       	//system("gconf-editor " + the_applet.get_preferences_key() + " &");
-		GtkExtra.GConfDialog gcd = new GtkExtra.GConfDialog(the_applet.get_preferences_key(), "Applet preferences");
-		gcd.run();
-		gcd.destroy();
-    }
-	private void on_active_window_changed (WnckCompat.Screen screen, Wnck.Window? previous_window){
-		weak Wnck.Window window = (screen as Wnck.Screen).get_active_window();
-			if((window != previous_window) && (window is Wnck.Window)) {
-				weak Wnck.Window transient_for = window.get_transient();
-				if(transient_for != null) window = transient_for;
-				string xid = window.get_xid().to_string();
-				menubar.switch(xid);
-			}
-	}
-	/*private override void size_allocate(Gdk.Rectangle a) {
-		//message("test");
-	}*/
-    private void on_change_background (GlobalMenuApplet applet, Panel.AppletBackgroundType bgtype,
-                                       Gdk.Color? color, Gdk.Pixmap? pixmap) {
-        Gtk.Style style = (Gtk.rc_get_style(this.menubar) as GtkCompat.Style).copy();
-			switch(bgtype){
-				case Panel.AppletBackgroundType.NO_BACKGROUND:
-					Gtk.Style def_style = Gtk.rc_get_style(this);
-					this.menubar.set_style(def_style);
-					this.menubar.queue_draw();
-				
-					this.switcher.set_style(def_style);
-					this.switcher.queue_draw();
-					
-					return;
-				break;
-				case Panel.AppletBackgroundType.COLOR_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = null;
-					style.bg[(int)StateType.NORMAL] = color;
-				break;
-				case Panel.AppletBackgroundType.PIXMAP_BACKGROUND:
-					style.bg_pixmap[(int)StateType.NORMAL] = pixmap;
-				break;
-			}
-			this.menubar.set_style(style);
-			this.menubar.queue_draw();
-					
-			this.switcher.set_style(style);
-			this.switcher.queue_draw();
-    }
-	private void get_prefs() {
-		switcher.show_label = this.gconf_get_bool("show_name");
-		switcher.show_icon = this.gconf_get_bool("show_icon");
-		switcher.max_size = this.gconf_get_int("title_max_width");
-		switcher.show_window_actions = this.gconf_get_bool("show_window_actions");
-		switcher.show_window_list = this.gconf_get_bool("show_window_list");
-		switcher.refresh();
-	}
-    private void create () {
-    	the_applet = this;
+		    
+	private override void realize() {
+		base.realize();
+		
+		/* Connect to gconf */
 		this.add_preferences(GCONF_SCHEMA_DIR);
 		GConf.Client.get_default().value_changed += (key, value) => {
 			this.get_prefs();
 		};
 		
-    	this.set_flags(Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
-        change_background += on_change_background;
-
-		menubar = new Gnomenu.MenuBar();
-		menubar.set_name("PanelMenuBar");
-		box = new Gtk.HBox(false, 0);
-		menubar.show_tabs = false;
-
-		string menu_definition = 
-		    "<popup name=\"button3\">" +
-		        "<menuitem debuname=\"Preferences\" verb=\"Preferences\" _label=\"_Preferences\" pixtype=\"stock\" pixname=\"gtk-preferences\"/>" +
-		        "<menuitem debuname=\"Help\" verb=\"Help\" _label=\"_Help\" pixtype=\"stock\" pixname=\"gtk-help\"/>" +
-		     	"<menuitem debuname=\"About\" verb=\"About\" _label=\"_About...\" pixtype=\"stock\" pixname=\"gtk-about\"/>" +
-		    "</popup>";
+		string applet_menu_xml = _("""
+<popup name="button3">
+	<menuitem debuname="Preferences" 
+		verb="Preferences" 
+		_label="_Preferences" 
+		pixtype="stock" 
+		pixname="gtk-preferences"/>
+	<menuitem debuname="Help" 
+		verb="Help" 
+		_label="_Help" 
+		pixtype="stock" 
+		pixname="gtk-help"/>
+	<menuitem debuname="About" 
+		verb="About" _label="_About..." 
+		pixtype="stock" 
+		pixname="gtk-about"/>
+</popup>
+		""");
 		    
 		var verbPreferences = BonoboUI.Verb ();
 		verbPreferences.cname = "Preferences";
@@ -156,42 +291,84 @@ public class GlobalMenuApplet : PanelCompat.Applet {
 		verbHelp.cb = on_help_clicked;
 		
 		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
-		setup_menu (menu_definition, verbs, null);
+		setup_menu (applet_menu_xml, verbs, this);
 
-		switcher = new PanelExtra.Switcher();
-		box.pack_start(switcher, false, true, 0);
+		get_prefs();
+
+		/*init wnck*/
+		init_wnck();
+
+		/* Key grab F10 (gtk-menu-bar-key)*/
+		grab_gtk_menu_bar_key();
+	}
+	private void get_prefs() {
+		selector.max_size = gconf_get_int("title_max_width");
+		selector.show_icon = gconf_get_bool("show_icon");
+		selector.show_label = gconf_get_bool("show_name");
+		selector.show_window_actions = gconf_get_bool("show_window_actions");
+		selector.show_window_list = gconf_get_bool("show_window_list");
+	}
+	private static void on_about_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+		Applet _this = (Applet) user_data;
 		
-		box.pack_start(menubar, true, true, 0);
-		this.add(box);
-		screen = Wnck.Screen.get_default();
-		(screen as WnckCompat.Screen).active_window_changed += on_active_window_changed;
-		
-        show_all();
-        
-        get_prefs();
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
+		dialog.version = Config.VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
+		dialog.website_label = _("Project Home");
+		dialog.wrap_license = false;
+		dialog.license = Licenses.GPLv2;
+		dialog.logo_icon_name = APPLET_ICON;
+		dialog.authors = APPLET_AUTHORS;
+		dialog.documenters = APPLET_ADOCUMENTERS;
+		dialog.set_icon_name("gtk-about");
+       	dialog.run();
+       	dialog.destroy();
     }
-
-    public static int main (string[] args) {
-        var program = Gnome.Program.init ("GlobalMenuApplet", "0.6", Gnome.libgnomeui_module,
-                                          args, "sm-connect", false);
-                                          
-        Gtk.rc_parse_string("""
-			style "globalmenu_event_box_style"
-			{
-			 	GtkWidget::focus-line-width=0
-			 	GtkWidget::focus-padding=0
-			}
-			style "globalmenu_menu_bar_style"
-			{
-				ythickness = 0
-				GtkMenuBar::shadow-type = none
-				GtkMenuBar::internal-padding = 0
-			}
-			class "GtkEventBox" style "globalmenu_event_box_style"
-			class "GnomenuMenuBar" style:highest "globalmenu_menu_bar_style"
-""");
-
-        return Panel.Applet.factory_main ("OAFIID:GlobalMenu_PanelApplet_Factory",
-                                    typeof (GlobalMenuApplet), factory);
+    private static void on_help_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+		Applet _this = (Applet) user_data;
+       	var dialog = new Gtk.AboutDialog();
+       	dialog.program_name = APPLET_NAME;
+		dialog.version = Config.VERSION;
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
+		dialog.website_label = _("On-line help");
+		dialog.logo_icon_name = "gtk-help";
+		dialog.set_icon_name("gtk-help");
+       	dialog.run();
+       	dialog.destroy();
     }
+    private static void on_preferences_clicked (BonoboUI.Component component,
+                                          void* user_data, string cname) {
+
+		Applet _this = (Applet) user_data;
+       	//system("gconf-editor " + _this.get_preferences_key() + " &");
+		GConfDialog gcd = new GConfDialog.with_subkeys(_this.get_preferences_key(),
+											"Applet preferences",
+											new string[]{
+												"show_icon",
+												"show_name",
+												"title_max_width",
+												"show_window_actions",
+												"show_window_list"});
+		gcd.run();
+		gcd.destroy();
+    }
+	/**
+	 * return the accelerator key combination for invoking menu bars
+	 * in GTK Settings. It is usually F10.
+	 */
+	private static void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
+		Settings settings = Settings.get_default();
+		string accel = null;
+		settings.get("gtk_menu_bar_accel", &accel, null);
+		if(accel != null)
+			Gtk.accelerator_parse(accel, out keyval, out mods);
+	}
 }
+
+
+/**
+ * :vim:ts=4:sw=4:
+ */

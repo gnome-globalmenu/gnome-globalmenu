@@ -1,28 +1,54 @@
 NULL =
-SUBDIRS = vapi-compat libgmarkupdoc libgnomenu server navigator gtk-modules applet po
+SUBDIRS = tests libgnomenu applet gtk-modules po
+DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
-		-include $(CONFIG_HEADER) \
 		$(NULL)
 
 EXTRA_DIST = \
 	intltool-extract.in \
-	intltool-update.in \
 	intltool-merge.in \
+	intltool-update.in \
+	gnome-globalmenu.schemas.in \
+	patch.sh \
 	$(NULL)
 
 DISTCLEANFILES = \
 	intltool-extract \
-	intltool-update \
 	intltool-merge \
-	po/.intltool-merge-cache \
+	intltool-update \
 	$(NULL)
 
+BUILT_SOURCES =
+
+CLEANFILES = 
+
+include $(top_srcdir)/Makefile.configmake
+include $(top_srcdir)/Makefile.config
+include $(top_srcdir)/Makefile.licenses
+
 schemadir   = @GCONF_SCHEMA_FILE_DIR@
-schema_DATA = applet/gnome-globalmenu-applet.schemas
+schema_in_files = gnome-globalmenu.schemas.in
+schema_DATA = $(schema_in_files:.in=)
+@INTLTOOL_SCHEMAS_RULE@
+
+if GCONF_SCHEMAS_INSTALL
 
 install-data-local:
-	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(srcdir)/$(schema_DATA)
-	
-any:
-	echo $(VALAC) $(GNOMENU_SERVICE_VALA_PKGS)
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(schema_DATA)
+else
+install-data-local:
+endif
+
+
+
+rpm: 
+	touch `find . -name '*.vala'`
+	make dist
+	vim *.spec
+	cp *.tar.gz ~/rpmbuild/SOURCES
+	rpmbuild -bb *.spec
+
+rpm-fast:
+	cp *.tar.gz ~/rpmbuild/SOURCES
+	rpmbuild -bb *.spec
