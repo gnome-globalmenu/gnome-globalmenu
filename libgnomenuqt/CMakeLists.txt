@@ -15,7 +15,7 @@ include_directories(
 	#	${QT_QTDBUS_INCLUDE_DIR}
 	)
 
-set(globalmenu_SRCS plasma-globalmenu.cpp server.cpp app-document.cpp)
+set(globalmenu_SRCS plasma-globalmenu.cpp app-model.cpp)
 
 kde4_add_plugin(plasma_applet_globalmenu ${globalmenu_SRCS})
 target_link_libraries(plasma_applet_globalmenu

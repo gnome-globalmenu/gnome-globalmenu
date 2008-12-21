@@ -4,7 +4,7 @@
  *
  * This file is part of ________.
  *
- * Copyright (C) 2008 - ubuntu <ubuntu@gmail.com>.
+ * Copyright (C) 2008 - Mingxi Wu<fengshenx@gmail.com>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,9 @@
 #include <plasma/svg.h>
 #include <plasma/theme.h>
 
-#include "app-document.h"
-#include "server.h"
+#include <X11/Xlib.h>
+
+#include "app-model.h"
 
 PlasmaGlobalMenu::PlasmaGlobalMenu(QObject *parent, const QVariantList &args)
 	:Plasma::Applet(parent, args)
@@ -51,8 +52,6 @@ PlasmaGlobalMenu::PlasmaGlobalMenu(QObject *parent, const QVariantList &args)
 	connect(_windowManager, SIGNAL(activeWindowChanged(WId)), 
 				this, SLOT(onActiveWindowChanged(WId)));
 	
-	_server = new Server("org.gnome.GlobalMenu.Server",
-						"/org/gnome/GlobalMenu/Server");
 }
 
 PlasmaGlobalMenu::~PlasmaGlobalMenu()
@@ -62,15 +61,10 @@ PlasmaGlobalMenu::~PlasmaGlobalMenu()
 	} else {
 
 	}
-	delete _server;
 }
 
 void PlasmaGlobalMenu::init()
 {
-//	QMenuBar *menubar;
-
-//	menubar = server->queryByXID("71303200")->createMenuBar();
-
 	_stackedWidget = new QStackedWidget;
 	_defaultWidget = createDefaultMenu();
 	_stackedWidget->addWidget(_defaultWidget);
@@ -81,27 +75,30 @@ void PlasmaGlobalMenu::init()
 
 void PlasmaGlobalMenu::onActiveWindowChanged(WId xid)
 {
-	AppDocument *model;
-	qDebug() << "window changed" << xid;
+	AppModel *model;
+	qDebug() << "window changed" << QString().sprintf("0x%x", xid);
 
 	QWidget *self = QApplication::activeWindow();
 
 	if (self && self->winId() == xid)
 		return;
-//	qDebug() << "winId" << QApplication::activeWindow()->winId() ;
-//
-	if(!(model = _server->queryByXID(QString::number(xid)))) {
-		_stackedWidget->setCurrentWidget(_defaultWidget);
-		return;
-	} 
-	
-	if (!_xidHash.contains(xid)) {
+
+	if (!_modelHash.contains(xid)) {
 		QMenuBar *menubar;
+
+		model = new AppModel(xid);
+
+		if (model->isNull()) {
+			delete model;
+			return;
+		}
+
 		menubar = model->createMenuBar();
 		_stackedWidget->addWidget(menubar);
-		_xidHash.insert(xid, menubar);
+		_modelHash.insert(xid, model);
+		_menubarHash.insert(xid, menubar);
 	} 
-	_stackedWidget->setCurrentWidget(_xidHash.value(xid));
+	_stackedWidget->setCurrentWidget(_menubarHash.value(xid));
 }
 
 QWidget* PlasmaGlobalMenu::createDefaultMenu()

@@ -9,9 +9,10 @@
 
 
 class QSizeF;
-class Server;
 class QStackedWidget;
 class QGraphicsProxyWidget;
+class AppModel;
+class QMenuBar;
 
 class PlasmaGlobalMenu: public Plasma::Applet
 {
@@ -25,9 +26,9 @@ class PlasmaGlobalMenu: public Plasma::Applet
 	private:
 		QGraphicsProxyWidget *_widget;
 		KWindowSystem *_windowManager;
-		Server *_server;
 		QStackedWidget *_stackedWidget;
-		QHash<WId, QWidget*> _xidHash;
+		QHash<WId, QMenuBar*> _menubarHash;
+		QHash<WId, AppModel*> _modelHash;
 		QWidget *_defaultWidget;
 
 		QWidget* createDefaultMenu();

@@ -1,10 +1,10 @@
 /* vi: set sw=4 ts=4: */
 /*
- * app-document.h
+ * app-model.h
  *
  * This file is part of ________.
  *
- * Copyright (C) 2008 - ubuntu <ubuntu@gmail.com>.
+ * Copyright (C) 2008 - Mingxi Wu <fengshenx@gmail.com>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,48 +22,41 @@
  * Boston, MA 02111-1307, USA.
  * */
 
-#ifndef __APP_DOCUMENT_H__
-#define __APP_DOCUMENT_H__  1
+#ifndef __APP_MODEL_H__
+#define __APP_MODEL_H__  1
 
 #include <QObject>
-#include <QXmlStreamReader>
-#include <QDBusConnection>
-
-class AppModel;
+#include <QWidget>
 
 class QMenuBar;
 class QMenu;
 class QAction;
 
-class AppDocument : public QObject {
+class AppNode;
+
+class AppModel : public QObject
+{
 	Q_OBJECT
-
-public:
-	AppDocument(QString service, QString path);
-	~AppDocument() {}
 	
+public:
+	AppModel(WId wid);
+	~AppModel();
+
 	QMenuBar *createMenuBar();
+	inline bool isNull() { return _content.isNull();}
+
 private:
-	QString _service;
-	QString _path;
-	QString _xid;
-	QString _name;
+	QString _content;
 	QMenuBar *_menubar;
+	WId _xid;
 
-	void parseDocument();
-	AppModel *_model;
+	AppNode *_rootNode;
+	
 
-
-	QAction *createAction(QWidget *parent, AppModel *model);
-	QMenu* createMenu(QWidget *parent, AppModel *model);
-
-private slots:
-	void onNameOwnerChanged(QString bus, QString oldOwner, QString newOwner);
-	void onInserted(QString pathName, QString nodeName, int pos);
-	void onRemoved(QString parentName, QString nodeName);
-	void onUpdated(QString nodeName, QString propName);
-
-	void onActionTrigger(bool);
+	void parseContent();
+	void updateContent();
+	QMenu *createMenu(QWidget *parent, AppNode *node);
+	QAction *createAction(QWidget *parent, AppNode *node);
 };
 
-#endif /*__APP_DOCUMENT_H__ */
+#endif /*__APP_MODEL_H__ */
