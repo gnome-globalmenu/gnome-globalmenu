@@ -194,19 +194,19 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		if(old && GTK_IS_LABEL(widget))
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 
-					menubar);
+					old);
 		if(old && GTK_IS_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_submenu_notify, 
-					menubar);
+					old);
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 
-					menubar);
+					old);
 		}
 		if(menubar && GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 
-					menubar);
+					old);
 		}
 	}
 	g_timer_stop(timer);
