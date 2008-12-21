@@ -152,8 +152,29 @@ public extern string* __get_task_name_by_pid(int pid);
 				} else {
 					item.item_type = "icon";
 				}
-				Gdk.Pixbuf icon = current_window.get_mini_icon();
-				item.image.set_from_pixbuf(icon);
+				Gdk.Pixbuf icon = current_window.get_icon();
+
+				int size = icon.height;
+				if(icon.get_width() > size)
+					size = icon.width;
+
+				int scaled_size = allocation.height;
+				if(allocation.width < scaled_size)
+					scaled_size = allocation.width;
+
+				double ratio = (double)scaled_size/(double)size;
+				Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
+						Gdk.Colorspace.RGB,
+						icon.has_alpha, 8,
+						(int) (icon.width * ratio),
+						(int) (icon.height * ratio)
+						);
+
+				icon.scale(scaled_icon,
+						0, 0, scaled_icon.width, scaled_icon.height,
+						0, 0, ratio, ratio, Gdk.InterpType.BILINEAR);
+				/* can't use scale_simple because the vala binding is wrong*/
+				item.image.set_from_pixbuf(scaled_icon);
 			}
 			do_menu(item, current_window);
 		}
