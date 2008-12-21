@@ -11,7 +11,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_label = true;
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
-		private Gdk.Pixbuf _icon;
+
 		private Wnck.Window _window;
 		
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
@@ -138,15 +138,24 @@ public extern string* __get_task_name_by_pid(int pid);
 			if(current_window == null) return;
 			_label = get_application_name(current_window);
 			if (_show_label) 
-				Parser.parse(this, TEMPLATE.replace("%s", cut_string(_label, _max_size))); else
+				Parser.parse(this, 
+					TEMPLATE.replace("%s", cut_string(_label, _max_size)));
+		   	else
 				Parser.parse(this, TEMPLATE.replace("%s", ""));
 				
-			_icon = current_window.get_mini_icon();
-			if (_show_icon)
-				this.get("/0").icon_pixbuf  = _icon; else
-				this.get("/0").item_type = "normal";
-				
-			do_menu(this.get("/0"), current_window);
+			Gnomenu.MenuItem item = this.get("/0");
+			if (!_show_icon) {
+				item.item_type = "normal";
+			} else {
+				if (_show_label) {
+					item.item_type = "image";
+				} else {
+					item.item_type = "icon";
+				}
+				Gdk.Pixbuf icon = current_window.get_mini_icon();
+				item.image.set_from_pixbuf(icon);
+			}
+			do_menu(item, current_window);
 		}
 		public Wnck.Window? current_window {
 			get {
