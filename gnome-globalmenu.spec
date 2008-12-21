@@ -1,4 +1,4 @@
-%define 	base_version 	0.6.9
+%define 	base_version 	0.7.0
 %define 	svn_version 	svn1841
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
