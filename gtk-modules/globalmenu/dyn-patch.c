@@ -28,7 +28,7 @@ static GTimer * timer = NULL;
 static gulong buffered_changes = 0;
 static GHashTable * old_vfuncs = NULL;
 static GHashTable * classes = NULL;
-
+static GHashTable * notifiers = NULL;
 void dyn_patch_init () {
 	
 	GDK_THREADS_ENTER();
@@ -44,6 +44,8 @@ void dyn_patch_init () {
 	DETAIL_LABEL = g_quark_from_string("label");
 	old_vfuncs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	classes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_type_class_unref);
+
+	notifiers = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, g_source_remove);
 
 	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
 	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
@@ -72,6 +74,7 @@ void dyn_patch_uninit() {
 	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
 
+	g_hash_table_unref(notifiers);
 	g_hash_table_unref(old_vfuncs);
 	g_hash_table_unref(classes);
 
@@ -118,14 +121,35 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 
 	g_timer_reset(timer);
 	g_timer_stop(timer);
+	/* The source and the reference to the menubar are removed by the hash
+	 * table*/
+	/* The reference on the menubar by this notifier is removed after
+	 * the source is removed by the hash table.*/
+	g_hash_table_remove(notifiers, menubar);
 	GDK_THREADS_LEAVE();
-	return FALSE;
+	/*already removed, do'nt want glib get into troubles for removing the
+	 * source again.*/
+	return TRUE;
 }
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
+	GDK_THREADS_ENTER();
+	guint source_id;
 	buffered_changes++;
-	if(g_object_get_qdata((GObject*)menubar, __DIRTY__)) return;
-	g_object_set_qdata((GObject*) menubar, __DIRTY__, GINT_TO_POINTER(1));
-	g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
+	/* if their is a pending notifier, do nothing. wait for that notifier
+	 * to notifier the changes of the menubar.*/
+	if(g_hash_table_lookup(notifiers, menubar)) return;
+
+	source_id = g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
+
+	if(source_id) {
+	/* to make sure the menubar is alive when it is in the hash table.
+	 * This might be a redundancy as we also refer it in the notifier
+	 * above. but I don't want to think too much into this.*/
+		g_hash_table_insert(notifiers, g_object_ref(menubar), source_id);
+	} else {
+		/* should never get to here */
+	}
+	GDK_THREADS_LEAVE();
 }
 
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
