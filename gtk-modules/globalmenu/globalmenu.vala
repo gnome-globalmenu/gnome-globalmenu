@@ -109,12 +109,14 @@ namespace GnomenuGtk {
 	private bool menubar_should_be_skipped(MenuBar menubar) {
 		weak Gtk.Widget parent = menubar;
 		GLib.Type panel_applet_type = GLib.Type.from_name("PanelApplet");
-		GLib.Type menu_bar_type = GLib.Type.from_name("GnomenuMenuBar");
+		GLib.Type gnomenu_menu_bar_type = GLib.Type.from_name("GnomenuMenuBar");
+		GLib.Type panel_menu_bar_type = GLib.Type.from_name("PanelMenuBar");
 		while(parent is Gtk.Widget) {
 			GLib.Type type = parent.get_type();
 
 			if(type.is_a(panel_applet_type)
-			|| type.is_a(menu_bar_type))  {
+			|| type.is_a(gnomenu_menu_bar_type)
+			|| type.is_a(panel_menu_bar_type))  {
 				message("menu bar skipped");
 				return true;
 			}
