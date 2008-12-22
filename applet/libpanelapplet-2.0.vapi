@@ -32,6 +32,7 @@ namespace Panel {
 		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
 		[NoArrayLength]
 		public void setup_menu (string xml, BonoboUI.Verb[] verb_list, void* data);
+		public Bonobo.Control control {get;}
 
 		public virtual signal void change_background (AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap);
 		public virtual signal void change_orient (AppletOrient orient);
@@ -74,4 +75,9 @@ namespace Panel {
 
 	public delegate bool AppletFactoryCallback (Applet applet, string iid);
 }
+namespace Bonobo {
 
+	public class Control {
+		public bool do_popup(uint button, uint32 time);
+	}
+}

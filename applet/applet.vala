@@ -58,7 +58,7 @@ public class Applet : Panel.Applet {
 
 
 		/*init panel */
-		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.HAS_HANDLE | Panel.AppletFlags.EXPAND_MAJOR );
+		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.EXPAND_MAJOR );
 		set_background_widget(this);
 
 		Gdk.Color color;
@@ -365,6 +365,11 @@ public class Applet : Panel.Applet {
 		settings.get("gtk_menu_bar_accel", &accel, null);
 		if(accel != null)
 			Gtk.accelerator_parse(accel, out keyval, out mods);
+	}
+	public override bool button_press_event(Gdk.EventButton event) {
+		if(event.button == 3)
+		return control.do_popup(event.button, event.time);
+		return false;
 	}
 }
 
