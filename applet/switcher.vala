@@ -21,7 +21,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
 			program_list = GnomeMenuHelper.get_flat_list();
 			if (program_list.lookup("nautilus")==null)
-				program_list.insert("nautilus", "File Manager");
+				program_list.insert("nautilus", _("File Manager"));
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
@@ -113,7 +113,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		private string get_application_name(Wnck.Window window) {
 			if (window.get_window_type() == Wnck.WindowType.DESKTOP)
-				return "Desktop";
+				return _("Desktop");
 				
 			string process_name = get_process_name(window);
 			if (process_name==null) return window.get_name();
