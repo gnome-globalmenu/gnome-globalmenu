@@ -45,6 +45,7 @@ public class Applet : Panel.Applet {
 		selector = new Switcher();
 		selector.visible = true;
 		menubars.add(selector);
+		setup_popup_menu(selector);
 
 		main_menubar = new Gnomenu.MenuBar();
 		main_menubar.min_length = 0;  /*Then it will have a overflown item*/
@@ -53,6 +54,8 @@ public class Applet : Panel.Applet {
 				current_window.emit_menu_event(item.path);
 			}
 		};
+		setup_popup_menu(main_menubar);
+
 		menubars.add(main_menubar);
 		menubars.child_set(main_menubar, "expand", true, null);	/*Let the main_menubar use the remaining space in the applet.*/
 
@@ -370,6 +373,16 @@ public class Applet : Panel.Applet {
 		if(event.button == 3)
 		return control.do_popup(event.button, event.time);
 		return false;
+	}
+
+	private void setup_popup_menu(Gtk.Widget widget) {
+		widget.button_press_event += (widget, event) => {
+			if(event.button == 3) {
+				(this as Gtk.Widget).button_press_event(event);
+				return true;
+			}
+			else return false;
+		};
 	}
 }
 
