@@ -436,8 +436,12 @@ namespace Gnomenu {
 				/*Then throw it away*/
 			}
 			if(_item_type == MenuItemType.ICON) {
+				int horizontal_padding = 0;
+				style_get ("horizontal-padding", 
+						&horizontal_padding,
+						null);
 				_icon_widget.size_request(out req);
-				req.width += (int)border_width * 2;
+				req.width += (int)border_width * 2 + horizontal_padding * 2;
 				req.height += (int)border_width * 2;
 			} else {
 				base.size_request(out req);	
@@ -446,11 +450,21 @@ namespace Gnomenu {
 		public override void size_allocate(Gdk.Rectangle a) {
 			Gdk.Rectangle ca = {0, 0, 0, 0};
 			if(_item_type == MenuItemType.ICON) {
-				ca.x = a.x + (int)border_width;
+				int horizontal_padding = 0;
+				style_get ("horizontal-padding", 
+						&horizontal_padding,
+						null);
+				ca.x = a.x + (int)border_width + horizontal_padding;
 				ca.y = a.y + (int)border_width;
-				ca.width = a.width - (int)border_width * 2;
+				ca.width = a.width - (int)border_width * 2 - horizontal_padding;
 				ca.height = a.height - (int)border_width * 2;
 				_icon_widget.size_allocate(ca);
+				if((get_flags() & WidgetFlags.REALIZED) != 0) {
+					event_window.move_resize(allocation.x,
+							allocation.y,
+							allocation.width, allocation.height);
+				}
+				allocation = (Allocation) a;
 			} else {
 				base.size_allocate(a);
 			}
