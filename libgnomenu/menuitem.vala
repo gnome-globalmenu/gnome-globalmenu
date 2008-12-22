@@ -143,13 +143,7 @@ namespace Gnomenu {
 			set {
 				if(_font == value) return;
 				_font = value;
-				Pango.FontDescription desc;
-				if(_font != null) 
-					desc = pango_font_description_from_string(_font);
-				else 
-					desc = null;
-				weak Widget bin_child = get_child();
-				bin_child.modify_font(desc);
+				update_font();
 			}
 		}
 
@@ -492,6 +486,15 @@ namespace Gnomenu {
 				_image_widget.size_allocate(ca);
 			}
 		}
+		private void update_font() {
+			Pango.FontDescription desc;
+			if(_font != null) 
+				desc = pango_font_description_from_string(_font);
+			else 
+				desc = null;
+			weak Widget bin_child = get_child();
+			bin_child.modify_font(desc);
+		}
 		private void update_label_text() {
 			if(!item_type_has_label(_item_type)) return;
 			string text;
@@ -517,6 +520,7 @@ namespace Gnomenu {
 			add(new MenuLabel());
 			get_child().visible = true;
 			(get_child() as MenuLabel).gravity = gravity;
+			update_font();	
 		}
 		private weak MenuLabel? get_label_widget() {
 			weak MenuLabel label = get_child() as MenuLabel;
