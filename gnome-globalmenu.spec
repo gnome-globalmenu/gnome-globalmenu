@@ -1,5 +1,5 @@
 %define 	base_version 	0.7.0
-%define 	svn_version 	svn1841
+%define 	svn_version 	svn1860
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -73,6 +73,8 @@ gconftool-2 --makefile-uninstall-rule \
 
 
 %changelog
+* Sun Dec 21 2008 Feng Yu <rainwoodman@gmail.com>
+- 0.7 release.
 * Wed Dec 17 2008 Feng Yu <rainwoodman@gmail.com>
 - The module is ready for loaded/unloaded by GtkSettings. Because an issue with scim-bridge, the gconf key keeps disabling the module by default.
 * Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
