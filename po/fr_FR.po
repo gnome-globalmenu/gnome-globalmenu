@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-14 21:29-0500\n"
+"POT-Creation-Date: 2008-12-22 00:13-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,24 +11,55 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:819
+#: ../libgnomenu/menuitem.c:954
 msgid "Indicator Size"
 msgstr ""
 
-#: ../libgnomenu/menuitem.c:819
+#: ../libgnomenu/menuitem.c:954
 msgid "Size of check or radio indicator"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:32
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Be verbose"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:32
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Disable the Plugin"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:32
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "File to save the log, default to stderr"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:53
+msgid "Global Menu plugin module is loaded"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:60
+#, fuzzy
+msgid "Global Menu is enabled"
+msgstr "Fabrique d'applet de Menu Global"
+
+#: ../gtk-modules/globalmenu/module-main.c:91
+msgid "Global Menu plugin module is unloaded"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:125
+#, fuzzy
+msgid "- Global Menu plugin Module for GTK"
+msgstr "Applet Menu Global pour GNOME"
+
+#: ../gtk-modules/globalmenu/module-main.c:126
+msgid ""
+"These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
+"instead of the command line.\n"
+"NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored "
+"by the plugin.\n"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:188
+#, c-format
+msgid "Log file %s is not accessible. Fallback to stderr. %s"
 msgstr ""
 
 #: ../applet/main.c:23
@@ -40,7 +71,7 @@ msgstr ""
 msgid "globalmenu-panel-applet"
 msgstr "Applet Menu Global"
 
-#: ../applet/applet.c:355
+#: ../applet/applet.c:486
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -62,12 +93,79 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:393
+#: ../applet/applet.c:564
 msgid "Project Home"
 msgstr ""
 
-#: ../applet/applet.c:414
+#: ../applet/applet.c:590
 msgid "On-line help"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:1
+#, fuzzy
+msgid "Add window action menu entries to active application name menu"
+msgstr "afficher le titre de l'application active"
+
+#: ../gnome-globalmenu.schemas.in.h:2
+#, fuzzy
+msgid "GTK+ module for Global Menu"
+msgstr "Applet Menu Global pour le tableau de bord de GNOME"
+
+#: ../gnome-globalmenu.schemas.in.h:3
+msgid "Icon"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:4
+msgid "Label"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:5
+msgid "Max title length"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:6
+#, fuzzy
+msgid "Show/Hide the icon of the active window"
+msgstr "afficher l'icône de la fenêtre active"
+
+#: ../gnome-globalmenu.schemas.in.h:7
+#, fuzzy
+msgid "Show/Hide the name of the active application"
+msgstr "afficher le titre de l'application active"
+
+#: ../gnome-globalmenu.schemas.in.h:8
+#, fuzzy
+msgid "The Maximum length of name of the active application"
+msgstr "afficher le titre de l'application active"
+
+#: ../gnome-globalmenu.schemas.in.h:9
+msgid "This key determines the GTK+ module to load for Global Menu."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:10
+msgid "Uses active application lablel as application switcher"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:11
+msgid "Window Actions"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:12
+msgid "Window List"
+msgstr ""
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#, fuzzy
+msgid "Global Menu Panel Applet"
+msgstr "Applet Menu Global"
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#, fuzzy
+msgid "GlobalMenu.PanelApplet Factory"
+msgstr "Fabrique d'applet de Menu Global"
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr ""
 
 #~ msgid "Show fancy control buttons for menu bars"
@@ -88,26 +186,11 @@ msgstr ""
 #~ msgid "translator_credits"
 #~ msgstr "pierre.slamich"
 
-#~ msgid "GNOME panel applet for Global Menu"
-#~ msgstr "Applet Menu Global pour le tableau de bord de GNOME"
-
-#~ msgid "Global Menu applet Factory"
-#~ msgstr "Fabrique d'applet de Menu Global"
-
 #~ msgid "Global Menu applet factory"
 #~ msgstr "Fabrique d'applet de Menu Global"
-
-#~ msgid "Global Menu applet for GNOME"
-#~ msgstr "Applet Menu Global pour GNOME"
 
 #~ msgid "_About"
 #~ msgstr "_A Propos"
 
 #~ msgid "_Preferences"
 #~ msgstr "_Préferences"
-
-#~ msgid "show the icon of the active window"
-#~ msgstr "afficher l'icône de la fenêtre active"
-
-#~ msgid "show the title of active application"
-#~ msgstr "afficher le titre de l'application active"
