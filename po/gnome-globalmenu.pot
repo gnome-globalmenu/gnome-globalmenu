@@ -148,7 +148,7 @@ msgid "This key determines the GTK+ module to load for Global Menu."
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-msgid "Uses active application lablel as application switcher"
+msgid "Uses active application label as application switcher"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:11
