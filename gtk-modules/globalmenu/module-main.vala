@@ -19,7 +19,6 @@ public class GlobalMenuModule {
 
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		Gdk.threads_enter();
 		if(!initialized) {
 			initialized = true;
 			if(!disabled) {	
@@ -27,12 +26,10 @@ public class GlobalMenuModule {
 				add_emission_hooks();
 			}
 		}
-		Gdk.threads_leave();
 	}
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
-		Gdk.threads_enter();
 		debug(_("Global Menu plugin module is loaded"));
 		domain = Quark.from_string("GlobalMenu");
 
@@ -58,13 +55,11 @@ public class GlobalMenuModule {
 
 		module.make_resident();
 		*/
-		Gdk.threads_leave();
 		return null;
 	}
 
 	[CCode (cname="g_module_unload")]
 	public static void g_module_unload(Module module) {
-		Gdk.threads_enter();
 		if(!disabled) {
 		remove_emission_hooks();
 		dyn_patch_uninit();
@@ -73,7 +68,6 @@ public class GlobalMenuModule {
 		log_stream = null;
 		}
 		debug(_("Global Menu plugin module is unloaded"));
-		Gdk.threads_leave();
 	}
 	
 	[CCode (cname="MY_")]
