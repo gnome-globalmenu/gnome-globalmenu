@@ -79,3 +79,12 @@ GtkMenuBar * gtk_window_find_menubar(GtkWidget * widget) {
 	g_list_free(list);
 	return NULL;
 }
+
+static void gcgac_cb(GtkWidget * widget, GList ** list) {
+	*list = g_list_append(*list, widget);
+}
+GList * gtk_container_get_all_children(GtkContainer * container) {
+	GList * list = NULL;
+	gtk_container_forall(container, gcgac_cb, &list);
+	return list;
+}

@@ -164,7 +164,7 @@ static void _dyn_patch_simple_notify(GtkWidget * widget, GParamSpec * pspec, Gtk
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
 	GtkWidget * old_submenu = g_object_get_qdata((GObject*) widget, __OLD_SUBMENU__);
 	GtkWidget * submenu = gtk_menu_item_get_submenu((GtkMenuItem*)widget);
-	g_debug("submenu changed %p %p", widget, submenu);
+	g_debug("submenu on Widget %p changed from %p to %p", widget, old_submenu, submenu);
 	if(submenu != old_submenu) {
 		if(old_submenu) {
 			dyn_patch_set_menubar_r(old_submenu, NULL);
@@ -186,7 +186,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
 	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
 	if(old && old != menubar) {
-		g_debug("Detaching hooks on %p of menubar %p", widget, old);
+		g_debug("Detaching hooks on Widget %p of menubar %p", widget, old);
 		if(GTK_IS_LABEL(widget))
 			g_signal_handlers_disconnect_by_func(widget, 
 					_dyn_patch_simple_notify, 

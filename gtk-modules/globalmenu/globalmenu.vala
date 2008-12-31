@@ -146,7 +146,7 @@ namespace GnomenuGtk {
 		menubar.set("local", value, null);
 	}
 	private MenuBar? find_menubar(Container widget) {
-		List<weak Widget> children = widget.get_children();
+		List<weak Widget> children = gtk_container_get_children(widget);
 		foreach(Widget child in children) {
 			if(child is MenuBar) return child as MenuBar;
 			if(child is Container) {
@@ -178,6 +178,10 @@ namespace GnomenuGtk {
 				MenuItem item = Locator.locate(menubar, path);
 				if(item != null) {
 					item.activate();
+					debug("item %p is activated", item);
+					if(item.submenu != null) {
+						item.submenu.show();
+					}
 				} else {
 					warning("item lookup failure");
 				}

@@ -29,6 +29,7 @@ namespace GnomenuGtk {
 		}
 		private void visit_container(Container container) {
 			List<weak Widget> children = gtk_container_get_children(container);
+			debug("%s %p has %u children", container.get_name(), container, children.length());
 			foreach(weak Widget child in children) {
 				visit(child);
 			}
