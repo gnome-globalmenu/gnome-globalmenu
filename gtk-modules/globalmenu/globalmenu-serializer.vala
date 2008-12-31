@@ -139,9 +139,12 @@ namespace GnomenuGtk {
 				sb.append(Markup.printf_escaped(" icon=\"file:%s\"", image.file));
 			} else {
 				if(image.storage_type == ImageType.STOCK) {
-					/*FIXME: only stock icons are supported! Do more!*/
 					sb.append(Markup.printf_escaped(" icon=\"%s\"", 
 							image.stock));
+				}
+				if(image.storage_type == ImageType.ICON_NAME) {
+					sb.append(Markup.printf_escaped(" icon=\"theme:%s\"", 
+							image.icon_name));
 				}
 				if(image.storage_type == ImageType.PIXBUF) {
 					Gdk.Pixdata pixdata = {0};

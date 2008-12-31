@@ -558,6 +558,10 @@ namespace Gnomenu {
 		private void update_image() {
 			if(_item_type != MenuItemType.IMAGE
 			&& _item_type != MenuItemType.ICON) return;
+			if(icon != null && icon.has_prefix("theme:")) {
+				weak string icon_name = icon.offset(6);
+				image.set_from_icon_name(icon_name, IconSize.MENU);
+			} else 
 			if(icon != null && icon.has_prefix("file:")) {
 				weak string filename = icon.offset(5);
 				image.set_from_file(filename);
