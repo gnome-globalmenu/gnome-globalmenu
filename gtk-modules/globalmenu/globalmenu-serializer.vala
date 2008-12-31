@@ -25,6 +25,8 @@ namespace GnomenuGtk {
 			else
 			if(widget is Label) visit_label(widget as Label);
 			else
+			if(widget is Image) visit_image(widget as Image);
+			else
 			if(widget is Gtk.Container) visit_container(widget as Container);
 		}
 		private void visit_container(Container container) {
@@ -71,19 +73,8 @@ namespace GnomenuGtk {
 			if(menuitem is ImageMenuItem) {
 				Image image = (menuitem as ImageMenuItem).image as Image;
 				if(image != null) {
-					if(image.storage_type == ImageType.STOCK) {
-						/*FIXME: only stock icons are supported! Do more!*/
-						sb.append(" type=\"i\"");
-						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
-								image.stock));
-					}
-					if(image.storage_type == ImageType.PIXBUF) {
-						Gdk.Pixdata pixdata = {0};
-						pixdata.from_pixbuf(image.pixbuf, true);
-						string b64_data = Base64.encode(pixdata.serialize());
-						sb.append(" type=\"i\"");
-						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
-					}
+					sb.append(" type=\"i\"");
+					append_icon_attribute(image);
 				}
 			}
 			if(menuitem is CheckMenuItem) {
@@ -136,7 +127,26 @@ namespace GnomenuGtk {
 				}
 			}
 		}
+		private void visit_image(Image image) {
+			/*workaround a bug before Gtk 2.14*/
+			if(image.parent is ImageMenuItem) return; 
+			sb.append(" type=\"i\"");
+			append_icon_attribute(image);
+		}
 
+		private void append_icon_attribute(Image image) {
+			if(image.storage_type == ImageType.STOCK) {
+				/*FIXME: only stock icons are supported! Do more!*/
+				sb.append(Markup.printf_escaped(" icon=\"%s\"", 
+						image.stock));
+			}
+			if(image.storage_type == ImageType.PIXBUF) {
+				Gdk.Pixdata pixdata = {0};
+				pixdata.from_pixbuf(image.pixbuf, true);
+				string b64_data = Base64.encode(pixdata.serialize());
+				sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
+			}		
+		}
 		private MenuBar menubar;
 		private StringBuilder sb;
 		private StringBuilder label_sb;
