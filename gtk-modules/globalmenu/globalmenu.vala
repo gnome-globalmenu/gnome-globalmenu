@@ -65,10 +65,12 @@ namespace GnomenuGtk {
 			if(menubar_get_local(self)) return true;
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 			Gtk.Window toplevel = self.get_ancestor(typeof(Gtk.Window)) as Gtk.Window;
-			if(toplevel != null && (0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
-				gdk_window_set_menu_context(toplevel.window, 
-						Serializer.to_string(self)
-						);
+			if(toplevel != null) {
+				if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
+					gdk_window_set_menu_context(toplevel.window, 
+							Serializer.to_string(self)
+							);
+				}
 			}
 		} 
 		return true;
@@ -160,15 +162,31 @@ namespace GnomenuGtk {
 	}
 
 	private void unbind_menubar_from_window(MenuBar menubar, Window window) {
-		window.property_notify_event -= window_property_notify_event;
-		window.set_data("__menubar__", null);
+		MenuBar old_menubar = null;
+		old_menubar = (MenuBar) window.get_data("__menubar__");
+		if(old_menubar == menubar) {
+			window.property_notify_event -= window_property_notify_event;
+			window.realize -= window_realize;
+			window.set_data("__menubar__", null);
+			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
+		} else {
+			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
+		}
 	}
 	private void bind_menubar_to_window(MenuBar menubar, Window window) {
 		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;
+		window.realize += window_realize;
+		debug("Bind bar %p from window %p(%s)", menubar, window, window.get_name());
 	}
 
+	private void window_realize(Gtk.Window window) {
+		MenuBar menubar = (MenuBar) window.get_data("__menubar__");
+		Signal.emit_by_name(menubar, "changed", 
+				typeof(Widget), menubar, null);
+			
+	}
 	private bool window_property_notify_event (Window window, Gdk.EventProperty event) {
 		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false)) {
 			string path = gdk_window_get_menu_event(window.window);
