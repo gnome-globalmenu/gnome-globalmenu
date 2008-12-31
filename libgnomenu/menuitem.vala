@@ -31,6 +31,8 @@ namespace Gnomenu {
 						_("Size of check or radio indicator"), 
 						0, int.MAX, 13, ParamFlags.READABLE));
 			icon_size_lookup (IconSize.MENU, out icon_width, out icon_height);
+			/*Load gtk-menu-images setting*/
+			Gtk.ImageMenuItem item = new Gtk.ImageMenuItem();
 		}
 
 		construct {
@@ -38,6 +40,7 @@ namespace Gnomenu {
 			_item_type = MenuItemType.NORMAL;
 			create_labels();
 		}
+
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
@@ -298,6 +301,9 @@ namespace Gnomenu {
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
+
+		private bool _show_image;
+
 		public Gtk.Image? image {
 			get {
 				if(_item_type == MenuItemType.IMAGE)
@@ -322,6 +328,10 @@ namespace Gnomenu {
 				break;
 				case MenuItemType.IMAGE:
 				/*FIXME: BTT, TTB uses icon_height*/
+					if(!_show_image) {
+						*((int*) requisition) = 0;
+						break;
+					}
 					if(image != null) {
 						Requisition req;
 						image.size_request(out req);
@@ -422,6 +432,38 @@ namespace Gnomenu {
 		}
 		public override void activate() {
 			menubar.activate(this);
+		}
+		private static void show_image_notify_r(Gtk.Widget widget, Gtk.Settings settings) {
+			if(widget is MenuItem) {
+				MenuItem item = widget as MenuItem;
+				settings.get("gtk-menu-images", &item._show_image, null);
+				if(item._image_widget != null) {
+					item._image_widget.visible = item._show_image;
+				}
+				item.queue_resize();
+			} else {
+				if(widget is Container) {
+					List<weak Gtk.Widget> children = gtk_container_get_children(widget as Container);
+					foreach(Gtk.Widget child in children)
+						show_image_notify_r(child, settings);
+				}
+			}
+		}
+		private static void show_image_notify(Gtk.Settings settings) {
+			List<weak Gtk.Window> toplevels = gtk_window_list_toplevels();
+			foreach(Gtk.Container c in toplevels) {
+				show_image_notify_r(c, settings);
+			}
+		}
+		public override void screen_changed(Gdk.Screen previous_screen) {
+			if(!has_screen()) return;
+			Gtk.Settings settings = get_settings();
+			if(settings.get_data("gnomenu-menu-item-connection") == null) {
+				settings.notify["gtk-menu-images"] += show_image_notify;
+				/*set it to non-null value*/
+				settings.set_data("gnomenu-menu-item-connection", settings);
+				show_image_notify(settings);
+			}
 		}
 		public override void size_request(out Requisition req) {
 			if(_item_type == MenuItemType.IMAGE) {

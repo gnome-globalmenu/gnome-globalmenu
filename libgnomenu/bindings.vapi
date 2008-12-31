@@ -3,6 +3,7 @@
  * didn't work in 0.5.1
  */
 public static GLib.List<weak Gtk.Widget> gtk_container_get_children(Gtk.Container container);
+public static GLib.List<weak Gtk.Window> gtk_window_list_toplevels();
 
 /***
  * Not working since 0.5.1
