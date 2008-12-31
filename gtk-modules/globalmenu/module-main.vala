@@ -7,7 +7,7 @@ public class GlobalMenuModule {
 	private static bool disabled = false;
 	private static bool initialized = false;
 
-	private static string log_file_name;
+	private static string log_file_name = null;
 	private static GLib.OutputStream log_stream;
 	private static Quark domain;
 
@@ -30,44 +30,39 @@ public class GlobalMenuModule {
 
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
-		debug(_("Global Menu plugin module is loaded"));
 		domain = Quark.from_string("GlobalMenu");
 
 		if(is_quirky_app()) disabled = true;
 
 		parse_args();
 
+	/* Do not write any log messages before we prepare the log file.*/
+		prepare_log_file();
+		if(!verbose) {
+			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, empty_log_handler);
+		} else {
+			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
+		
+		}
+
 		if(!disabled) {
 			debug(_("Global Menu is enabled"));
-
-			prepare_log_file();
-
-			if(!verbose) {
-//				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MESSAGE, empty_log_handler);
-				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, empty_log_handler);
-				Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_INFO, empty_log_handler);
-			}
+		} else {
+			return _("Global Menu is disabled");
 		}
-		/** make the module resident to avoid the rapid reloading issue
-		 * before we figure out why.
-		 *  Therefore after the gconf key for gtk-modules is changed,
-		 *  the user needs to relogin to clear global menu
-
-		module.make_resident();
-		*/
 		return null;
 	}
 
 	[CCode (cname="g_module_unload")]
 	public static void g_module_unload(Module module) {
 		if(!disabled) {
-		remove_emission_hooks();
-		dyn_patch_uninit();
+			remove_emission_hooks();
+			dyn_patch_uninit();
 
-		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
-		log_stream = null;
+			debug(_("Global Menu plugin module is unloaded"));
+			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
+			log_stream = null;
 		}
-		debug(_("Global Menu plugin module is unloaded"));
 	}
 	
 	[CCode (cname="MY_")]
@@ -78,46 +73,48 @@ public class GlobalMenuModule {
 	private static const OptionEntry [] options = {
 		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
-		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to stderr"), null},
+		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to ~/.gnomenu.log"), null},
 		{null}
 	};
 
-	private static void parse_args() {
+	private static bool parse_args() {
 		string [] args;
 		string env = Environment.get_variable("GLOBALMENU_GNOME_ARGS");
-		
-		if(env == null) return;
-		string command_line = "globalmenu-gnome " + env;
-		Shell.parse_argv(command_line, out args);
-
-		OptionContext context = new OptionContext(
-				_("- Global Menu plugin Module for GTK"));
-		context.set_description(
-_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
-NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by the plugin.
-""")
-		);
-		context.set_ignore_unknown_options(true);
-		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
-		try {
-			context.parse(ref args);
-		} catch (Error e) {
-			warning("%s", e.message);
-			print("%s", context.get_help(false, null));
+		bool rt = true;	
+		if(env != null) {
+			string command_line = "globalmenu-gnome " + env;
+			try {
+				rt = Shell.parse_argv(command_line, out args);
+			} catch( GLib.Error e) { }
+			if(rt) {
+				OptionContext context = new OptionContext(
+						_("- Global Menu plugin Module for GTK"));
+				context.set_description(
+		_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
+		NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by the plugin.
+		""")
+				);
+				context.set_help_enabled(false);
+				context.set_ignore_unknown_options(true);
+				context.add_main_entries(options, Config.GETTEXT_PACKAGE);
+				try {
+					rt = context.parse(ref args);
+				} catch(GLib.Error e) { }
+			}
 		}
+		if(log_file_name == null) {
+			log_file_name = Environment.get_home_dir() + "/.gnomenu.log";
+		}
+		return rt;
 	}
 
 	private static void prepare_log_file() {
-		if(log_file_name != null) {
-			try {
-				GLib.File file = GLib.File.new_for_path(log_file_name);
-				log_stream = file.append_to(FileCreateFlags.NONE, null);
-			} catch (GLib.Error e) {
-				warning(_("Log file %s is not accessible. Fallback to stderr. %s"), log_file_name, e.message);
-			}	
-		}
-		if(log_stream == null) log_stream = new GLib.UnixOutputStream(2, false);
-		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, default_log_handler);
+		try {
+			GLib.File file = GLib.File.new_for_path(log_file_name);
+			log_stream = file.append_to(FileCreateFlags.NONE, null);
+		} catch (GLib.Error e) {
+			log_stream = new GLib.UnixOutputStream(2, false);
+		}	
 	}
 
 
@@ -125,7 +122,9 @@ NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by 
 		TimeVal time = {0};
 		time.get_current_time();
 		string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, Environment.get_prgname(), domain, message);
+		try {
 		log_stream.write(s, s.size(), null);
+		} catch (GLib.Error e) { } 
 	}
 	private static void empty_log_handler(string? domain, LogLevelFlags level,
 			string message) {

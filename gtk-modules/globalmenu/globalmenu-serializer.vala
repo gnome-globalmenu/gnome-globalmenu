@@ -13,7 +13,7 @@ namespace GnomenuGtk {
 			s.sb = new StringBuilder("");
 			s.label_sb = new StringBuilder("");
 			s.visit(menubar);
-			message("Serializer consumption = %lf", timer.elapsed(null));
+			debug("Serializer consumption = %lf", timer.elapsed(null));
 			return s.sb.str;
 		}
 		private void visit(Widget widget) {

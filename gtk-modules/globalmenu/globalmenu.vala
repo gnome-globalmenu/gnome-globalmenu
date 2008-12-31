@@ -30,7 +30,6 @@ namespace GnomenuGtk {
 			MenuBar menubar = gtk_window_find_menubar(toplevel as Container);
 			
 			if(menubar == null) continue;
-			weak string typename = menubar.get_type().name();
 			menubar_set_local(menubar, 
 				menubar_should_be_skipped(menubar));
 			bind_menubar_to_window(menubar, toplevel as Window);
@@ -117,12 +116,12 @@ namespace GnomenuGtk {
 			if(type.is_a(panel_applet_type)
 			|| type.is_a(gnomenu_menu_bar_type)
 			|| type.is_a(panel_menu_bar_type))  {
-				message("menu bar skipped");
+				debug("menu bar skipped");
 				return true;
 			}
 			parent = parent.parent;
 		} 
-		message("not skipped");
+		debug("not skipped");
 		return false;
 	}
 
