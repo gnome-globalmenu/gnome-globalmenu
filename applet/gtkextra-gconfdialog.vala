@@ -21,24 +21,22 @@ using Gtk;
 using GConf;
 
 	public class GConfDialog : Gtk.Dialog {
-		public string root_key {get; construct;}
 
 		private GConf.Client _default_client;
 
-		public GConfDialog(string key, string dialog_title) {
-			root_key = key;
+		public GConfDialog(string dialog_title) {
 			title = dialog_title;
 			icon_name = "gtk-preferences";
 		}
+
 		public GConfDialog.with_subkeys(string key, string dialog_title, string[] subkeys) {
-			root_key = key;
 			title = dialog_title;
 			icon_name = "gtk-preferences";
-			if (subkeys==null) {
-				add_all_subkeys();
+			if (subkeys == null) {
+				add_subkeys(key);
        		} else {
 				foreach(weak string subkey in subkeys) {
-					add_subkey(subkey);
+					add_key(key + "/" + subkey);
 				}
 			}
 		}
@@ -46,17 +44,17 @@ using GConf;
 			_default_client = GConf.Client.get_default();
 			vbox.width_request = 320;
 		}
-		public void add_all_subkeys() {
-			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(root_key);
+		public void add_key(string key) {
+			weak GConf.Entry entry = _default_client.get_entry(key, null, true);
+			if(entry != null)
+				addEntry(entry);
+		}
+		public void add_subkeys(string key) {
+			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(key);
 			foreach(weak GConf.Entry entry in prefs)
 				addEntry(entry);
 		}
-		public void add_subkey(string subkey) {
-			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(root_key);
-			foreach(weak GConf.Entry entry in prefs)
-				if (entry.key == (root_key + "/" + subkey))
-					addEntry(entry);
-		}
+
 		private void addEntry(GConf.Entry entry) {
 			Gtk.Box row = new Gtk.HBox(false, 0);
        		string schema_name = entry.get_schema_name();
