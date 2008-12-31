@@ -8,8 +8,8 @@
 	  <type>bool</type>
 	  <default>false</default>
 	  <locale name="C">
-		<short>GTK+ module for Global Menu</short>
-		<long>This key determines the GTK+ module to load for Global Menu.</long>
+		<short>Enable Global Menu For GTK applications</short>
+		<long>If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is loaded.</long>
 	  </locale>
 	</schema>
 	<schema>

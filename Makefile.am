@@ -44,12 +44,8 @@ endif
 
 
 rpm: 
+	vim gnome-globalmenu.spec
 	touch `find . -name '*.vala'`
 	make dist
-	vim *.spec
-	cp *.tar.gz ~/rpmbuild/SOURCES
-	rpmbuild -bb *.spec
+	rpmbuild -tb gnome-globalmenu-0.7.0.tar.gz
 
-rpm-fast:
-	cp *.tar.gz ~/rpmbuild/SOURCES
-	rpmbuild -bb *.spec

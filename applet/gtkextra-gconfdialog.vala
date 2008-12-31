@@ -29,16 +29,10 @@ using GConf;
 			icon_name = "gtk-preferences";
 		}
 
-		public GConfDialog.with_subkeys(string key, string dialog_title, string[] subkeys) {
+		public GConfDialog.with_subkeys(string key, string dialog_title, string[]? subkeys = null) {
 			title = dialog_title;
 			icon_name = "gtk-preferences";
-			if (subkeys == null) {
-				add_subkeys(key);
-       		} else {
-				foreach(weak string subkey in subkeys) {
-					add_key(key + "/" + subkey);
-				}
-			}
+			add_subkeys(key, subkeys);
 		}
 		construct {
 			_default_client = GConf.Client.get_default();
@@ -49,10 +43,16 @@ using GConf;
 			if(entry != null)
 				addEntry(entry);
 		}
-		public void add_subkeys(string key) {
+		public void add_subkeys(string key, string[]? subkeys= null) {
 			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(key);
-			foreach(weak GConf.Entry entry in prefs)
-				addEntry(entry);
+			if (subkeys == null) {
+				foreach(weak GConf.Entry entry in prefs)
+					addEntry(entry);
+       		} else {
+				foreach(weak string subkey in subkeys) {
+					add_key(key + "/" + subkey);
+				}
+			}
 		}
 
 		private void addEntry(GConf.Entry entry) {
