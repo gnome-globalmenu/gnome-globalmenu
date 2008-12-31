@@ -64,7 +64,8 @@ namespace GnomenuGtk {
 		if(self != null) {
 			if(menubar_get_local(self)) return true;
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
-			Gtk.Window toplevel = self.get_ancestor(typeof(Gtk.Window)) as Gtk.Window;
+			Gtk.Window toplevel = (Gtk.Window) self.get_data("__toplevel__");
+
 			if(toplevel != null) {
 				if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
 					gdk_window_set_menu_context(toplevel.window, 
@@ -168,12 +169,18 @@ namespace GnomenuGtk {
 			window.property_notify_event -= window_property_notify_event;
 			window.realize -= window_realize;
 			window.set_data("__menubar__", null);
+			menubar.set_data("__toplevel__", null);
 			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
 		} else {
 			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
 		}
 	}
 	private void bind_menubar_to_window(MenuBar menubar, Window window) {
+		MenuBar old_menubar = null;
+		old_menubar = (MenuBar) window.get_data("__menubar__");
+		if(old_menubar != null) unbind_menubar_from_window(old_menubar, window);
+
+		menubar.set_data_full("__toplevel__", window.ref(), g_object_unref);
 		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;
