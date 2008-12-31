@@ -11,6 +11,7 @@ public class GlobalMenuModule {
 	private static GLib.OutputStream log_stream;
 	private static Quark domain;
 
+	private static uint deferred_init_id = 0;
 	[CCode (cname = "dyn_patch_init")]
 	public static extern void dyn_patch_init();
 
@@ -19,15 +20,19 @@ public class GlobalMenuModule {
 
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		if(!initialized) {
-			initialized = true;
-			if(!disabled) {	
-				dyn_patch_init();
-				add_emission_hooks();
-			}
-		}
+		if(!disabled) 
+		deferred_init_id = Idle.add(deferred_init);
 	}
 
+	private static bool deferred_init() {
+		if(!initialized) {
+			initialized = true;
+			dyn_patch_init();
+			add_emission_hooks();
+		}
+		deferred_init_id = 0;
+		return false;
+	}
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
 		domain = Quark.from_string("GlobalMenu");
@@ -56,8 +61,13 @@ public class GlobalMenuModule {
 	[CCode (cname="g_module_unload")]
 	public static void g_module_unload(Module module) {
 		if(!disabled) {
-			remove_emission_hooks();
-			dyn_patch_uninit();
+			if(deferred_init_id != 0) {
+				Source.remove(deferred_init_id);
+			}
+			if(initialized) {
+				remove_emission_hooks();
+				dyn_patch_uninit();
+			}
 
 			debug(_("Global Menu plugin module is unloaded"));
 			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);

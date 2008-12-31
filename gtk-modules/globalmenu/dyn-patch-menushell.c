@@ -13,6 +13,7 @@ DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * chi
 		dyn_patch_set_menubar_r(child, menubar);
 		dyn_patch_queue_changed(menubar, child);
 	}
+	g_debug("Insert %p to menu shell %p on menu bar %p", child, shell, menubar);
 }
 DEFINE_FUNC(void, gtk_menu_shell, remove, (GtkMenuShell * shell, GtkWidget * child)) {
 
@@ -23,6 +24,7 @@ DEFINE_FUNC(void, gtk_menu_shell, remove, (GtkMenuShell * shell, GtkWidget * chi
 	if(menubar) {
 		dyn_patch_queue_changed(menubar, child);
 	}
+	g_debug("remove %p from menu shell %p on menu bar %p", child, shell, menubar);
 }
 
 void dyn_patch_menu_shell_patcher(GType menu_shell_type) {

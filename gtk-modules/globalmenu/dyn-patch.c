@@ -31,6 +31,7 @@ static GHashTable * classes = NULL;
 static GHashTable * notifiers = NULL;
 void dyn_patch_init () {
 	
+	GDK_THREADS_ENTER();
 	__MENUBAR__ = g_quark_from_string("__menubar__");
 	__DIRTY__ = g_quark_from_string("__dirty__");
 	__OLD_SUBMENU__ = g_quark_from_string("__old_submenu__");
@@ -51,7 +52,8 @@ void dyn_patch_init () {
 
 	timer = g_timer_new();
 	g_timer_stop(timer);
-
+	
+	GDK_THREADS_LEAVE();
 }
 
 void dyn_patch_uninit() {
