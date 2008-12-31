@@ -135,17 +135,21 @@ namespace GnomenuGtk {
 		}
 
 		private void append_icon_attribute(Image image) {
-			if(image.storage_type == ImageType.STOCK) {
-				/*FIXME: only stock icons are supported! Do more!*/
-				sb.append(Markup.printf_escaped(" icon=\"%s\"", 
-						image.stock));
+			if(image.file != null) {
+				sb.append(Markup.printf_escaped(" icon=\"file:%s\"", image.file));
+			} else {
+				if(image.storage_type == ImageType.STOCK) {
+					/*FIXME: only stock icons are supported! Do more!*/
+					sb.append(Markup.printf_escaped(" icon=\"%s\"", 
+							image.stock));
+				}
+				if(image.storage_type == ImageType.PIXBUF) {
+					Gdk.Pixdata pixdata = {0};
+					pixdata.from_pixbuf(image.pixbuf, true);
+					string b64_data = Base64.encode(pixdata.serialize());
+					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
+				}		
 			}
-			if(image.storage_type == ImageType.PIXBUF) {
-				Gdk.Pixdata pixdata = {0};
-				pixdata.from_pixbuf(image.pixbuf, true);
-				string b64_data = Base64.encode(pixdata.serialize());
-				sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
-			}		
 		}
 		private MenuBar menubar;
 		private StringBuilder sb;

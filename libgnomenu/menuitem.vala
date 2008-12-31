@@ -338,12 +338,13 @@ namespace Gnomenu {
 						*((int*) requisition) = 0;
 						break;
 					}
-					if(image != null) {
+					if(image != null && _icon != null) {
 						Requisition req;
 						image.size_request(out req);
 						*((int*) requisition ) = req.width + toggle_spacing;
 					} else {
-						*((int*) requisition ) = icon_width + toggle_spacing;
+						/*no image*/
+						*((int*) requisition ) = 0;
 					}
 				break;
 				default:
@@ -557,6 +558,10 @@ namespace Gnomenu {
 		private void update_image() {
 			if(_item_type != MenuItemType.IMAGE
 			&& _item_type != MenuItemType.ICON) return;
+			if(icon != null && icon.has_prefix("file:")) {
+				weak string filename = icon.offset(5);
+				image.set_from_file(filename);
+			} else 
 			if(icon != null && icon.has_prefix("pixbuf:")) {
 				weak string b64data = icon.offset(7);
 				int len = 0;
