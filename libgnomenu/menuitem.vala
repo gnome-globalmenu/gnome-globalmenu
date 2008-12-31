@@ -302,7 +302,13 @@ namespace Gnomenu {
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
 
-		private bool _show_image;
+		private bool _show_image {
+			get {
+				bool rt = false;
+				get_settings().get("gtk-menu-images", &rt, null);
+				return rt;
+			}
+		}
 
 		public Gtk.Image? image {
 			get {
@@ -436,7 +442,6 @@ namespace Gnomenu {
 		private static void show_image_notify_r(Gtk.Widget widget, Gtk.Settings settings) {
 			if(widget is MenuItem) {
 				MenuItem item = widget as MenuItem;
-				settings.get("gtk-menu-images", &item._show_image, null);
 				if(item._image_widget != null) {
 					item._image_widget.visible = item._show_image;
 				}
@@ -552,7 +557,17 @@ namespace Gnomenu {
 		private void update_image() {
 			if(_item_type != MenuItemType.IMAGE
 			&& _item_type != MenuItemType.ICON) return;
-			image.set_from_stock(icon, IconSize.MENU);
+			if(icon != null && icon.has_prefix("pixbuf:")) {
+				weak string b64data = icon.offset(7);
+				int len = 0;
+				uchar [] data = Base64.decode(b64data, out len);
+				Gdk.Pixdata pixdata = {0};
+				pixdata.deserialize(data);
+				Gdk.Pixbuf pixbuf = gdk_pixbuf_from_pixdata(pixdata, true);
+				image.set_from_pixbuf(pixbuf);
+			} else {
+				image.set_from_stock(icon, IconSize.MENU);
+			}
 		}
 		public override void parent_set(Gtk.Widget old_parent) {
 			update_label_text();

@@ -50,4 +50,4 @@ public enum GMarkupCollectType {
 	TRISTATE,
 	OPTIONAL
 }
-
+Gdk.Pixbuf gdk_pixbuf_from_pixdata(Gdk.Pixdata pixdata, bool copy_pixels) throws GLib.Error;

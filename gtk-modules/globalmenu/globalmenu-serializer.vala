@@ -77,6 +77,13 @@ namespace GnomenuGtk {
 						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
 								image.stock));
 					}
+					if(image.storage_type == ImageType.PIXBUF) {
+						Gdk.Pixdata pixdata = {0};
+						pixdata.from_pixbuf(image.pixbuf, true);
+						string b64_data = Base64.encode(pixdata.serialize());
+						sb.append(" type=\"i\"");
+						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
+					}
 				}
 			}
 			if(menuitem is CheckMenuItem) {
