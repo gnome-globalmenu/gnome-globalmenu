@@ -250,7 +250,7 @@ namespace Gnomenu {
 				if(_item_type == MenuItemType.IMAGE) {
 					_image_widget = new Gtk.Image();
 					_image_widget.set_parent(this);
-					_image_widget.visible = true;
+					_image_widget.visible = _show_image;
 					update_image();
 				} else {
 					if(_image_widget != null) {
@@ -441,13 +441,16 @@ namespace Gnomenu {
 		public override void activate() {
 			menubar.activate(this);
 		}
+		private void update_show_image() {
+			if(_image_widget != null) {
+				_image_widget.visible = _show_image;
+			}
+			queue_resize();
+		}
 		private static void show_image_notify_r(Gtk.Widget widget, Gtk.Settings settings) {
 			if(widget is MenuItem) {
 				MenuItem item = widget as MenuItem;
-				if(item._image_widget != null) {
-					item._image_widget.visible = item._show_image;
-				}
-				item.queue_resize();
+				item.update_show_image();
 			} else {
 				if(widget is Container) {
 					List<weak Gtk.Widget> children = gtk_container_get_children(widget as Container);
@@ -469,8 +472,15 @@ namespace Gnomenu {
 				settings.notify["gtk-menu-images"] += show_image_notify;
 				/*set it to non-null value*/
 				settings.set_data("gnomenu-menu-item-connection", settings);
-				show_image_notify(settings);
+				/*if there is no such connection yet, 
+				 * this widget must have been the first
+				 * item attached to the screen, therefore there is no
+				 * need to do a show_image_notify to all widgets.
+				 * */
 			}
+			/*If the connection to settings is already established,
+			 * updating this widget is sufficient*/
+			update_show_image();
 		}
 		public override void size_request(out Requisition req) {
 			if(_item_type == MenuItemType.IMAGE) {
