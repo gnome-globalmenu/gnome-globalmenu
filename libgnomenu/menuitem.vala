@@ -374,16 +374,17 @@ namespace Gnomenu {
 			/*FIXME: alignment !*/
 			int x = 0;
 			int y = 0;
-			int offset = (toggle_size - indicator_size)/2;
+			int xoffset = (toggle_size - indicator_size)/2;
+			int yoffset = (allocation.height - indicator_size)/2;
 			int spacing = toggle_spacing /2;
 			switch(get_direction()) {
 				case Gtk.TextDirection.LTR:
-					x = allocation.x + offset + spacing;
-					y = allocation.y + offset;
+					x = allocation.x + xoffset + spacing;
+					y = allocation.y + yoffset;
 				break;
 				case Gtk.TextDirection.RTL:
-					x = allocation.x + allocation.width - toggle_size - offset - spacing;
-					y = allocation.y + offset;
+					x = allocation.x + allocation.width - toggle_size - xoffset - spacing;
+					y = allocation.y + yoffset;
 				break;
 			}
 			switch(_item_type) {
