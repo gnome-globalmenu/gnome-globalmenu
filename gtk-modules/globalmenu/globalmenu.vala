@@ -42,7 +42,7 @@ namespace GnomenuGtk {
 		List<weak Widget> toplevels = gtk_window_list_toplevels();
 		foreach(Widget toplevel in toplevels) {
 			if(!(toplevel is Window)) continue;
-			MenuBar menubar = find_menubar(toplevel as Container);
+			MenuBar menubar = (MenuBar) toplevel.get_data("__menubar__");
 			if(menubar == null) continue;
 			unbind_menubar_from_window(menubar, toplevel as Window);
 
