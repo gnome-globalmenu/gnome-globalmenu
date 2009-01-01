@@ -152,6 +152,16 @@ namespace GnomenuGtk {
 					string b64_data = Base64.encode(pixdata.serialize());
 					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
 				}		
+				if(image.storage_type == ImageType.PIXMAP) {
+					ulong pixmap_xid = 0;
+					ulong mask_xid = 0;
+					if(image.pixmap != null) 
+						pixmap_xid = gdk_drawable_xid(image.pixmap);
+					if(image.mask != null) 
+						mask_xid = gdk_drawable_xid(image.mask);
+					sb.append(Markup.printf_escaped(" icon=\"pixmap:%lu,%lu\"", 
+						pixmap_xid, mask_xid));
+				}
 			}
 		}
 		private MenuBar menubar;
