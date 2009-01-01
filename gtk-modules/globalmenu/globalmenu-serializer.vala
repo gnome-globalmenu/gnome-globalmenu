@@ -151,9 +151,11 @@ namespace GnomenuGtk {
 						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
 							stock));
 					} else {
-						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
-							pixbuf_encode_b64(image.render_icon(image.stock, 
-									IconSize.MENU, null))));
+						Gdk.Pixbuf pixbuf = image.render_icon(image.stock, 
+							IconSize.MENU, null);
+						if(pixbuf != null)
+							sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
+								pixbuf_encode_b64(pixbuf)));
 					}
 				}
 				if(image.storage_type == ImageType.ICON_NAME) {
@@ -162,7 +164,8 @@ namespace GnomenuGtk {
 							image.icon_name));
 				}
 				if(image.storage_type == ImageType.PIXBUF) {
-					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
+					if(image.pixbuf != null)
+						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
 								pixbuf_encode_b64(image.pixbuf)));
 				}		
 				if(image.storage_type == ImageType.PIXMAP) {
