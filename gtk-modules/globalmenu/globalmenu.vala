@@ -45,7 +45,16 @@ namespace GnomenuGtk {
 			MenuBar menubar = (MenuBar) toplevel.get_data("__menubar__");
 			if(menubar == null) continue;
 			unbind_menubar_from_window(menubar, toplevel as Window);
-
+			menubar.queue_resize();
+			if(0 != (menubar.get_flags() & WidgetFlags.REALIZED)) {
+				menubar.unrealize();
+				if(menubar.visible) {
+					menubar.map();
+					menubar.queue_draw();
+				}
+				else 
+					menubar.realize();
+			}
 			if((0 != (toplevel.get_flags() & WidgetFlags.REALIZED))) {
 				gdk_window_set_menu_context(toplevel.window, null);
 			}

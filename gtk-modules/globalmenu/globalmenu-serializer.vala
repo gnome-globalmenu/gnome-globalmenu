@@ -130,27 +130,40 @@ namespace GnomenuGtk {
 		private void visit_image(Image image) {
 			/*workaround a bug before Gtk 2.14*/
 			if(image.parent is ImageMenuItem) return; 
-			sb.append(" type=\"i\"");
+			sb.append(" type=\"icon\"");
 			append_icon_attribute(image);
 		}
 
+		string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
+			Gdk.Pixdata pixdata = {0};
+			pixdata.from_pixbuf(pixbuf, true);
+			return Base64.encode(pixdata.serialize());
+		}
 		private void append_icon_attribute(Image image) {
 			if(image.file != null) {
 				sb.append(Markup.printf_escaped(" icon=\"file:%s\"", image.file));
 			} else {
 				if(image.storage_type == ImageType.STOCK) {
-					sb.append(Markup.printf_escaped(" icon=\"%s\"", 
-							image.stock));
+					/* STOCK is not shared between app and the applet */
+					string stock = image.stock;
+					if(stock.has_prefix("gtk")) {
+						/*a GTK stock, shared between app and applet*/
+						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
+							stock));
+					} else {
+						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
+							pixbuf_encode_b64(image.render_icon(image.stock, 
+									IconSize.MENU, null))));
+					}
 				}
 				if(image.storage_type == ImageType.ICON_NAME) {
+					/* THEME is shared between applet and the application*/
 					sb.append(Markup.printf_escaped(" icon=\"theme:%s\"", 
 							image.icon_name));
 				}
 				if(image.storage_type == ImageType.PIXBUF) {
-					Gdk.Pixdata pixdata = {0};
-					pixdata.from_pixbuf(image.pixbuf, true);
-					string b64_data = Base64.encode(pixdata.serialize());
-					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", b64_data));
+					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
+								pixbuf_encode_b64(image.pixbuf)));
 				}		
 				if(image.storage_type == ImageType.PIXMAP) {
 					ulong pixmap_xid = 0;

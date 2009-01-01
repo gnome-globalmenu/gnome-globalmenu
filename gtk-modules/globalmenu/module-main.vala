@@ -65,8 +65,8 @@ public class GlobalMenuModule {
 				Source.remove(deferred_init_id);
 			}
 			if(initialized) {
-				remove_emission_hooks();
 				dyn_patch_uninit();
+				remove_emission_hooks();
 			}
 
 			debug(_("Global Menu plugin module is unloaded"));
