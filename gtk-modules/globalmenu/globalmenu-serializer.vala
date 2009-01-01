@@ -61,13 +61,18 @@ namespace GnomenuGtk {
 			indent();
 			sb.append("<item");
 			label_sb.erase(0, -1);
+			last_item_empty = true;
 			visit_container(menuitem);
+
 			if(label_sb.len > 0) {
 				sb.append(Markup.printf_escaped(" label=\"%s\"", label_sb.str));
+				last_item_empty = false;
 			}
 			if(menuitem is SeparatorMenuItem
-			|| menuitem.get_child() == null) 
+			|| menuitem.get_child() == null) {
 				sb.append(" type=\"s\"");
+				last_item_empty = false;
+			}
 
 
 			if(menuitem is ImageMenuItem) {
@@ -75,6 +80,7 @@ namespace GnomenuGtk {
 				if(image != null) {
 					sb.append(" type=\"i\"");
 					append_icon_attribute(image);
+					last_item_empty = false;
 				}
 			}
 			if(menuitem is CheckMenuItem) {
@@ -90,15 +96,26 @@ namespace GnomenuGtk {
 					else
 						sb.append(" state=\"0\"");
 				}
+				last_item_empty = false;
 			}
 
 			if(menuitem.visible == false) {
 				sb.append(" visible=\"0\"");
+				last_item_empty = false;
 			}
 			if(menuitem.sensitive == false) {
 				sb.append(" sensitive=\"0\"");
 			}
 
+			if(last_item_empty) {
+				/* hide the empty items with
+				 * no label, no image, or
+				 * any other visible elements.
+				 *
+				 * eg, PidginMenuTray
+				 * */
+				sb.append(" visible=\"0\"");
+			}
 			if(menuitem.submenu == null) {
 				sb.append("/>");
 				linebreak();
@@ -183,6 +200,7 @@ namespace GnomenuGtk {
 		private MenuBar menubar;
 		private StringBuilder sb;
 		private StringBuilder label_sb;
+		private bool last_item_empty;
 		private bool pretty_print;
 		private int level;
 		private bool newline;
