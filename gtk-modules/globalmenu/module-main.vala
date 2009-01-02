@@ -43,12 +43,7 @@ public class GlobalMenuModule {
 
 	/* Do not write any log messages before we prepare the log file.*/
 		prepare_log_file();
-		if(!verbose) {
-			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, empty_log_handler);
-		} else {
-			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
-		
-		}
+		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
 
 		if(!disabled) {
 			debug(_("Global Menu is enabled"));
@@ -123,22 +118,20 @@ public class GlobalMenuModule {
 			GLib.File file = GLib.File.new_for_path(log_file_name);
 			log_stream = file.append_to(FileCreateFlags.NONE, null);
 		} catch (GLib.Error e) {
-			log_stream = new GLib.UnixOutputStream(2, false);
+			/*If can't log just ignore verbose parameter.*/
+			verbose = false;
 		}	
 	}
 
 
 	private static void default_log_handler(string? domain, LogLevelFlags level, string message) {
+		if(!verbose) return;
 		TimeVal time = {0};
 		time.get_current_time();
 		string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, Environment.get_prgname(), domain, message);
 		try {
 		log_stream.write(s, s.size(), null);
 		} catch (GLib.Error e) { } 
-	}
-	private static void empty_log_handler(string? domain, LogLevelFlags level,
-			string message) {
-		/*do nothing*/
 	}
 	private static bool is_quirky_app() {
 		string disabled_application_names = 

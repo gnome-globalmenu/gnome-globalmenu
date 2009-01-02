@@ -30,7 +30,7 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) bindings.vapi patch.sh
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --pkg gio-unix-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings $(VALASOURCES)
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --pkg gio-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings $(VALASOURCES)
 	bash patch.sh
 	touch $@
 $(STAMP:.vapi=.deps):
