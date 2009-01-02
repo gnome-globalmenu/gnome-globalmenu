@@ -11,6 +11,8 @@ namespace GnomenuGtk {
 	[CCode (cname = "gdk_window_get_menu_event")]
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
+	[CCode (cname = "dyn_patch_set_menubar_r")]
+	protected extern void dyn_patch_set_menubar_r(Widget widget, MenuBar? menubar);
 	[CCode (cname = "gtk_window_find_menubar")]
 	protected extern weak MenuBar gtk_window_find_menubar (Widget window);
 
@@ -180,6 +182,7 @@ namespace GnomenuGtk {
 			window.set_data("__menubar__", null);
 			menubar.set_data("__toplevel__", null);
 			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
+			dyn_patch_set_menubar_r(menubar, null);
 		} else {
 			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
 		}
@@ -191,6 +194,8 @@ namespace GnomenuGtk {
 
 		menubar.set_data_full("__toplevel__", window.ref(), g_object_unref);
 		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
+		dyn_patch_set_menubar_r(menubar, menubar);
+
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;
 		window.realize += window_realize;

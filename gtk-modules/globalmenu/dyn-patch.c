@@ -159,6 +159,8 @@ void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
 	}
 }
 static void _dyn_patch_simple_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
+	g_debug("simple notify: %s on widget %p (%s) of bar %p", pspec->name,
+			widget, gtk_widget_get_name(widget), menubar);
 	dyn_patch_queue_changed(menubar, widget);
 }
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar) {
