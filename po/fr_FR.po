@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-22 00:13-0500\n"
+"POT-Creation-Date: 2009-01-02 01:59-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,67 +11,47 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:954
+#: ../libgnomenu/menuitem.c:1151
 msgid "Indicator Size"
 msgstr "Taille de l'Indicateur"
 
-#: ../libgnomenu/menuitem.c:954
+#: ../libgnomenu/menuitem.c:1151
 msgid "Size of check or radio indicator"
 msgstr "Taille de l'indicateur check ou radio"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.c:27
 msgid "Be verbose"
 msgstr "Etre prolixe (verbose mode)"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.c:27
 msgid "Disable the Plugin"
 msgstr "Désactiver ce Greffon"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
-msgid "File to save the log, default to stderr"
-msgstr "Fichier dans lequel sauvegarder le journal, par défaut stderr"
+#: ../gtk-modules/globalmenu/module-main.c:27
+msgid "File to save the log, default to ~/.gnomenu.log"
+msgstr "Fichier dans lequel sauvegarder le journal, par défaut ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:53
-msgid "Global Menu plugin module is loaded"
-msgstr "Le module du greffon de Menu Global est chargé"
-
-#: ../gtk-modules/globalmenu/module-main.c:60
-#, fuzzy
-msgid "Global Menu is enabled"
-msgstr "Fabrique d'applet de Menu Global"
-
-#: ../gtk-modules/globalmenu/module-main.c:91
-msgid "Global Menu plugin module is unloaded"
-msgstr "Le module du greffon de Menu Global a été déchargé"
-
-#: ../gtk-modules/globalmenu/module-main.c:125
-#, fuzzy
+#: ../gtk-modules/globalmenu/module-main.c:134
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Applet Menu Global pour GNOME"
 
-#: ../gtk-modules/globalmenu/module-main.c:126
+#: ../gtk-modules/globalmenu/module-main.c:135
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
 "NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored "
-"by the plugin.\n"
+"by the plugin."
 msgstr ""
-"Ces paramètres doivent être fournis dans l'environnement GLOBALMENU_GNOME_ARGS "
-"au lieu de la ligne de commande.\n"
-"NOTE: L'environnement GTK_MENUBAR_NO_MAC contient les applications que le greffon "
-"ignorera.\n"
-
-#: ../gtk-modules/globalmenu/module-main.c:188
-#, c-format
-msgid "Log file %s is not accessible. Fallback to stderr. %s"
-msgstr "Le fichier journal %s n'est pas accessible. Repli sur stderr. %s"
+"Ces paramètres doivent être fournis dans l'environnement "
+"GLOBALMENU_GNOME_ARGS au lieu de la ligne de commande.\n"
+"NOTE: L'environnement GTK_MENUBAR_NO_MAC contient les applications que le "
+"greffon ignorera."
 
 #: ../applet/main.c:23
 msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr "Montrer les messages de débogage de GMarkupDoc et Gnomenu"
 
 #: ../applet/applet.c:37
-#, fuzzy
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
@@ -105,14 +85,22 @@ msgstr "Page Internet du Projet"
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
+#: ../applet/switcher.c:128
+msgid "File Manager"
+msgstr ""
+
+#: ../applet/switcher.c:420
+msgid "Desktop"
+msgstr ""
+
 #: ../gnome-globalmenu.schemas.in.h:1
-#, fuzzy
 msgid "Add window action menu entries to active application name menu"
-msgstr "Ajouter le menu d'actions sur la fenêtre dans le menu de titre de l'application active"
+msgstr ""
+"Ajouter le menu d'actions sur la fenêtre dans le menu de titre de "
+"l'application active"
 
 #: ../gnome-globalmenu.schemas.in.h:2
-#, fuzzy
-msgid "GTK+ module for Global Menu"
+msgid "Enable Global Menu"
 msgstr "Module GTK+ pour le Menu Global"
 
 #: ../gnome-globalmenu.schemas.in.h:3
@@ -120,35 +108,36 @@ msgid "Icon"
 msgstr "Icône"
 
 #: ../gnome-globalmenu.schemas.in.h:4
+msgid ""
+"If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
+"loaded."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:5
 msgid "Label"
 msgstr "Intitulé"
 
-#: ../gnome-globalmenu.schemas.in.h:5
+#: ../gnome-globalmenu.schemas.in.h:6
 msgid "Max title length"
 msgstr "Longueur maximale du titre"
 
-#: ../gnome-globalmenu.schemas.in.h:6
-#, fuzzy
+#: ../gnome-globalmenu.schemas.in.h:7
 msgid "Show/Hide the icon of the active window"
 msgstr "Afficher/Cacher l'icône de la fenêtre active"
 
-#: ../gnome-globalmenu.schemas.in.h:7
-#, fuzzy
+#: ../gnome-globalmenu.schemas.in.h:8
 msgid "Show/Hide the name of the active application"
 msgstr "Afficher/Masquer le titre de l'application active"
 
-#: ../gnome-globalmenu.schemas.in.h:8
-#, fuzzy
+#: ../gnome-globalmenu.schemas.in.h:9
 msgid "The Maximum length of name of the active application"
 msgstr "La taille maximale du nom de l'application active"
 
-#: ../gnome-globalmenu.schemas.in.h:9
-msgid "This key determines the GTK+ module to load for Global Menu."
-msgstr "Cette clé détermine le module GTK+ à charger pour le Menu Global"
-
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Uses active application lablel as application switcher"
-msgstr "Utilise l'intitulé de l'application active en tant dans le permutateur de fenêtres"
+msgstr ""
+"Utilise l'intitulé de l'application active en tant dans le permutateur de "
+"fenêtres"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Window Actions"
@@ -159,18 +148,36 @@ msgid "Window List"
 msgstr "Liste des Fenêtres"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:1
-#, fuzzy
 msgid "Global Menu Panel Applet"
 msgstr "Applet Menu Global"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:2
-#, fuzzy
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr "Fabrique d'applet de Menu Global"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "La fabrique pour construire les objets GlobalMenu.PanelApplet"
+
+#, fuzzy
+#~ msgid "Global Menu is enabled"
+#~ msgstr "Fabrique d'applet de Menu Global"
+
+#, fuzzy
+#~ msgid "Global Menu is disabled"
+#~ msgstr "Fabrique d'applet de Menu Global"
+
+#~ msgid "Global Menu plugin module is unloaded"
+#~ msgstr "Le module du greffon de Menu Global a été déchargé"
+
+#~ msgid "Global Menu plugin module is loaded"
+#~ msgstr "Le module du greffon de Menu Global est chargé"
+
+#~ msgid "Log file %s is not accessible. Fallback to stderr. %s"
+#~ msgstr "Le fichier journal %s n'est pas accessible. Repli sur stderr. %s"
+
+#~ msgid "This key determines the GTK+ module to load for Global Menu."
+#~ msgstr "Cette clé détermine le module GTK+ à charger pour le Menu Global"
 
 #~ msgid "Show fancy control buttons for menu bars"
 #~ msgstr "Afficher des boutons de contrôle pour les barre de menus"
