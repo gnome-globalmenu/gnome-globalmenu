@@ -46,9 +46,9 @@ public class GlobalMenuModule {
 		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
 
 		if(!disabled) {
-			debug(_("Global Menu is enabled"));
+			debug("Global Menu is enabled");
 		} else {
-			return _("Global Menu is disabled");
+			return "Global Menu is disabled";
 		}
 		return null;
 	}
@@ -64,17 +64,12 @@ public class GlobalMenuModule {
 				remove_emission_hooks();
 			}
 
-			debug(_("Global Menu plugin module is unloaded"));
+			debug("Global Menu plugin module is unloaded");
 			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
 			log_stream = null;
 		}
 	}
 	
-	[CCode (cname="MY_")]
-	private static weak string _(string s) {
-		return dgettext(Config.GETTEXT_PACKAGE, s);
-	}
-
 	private static const OptionEntry [] options = {
 		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
