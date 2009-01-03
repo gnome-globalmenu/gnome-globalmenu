@@ -36,7 +36,7 @@ using GConf;
 		}
 		construct {
 			_default_client = GConf.Client.get_default();
-			vbox.width_request = 320;
+			//vbox.width_request = 320;
 		}
 		public void add_key(string key) {
 			weak GConf.Entry entry = _default_client.get_entry(key, null, true);
