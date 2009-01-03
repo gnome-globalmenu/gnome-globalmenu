@@ -75,9 +75,10 @@ public extern string* __get_task_name_by_pid(int pid);
 						Gtk.ImageMenuItem mi;
 						string txt = window.get_name();
 						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
+						txt = txt.replace("_", "\_");
 						mi = new Gtk.ImageMenuItem.with_label(txt);
 						if (window.is_active())
-							(mi.child as Gtk.Label).set_markup_with_mnemonic("<b>" + txt + "</b>");
+							(mi.child as Gtk.Label).set_markup("<b>" + txt + "</b>");
 						
 						mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
 						mi.user_data = window;
@@ -118,11 +119,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			string process_name = get_process_name(window);
 			if (process_name==null) return window.get_name();
 			
-			string ret;
-			if (program_list.lookup(process_name)!=null)
-				ret = program_list.lookup(process_name); else
+			string ret = program_list.lookup(process_name);
+			if (ret == null) {
 				ret = window.get_name();
-			return ret; 
+				program_list.insert(process_name, ret);	// fixes a problem with some apps like Archive Manager.
+			}
+			return ret.replace("_", "\_"); 
 		}
 		private string cut_string(string txt, int max) {
 			if (max<1) return txt;
