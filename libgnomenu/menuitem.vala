@@ -338,7 +338,7 @@ namespace Gnomenu {
 						*((int*) requisition) = 0;
 						break;
 					}
-					if(image != null && _icon != null) {
+					if(image != null) {
 						Requisition req;
 						image.size_request(out req);
 						*((int*) requisition ) = req.width + toggle_spacing;
@@ -346,6 +346,7 @@ namespace Gnomenu {
 						/*no image*/
 						*((int*) requisition ) = 0;
 					}
+					message("requisition = %d", *((int*) requisition));
 				break;
 				default:
 					*((int*) requisition ) = 0;
