@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, [0.7.0], [rainwoodman@gmail.com], [gnome-globalmenu])
+AC_INIT(gnome-globalmenu, [0.7.2], [rainwoodman@gmail.com], [gnome-globalmenu])
 
 AM_INIT_AUTOMAKE([1.9 tar-ustar])
 AC_CONFIG_SRCDIR([Makefile.am])

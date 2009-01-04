@@ -47,5 +47,5 @@ rpm:
 	vim gnome-globalmenu.spec
 	touch `find . -name '*.vala'`
 	make dist
-	rpmbuild -tb gnome-globalmenu-0.7.0.tar.gz
+	rpmbuild -tb $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz
 
