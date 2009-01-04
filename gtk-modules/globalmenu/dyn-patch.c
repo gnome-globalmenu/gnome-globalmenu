@@ -18,11 +18,8 @@ static GQuark __MENUBAR__ = 0;
 static GQuark __DIRTY__ = 0;
 static GQuark __OLD_SUBMENU__ = 0;
 static GQuark __ITEM__  =  0;
-static GQuark __LABEL_NOTIFY_CLOSURE__ = 0;
-static GQuark __SUBMENU_NOTIFY_CLOSURE__ = 0;
+
 static gulong SIGNAL_NOTIFY = 0;
-static GQuark DETAIL_SUBMENU = 0;
-static GQuark DETAIL_LABEL = 0;
 
 static GTimer * timer = NULL;
 static gulong buffered_changes = 0;
@@ -33,10 +30,10 @@ static GHashTable * notifiers = NULL;
 void dyn_patch_init () {
 	
 	GDK_THREADS_ENTER();
-	__MENUBAR__ = g_quark_from_string("__menubar__");
-	__DIRTY__ = g_quark_from_string("__dirty__");
-	__OLD_SUBMENU__ = g_quark_from_string("__old_submenu__");
-	__ITEM__ = g_quark_from_string("__item__");
+	__MENUBAR__ = g_quark_from_string("__dyn-patch-menubar__");
+	__DIRTY__ = g_quark_from_string("__dyn-patch-dirty__");
+	__OLD_SUBMENU__ = g_quark_from_string("__dyn-patch-old-submenu__");
+	__ITEM__ = g_quark_from_string("__dyn-patch-item__");
 
 	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
 
