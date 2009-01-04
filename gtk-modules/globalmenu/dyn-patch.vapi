@@ -4,4 +4,6 @@ namespace DynPatch {
 	public void init();
 [CCode (cname = "dyn_patch_init")]
 	public void uninit();
+[CCode (cname = "dyn_patch_set_menubar_r")]
+	public void set_menubar_r(Gtk.Widget widget, Gtk.MenuBar? menubar);
 }

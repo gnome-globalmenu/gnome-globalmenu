@@ -1,6 +1,6 @@
 using Gtk;
 
-namespace GnomenuGtk {
+namespace GlobalMenuGTK {
 	[Compact]
 	public class Locator {
 		Locator() { }	

@@ -65,21 +65,6 @@ GtkWindow * gtk_widget_get_toplevel_window(GtkWidget * widget) {
 	return gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 }
 
-GtkMenuBar * gtk_window_find_menubar(GtkWidget * widget) {
-	GList * list = gtk_container_get_children(widget);
-	GList * node;
-	for(node = list; node; node = node->next) {
-		GtkWidget * child = node->data;
-		if(GTK_IS_MENU_BAR(child)) return child;
-		if(GTK_IS_CONTAINER(child)) {
-			GtkMenuBar * menubar = gtk_window_find_menubar(child);
-			if(menubar) return menubar;
-		}
-	}	
-	g_list_free(list);
-	return NULL;
-}
-
 static void gcgac_cb(GtkWidget * widget, GList ** list) {
 	*list = g_list_append(*list, widget);
 }

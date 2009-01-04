@@ -1,9 +1,7 @@
 using Gtk;
 
-namespace GnomenuGtk {
+namespace GlobalMenuGTK {
 
-	[CCode (cname = "gdk_window_get_desktop_hint")]
-	protected extern bool gdk_window_get_is_desktop (Gdk.Window window);
 	[CCode (cname = "gtk_widget_get_toplevel_window")]
 	protected extern weak Gtk.Window? gtk_widget_get_toplevel_window (Gtk.Widget widget);
 	[CCode (cname = "gdk_window_set_menu_context")]
@@ -11,15 +9,10 @@ namespace GnomenuGtk {
 	[CCode (cname = "gdk_window_get_menu_event")]
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
-	[CCode (cname = "dyn_patch_set_menubar_r")]
-	protected extern void dyn_patch_set_menubar_r(Widget widget, MenuBar? menubar);
-	[CCode (cname = "gtk_window_find_menubar")]
-	protected extern weak MenuBar gtk_window_find_menubar (Widget window);
-
 	protected ulong changed_hook_id;
 	protected ulong hc_hook_id;
 
-	protected void add_emission_hooks() {
+	public void init() {
 		uint signal_id = Signal.lookup("changed", typeof(MenuBar));
 		uint signal_id_hc = Signal.lookup("hierarchy-changed", typeof(Gtk.Widget));
 
@@ -29,18 +22,16 @@ namespace GnomenuGtk {
 		List<weak Widget> toplevels = gtk_window_list_toplevels();
 		foreach(Widget toplevel in toplevels) {
 			if(!(toplevel is Window)) continue;
-			MenuBar menubar = gtk_window_find_menubar(toplevel as Container);
+			MenuBar menubar = find_menubar(toplevel as Container);
 			
 			if(menubar == null) continue;
-			menubar_set_local(menubar, 
-				menubar_should_be_skipped(menubar));
 			bind_menubar_to_window(menubar, toplevel as Window);
 			Signal.emit_by_name(menubar, "changed", 
 					typeof(Widget), menubar, null);
 		}
 	}
 
-	protected void remove_emission_hooks() {
+	public void uninit() {
 		List<weak Widget> toplevels = gtk_window_list_toplevels();
 		foreach(Widget toplevel in toplevels) {
 			if(!(toplevel is Window)) continue;
@@ -162,10 +153,20 @@ namespace GnomenuGtk {
 	private MenuBar? find_menubar(Container widget) {
 		List<weak Widget> children = gtk_container_get_children(widget);
 		foreach(Widget child in children) {
-			if(child is MenuBar) return child as MenuBar;
+			if(child is MenuBar) {
+				MenuBar menubar = child as MenuBar;
+
+				if(menubar_should_be_skipped(menubar)) {
+					menubar_set_local(menubar, true);
+					return null;
+				} else {
+					menubar_set_local(menubar, false);
+					return menubar;
+				}
+			}
 			if(child is Container) {
 				MenuBar menubar = find_menubar(child as Container);
-				if(menubar != null && !menubar_get_local(menubar)) {
+				if(menubar != null) {
 					return menubar;
 				}
 			}
@@ -182,7 +183,7 @@ namespace GnomenuGtk {
 			window.set_data("__menubar__", null);
 			menubar.set_data("__toplevel__", null);
 			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
-			dyn_patch_set_menubar_r(menubar, null);
+			DynPatch.set_menubar_r(menubar, null);
 		} else {
 			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
 		}
@@ -194,7 +195,7 @@ namespace GnomenuGtk {
 
 		menubar.set_data_full("__toplevel__", window.ref(), g_object_unref);
 		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
-		dyn_patch_set_menubar_r(menubar, menubar);
+		DynPatch.set_menubar_r(menubar, menubar);
 
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;

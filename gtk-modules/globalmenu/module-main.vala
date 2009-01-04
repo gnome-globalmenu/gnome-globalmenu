@@ -1,8 +1,7 @@
 using Gtk;
-using GnomenuGtk;
 
 [Compact]
-public class GlobalMenuModule {
+public class GlobalMenuGNOME {
 	private static bool verbose = false;
 	private static bool disabled = false;
 	private static bool initialized = false;
@@ -22,7 +21,7 @@ public class GlobalMenuModule {
 		if(!initialized) {
 			initialized = true;
 			DynPatch.init();
-			add_emission_hooks();
+			GlobalMenuGTK.init();
 		}
 		deferred_init_id = 0;
 		return false;
@@ -55,7 +54,7 @@ public class GlobalMenuModule {
 			}
 			if(initialized) {
 				DynPatch.uninit();
-				remove_emission_hooks();
+				GlobalMenuGTK.uninit();
 			}
 
 			debug("Global Menu plugin module is unloaded");

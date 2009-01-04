@@ -1,6 +1,6 @@
 using Gtk;
 
-namespace GnomenuGtk {
+namespace GlobalMenuGTK {
 
 	class TestSerializer : TestMan {
 		MenuBar menubar;
