@@ -12,12 +12,6 @@ public class GlobalMenuModule {
 	private static Quark domain;
 
 	private static uint deferred_init_id = 0;
-	[CCode (cname = "dyn_patch_init")]
-	public static extern void dyn_patch_init();
-
-	[CCode (cname = "dyn_patch_uninit")]
-	public static extern void dyn_patch_uninit();
-
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
 		if(!disabled) 
@@ -27,7 +21,7 @@ public class GlobalMenuModule {
 	private static bool deferred_init() {
 		if(!initialized) {
 			initialized = true;
-			dyn_patch_init();
+			DynPatch.init();
 			add_emission_hooks();
 		}
 		deferred_init_id = 0;
@@ -60,7 +54,7 @@ public class GlobalMenuModule {
 				Source.remove(deferred_init_id);
 			}
 			if(initialized) {
-				dyn_patch_uninit();
+				DynPatch.uninit();
 				remove_emission_hooks();
 			}
 

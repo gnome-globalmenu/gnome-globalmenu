@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 #include "dyn-patch.h"
-extern GtkMenuBar * gtk_window_find_menubar(GtkWidget * widget);
+#include "dyn-patch-private.h"
 
 extern void dyn_patch_widget_patcher();
 extern void	dyn_patch_menu_shell_patcher();
@@ -29,6 +29,7 @@ static gulong buffered_changes = 0;
 static GHashTable * old_vfuncs = NULL;
 static GHashTable * classes = NULL;
 static GHashTable * notifiers = NULL;
+
 void dyn_patch_init () {
 	
 	GDK_THREADS_ENTER();
@@ -36,11 +37,9 @@ void dyn_patch_init () {
 	__DIRTY__ = g_quark_from_string("__dirty__");
 	__OLD_SUBMENU__ = g_quark_from_string("__old_submenu__");
 	__ITEM__ = g_quark_from_string("__item__");
-	__LABEL_NOTIFY_CLOSURE__ = g_quark_from_string("__label_notify_closure__");
-	__SUBMENU_NOTIFY_CLOSURE__ = g_quark_from_string("__submenu_notify_closure__");
+
 	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
-	DETAIL_SUBMENU = g_quark_from_string("submenu");
-	DETAIL_LABEL = g_quark_from_string("label");
+
 	old_vfuncs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	classes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_type_class_unref);
 
@@ -61,10 +60,7 @@ void dyn_patch_uninit() {
 	GList * node;
 	for(node = toplevels; node; node = node->next) {
 		GtkWidget * toplevel = node->data;
-		GtkMenuBar * menubar = gtk_window_find_menubar(toplevel);
-		if(menubar) {
-			dyn_patch_set_menubar_r(menubar, NULL);
-		}
+		dyn_patch_set_menubar_r(toplevel, NULL);
 	}
 	g_list_free(toplevels);
 	g_timer_destroy(timer);
@@ -82,6 +78,7 @@ void dyn_patch_save_vfunc(const char * type, const char * name, gpointer vfunc) 
 	char * long_name = g_strdup_printf("%s_%s", type, name);
 	g_hash_table_insert(old_vfuncs, long_name, vfunc);
 }
+
 gpointer dyn_patch_hold_type(GType type) {
 	gpointer klass = g_type_class_ref(type);
 	g_hash_table_insert(classes, type, klass);
@@ -90,6 +87,7 @@ gpointer dyn_patch_hold_type(GType type) {
 void dyn_patch_release_type(GType type) {
 	g_hash_table_remove(classes, type);
 }
+
 gpointer dyn_patch_load_vfunc(const char * type, const char * name) {
 	char * long_name = g_strdup_printf("%s_%s", type, name);
 	gpointer rt = g_hash_table_lookup(old_vfuncs, long_name);

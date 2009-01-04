@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch.h"
+#include "dyn-patch-private.h"
 
 #define PROP_LOCAL 9999
 
