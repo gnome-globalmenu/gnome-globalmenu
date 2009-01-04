@@ -183,7 +183,6 @@ namespace GlobalMenuGTK {
 			window.set_data("__menubar__", null);
 			menubar.set_data("__toplevel__", null);
 			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
-			DynPatch.set_menubar_r(menubar, null);
 		} else {
 			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
 		}
@@ -195,7 +194,6 @@ namespace GlobalMenuGTK {
 
 		menubar.set_data_full("__toplevel__", window.ref(), g_object_unref);
 		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
-		DynPatch.set_menubar_r(menubar, menubar);
 
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;

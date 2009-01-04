@@ -10,6 +10,37 @@ extern void	dyn_patch_menu_shell_unpatcher();
 extern void	dyn_patch_menu_bar_unpatcher();
 
 static void dyn_patch_type_r(GType type, DynPatcherFunc patcher);
+typedef enum {
+	DISCOVER_MODE_INIT,
+	DISCOVER_MODE_UNINIT
+} DiscoverMode;
+static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
+	if(GTK_IS_MENU_BAR(widget)) {
+		if(*mode == DISCOVER_MODE_INIT) {
+			dyn_patch_set_menubar_r(widget, widget);
+			dyn_patch_queue_changed(widget, widget);
+		} else {
+			dyn_patch_set_menubar_r(widget, NULL);
+		}
+	} else {
+		if(GTK_IS_CONTAINER(widget)) {
+			gtk_container_foreach(GTK_CONTAINER(widget), 
+					dpdm_transverse, 
+					mode);
+		}
+	}
+}
+static void dyn_patch_discover_menubars(DiscoverMode mode) {
+	GList * toplevels = gtk_window_list_toplevels();
+	GList * iter;
+	for(iter = toplevels; iter; iter = iter->next) {
+		GtkWindow * window = iter->data;
+		dpdm_transverse(window, &mode);
+	}
+	g_list_free(toplevels);
+}
+
+
 /*
  * _USE_CLOSURES doesn't help improving the performance.
  * */
@@ -51,18 +82,15 @@ void dyn_patch_init () {
 	timer = g_timer_new();
 	g_timer_stop(timer);
 	
+	dyn_patch_discover_menubars(DISCOVER_MODE_INIT);
 	GDK_THREADS_LEAVE();
 }
 
 void dyn_patch_uninit() {
-	GList * toplevels = gtk_window_list_toplevels();
-	GList * node;
-	for(node = toplevels; node; node = node->next) {
-		GtkWidget * toplevel = node->data;
-		dyn_patch_set_menubar_r(toplevel, NULL);
-	}
-	g_list_free(toplevels);
 	g_timer_destroy(timer);
+
+	dyn_patch_discover_menubars(DISCOVER_MODE_UNINIT);
+
 	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
 	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
