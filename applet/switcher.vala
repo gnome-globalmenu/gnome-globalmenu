@@ -33,6 +33,14 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		private void app_selected(Gtk.ImageMenuItem? item) {
 			Wnck.Window window = item.user_data as Wnck.Window;
+			int ax = 0;
+			int ay = 0;
+			this.window.get_origin(out ax, out ay);
+			window.set_icon_geometry(ax,
+									 ay,
+									 allocation.width,
+									 allocation.height);
+			
 			Wnck.Workspace workspace = window.get_workspace();
 			if ((window.is_active()) 
 			&& (window.is_visible_on_workspace(workspace))) {
