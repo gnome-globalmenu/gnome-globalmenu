@@ -10,35 +10,13 @@ extern void	dyn_patch_menu_shell_unpatcher();
 extern void	dyn_patch_menu_bar_unpatcher();
 
 static void dyn_patch_type_r(GType type, DynPatcherFunc patcher);
+static void dyn_patch_type(GType type, DynPatcherFunc patcher);
 typedef enum {
 	DISCOVER_MODE_INIT,
 	DISCOVER_MODE_UNINIT
 } DiscoverMode;
-static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
-	if(GTK_IS_MENU_BAR(widget)) {
-		if(*mode == DISCOVER_MODE_INIT) {
-			dyn_patch_set_menubar_r(widget, widget);
-			dyn_patch_queue_changed(widget, widget);
-		} else {
-			dyn_patch_set_menubar_r(widget, NULL);
-		}
-	} else {
-		if(GTK_IS_CONTAINER(widget)) {
-			gtk_container_foreach(GTK_CONTAINER(widget), 
-					dpdm_transverse, 
-					mode);
-		}
-	}
-}
-static void dyn_patch_discover_menubars(DiscoverMode mode) {
-	GList * toplevels = gtk_window_list_toplevels();
-	GList * iter;
-	for(iter = toplevels; iter; iter = iter->next) {
-		GtkWindow * window = iter->data;
-		dpdm_transverse(window, &mode);
-	}
-	g_list_free(toplevels);
-}
+static void dyn_patch_discover_menubars(DiscoverMode mode);
+
 
 
 /*
@@ -50,6 +28,7 @@ GQuark __DIRTY__ = 0;
 GQuark __OLD_SUBMENU__ = 0;
 GQuark __ITEM__  =  0;
 GQuark __IS_LOCAL__ = 0;
+GQuark __TOPLEVEL__ = 0;
 
 static gulong SIGNAL_NOTIFY = 0;
 
@@ -67,6 +46,7 @@ void dyn_patch_init () {
 	__OLD_SUBMENU__ = g_quark_from_string("__dyn-patch-old-submenu__");
 	__ITEM__ = g_quark_from_string("__dyn-patch-item__");
 	__IS_LOCAL__ = g_quark_from_string("__dyn-patch-is-local__");
+	__TOPLEVEL__ = g_quark_from_string("__dyn-patch-toplevel__");
 
 	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
 
@@ -75,9 +55,9 @@ void dyn_patch_init () {
 
 	notifiers = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, g_source_remove);
 
-	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
-	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
-	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_patcher);
+	dyn_patch_type(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
+	dyn_patch_type(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
+	dyn_patch_type(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_patcher);
 
 	timer = g_timer_new();
 	g_timer_stop(timer);
@@ -91,9 +71,9 @@ void dyn_patch_uninit() {
 
 	dyn_patch_discover_menubars(DISCOVER_MODE_UNINIT);
 
-	dyn_patch_type_r(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
-	dyn_patch_type_r(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
-	dyn_patch_type_r(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
+	dyn_patch_type(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
+	dyn_patch_type(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
+	dyn_patch_type(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
 
 	g_hash_table_unref(notifiers);
 	g_hash_table_unref(old_vfuncs);
@@ -122,6 +102,9 @@ gpointer dyn_patch_load_vfunc(const char * type, const char * name) {
 	return rt;
 }
 
+static void dyn_patch_type(GType type, DynPatcherFunc patcher) {
+	dyn_patch_type_r(type, patcher);
+}
 static void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 	GType * children = g_type_children(type, NULL);
 	int i;
@@ -132,12 +115,52 @@ static void dyn_patch_type_r(GType type, DynPatcherFunc patcher) {
 	g_free(children);
 }
 
+static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
+	if(GTK_IS_MENU_BAR(widget)) {
+		if(*mode == DISCOVER_MODE_INIT) {
+			dyn_patch_set_menubar_r(widget, widget);
+			dyn_patch_queue_changed(widget, widget);
+
+			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
+			if(toplevel) {
+				dyn_patch_set_menubar(toplevel, widget);
+				g_object_set_qdata(widget, __TOPLEVEL__, toplevel);
+				g_signal_emit_by_name(widget, "dyn-patch-attached", toplevel, NULL);
+			}
+		} else {
+			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
+			if(toplevel) {
+				g_signal_emit_by_name(widget, "dyn-patch-detached", toplevel, NULL);
+				g_object_set_qdata(widget, __TOPLEVEL__, NULL);
+				dyn_patch_set_menubar(toplevel, NULL);
+			}
+			
+			dyn_patch_set_menubar_r(widget, NULL);
+		}
+	} else {
+		if(GTK_IS_CONTAINER(widget)) {
+			gtk_container_foreach(GTK_CONTAINER(widget), 
+					dpdm_transverse, 
+					mode);
+		}
+	}
+}
+static void dyn_patch_discover_menubars(DiscoverMode mode) {
+	GList * toplevels = gtk_window_list_toplevels();
+	GList * iter;
+	for(iter = toplevels; iter; iter = iter->next) {
+		GtkWindow * window = iter->data;
+		dpdm_transverse(window, &mode);
+	}
+	g_list_free(toplevels);
+}
+
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	GDK_THREADS_ENTER();
 	g_debug("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
-	g_signal_emit_by_name(menubar, "changed", 0, NULL);
+	g_signal_emit_by_name(menubar, "changed", NULL);
 	g_debug("_dyn_patch_set_menu_bar_r consumption: %lf, buffered_changes = %ld ", g_timer_elapsed(timer, NULL), buffered_changes);
 	buffered_changes = 0;
 

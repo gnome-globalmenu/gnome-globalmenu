@@ -4,10 +4,32 @@
 
 #define PROP_LOCAL 9999
 extern GQuark __IS_LOCAL__;
+extern GQuark __TOPLEVEL__;
 
 static GtkMenuShellClass * _gtk_menu_bar_parent_class = NULL;
 guint SIGNAL_CHANGED = 0;
+guint SIGNAL_ATTACHED = 0;
+guint SIGNAL_DETACHED = 0;
 
+
+DEFINE_FUNC(void, gtk_menu_bar, hierarchy_changed, (GtkWidget * widget, GtkWidget * old_toplevel)) {
+
+	VFUNC_TYPE(gtk_menu_bar, hierarchy_changed) vfunc = CHAINUP(gtk_menu_bar, hierarchy_changed);
+	if(vfunc) vfunc(widget, old_toplevel);
+
+	GtkWindow * old = g_object_get_qdata(widget, __TOPLEVEL__);
+	GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
+	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, gtk_widget_get_name(toplevel));
+	if(old != toplevel) {
+		if(old) {
+			g_signal_emit_by_name(widget, "dyn-patch-detached", 0, old, NULL);
+		}
+		if(toplevel) {
+			g_object_set_qdata(widget, __TOPLEVEL__, toplevel);
+			g_signal_emit_by_name(widget, "dyn-patch-attached", 0, toplevel, NULL);
+		}
+	}
+}
 
 DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
 	gboolean local = TRUE;
@@ -101,6 +123,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, map);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, can_activate_accel);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, size_request);
+		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, hierarchy_changed);
 		
 		if(g_object_class_find_property (klass, "local") == NULL) {
 			g_object_class_install_property (klass,
@@ -123,6 +146,28 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 				  gtk_marshal_VOID__VOID,
 				  G_TYPE_NONE, 0);
 		}
+		SIGNAL_ATTACHED = g_signal_lookup("dyn-patch-attached", G_OBJECT_CLASS_TYPE (klass));
+		if (SIGNAL_ATTACHED == 0) {
+			SIGNAL_ATTACHED =
+				g_signal_new (("dyn-patch-attached"),
+				  G_OBJECT_CLASS_TYPE (klass),
+				  G_SIGNAL_RUN_FIRST,
+				  0, 
+				  NULL, NULL,
+				  gtk_marshal_VOID__OBJECT,
+				  G_TYPE_NONE, 1, GTK_TYPE_WINDOW);
+		}
+		SIGNAL_DETACHED = g_signal_lookup("dyn-patch-detached", G_OBJECT_CLASS_TYPE (klass));
+		if (SIGNAL_DETACHED == 0) {
+			SIGNAL_DETACHED =
+				g_signal_new (("dyn-patch-detached"),
+				  G_OBJECT_CLASS_TYPE (klass),
+				  G_SIGNAL_RUN_FIRST,
+				  0, 
+				  NULL, NULL,
+				  gtk_marshal_VOID__OBJECT,
+				  G_TYPE_NONE, 1, GTK_TYPE_WINDOW);
+		}
 	} else {	
 
 		OVERRIDE(klass, gtk_menu_bar, get_property);
@@ -130,6 +175,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 		OVERRIDE(widget_klass, gtk_menu_bar, map);
 		OVERRIDE(widget_klass, gtk_menu_bar, can_activate_accel);
 		OVERRIDE(widget_klass, gtk_menu_bar, size_request);
+		OVERRIDE(widget_klass, gtk_menu_bar, hierarchy_changed);
 	}
 }
 void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
@@ -142,6 +188,7 @@ void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
 	RESTORE(widget_klass, gtk_menu_bar, map);
 	RESTORE(widget_klass, gtk_menu_bar, can_activate_accel);
 	RESTORE(widget_klass, gtk_menu_bar, size_request);
+	RESTORE(widget_klass, gtk_menu_bar, hierarchy_changed);
 	
 	g_type_class_unref(klass);
 	dyn_patch_release_type(menu_bar_type);

@@ -3,9 +3,14 @@
 #include "dyn-patch-private.h"
 
 
+
 DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_parent)) {
 	GtkWidget * parent = widget->parent;
 	GtkWidget * menubar = NULL;
+
+	VFUNC_TYPE(gtk_widget, parent_set) vfunc = CHAINUP(gtk_widget, parent_set);
+	if(vfunc) vfunc(widget, old_parent);
+
 	if(GTK_IS_MENU_BAR(widget) || GTK_IS_MENU(widget)) {
 		/* NOTE: for a gtk menu, the parent is a fake window.
 		 * We handle it in dyn-patch-helper.c*/
@@ -42,6 +47,7 @@ void dyn_patch_widget_unpatcher(GType widget_type) {
 	GtkWidgetClass * widget_klass = (GtkWidgetClass*)klass;
 
 	RESTORE(widget_klass, gtk_widget, parent_set);
+
 	g_type_class_unref(klass);
 	dyn_patch_release_type(widget_type);
 }
