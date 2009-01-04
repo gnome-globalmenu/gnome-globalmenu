@@ -74,6 +74,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				int ax = 0;
 				int ay = 0;
 				this.window.get_origin(out ax, out ay);
+				int items = 0;
 				foreach(weak Wnck.Window window in windows) {
 					if (!window.is_skip_pager()) {
 						window.set_icon_geometry(ax,
@@ -92,7 +93,14 @@ public extern string* __get_task_name_by_pid(int pid);
 						mi.user_data = window;
 						mi.activate += app_selected;
 						menu.insert(mi, 0);
+						items++;
 					}
+				}
+				if (items==0) {
+					Gtk.MenuItem mi = new Gtk.MenuItem.with_label(_("no windows"));
+					mi.sensitive = false;
+					(mi.child as Gtk.Label).justify = Gtk.Justification.CENTER;
+					menu.add(mi);
 				}
 			}
 			
