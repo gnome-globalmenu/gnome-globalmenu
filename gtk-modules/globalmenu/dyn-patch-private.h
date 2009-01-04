@@ -49,4 +49,5 @@ void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar);
 				); \
 		klass->method = dyn_patch_load_vfunc(#type, #method); \
 	}
+
 #endif

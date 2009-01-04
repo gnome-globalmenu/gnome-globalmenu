@@ -14,10 +14,11 @@ static void dyn_patch_type_r(GType type, DynPatcherFunc patcher);
  * _USE_CLOSURES doesn't help improving the performance.
  * */
 
-static GQuark __MENUBAR__ = 0;
-static GQuark __DIRTY__ = 0;
-static GQuark __OLD_SUBMENU__ = 0;
-static GQuark __ITEM__  =  0;
+GQuark __MENUBAR__ = 0;
+GQuark __DIRTY__ = 0;
+GQuark __OLD_SUBMENU__ = 0;
+GQuark __ITEM__  =  0;
+GQuark __IS_LOCAL__ = 0;
 
 static gulong SIGNAL_NOTIFY = 0;
 
@@ -34,6 +35,7 @@ void dyn_patch_init () {
 	__DIRTY__ = g_quark_from_string("__dyn-patch-dirty__");
 	__OLD_SUBMENU__ = g_quark_from_string("__dyn-patch-old-submenu__");
 	__ITEM__ = g_quark_from_string("__dyn-patch-item__");
+	__IS_LOCAL__ = g_quark_from_string("__dyn-patch-is-local__");
 
 	SIGNAL_NOTIFY = g_signal_lookup("notify", G_TYPE_OBJECT);
 

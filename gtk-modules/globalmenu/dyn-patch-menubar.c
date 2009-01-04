@@ -3,6 +3,7 @@
 #include "dyn-patch-private.h"
 
 #define PROP_LOCAL 9999
+extern GQuark __IS_LOCAL__;
 
 static GtkMenuShellClass * _gtk_menu_bar_parent_class = NULL;
 guint SIGNAL_CHANGED = 0;
@@ -30,7 +31,7 @@ DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, 
     {
 	case PROP_LOCAL:
 		{
-		gint val = GPOINTER_TO_INT(g_object_get_data(object, "is-local"));
+		gint val = GPOINTER_TO_INT(g_object_get_qdata(object, __IS_LOCAL__));
 		gboolean prop_value = TRUE;
 		if(val == 0) prop_value = TRUE; /*default to true*/
 		if(val == 100) prop_value = TRUE;
@@ -56,9 +57,9 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 	case PROP_LOCAL:
 		is_local = g_value_get_boolean(value);
 		if(is_local) {
-		  g_object_set_data(object, "is-local", GINT_TO_POINTER(100));
+		  g_object_set_qdata(object, __IS_LOCAL__, GINT_TO_POINTER(100));
 		} else {
-		  g_object_set_data(object, "is-local", GINT_TO_POINTER(-100));
+		  g_object_set_qdata(object, __IS_LOCAL__, GINT_TO_POINTER(-100));
 		}
 	  if(GTK_WIDGET_MAPPED (menubar))
 		  _gtk_menu_bar_map (menubar);
