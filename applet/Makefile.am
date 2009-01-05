@@ -9,6 +9,7 @@ VALASOURCES = \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
 	gnomemenuhelper.vala \
+	wncktools.vala \
 	$(NULL)
 
 libexec_PROGRAMS = GlobalMenu.PanelApplet
@@ -26,6 +27,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
 	task-utils-c.c \
+	wncktools-ccode.c \
 	$(NULL)
 
 

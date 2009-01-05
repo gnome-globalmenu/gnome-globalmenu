@@ -23,14 +23,6 @@ public class Applet : Panel.Applet {
 		base.dispose();	
 	}
 	~Applet() {
-		int keyval;
-		Gdk.ModifierType mods;
-		get_accel_key(out keyval, out mods);
-		root_window.ungrab_key(keyval, mods);
-	}
-	static construct {
-		screen = Wnck.Screen.get_default();
-		root_window = Gnomenu.Window.new_from_gdk_window(Gdk.get_default_root_window());
 	}
 
 	construct {
@@ -71,9 +63,8 @@ public class Applet : Panel.Applet {
 		(this as Panel.Applet).change_background(bgtype, color, pixmap);
 	}
 
-	private static Wnck.Screen screen;
 	private Gnomenu.Window current_window;
-	private static Gnomenu.Window root_window;
+	private Gnomenu.Window root_window;
 
 	private MenuBarBox menubars;
 	private bool disposed;
@@ -91,40 +82,55 @@ public class Applet : Panel.Applet {
 		m.destroy();
 	}
 	
-	private void init_wnck() {
-		screen.window_closed += (screen, window) => {
-			ulong xid = window.get_xid();
-			if(current_window != null && xid == current_window.xid) {
-				/* if the closed window is current window,
-				 * fallback to the desktop and
-				 * wait for the next active_window_changed event
-				 *
-				 * To solve the haunting menu bar of closed window
-				 * problem.
-				 * */
-				switch_to(find_desktop(screen)); 
+	public override void screen_changed(Gdk.Screen previous_screen) {
+		if(previous_screen != null) {
+			Wnck.Screen prev = gdk_screen_to_wnck_screen(previous_screen);
+			if(prev != null) {
+				prev.window_closed -= on_window_closed;
+				prev.active_window_changed -= on_active_window_changed;
 			}
-		};
-		screen.active_window_changed += (screen, previous_window) => {
-			weak Wnck.Window window = screen.get_active_window();
-			if((window != previous_window) && (window is Wnck.Window)) {
-				weak Wnck.Window transient_for = window.get_transient();
-				if(transient_for != null) window = transient_for;
-				switch(window.get_window_type()) {
-					case Wnck.WindowType.NORMAL:
-					case Wnck.WindowType.DESKTOP:
-						switch_to(window);
-					break;
-					default:
-						/*Do nothing if it is a toolbox or so*/
-					break;
-				}
+			ungrab_menu_bar_key(root_window);
+			root_window.destroy();
+			root_window = null;
+		}
+		Gdk.Screen gdk_screen = get_screen();
+		if(gdk_screen != null) {
+			root_window = Gnomenu.Window.new_from_gdk_window(gdk_screen.get_root_window());
+			grab_menu_bar_key(root_window);
+			Wnck.Screen screen = gdk_screen_to_wnck_screen(gdk_screen);
+			screen.window_closed += on_window_closed;
+			screen.active_window_changed += on_active_window_changed;
+			screen.active_window_changed (null);
+		}
+	}
+	private void on_window_closed(Wnck.Screen screen, Wnck.Window window) {
+		ulong xid = window.get_xid();
+		if(current_window != null && xid == current_window.xid) {
+			/* if the closed window is current window,
+			 * fallback to the desktop and
+			 * wait for the next active_window_changed event
+			 *
+			 * To solve the haunting menu bar of closed window
+			 * problem.
+			 * */
+			switch_to(find_desktop(screen)); 
+		}
+	}
+	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
+		weak Wnck.Window window = screen.get_active_window();
+		if((window != previous_window) && (window is Wnck.Window)) {
+			weak Wnck.Window transient_for = window.get_transient();
+			if(transient_for != null) window = transient_for;
+			switch(window.get_window_type()) {
+				case Wnck.WindowType.NORMAL:
+				case Wnck.WindowType.DESKTOP:
+					switch_to(window);
+				break;
+				default:
+					/*Do nothing if it is a toolbox or so*/
+				break;
 			}
-		};
-		screen.window_closed += (window) => {
-			selector.current_window = screen.get_active_window();
-		};
-		screen.active_window_changed (null);
+		}
 	}
 	private void switch_to(Wnck.Window? window) {
 		if(current_window != null) {
@@ -160,29 +166,42 @@ public class Applet : Panel.Applet {
 		}
 		return null;
 	}
-	private void grab_gtk_menu_bar_key() {
+	private void ungrab_menu_bar_key(Gnomenu.Window window) {
+		int keyval = (int) window.get_data("menu-bar-keyval");
+		Gdk.ModifierType mods = 
+			(Gdk.ModifierType) window.get_data("menu-bar-keymods");
+
+		window.ungrab_key(keyval, mods);
+		window.key_press_event -= on_menu_bar_key;
+		window.set_data("menu-bar-keyval", null);
+		window.set_data("menu-bar-keymods", null);
+	}
+	private void grab_menu_bar_key(Gnomenu.Window window) {
 		/*FIXME: listen to changes in GTK_SETTINGS.*/
 		int keyval;
 		Gdk.ModifierType mods;
 		get_accel_key(out keyval, out mods);
-		root_window.grab_key(keyval, mods);
-		root_window.key_press_event += (root_window, event) => {
-			uint keyval;
-			Gdk.ModifierType mods;
-			get_accel_key(out keyval, out mods);
-			if(event.keyval == keyval &&
-				(event.state & Gtk.accelerator_get_default_mod_mask())
-				== (mods & Gtk.accelerator_get_default_mod_mask())) {
-				/* We chain up to the toplevel key_press_event,
-				 * which is listened by all the menubars within
-				 * the applet*/
-				Gtk.Widget toplevel = get_toplevel();
-				if(toplevel != null) 
-					toplevel.key_press_event(event);
-				return false;
-			}
-			return true;
-		};
+		window.grab_key(keyval, mods);
+		window.key_press_event += on_menu_bar_key; 
+		window.set_data("menu-bar-keyval", (void*) keyval);
+		window.set_data("menu-bar-keymods", (void*) mods);
+	}	
+	private bool on_menu_bar_key (Gnomenu.Window window, Gdk.EventKey event) {
+		uint keyval;
+		Gdk.ModifierType mods;
+		get_accel_key(out keyval, out mods);
+		if(event.keyval == keyval &&
+			(event.state & Gtk.accelerator_get_default_mod_mask())
+			== (mods & Gtk.accelerator_get_default_mod_mask())) {
+			/* We chain up to the toplevel key_press_event,
+			 * which is listened by all the menubars within
+			 * the applet*/
+			Gtk.Widget toplevel = get_toplevel();
+			if(toplevel != null) 
+				toplevel.key_press_event(event);
+			return false;
+		}
+		return true;
 	}
 	private void update_menubar() {
 		if(current_window != null) {
@@ -299,11 +318,6 @@ public class Applet : Panel.Applet {
 
 		get_prefs();
 
-		/*init wnck*/
-		init_wnck();
-
-		/* Key grab F10 (gtk-menu-bar-key)*/
-		grab_gtk_menu_bar_key();
 	}
 	private void get_prefs() {
 		selector.max_size = gconf_get_int("title_max_width");
