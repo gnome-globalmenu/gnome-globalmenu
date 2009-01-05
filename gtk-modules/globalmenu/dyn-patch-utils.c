@@ -14,6 +14,7 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar);
 static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode);
 static void _dyn_patch_simple_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar);
 static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, GtkMenuBar * menubar);
+static void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar);
 
 void dyn_patch_discover_menubars(DiscoverMode mode) {
 	GList * toplevels = gtk_window_list_toplevels();
@@ -49,13 +50,6 @@ GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
 	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
 
-void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
-	if(menubar != NULL) {
-		g_object_set_qdata_full((GObject*) widget, __MENUBAR__, g_object_ref(menubar), g_object_unref);
-	} else {
-		g_object_set_qdata((GObject*) widget, __MENUBAR__, NULL);
-	}
-}
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
 	g_object_set_qdata_full(menubar, __TOPLEVEL__, g_object_ref(window), g_object_unref);
@@ -159,6 +153,14 @@ static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
 					dpdm_transverse, 
 					mode);
 		}
+	}
+}
+
+static void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
+	if(menubar != NULL) {
+		g_object_set_qdata_full((GObject*) widget, __MENUBAR__, g_object_ref(menubar), g_object_unref);
+	} else {
+		g_object_set_qdata((GObject*) widget, __MENUBAR__, NULL);
 	}
 }
 
