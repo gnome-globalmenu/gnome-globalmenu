@@ -13,8 +13,9 @@ public class GlobalMenuGNOME {
 	private static uint deferred_init_id = 0;
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
-		if(!disabled) 
-		deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
+		if(!disabled) {
+			deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
+		}
 	}
 
 	private static bool deferred_init() {

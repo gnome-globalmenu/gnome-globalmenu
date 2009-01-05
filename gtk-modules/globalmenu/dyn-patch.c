@@ -16,6 +16,7 @@ typedef enum {
 	DISCOVER_MODE_UNINIT
 } DiscoverMode;
 static void dyn_patch_discover_menubars(DiscoverMode mode);
+static gboolean discover_menubars();
 
 
 
@@ -62,10 +63,16 @@ void dyn_patch_init () {
 	timer = g_timer_new();
 	g_timer_stop(timer);
 	
-	dyn_patch_discover_menubars(DISCOVER_MODE_INIT);
+	g_idle_add_full(G_PRIORITY_HIGH, discover_menubars, NULL, NULL);
 	GDK_THREADS_LEAVE();
 }
 
+static gboolean discover_menubars() {
+	GDK_THREADS_ENTER();
+	dyn_patch_discover_menubars(DISCOVER_MODE_INIT);
+	GDK_THREADS_LEAVE();
+	return FALSE;
+}
 void dyn_patch_uninit() {
 	g_timer_destroy(timer);
 
