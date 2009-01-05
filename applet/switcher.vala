@@ -12,17 +12,21 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
 
-		private Wnck.Window _window;
+		private Wnck.Window _current_window;
 		
 		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
 		private GLib.HashTable<string,string> program_list;
 		
 		public Switcher() {
+		}
+
+		construct {
 			Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
 			program_list = GnomeMenuHelper.get_flat_list();
 			if (program_list.lookup("nautilus")==null)
 				program_list.insert("nautilus", _("File Manager"));
 		}
+
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
 			while ((co>=0) && (txt.substring(co, 1)!=separator)) {
@@ -198,10 +202,10 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		public Wnck.Window? current_window {
 			get {
-				return _window ;
+				return _current_window ;
 			}
 			set {
-				_window = value;
+				_current_window = value;
 				/* always refresh !*/
 				update();
 			}
