@@ -46,7 +46,6 @@ DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, GValue * value, GParamSpec *pspec)) {
-  GtkMenuBar *menubar = GTK_MENU_BAR (object);
   switch (prop_id)
     {
 	case PROP_LOCAL:

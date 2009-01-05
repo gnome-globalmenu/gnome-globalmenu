@@ -15,6 +15,7 @@ VALASOURCES = \
 
 noinst_LTLIBRARIES = libdyn-patch.la
 libdyn_patch_la_SOURCES = \
+	dyn-patch.h \
 	dyn-patch-main.h \
 	dyn-patch-utils.h \
 	dyn-patch-vfunc.h \

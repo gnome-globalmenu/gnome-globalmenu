@@ -1,5 +1,5 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn1891
+%define 	svn_version 	svn1954
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -64,7 +64,7 @@ gconftool-2 --makefile-uninstall-rule \
 %defattr(-,root,root,-)
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-0.7.0.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
 %{_libexecdir}/GlobalMenu.PanelApplet
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png

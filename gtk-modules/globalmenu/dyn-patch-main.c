@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 
 #include "dyn-patch-main.h"
+#include "dyn-patch-vfunc.h"
 #include "dyn-patch-utils.h"
 
 extern void dyn_patch_widget_patcher();
