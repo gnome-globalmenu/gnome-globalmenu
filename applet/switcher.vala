@@ -96,7 +96,8 @@ public extern string* __get_task_name_by_pid(int pid);
 						mi = new Gtk.ImageMenuItem.with_label(txt);
 						if (window.is_active())
 							(mi.child as Gtk.Label).set_markup("<b>" + txt + "</b>");
-						
+						if (window.is_minimized())
+							(mi.child as Gtk.Label).set_markup("<i>" + txt + "</i>");
 						mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
 						mi.user_data = window;
 						mi.activate += app_selected;
