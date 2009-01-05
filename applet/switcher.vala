@@ -169,6 +169,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (!_show_icon) {
 				item.item_type = "normal";
 			} else {
+				item.icon = "custom:";
 				if (_show_label) {
 					item.item_type = "image";
 				} else {

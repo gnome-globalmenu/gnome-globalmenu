@@ -338,7 +338,7 @@ namespace Gnomenu {
 						*((int*) requisition) = 0;
 						break;
 					}
-					if(image != null) {
+					if(image != null && _icon != null) {
 						Requisition req;
 						image.size_request(out req);
 						*((int*) requisition ) = req.width + toggle_spacing;
@@ -346,7 +346,6 @@ namespace Gnomenu {
 						/*no image*/
 						*((int*) requisition ) = 0;
 					}
-					message("requisition = %d", *((int*) requisition));
 				break;
 				default:
 					*((int*) requisition ) = 0;
@@ -586,6 +585,9 @@ namespace Gnomenu {
 				pixdata.deserialize(data);
 				Gdk.Pixbuf pixbuf = gdk_pixbuf_from_pixdata(pixdata, true);
 				image.set_from_pixbuf(pixbuf);
+			} else 
+			if(icon != null && icon.has_prefix("custom:")) {
+				/*Do nothing*/
 			} else {
 				image.set_from_stock(icon, IconSize.MENU);
 			}
