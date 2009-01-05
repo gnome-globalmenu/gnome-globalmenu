@@ -1,2 +1,0 @@
-#ifndef __DYN_PATCH_INTERNAL_H__
-#define __DYN_PATCH_INTERNAL_H__
