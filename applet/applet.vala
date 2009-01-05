@@ -71,17 +71,6 @@ public class Applet : Panel.Applet {
 	private Gnomenu.MenuBar main_menubar;
 	private Switcher selector;
 
-	/* to be removed */
-	public static void message(string msg) {
-		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
-							    Gtk.DialogFlags.MODAL,
-							    Gtk.MessageType.INFO,
-							    Gtk.ButtonsType.OK,
-							    msg);
-		m.run();
-		m.destroy();
-	}
-	
 	public override void screen_changed(Gdk.Screen previous_screen) {
 		if(previous_screen != null) {
 			Wnck.Screen prev = gdk_screen_to_wnck_screen(previous_screen);
