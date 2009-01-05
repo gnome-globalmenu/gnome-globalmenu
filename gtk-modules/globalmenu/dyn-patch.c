@@ -109,6 +109,14 @@ gpointer dyn_patch_load_vfunc(const char * type, const char * name) {
 	return rt;
 }
 
+void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
+	g_object_set_qdata_full(menubar, __TOPLEVEL__, g_object_ref(window), g_object_unref);
+	g_signal_emit_by_name(menubar, "dyn-patch-attached", window, NULL);
+}
+void dyn_patch_detach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
+	g_signal_emit_by_name(menubar, "dyn-patch-detached", window, NULL);
+	g_object_set_qdata(menubar, __TOPLEVEL__, NULL);
+}
 static void dyn_patch_type(GType type, DynPatcherFunc patcher) {
 	dyn_patch_type_r(type, patcher);
 }
@@ -131,14 +139,12 @@ static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
 			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 			if(toplevel) {
 				dyn_patch_set_menubar(toplevel, widget);
-				g_object_set_qdata(widget, __TOPLEVEL__, toplevel);
-				g_signal_emit_by_name(widget, "dyn-patch-attached", toplevel, NULL);
+				dyn_patch_attach_menubar(toplevel, widget);
 			}
 		} else {
 			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 			if(toplevel) {
-				g_signal_emit_by_name(widget, "dyn-patch-detached", toplevel, NULL);
-				g_object_set_qdata(widget, __TOPLEVEL__, NULL);
+				dyn_patch_detach_menubar(toplevel, widget);
 				dyn_patch_set_menubar(toplevel, NULL);
 			}
 			

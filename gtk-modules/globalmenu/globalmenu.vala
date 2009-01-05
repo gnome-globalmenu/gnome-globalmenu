@@ -10,7 +10,6 @@ namespace GlobalMenuGTK {
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
 	protected ulong changed_hook_id;
-	protected ulong hc_hook_id;
 	protected ulong attached_hook_id;
 	protected ulong detached_hook_id;
 	
@@ -19,9 +18,6 @@ namespace GlobalMenuGTK {
 		changed_hook_id = Signal.add_emission_hook(
 				Signal.lookup("changed", typeof(MenuBar)),
 				0, changed_eh, null);
-		hc_hook_id = Signal.add_emission_hook (
-				Signal.lookup("hierarchy-changed", typeof(Widget)),
-				0, hierachy_changed_eh, null);
 		attached_hook_id = Signal.add_emission_hook (
 				Signal.lookup("dyn-patch-attached", typeof(MenuBar)),
 				0, attached_eh, null);
@@ -29,25 +25,12 @@ namespace GlobalMenuGTK {
 				Signal.lookup("dyn-patch-detached", typeof(MenuBar)),
 				0, detached_eh, null);
 
-		List<weak Widget> toplevels = gtk_window_list_toplevels();
-		foreach(Widget toplevel in toplevels) {
-			if(!(toplevel is Window)) continue;
-			MenuBar menubar = find_menubar(toplevel as Container);
-			
-			if(menubar == null) continue;
-			bind_menubar_to_window(menubar, toplevel as Window);
-			Signal.emit_by_name(menubar, "changed", 
-					typeof(Widget), menubar, null);
-		}
 	}
 
 	public void uninit() {
 		Signal.remove_emission_hook (
 			Signal.lookup("changed", typeof(MenuBar)),
 			changed_hook_id);
-		Signal.remove_emission_hook (
-			Signal.lookup("hierarchy-changed", typeof(Gtk.Widget)),
-			hc_hook_id);
 		Signal.remove_emission_hook (
 			Signal.lookup("dyn-patch-attached", typeof(MenuBar)),
 			attached_hook_id);
@@ -80,17 +63,28 @@ namespace GlobalMenuGTK {
 	public bool attached_eh (SignalInvocationHint ihint, 
 			[CCode (array_length_pos = 1.9) ]
 			Value[] param_values ) {
+		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 		MenuBar menubar = param_values[0].get_object() as MenuBar;
-		Window window = param_values[1].get_object() as Window;
+		Gtk.Window window = param_values[1].get_object() as Gtk.Window;
 		debug("attached_eh menubar %p to window %p", menubar, window);
+		if(menubar_should_be_skipped(menubar)) {
+			menubar_set_local(menubar, true);
+		} else {
+			menubar_set_local(menubar, false);
+			bonobo_plug_widget_hack(menubar);
+		}
+		bind_menubar_to_window(menubar, window);
 		return true;
 	}
 	public bool detached_eh (SignalInvocationHint ihint, 
 			[CCode (array_length_pos = 1.9) ]
 			Value[] param_values ) {
+		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 		MenuBar menubar = param_values[0].get_object() as MenuBar;
-		Window window = param_values[1].get_object() as Window;
-		debug("detached_eh menubar %p to window %p", menubar, window);
+		Gtk.Window window = param_values[1].get_object() as Gtk.Window;
+
+		debug("detached_eh menubar %p from window %p", menubar, window);
+		unbind_menubar_from_window(menubar, window);
 		return true;
 	}
 	private bool changed_eh (SignalInvocationHint ihint, 
@@ -112,37 +106,6 @@ namespace GlobalMenuGTK {
 			}
 			debug("changed_eh");
 		} 
-		return true;
-	}
-
-	private bool hierachy_changed_eh (SignalInvocationHint ihint, 
-			[CCode (array_length_pos = 1.9) ]
-			Value[] param_values
-	) {
-
-		MenuBar self = param_values[0].get_object() as MenuBar;
-
-		if(self == null) return true;
-
-		Gtk.Widget old_toplevel = param_values[1].get_object() as Gtk.Widget;
-		
-		Gtk.Window old_toplevel_window = gtk_widget_get_toplevel_window(old_toplevel);
-		Gtk.Window toplevel_window = gtk_widget_get_toplevel_window(self);
-
-		if(old_toplevel_window != null) {
-			unbind_menubar_from_window(self, old_toplevel_window);
-		}
-
-		if(menubar_should_be_skipped(self)) {
-			menubar_set_local(self, true);
-		} else {
-			menubar_set_local(self, false);
-			bonobo_plug_widget_hack(self);
-		}
-
-		if(toplevel_window != null) {
-			bind_menubar_to_window(self, toplevel_window);
-	  	} 
 		return true;
 	}
 

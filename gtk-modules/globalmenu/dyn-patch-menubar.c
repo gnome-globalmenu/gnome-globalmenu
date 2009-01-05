@@ -13,20 +13,18 @@ guint SIGNAL_DETACHED = 0;
 
 
 DEFINE_FUNC(void, gtk_menu_bar, hierarchy_changed, (GtkWidget * widget, GtkWidget * old_toplevel)) {
-
 	VFUNC_TYPE(gtk_menu_bar, hierarchy_changed) vfunc = CHAINUP(gtk_menu_bar, hierarchy_changed);
 	if(vfunc) vfunc(widget, old_toplevel);
 
 	GtkWindow * old = g_object_get_qdata(widget, __TOPLEVEL__);
 	GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
-	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, gtk_widget_get_name(toplevel));
+	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, toplevel?gtk_widget_get_name(toplevel):NULL);
 	if(old != toplevel) {
 		if(old) {
-			g_signal_emit_by_name(widget, "dyn-patch-detached", 0, old, NULL);
+			dyn_patch_detach_menubar(old, widget);
 		}
 		if(toplevel) {
-			g_object_set_qdata(widget, __TOPLEVEL__, toplevel);
-			g_signal_emit_by_name(widget, "dyn-patch-attached", 0, toplevel, NULL);
+			dyn_patch_attach_menubar(toplevel, widget);
 		}
 	}
 }
