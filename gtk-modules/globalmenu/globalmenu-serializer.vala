@@ -62,6 +62,7 @@ namespace GlobalMenuGTK {
 			sb.append("<item");
 			label_sb.erase(0, -1);
 			last_item_empty = true;
+			guessed_type = null;
 			visit_container(menuitem);
 
 			if(label_sb.len > 0) {
@@ -70,7 +71,7 @@ namespace GlobalMenuGTK {
 			}
 			if(menuitem is SeparatorMenuItem
 			|| menuitem.get_child() == null) {
-				sb.append(" type=\"s\"");
+				guessed_type = "s";
 				last_item_empty = false;
 			}
 
@@ -78,7 +79,7 @@ namespace GlobalMenuGTK {
 			if(menuitem is ImageMenuItem) {
 				Image image = (menuitem as ImageMenuItem).image as Image;
 				if(image != null) {
-					sb.append(" type=\"i\"");
+					guessed_type = "i";
 					append_icon_attribute(image);
 					last_item_empty = false;
 				}
@@ -86,10 +87,9 @@ namespace GlobalMenuGTK {
 			if(menuitem is CheckMenuItem) {
 				var checkmenuitem = menuitem as CheckMenuItem;
 				if(checkmenuitem.draw_as_radio) 
-					sb.append(" type=\"r\"");
+					guessed_type = "r";
 				else 
-					sb.append(" type=\"c\"");
-
+					guessed_type = "c";
 				if(!checkmenuitem.inconsistent) {
 					if(checkmenuitem.active)
 						sb.append(" state=\"1\"");
@@ -116,6 +116,9 @@ namespace GlobalMenuGTK {
 				 * */
 				sb.append(" visible=\"0\"");
 			}
+			if(guessed_type != null)
+				sb.append_printf(" type=\"%s\"", guessed_type);
+
 			if(menuitem.submenu == null) {
 				sb.append("/>");
 				linebreak();
@@ -135,6 +138,7 @@ namespace GlobalMenuGTK {
 		private void visit_label(Label label) {
 			string label_text = label.label;
 			label_sb.append(label_text);
+			debug ("append text = %s", label_text);
 			if(label is AccelLabel) {
 				(label as AccelLabel).refetch();
 				string accel_string = (label as AccelLabel).accel_string;
@@ -147,7 +151,19 @@ namespace GlobalMenuGTK {
 		private void visit_image(Image image) {
 			/*workaround a bug before Gtk 2.14*/
 			if(image.parent is ImageMenuItem) return; 
+			/*Disable pure image menu item since
+			  the purpose of introducing it was
+			  to get Pidgin's menu icon tray working
+			  but it turns out not working;
+			  and causing issue 243
 			sb.append(" type=\"icon\"");
+			*/
+			/**
+			 * adobe reader sucks. It doesn't use
+			 * image menu item but use a hbox
+			 * to contain the image
+			 */
+			guessed_type = "i";
 			append_icon_attribute(image);
 		}
 
@@ -201,6 +217,7 @@ namespace GlobalMenuGTK {
 		private StringBuilder sb;
 		private StringBuilder label_sb;
 		private bool last_item_empty;
+		private weak string guessed_type;
 		private bool pretty_print;
 		private int level;
 		private bool newline;
