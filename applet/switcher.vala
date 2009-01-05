@@ -157,7 +157,9 @@ public extern string* __get_task_name_by_pid(int pid);
 			return txt;
 		}
 		private void update() {
-
+			Gnomenu.MenuItem item = this.get("/0");
+			item.submenu.popdown();	/* prevent the menu to be updated while visible so causing the applet to block */
+			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
 			
@@ -169,7 +171,6 @@ public extern string* __get_task_name_by_pid(int pid);
 		   	else
 				Parser.parse(this, TEMPLATE.replace("%s", ""));
 				
-			Gnomenu.MenuItem item = this.get("/0");
 			if (!_show_icon) {
 				item.item_type = "normal";
 			} else {
