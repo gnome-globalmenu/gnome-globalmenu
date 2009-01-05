@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch-private.h"
+#include "dyn-patch-vfunc.h"
 
 #define PROP_LOCAL 9999
 extern GQuark __IS_LOCAL__;

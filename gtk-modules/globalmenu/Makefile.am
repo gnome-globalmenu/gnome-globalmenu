@@ -15,11 +15,14 @@ VALASOURCES = \
 
 noinst_LTLIBRARIES = libdyn-patch.la
 libdyn_patch_la_SOURCES = \
+	dyn-patch-main.h \
+	dyn-patch-utils.h \
+	dyn-patch-vfunc.h \
 	dyn-patch-menubar.c \
 	dyn-patch-menushell.c \
-	dyn-patch.h \
-	dyn-patch-private.h \
-	dyn-patch.c \
+	dyn-patch-main.c \
+	dyn-patch-utils.c \
+	dyn-patch-vfunc.c \
 	dyn-patch-widget.c \
 	$(NULL)
 

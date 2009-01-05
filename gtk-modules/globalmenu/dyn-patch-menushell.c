@@ -1,6 +1,6 @@
 #include <gtk/gtk.h>
 
-#include "dyn-patch-private.h"
+#include "dyn-patch-vfunc.h"
 
 
 DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * child, int position)) {
