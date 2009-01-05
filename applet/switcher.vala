@@ -35,8 +35,18 @@ public extern string* __get_task_name_by_pid(int pid);
 			string ret = txt.substring(co+1,(txt.length-co-1));
 			return ret;
 		}
+		private void set_iconify_destination(Wnck.Window window) {
+			int ax = 0;
+			int ay = 0;
+			this.window.get_origin(out ax, out ay);
+			window.set_icon_geometry(ax,
+									 ay,
+						 			 allocation.width,
+									 allocation.height);
+		}
 		private void app_selected(Gtk.ImageMenuItem? item) {
 			Wnck.Window window = item.user_data as Wnck.Window;
+			set_iconify_destination(window); /* make sure that it goes to the switcher */
 			
 			Wnck.Workspace workspace = window.get_workspace();
 			if ((window.is_active()) 
@@ -75,16 +85,10 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (_show_window_list) {
 				menu.insert(new Gtk.SeparatorMenuItem(), 0);
 				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-				int ax = 0;
-				int ay = 0;
-				this.window.get_origin(out ax, out ay);
 				int items = 0;
 				foreach(weak Wnck.Window window in windows) {
 					if (!window.is_skip_pager()) {
-						window.set_icon_geometry(ax,
-												 ay,
-									 			 allocation.width,
-												 allocation.height);
+						set_iconify_destination(window); /* just in case that no other task bars are around and the users clicks on the minimize button */
 						Gtk.ImageMenuItem mi;
 						string txt = window.get_name();
 						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";

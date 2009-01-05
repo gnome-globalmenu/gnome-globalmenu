@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-02 01:59-0500\n"
+"POT-Creation-Date: 2009-01-05 17:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,36 +11,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1151
+#: ../libgnomenu/menuitem.c:1162
 msgid "Indicator Size"
 msgstr "Taille de l'Indicateur"
 
-#: ../libgnomenu/menuitem.c:1151
+#: ../libgnomenu/menuitem.c:1162
 msgid "Size of check or radio indicator"
 msgstr "Taille de l'indicateur check ou radio"
 
-#: ../gtk-modules/globalmenu/module-main.c:27
+#: ../gtk-modules/globalmenu/module-main.c:28
 msgid "Be verbose"
 msgstr "Etre prolixe (verbose mode)"
 
-#: ../gtk-modules/globalmenu/module-main.c:27
+#: ../gtk-modules/globalmenu/module-main.c:28
 msgid "Disable the Plugin"
 msgstr "Désactiver ce Greffon"
 
-#: ../gtk-modules/globalmenu/module-main.c:27
+#: ../gtk-modules/globalmenu/module-main.c:28
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Fichier dans lequel sauvegarder le journal, par défaut ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:134
+#: ../gtk-modules/globalmenu/module-main.c:135
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Applet Menu Global pour GNOME"
 
-#: ../gtk-modules/globalmenu/module-main.c:135
+#: ../gtk-modules/globalmenu/module-main.c:136
+#, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
-"NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored "
-"by the plugin."
+"\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
+"ignored by the plugin.\n"
+"\t\t"
 msgstr ""
 "Ces paramètres doivent être fournis dans l'environnement "
 "GLOBALMENU_GNOME_ARGS au lieu de la ligne de commande.\n"
@@ -51,11 +53,11 @@ msgstr ""
 msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr "Montrer les messages de débogage de GMarkupDoc et Gnomenu"
 
-#: ../applet/applet.c:37
+#: ../applet/applet.c:39
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:486
+#: ../applet/applet.c:524
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -77,20 +79,24 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:564
+#: ../applet/applet.c:598
 msgid "Project Home"
 msgstr "Page Internet du Projet"
 
-#: ../applet/applet.c:590
+#: ../applet/applet.c:624
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
-#: ../applet/switcher.c:128
-msgid "File Manager"
+#: ../applet/switcher.c:330
+msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:420
+#: ../applet/switcher.c:433
 msgid "Desktop"
+msgstr ""
+
+#: ../applet/switcher.c:703
+msgid "File Manager"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:1
@@ -100,7 +106,8 @@ msgstr ""
 "l'application active"
 
 #: ../gnome-globalmenu.schemas.in.h:2
-msgid "Enable Global Menu"
+#, fuzzy
+msgid "Enable Global Menu For GTK applications"
 msgstr "Module GTK+ pour le Menu Global"
 
 #: ../gnome-globalmenu.schemas.in.h:3
