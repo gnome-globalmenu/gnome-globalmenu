@@ -4,7 +4,6 @@ using Gnomenu;
 using Wnck;
 using Panel;
 using GConf;
-public extern int system(string? cmd);
 
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
@@ -350,7 +349,7 @@ public class Applet : Panel.Applet {
                                           void* user_data, string cname) {
 
 		Applet _this = (Applet) user_data;
-       	//system("gconf-editor " + _this.get_preferences_key() + " &");
+
 		GConfDialog gcd = new GConfDialog("Applet preferences");
 		
 		gcd.add_key("/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome");
