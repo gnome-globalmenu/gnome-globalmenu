@@ -124,6 +124,7 @@ public class Applet : Panel.Applet {
 		screen.window_closed += (window) => {
 			selector.current_window = screen.get_active_window();
 		};
+		screen.active_window_changed (null);
 	}
 	private void switch_to(Wnck.Window? window) {
 		if(current_window != null) {
