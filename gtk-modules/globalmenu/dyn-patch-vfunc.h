@@ -35,10 +35,10 @@ void dyn_patch_release_type(GType type);
 				#type, #method, \
 				klass->method, \
 				VFUNC_NAME(type, method)); \
-		klass->method = VFUNC_NAME(type, method); 
+		klass->method = (gpointer) VFUNC_NAME(type, method); 
 
 #define RESTORE( klass, type, method ) \
-	if(klass->method == VFUNC_NAME(type, method)) { \
+	if((gpointer) klass->method == (gpointer) VFUNC_NAME(type, method)) { \
 		g_debug("restore %s->%s_%s from %p to %p",  \
 				G_OBJECT_CLASS_NAME(klass), \
 				#type, #method, \

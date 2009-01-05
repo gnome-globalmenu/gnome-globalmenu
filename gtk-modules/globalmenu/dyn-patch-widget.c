@@ -6,7 +6,7 @@
 
 DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_parent)) {
 	GtkWidget * parent = widget->parent;
-	GtkWidget * menubar = NULL;
+	GtkMenuBar * menubar = NULL;
 
 	VFUNC_TYPE(gtk_widget, parent_set) vfunc = CHAINUP(gtk_widget, parent_set);
 	if(vfunc) vfunc(widget, old_parent);
@@ -21,7 +21,7 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 		 * instead of the topmost menubar in the hierarchy*/
 		menubar = dyn_patch_get_menubar(parent);
 
-	GtkWidget * old = dyn_patch_get_menubar(widget);
+	GtkMenuBar * old = dyn_patch_get_menubar(widget);
 	if(old != menubar) {
 		dyn_patch_set_menubar_r(widget, menubar);
 		if(old)

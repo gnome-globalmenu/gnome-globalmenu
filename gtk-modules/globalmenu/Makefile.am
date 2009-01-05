@@ -40,6 +40,7 @@ libdyn_patch_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
+	  -Werror \
 	  -g
 
 libglobalmenu_gnomedir = $(GTK_MODULES_DIR)

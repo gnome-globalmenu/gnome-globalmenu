@@ -21,7 +21,7 @@ void dyn_patch_discover_menubars(DiscoverMode mode) {
 	GList * iter;
 	for(iter = toplevels; iter; iter = iter->next) {
 		GtkWindow * window = iter->data;
-		dpdm_transverse(window, &mode);
+		dpdm_transverse(GTK_WIDGET(window), &mode);
 	}
 	g_list_free(toplevels);
 }
@@ -39,35 +39,35 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	/* to make sure the menubar is alive when it is in the hash table.
 	 * This might be a redundancy as we also refer it in the notifier
 	 * above. but I don't want to think too much into this.*/
-		g_hash_table_insert(notifiers, g_object_ref(menubar), source_id);
+		g_hash_table_insert(notifiers, g_object_ref(menubar), GINT_TO_POINTER(source_id));
 	} else {
 		/* should never get to here */
 	}
 }
 
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
-	if(GTK_IS_MENU_BAR(widget)) return widget;
+	if(GTK_IS_MENU_BAR(widget)) return GTK_MENU_BAR(widget);
 	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
 }
 
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
-	g_object_set_qdata_full(menubar, __TOPLEVEL__, g_object_ref(window), g_object_unref);
-	g_object_set_qdata_full(window, __MENUBAR__, g_object_ref(menubar), g_object_unref);
+	g_object_set_qdata_full(G_OBJECT(menubar), __TOPLEVEL__, g_object_ref(window), g_object_unref);
+	g_object_set_qdata_full(G_OBJECT(window), __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	g_signal_emit_by_name(menubar, "dyn-patch-attached", window, NULL);
 }
 void dyn_patch_detach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
 	g_signal_emit_by_name(menubar, "dyn-patch-detached", window, NULL);
-	g_object_set_qdata(window, __MENUBAR__, NULL);
-	g_object_set_qdata(menubar, __TOPLEVEL__, NULL);
+	g_object_set_qdata(G_OBJECT(window), __MENUBAR__, NULL);
+	g_object_set_qdata(G_OBJECT(menubar), __TOPLEVEL__, NULL);
 }
 
 GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar) {
-	return g_object_get_qdata(menubar, __TOPLEVEL__);
+	return g_object_get_qdata(G_OBJECT(menubar), __TOPLEVEL__);
 }
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
-	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);
+	GtkMenuBar * old = dyn_patch_get_menubar(widget);
 	if(old && old != menubar) {
 		g_debug("Detaching hooks on Widget %p of menubar %p", widget, old);
 		if(GTK_IS_LABEL(widget))
@@ -110,23 +110,23 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		g_debug("Registering hooks on %p of %p", widget, menubar);
 		if(GTK_IS_LABEL(widget)) {
 			g_signal_connect(widget, "notify::label", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 		}
 		if(GTK_IS_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::submenu", 
-					_dyn_patch_submenu_notify, menubar);
+					(GCallback)_dyn_patch_submenu_notify, menubar);
 			g_signal_connect(widget, "notify::visible", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::sensitive", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 		}
 		if(GTK_IS_CHECK_MENU_ITEM(widget)) {
 			g_signal_connect(widget, "notify::active", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::inconsistent", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 			g_signal_connect(widget, "notify::draw-as-radio", 
-					_dyn_patch_simple_notify, menubar);
+					(GCallback)_dyn_patch_simple_notify, menubar);
 		}
 	}
 	g_timer_stop(timer);
@@ -135,19 +135,19 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
 	if(GTK_IS_MENU_BAR(widget)) {
 		if(*mode == DISCOVER_MODE_INIT) {
-			dyn_patch_set_menubar_r(widget, widget);
-			dyn_patch_queue_changed(widget, widget);
+			dyn_patch_set_menubar_r(widget, GTK_MENU_BAR(widget));
+			dyn_patch_queue_changed(GTK_MENU_BAR(widget), widget);
 
-			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
+			GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
 			if(toplevel) {
-				dyn_patch_set_menubar(toplevel, widget);
-				dyn_patch_attach_menubar(toplevel, widget);
+				dyn_patch_set_menubar(GTK_WIDGET(toplevel), GTK_MENU_BAR(widget));
+				dyn_patch_attach_menubar(toplevel, GTK_MENU_BAR(widget));
 			}
 		} else {
-			GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
+			GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
 			if(toplevel) {
-				dyn_patch_detach_menubar(toplevel, widget);
-				dyn_patch_set_menubar(toplevel, NULL);
+				dyn_patch_detach_menubar(toplevel, GTK_MENU_BAR(widget));
+				dyn_patch_set_menubar(GTK_WIDGET(toplevel), NULL);
 			}
 			
 			dyn_patch_set_menubar_r(widget, NULL);
@@ -155,7 +155,7 @@ static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
 	} else {
 		if(GTK_IS_CONTAINER(widget)) {
 			gtk_container_foreach(GTK_CONTAINER(widget), 
-					dpdm_transverse, 
+					(GtkCallback) dpdm_transverse, 
 					mode);
 		}
 	}

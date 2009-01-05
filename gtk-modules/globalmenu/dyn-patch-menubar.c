@@ -16,15 +16,15 @@ DEFINE_FUNC(void, gtk_menu_bar, hierarchy_changed, (GtkWidget * widget, GtkWidge
 	VFUNC_TYPE(gtk_menu_bar, hierarchy_changed) vfunc = CHAINUP(gtk_menu_bar, hierarchy_changed);
 	if(vfunc) vfunc(widget, old_toplevel);
 
-	GtkWindow * old = dyn_patch_get_window(widget);
-	GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
-	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, toplevel?gtk_widget_get_name(toplevel):NULL);
+	GtkWindow * old = dyn_patch_get_window(GTK_MENU_BAR(widget));
+	GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
+	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, toplevel?gtk_widget_get_name(GTK_WIDGET(toplevel)):NULL);
 	if(old != toplevel) {
 		if(old) {
-			dyn_patch_detach_menubar(old, widget);
+			dyn_patch_detach_menubar(old, GTK_MENU_BAR(widget));
 		}
 		if(toplevel) {
-			dyn_patch_attach_menubar(toplevel, widget);
+			dyn_patch_attach_menubar(toplevel, GTK_MENU_BAR(widget));
 		}
 	}
 }
@@ -45,7 +45,7 @@ DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
 	if(vfunc) vfunc(widget);
 }
 
-DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, const GValue * value, GParamSpec *pspec)) {
+DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, GValue * value, GParamSpec *pspec)) {
   GtkMenuBar *menubar = GTK_MENU_BAR (object);
   switch (prop_id)
     {
@@ -82,8 +82,8 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 		  g_object_set_qdata(object, __IS_LOCAL__, GINT_TO_POINTER(-100));
 		}
 	  if(GTK_WIDGET_MAPPED (menubar))
-		  _gtk_menu_bar_map (menubar);
-	  gtk_widget_queue_resize(menubar);
+		  _gtk_menu_bar_map (GTK_WIDGET(menubar));
+	  gtk_widget_queue_resize(GTK_WIDGET(menubar));
 	  break;
     default:
 	  {

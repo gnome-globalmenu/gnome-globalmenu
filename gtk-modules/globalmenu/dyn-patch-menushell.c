@@ -1,10 +1,11 @@
 #include <gtk/gtk.h>
 
 #include "dyn-patch-vfunc.h"
+#include "dyn-patch-utils.h"
 
 
 DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * child, int position)) {
-	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
+	GtkMenuBar * menubar = dyn_patch_get_menubar(GTK_WIDGET(shell));
 	VFUNC_TYPE(gtk_menu_shell, insert) vfunc = CHAINUP(gtk_menu_shell, insert);
 	if(vfunc) {
 		vfunc(shell, child, position);
@@ -17,7 +18,7 @@ DEFINE_FUNC(void, gtk_menu_shell, insert, (GtkMenuShell * shell, GtkWidget * chi
 }
 DEFINE_FUNC(void, gtk_menu_shell, remove, (GtkMenuShell * shell, GtkWidget * child)) {
 
-	GtkMenuBar * menubar = dyn_patch_get_menubar(shell);
+	GtkMenuBar * menubar = dyn_patch_get_menubar(GTK_WIDGET(shell));
 	dyn_patch_set_menubar_r(child, NULL);
 	VFUNC_TYPE(gtk_menu_shell, remove) vfunc = CHAINUP(gtk_menu_shell, remove);
 	if(vfunc) vfunc(shell, child);

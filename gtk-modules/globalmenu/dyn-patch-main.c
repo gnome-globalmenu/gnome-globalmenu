@@ -36,7 +36,7 @@ void dyn_patch_init () {
 
 	old_vfuncs = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 	classes = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, g_type_class_unref);
-	notifiers = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, g_source_remove);
+	notifiers = g_hash_table_new_full(g_direct_hash, g_direct_equal, g_object_unref, (GDestroyNotify)g_source_remove);
 
 	dyn_patch_type(GTK_TYPE_WIDGET, dyn_patch_widget_patcher);
 	dyn_patch_type(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_patcher);
