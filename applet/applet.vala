@@ -102,6 +102,8 @@ public class Applet : Panel.Applet {
 			 * problem.
 			 * */
 			switch_to(find_desktop(screen)); 
+		} else {
+			selector.current_window = screen.get_active_window(); /* force the selector to update the window list */
 		}
 	}
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {

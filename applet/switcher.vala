@@ -101,7 +101,7 @@ public extern string* __get_task_name_by_pid(int pid);
 					}
 				}
 				if (items==0) {
-					Gtk.MenuItem mi = new Gtk.MenuItem.with_label(_("no windows"));
+					Gtk.MenuItem mi = new Gtk.MenuItem.with_label(" " + _("no windows") + " ");
 					mi.sensitive = false;
 					(mi.child as Gtk.Label).justify = Gtk.Justification.CENTER;
 					menu.add(mi);
