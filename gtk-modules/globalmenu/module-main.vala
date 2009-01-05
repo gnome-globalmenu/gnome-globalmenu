@@ -103,6 +103,7 @@ public class GlobalMenuGNOME {
 	}
 
 	private static void prepare_log_file() {
+		if(!verbose) return;
 		try {
 			GLib.File file = GLib.File.new_for_path(log_file_name);
 			log_stream = file.append_to(FileCreateFlags.NONE, null);
