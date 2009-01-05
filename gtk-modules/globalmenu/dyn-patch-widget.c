@@ -8,7 +8,6 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 	GtkWidget * parent = widget->parent;
 	GtkWidget * menubar = NULL;
 
-	g_message("%s", gtk_widget_get_name(widget));
 	VFUNC_TYPE(gtk_widget, parent_set) vfunc = CHAINUP(gtk_widget, parent_set);
 	if(vfunc) vfunc(widget, old_parent);
 
