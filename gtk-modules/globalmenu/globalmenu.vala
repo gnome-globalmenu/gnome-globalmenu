@@ -95,7 +95,7 @@ namespace GlobalMenuGTK {
 		if(self != null) {
 			if(menubar_get_local(self)) return true;
 			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
-			Gtk.Window toplevel = (Gtk.Window) self.get_data("__toplevel__");
+			Gtk.Window toplevel = DynPatch.get_window(self);
 
 			if(toplevel != null) {
 				if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
@@ -174,25 +174,11 @@ namespace GlobalMenuGTK {
 	}
 
 	private void unbind_menubar_from_window(MenuBar menubar, Window window) {
-		MenuBar old_menubar = null;
-		old_menubar = (MenuBar) window.get_data("__menubar__");
-		if(old_menubar == menubar) {
-			window.property_notify_event -= window_property_notify_event;
-			window.realize -= window_realize;
-			window.set_data("__menubar__", null);
-			menubar.set_data("__toplevel__", null);
-			debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
-		} else {
-			debug("old_menubar = %p, menubar = %p, unbinding fails", old_menubar, menubar);
-		}
+		window.property_notify_event -= window_property_notify_event;
+		window.realize -= window_realize;
+		debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
 	}
 	private void bind_menubar_to_window(MenuBar menubar, Window window) {
-		MenuBar old_menubar = null;
-		old_menubar = (MenuBar) window.get_data("__menubar__");
-		if(old_menubar != null) unbind_menubar_from_window(old_menubar, window);
-
-		menubar.set_data_full("__toplevel__", window.ref(), g_object_unref);
-		window.set_data_full("__menubar__", menubar.ref(), g_object_unref);
 
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;
@@ -201,7 +187,7 @@ namespace GlobalMenuGTK {
 	}
 
 	private void window_realize(Gtk.Window window) {
-		MenuBar menubar = (MenuBar) window.get_data("__menubar__");
+		MenuBar menubar = DynPatch.get_menubar(window);
 		Signal.emit_by_name(menubar, "changed", 
 				typeof(Widget), menubar, null);
 			
@@ -209,7 +195,7 @@ namespace GlobalMenuGTK {
 	private bool window_property_notify_event (Window window, Gdk.EventProperty event) {
 		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false)) {
 			string path = gdk_window_get_menu_event(window.window);
-			MenuBar menubar = window.get_data("__menubar__") as MenuBar;
+			MenuBar menubar = DynPatch.get_menubar(window);
 			debug("path = %s", path);
 			if(menubar != null) {
 				MenuItem item = Locator.locate(menubar, path);

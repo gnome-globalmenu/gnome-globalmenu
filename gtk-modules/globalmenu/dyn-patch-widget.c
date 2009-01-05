@@ -16,7 +16,9 @@ DEFINE_FUNC(void, gtk_widget, parent_set, (GtkWidget * widget, GtkWidget * old_p
 		 * We handle it in dyn-patch-helper.c*/
 		return;
 	}
-	if(parent != NULL) 
+	if(parent != NULL && !GTK_IS_WINDOW(parent)) 
+		/*For a GtkWindow get_menubar returns the attached menubar
+		 * instead of the topmost menubar in the hierarchy*/
 		menubar = dyn_patch_get_menubar(parent);
 
 	GtkWidget * old = dyn_patch_get_menubar(widget);

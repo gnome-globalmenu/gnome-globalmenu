@@ -53,13 +53,18 @@ GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
 	g_object_set_qdata_full(menubar, __TOPLEVEL__, g_object_ref(window), g_object_unref);
+	g_object_set_qdata_full(window, __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	g_signal_emit_by_name(menubar, "dyn-patch-attached", window, NULL);
 }
 void dyn_patch_detach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
 	g_signal_emit_by_name(menubar, "dyn-patch-detached", window, NULL);
+	g_object_set_qdata(window, __MENUBAR__, NULL);
 	g_object_set_qdata(menubar, __TOPLEVEL__, NULL);
 }
 
+GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar) {
+	return g_object_get_qdata(menubar, __TOPLEVEL__);
+}
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
 	GtkWidget * old = (GtkWidget*) dyn_patch_get_menubar(widget);

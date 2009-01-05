@@ -1,10 +1,10 @@
 #include <gtk/gtk.h>
 
 #include "dyn-patch-vfunc.h"
+#include "dyn-patch-utils.h"
 
 #define PROP_LOCAL 9999
 extern GQuark __IS_LOCAL__;
-extern GQuark __TOPLEVEL__;
 
 static GtkMenuShellClass * _gtk_menu_bar_parent_class = NULL;
 guint SIGNAL_CHANGED = 0;
@@ -16,7 +16,7 @@ DEFINE_FUNC(void, gtk_menu_bar, hierarchy_changed, (GtkWidget * widget, GtkWidge
 	VFUNC_TYPE(gtk_menu_bar, hierarchy_changed) vfunc = CHAINUP(gtk_menu_bar, hierarchy_changed);
 	if(vfunc) vfunc(widget, old_toplevel);
 
-	GtkWindow * old = g_object_get_qdata(widget, __TOPLEVEL__);
+	GtkWindow * old = dyn_patch_get_window(widget);
 	GtkWindow * toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 	g_debug("widget hierarchy changed old = %p, toplevel=%p(%s)", old, toplevel, toplevel?gtk_widget_get_name(toplevel):NULL);
 	if(old != toplevel) {
