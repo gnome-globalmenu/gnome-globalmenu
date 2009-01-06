@@ -14,10 +14,6 @@ public class Applet : Panel.Applet {
 		if(!disposed) {
 			disposed = true;
 			set_background_widget(null);
-			if(current_window != null) {
-				current_window.destroy();
-				current_window = null;
-			}
 		}
 		base.dispose();	
 	}
@@ -50,11 +46,7 @@ public class Applet : Panel.Applet {
 
 		main_menubar = new Gnomenu.MenuBar();
 		main_menubar.min_length = 0;  /*Then it will have a overflown item*/
-		main_menubar.activate += (menubar, item) => {
-			if(current_window != null) {
-				current_window.emit_menu_event(item.path);
-			}
-		};
+		monitor.menubar = main_menubar;
 		setup_popup_menu(main_menubar);
 
 		menubars.add(main_menubar);
@@ -72,8 +64,6 @@ public class Applet : Panel.Applet {
 		(this as Panel.Applet).change_background(bgtype, color, pixmap);
 	}
 
-	private Gnomenu.Window current_window;
-	private Gnomenu.Window root_window;
 
 	private Monitor monitor;
 	private MenuBarBox menubars;
@@ -82,97 +72,17 @@ public class Applet : Panel.Applet {
 	private Switcher selector;
 
 	public override void screen_changed(Gdk.Screen previous_screen) {
-		if(previous_screen != null) {
-			ungrab_menu_bar_key(root_window);
-			root_window.destroy();
-			root_window = null;
-		}
 		Gdk.Screen gdk_screen = get_screen();
 		if(gdk_screen != null) {
-			root_window = Gnomenu.Window.new_from_gdk_window(gdk_screen.get_root_window());
-			grab_menu_bar_key(root_window);
-			Wnck.Screen screen = gdk_screen_to_wnck_screen(gdk_screen);
 			ensure_monitor();
-			monitor.screen = screen;
+			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
 		}
 	}
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
-		if(window is Wnck.Window)
-			switch_to(window);
-	}
-	private void switch_to(Wnck.Window? window) {
-		if(current_window != null) {
-			/* This is a weird way to free a window:
-			 * We have two reference counts for current_window
-			 * Destroy will release the one held by GTK( including
-			 * all circular references),
-			 * and the assignment line below will release the one
-			 * held by us.
-			 * */
-			current_window.destroy();
-			assert(current_window.ref_count == 1);
-			current_window = null;
-		}
-		if(window != null) {
-			current_window = Gnomenu.Window.new_from_native(window.get_xid());
+		if(window is Wnck.Window) {
 			selector.current_window = window;
 		}
-		if(current_window != null) {
-			current_window.menu_context_changed += (current_window) => {
-				update_menubar();
-			};
-		}
-		update_menubar();
-	}
-	private void ungrab_menu_bar_key(Gnomenu.Window window) {
-		int keyval = (int) window.get_data("menu-bar-keyval");
-		Gdk.ModifierType mods = 
-			(Gdk.ModifierType) window.get_data("menu-bar-keymods");
-
-		window.ungrab_key(keyval, mods);
-		window.key_press_event -= on_menu_bar_key;
-		window.set_data("menu-bar-keyval", null);
-		window.set_data("menu-bar-keymods", null);
-	}
-	private void grab_menu_bar_key(Gnomenu.Window window) {
-		/*FIXME: listen to changes in GTK_SETTINGS.*/
-		int keyval;
-		Gdk.ModifierType mods;
-		get_accel_key(out keyval, out mods);
-		window.grab_key(keyval, mods);
-		window.key_press_event += on_menu_bar_key; 
-		window.set_data("menu-bar-keyval", (void*) keyval);
-		window.set_data("menu-bar-keymods", (void*) mods);
-	}	
-	private bool on_menu_bar_key (Gnomenu.Window window, Gdk.EventKey event) {
-		uint keyval;
-		Gdk.ModifierType mods;
-		get_accel_key(out keyval, out mods);
-		if(event.keyval == keyval &&
-			(event.state & Gtk.accelerator_get_default_mod_mask())
-			== (mods & Gtk.accelerator_get_default_mod_mask())) {
-			/* We chain up to the toplevel key_press_event,
-			 * which is listened by all the menubars within
-			 * the applet*/
-			Gtk.Widget toplevel = get_toplevel();
-			if(toplevel != null) 
-				toplevel.key_press_event(event);
-			return false;
-		}
-		return true;
-	}
-	private void update_menubar() {
-		if(current_window != null) {
-			string context = current_window.menu_context;
-			if(context != null) {
-				Parser.parse(main_menubar, context);
-				main_menubar.show();
-				return;
-			}
-		}
-		/* elseever */
-		main_menubar.hide();
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
@@ -335,17 +245,6 @@ public class Applet : Panel.Applet {
 		gcd.run();
 		gcd.destroy();
     }
-	/**
-	 * return the accelerator key combination for invoking menu bars
-	 * in GTK Settings. It is usually F10.
-	 */
-	private static void get_accel_key(out uint keyval, out Gdk.ModifierType mods) {
-		Settings settings = Settings.get_default();
-		string accel = null;
-		settings.get("gtk_menu_bar_accel", &accel, null);
-		if(accel != null)
-			Gtk.accelerator_parse(accel, out keyval, out mods);
-	}
 	public override bool button_press_event(Gdk.EventButton event) {
 		if(event.button == 3)
 		return control.do_popup(event.button, event.time);
