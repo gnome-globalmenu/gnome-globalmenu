@@ -10,6 +10,7 @@ VALASOURCES = \
 	switcher.vala \
 	gnomemenuhelper.vala \
 	wncktools.vala \
+	monitor.vala \
 	$(NULL)
 
 libexec_PROGRAMS = GlobalMenu.PanelApplet
