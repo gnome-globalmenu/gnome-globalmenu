@@ -2,6 +2,10 @@ using Gtk;
 
 namespace GlobalMenuGTK {
 
+	public enum Flags {
+		NONE = 0,
+		DISABLE_PIXBUF = 1,
+	}
 	[CCode (cname = "gtk_widget_get_toplevel_window")]
 	protected extern weak Gtk.Window? gtk_widget_get_toplevel_window (Gtk.Widget widget);
 	[CCode (cname = "gdk_window_set_menu_context")]
@@ -12,8 +16,11 @@ namespace GlobalMenuGTK {
 	protected ulong changed_hook_id;
 	protected ulong attached_hook_id;
 	protected ulong detached_hook_id;
-	
-	public void init() {
+
+	protected bool disable_pixbuf = false;
+	public void init(Flags flags) {
+
+		if((flags & Flags.DISABLE_PIXBUF) != 0) disable_pixbuf = true;
 
 		changed_hook_id = Signal.add_emission_hook(
 				Signal.lookup("changed", typeof(MenuBar)),

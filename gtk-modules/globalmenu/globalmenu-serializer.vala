@@ -184,11 +184,13 @@ namespace GlobalMenuGTK {
 						sb.append(Markup.printf_escaped(" icon=\"%s\"", 
 							stock));
 					} else {
+						if(!disable_pixbuf) {
 						Gdk.Pixbuf pixbuf = image.render_icon(image.stock, 
 							IconSize.MENU, null);
 						if(pixbuf != null)
 							sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
 								pixbuf_encode_b64(pixbuf)));
+						}
 					}
 				}
 				if(image.storage_type == ImageType.ICON_NAME) {
@@ -197,9 +199,11 @@ namespace GlobalMenuGTK {
 							image.icon_name));
 				}
 				if(image.storage_type == ImageType.PIXBUF) {
+					if(!disable_pixbuf) {
 					if(image.pixbuf != null)
 						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
 								pixbuf_encode_b64(image.pixbuf)));
+					}
 				}		
 				if(image.storage_type == ImageType.PIXMAP) {
 					ulong pixmap_xid = 0;
