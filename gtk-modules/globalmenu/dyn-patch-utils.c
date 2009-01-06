@@ -173,7 +173,7 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	GDK_THREADS_ENTER();
 	g_debug("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
-	g_signal_emit_by_name(menubar, "changed", NULL);
+	g_signal_emit_by_name(menubar, "dyn-patch-changed", NULL);
 	g_debug("_dyn_patch_set_menu_bar_r consumption: %lf, buffered_changes = %ld ", g_timer_elapsed(timer, NULL), buffered_changes);
 	buffered_changes = 0;
 

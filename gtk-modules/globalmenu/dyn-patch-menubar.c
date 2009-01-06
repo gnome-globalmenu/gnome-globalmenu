@@ -132,10 +132,10 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 								  G_PARAM_READWRITE));
 		}
 
-		SIGNAL_CHANGED = g_signal_lookup("changed", G_OBJECT_CLASS_TYPE (klass));
+		SIGNAL_CHANGED = g_signal_lookup("dyn-patch-changed", G_OBJECT_CLASS_TYPE (klass));
 		if (SIGNAL_CHANGED == 0) {
 			SIGNAL_CHANGED =
-				g_signal_new (("changed"),
+				g_signal_new (("dyn-patch-changed"),
 				  G_OBJECT_CLASS_TYPE (klass),
 				  G_SIGNAL_RUN_FIRST,
 				  0, 

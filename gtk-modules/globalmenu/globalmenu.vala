@@ -23,7 +23,7 @@ namespace GlobalMenuGTK {
 		if((flags & Flags.DISABLE_PIXBUF) != 0) disable_pixbuf = true;
 
 		changed_hook_id = Signal.add_emission_hook(
-				Signal.lookup("changed", typeof(MenuBar)),
+				Signal.lookup("dyn-patch-changed", typeof(MenuBar)),
 				0, changed_eh, null);
 		attached_hook_id = Signal.add_emission_hook (
 				Signal.lookup("dyn-patch-attached", typeof(MenuBar)),
@@ -36,7 +36,7 @@ namespace GlobalMenuGTK {
 
 	public void uninit() {
 		Signal.remove_emission_hook (
-			Signal.lookup("changed", typeof(MenuBar)),
+			Signal.lookup("dyn-patch-changed", typeof(MenuBar)),
 			changed_hook_id);
 		Signal.remove_emission_hook (
 			Signal.lookup("dyn-patch-attached", typeof(MenuBar)),
@@ -196,7 +196,7 @@ namespace GlobalMenuGTK {
 
 	private void window_realize(Gtk.Window window) {
 		MenuBar menubar = DynPatch.get_menubar(window);
-		Signal.emit_by_name(menubar, "changed", 
+		Signal.emit_by_name(menubar, "dyn-patch-changed", 
 				typeof(Widget), menubar, null);
 			
 	}
