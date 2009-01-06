@@ -24,11 +24,24 @@ public class Applet : Panel.Applet {
 	~Applet() {
 	}
 
+	private void ensure_monitor() {
+		/* this is to workaround the issue that
+		 * screen_changed is invoked by GTK before
+		 * the instance constructor is invoked */
+		if(monitor == null) {
+			monitor = new Monitor();
+			monitor.window_changed += (monitor, prev_window) => {
+				message("window_changed by monitor, from %p to %p",
+						prev_window, monitor.current_window);
+			};
+		}
+	}
 	construct {
 		disposed = false;
 		set_name("GlobalMenuPanelApplet");
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
+		ensure_monitor();
 		menubars = new MenuBarBox();
 		menubars.visible = true;
 		add(menubars);
@@ -65,6 +78,7 @@ public class Applet : Panel.Applet {
 	private Gnomenu.Window current_window;
 	private Gnomenu.Window root_window;
 
+	private Monitor monitor;
 	private MenuBarBox menubars;
 	private bool disposed;
 	private Gnomenu.MenuBar main_menubar;
@@ -89,6 +103,8 @@ public class Applet : Panel.Applet {
 			screen.window_closed += on_window_closed;
 			screen.active_window_changed += on_active_window_changed;
 			screen.active_window_changed (null);
+			ensure_monitor();
+			monitor.screen = screen;
 		}
 	}
 	private void on_window_closed(Wnck.Screen screen, Wnck.Window window) {
