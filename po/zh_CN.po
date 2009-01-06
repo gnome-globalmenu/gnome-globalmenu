@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 17:09+0100\n"
+"POT-Creation-Date: 2009-01-05 19:18-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr "复选框的大小"
 msgid "Size of check or radio indicator"
 msgstr "单选框的大小"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:28 ../applet/main.c:23
 msgid "Be verbose"
 msgstr "显示调试信息"
 
@@ -36,7 +36,6 @@ msgid "- Global Menu plugin Module for GTK"
 msgstr "- 全局菜单 GTK 插件"
 
 #: ../gtk-modules/globalmenu/module-main.c:136
-#, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -46,10 +45,6 @@ msgid ""
 msgstr ""
 "这些命令行参数应当在环境变量 GLOBALMENU_GNOME_ARGS 里设置。注意: 可以在 "
 "GTK_MENUBAR_NO_MAC 环境变量里提供禁用插件的应用程序列表。"
-
-#: ../applet/main.c:23
-msgid "Show debug messages from GMarkupDoc and Gnomenu"
-msgstr ""
 
 #: ../applet/applet.c:39
 msgid "globalmenu-panel-applet"
@@ -103,24 +98,23 @@ msgstr "项目主页"
 msgid "On-line help"
 msgstr "在线帮助"
 
-#: ../applet/switcher.c:330
+#: ../applet/switcher.c:352
 msgid "no windows"
-msgstr ""
+msgstr "没有文档"
 
-#: ../applet/switcher.c:433
+#: ../applet/switcher.c:455
 msgid "Desktop"
-msgstr ""
+msgstr "桌面"
 
-#: ../applet/switcher.c:703
+#: ../applet/switcher.c:729
 msgid "File Manager"
-msgstr ""
+msgstr "文件管理器"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
 msgstr "在主菜单中显示窗口操作"
 
 #: ../gnome-globalmenu.schemas.in.h:2
-#, fuzzy
 msgid "Enable Global Menu For GTK applications"
 msgstr "激活全局菜单"
 

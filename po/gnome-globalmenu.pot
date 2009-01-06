@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 17:09+0100\n"
+"POT-Creation-Date: 2009-01-05 19:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,7 +24,7 @@ msgstr ""
 msgid "Size of check or radio indicator"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:28 ../applet/main.c:23
 msgid "Be verbose"
 msgstr ""
 
@@ -47,10 +47,6 @@ msgid ""
 "\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
 "ignored by the plugin.\n"
 "\t\t"
-msgstr ""
-
-#: ../applet/main.c:23
-msgid "Show debug messages from GMarkupDoc and Gnomenu"
 msgstr ""
 
 #: ../applet/applet.c:39
@@ -87,15 +83,15 @@ msgstr ""
 msgid "On-line help"
 msgstr ""
 
-#: ../applet/switcher.c:330
+#: ../applet/switcher.c:352
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:433
+#: ../applet/switcher.c:455
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:703
+#: ../applet/switcher.c:729
 msgid "File Manager"
 msgstr ""
 

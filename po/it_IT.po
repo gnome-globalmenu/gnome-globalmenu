@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 17:09+0100\n"
+"POT-Creation-Date: 2009-01-05 19:18-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr "Dimensioni indicatore"
 msgid "Size of check or radio indicator"
 msgstr "Dimensioni dei radio e check"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:28 ../applet/main.c:23
 msgid "Be verbose"
 msgstr "verboso"
 
@@ -36,7 +36,6 @@ msgid "- Global Menu plugin Module for GTK"
 msgstr "Modulo Global Menu plugin per GTK"
 
 #: ../gtk-modules/globalmenu/module-main.c:136
-#, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -48,10 +47,6 @@ msgstr ""
 "GLOBALMENU_GNOME_ARGS anzichè nella command line.\n"
 "NOTA: La variablie d'ambiente GTK_MENUBAR_NO_MAC contiene le applicazioni da "
 "ignorare."
-
-#: ../applet/main.c:23
-msgid "Show debug messages from GMarkupDoc and Gnomenu"
-msgstr "Mostra messaggi di debug per GMarkupDoc e Gnomenu"
 
 #: ../applet/applet.c:39
 msgid "globalmenu-panel-applet"
@@ -105,15 +100,15 @@ msgstr "Sito Web Progetto"
 msgid "On-line help"
 msgstr "Guida in linea"
 
-#: ../applet/switcher.c:330
+#: ../applet/switcher.c:352
 msgid "no windows"
 msgstr "nessuna finestra"
 
-#: ../applet/switcher.c:433
+#: ../applet/switcher.c:455
 msgid "Desktop"
 msgstr "Scrivania"
 
-#: ../applet/switcher.c:703
+#: ../applet/switcher.c:729
 msgid "File Manager"
 msgstr "Esplorazione file"
 
@@ -122,7 +117,6 @@ msgid "Add window action menu entries to active application name menu"
 msgstr "Aggiungi azioni finestra"
 
 #: ../gnome-globalmenu.schemas.in.h:2
-#, fuzzy
 msgid "Enable Global Menu For GTK applications"
 msgstr "Modulo GTK+ per Global Menu"
 
@@ -179,6 +173,9 @@ msgstr "GlobalMenu.PanelApplet Factory"
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "The factory to build GlobalMenu.PanelApplet objects"
+
+#~ msgid "Show debug messages from GMarkupDoc and Gnomenu"
+#~ msgstr "Mostra messaggi di debug per GMarkupDoc e Gnomenu"
 
 #, fuzzy
 #~ msgid "Global Menu is enabled"
