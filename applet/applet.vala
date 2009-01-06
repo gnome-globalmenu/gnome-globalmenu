@@ -30,10 +30,7 @@ public class Applet : Panel.Applet {
 		 * the instance constructor is invoked */
 		if(monitor == null) {
 			monitor = new Monitor();
-			monitor.window_changed += (monitor, prev_window) => {
-				message("window_changed by monitor, from %p to %p",
-						prev_window, monitor.current_window);
-			};
+			monitor.window_changed += on_window_changed;
 		}
 	}
 	construct {
@@ -86,11 +83,6 @@ public class Applet : Panel.Applet {
 
 	public override void screen_changed(Gdk.Screen previous_screen) {
 		if(previous_screen != null) {
-			Wnck.Screen prev = gdk_screen_to_wnck_screen(previous_screen);
-			if(prev != null) {
-				prev.window_closed -= on_window_closed;
-				prev.active_window_changed -= on_active_window_changed;
-			}
 			ungrab_menu_bar_key(root_window);
 			root_window.destroy();
 			root_window = null;
@@ -100,43 +92,14 @@ public class Applet : Panel.Applet {
 			root_window = Gnomenu.Window.new_from_gdk_window(gdk_screen.get_root_window());
 			grab_menu_bar_key(root_window);
 			Wnck.Screen screen = gdk_screen_to_wnck_screen(gdk_screen);
-			screen.window_closed += on_window_closed;
-			screen.active_window_changed += on_active_window_changed;
-			screen.active_window_changed (null);
 			ensure_monitor();
 			monitor.screen = screen;
 		}
 	}
-	private void on_window_closed(Wnck.Screen screen, Wnck.Window window) {
-		ulong xid = window.get_xid();
-		if(current_window != null && xid == current_window.xid) {
-			/* if the closed window is current window,
-			 * fallback to the desktop and
-			 * wait for the next active_window_changed event
-			 *
-			 * To solve the haunting menu bar of closed window
-			 * problem.
-			 * */
-			switch_to(find_desktop(screen)); 
-		} else {
-			selector.current_window = screen.get_active_window(); /* force the selector to update the window list */
-		}
-	}
-	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
-		weak Wnck.Window window = screen.get_active_window();
-		if((window != previous_window) && (window is Wnck.Window)) {
-			weak Wnck.Window transient_for = window.get_transient();
-			if(transient_for != null) window = transient_for;
-			switch(window.get_window_type()) {
-				case Wnck.WindowType.NORMAL:
-				case Wnck.WindowType.DESKTOP:
-					switch_to(window);
-				break;
-				default:
-					/*Do nothing if it is a toolbox or so*/
-				break;
-			}
-		}
+	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
+		weak Wnck.Window window = monitor.current_window;
+		if(window is Wnck.Window)
+			switch_to(window);
 	}
 	private void switch_to(Wnck.Window? window) {
 		if(current_window != null) {
@@ -161,16 +124,6 @@ public class Applet : Panel.Applet {
 			};
 		}
 		update_menubar();
-	}
-	private Wnck.Window? find_desktop(Wnck.Screen screen) {
-		weak List<weak Wnck.Window> windows = screen.get_windows();
-		foreach(weak Wnck.Window window in windows) {
-			if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
-				/*Vala should ref it*/
-				return window;
-			}
-		}
-		return null;
 	}
 	private void ungrab_menu_bar_key(Gnomenu.Window window) {
 		int keyval = (int) window.get_data("menu-bar-keyval");
