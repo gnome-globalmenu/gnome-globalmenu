@@ -21,7 +21,8 @@ void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 	gint l = g_list_length(children);
 	for(iter = g_list_last(children); iter; iter = iter->prev) {
 		if(l > length) {
-			gtk_container_remove(menu_shell, iter->data);	
+			//gtk_container_remove(menu_shell, iter->data);	
+			gtk_widget_hide(GTK_WIDGET(iter->data));
 		}
 		l--;
 	}

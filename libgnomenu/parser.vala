@@ -54,7 +54,7 @@ namespace Gnomenu {
 					} else {
 		//				weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						if(item.submenu == null) {
-							item.submenu = new Menu();
+							item.submenu = (Menu) item.get_data("_saved_menu_");
 						}	
 						child_parser = new Parser();
 						child_parser.shell = item.submenu;
@@ -71,6 +71,7 @@ namespace Gnomenu {
 						setup_item(item, attribute_names, attribute_values);
 					} else {
 						item = new MenuItem();
+						item.set_data_full("_saved_menu_", (new Menu()).ref(), g_object_unref);
 						shell.append(item);
 						item.position = position;
 						item.menubar = topmost;
