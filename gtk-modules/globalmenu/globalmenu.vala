@@ -133,9 +133,10 @@ namespace GlobalMenuGTK {
 		weak Gtk.Widget parent = self.parent;
 		while(parent is Gtk.Widget) {
 			weak string typename = parent.get_type().name();
-			if(typename.str("Bonobo")!= null) {
+			if(typename.str("BonoboDockBand")!= null) {
 				debug("Hiding %s", typename);
 				parent.hide();
+				break;
 			}
 			parent = parent.parent;
 		} 
