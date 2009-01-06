@@ -33,6 +33,8 @@ namespace Gnomenu {
 		MarkupParser functions;
 		MenuShell shell;
 		MenuBar topmost;
+		MenuItem item;
+
 		int position;
 		bool inside_item;
 		bool item_has_submenu;
@@ -49,7 +51,7 @@ namespace Gnomenu {
 						 * <menu> <item/><item/><item/> </menu>
 						 */
 					} else {
-						weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
+		//				weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						if(item.submenu == null) {
 							item.submenu = new Menu();
 						}	
@@ -63,11 +65,11 @@ namespace Gnomenu {
 				case "item":
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
-					if(gtk_menu_shell_has_item(shell, position)) {
-						var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
+					item = gtk_menu_shell_get_item(shell, position) as MenuItem;
+					if(item != null) {
 						setup_item(item, attribute_names, attribute_values);
 					} else {
-						var item = new MenuItem();
+						item = new MenuItem();
 						shell.append(item);
 						item.position = position;
 						item.menubar = topmost;
@@ -144,7 +146,7 @@ namespace Gnomenu {
 					break;
 				case "item":
 					if(!item_has_submenu) {
-						var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
+		//				var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						item.submenu = null;
 					}
 					inside_item = false;
