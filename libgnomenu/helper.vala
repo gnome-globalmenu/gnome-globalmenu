@@ -52,30 +52,5 @@ namespace Gnomenu {
 		}
 	}
 
-	/** 
-	 * MenuShellHelper needs to be written.
-	 * It has the potential to break in 
-	 * future vala releases.
-	 * */
-	[Compact]
-	[CCode (has_type_id = false)]
-	protected class MenuShellHelper {
-		public weak MenuItem get(int index) {
-			return gtk_container_get_children(this as Container).nth_data(index) as MenuItem;
-		}
-		public bool has(int index) {
-			List<weak Widget> children = gtk_container_get_children(this as Container);
-			return index >= 0 && index < children.length();
-		}
-		public void truncate(int length) {
-			while(gtk_container_get_children(this as Container).length() > length) {
-				weak Widget child = gtk_container_get_children(this as Container).last().data as Widget;
-				(this as Container).remove(child);
-			}
-		}
-		public uint length() {
-			return gtk_container_get_children(this as Container).length();
-		}
-	}
 }
 

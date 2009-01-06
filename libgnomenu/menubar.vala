@@ -570,7 +570,7 @@ namespace Gnomenu {
 			(child as MenuItem).gravity = gravity;
 		}
 		public void remove_all() {
-			((MenuShellHelper)this).truncate(0);
+			gtk_menu_shell_truncate(this, 0);
 		}	
 	}
 }

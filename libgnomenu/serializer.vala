@@ -26,13 +26,13 @@ namespace Gnomenu {
 		}
 		private void visit_shell(MenuShell shell) {
 			int i;
-			if(((MenuShellHelper)shell).length() > 0) {
+			if(gtk_menu_shell_length(shell) > 0) {
 				indent();
 				sb.append_printf("<menu>");
 				newline();
 				level++;
-				for(i = 0; i< ((MenuShellHelper)shell).length(); i++) {
-					visit(((MenuShellHelper)shell).get(i));
+				for(i = 0; i< gtk_menu_shell_length(shell); i++) {
+					visit(gtk_menu_shell_get_item(shell, i));
 				}
 				level--;
 				indent();

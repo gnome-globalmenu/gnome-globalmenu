@@ -10,6 +10,7 @@ INTERNAL = \
 	menuitem.vala \
 	window.vala \
 	menubarbox.vala \
+	menushellutils.vala \
 	label.vala \
 	keygrab.vala \
 	$(NULL)
@@ -23,7 +24,8 @@ libgnomenu_la_SOURCES = \
 						$(INTERNAL:.vala=.h) \
 						$(EXTERNAL:.vala=.c) \
 						$(EXTERNAL:.vala=.h) \
-						keygrab-ccode.c
+						keygrab-ccode.c \
+						menushellutils-ccode.c 
 
 libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)

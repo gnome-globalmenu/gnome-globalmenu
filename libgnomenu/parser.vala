@@ -49,7 +49,7 @@ namespace Gnomenu {
 						 * <menu> <item/><item/><item/> </menu>
 						 */
 					} else {
-						weak MenuItem item = ((MenuShellHelper)shell).get(position);
+						weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						if(item.submenu == null) {
 							item.submenu = new Menu();
 						}	
@@ -63,8 +63,8 @@ namespace Gnomenu {
 				case "item":
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
-					if(((MenuShellHelper)shell).has(position)) {
-						var item = ((MenuShellHelper)shell).get(position);
+					if(gtk_menu_shell_has_item(shell, position)) {
+						var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						setup_item(item, attribute_names, attribute_values);
 					} else {
 						var item = new MenuItem();
@@ -136,15 +136,15 @@ namespace Gnomenu {
 					if(inside_item) {
 						/* stop the child parser */
 						g_markup_parse_context_pop(context);
-						((MenuShellHelper)(child_parser.shell)).truncate(child_parser.position);
+						gtk_menu_shell_truncate(child_parser.shell, child_parser.position);
 						child_parser = null;
 					} else {
-						((MenuShellHelper)shell).truncate(position);
+						gtk_menu_shell_truncate(shell, position);
 					}
 					break;
 				case "item":
 					if(!item_has_submenu) {
-						var item = ((MenuShellHelper)shell).get(position);
+						var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
 						item.submenu = null;
 					}
 					inside_item = false;
