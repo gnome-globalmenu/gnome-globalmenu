@@ -5,7 +5,7 @@ const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 
 public bool verbose = false;
 const OptionEntry[] options = {
-	{"verbose", 'v',0, OptionArg.NONE, ref verbose, N_("Show debug messages from GMarkupDoc and Gnomenu"), null},
+	{"verbose", 'v',0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 	{null}
 };
 
