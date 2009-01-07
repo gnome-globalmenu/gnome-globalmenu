@@ -137,8 +137,7 @@ namespace Gnomenu {
 					case BackgroundType.COLOR:
 						if(old_type != _background.type
 						|| (old_type == _background.type
-						&& old_color.to_string() !=
-							_background.color.to_string())) {
+						&& !old_color.equal(_background.color))) {
 							modify_bg(StateType.NORMAL, _background.color);
 							if(_overflown_menubar != null) {
 								_overflown_menubar.background = value;
