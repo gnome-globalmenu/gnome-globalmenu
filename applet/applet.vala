@@ -78,10 +78,18 @@ public class Applet : Panel.Applet {
 			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
 		}
 	}
+	private Wnck.Window? find_desktop(Wnck.Window? window) {
+		weak Wnck.Screen screen = window.get_screen();
+		foreach(weak Wnck.Window w in (weak List<weak Wnck.Window>)screen.get_windows())
+			if (w.get_window_type() == Wnck.WindowType.DESKTOP) return w;
+		return null;
+	}
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
 		if(window is Wnck.Window) {
-			selector.current_window = window;
+			if (window.is_skip_pager())
+				selector.current_window = find_desktop(window); else /* TOFIX: must implement a safer way to ensure consistency between switcher.current_window and actual menu shown by the gnomenu */
+				selector.current_window = window;
 		}
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
