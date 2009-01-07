@@ -142,9 +142,7 @@ public class Applet : Panel.Applet {
 	
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
 		    
-	private override void realize() {
-		base.realize();
-		
+	public void init() {
 		/* Connect to gconf */
 		this.add_preferences(GCONF_SCHEMA_DIR);
 		GConf.Client.get_default().value_changed += (key, value) => {
@@ -153,41 +151,46 @@ public class Applet : Panel.Applet {
 		
 		string applet_menu_xml = _("""
 <popup name="button3">
-	<menuitem debuname="Preferences" 
+	<menuitem name="Preferences" 
 		verb="Preferences" 
 		_label="_Preferences" 
 		pixtype="stock" 
 		pixname="gtk-preferences"/>
-	<menuitem debuname="Help" 
+	<menuitem name="Help" 
 		verb="Help" 
 		_label="_Help" 
 		pixtype="stock" 
 		pixname="gtk-help"/>
-	<menuitem debuname="About" 
+	<menuitem name="About" 
 		verb="About" _label="_About..." 
 		pixtype="stock" 
 		pixname="gtk-about"/>
 </popup>
 		""");
 		    
-		var verbPreferences = BonoboUI.Verb ();
+		var verbPreferences = new BonoboUI.Verb ();
 		verbPreferences.cname = "Preferences";
 		verbPreferences.cb = on_preferences_clicked;
 		
-		var verbAbout = BonoboUI.Verb ();
+		var verbAbout = new BonoboUI.Verb ();
 		verbAbout.cname = "About";
 		verbAbout.cb = on_about_clicked;
 		
-		var verbHelp = BonoboUI.Verb ();
+		var verbHelp = new BonoboUI.Verb ();
 		verbHelp.cname = "Help";
 		verbHelp.cb = on_help_clicked;
 		
-		var verbs = new BonoboUI.Verb[] { verbAbout, verbHelp, verbPreferences };
+		var verbEnd = new BonoboUI.Verb ();
+		verbEnd.cname = null;
+		verbEnd.cb = null;
+
+		BonoboUI.Verb[] verbs = { verbAbout, verbHelp, verbPreferences, verbEnd };
 		setup_menu (applet_menu_xml, verbs, this);
 
 		get_prefs();
-
+	
 	}
+
 	private void get_prefs() {
 		selector.max_size = gconf_get_int("title_max_width");
 		selector.show_icon = gconf_get_bool("show_icon");
