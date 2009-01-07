@@ -92,11 +92,8 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	dyn_patch_set_menubar(widget, menubar);
 
 	if(GTK_IS_CONTAINER(widget)) {
-		GList * children = gtk_container_get_children((GtkContainer*)widget);
-		GList * node;
-		for(node = children; node; node = node->next) {
-			dyn_patch_set_menubar_r(node->data, menubar);
-		}
+		gtk_container_foreach((GtkContainer*)widget, 
+				(GtkCallback)dyn_patch_set_menubar_r, menubar);
 	}
 	if(GTK_IS_MENU_ITEM(widget)) {
 		GtkWidget * submenu = gtk_menu_item_get_submenu((GtkMenuItem*)widget);
