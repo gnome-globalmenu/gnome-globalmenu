@@ -65,6 +65,7 @@ GIO_REQUIRED=2.12.0
 WNCK_REQUIRED=2.24.1
 PANEL_REQUIRED=2.24.1
 GMENU_REQUIRED=2.24.1
+XFCE4_PANEL_REQUIRED=4.4.3
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gmodule-2.0 >= $GLIB_REQUIRED)
 AC_SUBST(GLIB_CFLAGS)
@@ -99,6 +100,27 @@ AS_IF([test "x$with_gnome_panel" != xno],
 	)])
 AM_CONDITIONAL(WITH_GNOME_PANEL, [test "x$with_gnome_panel" = xtrue ]) 
 
+AC_ARG_WITH(
+	[xfce4-panel],
+	AC_HELP_STRING([--with-xfce4-panel], [enable xfce panel applet]),
+	[],
+	[with_xfce4_panel=no])
+AS_IF([test "x$with_xfce4_panel" != xno],
+	[PKG_CHECK_MODULES(XFCE4_PANEL, [libxfce4panel-1.0 >= $XFCE4_PANEL_REQUIRED],
+		[
+		with_xfce4_panel=true;
+		AC_SUBST(XFCE4_PANEL_CFLAGS)
+		AC_SUBST(XFCE4_PANEL_LIBS)
+		],
+		[
+		with_xfce4_panel=false;
+		if test "x$with_xfce4_panel" != xcheck; then
+			AC_MSG_FAILURE(
+				[test for libxfce4panel-1.0 failed. (--without-xfce4-panel to disable).])
+		fi;]
+	)])
+AM_CONDITIONAL(WITH_XFCE4_PANEL, [test "x$with_xfce4_panel" = xtrue ]) 
+
 
 PKG_CHECK_MODULES(GIO, gio-2.0 >= $GIO_REQUIRED)
 AC_SUBST(GIO_FLAGS)
@@ -125,6 +147,7 @@ AC_CONFIG_FILES(
 	libgnomenu/Makefile
 	libgnomenu/tests/Makefile
 	applet/Makefile
+	xfce/Makefile
 	tests/Makefile
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
