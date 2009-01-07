@@ -38,6 +38,10 @@ namespace Gnomenu {
 		construct {
 			disposed = false;
 			_item_type = MenuItemType.NORMAL;
+			_cached_label_widget = new MenuLabel();
+			_cached_image_widget = new Image();
+			_cached_arrow_widget = new Arrow(gravity_to_arrow_type(_gravity), ShadowType.NONE);
+
 			create_labels();
 		}
 
@@ -240,7 +244,7 @@ namespace Gnomenu {
 					case MenuItemType.ICON:
 						if(old_type != MenuItemType.ICON) {
 							remove_child();
-							_icon_widget = new Gtk.Image();
+							_icon_widget = new Image();
 							_icon_widget.visible = true;
 							add(_icon_widget);
 							update_image();
@@ -248,7 +252,7 @@ namespace Gnomenu {
 					break;
 				}
 				if(_item_type == MenuItemType.IMAGE) {
-					_image_widget = new Gtk.Image();
+					_image_widget = _cached_image_widget;
 					_image_widget.set_parent(this);
 					_image_widget.visible = _show_image;
 					update_image();
@@ -289,7 +293,20 @@ namespace Gnomenu {
 			}
 		}
 		
+		/*used by MenuShell truncate and the serializer.*/
+		public bool truncated {
+			set {
+				_truncated = value;
+				visible = !truncated;
+			}
+			get {
+				return _truncated;
+			}
+		}
+
 		private bool disposed;
+
+		private bool _truncated;
 
 		private string _path; /*merely a buffer*/
 		private string _font;
@@ -301,6 +318,10 @@ namespace Gnomenu {
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
+
+		private Image _cached_image_widget;
+		private Arrow _cached_arrow_widget;
+		private MenuLabel _cached_label_widget;
 
 		private bool _show_image {
 			get {
@@ -597,7 +618,7 @@ namespace Gnomenu {
 		}
 		private void create_labels() {
 			assert(item_type_has_label(_item_type));
-			add(new MenuLabel());
+			add(_cached_label_widget);
 			get_child().visible = true;
 			(get_child() as MenuLabel).gravity = gravity;
 			update_font();	
@@ -612,7 +633,7 @@ namespace Gnomenu {
 		}
 		private void create_arrow() {
 			assert(_item_type == MenuItemType.ARROW);
-			add(new Arrow(gravity_to_arrow_type(_gravity), ShadowType.NONE));
+			add(_cached_arrow_widget);
 			get_child().visible = true;
 		}
 		private void update_arrow_type() {

@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <libgnomenu/menuitem.h>
 
 static void gmsg_foreach_cb(GtkWidget * child, gpointer data[]) {
 	gint * pos = data[0];
@@ -22,7 +23,8 @@ void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 	for(iter = g_list_last(children); iter; iter = iter->prev) {
 		if(l > length) {
 			//gtk_container_remove(menu_shell, iter->data);	
-			gtk_widget_hide(GTK_WIDGET(iter->data));
+//			gtk_widget_hide(GTK_WIDGET(iter->data));
+			gnomenu_menu_item_set_truncated(iter->data, TRUE);
 		}
 		l--;
 	}
@@ -30,7 +32,7 @@ void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 }
 static void gmsl_foreach(GtkWidget * child, gpointer data[]) {
 	gint * length = data[0];
-	(*length) ++;
+	if(!gnomenu_menu_item_get_truncated(child)) (*length) ++;
 }
 gint gtk_menu_shell_length(GtkMenuShell * menu_shell) {
 	gint length = 0;

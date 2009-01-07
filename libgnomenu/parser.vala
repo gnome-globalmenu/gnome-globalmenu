@@ -123,6 +123,7 @@ namespace Gnomenu {
 			if(sensitive != false)
 				sensitive = true;
 
+			item.truncated = false;
 			item.id = id;
 			item.accel_text = accel;
 			item.visible = visible;
