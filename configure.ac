@@ -78,9 +78,27 @@ PKG_CHECK_MODULES(WNCK, libwnck-1.0 >= $WNCK_REQUIRED)
 AC_SUBST(WNCK_CFLAGS)
 AC_SUBST(WNCK_LIBS)
 
-PKG_CHECK_MODULES(PANEL, libpanelapplet-2.0 >= $PANEL_REQUIRED)
-AC_SUBST(PANEL_CFALGS)
-AC_SUBST(PANEL_LIBS)
+AC_ARG_WITH(
+	[gnome-panel],
+	AC_HELP_STRING([--without-gnome-panel], [disable gnome panel applet]),
+	[],
+	[with_gnome_panel=yes])
+AS_IF([test "x$with_gnome_panel" != xno],
+	[PKG_CHECK_MODULES(PANEL, [libpanelapplet-2.0 >= $PANEL_REQUIRED],
+		[
+		with_gnome_panel=true;
+		AC_SUBST(PANEL_CFLAGS)
+		AC_SUBST(PANEL_LIBS)
+		],
+		[
+		with_gnome_panel=false;
+		if test "x$with_gnome_panel" != xcheck; then
+			AC_MSG_FAILURE(
+				[test for libpanelapplet-2.0 failed. (--without-gnome-panel to disable).])
+		fi;]
+	)])
+AM_CONDITIONAL(WITH_GNOME_PANEL, [test "x$with_gnome_panel" = xtrue ]) 
+
 
 PKG_CHECK_MODULES(GIO, gio-2.0 >= $GIO_REQUIRED)
 AC_SUBST(GIO_FLAGS)

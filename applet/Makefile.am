@@ -13,12 +13,15 @@ VALASOURCES = \
 	monitor.vala \
 	$(NULL)
 
+if WITH_GNOME_PANEL
 libexec_PROGRAMS = GlobalMenu.PanelApplet
 
 serverdir = $(BONOBO_SERVER_DIR)
+server_DATA = $(server_in_files:.server.in=.server)
+endif
+
 server_in_in_files = GlobalMenu_PanelApplet.server.in.in
 server_in_files = GlobalMenu_PanelApplet.server.in
-server_DATA = $(server_in_files:.server.in=.server)
 @INTLTOOL_SERVER_RULE@
 
 $(server_in_files): $(server_in_in_files) Makefile
