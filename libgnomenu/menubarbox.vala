@@ -74,9 +74,11 @@ public class MenuBarBox: Gtk.Container {
 		if(include_internals) {
 
 		}
-		List<weak Gnomenu.MenuBar> copy = children.copy();
-		foreach(Gnomenu.MenuBar menubar in copy) {
-			callback(menubar);
+		weak List<weak Gnomenu.MenuBar> iter = children;
+		while(iter!=null) {
+			weak Widget child = iter.data;
+			iter = iter.next;
+			callback(child);
 		}
 	}
 	public override void add(Widget child) {

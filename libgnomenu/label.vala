@@ -131,8 +131,10 @@ namespace Gnomenu {
 
 			if(include_internals) {
 			}
-			List<weak Label> copy = children.copy();
-			foreach(Widget child in copy) {
+			weak List<weak Label> iter = children;
+			while(iter != null) {
+				weak Widget child = iter.data;
+				iter = iter.next;
 				callback(child);
 			}
 		}
