@@ -87,9 +87,10 @@ public class Applet : Panel.Applet {
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
 		if(window is Wnck.Window) {
-			if (window.is_skip_pager())
-				selector.current_window = find_desktop(window); else /* TOFIX: must implement a safer way to ensure consistency between switcher.current_window and actual menu shown by the gnomenu */
-				selector.current_window = window;
+			/* if (window.is_skip_pager())
+				selector.current_window = find_desktop(window); else
+				selector.current_window = window; */
+			selector.current_window = monitor.current_window;
 		}
 	}
 	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {

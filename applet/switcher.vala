@@ -88,7 +88,9 @@ public extern string* __get_task_name_by_pid(int pid);
 				int items = 0;
 				foreach(weak Wnck.Window window in windows) {
 					if (!window.is_skip_pager()) {
-						set_iconify_destination(window); /* just in case that no other task bars are around and the users clicks on the minimize button */
+						/* just in case that no other task bars are around and the users clicks on the minimize button */
+						// set_iconify_destination(window);
+						
 						Gtk.ImageMenuItem mi;
 						string txt = window.get_name();
 						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
@@ -165,7 +167,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (!this.visible) return;
 			
 			if(current_window == null) return;
-			_label = get_application_name(current_window);
+			
+			Wnck.WindowType wt = current_window.get_window_type();
+			if (wt==Wnck.WindowType.DOCK) 
+				_label = ""; else
+				_label = get_application_name(current_window);
+				
 			if (_show_label) 
 				Parser.parse(this, 
 					TEMPLATE.replace("%s", cut_string(_label, _max_size)));
