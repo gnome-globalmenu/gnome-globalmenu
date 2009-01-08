@@ -31,7 +31,11 @@ public class Monitor: GLib.Object {
 			_wnck_screen.window_opened += on_window_opened;
 			_wnck_screen.active_window_changed += on_active_window_changed;
 			_wnck_screen.active_window_changed (null);
-			_desktop = find_desktop(_wnck_screen);
+			Wnck.Window new_desktop = find_desktop(_wnck_screen);
+			if(_current_window == _desktop) {
+				_current_window = new_desktop;
+			}
+			_desktop = new_desktop;
 		}
 	}
 	public Gnomenu.MenuBar? menubar {
@@ -98,6 +102,7 @@ public class Monitor: GLib.Object {
 			_desktop = null;
 		}
 		if(window == current_window) {
+			window.set_data("window-closed", window);
 			update_current_window();
 		}
 	}
@@ -106,20 +111,7 @@ public class Monitor: GLib.Object {
 			_desktop = window;
 	}
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
-		weak Wnck.Window window = screen.get_active_window();
-		if((window != previous_window) && (window is Wnck.Window)) {
-			weak Wnck.Window transient_for = window.get_transient();
-			if(transient_for != null) window = transient_for;
-			switch(window.get_window_type()) {
-				case Wnck.WindowType.NORMAL:
-				case Wnck.WindowType.DESKTOP:
-					update_current_window();
-				break;
-				default:
-					/*Do nothing if it is a toolbox or so*/
-				break;
-			}
-		}
+		update_current_window();
 	}
 
 	private Wnck.Window? find_desktop(Wnck.Screen screen) {
@@ -137,6 +129,22 @@ public class Monitor: GLib.Object {
 		_current_window = _wnck_screen.get_active_window();
 		if(_current_window == null)
 			_current_window = _desktop;
+		if(_current_window != null) {
+			switch(_current_window.get_window_type()) {
+				case Wnck.WindowType.NORMAL:
+				case Wnck.WindowType.DESKTOP:
+					break;
+				default:
+					if(old.get_data("window-closed") != null) {
+						_current_window = _desktop;
+						old.set_data("window-closed", null);
+					}
+					break;
+			}
+			weak Wnck.Window transient_for = _current_window.get_transient();
+			if(transient_for != null) 
+				_current_window = transient_for;
+		}
 		if(old == _current_window) return;
 		if( _current_gnomenu_window != null) {
 			_current_gnomenu_window.destroy();
