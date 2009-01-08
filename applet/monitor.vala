@@ -138,10 +138,10 @@ public class Monitor: GLib.Object {
 				case Wnck.WindowType.DESKTOP:
 					break;
 				default:
-					if(old.get_data("window-closed") != null) {
+					//if(old.get_data("window-closed") != null) {
 						_current_window = _desktop;
 						old.set_data("window-closed", null);
-					}
+					//}
 					break;
 			}
 		}
