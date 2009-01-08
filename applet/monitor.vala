@@ -130,6 +130,9 @@ public class Monitor: GLib.Object {
 		if(_current_window == null)
 			_current_window = _desktop;
 		if(_current_window != null) {
+			weak Wnck.Window transient_for = _current_window.get_transient();
+			if(transient_for != null) 
+				_current_window = transient_for;
 			switch(_current_window.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
 				case Wnck.WindowType.DESKTOP:
@@ -141,9 +144,6 @@ public class Monitor: GLib.Object {
 					}
 					break;
 			}
-			weak Wnck.Window transient_for = _current_window.get_transient();
-			if(transient_for != null) 
-				_current_window = transient_for;
 		}
 		if(old == _current_window) return;
 		if( _current_gnomenu_window != null) {
