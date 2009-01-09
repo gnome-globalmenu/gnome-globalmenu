@@ -83,6 +83,10 @@ DEFINE_FUNC(void, gtk_menu_bar, set_property,
 	  if(GTK_WIDGET_MAPPED (menubar))
 		  _gtk_menu_bar_map (GTK_WIDGET(menubar));
 	  gtk_widget_queue_resize(GTK_WIDGET(menubar));
+	  if(is_local)
+		  dyn_patch_set_menubar_r(GTK_WIDGET(menubar), NULL);
+	  else 
+		  dyn_patch_set_menubar_r(GTK_WIDGET(menubar), menubar);
 	  break;
     default:
 	  {

@@ -89,6 +89,12 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		}
 	}
 	g_timer_stop(timer);
+
+	if(menubar != NULL) {
+		gboolean local = FALSE;
+		g_object_get(menubar, "local", &local, NULL);
+		if(local) return;
+	}
 	dyn_patch_set_menubar(widget, menubar);
 
 	if(GTK_IS_CONTAINER(widget)) {
