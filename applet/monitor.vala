@@ -1,6 +1,7 @@
 using Gnomenu;
 using Wnck;
 
+namespace Gnomenu {
 public class Monitor: GLib.Object {
 	public Wnck.Screen screen {
 		get {
@@ -232,4 +233,5 @@ public class Monitor: GLib.Object {
 		/* elseever */
 		_menubar.hide();
 	}
+}
 }

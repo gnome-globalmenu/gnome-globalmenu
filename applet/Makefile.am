@@ -2,16 +2,53 @@ NULL =
 
 STAMP = vala-stamp
 
-BUILT_SOURCES = $(STAMP) $(server_in_files)
+BUILT_SOURCES = $(STAMP) $(libapplet_STAMP) $(server_in_files)
+
 VALASOURCES = \
 	applet.vala \
 	main.vala \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
 	gnomemenuhelper.vala \
+	$(NULL)
+libapplet_VALASOURCES = \
 	wncktools.vala \
 	monitor.vala \
 	$(NULL)
+libapplet_STAMP = libapplet-private.vapi
+
+libapplet_la_SOURCES =  \
+	$(libapplet_VALASOURCES:.vala=.c) \
+	$(libapplet_VALASOURCES:.vala=.h) \
+	wncktools-ccode.c \
+	$(NULL)
+libapplet_la_LIBADD = \
+		$(GLIB_LIBS) \
+		$(GTK_LIBS) \
+		$(WNCK_LIBS) \
+		../libgnomenu/libgnomenu.la \
+		$(NULL)
+libapplet_la_CPPFLAGS = \
+		$(GLIB_CFLAGS) \
+		$(GTK_CFLAGS) \
+		$(WNCK_CFLAGS) \
+		-I$(top_srcdir) \
+		-include $(CONFIG_HEADER) \
+		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
+		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+		-g \
+		$(NULL)
+$(libapplet_STAMP): $(libapplet_VALASOURCES) patchlibapplet.sh
+	$(VALAC) -C --vapidir=. \
+	--vapidir=$(top_srcdir)/libgnomenu \
+	--pkg=gtk+-2.0 \
+	--pkg=libwnck-1.0 \
+	--pkg=gnomenu-private \
+	--library=libapplet-private \
+	$(libapplet_VALASOURCES)
+	bash patchlibapplet.sh
+
+noinst_LTLIBRARIES = libapplet.la
 
 if WITH_GNOME_PANEL
 libexec_PROGRAMS = GlobalMenu.PanelApplet
@@ -35,18 +72,19 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(NULL)
 
 
-$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
+$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps	libapplet-private.vapi
 	$(VALAC) -C --vapidir=. \
 	--vapidir=$(top_srcdir)/libgnomenu \
 	--pkg=gtk+-2.0 \
 	--pkg=libwnck-1.0 \
 	--pkg=libpanelapplet-2.0 \
-	--pkg=gnomenu-private \
 	--pkg=gnome-desktop-2.0 \
 	--pkg=libgnome-menu \
 	--pkg=gconf-2.0 \
 	--pkg=gconfcompat \
 	--pkg=wnckcompat \
+	--pkg=gnomenu-private \
+	--pkg=libapplet-private \
 	$(VALASOURCES)
 	bash patch.sh
 	touch $@
@@ -62,6 +100,7 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(PANEL_LIBS) \
 		$(GMENU_LIBS) \
 		../libgnomenu/libgnomenu.la \
+		libapplet.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GLIB_CFLAGS) \
@@ -82,7 +121,9 @@ icons_DATA = globalmenu.png
 
 EXTRA_DIST = \
 	$(STAMP) \
+	$(libapplet_STAMP) \
 	patch.sh \
+	patchlibapplet.sh \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
