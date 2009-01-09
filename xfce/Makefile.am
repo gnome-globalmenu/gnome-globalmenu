@@ -11,9 +11,18 @@ $(desktopfile_in_files): $(desktopfile_in_in_files) Makefile
 	sed -e "s|@LOCATION@|$(libexecdir)/xfce4/panel-plugins|" $< > $@
 
 GlobalMenu_XFCEPlugin_SOURCES = main.c
+GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
+								 $(WNCK_CFLAGS) \
+						-I$(top_srcdir) \
+						-include $(CONFIG_HEADER) \
+						-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
+						-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+						-g 
 
-AM_CPPFLAGS = $(XFCE4_PANEL_CFLAGS)
-AM_LDFLAGS = $(XFCE4_PANEL_LIBS)
+GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
+			$(WNCK_LIBS) \
+			../libgnomenu/libgnomenu.la \
+		   ../applet/libapplet.la
 
 EXTRA_DIST = \
 	$(desktopfile_in_in_files)	 
