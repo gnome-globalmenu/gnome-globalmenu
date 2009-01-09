@@ -7,7 +7,7 @@ namespace Gnomenu {
 		 * We don't do dispose, but gtk won't reset these pointers
 		 * related to the colormaps and valgrind won't be happy.
 		 */
-		private override void dispose() {
+		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
 				/*

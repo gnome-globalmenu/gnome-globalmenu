@@ -13,7 +13,9 @@ public int main(string[] args) {
 	GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
 	context.set_help_enabled (true);
 	context.add_main_entries(options, null);
-	Gnome.Program program = Gnome.Program.init (
+	Gnome.Program program = null;
+	
+	program = Gnome.Program.init (
 			"GlobalMenu.PanelApplet", Config.VERSION, 
 			Gnome.libgnomeui_module, 
 			args, 

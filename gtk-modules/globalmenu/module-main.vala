@@ -13,7 +13,7 @@ public class GlobalMenuGNOME {
 
 	private static uint deferred_init_id = 0;
 	[CCode (cname="gtk_module_init")]
-	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref weak string[] args) {
+	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref string[] args) {
 		if(!disabled) {
 			deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
 		}
@@ -64,6 +64,9 @@ public class GlobalMenuGNOME {
 			}
 
 			debug("Global Menu plugin module is unloaded");
+			/******
+			 * this line is causing vala gives two criticals
+			 * */
 			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
 			log_stream = null;
 		}
@@ -78,7 +81,7 @@ public class GlobalMenuGNOME {
 	};
 
 	private static bool parse_args() {
-		string [] args;
+		string [] args = null;
 		string env = Environment.get_variable("GLOBALMENU_GNOME_ARGS");
 		bool rt = true;	
 		if(env != null) {

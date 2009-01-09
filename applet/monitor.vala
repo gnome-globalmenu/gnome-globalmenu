@@ -220,7 +220,11 @@ public class Monitor: GLib.Object {
 		if(_current_gnomenu_window != null) {
 			string context = _current_gnomenu_window.menu_context;
 			if(context != null) {
-				Parser.parse(_menubar, context);
+				try {
+					Parser.parse(_menubar, context);
+				} catch(GLib.Error e) {
+					warning("%s", e.message);	
+				}
 				_menubar.show();
 				return;
 			}

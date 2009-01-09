@@ -348,7 +348,11 @@ namespace Gnomenu {
 			MenuBar menubar = new MenuBar();
 			menubar.set_parent(this);
 			menubar.style = style;
-			Parser.parse(menubar,OVERFLOWER_TEMPLATE.printf("<menu/>"));
+			try {
+				Parser.parse(menubar,OVERFLOWER_TEMPLATE.printf("<menu/>"));
+			} catch(GLib.Error e) {
+				warning("%s", e.message);
+			}
 			menubar.activate += (menubar, item) => {
 				string path = item.path;
 				if(item.id == "_arrow_") {
@@ -374,7 +378,11 @@ namespace Gnomenu {
 				overflown_menu = "<menu/>";
 			}
 			string overflower_context = OVERFLOWER_TEMPLATE.printf(overflown_menu);
-			Parser.parse(_overflown_menubar, overflower_context);
+			try {
+				Parser.parse(_overflown_menubar, overflower_context);
+			} catch(GLib.Error e) {
+				warning("%s", e.message);
+			}
 		}
 		private string? overflown_path_to_path(string path) {
 			int slashes = 0;

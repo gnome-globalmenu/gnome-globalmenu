@@ -78,18 +78,13 @@ public class Applet : Panel.Applet {
 			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
 		}
 	}
-	private Wnck.Window? find_desktop(Wnck.Window? window) {
-		weak Wnck.Screen screen = window.get_screen();
-		foreach(weak Wnck.Window w in (weak List<weak Wnck.Window>)screen.get_windows())
-			if (w.get_window_type() == Wnck.WindowType.DESKTOP) return w;
-		return null;
-	}
+
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
 		if(window is Wnck.Window)
 			selector.current_window = monitor.current_window;
 	}
-	private override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
+	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
@@ -110,7 +105,7 @@ public class Applet : Panel.Applet {
 		}
 		menubars.background = bg;
 	}
-	private override void change_orient(AppletOrient orient) {
+	public override void change_orient(AppletOrient orient) {
 		switch(orient) {
 			case AppletOrient.UP:
 				menubars.gravity = Gravity.DOWN;
@@ -146,10 +141,21 @@ public class Applet : Panel.Applet {
 						"Valiant Wing <Valiant.Wing@gmail.com>"};
 	
 	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
+
+	static const BonoboUI.Verb[] verbs = { 
+			{"About", on_about_clicked, null},
+			{"Help", on_help_clicked, null},
+			{"Preference", on_preferences_clicked, null},
+			{null, null, null}
+		};
 		    
 	public void init() {
 		/* Connect to gconf */
-		this.add_preferences(GCONF_SCHEMA_DIR);
+		try {
+			this.add_preferences(GCONF_SCHEMA_DIR);
+		} catch (GLib.Error e) {
+			warning("%s", e.message );
+		}
 		GConf.Client.get_default().value_changed += (key, value) => {
 			this.get_prefs();
 		};
@@ -173,23 +179,6 @@ public class Applet : Panel.Applet {
 </popup>
 		""");
 		    
-		var verbPreferences = new BonoboUI.Verb ();
-		verbPreferences.cname = "Preferences";
-		verbPreferences.cb = on_preferences_clicked;
-		
-		var verbAbout = new BonoboUI.Verb ();
-		verbAbout.cname = "About";
-		verbAbout.cb = on_about_clicked;
-		
-		var verbHelp = new BonoboUI.Verb ();
-		verbHelp.cname = "Help";
-		verbHelp.cb = on_help_clicked;
-		
-		var verbEnd = new BonoboUI.Verb ();
-		verbEnd.cname = null;
-		verbEnd.cb = null;
-
-		BonoboUI.Verb[] verbs = { verbAbout, verbHelp, verbPreferences, verbEnd };
 		setup_menu (applet_menu_xml, verbs, this);
 
 		get_prefs();
@@ -205,7 +194,7 @@ public class Applet : Panel.Applet {
 	}
 	private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-		Applet _this = (Applet) user_data;
+//		Applet _this = (Applet) user_data;
 		
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
@@ -223,7 +212,7 @@ public class Applet : Panel.Applet {
     }
     private static void on_help_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
-		Applet _this = (Applet) user_data;
+//		Applet _this = (Applet) user_data;
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		dialog.version = Config.VERSION;

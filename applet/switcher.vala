@@ -21,7 +21,11 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 
 		construct {
-			Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
+			try {
+				Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
+			} catch (GLib.Error e) {
+				warning("%s", e.message);
+			}
 			program_list = GnomeMenuHelper.get_flat_list();
 			if (program_list.lookup("nautilus")==null)
 				program_list.insert("nautilus", _("File Manager"));
@@ -132,10 +136,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			case "python2.5":
 			case "vmplayer":
 				return remove_path(txt.chomp().split(" ")[1], "/");
-				break;
 			case "wine":
 				return window.get_application().get_name();
-				break;
 			}
 			return ret;
 		}
@@ -173,11 +175,15 @@ public extern string* __get_task_name_by_pid(int pid);
 				_label = ""; else
 				_label = get_application_name(current_window);
 				
-			if (_show_label) 
-				Parser.parse(this, 
-					TEMPLATE.replace("%s", cut_string(_label, _max_size)));
-		   	else
-				Parser.parse(this, TEMPLATE.replace("%s", ""));
+			try {
+				if (_show_label) 
+					Parser.parse(this, 
+						TEMPLATE.replace("%s", cut_string(_label, _max_size)));
+				else
+					Parser.parse(this, TEMPLATE.replace("%s", ""));
+			} catch (GLib.Error e) {
+				warning("%s", e.message);
+			}
 				
 			if (!_show_icon) {
 				item.item_type = "normal";

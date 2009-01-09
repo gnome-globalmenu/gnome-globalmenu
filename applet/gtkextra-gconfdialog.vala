@@ -39,19 +39,26 @@ using GConf;
 			//vbox.width_request = 320;
 		}
 		public void add_key(string key) {
-			weak GConf.Entry entry = _default_client.get_entry(key, null, true);
-			if(entry != null)
-				addEntry(entry);
+			try {
+				weak GConf.Entry entry = _default_client.get_entry(key, null, true);
+				if(entry != null) addEntry(entry);
+			} catch (GLib.Error e) {
+				warning("%s", e.message);
+			}
 		}
 		public void add_subkeys(string key, string[]? subkeys= null) {
-			weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(key);
-			if (subkeys == null) {
-				foreach(weak GConf.Entry entry in prefs)
-					addEntry(entry);
-       		} else {
-				foreach(weak string subkey in subkeys) {
-					add_key(key + "/" + subkey);
+			try {
+				weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(key);
+				if (subkeys == null) {
+					foreach(weak GConf.Entry entry in prefs)
+						addEntry(entry);
+				} else {
+					foreach(weak string subkey in subkeys) {
+						add_key(key + "/" + subkey);
+					}
 				}
+			} catch(GLib.Error e) {
+				warning("%s", e.message);
 			}
 		}
 
@@ -87,7 +94,6 @@ using GConf;
        				break;
        			default:
        				return;
-       				break;
 			}
 			widget.user_data = entry;
 				
@@ -107,12 +113,20 @@ using GConf;
 		}
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
 			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
-			_default_client.set_bool(entry.key, widget.active);
+			try {
+				_default_client.set_bool(entry.key, widget.active);
+			} catch (GLib.Error e) {
+				warning("%s", e.message);	
+			}
 		}
 		
 		private void onSpinButtonValueChanged(Gtk.SpinButton widget) {
 			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
-			_default_client.set_int(entry.key, (int)widget.value);
+			try {
+				_default_client.set_int(entry.key, (int)widget.value);
+			} catch (GLib.Error e) {
+				warning("%s", e.message);
+			}
 		}
 		
 		private void onResetButtonPressed(Gtk.Button widget) {
