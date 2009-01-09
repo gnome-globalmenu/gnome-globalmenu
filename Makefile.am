@@ -48,4 +48,6 @@ rpm:
 	touch `find . -name '*.vala'`
 	make dist
 	rpmbuild -tb $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz
-
+rpm-fast:
+	make dist
+	rpmbuild -tb $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz

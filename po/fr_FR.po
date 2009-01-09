@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 19:18-0500\n"
+"POT-Creation-Date: 2009-01-09 00:20-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,31 +11,35 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1162
+#: ../libgnomenu/menuitem.c:1192
 msgid "Indicator Size"
 msgstr "Taille de l'Indicateur"
 
-#: ../libgnomenu/menuitem.c:1162
+#: ../libgnomenu/menuitem.c:1192
 msgid "Size of check or radio indicator"
 msgstr "Taille de l'indicateur check ou radio"
 
-#: ../gtk-modules/globalmenu/module-main.c:28 ../applet/main.c:23
+#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
 msgid "Be verbose"
 msgstr "Etre prolixe (verbose mode)"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:29
+msgid "disable serializing pixbuf"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Disable the Plugin"
 msgstr "Désactiver ce Greffon"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Fichier dans lequel sauvegarder le journal, par défaut ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:135
+#: ../gtk-modules/globalmenu/module-main.c:146
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Applet Menu Global pour GNOME"
 
-#: ../gtk-modules/globalmenu/module-main.c:136
+#: ../gtk-modules/globalmenu/module-main.c:147
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -48,25 +52,25 @@ msgstr ""
 "NOTE: L'environnement GTK_MENUBAR_NO_MAC contient les applications que le "
 "greffon ignorera."
 
-#: ../applet/applet.c:39
+#: ../applet/applet.c:35
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:524
+#: ../applet/applet.c:265
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
-"\t<menuitem debuname=\"Preferences\" \n"
+"\t<menuitem name=\"Preferences\" \n"
 "\t\tverb=\"Preferences\" \n"
 "\t\t_label=\"_Preferences\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem debuname=\"Help\" \n"
+"\t<menuitem name=\"Help\" \n"
 "\t\tverb=\"Help\" \n"
 "\t\t_label=\"_Help\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem debuname=\"About\" \n"
+"\t<menuitem name=\"About\" \n"
 "\t\tverb=\"About\" _label=\"_About...\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-about\"/>\n"
@@ -74,11 +78,11 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:598
+#: ../applet/applet.c:323
 msgid "Project Home"
 msgstr "Page Internet du Projet"
 
-#: ../applet/applet.c:624
+#: ../applet/applet.c:345
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
@@ -86,11 +90,11 @@ msgstr "Aide en Ligne"
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:455
+#: ../applet/switcher.c:453
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:729
+#: ../applet/switcher.c:762
 msgid "File Manager"
 msgstr ""
 
@@ -161,6 +165,16 @@ msgstr "Fabrique d'applet de Menu Global"
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "La fabrique pour construire les objets GlobalMenu.PanelApplet"
 
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#, fuzzy
+msgid "Global Menu Plugin for XFCE Panel"
+msgstr "Le module du greffon de Menu Global est chargé"
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#, fuzzy
+msgid "The Global Menu Plugin for XFCE Panel"
+msgstr "Applet Menu Global pour GNOME"
+
 #~ msgid "Show debug messages from GMarkupDoc and Gnomenu"
 #~ msgstr "Montrer les messages de débogage de GMarkupDoc et Gnomenu"
 
@@ -174,9 +188,6 @@ msgstr "La fabrique pour construire les objets GlobalMenu.PanelApplet"
 
 #~ msgid "Global Menu plugin module is unloaded"
 #~ msgstr "Le module du greffon de Menu Global a été déchargé"
-
-#~ msgid "Global Menu plugin module is loaded"
-#~ msgstr "Le module du greffon de Menu Global est chargé"
 
 #~ msgid "Log file %s is not accessible. Fallback to stderr. %s"
 #~ msgstr "Le fichier journal %s n'est pas accessible. Repli sur stderr. %s"

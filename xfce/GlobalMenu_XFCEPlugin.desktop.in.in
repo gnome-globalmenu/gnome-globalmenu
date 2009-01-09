@@ -1,0 +1,7 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+Encoding=UTF-8
+_Name=Global Menu Plugin for XFCE Panel
+_Comment=The Global Menu Plugin for XFCE Panel
+Icon=globalmenu
+X-XFCE-Exec=@LOCATION@/GlobalMenu.XFCEPlugin

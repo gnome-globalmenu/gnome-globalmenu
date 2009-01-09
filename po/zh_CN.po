@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 19:18-0500\n"
+"POT-Creation-Date: 2009-01-09 00:20-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -11,31 +11,35 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1162
+#: ../libgnomenu/menuitem.c:1192
 msgid "Indicator Size"
 msgstr "复选框的大小"
 
-#: ../libgnomenu/menuitem.c:1162
+#: ../libgnomenu/menuitem.c:1192
 msgid "Size of check or radio indicator"
 msgstr "单选框的大小"
 
-#: ../gtk-modules/globalmenu/module-main.c:28 ../applet/main.c:23
+#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
 msgid "Be verbose"
 msgstr "显示调试信息"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:29
+msgid "disable serializing pixbuf"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Disable the Plugin"
 msgstr "禁用本插件"
 
-#: ../gtk-modules/globalmenu/module-main.c:28
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "保存调试信息的文件。默认为标准错误流(~/.gnomenu.log)"
 
-#: ../gtk-modules/globalmenu/module-main.c:135
+#: ../gtk-modules/globalmenu/module-main.c:146
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- 全局菜单 GTK 插件"
 
-#: ../gtk-modules/globalmenu/module-main.c:136
+#: ../gtk-modules/globalmenu/module-main.c:147
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -46,25 +50,26 @@ msgstr ""
 "这些命令行参数应当在环境变量 GLOBALMENU_GNOME_ARGS 里设置。注意: 可以在 "
 "GTK_MENUBAR_NO_MAC 环境变量里提供禁用插件的应用程序列表。"
 
-#: ../applet/applet.c:39
+#: ../applet/applet.c:35
 msgid "globalmenu-panel-applet"
 msgstr "全局菜单小程序"
 
-#: ../applet/applet.c:524
+#: ../applet/applet.c:265
+#, fuzzy
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
-"\t<menuitem debuname=\"Preferences\" \n"
+"\t<menuitem name=\"Preferences\" \n"
 "\t\tverb=\"Preferences\" \n"
 "\t\t_label=\"_Preferences\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem debuname=\"Help\" \n"
+"\t<menuitem name=\"Help\" \n"
 "\t\tverb=\"Help\" \n"
 "\t\t_label=\"_Help\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem debuname=\"About\" \n"
+"\t<menuitem name=\"About\" \n"
 "\t\tverb=\"About\" _label=\"_About...\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-about\"/>\n"
@@ -90,11 +95,11 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:598
+#: ../applet/applet.c:323
 msgid "Project Home"
 msgstr "项目主页"
 
-#: ../applet/applet.c:624
+#: ../applet/applet.c:345
 msgid "On-line help"
 msgstr "在线帮助"
 
@@ -102,11 +107,11 @@ msgstr "在线帮助"
 msgid "no windows"
 msgstr "没有文档"
 
-#: ../applet/switcher.c:455
+#: ../applet/switcher.c:453
 msgid "Desktop"
 msgstr "桌面"
 
-#: ../applet/switcher.c:729
+#: ../applet/switcher.c:762
 msgid "File Manager"
 msgstr "文件管理器"
 
@@ -172,6 +177,16 @@ msgstr "全局菜单小程序工厂"
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "构造全局菜单小程序的工厂"
 
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#, fuzzy
+msgid "Global Menu Plugin for XFCE Panel"
+msgstr "- 全局菜单 GTK 插件"
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#, fuzzy
+msgid "The Global Menu Plugin for XFCE Panel"
+msgstr "- 全局菜单 GTK 插件"
+
 #, fuzzy
 #~ msgid "Global Menu is enabled"
 #~ msgstr "全局菜单插件被启用"
@@ -182,10 +197,6 @@ msgstr "构造全局菜单小程序的工厂"
 
 #, fuzzy
 #~ msgid "Global Menu plugin module is unloaded"
-#~ msgstr "- 全局菜单 GTK 插件"
-
-#, fuzzy
-#~ msgid "Global Menu plugin module is loaded"
 #~ msgstr "- 全局菜单 GTK 插件"
 
 #~ msgid "Log file %s is not accessible. Fallback to stderr. %s"

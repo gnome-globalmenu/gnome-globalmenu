@@ -1,8 +1,8 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn1984
+%define 	svn_version 	svn1997
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -11,26 +11,46 @@ URL:		http://code.google.com/p/gnome2-globalmenu/
 Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{base_version}-%{release}-XXXXXXX)
 
-Requires:		gtk2
-Requires:		libwnck
-Requires:		gnome-panel
-
 Requires(pre): GConf2
 Requires(post): GConf2
 Requires(preun): GConf2
 
-
 %description
 GNOME Global Menu project aims to improve GNOME toward a Document Centric Desktop Environment. Global Menu is a menu bar shared with every window in this screen/session. This package extends GTK and gnome panel in a way such that Global Menu can be enabled on all GTK applications.
+
+%package		common
+Summary:		Shared configurations and translations of Global Menu packages
+Group:			User Interface/Desktops
+%description	common
+This package contains shared configurations and translations of various Global Menu packages.
+
+%package 		gtkmodule
+Summary:		Gtk Plugin Module of Global Menu
+Group: 			User Interface/Desktops
+Requires:		gtk2
+Requires:		gnome-globalmenu-common
+%description	gtkmodule
+The Gtk Plugin Module of Global Menu adds global menu feature to any GTK applications on the fly without the need of modifying the source code.
+
+%package		gnome-panel
+Summary:		GNOME panel applet of Global Menu
+Group:			User Interface/Desktops
+Requires:		gtk2
+Requires:		gnome-panel
+Requires:		libwnck
+Requires:		gnome-menus
+Requires:		gnome-globalmenu-common
+%description 	gnome-panel
+The GNOME panel applet of Global Menu is a representation of Global Menu with GTK widgets. The applet can be inserted to the default top panel to provide access to the Global Menu of the applications. 
+The applet also provides limited window management functionalities.
 
 %prep
 %setup -q -n %{name}-%{base_version}
 
 
 %build
-%configure --disable-schemas-install --disable-static --disable-tests
+%configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel
 make %{?_smp_mflags}
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -41,40 +61,41 @@ rm -f $RPM_BUILD_ROOT/%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%pre
+%pre common
 if [ "$1" -gt 1 ] ; then
 	export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 	gconftool-2 --makefile-uninstall-rule \
 	%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas >/dev/null || :
 fi
 
-%post
+%post common
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-install-rule \
 		%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas > /dev/null || :
 
-%preun
+%preun common
 if [ "$1" -eq 0 ] ; then
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-uninstall-rule \
 		%{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas > /dev/null || :
 		fi
 
-%files -f %{name}.lang
+%files common -f %{name}.lang
 %defattr(-,root,root,-)
-%{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
-%{_libexecdir}/GlobalMenu.PanelApplet
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png
 
+%files gnome-panel
+%{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
+%{_libexecdir}/GlobalMenu.PanelApplet
 
-
+%files gtkmodule
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
 
 %changelog
-* Sun Dec 21 2008 Feng Yu <rainwoodman@gmail.com>
-- 0.7 release.
+* Thu Jan 8 2009 Feng Yu <rainwoodman@gmail.com>
+- Spawn into sub packages.
 * Wed Dec 17 2008 Feng Yu <rainwoodman@gmail.com>
 - The module is ready for loaded/unloaded by GtkSettings. Because an issue with scim-bridge, the gconf key keeps disabling the module by default.
 * Tue Dec 15 2008 Feng Yu <rainwoodman@gmail.com>
