@@ -68,7 +68,6 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
 	task-utils-c.c \
-	wncktools-ccode.c \
 	$(NULL)
 
 
@@ -126,6 +125,7 @@ EXTRA_DIST = \
 	patchlibapplet.sh \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
+	$(libapplet_VALASOURCES) \
 	$(VALASOURCES) \
 	$(server_in_in_files) \
 	$(icons_DATA) \
