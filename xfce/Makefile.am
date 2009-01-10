@@ -1,6 +1,7 @@
 
 if WITH_XFCE4_PANEL
-libexec_PROGRAMS = GlobalMenu.XFCEPlugin
+GlobalMenu_XFCEPlugin_PROGRAMS = GlobalMenu.XFCEPlugin
+GlobalMenu_XFCEPlugindir = $(libexecdir)/xfce4/panel-plugins
 desktopfiledir = $(datadir)/xfce4/panel-plugins
 desktopfile_DATA = $(desktopfile_in_files:.desktop.in=.desktop)
 endif
