@@ -145,7 +145,7 @@ public class Applet : Panel.Applet {
 	static const BonoboUI.Verb[] verbs = { 
 			{"About", on_about_clicked, null},
 			{"Help", on_help_clicked, null},
-			{"Preference", on_preferences_clicked, null},
+			{"Preferences", on_preferences_clicked, null},
 			{null, null, null}
 		};
 		    
