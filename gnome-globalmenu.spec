@@ -1,8 +1,8 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn1997
+%define 	svn_version 	svn1998
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -44,12 +44,22 @@ Requires:		gnome-globalmenu-common
 The GNOME panel applet of Global Menu is a representation of Global Menu with GTK widgets. The applet can be inserted to the default top panel to provide access to the Global Menu of the applications. 
 The applet also provides limited window management functionalities.
 
+%package		xfce-panel
+Summary:		XFCE panel applet of Global Menu
+Group:			User Interface/Desktops
+Requires:		gtk2
+Requires:		xfce4-panel
+Requires:		libwnck
+Requires:		gnome-globalmenu-common
+%description 	xfce-panel
+The XFCE panel applet of Global Menu is a representation of Global Menu with GTK widgets. The applet can be inserted to the default top panel to provide access to the Global Menu of the applications. 
+
 %prep
 %setup -q -n %{name}-%{base_version}
 
 
 %build
-%configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel
+%configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --with-xfce4-panel
 make %{?_smp_mflags}
 
 %install
@@ -88,12 +98,17 @@ gconftool-2 --makefile-uninstall-rule \
 %files gnome-panel
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
 %{_libexecdir}/GlobalMenu.PanelApplet
+%files xfce-panel
+%{_datadir}/xfce4/panel-plugins/GlobalMenu_XFCEPlugin.desktop
+%{_libexecdir}/xfce4/panel-plugins/GlobalMenu.XFCEPlugin
 
 %files gtkmodule
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
 
 %changelog
+* Thu Jan 8 2009 Feng Yu <rainwoodman@gmail.com>
+- Add XFCE4 plugin
 * Thu Jan 8 2009 Feng Yu <rainwoodman@gmail.com>
 - Spawn into sub packages.
 * Wed Dec 17 2008 Feng Yu <rainwoodman@gmail.com>
