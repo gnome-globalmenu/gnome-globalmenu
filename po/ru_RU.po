@@ -1,27 +1,27 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-globalmenu-0.4\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-13 20:07+0100\n"
-"PO-Revision-Date: 2008-03-14 00:48-0400\n"
-"Last-Translator: Yu <rainwoodman@gmail.com>\n"
-"Language-Team: zh-CN <LL@li.org>\n"
+"PO-Revision-Date: 2009-01-13 20:53+0300\n"
+"Last-Translator: Sergey Bekharsky <mr.alinaki@gmail.com>\n"
+"Language-Team: ru-RU <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: ../libgnomenu/menuitem.c:1192
 msgid "Indicator Size"
-msgstr "复选框的大小"
+msgstr "Размер индикатора"
 
 #: ../libgnomenu/menuitem.c:1192
 msgid "Size of check or radio indicator"
-msgstr "单选框的大小"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
 msgid "Be verbose"
-msgstr "显示调试信息"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 msgid "disable serializing pixbuf"
@@ -29,15 +29,15 @@ msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Disable the Plugin"
-msgstr "禁用本插件"
+msgstr "Выключить плагин"
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "保存调试信息的文件。默认为标准错误流(~/.gnomenu.log)"
+msgstr "Сохранять лог в... (по умолчанию: ~/.gnomenu.log)"
 
 #: ../gtk-modules/globalmenu/module-main.c:146
 msgid "- Global Menu plugin Module for GTK"
-msgstr "- 全局菜单 GTK 插件"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.c:147
 msgid ""
@@ -47,15 +47,12 @@ msgid ""
 "ignored by the plugin.\n"
 "\t\t"
 msgstr ""
-"这些命令行参数应当在环境变量 GLOBALMENU_GNOME_ARGS 里设置。注意: 可以在 "
-"GTK_MENUBAR_NO_MAC 环境变量里提供禁用插件的应用程序列表。"
 
 #: ../applet/applet.c:35
 msgid "globalmenu-panel-applet"
-msgstr "全局菜单小程序"
+msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.c:265
-#, fuzzy
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -78,18 +75,18 @@ msgid ""
 msgstr ""
 "\n"
 "<popup name=\"button3\">\n"
-"\t<menuitem debuname=\"Preferences\" \n"
+"\t<menuitem name=\"Preferences\" \n"
 "\t\tverb=\"Preferences\" \n"
-"\t\t_label=\"首选项(_P)\" \n"
+"\t\t_label=\"_Настройки\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem debuname=\"Help\" \n"
+"\t<menuitem name=\"Help\" \n"
 "\t\tverb=\"Help\" \n"
-"\t\t_label=\"帮助(_H)\" \n"
+"\t\t_label=\"_Помощь\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem debuname=\"About\" \n"
-"\t\tverb=\"About\" _label=\"关于(_A)...\" \n"
+"\t<menuitem name=\"About\" \n"
+"\t\tverb=\"About\" _label=\"_Об апплете...\" \n"
 "\t\tpixtype=\"stock\" \n"
 "\t\tpixname=\"gtk-about\"/>\n"
 "</popup>\n"
@@ -97,113 +94,91 @@ msgstr ""
 
 #: ../applet/applet.c:323
 msgid "Project Home"
-msgstr "项目主页"
+msgstr "Страница проекта"
 
 #: ../applet/applet.c:345
 msgid "On-line help"
-msgstr "在线帮助"
+msgstr "Помощь онлайн"
 
 #: ../applet/switcher.c:352
 msgid "no windows"
-msgstr "没有文档"
+msgstr "нет окон"
 
 #: ../applet/switcher.c:453
 msgid "Desktop"
-msgstr "桌面"
+msgstr "Рабочий стол"
 
 #: ../applet/switcher.c:762
 msgid "File Manager"
-msgstr "文件管理器"
+msgstr "Файл-менеджер"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
-msgstr "在主菜单中显示窗口操作"
+msgstr "Добавить опции управления окнами в меню метки активного приложения"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Enable Global Menu For GTK applications"
-msgstr "激活全局菜单"
+msgstr "Включить Global Menu для GTK приложений"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Icon"
-msgstr "图标"
+msgstr "Значок"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
-msgstr "激活本选线将加载 libglobalmenu-gnome，全局菜单的 GTK 插件。"
+msgstr ""
+"Если ключ libglobalmenu-gnome включен, плагин для Global Menu загружен."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Label"
-msgstr "标题"
+msgstr "Метка"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Max title length"
-msgstr "最大标题长度"
+msgstr "Максимальная длина заголовка"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Show/Hide the icon of the active window"
-msgstr "显示活动窗口的图标"
+msgstr "Показать/спрятать значок активного окна"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid "Show/Hide the name of the active application"
-msgstr "显示活动程序的标准名称"
+msgstr "Показать/спрятать имя активного приложения"
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "The Maximum length of name of the active application"
-msgstr "活动应用程序名称的最大长度"
+msgstr "Максимальная длина имени активного приложения"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Uses active application lablel as application switcher"
-msgstr "使用活动程序标题来切换活动窗口"
+msgstr "Использовать меню метки активного приложения как переключатель задач"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Window Actions"
-msgstr "窗口操作"
+msgstr "Управление окнами"
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Window List"
-msgstr "显示窗口列表"
+msgstr "Список окон"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr "全局菜单小程序"
+msgstr "Апплет Global Menu"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr "全局菜单小程序工厂"
+msgstr ""
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr "构造全局菜单小程序的工厂"
+msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
-#, fuzzy
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr "- 全局菜单 GTK 插件"
+msgstr "Плагин Global Menu для панели XFCE"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
-#, fuzzy
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr "- 全局菜单 GTK 插件"
-
-#, fuzzy
-#~ msgid "Global Menu is enabled"
-#~ msgstr "全局菜单插件被启用"
-
-#, fuzzy
-#~ msgid "Global Menu is disabled"
-#~ msgstr "全局菜单插件被禁用"
-
-#, fuzzy
-#~ msgid "Global Menu plugin module is unloaded"
-#~ msgstr "- 全局菜单 GTK 插件"
-
-#~ msgid "Log file %s is not accessible. Fallback to stderr. %s"
-#~ msgstr "日志文件 %s 不可写。将记录到标准错误输出流。%s"
-
-#~ msgid "GlobalMenu is disabled for several programs"
-#~ msgstr "对特定的程序全局菜单插件被强制禁用。"
-
-#~ msgid "GlobalMenu is disabled for applications in GTK_MENUBAR_NO_MAC list"
-#~ msgstr "全局菜单被禁用，因为程序名字被列在 GTK_MENUBAR_NO_MAC 中。"
+msgstr "Плагин Global Menu для панели XFCE"
