@@ -56,7 +56,7 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) bindings.vapi patch.sh dyn-patch.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --pkg gio-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
 	bash patch.sh
 	touch $@
 $(STAMP:.vapi=.deps):
@@ -65,7 +65,6 @@ $(STAMP:.vapi=.deps):
 libglobalmenu_gnome_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
-		$(GIO_LIBS) \
 		libdyn-patch.la \
 		$(NULL)
 
@@ -79,7 +78,7 @@ libglobalmenu_gnome_la_LDFLAGS = \
 		-module
 
 libglobalmenu_gnome_la_CPPFLAGS = \
-	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(GIO_CFLAGS) \
+	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
 	  -g

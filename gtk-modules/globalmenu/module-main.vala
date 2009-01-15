@@ -8,7 +8,7 @@ public class GlobalMenuGNOME {
 	private static bool disable_pixbuf = false;
 
 	private static string log_file_name = null;
-	private static GLib.OutputStream log_stream;
+	private static FileStream log_stream;
 	private static Quark domain;
 
 	private static uint deferred_init_id = 0;
@@ -113,13 +113,7 @@ public class GlobalMenuGNOME {
 
 	private static void prepare_log_file() {
 		if(!verbose) return;
-		try {
-			GLib.File file = GLib.File.new_for_path(log_file_name);
-			log_stream = file.append_to(FileCreateFlags.NONE, null);
-		} catch (GLib.Error e) {
-			/*If can't log just ignore verbose parameter.*/
-			verbose = false;
-		}	
+		log_stream = FileStream.open(log_file_name, "a+");
 	}
 
 
@@ -128,9 +122,8 @@ public class GlobalMenuGNOME {
 		TimeVal time = {0};
 		time.get_current_time();
 		string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, Environment.get_prgname(), domain, message);
-		try {
-		log_stream.write(s, s.size(), null);
-		} catch (GLib.Error e) { } 
+		log_stream.puts(s);
+		log_stream.flush();
 	}
 	private static bool is_quirky_app() {
 		string disabled_application_names = 
