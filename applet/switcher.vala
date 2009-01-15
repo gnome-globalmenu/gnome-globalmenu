@@ -22,7 +22,7 @@ public extern string* __get_task_name_by_pid(int pid);
 
 		construct {
 			try {
-				Parser.parse(this, TEMPLATE.replace("%s","Global Menu Bar"));
+				Parser.parse(this, TEMPLATE.printf("Global Menu Bar"));
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
@@ -83,7 +83,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			Gtk.Menu menu = null;
 			
 			if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && (_show_window_actions))
-				menu = new Wnck.ActionMenu(window); else
+				menu = wnck_action_menu_new(window); else
 				if (_show_window_list) menu = new Gtk.Menu();
 				/* FIXME: Since it is a Gtk.Menu, some rgba tricks has to be added */	
 			if (_show_window_list) {
@@ -98,7 +98,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						Gtk.ImageMenuItem mi;
 						string txt = window.get_name();
 						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
-						txt = txt.replace("_", "\_");
+						/*In theory with_label won't give underlines.*/
 						mi = new Gtk.ImageMenuItem.with_label(txt);
 						if (window.is_active())
 							(mi.child as Gtk.Label).set_markup("<b>" + txt + "</b>");
@@ -153,7 +153,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				ret = window.get_name();
 				program_list.insert(process_name, ret);	// fixes a problem with some apps like Archive Manager.
 			}
-			return ret.replace("_", "\_"); 
+			return ret; 
 		}
 		private string cut_string(string txt, int max) {
 			if (max<1) return txt;
@@ -178,9 +178,9 @@ public extern string* __get_task_name_by_pid(int pid);
 			try {
 				if (_show_label) 
 					Parser.parse(this, 
-						TEMPLATE.replace("%s", cut_string(_label, _max_size)));
+						TEMPLATE.printf(cut_string(_label, _max_size)));
 				else
-					Parser.parse(this, TEMPLATE.replace("%s", ""));
+					Parser.parse(this, TEMPLATE.printf(""));
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}

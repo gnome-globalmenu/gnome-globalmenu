@@ -1,4 +1,12 @@
-using Wnck;
+[CCode (cprefix = "GConf", lower_case_cprefix = "gconf_")]
+namespace GConfCompat {
+	[Compact]
+	[CCode (copy_function = "gconf_schema_copy", cheader_filename = "gconf/gconf.h")]
+	public class Schema : GConf.Schema {
+		public GConf.ValueType get_type ();
+	}
+}
+
 [CCode (cprefix = "Wnck", lower_case_cprefix = "wnck_")]
 namespace WnckCompat {
 	public class Screen : GLib.Object {
