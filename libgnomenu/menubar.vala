@@ -337,7 +337,7 @@ namespace Gnomenu {
 
 		private bool disposed;
 
-		public override void style_set(Style old_style) {
+		public override void style_set(Style? old_style) {
 			base.style_set(old_style);
 			if(_overflown_menubar != null) {
 				_overflown_menubar.style = style;
