@@ -45,7 +45,7 @@ public class Applet : Panel.Applet {
 		setup_popup_menu(selector);
 
 		main_menubar = new Gnomenu.MenuBar();
-		main_menubar.min_length = 0;  /*Then it will have a overflown item*/
+		main_menubar.min_length = 12;  /*Then it will have a overflown item*/
 		monitor.menubar = main_menubar;
 		setup_popup_menu(main_menubar);
 
