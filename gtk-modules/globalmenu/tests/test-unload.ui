@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<!--*- mode: xml -*-->
+<interface>
+  <object class="GtkUIManager" id="uimanager1">
+    <child>
+      <object class="GtkActionGroup" id="actiongroup1">
+        <child>
+          <object class="GtkAction" id="menuitem1">
+            <property name="name">menuitem1</property>
+            <property name="label" translatable="yes">_File</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="new1">
+            <property name="stock_id">gtk-new</property>
+            <property name="name">new1</property>
+            <signal handler="on_new1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="open1">
+            <property name="stock_id">gtk-open</property>
+            <property name="name">open1</property>
+            <signal handler="on_open1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="save1">
+            <property name="stock_id">gtk-save</property>
+            <property name="name">save1</property>
+            <signal handler="on_save1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="save_as1">
+            <property name="stock_id">gtk-save-as</property>
+            <property name="name">save_as1</property>
+            <signal handler="on_save_as1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="quit1">
+            <property name="stock_id">gtk-quit</property>
+            <property name="name">quit1</property>
+            <signal handler="on_quit1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menuitem2">
+            <property name="name">menuitem2</property>
+            <property name="label" translatable="yes">_Edit</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="cut1">
+            <property name="stock_id">gtk-cut</property>
+            <property name="name">cut1</property>
+            <signal handler="on_cut1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="copy1">
+            <property name="stock_id">gtk-copy</property>
+            <property name="name">copy1</property>
+            <signal handler="on_copy1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="paste1">
+            <property name="stock_id">gtk-paste</property>
+            <property name="name">paste1</property>
+            <signal handler="on_paste1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="delete1">
+            <property name="stock_id">gtk-delete</property>
+            <property name="name">delete1</property>
+            <signal handler="on_delete1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menuitem3">
+            <property name="name">menuitem3</property>
+            <property name="label" translatable="yes">_View</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="menuitem4">
+            <property name="name">menuitem4</property>
+            <property name="label" translatable="yes">_Help</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="about1">
+            <property name="name">about1</property>
+            <property name="label" translatable="yes">_About</property>
+            <signal handler="on_about1_activate" last_modification_time="Tue, 16 Dec 2008 20:08:14 GMT" name="activate"/>
+          </object>
+        </child>
+      </object>
+    </child>
+    <ui>
+      <menubar name="menubar1">
+        <menu action="menuitem1">
+          <menuitem action="new1"/>
+          <menuitem action="open1"/>
+          <menuitem action="save1"/>
+          <menuitem action="save_as1"/>
+          <separator/>
+          <menuitem action="quit1"/>
+        </menu>
+        <menu action="menuitem2">
+          <menuitem action="cut1"/>
+          <menuitem action="copy1"/>
+          <menuitem action="paste1"/>
+          <menuitem action="delete1"/>
+        </menu>
+        <menu action="menuitem3"/>
+        <menu action="menuitem4">
+          <menuitem action="about1"/>
+        </menu>
+      </menubar>
+    </ui>
+  </object>
+  <object class="GtkWindow" id="test_window">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Load/UnLoad</property>
+    <property name="type">GTK_WINDOW_TOPLEVEL</property>
+    <property name="window_position">GTK_WIN_POS_NONE</property>
+    <property name="modal">False</property>
+    <property name="default_width">500</property>
+    <property name="default_height">500</property>
+    <property name="resizable">True</property>
+    <property name="destroy_with_parent">False</property>
+    <property name="decorated">True</property>
+    <property name="skip_taskbar_hint">False</property>
+    <property name="skip_pager_hint">False</property>
+    <property name="type_hint">GDK_WINDOW_TYPE_HINT_NORMAL</property>
+    <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
+    <property name="focus_on_map">True</property>
+    <property name="urgency_hint">False</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="homogeneous">False</property>
+        <property name="spacing">0</property>
+        <child>
+          <object class="GtkMenuBar" constructor="uimanager1" id="menubar1">
+            <property name="visible">True</property>
+            <property name="pack_direction">GTK_PACK_DIRECTION_LTR</property>
+            <property name="child_pack_direction">GTK_PACK_DIRECTION_LTR</property>
+          </object>
+          <packing>
+            <property name="padding">0</property>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <property name="homogeneous">True</property>
+            <property name="spacing">0</property>
+            <child>
+              <object class="GtkButton" id="load">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">Load the module</property>
+                <property name="use_underline">True</property>
+                <property name="relief">GTK_RELIEF_NORMAL</property>
+                <property name="focus_on_click">True</property>
+              </object>
+              <packing>
+                <property name="padding">0</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="unload">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="label" translatable="yes">Unload the Module</property>
+                <property name="use_underline">True</property>
+                <property name="relief">GTK_RELIEF_NORMAL</property>
+                <property name="focus_on_click">True</property>
+              </object>
+              <packing>
+                <property name="padding">0</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="padding">0</property>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFileChooserWidget" id="chooser">
+            <property name="visible">True</property>
+            <property name="action">GTK_FILE_CHOOSER_ACTION_OPEN</property>
+            <property name="local_only">True</property>
+            <property name="select_multiple">False</property>
+            <property name="show_hidden">True</property>
+          </object>
+          <packing>
+            <property name="padding">0</property>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
