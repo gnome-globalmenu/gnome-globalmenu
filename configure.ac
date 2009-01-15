@@ -36,7 +36,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
 AC_SUBST(GETTEXT_PACKAGE)
 
 # Check for Vala
-AC_SUBST(VALA_REQUIRED, [0.5.2])
+AC_SUBST(VALA_REQUIRED, [0.5.5])
 AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
 
 VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses --pkg config"
