@@ -18,6 +18,7 @@ DISTCLEANFILES = \
 	intltool-extract \
 	intltool-merge \
 	intltool-update \
+	$(schema_DATA) \
 	$(NULL)
 
 BUILT_SOURCES =
@@ -40,8 +41,6 @@ install-data-local:
 else
 install-data-local:
 endif
-
-
 
 rpm: 
 	vim gnome-globalmenu.spec

@@ -1,0 +1,4 @@
+applet/GlobalMenu_PanelApplet.server.in
+xfce/GlobalMenu_XFCEPlugin.desktop.in
+gtk-modules/globalmenu/tests/test-unload.glade
+gtk-modules/globalmenu/tests/test-unload.ui

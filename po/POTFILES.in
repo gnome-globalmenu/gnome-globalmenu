@@ -6,5 +6,5 @@ applet/main.c
 applet/applet.c
 applet/switcher.c
 gnome-globalmenu.schemas.in
-applet/GlobalMenu_PanelApplet.server.in
-xfce/GlobalMenu_XFCEPlugin.desktop.in
+applet/GlobalMenu_PanelApplet.server.in.in
+xfce/GlobalMenu_XFCEPlugin.desktop.in.in

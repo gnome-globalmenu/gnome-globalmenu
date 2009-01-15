@@ -2,7 +2,7 @@ NULL =
 
 STAMP = vala-stamp
 
-BUILT_SOURCES = $(STAMP) $(libapplet_STAMP) $(server_in_files)
+BUILT_SOURCES = $(STAMP) $(libapplet_STAMP) 
 
 VALASOURCES = \
 	applet.vala \
@@ -132,5 +132,7 @@ EXTRA_DIST = \
 	$(icons_DATA) \
 	$(NULL)
 
-DISTCLEANFILES = $(server_DATA)
+DISTCLEANFILES = $(server_DATA) \
+				 $(noinst_DATA) \
+				$(server_in_files)
 

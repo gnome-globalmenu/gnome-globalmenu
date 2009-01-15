@@ -31,3 +31,7 @@ GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
 
 EXTRA_DIST = \
 	$(desktopfile_in_in_files)	 
+DISTCLEANFILES =  \
+	$(desktopfile_in_files)	  \
+	$(desktopfile_DATA)	 \
+	$(noinst_DATA)
