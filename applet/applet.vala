@@ -5,6 +5,7 @@ using Wnck;
 using Panel;
 using GConf;
 
+[CCode (cname = "GlobalMenuPanelApplet")]
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
 
@@ -31,7 +32,6 @@ public class Applet : Panel.Applet {
 	}
 	construct {
 		disposed = false;
-		set_name("GlobalMenuPanelApplet");
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
 		ensure_monitor();
