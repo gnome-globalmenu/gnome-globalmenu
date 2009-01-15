@@ -25,6 +25,8 @@ libgnomenu_la_SOURCES = \
 						$(EXTERNAL:.vala=.c) \
 						$(EXTERNAL:.vala=.h) \
 						keygrab-ccode.c \
+						gmarkup-backport.h \
+						gmarkup-backport.c \
 						menushellutils-ccode.c 
 
 libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
