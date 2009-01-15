@@ -22,5 +22,3 @@ AM_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS)
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libglobalmenu-gnome.la $(top_builddir)/tests/libtestman.la
 EXTRA_DIST += $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h) test-unload.ui test-unload.glade
-dist-hook:
-	find . -name '*.[ch]' -exec touch {} +
