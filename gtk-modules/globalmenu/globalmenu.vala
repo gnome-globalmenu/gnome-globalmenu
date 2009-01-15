@@ -184,14 +184,14 @@ namespace GlobalMenuGTK {
 	private void unbind_menubar_from_window(MenuBar menubar, Window window) {
 		window.property_notify_event -= window_property_notify_event;
 		window.realize -= window_realize;
-		debug("Unbind bar %p from window %p(%s)", menubar, window, window.get_name());
+		debug("Unbind bar %p from window %p", menubar, window);
 	}
 	private void bind_menubar_to_window(MenuBar menubar, Window window) {
 
 		window.add_events(Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		window.property_notify_event += window_property_notify_event;
 		window.realize += window_realize;
-		debug("Bind bar %p from window %p(%s)", menubar, window, window.get_name());
+		debug("Bind bar %p from window %p", menubar, window );
 	}
 
 	private void window_realize(Gtk.Window window) {

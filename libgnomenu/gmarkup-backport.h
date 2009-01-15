@@ -1,4 +1,5 @@
 #include <glib.h>
+#define GMARKUP_BACKPORT_STUB "stub to be loaded by vala"
 #if GLIB_MINOR_VERSION < 16
 #include <stdarg.h>
 G_BEGIN_DECLS
@@ -13,6 +14,8 @@ typedef enum
   G_MARKUP_COLLECT_OPTIONAL = (1 << 16)
 } GMarkupCollectType;
 
+/*any unused number*/
+#define G_MARKUP_ERROR_MISSING_ATTRIBUTE 314159
 
 /* useful from start_element */
 gboolean   g_markup_collect_attributes (const gchar         *element_name,
