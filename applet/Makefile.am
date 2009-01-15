@@ -55,6 +55,8 @@ libexec_PROGRAMS = GlobalMenu.PanelApplet
 
 serverdir = $(BONOBO_SERVER_DIR)
 server_DATA = $(server_in_files:.server.in=.server)
+else
+noinst_DATA = $(server_in_files:.server.in=.server)
 endif
 
 server_in_in_files = GlobalMenu_PanelApplet.server.in.in
@@ -63,6 +65,7 @@ server_in_files = GlobalMenu_PanelApplet.server.in
 
 $(server_in_files): $(server_in_in_files) Makefile
 	sed -e "s|@LOCATION@|$(libexecdir)|" $< > $@
+
 
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
@@ -131,5 +134,5 @@ EXTRA_DIST = \
 	$(icons_DATA) \
 	$(NULL)
 
-DISTCLEANFILES = $(server_DATA) $(server_in_files)
+DISTCLEANFILES = $(server_DATA)
 
