@@ -30,7 +30,8 @@ GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
 		   ../applet/libapplet.la
 
 EXTRA_DIST = \
-	$(desktopfile_in_in_files)	 
+	$(desktopfile_in_in_files)	\
+	globalmenu-xfce.png 
 DISTCLEANFILES =  \
 	$(desktopfile_in_files)	  \
 	$(desktopfile_DATA)	 \

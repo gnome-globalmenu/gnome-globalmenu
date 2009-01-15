@@ -1,5 +1,5 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn1998
+%define 	svn_version 	svn2097
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -101,6 +101,7 @@ gconftool-2 --makefile-uninstall-rule \
 %files xfce-panel
 %{_datadir}/xfce4/panel-plugins/GlobalMenu_XFCEPlugin.desktop
 %{_libexecdir}/xfce4/panel-plugins/GlobalMenu.XFCEPlugin
+%{_datadir}/pixmaps/globalmenu-xfce.png
 
 %files gtkmodule
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so

@@ -254,6 +254,7 @@ namespace Gnomenu {
 				if(_item_type == MenuItemType.IMAGE) {
 					_image_widget = _cached_image_widget;
 					_image_widget.set_parent(this);
+					_image_widget.sensitive = true;
 					_image_widget.visible = _show_image;
 					update_image();
 				} else {
@@ -634,9 +635,10 @@ namespace Gnomenu {
 		}
 		private void create_labels() {
 			assert(item_type_has_label(_item_type));
+			_cached_label_widget.visible = true;
+			_cached_label_widget.sensitive = true;
+			_cached_label_widget.gravity = gravity;
 			add(_cached_label_widget);
-			get_child().visible = true;
-			(get_child() as MenuLabel).gravity = gravity;
 			update_font();	
 			update_label_underline();
 		}
@@ -651,7 +653,9 @@ namespace Gnomenu {
 		private void create_arrow() {
 			assert(_item_type == MenuItemType.ARROW);
 			add(_cached_arrow_widget);
-			get_child().visible = true;
+			_cached_arrow_widget.visible = true;
+			_cached_arrow_widget.sensitive = true;
+			update_arrow_type();
 		}
 		private void update_arrow_type() {
 			if(_item_type != MenuItemType.ARROW) return;
