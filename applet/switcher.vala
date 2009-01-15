@@ -83,7 +83,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			Gtk.Menu menu = null;
 			
 			if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && (_show_window_actions))
-				menu = wnck_action_menu_new(window); else
+				menu = new Wnck.ActionMenu(window); else
 				if (_show_window_list) menu = new Gtk.Menu();
 				/* FIXME: Since it is a Gtk.Menu, some rgba tricks has to be added */	
 			if (_show_window_list) {
@@ -185,6 +185,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				warning("%s", e.message);
 			}
 				
+			item.use_underline = false;
 			if (!_show_icon) {
 				item.item_type = "normal";
 			} else {

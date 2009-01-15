@@ -41,7 +41,7 @@ namespace Gnomenu {
 			_cached_label_widget = new MenuLabel();
 			_cached_image_widget = new Image();
 			_cached_arrow_widget = new Arrow(gravity_to_arrow_type(_gravity), ShadowType.NONE);
-
+			_use_underline = true;
 			create_labels();
 		}
 
@@ -265,7 +265,16 @@ namespace Gnomenu {
 				queue_resize();
 			}
 		}
-
+		public bool use_underline {
+			get {
+				return _use_underline;
+			}
+			set {
+				if(_use_underline == value) return;
+				_use_underline = value;
+				update_label_underline();
+			}
+		}
 
 		/**
 		 * get/set the state of the item. It can be either triggled or not,
@@ -318,6 +327,7 @@ namespace Gnomenu {
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
+		private bool _use_underline = false;
 
 		private Image _cached_image_widget;
 		private Arrow _cached_arrow_widget;
@@ -587,6 +597,12 @@ namespace Gnomenu {
 			label.label = text;
 			label.accel = accel_text;
 		}
+		private void update_label_underline() {
+			if(!item_type_has_label(_item_type)) return;
+			MenuLabel label = get_label_widget();;
+			assert(label != null);
+			label.use_underline = _use_underline;
+		}
 		private void update_image() {
 			if(_item_type != MenuItemType.IMAGE
 			&& _item_type != MenuItemType.ICON) return;
@@ -622,6 +638,7 @@ namespace Gnomenu {
 			get_child().visible = true;
 			(get_child() as MenuLabel).gravity = gravity;
 			update_font();	
+			update_label_underline();
 		}
 		private weak MenuLabel? get_label_widget() {
 			weak MenuLabel label = get_child() as MenuLabel;

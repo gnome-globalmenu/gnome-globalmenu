@@ -57,6 +57,16 @@ namespace Gnomenu {
 				queue_resize();
 			}
 		}
+		public bool use_underline {
+			get {
+				return _use_underline;
+			}
+			set {
+				if(_use_underline == value) return;
+				_use_underline = value;
+				_label_widget.use_underline = _use_underline;
+			}
+		}
 		public string label {
 			get {
 				return _label;
@@ -116,6 +126,7 @@ namespace Gnomenu {
 		private Label _accel_widget;
 		private string _label;
 		private string _accel;
+		private bool _use_underline;
 		private Gravity _gravity;
 
 		private List<weak Label> children;
