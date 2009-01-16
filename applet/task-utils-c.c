@@ -21,6 +21,12 @@ char* __get_task_name_by_pid(int pid) {
 		fclose(file);
 	} else ret = readlink(linkname, buf, 64);
 
+	if (ret < 1) {
+		char linkname2[64];
+		snprintf(linkname2, sizeof(linkname2), "/proc/%i/exe", pid);
+		ret = readlink(linkname, buf, 64);
+	}
+	
 	if (ret == -1)
 		return NULL;
 	buf[ret] = 0;

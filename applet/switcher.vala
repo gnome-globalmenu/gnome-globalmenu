@@ -123,8 +123,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			mi_parent.submenu = menu;
 		}
 		private string get_process_name(Wnck.Window window) {
-			string txt = __get_task_name_by_pid(window.get_application().get_pid());
-			if ((txt==null) || (txt=="")) return window.get_application().get_name();
+			string txt = __get_task_name_by_pid(window.get_pid());
+			if ((txt==null) || (txt=="")) return "";
 			string ret = txt.chomp();
 			if (ret.substring(ret.length-4,4)==".exe") return remove_path(ret, "\\"); // is a wine program
 
@@ -146,9 +146,13 @@ public extern string* __get_task_name_by_pid(int pid);
 				return _("Desktop");
 				
 			string process_name = get_process_name(window);
-			if (process_name==null) return window.get_name();
-			
+			if (process_name=="") process_name = window.get_name();
+
 			string ret = program_list.lookup(process_name);
+			if (ret == null) {
+				/* try by removing .real (i.e. Skype bug) */
+				ret = program_list.lookup(process_name.replace(".real", ""));
+			}
 			if (ret == null) {
 				ret = window.get_name();
 				program_list.insert(process_name, ret);	// fixes a problem with some apps like Archive Manager.
