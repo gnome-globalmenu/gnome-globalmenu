@@ -14,7 +14,11 @@ public extern string* __get_task_name_by_pid(int pid);
 
 		private Wnck.Window _current_window;
 		
-		private const string TEMPLATE = """<menu><item label="%s" font="bold"/></menu>""";
+		private const string MENU_TEMPLATE = """<menu>
+	<item label="%label%" font="bold">%sub-menu%</item>
+</menu>""";
+		private const string ITEM_TEMPLATE = """<item type="image" id="_%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%"/>""";
+		
 		private GLib.HashTable<string,string> program_list;
 		
 		public Switcher() {
@@ -22,7 +26,7 @@ public extern string* __get_task_name_by_pid(int pid);
 
 		construct {
 			try {
-				Parser.parse(this, TEMPLATE.printf("Global Menu Bar"));
+				Parser.parse(this, MENU_TEMPLATE.replace("%label%","Global Menu Bar").replace("%sub-menu%", ""));
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
@@ -48,7 +52,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						 			 allocation.width,
 									 allocation.height);
 		}
-		private void app_selected(Gtk.ImageMenuItem? item) {
+		private void app_selected(Gtk.MenuItem? item) {
 			Wnck.Window window = item.user_data as Wnck.Window;
 			set_iconify_destination(window); /* make sure that it goes to the switcher */
 			
@@ -79,48 +83,37 @@ public extern string* __get_task_name_by_pid(int pid);
 
 			//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
 		}
-		private void do_menu(Gnomenu.MenuItem? mi_parent, Wnck.Window window) {
-			Gtk.Menu menu = null;
-			
-			if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && (_show_window_actions))
-				menu = new Wnck.ActionMenu(window); else
-				if (_show_window_list) menu = new Gtk.Menu();
-				/* FIXME: Since it is a Gtk.Menu, some rgba tricks has to be added */	
-			if (_show_window_list) {
-				menu.insert(new Gtk.SeparatorMenuItem(), 0);
-				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-				int items = 0;
-				foreach(weak Wnck.Window window in windows) {
-					if (!window.is_skip_pager()) {
-						/* just in case that no other task bars are around and the users clicks on the minimize button */
-						// set_iconify_destination(window);
-						
-						Gtk.ImageMenuItem mi;
-						string txt = window.get_name();
-						if ((txt.length>max_size) && (max_size>3)) txt = txt.substring(0, (max_size-3)) + "...";
-						/*In theory with_label won't give underlines.*/
-						mi = new Gtk.ImageMenuItem.with_label(txt);
-						if (window.is_active())
-							(mi.child as Gtk.Label).set_markup("<b>" + txt + "</b>");
+		string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
+			Gdk.Pixdata pixdata = {0};
+			pixdata.from_pixbuf(pixbuf, true);
+			return Base64.encode(pixdata.serialize());
+		}
+		private string do_xml_menu() {
+			if (!_show_window_list) return "";
+			string items="";
+			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+			foreach(weak Wnck.Window window in windows) {
+				if (!window.is_skip_pager()) {
+					string item = ITEM_TEMPLATE.replace("%label%", cut_string(window.get_name(), _max_size));
+					if (window.is_active())
+						item = item.replace("%font%", "bold"); else
 						if (window.is_minimized())
-							(mi.child as Gtk.Label).set_markup("<i>" + txt + "</i>");
-						mi.set_image(new Gtk.Image.from_pixbuf(window.get_mini_icon()));
-						mi.user_data = window;
-						mi.activate += app_selected;
-						menu.insert(mi, 0);
-						items++;
-					}
-				}
-				if (items==0) {
-					Gtk.MenuItem mi = new Gtk.MenuItem.with_label(" " + _("no windows") + " ");
-					mi.sensitive = false;
-					(mi.child as Gtk.Label).justify = Gtk.Justification.CENTER;
-					menu.add(mi);
+							item = item.replace("%font%", "italic"); else
+							item = item.replace("%font%", "");
+					
+					item = item.replace("%pixdata%",
+										pixbuf_encode_b64(window.get_mini_icon()));
+					item = item.replace("%id%", window.get_xid().to_string());
+					items+=item;
 				}
 			}
-			
-			if (menu!=null) menu.show_all();
-			mi_parent.submenu = menu;
+			if (items=="")
+				items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "");
+			return "<menu>" + items + "</menu>";
+		}
+		private Gtk.Menu do_action_menu(Wnck.Window? window) {
+			Wnck.ActionMenu ret = new Wnck.ActionMenu(window); 
+			return ret;
 		}
 		private string get_process_name(Wnck.Window window) {
 			string txt = __get_task_name_by_pid(window.get_pid());
@@ -182,9 +175,9 @@ public extern string* __get_task_name_by_pid(int pid);
 			try {
 				if (_show_label) 
 					Parser.parse(this, 
-						TEMPLATE.printf(cut_string(_label, _max_size)));
+						MENU_TEMPLATE.replace("%label%", cut_string(_label, _max_size)).replace("%sub-menu%",do_xml_menu()));
 				else
-					Parser.parse(this, TEMPLATE.printf(""));
+					Parser.parse(this, MENU_TEMPLATE.replace("%label%","").replace("%sub-menu%", ""));
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
@@ -223,7 +216,27 @@ public extern string* __get_task_name_by_pid(int pid);
 				/* can't use scale_simple because the vala binding is wrong*/
 				item.image.set_from_pixbuf(scaled_icon);
 			}
-			do_menu(item, current_window);
+
+			/* TOFIX: this part should be made within do_xml_menu */
+			if (_show_window_list) {
+				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+				foreach(weak Wnck.Window window in windows) {
+					Gnomenu.MenuItem mi = this.get("/0/_" + window.get_xid().to_string());
+					if (mi!=null) {
+						mi.user_data = window;
+						mi.activate += app_selected;
+						if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && 
+							(_show_window_actions) &&
+							(window.is_active()))
+							mi.submenu = do_action_menu(window);
+										/* TOFIX: there is a bug here. Perhaps is on the Gnomenu.MenuItem
+										 * As soon as the user moves the mouse over this menu item, the first item
+										 * of the sub menu (that is the Wnck.ActionMenu -> Minimize) is automatically
+										 * invoked and current window minimizes. */
+					}
+				}
+			}
+			
 		}
 		public Wnck.Window? current_window {
 			get {
