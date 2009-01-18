@@ -34,7 +34,11 @@ public class Applet : Panel.Applet {
 		disposed = false;
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
-		ensure_monitor();
+		ensure_monitor(); 
+		/* 
+		 * already ensured by screen_changed signal, 
+		 * leave it to remind us the monitor is already there.
+		*/
 		menubars = new MenuBarBox();
 		menubars.visible = true;
 		add(menubars);
@@ -76,6 +80,11 @@ public class Applet : Panel.Applet {
 		if(gdk_screen != null) {
 			ensure_monitor();
 			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
+			if(null == get_settings().gtk_modules.str("globalmenu")) {
+				tooltip_text = _("No Global Menu?\nEnable Global Menu Plugin in Preferences.");
+			} else {
+				tooltip_text = null;
+			}
 		}
 	}
 
