@@ -222,17 +222,23 @@ public extern string* __get_task_name_by_pid(int pid);
 				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 				foreach(weak Wnck.Window window in windows) {
 					Gnomenu.MenuItem mi = this.get("/0/_" + window.get_xid().to_string());
-					if (mi!=null) {
+					if (mi != null) {
+						if(!(bool) mi.get_data("connected")) {
+							mi.set_data("connected", (void*) true);
+							mi.activate += (item) => {
+								/* Workaround the activate signal for items with a submenu. */
+								if(item.submenu == null)
+									app_selected(item);
+							};
+						}
 						mi.user_data = window;
-						mi.activate += app_selected;
 						if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && 
 							(_show_window_actions) &&
-							(window.is_active()))
-							mi.submenu = do_action_menu(window);
-										/* TOFIX: there is a bug here. Perhaps is on the Gnomenu.MenuItem
-										 * As soon as the user moves the mouse over this menu item, the first item
-										 * of the sub menu (that is the Wnck.ActionMenu -> Minimize) is automatically
-										 * invoked and current window minimizes. */
+							(window.is_active())) {
+							mi.submenu = do_action_menu(window); 
+						} else {
+							mi.submenu = null;
+						}
 					}
 				}
 			}
