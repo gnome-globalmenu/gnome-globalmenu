@@ -85,6 +85,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=gconf-2.0 \
 	--pkg=gnomenu-private \
 	--pkg=libapplet-private \
+	--pkg=libnotify \
 	$(VALASOURCES) bindings.vapi
 	bash patch.sh
 	touch $@

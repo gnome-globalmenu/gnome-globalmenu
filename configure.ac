@@ -64,6 +64,7 @@ GTK_REQUIRED=2.10.0
 WNCK_REQUIRED=2.16.0
 PANEL_REQUIRED=2.16.0
 GMENU_REQUIRED=2.16.0
+NOTIFY_REQUIRED=0.4.0
 XFCE4_PANEL_REQUIRED=4.4.3
 
 PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gmodule-2.0 >= $GLIB_REQUIRED)
@@ -78,13 +79,14 @@ PKG_CHECK_MODULES(WNCK, libwnck-1.0 >= $WNCK_REQUIRED)
 AC_SUBST(WNCK_CFLAGS)
 AC_SUBST(WNCK_LIBS)
 
+
 AC_ARG_WITH(
 	[gnome-panel],
 	AC_HELP_STRING([--without-gnome-panel], [disable gnome panel applet]),
 	[],
 	[with_gnome_panel=yes])
 AS_IF([test "x$with_gnome_panel" != xno],
-	[PKG_CHECK_MODULES(PANEL, [libpanelapplet-2.0 >= $PANEL_REQUIRED],
+	[PKG_CHECK_MODULES(PANEL, [libpanelapplet-2.0 >= $PANEL_REQUIRED, libnotify >= 0.4.0],
 		[
 		with_gnome_panel=true;
 		AC_SUBST(PANEL_CFLAGS)
