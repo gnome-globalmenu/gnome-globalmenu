@@ -50,21 +50,25 @@ void dyn_patch_init () {
 	GDK_THREADS_LEAVE();
 }
 
-void dyn_patch_uninit() {
-	g_timer_destroy(timer);
+void dyn_patch_uninit_vfuncs() {
 
-	dyn_patch_discover_menubars(DISCOVER_MODE_UNINIT);
+	dyn_patch_discover_menubars(DISCOVER_MODE_UNINIT_VFUNCS);
 
 	dyn_patch_type(GTK_TYPE_MENU_BAR, dyn_patch_menu_bar_unpatcher);
 	dyn_patch_type(GTK_TYPE_MENU_SHELL, dyn_patch_menu_shell_unpatcher);
 	dyn_patch_type(GTK_TYPE_WIDGET, dyn_patch_widget_unpatcher);
 
+}
+
+void dyn_patch_uninit_final() {
+
+	dyn_patch_discover_menubars(DISCOVER_MODE_UNINIT_FINAL);
+
 	g_hash_table_unref(notifiers);
 	g_hash_table_unref(old_vfuncs);
 	g_hash_table_unref(classes);
-
+	g_timer_destroy(timer);
 }
-
 static gboolean discover_menubars() {
 	GDK_THREADS_ENTER();
 	dyn_patch_discover_menubars(DISCOVER_MODE_INIT);

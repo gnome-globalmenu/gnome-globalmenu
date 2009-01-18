@@ -59,8 +59,9 @@ public class GlobalMenuGNOME {
 				Source.remove(deferred_init_id);
 			}
 			if(initialized) {
-				DynPatch.uninit();
+				DynPatch.uninit_vfuncs();
 				GlobalMenuGTK.uninit();
+				DynPatch.uninit_final();
 			}
 
 			debug("Global Menu plugin module is unloaded");

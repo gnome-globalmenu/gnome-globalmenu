@@ -1,7 +1,8 @@
 
 typedef enum {
 	DISCOVER_MODE_INIT,
-	DISCOVER_MODE_UNINIT
+	DISCOVER_MODE_UNINIT_VFUNCS,
+	DISCOVER_MODE_UNINIT_FINAL
 } DiscoverMode;
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar);

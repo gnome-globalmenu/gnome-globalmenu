@@ -137,30 +137,34 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 
 static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
 	if(GTK_IS_MENU_BAR(widget)) {
-		if(*mode == DISCOVER_MODE_INIT) {
-			dyn_patch_set_menubar_r(widget, GTK_MENU_BAR(widget));
-			dyn_patch_queue_changed(GTK_MENU_BAR(widget), widget);
+		GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
+		switch(*mode) {
+			case DISCOVER_MODE_INIT:
+				dyn_patch_set_menubar_r(widget, GTK_MENU_BAR(widget));
+				dyn_patch_queue_changed(GTK_MENU_BAR(widget), widget);
 
-			GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
-			if(toplevel) {
-				dyn_patch_set_menubar(GTK_WIDGET(toplevel), GTK_MENU_BAR(widget));
-				dyn_patch_attach_menubar(toplevel, GTK_MENU_BAR(widget));
-			}
-		} else {
-			GtkWindow * toplevel = GTK_WINDOW(gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
-			if(toplevel) {
-				dyn_patch_detach_menubar(toplevel, GTK_MENU_BAR(widget));
+				if(toplevel) {
+					dyn_patch_set_menubar(GTK_WIDGET(toplevel), GTK_MENU_BAR(widget));
+					dyn_patch_attach_menubar(toplevel, GTK_MENU_BAR(widget));
+				}
+			break;
+			case DISCOVER_MODE_UNINIT_VFUNCS:
+				dyn_patch_set_menubar_r(widget, NULL);
+			break;
+			case DISCOVER_MODE_UNINIT_FINAL:
+				if(toplevel) {
+					dyn_patch_detach_menubar(toplevel, GTK_MENU_BAR(widget));
+				}
 				dyn_patch_set_menubar(GTK_WIDGET(toplevel), NULL);
-			}
-			
-			dyn_patch_set_menubar_r(widget, NULL);
+			break;
 		}
-	} else {
-		if(GTK_IS_CONTAINER(widget)) {
-			gtk_container_foreach(GTK_CONTAINER(widget), 
-					(GtkCallback) dpdm_transverse, 
-					mode);
-		}
+		return;
+	} 
+	/* else */
+	if(GTK_IS_CONTAINER(widget)) {
+		gtk_container_foreach(GTK_CONTAINER(widget), 
+				(GtkCallback) dpdm_transverse, 
+				mode);
 	}
 }
 
