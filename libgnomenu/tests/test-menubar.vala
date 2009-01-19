@@ -106,6 +106,23 @@ namespace Gnomenu {
 				assert(menubar.get("/Go") != null);
 				assert(menubar.get("/Help/About") != null);
 			});
+			add("sensitive", () => {
+				Parser.parse( menubar, test1);
+				menubar.min_length = -1;
+				window.show();
+				/*
+				   won't compile before vala 0.5.7
+				menubar.activate += (menubar, i) => {
+					MenuItem item = menubar.get("/Go");
+					item.sensitive = !item.sensitive;
+					if(item.item_type == "image")
+						item.item_type = "seperator";
+					else
+						item.item_type = "image";
+				};
+				*/
+				Gtk.main();
+			});
 		}	
 		public static int main (string[] args) {
 			Test.init(ref args);
