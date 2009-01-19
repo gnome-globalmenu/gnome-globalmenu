@@ -17,7 +17,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private const string MENU_TEMPLATE = """<menu>
 	<item label="%label%" font="bold">%sub-menu%</item>
 </menu>""";
-		private const string ITEM_TEMPLATE = """<item type="image" id="_%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%"/>""";
+		private const string ITEM_TEMPLATE = """<item type="image" id="_%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true"/>""";
 		
 		private GLib.HashTable<string,string> program_list;
 		
@@ -116,7 +116,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				}
 			}
 			if (items=="")
-				items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "");
+				items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "").replace("pixbuf:%pixdata%", "theme:gtk-about").replace("sensitive=\"true\"", "sensitive=\"false\"");
 			return "<menu>" + items + "</menu>";
 		}
 		private Gtk.Menu do_action_menu(Wnck.Window? window) {
