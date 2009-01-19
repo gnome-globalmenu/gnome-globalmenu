@@ -21,6 +21,8 @@ public extern string* __get_task_name_by_pid(int pid);
 		
 		private GLib.HashTable<string,string> program_list;
 		
+		private bool disposed = false;
+
 		public Switcher() {
 		}
 
@@ -35,6 +37,12 @@ public extern string* __get_task_name_by_pid(int pid);
 				program_list.insert("nautilus", _("File Manager"));
 		}
 
+		public override void dispose() {
+			if(!disposed) {
+				disposed = true;
+				current_window = null;
+			}
+		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
 			while ((co>=0) && (txt.substring(co, 1)!=separator)) {
