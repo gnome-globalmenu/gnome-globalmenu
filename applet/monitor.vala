@@ -106,6 +106,9 @@ public class Monitor: GLib.Object {
 			window.set_data("window-closed", window);
 			update_current_window();
 		}
+		/* force the update! This is a workaround for issue 266 */
+		update_current_window();
+		window_changed(current_window);
 	}
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
