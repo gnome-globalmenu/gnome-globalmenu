@@ -96,7 +96,7 @@ AS_IF([test "x$with_gnome_panel" != xno],
 		with_gnome_panel=false;
 		if test "x$with_gnome_panel" != xcheck; then
 			AC_MSG_FAILURE(
-				[test for libpanelapplet-2.0 failed. (--without-gnome-panel to disable).])
+				[test for libpanelapplet-2.0 and libnotify failed. (--without-gnome-panel to disable).])
 		fi;]
 	)])
 AM_CONDITIONAL(WITH_GNOME_PANEL, [test "x$with_gnome_panel" = xtrue ]) 
