@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = tests libgnomenu applet xfce gtk-modules po
+SUBDIRS = tools tests libgnomenu applet xfce gtk-modules po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
