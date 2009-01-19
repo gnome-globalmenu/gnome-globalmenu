@@ -1,8 +1,8 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn2097
+%define 	svn_version 	svn2117
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -38,6 +38,7 @@ Group:			User Interface/Desktops
 Requires:		gtk2
 Requires:		gnome-panel
 Requires:		libwnck
+Requires:		libnotify
 Requires:		gnome-menus
 Requires:		gnome-globalmenu-common
 %description 	gnome-panel

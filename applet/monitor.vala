@@ -110,6 +110,8 @@ public class Monitor: GLib.Object {
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
 			_desktop = window;
+		if(current_window == null)
+			update_current_window();
 	}
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
 		update_current_window();
