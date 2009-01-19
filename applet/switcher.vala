@@ -168,7 +168,10 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		private void update() {
 			Gnomenu.MenuItem item = this.get("/0");
-			item.submenu.popdown();	/* prevent the menu to be updated while visible so causing the applet to block */
+
+			/* prevent the menu to be updated while visible so causing the applet to block */
+			if(item.submenu != null)
+				item.submenu.popdown();	
 			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
