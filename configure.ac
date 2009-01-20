@@ -86,11 +86,15 @@ AC_ARG_WITH(
 	[],
 	[with_gnome_panel=yes])
 AS_IF([test "x$with_gnome_panel" != xno],
-	[PKG_CHECK_MODULES(PANEL, [libpanelapplet-2.0 >= $PANEL_REQUIRED, libnotify >= 0.4.0],
+	[PKG_CHECK_MODULES(GNOME_PANEL, 
+		[	libpanelapplet-2.0 >= $PANEL_REQUIRED, 
+			libnotify >= $NOTIFY_REQUIRED,
+			libgnome-menu >= $GMENU_REQUIRED
+		],
 		[
 		with_gnome_panel=true;
-		AC_SUBST(PANEL_CFLAGS)
-		AC_SUBST(PANEL_LIBS)
+		AC_SUBST(GNOME_PANEL_CFLAGS)
+		AC_SUBST(GNOME_PANEL_LIBS)
 		],
 		[
 		with_gnome_panel=false;
@@ -123,9 +127,6 @@ AS_IF([test "x$with_xfce4_panel" != xno],
 AM_CONDITIONAL(WITH_XFCE4_PANEL, [test "x$with_xfce4_panel" = xtrue ]) 
 
 
-PKG_CHECK_MODULES(GMENU, libgnome-menu >= $GMENU_REQUIRED)
-AC_SUBST(GMENU_FLAGS)
-AC_SUBST(GMENU_LIBS)
 
 # path: bad way; move them back to the Makefiles according to GNU rules?
 
