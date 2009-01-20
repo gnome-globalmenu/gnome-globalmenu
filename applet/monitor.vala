@@ -30,6 +30,7 @@ public class Monitor: GLib.Object {
 			grab_menu_bar_key(_root_gnomenu_window);
 			_wnck_screen.window_closed += on_window_closed;
 			_wnck_screen.window_opened += on_window_opened;
+			_wnck_screen.window_stacking_changed += on_window_stacking_changed;
 			_wnck_screen.active_window_changed += on_active_window_changed;
 			_wnck_screen.active_window_changed (null);
 			Wnck.Window new_desktop = find_desktop(_wnck_screen);
@@ -60,6 +61,7 @@ public class Monitor: GLib.Object {
 		}
 	}
 	public virtual signal void window_changed(Wnck.Window? old_window);
+	public virtual signal void windowlist_changed();
 	
 	public Monitor() {
 	
@@ -93,6 +95,9 @@ public class Monitor: GLib.Object {
 
 	private bool disposed;
 
+	private void on_window_stacking_changed(Wnck.Screen screen) {
+		windowlist_changed();
+	}
 	private void on_activate(Gnomenu.MenuBar menubar, Gnomenu.MenuItem item){
 		if(_current_gnomenu_window != null) {
 			_current_gnomenu_window.emit_menu_event(item.path);
@@ -106,9 +111,6 @@ public class Monitor: GLib.Object {
 			window.set_data("window-closed", window);
 			update_current_window();
 		}
-		/* force the update! This is a workaround for issue 266 */
-		update_current_window();
-		window_changed(current_window);
 	}
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
@@ -171,6 +173,7 @@ public class Monitor: GLib.Object {
 	private void detach_from_screen(Wnck.Screen screen) {
 		_wnck_screen.window_opened -= on_window_opened;
 		_wnck_screen.window_closed -= on_window_closed;
+		_wnck_screen.window_stacking_changed -= on_window_stacking_changed;
 		_wnck_screen.active_window_changed -= on_active_window_changed;
 	}
 	private void ungrab_menu_bar_key(Gnomenu.Window window) {

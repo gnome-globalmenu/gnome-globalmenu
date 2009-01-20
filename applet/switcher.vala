@@ -166,7 +166,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		private void update() {
+		public void update() {
 			Gnomenu.MenuItem item = this.get("/0");
 
 			/* prevent the menu to be updated while visible so causing the applet to block */

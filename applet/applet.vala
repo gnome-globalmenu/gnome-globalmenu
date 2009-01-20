@@ -28,6 +28,7 @@ public class Applet : Panel.Applet {
 		if(monitor == null) {
 			monitor = new Monitor();
 			monitor.window_changed += on_window_changed;
+			monitor.windowlist_changed += on_windowlist_changed;
 		}
 	}
 	construct {
@@ -84,6 +85,9 @@ public class Applet : Panel.Applet {
 		}
 	}
 
+	private void on_windowlist_changed ( Monitor monitor) {
+		selector.update();	
+	}
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
 		if(window is Wnck.Window)
