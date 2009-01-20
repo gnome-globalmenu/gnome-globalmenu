@@ -214,7 +214,11 @@ public class Applet : Panel.Applet {
 		
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
-		dialog.version = Config.VERSION;
+		string ver = Config.VERSION;
+		if(Config.SVNVERSION.length > 0 ){
+			ver += ".svn" + Config.SVNVERSION;
+		}
+		dialog.version = ver;
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
 		dialog.website_label = _("Project Home");
 		dialog.wrap_license = false;

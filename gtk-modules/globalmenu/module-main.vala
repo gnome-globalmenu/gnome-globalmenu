@@ -44,6 +44,7 @@ public class GlobalMenuGNOME {
 		prepare_log_file();
 		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
 
+		debug("Global Menu Version: %s:%s", Config.VERSION, Config.SVNVERSION);
 		if(!disabled) {
 			debug("Global Menu is enabled");
 		} else {

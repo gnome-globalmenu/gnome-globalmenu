@@ -138,6 +138,12 @@ GTK_MODULES_DIR="$libdir/gtk-2.0/modules"
 AC_SUBST(GTK_MODULES_DIR)
 AC_DEFINE_UNQUOTED(GTK_MODULES_DIR, "$GTK_MODULES_DIR", [Where the gtk-2.0/modules dir is])
 
+# svnversion
+AC_PATH_PROG(SVNVERSION_BIN, [svnversion])
+SVNVERSION=`$SVNVERSION_BIN`
+AC_SUBST(SVNVERSION)
+AC_DEFINE_UNQUOTED(SVNVERSION, "$SVNVERSION", [svn version if appropriate])
+
 # old automake fix
 AC_SUBST(abs_top_srcdir)
 # output
