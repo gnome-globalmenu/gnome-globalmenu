@@ -11,14 +11,17 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_label = true;
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
-
 		private Wnck.Window _current_window;
 		
 		private const string MENU_TEMPLATE = """<menu>
-	<item label="%label%" font="bold">%sub-menu%</item>
+	<item label="%label%" font="bold">
+		<menu>
+			%sub_menu%
+		</menu>
+	</item>
 </menu>""";
 		private const string ITEM_TEMPLATE = """<item type="image" id="_%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true"/>""";
-		
+		private string NOWIN_TEMPLATE = """<item label="%no_windows%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private GLib.HashTable<string,string> program_list;
 		
 		private bool disposed = false;
@@ -37,6 +40,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			program_list = GnomeMenuHelper.get_flat_list();
 			if (program_list.lookup("nautilus")==null)
 				program_list.insert("nautilus", _("File Manager"));
+				
+			NOWIN_TEMPLATE = replace(NOWIN_TEMPLATE, "%no_windows%", _("no windows"));
 		}
 
 		public override void dispose() {
@@ -114,15 +119,17 @@ public extern string* __get_task_name_by_pid(int pid);
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 			foreach(weak Wnck.Window window in windows) {
 				if (!window.is_skip_pager()) {
-					//string item = ITEM_TEMPLATE.replace("%label%", cut_string(window.get_name(), _max_size));
 					string item = replace(ITEM_TEMPLATE, 
 										  "%label%",
 										  cut_string(window.get_name(), _max_size));
-					if (window.is_active())
-						item = replace(item, "%font%", "bold"); else
+					if (window.is_active()) {
+						item = replace(item, "%font%", "bold");
+						item = replace(item, "/>","><menu>" + do_action_menu(window) + "</menu></item>"); 
+					} else {
 						if (window.is_minimized())
 							item = replace(item, "%font%", "italic"); else
 							item = replace(item, "%font%", "");
+					}
 					
 					item = replace(item,
 								   "%pixdata%",
@@ -132,17 +139,41 @@ public extern string* __get_task_name_by_pid(int pid);
 				}
 			}
 			if (items=="") {
-				//items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "").replace("pixbuf:%pixdata%", "theme:gtk-about").replace("sensitive=\"true\"", "sensitive=\"false\"");
 				items = replace(ITEM_TEMPLATE, "%label%", " " + _("no windows") + " ");
 				items = replace(items, "%font%", "");
 				items = replace(items, "pixbuf:%pixdata%", "theme:gtk-about");
 				items = replace(items, "sensitive=\"true\"", "sensitive=\"false\"");
 			}
-			return "<menu>" + items + "</menu>";
+			return items;
 		}
-		private Gtk.Menu do_action_menu(Wnck.Window? window) {
-			Wnck.ActionMenu ret = new Wnck.ActionMenu(window); 
-			return ret;
+		private void do_main_menu(Gnomenu.MenuItem? item) {
+			remove_all();
+			if (_show_window_list) {
+				string s = replace(MENU_TEMPLATE, "%label%", item.label);
+				s = replace(s, "%sub_menu%", do_xml_menu());
+				Parser.parse(this, s);
+				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+				foreach(weak Wnck.Window window in windows) {
+					Gnomenu.MenuItem mi = this.get("/0/_" + window.get_xid().to_string());
+					if (mi != null) {
+						mi.user_data = window;
+						mi.activate += (mitem) => {
+							if (mitem.submenu==null)
+								app_selected(mitem);	
+						};
+					}
+				}
+			} else {
+				if (_show_window_actions) {
+					string s = replace(MENU_TEMPLATE, "%label%", item.label);
+					s = replace(s, "%sub_menu%", do_action_menu(_current_window));
+					Parser.parse(this, s);
+				}
+			}
+		}
+		private string do_action_menu(Wnck.Window? window) {
+			/* TODO: do actual action menu */
+			return NOWIN_TEMPLATE;
 		}
 		private string get_process_name(Wnck.Window window) {
 			string txt = __get_task_name_by_pid(window.get_pid());
@@ -191,7 +222,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		public void update() {
+		private void update() {
 			Gnomenu.MenuItem item = this.get("/0");
 
 			/* prevent the menu to be updated while visible so causing the applet to block */
@@ -211,11 +242,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			try {
 				if (_show_label) {
 					string s = replace(MENU_TEMPLATE, "%label%", cut_string(_label, _max_size));
-					s = replace(s, "%sub-menu%",do_xml_menu());
+					s = replace(s, "%sub_menu%", NOWIN_TEMPLATE);
 					Parser.parse(this, s);
+					item.activate -= do_main_menu;
+					item.activate += do_main_menu;
 				} else {
 					string s = replace(MENU_TEMPLATE, "%label%","");
-					s = replace(s, "%sub-menu%", "");
 					Parser.parse(this, s);
 				}
 			} catch (GLib.Error e) {
@@ -256,33 +288,6 @@ public extern string* __get_task_name_by_pid(int pid);
 				/* can't use scale_simple because the vala binding is wrong*/
 				item.image.set_from_pixbuf(scaled_icon);
 			}
-
-			/* TOFIX: this part should be made within do_xml_menu */
-			if (_show_window_list) {
-				weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-				foreach(weak Wnck.Window window in windows) {
-					Gnomenu.MenuItem mi = this.get("/0/_" + window.get_xid().to_string());
-					if (mi != null) {
-						if(!(bool) mi.get_data("connected")) {
-							mi.set_data("connected", (void*) true);
-							mi.activate += (item) => {
-								/* Workaround the activate signal for items with a submenu. */
-								if(item.submenu == null)
-									app_selected(item);
-							};
-						}
-						mi.user_data = window;
-						if ((window.get_window_type()!=Wnck.WindowType.DESKTOP) && 
-							(_show_window_actions) &&
-							(window.is_active())) {
-							mi.submenu = do_action_menu(window); 
-						} else {
-							mi.submenu = null;
-						}
-					}
-				}
-			}
-			
 		}
 		public Wnck.Window? current_window {
 			get {

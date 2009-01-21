@@ -86,7 +86,7 @@ public class Applet : Panel.Applet {
 	}
 
 	private void on_windowlist_changed ( Monitor monitor) {
-		selector.update();	
+		//selector.update();	
 	}
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
