@@ -28,7 +28,9 @@ public extern string* __get_task_name_by_pid(int pid);
 
 		construct {
 			try {
-				Parser.parse(this, MENU_TEMPLATE.replace("%label%","Global Menu Bar").replace("%sub-menu%", ""));
+				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
+				s = replace(s, "%sub-menu%", "");
+				Parser.parse(this, s);
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
@@ -42,6 +44,16 @@ public extern string* __get_task_name_by_pid(int pid);
 				disposed = true;
 				current_window = null;
 			}
+		}
+		private string replace(string source, string find, string replacement) {
+			/* replaces the string.replace method which depends on GLib.RegEx >= 2.12 */
+			string[] buf = source.split(find);
+			string ret = "";
+			for (int co=0; co<buf.length; co++) {
+				ret+=buf[co];
+				if (co!=(buf.length-1)) ret+=replacement;
+			}
+			return ret;
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;
@@ -102,21 +114,30 @@ public extern string* __get_task_name_by_pid(int pid);
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 			foreach(weak Wnck.Window window in windows) {
 				if (!window.is_skip_pager()) {
-					string item = ITEM_TEMPLATE.replace("%label%", cut_string(window.get_name(), _max_size));
+					//string item = ITEM_TEMPLATE.replace("%label%", cut_string(window.get_name(), _max_size));
+					string item = replace(ITEM_TEMPLATE, 
+										  "%label%",
+										  cut_string(window.get_name(), _max_size));
 					if (window.is_active())
-						item = item.replace("%font%", "bold"); else
+						item = replace(item, "%font%", "bold"); else
 						if (window.is_minimized())
-							item = item.replace("%font%", "italic"); else
-							item = item.replace("%font%", "");
+							item = replace(item, "%font%", "italic"); else
+							item = replace(item, "%font%", "");
 					
-					item = item.replace("%pixdata%",
-										pixbuf_encode_b64(window.get_mini_icon()));
-					item = item.replace("%id%", window.get_xid().to_string());
+					item = replace(item,
+								   "%pixdata%",
+								   pixbuf_encode_b64(window.get_mini_icon()));
+					item = replace(item, "%id%", window.get_xid().to_string());
 					items+=item;
 				}
 			}
-			if (items=="")
-				items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "").replace("pixbuf:%pixdata%", "theme:gtk-about").replace("sensitive=\"true\"", "sensitive=\"false\"");
+			if (items=="") {
+				//items = ITEM_TEMPLATE.replace("%label%", " " + _("no windows") + " ").replace("%font%", "").replace("pixbuf:%pixdata%", "theme:gtk-about").replace("sensitive=\"true\"", "sensitive=\"false\"");
+				items = replace(ITEM_TEMPLATE, "%label%", " " + _("no windows") + " ");
+				items = replace(items, "%font%", "");
+				items = replace(items, "pixbuf:%pixdata%", "theme:gtk-about");
+				items = replace(items, "sensitive=\"true\"", "sensitive=\"false\"");
+			}
 			return "<menu>" + items + "</menu>";
 		}
 		private Gtk.Menu do_action_menu(Wnck.Window? window) {
@@ -152,7 +173,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			string ret = program_list.lookup(process_name);
 			if (ret == null) {
 				/* try by removing .real (i.e. Skype bug) */
-				ret = program_list.lookup(process_name.replace(".real", ""));
+				ret = program_list.lookup(replace(process_name, ".real", ""));
 			}
 			if (ret == null) {
 				ret = window.get_name();
@@ -184,11 +205,15 @@ public extern string* __get_task_name_by_pid(int pid);
 				_label = get_application_name(current_window);
 				
 			try {
-				if (_show_label) 
-					Parser.parse(this, 
-						MENU_TEMPLATE.replace("%label%", cut_string(_label, _max_size)).replace("%sub-menu%",do_xml_menu()));
-				else
-					Parser.parse(this, MENU_TEMPLATE.replace("%label%","").replace("%sub-menu%", ""));
+				if (_show_label) {
+					string s = replace(MENU_TEMPLATE, "%label%", cut_string(_label, _max_size));
+					s = replace(s, "%sub-menu%",do_xml_menu());
+					Parser.parse(this, s);
+				} else {
+					string s = replace(MENU_TEMPLATE, "%label%","");
+					s = replace(s, "%sub-menu%", "");
+					Parser.parse(this, s);
+				}
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
