@@ -149,27 +149,31 @@ public extern string* __get_task_name_by_pid(int pid);
 			if ((txt==null) || (txt=="")) return "";
 			string ret = txt.chomp();
 			if (ret.substring(ret.length-4,4)==".exe") return remove_path(ret, "\\"); // is a wine program
-
+			
 			ret = remove_path(ret.split(" ")[0], "/");
-				
 			switch(ret) {
 			case "mono":
 			case "python":
 			case "python2.5":
 			case "vmplayer":
-				return remove_path(txt.chomp().split(" ")[1], "/");
+				string[] buf = txt.chomp().split(" ");
+				if (buf.length<2)
+					return ret; else
+					return remove_path(buf[1], "/");
+				break;
 			case "wine":
 				return window.get_application().get_name();
+				break;
 			}
 			return ret;
 		}
 		private string get_application_name(Wnck.Window window) {
 			if (window.get_window_type() == Wnck.WindowType.DESKTOP)
 				return _("Desktop");
-				
+			
 			string process_name = get_process_name(window);
-			if (process_name=="") process_name = window.get_name();
-
+			if ((process_name=="") && (process_name==null)) process_name = window.get_name();
+			
 			string ret = program_list.lookup(process_name);
 			if (ret == null) {
 				/* try by removing .real (i.e. Skype bug) */
