@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-13 20:07+0100\n"
+"POT-Creation-Date: 2009-01-21 10:20+0100\n"
 "PO-Revision-Date: 2009-01-13 20:53+0300\n"
 "Last-Translator: Sergey Bekharsky <mr.alinaki@gmail.com>\n"
 "Language-Team: ru-RU <LL@li.org>\n"
@@ -11,11 +11,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Indicator Size"
 msgstr "Размер индикатора"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Size of check or radio indicator"
 msgstr ""
 
@@ -35,11 +35,11 @@ msgstr "Выключить плагин"
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Сохранять лог в... (по умолчанию: ~/.gnomenu.log)"
 
-#: ../gtk-modules/globalmenu/module-main.c:146
+#: ../gtk-modules/globalmenu/module-main.c:157
 msgid "- Global Menu plugin Module for GTK"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:147
+#: ../gtk-modules/globalmenu/module-main.c:158
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -48,11 +48,11 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:35
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:265
+#: ../applet/applet.c:295
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -92,23 +92,23 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:323
+#: ../applet/applet.c:390
 msgid "Project Home"
 msgstr "Страница проекта"
 
-#: ../applet/applet.c:345
+#: ../applet/applet.c:413
 msgid "On-line help"
 msgstr "Помощь онлайн"
 
-#: ../applet/switcher.c:352
+#: ../applet/switcher.c:335
 msgid "no windows"
 msgstr "нет окон"
 
-#: ../applet/switcher.c:453
+#: ../applet/switcher.c:445
 msgid "Desktop"
 msgstr "Рабочий стол"
 
-#: ../applet/switcher.c:762
+#: ../applet/switcher.c:860
 msgid "File Manager"
 msgstr "Файл-менеджер"
 
@@ -163,22 +163,22 @@ msgstr "Управление окнами"
 msgid "Window List"
 msgstr "Список окон"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
 msgstr "Апплет Global Menu"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr ""
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr ""
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
 msgstr "Плагин Global Menu для панели XFCE"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Плагин Global Menu для панели XFCE"

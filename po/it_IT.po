@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-13 20:07+0100\n"
+"POT-Creation-Date: 2009-01-21 10:20+0100\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -11,11 +11,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Indicator Size"
 msgstr "Dimensioni indicatore"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Size of check or radio indicator"
 msgstr "Dimensioni dei radio e check"
 
@@ -35,11 +35,11 @@ msgstr "Disabilita il Plugin"
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Nome del log file (~/.gnomenu.log)"
 
-#: ../gtk-modules/globalmenu/module-main.c:146
+#: ../gtk-modules/globalmenu/module-main.c:157
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Modulo Global Menu plugin per GTK"
 
-#: ../gtk-modules/globalmenu/module-main.c:147
+#: ../gtk-modules/globalmenu/module-main.c:158
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -52,11 +52,11 @@ msgstr ""
 "NOTA: La variablie d'ambiente GTK_MENUBAR_NO_MAC contiene le applicazioni da "
 "ignorare."
 
-#: ../applet/applet.c:35
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:265
+#: ../applet/applet.c:295
 #, fuzzy
 msgid ""
 "\n"
@@ -97,23 +97,23 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:323
+#: ../applet/applet.c:390
 msgid "Project Home"
 msgstr "Sito Web Progetto"
 
-#: ../applet/applet.c:345
+#: ../applet/applet.c:413
 msgid "On-line help"
 msgstr "Guida in linea"
 
-#: ../applet/switcher.c:352
+#: ../applet/switcher.c:335
 msgid "no windows"
 msgstr "nessuna finestra"
 
-#: ../applet/switcher.c:453
+#: ../applet/switcher.c:445
 msgid "Desktop"
 msgstr "Scrivania"
 
-#: ../applet/switcher.c:762
+#: ../applet/switcher.c:860
 msgid "File Manager"
 msgstr "Esplorazione file"
 
@@ -167,24 +167,24 @@ msgstr "Azioni finestra"
 msgid "Window List"
 msgstr "Elenco programmi attivi"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
 msgstr "Global Menu Panel Applet"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr "GlobalMenu.PanelApplet Factory"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "The factory to build GlobalMenu.PanelApplet objects"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 #, fuzzy
 msgid "Global Menu Plugin for XFCE Panel"
 msgstr "Il plug in Global Menu è stato caricato"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 #, fuzzy
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Modulo Global Menu plugin per GTK"

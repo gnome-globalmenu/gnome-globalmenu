@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-13 20:07+0100\n"
+"POT-Creation-Date: 2009-01-21 10:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,11 +11,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Indicator Size"
 msgstr "Taille de l'Indicateur"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Size of check or radio indicator"
 msgstr "Taille de l'indicateur check ou radio"
 
@@ -35,11 +35,11 @@ msgstr "Désactiver ce Greffon"
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Fichier dans lequel sauvegarder le journal, par défaut ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:146
+#: ../gtk-modules/globalmenu/module-main.c:157
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Applet Menu Global pour GNOME"
 
-#: ../gtk-modules/globalmenu/module-main.c:147
+#: ../gtk-modules/globalmenu/module-main.c:158
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -52,11 +52,11 @@ msgstr ""
 "NOTE: L'environnement GTK_MENUBAR_NO_MAC contient les applications que le "
 "greffon ignorera."
 
-#: ../applet/applet.c:35
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:265
+#: ../applet/applet.c:295
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -78,23 +78,23 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:323
+#: ../applet/applet.c:390
 msgid "Project Home"
 msgstr "Page Internet du Projet"
 
-#: ../applet/applet.c:345
+#: ../applet/applet.c:413
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
-#: ../applet/switcher.c:352
+#: ../applet/switcher.c:335
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:453
+#: ../applet/switcher.c:445
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:762
+#: ../applet/switcher.c:860
 msgid "File Manager"
 msgstr ""
 
@@ -153,24 +153,24 @@ msgstr "Actions de la Fenêtre"
 msgid "Window List"
 msgstr "Liste des Fenêtres"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
 msgstr "Applet Menu Global"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr "Fabrique d'applet de Menu Global"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "La fabrique pour construire les objets GlobalMenu.PanelApplet"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 #, fuzzy
 msgid "Global Menu Plugin for XFCE Panel"
 msgstr "Le module du greffon de Menu Global est chargé"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 #, fuzzy
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Applet Menu Global pour GNOME"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-13 20:07+0100\n"
+"POT-Creation-Date: 2009-01-21 10:20+0100\n"
 "PO-Revision-Date: 2008-12-30 01:00+0000\n"
 "Last-Translator: acidrums4 <acidrums4@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Launchpad-Export-Date: 2009-01-09 07:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Indicator Size"
 msgstr "Tamaño del indicador"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Size of check or radio indicator"
 msgstr "Tamaño del indicador de radio o de la casilla"
 
@@ -42,11 +42,11 @@ msgstr "Deshabiñitar el plugin"
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Archivo para guardar el registro, por defecto a stderr"
 
-#: ../gtk-modules/globalmenu/module-main.c:146
+#: ../gtk-modules/globalmenu/module-main.c:157
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- Módulo del plugin Global Menu para GTK"
 
-#: ../gtk-modules/globalmenu/module-main.c:147
+#: ../gtk-modules/globalmenu/module-main.c:158
 #, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
@@ -60,11 +60,11 @@ msgstr ""
 "NOTA: El entorno GTK_MENUBAR_NO_MAC contiene los programas para ser "
 "ignorados por el plugin.\n"
 
-#: ../applet/applet.c:35
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:265
+#: ../applet/applet.c:295
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -86,23 +86,23 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:323
+#: ../applet/applet.c:390
 msgid "Project Home"
 msgstr "Inicio del Proyecto"
 
-#: ../applet/applet.c:345
+#: ../applet/applet.c:413
 msgid "On-line help"
 msgstr "Ayuda en línea"
 
-#: ../applet/switcher.c:352
+#: ../applet/switcher.c:335
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:453
+#: ../applet/switcher.c:445
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:762
+#: ../applet/switcher.c:860
 msgid "File Manager"
 msgstr ""
 
@@ -159,24 +159,24 @@ msgstr "Acciones de las ventanas"
 msgid "Window List"
 msgstr "Lista de ventanas"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
 msgstr "Applet del panel de Global Menu"
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr ""
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr ""
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 #, fuzzy
 msgid "Global Menu Plugin for XFCE Panel"
 msgstr "El módulo del plugin Global Menu se ha cargado"
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 #, fuzzy
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "El módulo del plugin Global Menu se ha cargado"

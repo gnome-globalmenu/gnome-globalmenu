@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-13 20:07+0100\n"
+"POT-Creation-Date: 2009-01-21 10:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,11 +16,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Indicator Size"
 msgstr ""
 
-#: ../libgnomenu/menuitem.c:1192
+#: ../libgnomenu/menuitem.c:1305
 msgid "Size of check or radio indicator"
 msgstr ""
 
@@ -40,11 +40,11 @@ msgstr ""
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:146
+#: ../gtk-modules/globalmenu/module-main.c:157
 msgid "- Global Menu plugin Module for GTK"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:147
+#: ../gtk-modules/globalmenu/module-main.c:158
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line.\n"
@@ -53,11 +53,11 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:35
+#: ../applet/applet.c:38
 msgid "globalmenu-panel-applet"
 msgstr ""
 
-#: ../applet/applet.c:265
+#: ../applet/applet.c:295
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -79,23 +79,23 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:323
+#: ../applet/applet.c:390
 msgid "Project Home"
 msgstr ""
 
-#: ../applet/applet.c:345
+#: ../applet/applet.c:413
 msgid "On-line help"
 msgstr ""
 
-#: ../applet/switcher.c:352
+#: ../applet/switcher.c:335
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:453
+#: ../applet/switcher.c:445
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:762
+#: ../applet/switcher.c:860
 msgid "File Manager"
 msgstr ""
 
@@ -149,22 +149,22 @@ msgstr ""
 msgid "Window List"
 msgstr ""
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:1
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
 msgstr ""
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:2
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
 msgstr ""
 
-#: ../applet/GlobalMenu_PanelApplet.server.in.h:3
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr ""
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:1
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
 msgstr ""
 
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.h:2
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr ""
