@@ -354,6 +354,14 @@ namespace Gnomenu {
 		private Gtk.Image _image_widget;
 		private Gtk.Image _icon_widget;
 
+		private Gtk.PackDirection pack_direction {
+			get {
+				if(parent is Gtk.MenuBar) {
+					return (parent as Gtk.MenuBar).child_pack_direction;
+				}
+				return PackDirection.LTR;
+			}
+		}
 		public override void toggle_size_request(void* requisition) {
 			int toggle_spacing = 0;
 			int indicator_size = 0;
@@ -365,7 +373,6 @@ namespace Gnomenu {
 					*((int*) requisition ) = indicator_size + toggle_spacing;
 				break;
 				case MenuItemType.IMAGE:
-				/*FIXME: BTT, TTB uses icon_height*/
 					if(!_show_image) {
 						*((int*) requisition) = 0;
 						break;
@@ -373,7 +380,12 @@ namespace Gnomenu {
 					if(image != null && _icon != null) {
 						Requisition req;
 						image.size_request(out req);
+						if(pack_direction == PackDirection.LTR ||
+							pack_direction == PackDirection.RTL )
 						*((int*) requisition ) = req.width + toggle_spacing;
+						if(pack_direction == PackDirection.TTB ||
+							pack_direction == PackDirection.BTT )
+						*((int*) requisition ) = req.height+ toggle_spacing;
 					} else {
 						/*no image*/
 						*((int*) requisition ) = 0;
@@ -563,15 +575,28 @@ namespace Gnomenu {
 					null);
 				ca.width = icon_req.width;
 				ca.height = icon_req.height;
-				int xoffset = (toggle_size - icon_req.width + toggle_spacing)/2;
-				int yoffset = (a.height - icon_req.height)/2;
-				ca.y = a.y + yoffset;
-				switch(get_direction()) {
-					case Gtk.TextDirection.LTR:
-						ca.x = a.x + xoffset;
+				switch(pack_direction) {
+					case PackDirection.LTR:
+					case PackDirection.RTL:
+						int xoffset = (toggle_size - icon_req.width + toggle_spacing)/2;
+						int yoffset = (a.height - icon_req.height)/2;
+						ca.y = a.y + yoffset;
+						if(get_direction() == TextDirection.LTR
+						&& pack_direction == PackDirection.LTR)
+							ca.x = a.x + xoffset;
+						else
+							ca.x = a.x + a.width - ca.width - xoffset;
 					break;
-					case Gtk.TextDirection.RTL:
-						ca.x = a.x + a.width - ca.width - xoffset;
+					case PackDirection.TTB:
+					case PackDirection.BTT:
+						int yoffset = (toggle_size - icon_req.height + toggle_spacing)/2;
+						int xoffset = (a.width- icon_req.width)/2;
+						ca.x = a.x + yoffset;
+						if(get_direction() == TextDirection.LTR
+						&& pack_direction == PackDirection.TTB)
+							ca.y = a.y + xoffset;
+						else
+							ca.y = a.y + a.height - ca.height- yoffset;
 					break;
 				}
 				_image_widget.size_allocate(ca);

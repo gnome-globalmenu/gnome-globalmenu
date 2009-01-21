@@ -24,7 +24,7 @@ namespace Gnomenu {
 			<item id="Close"/>
 		</menu>
 	</item>
-	<item id="Edit">
+	<item id="Edit" type="image" icon="gtk-go-up">
 		<menu>
 			<item id="Copy"/>
 			<item id="Paste"/>
@@ -121,6 +121,22 @@ namespace Gnomenu {
 						item.item_type = "image";
 				};
 				*/
+				Gtk.main();
+			});
+			add("TTB", () => {
+				Parser.parse( menubar, test1);
+				menubar.gravity = Gravity.LEFT;
+				menubar.pack_direction = Gtk.PackDirection.TTB;
+				menubar.child_pack_direction = Gtk.PackDirection.TTB;
+				window.show();
+				Gtk.main();
+			});
+			add("BTT", () => {
+				Parser.parse( menubar, test1);
+				menubar.gravity = Gravity.LEFT;
+				menubar.pack_direction = Gtk.PackDirection.BTT;
+				menubar.child_pack_direction = Gtk.PackDirection.BTT;
+				window.show();
 				Gtk.main();
 			});
 		}	
