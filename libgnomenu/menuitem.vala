@@ -591,7 +591,7 @@ namespace Gnomenu {
 					case PackDirection.BTT:
 						int yoffset = (toggle_size - icon_req.height + toggle_spacing)/2;
 						int xoffset = (a.width- icon_req.width)/2;
-						ca.x = a.x + yoffset;
+						ca.x = a.x + xoffset;
 						if(get_direction() == TextDirection.LTR
 						&& pack_direction == PackDirection.TTB)
 							ca.y = a.y + xoffset;
