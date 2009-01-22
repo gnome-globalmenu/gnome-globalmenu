@@ -87,6 +87,9 @@ namespace Gnomenu {
 			if(item.sensitive == false) {
 				sb.append(" sensitive=\"false\"");
 			}
+			if(item.use_underline == false) {
+				sb.append(" underline=\"false\"");
+			}
 			if(item.icon != null) {
 				sb.append(Markup.printf_escaped(" icon=\"%s\"", item.icon));
 			}

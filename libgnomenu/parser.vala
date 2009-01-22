@@ -94,8 +94,9 @@ namespace Gnomenu {
 			weak string font = null;
 			weak string id = null;
 			weak string accel = null;
-			weak bool sensitive = true;
-			weak bool visible = true;
+			bool sensitive = true;
+			bool visible = true;
+			bool underline = true;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 
@@ -114,6 +115,8 @@ namespace Gnomenu {
 					GMarkupCollectType.TRISTATE,
 					"visible", &visible, 
 					GMarkupCollectType.TRISTATE,
+					"underline", &underline, 
+					GMarkupCollectType.TRISTATE,
 					"sensitive", &sensitive, 
 					GMarkupCollectType.INVALID
 					);
@@ -123,9 +126,13 @@ namespace Gnomenu {
 			if(sensitive != false)
 				sensitive = true;
 
+			if(underline != false)
+				underline = true;
+
 			item.truncated = false;
 			item.id = id;
 			item.visible = visible;
+			item.use_underline = underline;
 			item.sensitive = sensitive;
 			item.item_type = type;
 			item.accel_text = accel;
