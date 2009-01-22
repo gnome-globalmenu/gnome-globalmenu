@@ -181,7 +181,17 @@ public extern string* __get_task_name_by_pid(int pid);
 			string ret = txt.chomp();
 			if (ret.substring(ret.length-4,4)==".exe") return remove_path(ret, "\\"); // is a wine program
 			
-			ret = remove_path(ret.split(" ")[0], "/");
+			/* This is a workaround for issue 279; until
+			 * the name handling scheme is cleaned up
+			 * */
+			string[] words = ret.split(" ");
+			string first_word = words[0];
+			if(first_word != null) {
+				ret = remove_path(first_word, "/");
+			} else {
+				/* Well I don't know what it should be */
+				ret = "";
+			}
 			switch(ret) {
 			case "mono":
 			case "python":
