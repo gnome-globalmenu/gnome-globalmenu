@@ -275,16 +275,12 @@ public extern string* __get_task_name_by_pid(int pid);
 					scaled_size = allocation.width;
 
 				double ratio = (double)scaled_size/(double)size;
-				Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
-						Gdk.Colorspace.RGB,
-						icon.has_alpha, 8,
-						(int) (icon.width * ratio),
-						(int) (icon.height * ratio)
-						);
+				Gdk.Pixbuf scaled_icon = 
+					gdk_pixbuf_scale_simple(icon,
+							(int) (icon.width * ratio),
+							(int) (icon.height * ratio),
+							Gdk.InterpType.BILINEAR);
 
-				icon.scale(scaled_icon,
-						0, 0, scaled_icon.width, scaled_icon.height,
-						0, 0, ratio, ratio, Gdk.InterpType.BILINEAR);
 				/* can't use scale_simple because the vala binding is wrong*/
 				item.image.set_from_pixbuf(scaled_icon);
 			}

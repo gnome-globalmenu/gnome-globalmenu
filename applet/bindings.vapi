@@ -19,3 +19,4 @@ namespace WnckCompat {
 		public void get_geometry (out int x, out int y, out int width, out int height);
 	}
 }
+public Gdk.Pixbuf gdk_pixbuf_scale_simple(Gdk.Pixbuf src, int width, int height, Gdk.InterpType interp_type);
