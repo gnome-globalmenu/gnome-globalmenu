@@ -25,6 +25,22 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
 	g_signal_connect(monitor, "window-changed", on_window_changed, plugin);
 	gtk_widget_show(menubar);
 	g_object_unref(menubar);
+
+	gtk_rc_parse_string(
+		"style \"globalmenu_event_box_style\"\n"
+		"{\n"
+		"	GtkWidget::focus-line-width=0\n"
+		"	GtkWidget::focus-padding=0\n"
+		"}\n"
+		"style \"globalmenu_menu_bar_style\"\n"
+		"{\n"
+		"	ythickness = 0\n"
+		"	GtkMenuBar::shadow-type = none\n"
+		"	GtkMenuBar::internal-padding = 0\n"
+		"}\n"
+		"class \"GtkEventBox\" style \"globalmenu_event_box_style\"\n"
+		"class \"GnomenuMenuBar\" style:highest \"globalmenu_menu_bar_style\"\n"
+	);
 }
 
 static void on_window_changed(GnomenuMonitor * monitor, WnckWindow * prev_window, XfcePanelPlugin * plugin) {
