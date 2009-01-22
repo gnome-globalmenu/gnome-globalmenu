@@ -17,7 +17,7 @@ namespace Gnomenu {
 	</item>
 	<item id="Edit">
 		<menu>
-			<item id="Copy"/>
+			<item id="Copy" type="image" icon="wnck-stock-delete"/>
 			<item id="Paste"/>
 		</menu>
 	</item>

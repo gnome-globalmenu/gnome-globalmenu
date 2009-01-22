@@ -360,9 +360,9 @@ namespace Gnomenu {
 				} else {
 					string stripped_path = overflown_path_to_path(path);
 					if(stripped_path != null) {
-						Gnomenu.MenuItem item = get(stripped_path);
-						if(item != null)
-							activate(item);
+						Gnomenu.MenuItem real_item = get(stripped_path);
+						if(real_item != null)
+							activate(real_item);
 						else {
 							warning("MenuItem %s not found in the main menubar!", stripped_path);
 						}
