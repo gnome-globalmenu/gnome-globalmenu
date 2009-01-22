@@ -78,9 +78,17 @@ public class Applet : Panel.Applet {
 	private Notify.Notification notify_no_plugin;
 	public override void screen_changed(Gdk.Screen previous_screen) {
 		Gdk.Screen gdk_screen = get_screen();
+		if(previous_screen != null) {
+			Settings old_settings = Settings.get_for_screen(previous_screen);
+			/* Work around an old vala bug on disconnecting signals
+			 * perhaps already fixed but ...*/
+			old_settings.notify -= check_module;
+		}
 		if(gdk_screen != null) {
 			ensure_monitor();
+			check_module();
 			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
+			gdk_screen.notify["gtk-modules"] += check_module;
 		}
 	}
 
@@ -161,10 +169,14 @@ public class Applet : Panel.Applet {
 		} catch (GLib.Error e) {
 			warning("%s", e.message );
 		}
-		GConf.Client.get_default().value_changed += (key, value) => {
-			this.get_prefs();
-		};
-		
+		GConf.Client client = GConf.Client.get_default();
+
+		if(client != null) {
+			client.value_changed += (key, value) => {
+				this.get_prefs();
+			};
+		}	
+
 		string applet_menu_xml = _("""
 <popup name="button3">
 	<menuitem name="Preferences" 
@@ -188,21 +200,34 @@ public class Applet : Panel.Applet {
 
 		get_prefs();
 	
-		if(!Notify.is_initted()) {
-			if(Notify.init(APPLET_NAME)) {
-			notify_no_plugin = new Notify.Notification("No Global Menu?", 
-					"Global Menu Plugin is not enabled on this Desktop. "
-					+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", this);
-			}
-		}
 	}
 
+	private void check_module() {
+		Settings settings = get_settings();
+		if(settings == null) return;
+		string modules = settings.gtk_modules;
+			
+		if(modules != null && modules.str("globalmenu") != null) {
+			return;
+		}
+		
+		if(notify_no_plugin == null) {
+			if(!Notify.is_initted()) {
+				if(!Notify.init(APPLET_NAME)) {
+					critical("libnotify is not initialized");	
+					return;
+				}
+			}
+			notify_no_plugin = new Notify.Notification("No Global Menu?", 
+							"Global Menu Plugin is not enabled on this Desktop. "
+							+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", null);
+		}
+		notify_no_plugin.show();
+	
+	}
 	public override void realize() {
 		base.realize();
-		if(null == get_settings().gtk_modules.str("globalmenu")) {
-			if(notify_no_plugin != null)
-				notify_no_plugin.show();
-		}
+
 	}
 	private void get_prefs() {
 		selector.max_size = gconf_get_int("title_max_width");
