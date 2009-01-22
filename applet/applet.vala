@@ -28,7 +28,6 @@ public class Applet : Panel.Applet {
 		if(monitor == null) {
 			monitor = new Monitor();
 			monitor.window_changed += on_window_changed;
-			monitor.windowlist_changed += on_windowlist_changed;
 		}
 	}
 	construct {
@@ -76,7 +75,7 @@ public class Applet : Panel.Applet {
 	private Gnomenu.MenuBar main_menubar;
 	private Switcher selector;
 
-	private Notify.Notification notify;
+	private Notify.Notification notify_no_plugin;
 	public override void screen_changed(Gdk.Screen previous_screen) {
 		Gdk.Screen gdk_screen = get_screen();
 		if(gdk_screen != null) {
@@ -85,9 +84,6 @@ public class Applet : Panel.Applet {
 		}
 	}
 
-	private void on_windowlist_changed ( Monitor monitor) {
-		//selector.update();	
-	}
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
 		if(window is Wnck.Window)
@@ -192,17 +188,20 @@ public class Applet : Panel.Applet {
 
 		get_prefs();
 	
-		if(!Notify.is_initted())
-			Notify.init(APPLET_NAME);
+		if(!Notify.is_initted()) {
+			if(Notify.init(APPLET_NAME)) {
+			notify_no_plugin = new Notify.Notification("No Global Menu?", 
+					"Global Menu Plugin is not enabled on this Desktop. "
+					+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", this);
+			}
+		}
 	}
 
 	public override void realize() {
 		base.realize();
-		notify = new Notify.Notification("No Global Menu?", 
-				"Global Menu Plugin is not enabled on this Desktop. "
-				+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", this);
 		if(null == get_settings().gtk_modules.str("globalmenu")) {
-			notify.show();
+			if(notify_no_plugin != null)
+				notify_no_plugin.show();
 		}
 	}
 	private void get_prefs() {
