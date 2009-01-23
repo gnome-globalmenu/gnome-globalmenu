@@ -1,5 +1,5 @@
 
-VALASOURCES = image-to-vala
+VALASOURCES = image-to-vala.vala
 STAMPS = $(VALASOURCES:.vala=.c)
 noinst_PROGRAMS = $(VALASOURCES:.vala=)
 
