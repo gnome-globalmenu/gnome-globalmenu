@@ -4,7 +4,7 @@ const string APPLET_STANDARD_PROPERTIES = ""; /* then replaced by patch.sh to GN
 const string FACTORY_IID = "OAFIID:GlobalMenu_PanelApplet_Factory";
 
 public bool verbose = false;
-const OptionEntry[] options = {
+private const OptionEntry[] options = {
 	{"verbose", 'v',0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 	{null}
 };
