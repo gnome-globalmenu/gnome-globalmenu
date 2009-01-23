@@ -10,6 +10,22 @@ XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL ( xfce_panel_plugin_init);
 
 static void on_window_changed(GnomenuMonitor * monitor, WnckWindow * prev_window, XfcePanelPlugin * plugin);
 static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
+	gtk_rc_parse_string(
+		"style \"globalmenu_event_box_style\"\n"
+		"{\n"
+		"	GtkWidget::focus-line-width=0\n"
+		"	GtkWidget::focus-padding=0\n"
+		"}\n"
+		"style \"globalmenu_menu_bar_style\"\n"
+		"{\n"
+		"	ythickness = 0\n"
+		"	GtkMenuBar::shadow-type = none\n"
+		"	GtkMenuBar::internal-padding = 0\n"
+		"}\n"
+		"class \"GtkPlug\" style \"globalmenu_event_box_style\"\n"
+		"class \"GnomenuMenuBar\" style:highest \"globalmenu_menu_bar_style\"\n"
+	);
+	gtk_widget_reset_rc_styles(plugin);
 	GnomenuMonitor * monitor = gnomenu_monitor_new();
 	GnomenuMenuBar * menubar = gnomenu_menu_bar_new();
 	g_object_ref_sink(menubar);
@@ -26,21 +42,6 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
 	gtk_widget_show(menubar);
 	g_object_unref(menubar);
 
-	gtk_rc_parse_string(
-		"style \"globalmenu_event_box_style\"\n"
-		"{\n"
-		"	GtkWidget::focus-line-width=0\n"
-		"	GtkWidget::focus-padding=0\n"
-		"}\n"
-		"style \"globalmenu_menu_bar_style\"\n"
-		"{\n"
-		"	ythickness = 0\n"
-		"	GtkMenuBar::shadow-type = none\n"
-		"	GtkMenuBar::internal-padding = 0\n"
-		"}\n"
-		"class \"GtkEventBox\" style \"globalmenu_event_box_style\"\n"
-		"class \"GnomenuMenuBar\" style:highest \"globalmenu_menu_bar_style\"\n"
-	);
 }
 
 static void on_window_changed(GnomenuMonitor * monitor, WnckWindow * prev_window, XfcePanelPlugin * plugin) {
