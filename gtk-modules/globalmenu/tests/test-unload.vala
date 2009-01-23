@@ -15,7 +15,11 @@ namespace GnomenuGtk {
 			settings = Settings.get_default();
 			add("test", () => {
 				Builder builder = new Builder();
-				builder.add_from_file(Config.ABSTOPSRCDIR + rel_path +"/tests/test-unload.ui");
+				try {
+					builder.add_from_file(Config.ABSTOPSRCDIR + rel_path +"/tests/test-unload.ui");
+				} catch(GLib.Error e) {
+					critical("%s", e.message);
+				}
 				window = builder.get_object("test_window") as Window;
 				chooser = builder.get_object("chooser") as FileChooser;
 				chooser.set_filename(Config.ABSTOPSRCDIR + rel_path + "/.libs/libglobalmenu-gnome.so");
