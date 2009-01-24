@@ -2,7 +2,7 @@
 <repository version="1.0">
 <include name="Gtk" version="2.0"/>
 <include name="Gdk" version="2.0"/>
-<namespace name="Gnomenu" version="1.0" shared-library="libgnomenu-0.7.0.so.1.0.0">
+<namespace name="Gnomenu" version="1.0" shared-library="libgnomenu.so">
 	<enumeration name="BackgroundType" c:type="GnomenuBackgroundType" glib:get-type="gnomenu_background_type_get_type">
 		<member name="none"  value="0"/>
 		<member name="color"  value="1"/>

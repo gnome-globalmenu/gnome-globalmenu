@@ -40,7 +40,7 @@ girdir = $(GIRDIR)
 gir_DATA = Gnomenu-1.0.gir
 SUFFIXES = .gir .typelib
 .gir.typelib: libgnomenu.la
-	$(GIRCOMPILER) -l libgnomenu.la $^ > $@
+	LD_LIBRARY_PATH=$${LD_LIBRARY_PATH:+$$LD_LIBRARY_PATH:}. $(GIRCOMPILER) $^ -o $@
 endif 
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
