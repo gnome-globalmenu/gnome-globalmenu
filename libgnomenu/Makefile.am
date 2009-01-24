@@ -13,6 +13,7 @@ INTERNAL = \
 	menushellutils.vala \
 	label.vala \
 	keygrab.vala \
+	globalmenu.vala \
 	$(NULL)
 
 EXTERNAL = gnomenu.vala
