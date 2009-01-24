@@ -88,9 +88,6 @@
 		</field>
 		<method name="clone" c:identifier="gnomenu_background_clone">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Background"/>
-				</parameter>
 			</parameters>
 			<return-value transfer-ownership="full">
 				<type name="Gnomenu.Background"/>
@@ -114,9 +111,6 @@
 		</constructor>
 		<method name="get" c:identifier="gnomenu_menu_bar_get">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.MenuBar"/>
-				</parameter>
 				<parameter name="path" transfer-ownership="none">
 					<type name="utf8"/>
 				</parameter>
@@ -127,9 +121,6 @@
 		</method>
 		<method name="create_overflown_menu" c:identifier="gnomenu_menu_bar_create_overflown_menu">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.MenuBar"/>
-				</parameter>
 			</parameters>
 			<return-value transfer-ownership="full">
 				<type name="utf8?"/>
@@ -137,9 +128,6 @@
 		</method>
 		<method name="remove_all" c:identifier="gnomenu_menu_bar_remove_all">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.MenuBar"/>
-				</parameter>
 			</parameters>
 			<return-value transfer-ownership="none">
 				<type name="none"/>
@@ -252,9 +240,6 @@
 		</function>
 		<method name="emit_menu_event" c:identifier="gnomenu_window_emit_menu_event">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="path" transfer-ownership="none">
 					<type name="utf8"/>
 				</parameter>
@@ -265,9 +250,6 @@
 		</method>
 		<method name="get" c:identifier="gnomenu_window_get">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="property_name" transfer-ownership="none">
 					<type name="utf8"/>
 				</parameter>
@@ -278,9 +260,6 @@
 		</method>
 		<method name="set" c:identifier="gnomenu_window_set">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="property_name" transfer-ownership="none">
 					<type name="utf8"/>
 				</parameter>
@@ -294,9 +273,6 @@
 		</method>
 		<method name="get_by_atom" c:identifier="gnomenu_window_get_by_atom">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="atom" transfer-ownership="none">
 					<type name="Gdk.Atom"/>
 				</parameter>
@@ -307,9 +283,6 @@
 		</method>
 		<method name="set_by_atom" c:identifier="gnomenu_window_set_by_atom">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="atom" transfer-ownership="none">
 					<type name="Gdk.Atom"/>
 				</parameter>
@@ -323,9 +296,6 @@
 		</method>
 		<method name="grab_key" c:identifier="gnomenu_window_grab_key">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="keyval" transfer-ownership="none">
 					<type name="uint"/>
 				</parameter>
@@ -339,9 +309,6 @@
 		</method>
 		<method name="ungrab_key" c:identifier="gnomenu_window_ungrab_key">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.Window"/>
-				</parameter>
 				<parameter name="keyval" transfer-ownership="none">
 					<type name="uint"/>
 				</parameter>
@@ -428,9 +395,6 @@
 	<class name="GlobalMenu" parent="Gnomenu.MenuBar" glib:type-name="GnomenuGlobalMenu" glib:get-type="gnomenu_global_menu_get_type">
 		<method name="switch_to" c:identifier="gnomenu_global_menu_switch_to">
 			<parameters>
-				<parameter name="self" transfer-ownership="none">
-					<type name="Gnomenu.GlobalMenu"/>
-				</parameter>
 				<parameter name="xid" transfer-ownership="none">
 					<type name="ulong"/>
 				</parameter>

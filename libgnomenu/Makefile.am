@@ -44,7 +44,6 @@ SUFFIXES = .gir .typelib
 endif 
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
-
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
 	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi
 	bash patch.sh
