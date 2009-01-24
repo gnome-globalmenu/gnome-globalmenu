@@ -35,9 +35,9 @@ libgnomenu_includedir = $(includedir)/libgnomenu
 libgnomenu_include_HEADERS = $(VALASOURCES:.vala=.h)
 if WITH_GIR
 typelibdir = $(TYPELIBDIR)
-typelib_DATA = Gnomenu.typelib
+typelib_DATA = Gnomenu-1.0.typelib
 girdir = $(GIRDIR)
-gir_DATA = Gnomenu.gir
+gir_DATA = Gnomenu-1.0.gir
 SUFFIXES = .gir .typelib
 .gir.typelib: libgnomenu.la
 	$(GIRCOMPILER) -l libgnomenu.la $^ > $@
@@ -54,5 +54,5 @@ gnomenu.deps:
 
 BUILT_SOURCES = gnomenu.vapi  gnomenu.deps
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu.gir patch-gir.sh
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh
 
