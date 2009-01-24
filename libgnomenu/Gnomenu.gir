@@ -1,0 +1,605 @@
+<?xml version="1.0"?>
+<repository version="1.0">
+<include name="Gtk" version="2.0"/>
+<include name="Gdk" version="2.0"/>
+<namespace name="Gnomenu" version="1.0">
+	<enumeration name="BackgroundType" c:type="GnomenuBackgroundType" glib:get-type="gnomenu_background_type_get_type">
+		<member name="none"  value="0"/>
+		<member name="color"  value="1"/>
+		<member name="pixmap"  value="2"/>
+	</enumeration>
+	<enumeration name="Gravity" c:type="GnomenuGravity" glib:get-type="gnomenu_gravity_get_type">
+		<member name="down"  value="0"/>
+		<member name="up"  value="1"/>
+		<member name="left"  value="2"/>
+		<member name="right"  value="3"/>
+	</enumeration>
+	<enumeration name="MenuItemType" c:type="GnomenuMenuItemType" glib:get-type="gnomenu_menu_item_type_get_type">
+		<member name="normal"  value="0"/>
+		<member name="check"  value="1"/>
+		<member name="radio"  value="2"/>
+		<member name="image"  value="3"/>
+		<member name="separator"  value="4"/>
+		<member name="arrow"  value="5"/>
+		<member name="icon"  value="6"/>
+	</enumeration>
+	<enumeration name="MenuItemState" c:type="GnomenuMenuItemState" glib:get-type="gnomenu_menu_item_state_get_type">
+		<member name="untoggled"  value="0"/>
+		<member name="toggled"  value="1"/>
+		<member name="tristate"  value="2"/>
+	</enumeration>
+	<record name="Parser">
+		<method name="parse" c:identifier="gnomenu_parser_parse">
+			<parameters>
+				<parameter name="menubar" transfer-ownership="none">
+					<type name="Gnomenu.MenuBar"/>
+				</parameter>
+				<parameter name="description" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+	</record>
+	<record name="Serializer">
+		<method name="to_string" c:identifier="gnomenu_serializer_to_string">
+			<parameters>
+				<parameter name="widget" transfer-ownership="none">
+					<type name="Gtk.Widget"/>
+				</parameter>
+				<parameter name="pretty_print" transfer-ownership="none">
+					<type name="bool"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="utf8"/>
+			</return-value>
+		</method>
+	</record>
+	<class name="Menu" parent="Gtk.Menu" glib:type-name="GnomenuMenu" glib:get-type="gnomenu_menu_get_type">
+		<constructor name="new" c:identifier="gnomenu_menu_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.Menu"/>
+			</return-value>
+		</constructor>
+		<property name="use_rgba_colormap" readable="1" writable="1">
+			<type name="bool"/>
+		</property>
+	</class>
+	<record name="Background">
+		<field name="type">
+			<type name="Gnomenu.BackgroundType"/>
+		</field>
+		<field name="pixmap">
+			<type name="Gdk.Pixmap"/>
+		</field>
+		<field name="color">
+			<type name="Gdk.Color"/>
+		</field>
+		<field name="offset_x">
+			<type name="int"/>
+		</field>
+		<field name="offset_y">
+			<type name="int"/>
+		</field>
+		<method name="clone" c:identifier="gnomenu_background_clone">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Background"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="Gnomenu.Background"/>
+			</return-value>
+		</method>
+		<constructor name="new" c:identifier="gnomenu_background_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.Background"/>
+			</return-value>
+		</constructor>
+	</record>
+	<class name="MenuBar" parent="Gtk.MenuBar" glib:type-name="GnomenuMenuBar" glib:get-type="gnomenu_menu_bar_get_type">
+		<constructor name="new" c:identifier="gnomenu_menu_bar_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.MenuBar"/>
+			</return-value>
+		</constructor>
+		<method name="get" c:identifier="gnomenu_menu_bar_get">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.MenuBar"/>
+				</parameter>
+				<parameter name="path" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="Gnomenu.MenuItem?"/>
+			</return-value>
+		</method>
+		<method name="create_overflown_menu" c:identifier="gnomenu_menu_bar_create_overflown_menu">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.MenuBar"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="utf8?"/>
+			</return-value>
+		</method>
+		<method name="remove_all" c:identifier="gnomenu_menu_bar_remove_all">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.MenuBar"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<property name="background" readable="1" writable="1">
+			<type name="Gnomenu.Background"/>
+		</property>
+		<property name="gravity" readable="1" writable="1">
+			<type name="Gnomenu.Gravity"/>
+		</property>
+		<property name="overflown" readable="1">
+			<type name="bool"/>
+		</property>
+		<property name="min_length" readable="1" writable="1">
+			<type name="int"/>
+		</property>
+		<glib:signal name="activate">
+			<parameters>
+				<parameter name="item" transfer-ownership="none">
+					<type name="Gnomenu.MenuItem"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</glib:signal>
+	</class>
+	<class name="MenuItem" parent="Gtk.MenuItem" glib:type-name="GnomenuMenuItem" glib:get-type="gnomenu_menu_item_get_type">
+		<constructor name="new" c:identifier="gnomenu_menu_item_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.MenuItem"/>
+			</return-value>
+		</constructor>
+		<property name="menubar" readable="1" writable="1">
+			<type name="Gnomenu.MenuBar?"/>
+		</property>
+		<property name="position" readable="1" writable="1">
+			<type name="int"/>
+		</property>
+		<property name="id" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="label" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="icon" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="accel_text" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="font" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="path" readable="1">
+			<type name="utf8"/>
+		</property>
+		<property name="item_type" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="use_underline" readable="1" writable="1">
+			<type name="bool"/>
+		</property>
+		<property name="item_state" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<property name="gravity" readable="1" writable="1">
+			<type name="Gnomenu.Gravity"/>
+		</property>
+		<property name="truncated" readable="1" writable="1">
+			<type name="bool"/>
+		</property>
+		<property name="image" readable="1">
+			<type name="Gtk.Image?"/>
+		</property>
+	</class>
+	<class name="Window" parent="Gtk.Window" glib:type-name="GnomenuWindow" glib:get-type="gnomenu_window_get_type">
+		<constructor name="new" c:identifier="gnomenu_window_new">
+			<parameters>
+				<parameter name="type" transfer-ownership="none">
+					<type name="Gtk.WindowType"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.Window"/>
+			</return-value>
+		</constructor>
+		<function name="new_from_native" c:identifier="gnomenu_window_new_from_native">
+			<parameters>
+				<parameter name="native" transfer-ownership="none">
+					<type name="ulong"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="Gnomenu.Window?"/>
+			</return-value>
+		</function>
+		<function name="new_from_gdk_window" c:identifier="gnomenu_window_new_from_gdk_window">
+			<parameters>
+				<parameter name="window" transfer-ownership="none">
+					<type name="Gdk.Window"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="Gnomenu.Window?"/>
+			</return-value>
+		</function>
+		<method name="emit_menu_event" c:identifier="gnomenu_window_emit_menu_event">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="path" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<method name="get" c:identifier="gnomenu_window_get">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="property_name" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="utf8?"/>
+			</return-value>
+		</method>
+		<method name="set" c:identifier="gnomenu_window_set">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="property_name" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+				<parameter name="value" transfer-ownership="none">
+					<type name="utf8?"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<method name="get_by_atom" c:identifier="gnomenu_window_get_by_atom">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="atom" transfer-ownership="none">
+					<type name="Gdk.Atom"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="utf8?"/>
+			</return-value>
+		</method>
+		<method name="set_by_atom" c:identifier="gnomenu_window_set_by_atom">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="atom" transfer-ownership="none">
+					<type name="Gdk.Atom"/>
+				</parameter>
+				<parameter name="value" transfer-ownership="none">
+					<type name="utf8?"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<method name="grab_key" c:identifier="gnomenu_window_grab_key">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="keyval" transfer-ownership="none">
+					<type name="uint"/>
+				</parameter>
+				<parameter name="state" transfer-ownership="none">
+					<type name="Gdk.ModifierType"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="bool"/>
+			</return-value>
+		</method>
+		<method name="ungrab_key" c:identifier="gnomenu_window_ungrab_key">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.Window"/>
+				</parameter>
+				<parameter name="keyval" transfer-ownership="none">
+					<type name="uint"/>
+				</parameter>
+				<parameter name="state" transfer-ownership="none">
+					<type name="Gdk.ModifierType"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="full">
+				<type name="bool"/>
+			</return-value>
+		</method>
+		<property name="invalid" readable="1">
+			<type name="bool"/>
+		</property>
+		<property name="is_foreign" readable="1" writable="1">
+			<type name="bool"/>
+		</property>
+		<property name="xid" readable="1">
+			<type name="ulong"/>
+		</property>
+		<property name="menu_context" readable="1" writable="1">
+			<type name="utf8?"/>
+		</property>
+		<glib:signal name="menu_context_changed">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</glib:signal>
+		<glib:signal name="menu_event">
+			<parameters>
+				<parameter name="path" transfer-ownership="none">
+					<type name="utf8"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</glib:signal>
+	</class>
+	<class name="MenuBarBox" parent="Gtk.Container" glib:type-name="GnomenuMenuBarBox" glib:get-type="gnomenu_menu_bar_box_get_type">
+		<constructor name="new" c:identifier="gnomenu_menu_bar_box_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.MenuBarBox"/>
+			</return-value>
+		</constructor>
+		<property name="pack_direction" readable="1" writable="1">
+			<type name="Gtk.PackDirection"/>
+		</property>
+		<property name="gravity" readable="1" writable="1">
+			<type name="Gnomenu.Gravity"/>
+		</property>
+		<property name="background" writable="1">
+			<type name="Gnomenu.Background"/>
+		</property>
+	</class>
+	<class name="MenuLabel" parent="Gtk.Container" glib:type-name="GnomenuMenuLabel" glib:get-type="gnomenu_menu_label_get_type">
+		<constructor name="new" c:identifier="gnomenu_menu_label_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.MenuLabel"/>
+			</return-value>
+		</constructor>
+		<property name="accel" readable="1" writable="1">
+			<type name="utf8"/>
+		</property>
+		<property name="use_underline" readable="1" writable="1">
+			<type name="bool"/>
+		</property>
+		<property name="label" readable="1" writable="1">
+			<type name="utf8"/>
+		</property>
+		<property name="gravity" readable="1" writable="1">
+			<type name="Gnomenu.Gravity"/>
+		</property>
+		<property name="label_widget" readable="1">
+			<type name="Gtk.Label?"/>
+		</property>
+	</class>
+	<class name="GlobalMenu" parent="Gnomenu.MenuBar" glib:type-name="GnomenuGlobalMenu" glib:get-type="gnomenu_global_menu_get_type">
+		<method name="switch_to" c:identifier="gnomenu_global_menu_switch_to">
+			<parameters>
+				<parameter name="self" transfer-ownership="none">
+					<type name="Gnomenu.GlobalMenu"/>
+				</parameter>
+				<parameter name="xid" transfer-ownership="none">
+					<type name="ulong"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<constructor name="new" c:identifier="gnomenu_global_menu_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.GlobalMenu"/>
+			</return-value>
+		</constructor>
+	</class>
+	<constant name="GNOMENU_NET_GLOBALMENU_MENU_CONTEXT" value="_NET_GLOBALMENU_MENU_CONTEXT">
+	<type name="utf8"/>
+</constant>
+	<constant name="GNOMENU_NET_GLOBALMENU_MENU_EVENT" value="_NET_GLOBALMENU_MENU_EVENT">
+	<type name="utf8"/>
+</constant>
+	<function name="gravity_to_text_angle" c:identifier="gnomenu_gravity_to_text_angle">
+		<parameters>
+			<parameter name="g" transfer-ownership="none">
+				<type name="Gnomenu.Gravity"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="double"/>
+		</return-value>
+	</function>
+	<function name="gravity_to_arrow_type" c:identifier="gnomenu_gravity_to_arrow_type">
+		<parameters>
+			<parameter name="g" transfer-ownership="none">
+				<type name="Gnomenu.Gravity"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="Gtk.ArrowType"/>
+		</return-value>
+	</function>
+	<function name="item_state_to_shadow_type" c:identifier="gnomenu_item_state_to_shadow_type">
+		<parameters>
+			<parameter name="state" transfer-ownership="none">
+				<type name="Gnomenu.MenuItemState"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="Gtk.ShadowType"/>
+		</return-value>
+	</function>
+	<function name="gtk_menu_shell_get_item" c:identifier="gtk_menu_shell_get_item">
+		<parameters>
+			<parameter name="menu_shell" transfer-ownership="none">
+				<type name="Gtk.MenuShell*"/>
+			</parameter>
+			<parameter name="position" transfer-ownership="none">
+				<type name="int"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="none">
+			<type name="Gtk.MenuItem"/>
+		</return-value>
+	</function>
+	<function name="gtk_menu_shell_truncate" c:identifier="gtk_menu_shell_truncate">
+		<parameters>
+			<parameter name="menushell" transfer-ownership="none">
+				<type name="Gtk.MenuShell*"/>
+			</parameter>
+			<parameter name="length" transfer-ownership="none">
+				<type name="int"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="none">
+			<type name="none"/>
+		</return-value>
+	</function>
+	<function name="gtk_menu_shell_length" c:identifier="gtk_menu_shell_length">
+		<parameters>
+			<parameter name="menu_shell" transfer-ownership="none">
+				<type name="Gtk.MenuShell*"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="int"/>
+		</return-value>
+	</function>
+	<function name="grab_key" c:identifier="gnomenu_grab_key">
+		<parameters>
+			<parameter name="grab_window" transfer-ownership="none">
+				<type name="Gdk.Window*"/>
+			</parameter>
+			<parameter name="keyval" transfer-ownership="none">
+				<type name="uint"/>
+			</parameter>
+			<parameter name="state" transfer-ownership="none">
+				<type name="Gdk.ModifierType"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="bool"/>
+		</return-value>
+	</function>
+	<function name="ungrab_key" c:identifier="gnomenu_ungrab_key">
+		<parameters>
+			<parameter name="grab_window" transfer-ownership="none">
+				<type name="Gdk.Window*"/>
+			</parameter>
+			<parameter name="keyval" transfer-ownership="none">
+				<type name="uint"/>
+			</parameter>
+			<parameter name="state" transfer-ownership="none">
+				<type name="Gdk.ModifierType"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="bool"/>
+		</return-value>
+	</function>
+	<function name="item_state_from_string" c:identifier="gnomenu_item_state_from_string">
+		<parameters>
+			<parameter name="str" transfer-ownership="none">
+				<type name="utf8?"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="Gnomenu.MenuItemState"/>
+		</return-value>
+	</function>
+	<function name="item_state_to_string" c:identifier="gnomenu_item_state_to_string">
+		<parameters>
+			<parameter name="state" transfer-ownership="none">
+				<type name="Gnomenu.MenuItemState"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="none">
+			<type name="utf8?"/>
+		</return-value>
+	</function>
+	<function name="item_type_from_string" c:identifier="gnomenu_item_type_from_string">
+		<parameters>
+			<parameter name="str" transfer-ownership="none">
+				<type name="utf8?"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="Gnomenu.MenuItemType"/>
+		</return-value>
+	</function>
+	<function name="item_type_has_label" c:identifier="gnomenu_item_type_has_label">
+		<parameters>
+			<parameter name="type" transfer-ownership="none">
+				<type name="Gnomenu.MenuItemType"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="full">
+			<type name="bool"/>
+		</return-value>
+	</function>
+	<function name="item_type_to_string" c:identifier="gnomenu_item_type_to_string">
+		<parameters>
+			<parameter name="type" transfer-ownership="none">
+				<type name="Gnomenu.MenuItemType"/>
+			</parameter>
+		</parameters>
+		<return-value transfer-ownership="none">
+			<type name="utf8?"/>
+		</return-value>
+	</function>
+</namespace>
+</repository>

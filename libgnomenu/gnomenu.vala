@@ -3,18 +3,18 @@ namespace Gnomenu {
 	public const string NET_GLOBALMENU_MENU_EVENT = "_NET_GLOBALMENU_MENU_EVENT";
 
 	public enum MenuItemType {
-		NORMAL,
-		CHECK,
-		RADIO,
-		IMAGE,
-		SEPARATOR,
-		ARROW,
-		ICON,
+		NORMAL = 0,
+		CHECK = 1,
+		RADIO = 2,
+		IMAGE = 3,
+		SEPARATOR = 4,
+		ARROW = 5,
+		ICON = 6,
 	}
 	public enum MenuItemState {
-		UNTOGGLED,
-		TOGGLED,
-		TRISTATE,
+		UNTOGGLED = 0,
+		TOGGLED = 1,
+		TRISTATE = 2,
 	}
 	protected MenuItemState item_state_from_string(string? str) {
 		switch(str) {

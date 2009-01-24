@@ -11,7 +11,7 @@ STAMP = $(VALASOURCES:.vala=.c)
 SUFFIXES = .vala .c
 
 .vala.c:
-	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu-private $^
+	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu $^
 	if [ $@ == test-leak.c ]; then bash patch.sh; fi;
 	touch $@
 

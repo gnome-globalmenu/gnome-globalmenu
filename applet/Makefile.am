@@ -83,7 +83,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=gnome-desktop-2.0 \
 	--pkg=libgnome-menu \
 	--pkg=gconf-2.0 \
-	--pkg=gnomenu-private \
+	--pkg=gnomenu \
 	--pkg=libapplet-private \
 	--pkg=libnotify \
 	$(VALASOURCES) bindings.vapi

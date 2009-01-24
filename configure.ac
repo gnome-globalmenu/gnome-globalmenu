@@ -81,6 +81,28 @@ AC_SUBST(WNCK_LIBS)
 
 
 AC_ARG_WITH(
+	[gir],
+	AC_HELP_STRING([--with-gir], [enable building gir typelib]),
+	[],
+	[with_gir=no])
+AS_IF([test "x$with_gir" != xno],
+	[
+	AC_PATH_PROG(GIRCOMPILER, [g-ir-compiler] )
+	AS_IF([test -n "$GIRCOMPILER" ],
+		[with_gir=true],
+		AC_MSG_FAILURE(
+			[test for g-ir-compiler failed. (--without-gir to disable).]
+		)
+	)
+	AC_SUBST(GIRCOMPILER)
+	GIRDIR=`$PKG_CONFIG --variable=girdir gobject-introspection-1.0`
+	AC_SUBST(GIRDIR)
+	TYPELIBDIR="$($PKG_CONFIG --variable=typelibdir gobject-introspection-1.0)"
+	AC_SUBST(TYPELIBDIR)
+	]
+)
+AM_CONDITIONAL(WITH_GIR, [test "x$with_gir" = xtrue ]) 
+AC_ARG_WITH(
 	[gnome-panel],
 	AC_HELP_STRING([--without-gnome-panel], [disable gnome panel applet]),
 	[],
@@ -152,6 +174,8 @@ AC_CONFIG_FILES(
 	[Makefile
 	libgnomenu/Makefile
 	libgnomenu/tests/Makefile
+	libgnomenu/libgnomenu.pc
+	libgnomenu/libgnomenu-uninstalled.pc
 	applet/Makefile
 	xfce/Makefile
 	tests/Makefile

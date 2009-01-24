@@ -3,15 +3,15 @@ using Gtk;
 
 namespace Gnomenu {
 	public enum BackgroundType {
-		NONE,
-		COLOR,
-		PIXMAP
+		NONE = 0,
+		COLOR = 1,
+		PIXMAP = 2,
 	}
 	public enum Gravity { /*Text Gravity, differ from Gdk.Gravity*/
-		DOWN, 
-		UP, /*Rarely used: up-side-down!*/
-		LEFT,
-		RIGHT
+		DOWN = 0, 
+		UP = 1, /*Rarely used: up-side-down!*/
+		LEFT = 2,
+		RIGHT = 3
 	}
 
 	protected double gravity_to_text_angle(Gravity g) {

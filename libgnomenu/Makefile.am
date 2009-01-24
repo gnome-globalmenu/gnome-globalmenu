@@ -1,7 +1,7 @@
 NULL=
 SUBDIRS = . tests
 
-INTERNAL = \
+VALASOURCES = \
 	helper.vala \
 	parser.vala \
 	serializer.vala \
@@ -14,17 +14,14 @@ INTERNAL = \
 	label.vala \
 	keygrab.vala \
 	globalmenu.vala \
+	gnomenu.vala \
 	$(NULL)
 
-EXTERNAL = gnomenu.vala
-
-noinst_LTLIBRARIES = libgnomenu.la
+lib_LTLIBRARIES = libgnomenu.la
 
 libgnomenu_la_SOURCES = \
-						$(INTERNAL:.vala=.c) \
-						$(INTERNAL:.vala=.h) \
-						$(EXTERNAL:.vala=.c) \
-						$(EXTERNAL:.vala=.h) \
+						$(VALASOURCES:.vala=.c) \
+						$(VALASOURCES:.vala=.h) \
 						keygrab-ccode.c \
 						gmarkup-backport.h \
 						gmarkup-backport.c \
@@ -34,17 +31,28 @@ libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)
 libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 
-INTERNAL_VAPI= gnomenu-private.vapi
-EXTERNAL_VAPI= gnomenu.vapi
+libgnomenu_includedir = $(includedir)/libgnomenu
+libgnomenu_include_HEADERS = $(VALASOURCES:.vala=.h)
+if WITH_GIR
+typelibdir = $(TYPELIBDIR)
+typelib_DATA = Gnomenu.typelib
+girdir = $(GIRDIR)
+gir_DATA = Gnomenu.gir
+SUFFIXES = .gir .typelib
+.gir.typelib: libgnomenu.la
+	$(GIRCOMPILER) -l libgnomenu.la $^ > $@
+endif 
 
-$(INTERNAL_VAPI): $(INTERNAL) patch.sh $(EXTERNAL_VAPI) bindings.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gnomenu --pkg gtk+-2.0 --pkg bindings --library $(@:.vapi=) $(INTERNAL)
-	echo gnomenu > $(@:.vapi=.deps)
+#VALAC=/home/rainwoodman/Projects/vala/compiler/valac
+
+gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi
 	bash patch.sh
-$(EXTERNAL_VAPI): $(EXTERNAL) patch.sh bindings.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --vapidir=. --pkg gtk+-2.0 --pkg bindings --library $(@:.vapi=) $(EXTERNAL)
 
-BUILT_SOURCES = $(INTERNAL_VAPI) $(EXTERNAL_VAPI) $(INTERNAL_VAPI:.vapi=.deps)
+gnomenu.deps:
+	echo gtk+-2.0 > $@
 
-EXTRA_DIST = $(INTERNAL_VAPI) $(INTERNAL) $(EXTERNAL_VAPI) $(EXTERNAL) patch.sh $(INTERNAL_VAPI:.vapi=.deps) bindings.vapi
+BUILT_SOURCES = gnomenu.vapi  gnomenu.deps
+
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu.gir patch-gir.sh
 
