@@ -31,6 +31,9 @@ libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)
 libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libgnomenu.pc
+
 libgnomenu_includedir = $(includedir)/libgnomenu
 libgnomenu_include_HEADERS = $(VALASOURCES:.vala=.h)
 if WITH_GIR
@@ -53,5 +56,5 @@ gnomenu.deps:
 
 BUILT_SOURCES = gnomenu.vapi  gnomenu.deps
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh libgnomenu.pc.in libgnomenu-uninstall.pc.in
 
