@@ -117,6 +117,8 @@ AS_IF([test "x$with_gnome_panel" != xno],
 		with_gnome_panel=true;
 		AC_SUBST(GNOME_PANEL_CFLAGS)
 		AC_SUBST(GNOME_PANEL_LIBS)
+		BONOBO_SERVER_DIR="$($PKG_CONFIG --variable=libdir bonobo-activation-2.0)/bonobo/servers"
+		AC_SUBST(BONOBO_SERVER_DIR)
 		],
 		[
 		with_gnome_panel=false;
@@ -138,6 +140,10 @@ AS_IF([test "x$with_xfce4_panel" != xno],
 		with_xfce4_panel=true;
 		AC_SUBST(XFCE4_PANEL_CFLAGS)
 		AC_SUBST(XFCE4_PANEL_LIBS)
+		XFCE4_PANEL_PLUGIN_DIR="$($PKG_CONFIG --variable=externalplugindir libxfce4panel-1.0)"
+		XFCE4_PANEL_DESKTOP_DIR="$($PKG_CONFIG --variable=desktopdatadir libxfce4panel-1.0)"
+		AC_SUBST(XFCE4_PANEL_PLUGIN_DIR)
+		AC_SUBST(XFCE4_PANEL_DESKTOP_DIR)
 		],
 		[
 		with_xfce4_panel=false;
@@ -149,16 +155,8 @@ AS_IF([test "x$with_xfce4_panel" != xno],
 AM_CONDITIONAL(WITH_XFCE4_PANEL, [test "x$with_xfce4_panel" = xtrue ]) 
 
 
-
-# path: bad way; move them back to the Makefiles according to GNU rules?
-
-BONOBO_SERVER_DIR="$libdir/bonobo/servers"
-AC_SUBST(BONOBO_SERVER_DIR)
-AC_DEFINE_UNQUOTED(BONOBO_SERVER_DIR, "$BONOBO_SERVER_DIR", [Where server dir for BONOBO is])
-
-GTK_MODULES_DIR="$libdir/gtk-2.0/modules"
+GTK_MODULES_DIR="$($PKG_CONFIG --variable=libdir gtk+-2.0)/gtk-2.0/modules"
 AC_SUBST(GTK_MODULES_DIR)
-AC_DEFINE_UNQUOTED(GTK_MODULES_DIR, "$GTK_MODULES_DIR", [Where the gtk-2.0/modules dir is])
 
 # svnversion
 AC_PATH_PROG(SVNVERSION_BIN, [svnversion])

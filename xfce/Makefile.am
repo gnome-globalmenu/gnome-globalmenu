@@ -1,8 +1,8 @@
 
 if WITH_XFCE4_PANEL
 GlobalMenu_XFCEPlugin_PROGRAMS = GlobalMenu.XFCEPlugin
-GlobalMenu_XFCEPlugindir = $(libexecdir)/xfce4/panel-plugins
-desktopfiledir = $(datadir)/xfce4/panel-plugins
+GlobalMenu_XFCEPlugindir = $(XFCE4_PANEL_PLUGIN_DIR))
+desktopfiledir = $(XFCE4_PANEL_DESKTOP_DIR)
 desktopfile_DATA = $(desktopfile_in_files:.desktop.in=.desktop)
 iconsdir = $(datadir)/pixmaps
 icons_DATA = globalmenu-xfce.png

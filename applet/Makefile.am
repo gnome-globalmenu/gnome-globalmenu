@@ -43,7 +43,7 @@ $(libapplet_STAMP): $(libapplet_VALASOURCES) patchlibapplet.sh
 	--vapidir=$(top_srcdir)/libgnomenu \
 	--pkg=gtk+-2.0 \
 	--pkg=libwnck-1.0 \
-	--pkg=gnomenu-private \
+	--pkg=gnomenu \
 	--library=libapplet-private \
 	$(libapplet_VALASOURCES)
 	bash patchlibapplet.sh
