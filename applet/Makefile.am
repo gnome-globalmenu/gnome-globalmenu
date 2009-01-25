@@ -12,7 +12,6 @@ VALASOURCES = \
 	gnomemenuhelper.vala \
 	$(NULL)
 libapplet_VALASOURCES = \
-	wncktools.vala \
 	monitor.vala \
 	$(NULL)
 libapplet_STAMP = libapplet-private.vapi
@@ -20,7 +19,6 @@ libapplet_STAMP = libapplet-private.vapi
 libapplet_la_SOURCES =  \
 	$(libapplet_VALASOURCES:.vala=.c) \
 	$(libapplet_VALASOURCES:.vala=.h) \
-	wncktools-ccode.c \
 	$(NULL)
 libapplet_la_LIBADD = \
 		$(GLIB_LIBS) \
