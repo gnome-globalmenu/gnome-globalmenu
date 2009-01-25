@@ -2,7 +2,7 @@ NULL =
 
 STAMP = vala-stamp
 
-BUILT_SOURCES = $(STAMP) $(libapplet_STAMP) 
+BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
@@ -11,42 +11,6 @@ VALASOURCES = \
 	switcher.vala \
 	gnomemenuhelper.vala \
 	$(NULL)
-libapplet_VALASOURCES = \
-	monitor.vala \
-	$(NULL)
-libapplet_STAMP = libapplet-private.vapi
-
-libapplet_la_SOURCES =  \
-	$(libapplet_VALASOURCES:.vala=.c) \
-	$(libapplet_VALASOURCES:.vala=.h) \
-	$(NULL)
-libapplet_la_LIBADD = \
-		$(GLIB_LIBS) \
-		$(GTK_LIBS) \
-		$(WNCK_LIBS) \
-		../libgnomenu/libgnomenu.la \
-		$(NULL)
-libapplet_la_CPPFLAGS = \
-		$(GLIB_CFLAGS) \
-		$(GTK_CFLAGS) \
-		$(WNCK_CFLAGS) \
-		-I$(top_srcdir) \
-		-include $(CONFIG_HEADER) \
-		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
-		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
-		-g \
-		$(NULL)
-$(libapplet_STAMP): $(libapplet_VALASOURCES) patchlibapplet.sh
-	$(VALAC) -C --vapidir=. \
-	--vapidir=$(top_srcdir)/libgnomenu \
-	--pkg=gtk+-2.0 \
-	--pkg=libwnck-1.0 \
-	--pkg=gnomenu \
-	--library=libapplet-private \
-	$(libapplet_VALASOURCES)
-	bash patchlibapplet.sh
-
-noinst_LTLIBRARIES = libapplet.la
 
 if WITH_GNOME_PANEL
 libexec_PROGRAMS = GlobalMenu.PanelApplet
@@ -72,7 +36,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(NULL)
 
 
-$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps	libapplet-private.vapi
+$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
 	$(VALAC) -C --vapidir=. \
 	--vapidir=$(top_srcdir)/libgnomenu \
 	--pkg=gtk+-2.0 \
@@ -82,7 +46,6 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=libgnome-menu \
 	--pkg=gconf-2.0 \
 	--pkg=gnomenu \
-	--pkg=libapplet-private \
 	--pkg=libnotify \
 	$(VALASOURCES) bindings.vapi
 	bash patch.sh
@@ -98,7 +61,6 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		../libgnomenu/libgnomenu.la \
-		libapplet.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GLIB_CFLAGS) \
@@ -118,12 +80,9 @@ icons_DATA = globalmenu.png
 
 EXTRA_DIST = \
 	$(STAMP) \
-	$(libapplet_STAMP) \
 	patch.sh \
-	patchlibapplet.sh \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
-	$(libapplet_VALASOURCES) \
 	$(VALASOURCES) \
 	$(server_in_in_files) \
 	$(icons_DATA) \

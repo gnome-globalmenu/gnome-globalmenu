@@ -15,6 +15,7 @@ VALASOURCES = \
 	keygrab.vala \
 	globalmenu.vala \
 	gnomenu.vala \
+	monitor.vala \
 	$(NULL)
 
 lib_LTLIBRARIES = libgnomenu.la
@@ -27,9 +28,9 @@ libgnomenu_la_SOURCES = \
 						gmarkup-backport.c \
 						menushellutils-ccode.c 
 
-libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
-libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS)
-libgnomenu_la_LDFLAGS = -version-info 1:0:0 -release 0.7.0
+libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
+libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS) $(WNCK_LIBS)
+libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
@@ -48,7 +49,7 @@ endif
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi
+	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi
 	bash patch.sh
 
 gnomenu.deps:

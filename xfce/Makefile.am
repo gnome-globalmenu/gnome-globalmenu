@@ -26,8 +26,7 @@ GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
 
 GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
 			$(WNCK_LIBS) \
-			../libgnomenu/libgnomenu.la \
-		   ../applet/libapplet.la
+			../libgnomenu/libgnomenu.la
 
 EXTRA_DIST = \
 	$(desktopfile_in_in_files)	\
