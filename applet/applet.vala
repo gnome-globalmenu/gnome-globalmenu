@@ -48,9 +48,8 @@ public class Applet : Panel.Applet {
 		menubars.add(selector);
 		setup_popup_menu(selector);
 
-		main_menubar = new Gnomenu.MenuBar();
+		main_menubar = new GlobalMenu();
 		main_menubar.min_length = 12;  /*Then it will have a overflown item*/
-		monitor.menubar = main_menubar;
 		setup_popup_menu(main_menubar);
 
 		menubars.add(main_menubar);
@@ -72,7 +71,7 @@ public class Applet : Panel.Applet {
 	private Monitor monitor;
 	private MenuBarBox menubars;
 	private bool disposed;
-	private Gnomenu.MenuBar main_menubar;
+	private GlobalMenu main_menubar;
 	private Switcher selector;
 
 	private Notify.Notification notify_no_plugin;
@@ -94,8 +93,10 @@ public class Applet : Panel.Applet {
 
 	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
 		weak Wnck.Window window = monitor.current_window;
-		if(window is Wnck.Window)
+		if(window is Wnck.Window) {
 			selector.current_window = monitor.current_window;
+			main_menubar.switch_to(window.get_xid());
+		}
 	}
 	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
