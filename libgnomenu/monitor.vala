@@ -1,5 +1,4 @@
 using Gnomenu;
-using Wnck;
 
 namespace Gnomenu {
 public class Monitor: GLib.Object {
@@ -32,12 +31,16 @@ public class Monitor: GLib.Object {
 		}
 	}
 
-	public Wnck.Window? current_window {
+	public ulong current_xid {
 		get {
-			return _current_window;
-		}
+			if(_current_window != null) {
+				return _current_window.get_xid();
+			}
+			return 0;
+		}	
 	}
-	public virtual signal void window_changed(Wnck.Window? old_window);
+
+	public virtual signal void window_changed(ulong old_xid);
 	
 	public Monitor() {
 	
@@ -64,7 +67,7 @@ public class Monitor: GLib.Object {
 		if(_desktop == window) {
 			_desktop = null;
 		}
-		if(window == current_window) {
+		if(window == _current_window) {
 			window.set_data("window-closed", window);
 			update_current_window();
 		}
@@ -72,7 +75,7 @@ public class Monitor: GLib.Object {
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
 			_desktop = window;
-		if(current_window == null)
+		if(_current_window == null)
 			update_current_window();
 	}
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
@@ -111,7 +114,11 @@ public class Monitor: GLib.Object {
 			}
 		}
 		if(old == _current_window) return;
-		window_changed(old);
+		if(old != null) {
+			window_changed(old.get_xid());
+		} else {
+			window_changed(0);
+		}
 	}
 	private void detach_from_screen(Wnck.Screen screen) {
 		_wnck_screen.window_opened -= on_window_opened;

@@ -91,12 +91,13 @@ public class Applet : Panel.Applet {
 		}
 	}
 
-	private void on_window_changed (Monitor monitor, Wnck.Window? previous_window) {
-		weak Wnck.Window window = monitor.current_window;
+	private void on_window_changed (Monitor monitor, ulong prev_xid) {
+		ulong xid = monitor.current_xid;
+		Wnck.Window window = Wnck.Window.get(xid);
 		if(window is Wnck.Window) {
-			selector.current_window = monitor.current_window;
-			main_menubar.switch_to(window.get_xid());
+			selector.current_window = window;
 		}
+		main_menubar.switch_to(xid);
 	}
 	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
