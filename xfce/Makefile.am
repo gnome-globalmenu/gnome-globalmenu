@@ -17,15 +17,11 @@ $(desktopfile_in_files): $(desktopfile_in_in_files) Makefile
 
 GlobalMenu_XFCEPlugin_SOURCES = main.c
 GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
-								 $(WNCK_CFLAGS) \
 						-I$(top_srcdir) \
 						-include $(CONFIG_HEADER) \
-						-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
-						-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 						-g 
 
 GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
-			$(WNCK_LIBS) \
 			../libgnomenu/libgnomenu.la
 
 EXTRA_DIST = \

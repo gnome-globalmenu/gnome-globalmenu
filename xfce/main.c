@@ -8,7 +8,7 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin);
 
 XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL ( xfce_panel_plugin_init);
 
-static void on_window_changed(GnomenuMonitor * monitor, WnckWindow * prev_window, XfcePanelPlugin * plugin);
+static void on_window_changed(GnomenuMonitor * monitor, ulong prev, XfcePanelPlugin * plugin);
 static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
 	gtk_rc_parse_string(
 		"style \"globalmenu_event_box_style\"\n"
@@ -43,9 +43,9 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
 
 }
 
-static void on_window_changed(GnomenuMonitor * monitor, WnckWindow * prev_window, XfcePanelPlugin * plugin) {
-	WnckWindow * current_window = gnomenu_monitor_get_current_window(monitor);
+static void on_window_changed(GnomenuMonitor * monitor, gulong prev, XfcePanelPlugin * plugin) {
+	gulong xid = gnomenu_monitor_get_current_xid(monitor);
 	GnomenuGlobalMenu * menubar = g_object_get_data(G_OBJECT(plugin),
 			"menubar");
-	gnomenu_global_menu_switch_to(menubar, wnck_window_get_xid(current_window));
+	gnomenu_global_menu_switch_to(menubar, xid);
 }
