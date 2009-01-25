@@ -411,6 +411,38 @@
 			</return-value>
 		</constructor>
 	</class>
+	<class name="Monitor" parent="GLib.Object" glib:type-name="GnomenuMonitor" glib:get-type="gnomenu_monitor_get_type">
+		<constructor name="new" c:identifier="gnomenu_monitor_new">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="Gnomenu.Monitor"/>
+			</return-value>
+		</constructor>
+		<method name="dispose" c:identifier="gnomenu_monitor_dispose">
+			<parameters>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</method>
+		<property name="screen" readable="1" writable="1">
+			<type name="Gdk.Screen"/>
+		</property>
+		<property name="current_xid" readable="1">
+			<type name="ulong"/>
+		</property>
+		<glib:signal name="window_changed">
+			<parameters>
+				<parameter name="old_xid" transfer-ownership="none">
+					<type name="ulong"/>
+				</parameter>
+			</parameters>
+			<return-value transfer-ownership="none">
+				<type name="none"/>
+			</return-value>
+		</glib:signal>
+	</class>
 	<constant name="GNOMENU_NET_GLOBALMENU_MENU_CONTEXT" value="_NET_GLOBALMENU_MENU_CONTEXT">
 	<type name="utf8"/>
 </constant>
