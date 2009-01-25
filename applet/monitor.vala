@@ -3,16 +3,23 @@ using Wnck;
 
 namespace Gnomenu {
 public class Monitor: GLib.Object {
-	public Wnck.Screen screen {
+	private Wnck.Screen? gdk_to_wnck_screen (Gdk.Screen? screen) {
+		if(screen != null)
+			return Wnck.Screen.get(screen.get_number());
+		return null;
+	}
+	private Gdk.Screen _screen;
+	public Gdk.Screen screen {
 		get {
-			return _wnck_screen;	
+			return _screen;	
 		}
 		set {
-			Wnck.Screen new_screen = value;
+			Wnck.Screen new_screen = gdk_to_wnck_screen(value);
 			if(new_screen == null) {
 				new_screen = Wnck.Screen.get_default();
 			}
 			if(new_screen == _wnck_screen) return;
+			_screen = value;
 
 			if(_wnck_screen != null) {
 				detach_from_screen(_wnck_screen);
@@ -23,10 +30,9 @@ public class Monitor: GLib.Object {
 				ungrab_menu_bar_key(_root_gnomenu_window);
 				_root_gnomenu_window = null;
 			}
+
 			_wnck_screen = new_screen;
-			int number = _wnck_screen.get_number();
-			Gdk.Screen gdk_screen = Gdk.Display.get_default().get_screen(number);
-			_root_gnomenu_window = Gnomenu.Window.new_from_gdk_window(gdk_screen.get_root_window());
+			_root_gnomenu_window = Gnomenu.Window.new_from_gdk_window(_screen.get_root_window());
 			grab_menu_bar_key(_root_gnomenu_window);
 			_wnck_screen.window_closed += on_window_closed;
 			_wnck_screen.window_opened += on_window_opened;
@@ -68,7 +74,7 @@ public class Monitor: GLib.Object {
 	}
 
 	construct {
-		screen = Wnck.Screen.get_default();
+		screen = Gdk.Screen.get_default();
 		disposed = false;
 	}
 

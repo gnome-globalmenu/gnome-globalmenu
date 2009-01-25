@@ -77,18 +77,18 @@ public class Applet : Panel.Applet {
 
 	private Notify.Notification notify_no_plugin;
 	public override void screen_changed(Gdk.Screen previous_screen) {
-		Gdk.Screen gdk_screen = get_screen();
+		Gdk.Screen screen = get_screen();
 		if(previous_screen != null) {
 			Settings old_settings = Settings.get_for_screen(previous_screen);
 			/* Work around an old vala bug on disconnecting signals
 			 * perhaps already fixed but ...*/
 			old_settings.notify -= check_module;
 		}
-		if(gdk_screen != null) {
+		if(screen != null) {
 			ensure_monitor();
 			check_module();
-			monitor.screen = gdk_screen_to_wnck_screen(gdk_screen);
-			gdk_screen.notify["gtk-modules"] += check_module;
+			monitor.screen = screen;
+			get_settings().notify["gtk-modules"] += check_module;
 		}
 	}
 
