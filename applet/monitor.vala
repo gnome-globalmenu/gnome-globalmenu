@@ -25,25 +25,10 @@ public class Monitor: GLib.Object {
 				detach_from_screen(_wnck_screen);
 			}
 
-			if(_root_gnomenu_window != null) {
-				_root_gnomenu_window.destroy();
-				ungrab_menu_bar_key(_root_gnomenu_window);
-				_root_gnomenu_window = null;
-			}
 
 			_wnck_screen = new_screen;
-			_root_gnomenu_window = Gnomenu.Window.new_from_gdk_window(_screen.get_root_window());
-			grab_menu_bar_key(_root_gnomenu_window);
-			_wnck_screen.window_closed += on_window_closed;
-			_wnck_screen.window_opened += on_window_opened;
-			_wnck_screen.window_stacking_changed += on_window_stacking_changed;
-			_wnck_screen.active_window_changed += on_active_window_changed;
-			_wnck_screen.active_window_changed (null);
-			Wnck.Window new_desktop = find_desktop(_wnck_screen);
-			if(_current_window == _desktop) {
-				_current_window = new_desktop;
-			}
-			_desktop = new_desktop;
+			attach_to_screen(_wnck_screen);
+
 		}
 	}
 	public Gnomenu.MenuBar? menubar {
@@ -67,7 +52,6 @@ public class Monitor: GLib.Object {
 		}
 	}
 	public virtual signal void window_changed(Wnck.Window? old_window);
-	public virtual signal void windowlist_changed();
 	
 	public Monitor() {
 	
@@ -82,14 +66,6 @@ public class Monitor: GLib.Object {
 		if(!disposed) {
 			disposed = true;
 			detach_from_screen(_wnck_screen);			
-			if(_current_gnomenu_window != null) {
-				_current_gnomenu_window.destroy();
-				_current_gnomenu_window = null;
-			}
-			if(_root_gnomenu_window != null) {
-				_root_gnomenu_window.destroy();
-				_root_gnomenu_window = null;
-			}
 		}
 	}
 	private Wnck.Screen? _wnck_screen;
@@ -101,9 +77,6 @@ public class Monitor: GLib.Object {
 
 	private bool disposed;
 
-	private void on_window_stacking_changed(Wnck.Screen screen) {
-		windowlist_changed();
-	}
 	private void on_activate(Gnomenu.MenuBar menubar, Gnomenu.MenuItem item){
 		if(_current_gnomenu_window != null) {
 			_current_gnomenu_window.emit_menu_event(item.path);
@@ -179,8 +152,28 @@ public class Monitor: GLib.Object {
 	private void detach_from_screen(Wnck.Screen screen) {
 		_wnck_screen.window_opened -= on_window_opened;
 		_wnck_screen.window_closed -= on_window_closed;
-		_wnck_screen.window_stacking_changed -= on_window_stacking_changed;
 		_wnck_screen.active_window_changed -= on_active_window_changed;
+		if(_root_gnomenu_window != null) {
+			_root_gnomenu_window.destroy();
+			ungrab_menu_bar_key(_root_gnomenu_window);
+		}
+		if(_current_gnomenu_window != null) {
+			_current_gnomenu_window.destroy();
+		}
+		_root_gnomenu_window = null;
+		_desktop = null;
+		_current_gnomenu_window = null;
+	}
+	private void attach_to_screen(Wnck.Screen screen) {
+		_wnck_screen.window_closed += on_window_closed;
+		_wnck_screen.window_opened += on_window_opened;
+		_wnck_screen.active_window_changed += on_active_window_changed;
+		_root_gnomenu_window = Gnomenu.Window.new_from_gdk_window(_screen.get_root_window());
+		grab_menu_bar_key(_root_gnomenu_window);
+		Wnck.Window new_desktop = find_desktop(_wnck_screen);
+		_desktop = new_desktop;
+
+		_wnck_screen.active_window_changed (null);
 	}
 	private void ungrab_menu_bar_key(Gnomenu.Window window) {
 		int keyval = (int) window.get_data("menu-bar-keyval");
