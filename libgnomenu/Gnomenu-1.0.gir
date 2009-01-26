@@ -412,7 +412,7 @@
 			</return-value>
 		</constructor>
 	</class>
-	<class name="Monitor" parent="GLib.Object" glib:type-name="GnomenuMonitor" glib:get-type="gnomenu_monitor_get_type">
+	<class name="Monitor" glib:type-name="GnomenuMonitor" glib:get-type="gnomenu_monitor_get_type">
 		<constructor name="new" c:identifier="gnomenu_monitor_new">
 			<parameters>
 			</parameters>
