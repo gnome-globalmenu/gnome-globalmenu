@@ -67,7 +67,7 @@
 				<type name="Gnomenu.Menu"/>
 			</return-value>
 		</constructor>
-		<property name="use_rgba_colormap" readable="1" writable="1">
+		<property name="use-rgba-colormap" readable="1" writable="1">
 			<type name="bool"/>
 		</property>
 	</class>
@@ -143,7 +143,7 @@
 		<property name="overflown" readable="1">
 			<type name="bool"/>
 		</property>
-		<property name="min_length" readable="1" writable="1">
+		<property name="min-length" readable="1" writable="1">
 			<type name="int"/>
 		</property>
 		<glib:signal name="activate">
@@ -180,7 +180,7 @@
 		<property name="icon" readable="1" writable="1">
 			<type name="utf8?"/>
 		</property>
-		<property name="accel_text" readable="1" writable="1">
+		<property name="accel-text" readable="1" writable="1">
 			<type name="utf8?"/>
 		</property>
 		<property name="font" readable="1" writable="1">
@@ -189,13 +189,13 @@
 		<property name="path" readable="1">
 			<type name="utf8"/>
 		</property>
-		<property name="item_type" readable="1" writable="1">
+		<property name="item-type" readable="1" writable="1">
 			<type name="utf8?"/>
 		</property>
-		<property name="use_underline" readable="1" writable="1">
+		<property name="use-underline" readable="1" writable="1">
 			<type name="bool"/>
 		</property>
-		<property name="item_state" readable="1" writable="1">
+		<property name="item-state" readable="1" writable="1">
 			<type name="utf8?"/>
 		</property>
 		<property name="gravity" readable="1" writable="1">
@@ -324,13 +324,13 @@
 		<property name="invalid" readable="1">
 			<type name="bool"/>
 		</property>
-		<property name="is_foreign" readable="1" writable="1">
+		<property name="is-foreign" readable="1" writable="1">
 			<type name="bool"/>
 		</property>
 		<property name="xid" readable="1">
 			<type name="ulong"/>
 		</property>
-		<property name="menu_context" readable="1" writable="1">
+		<property name="menu-context" readable="1" writable="1">
 			<type name="utf8?"/>
 		</property>
 		<glib:signal name="menu_context_changed">
@@ -359,7 +359,7 @@
 				<type name="Gnomenu.MenuBarBox"/>
 			</return-value>
 		</constructor>
-		<property name="pack_direction" readable="1" writable="1">
+		<property name="pack-direction" readable="1" writable="1">
 			<type name="Gtk.PackDirection"/>
 		</property>
 		<property name="gravity" readable="1" writable="1">
@@ -380,7 +380,7 @@
 		<property name="accel" readable="1" writable="1">
 			<type name="utf8"/>
 		</property>
-		<property name="use_underline" readable="1" writable="1">
+		<property name="use-underline" readable="1" writable="1">
 			<type name="bool"/>
 		</property>
 		<property name="label" readable="1" writable="1">
@@ -389,7 +389,7 @@
 		<property name="gravity" readable="1" writable="1">
 			<type name="Gnomenu.Gravity"/>
 		</property>
-		<property name="label_widget" readable="1">
+		<property name="label-widget" readable="1">
 			<type name="Gtk.Label?"/>
 		</property>
 	</class>
@@ -430,7 +430,7 @@
 		<property name="screen" readable="1" writable="1">
 			<type name="Gdk.Screen"/>
 		</property>
-		<property name="current_xid" readable="1">
+		<property name="current-xid" readable="1">
 			<type name="ulong"/>
 		</property>
 		<glib:signal name="window_changed">
