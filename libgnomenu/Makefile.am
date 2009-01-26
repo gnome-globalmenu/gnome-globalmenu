@@ -57,5 +57,5 @@ gnomenu.deps:
 
 BUILT_SOURCES = gnomenu.vapi  gnomenu.deps
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh libgnomenu.pc.in libgnomenu-uninstall.pc.in
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh libgnomenu.pc.in libgnomenu-uninstalled.pc.in
 
