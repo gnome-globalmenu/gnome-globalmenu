@@ -29,6 +29,7 @@ namespace Gnomenu {
 			is_foreign = false;
 		}
 		private Window.foreign() {
+			this.type = WindowType.POPUP;
 			is_foreign = true;
 		}
 		public static Window? new_from_native(ulong native) {
