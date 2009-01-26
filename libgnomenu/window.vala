@@ -23,7 +23,7 @@ namespace Gnomenu {
 		public bool invalid {get {return window == null;}}
 		public bool is_foreign {get; construct; }
 		public ulong xid {get {return _xid;}}
-
+		private Widget old_user_data = null;
 		public Window (WindowType type) {
 			this.type = type;
 			is_foreign = false;
@@ -62,6 +62,7 @@ namespace Gnomenu {
 			message("create: %p ref_count= %u", window, window.ref_count);
 			rt.window.set_events((Gdk.EventMask)rt.get_events());
 			rt.set_flags(WidgetFlags.REALIZED);
+			rt.window.get_user_data(&(rt.old_user_data));
 			rt.window.set_user_data(rt);
 			/* To avoid a warning, 
 			 * perhaps it is problematic */
@@ -199,6 +200,12 @@ namespace Gnomenu {
 			base.unrealize();
 		}
 
+		public override bool event (Gdk.Event event) {
+			if(old_user_data != null) {
+				old_user_data.event(event);
+			}	
+			return false;
+		}
 		public override bool property_notify_event(Gdk.EventProperty event) {
 			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_EVENT, false)) {
 				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
@@ -212,7 +219,7 @@ namespace Gnomenu {
 			if(is_foreign) {
 				if(!disposed) {
 					disposed = true;
-					window.set_user_data(null);
+					window.set_user_data(old_user_data);
 					/*Don't destroy it ever*/
 					window = null;
 					unset_flags(WidgetFlags.REALIZED);
