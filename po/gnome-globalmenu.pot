@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-21 10:20+0100\n"
+"POT-Creation-Date: 2009-01-29 14:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,7 @@ msgstr ""
 msgid "globalmenu-panel-applet"
 msgstr ""
 
-#: ../applet/applet.c:295
+#: ../applet/applet.c:312
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -79,24 +79,64 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:390
+#: ../applet/applet.c:446
 msgid "Project Home"
 msgstr ""
 
-#: ../applet/applet.c:413
+#: ../applet/applet.c:469
 msgid "On-line help"
 msgstr ""
 
-#: ../applet/switcher.c:335
+#: ../applet/switcher.c:469 ../applet/switcher.c:1271
 msgid "no windows"
 msgstr ""
 
-#: ../applet/switcher.c:445
+#: ../applet/switcher.c:497
+msgid "Show _Desktop"
+msgstr ""
+
+#: ../applet/switcher.c:526
+msgid "Mi_nimize"
+msgstr ""
+
+#: ../applet/switcher.c:538
+msgid "Ma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:548
+msgid "Unma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:560
+msgid "_Move"
+msgstr ""
+
+#: ../applet/switcher.c:571
+msgid "_Resize"
+msgstr ""
+
+#: ../applet/switcher.c:586 ../applet/switcher.c:596
+msgid "Always on _Top"
+msgstr ""
+
+#: ../applet/switcher.c:608 ../applet/switcher.c:618
+msgid "_Always on visible Workspace"
+msgstr ""
+
+#: ../applet/switcher.c:632
+msgid "_Close"
+msgstr ""
+
+#: ../applet/switcher.c:767
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:860
+#: ../applet/switcher.c:1268
 msgid "File Manager"
+msgstr ""
+
+#: ../applet/switcher.c:1273
+msgid "no actions"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:1

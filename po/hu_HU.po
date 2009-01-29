@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome2-globalmenu-1.0-RC\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-21 10:20+0100\n"
+"POT-Creation-Date: 2009-01-29 14:43+0100\n"
 "PO-Revision-Date: 2009-01-17 16:55+0100\n"
 "Last-Translator: Juhász Ádám <jadaml@gmail.com>\n"
 "Language-Team: hu_HU <LL@li.org>\n"
@@ -65,7 +65,7 @@ msgstr ""
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:295
+#: ../applet/applet.c:312
 msgid ""
 "\n"
 "<popup name=\"button3\">\n"
@@ -105,25 +105,67 @@ msgstr ""
 "</popup>\n"
 "\t\t"
 
-#: ../applet/applet.c:390
+#: ../applet/applet.c:446
 msgid "Project Home"
 msgstr "Projekt honlap"
 
-#: ../applet/applet.c:413
+#: ../applet/applet.c:469
 msgid "On-line help"
 msgstr "Online súgó"
 
-#: ../applet/switcher.c:335
+#: ../applet/switcher.c:469 ../applet/switcher.c:1271
 msgid "no windows"
 msgstr "ne legyen ablakok"
 
-#: ../applet/switcher.c:445
+#: ../applet/switcher.c:497
+#, fuzzy
+msgid "Show _Desktop"
+msgstr "Asztal"
+
+#: ../applet/switcher.c:526
+msgid "Mi_nimize"
+msgstr ""
+
+#: ../applet/switcher.c:538
+msgid "Ma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:548
+msgid "Unma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:560
+msgid "_Move"
+msgstr ""
+
+#: ../applet/switcher.c:571
+msgid "_Resize"
+msgstr ""
+
+#: ../applet/switcher.c:586 ../applet/switcher.c:596
+msgid "Always on _Top"
+msgstr ""
+
+#: ../applet/switcher.c:608 ../applet/switcher.c:618
+msgid "_Always on visible Workspace"
+msgstr ""
+
+#: ../applet/switcher.c:632
+msgid "_Close"
+msgstr ""
+
+#: ../applet/switcher.c:767
 msgid "Desktop"
 msgstr "Asztal"
 
-#: ../applet/switcher.c:860
+#: ../applet/switcher.c:1268
 msgid "File Manager"
 msgstr "Fájl kerelő"
+
+#: ../applet/switcher.c:1273
+#, fuzzy
+msgid "no actions"
+msgstr "Ablak műveletek"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
