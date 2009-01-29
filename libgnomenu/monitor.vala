@@ -104,12 +104,12 @@ public class Monitor: GLib.Object {
 			switch(_current_window.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
 				case Wnck.WindowType.DESKTOP:
+				case Wnck.WindowType.UTILITY:
+				case Wnck.WindowType.DIALOG:
 					break;
 				default:
-					//if(old.get_data("window-closed") != null) {
-						_current_window = _desktop;
-						old.set_data("window-closed", null);
-					//}
+					_current_window = _desktop;
+					old.set_data("window-closed", null);
 					break;
 			}
 		}

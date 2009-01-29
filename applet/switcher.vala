@@ -245,7 +245,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			if ((txt==null) || (txt=="")) return "";
 			string ret = txt.chomp();
 
-			if (ret.substring(ret.length-4,4)==".exe") return ret; // is a wine program
+			if (ret.substring(ret.length-4,4)==".exe")
+				return ret; // is a wine program
 			
 			ret = remove_path(ret.split(" ")[0], "/");
 			switch(ret) {

@@ -20,7 +20,7 @@ namespace GnomeMenuHelper {
 		}
 		return ret;
 	}
-	/*public static void message(string msg) {
+	public static void message(string msg) {
 		Gtk.MessageDialog m = new Gtk.MessageDialog(null,
 								Gtk.DialogFlags.MODAL,
 								Gtk.MessageType.INFO,
@@ -28,7 +28,7 @@ namespace GnomeMenuHelper {
 								msg);
 		m.run();
 		m.destroy();
-	}*/
+	}
 	private static string adjust_spaces(string source) {
 		string ret = "";
 		bool quoted = false;
