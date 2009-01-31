@@ -18,7 +18,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private static const string ICON_MINIMIZE = """pixbuf:R2RrUAAAAEACAQACAAAAQAAAABAAAAAQ/wAAAACkAAAAAIoAAAD/hgAAAACKAAAA/4YAAAAAigAAAP+zAAAAAA==""";
 		
 		private const string MENU_TEMPLATE = """<menu>
-	<item label="%label%" font="bold" type="%type%" icon="%icon%">
+	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
 		<menu>
 			%sub_menu%
 		</menu>
@@ -39,7 +39,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
 				s = replace(s, "%sub-menu%", "");
 				Parser.parse(this, s);
-				this.get("/0").activate += on_menu_activated;
+				this.activate += on_activate;
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
@@ -67,29 +67,14 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			return ret;
 		}
-		private string remove_path(string txt, string separator) {
-			long co = txt.length-1;
-			while ((co>=0) && (txt.substring(co, 1)!=separator)) {
-				co--;
+
+		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
+			if(item.path == "/switcher") {
+				update(true);
+				return;
 			}
-			string ret = txt.substring(co+1,(txt.length-co-1));
-			return ret;
-		}
-		private void set_iconify_destination(Wnck.Window window) {
-			int ax = 0;
-			int ay = 0;
-			this.window.get_origin(out ax, out ay);
-			window.set_icon_geometry(ax,
-									 ay,
-						 			 allocation.width,
-									 allocation.height);
-		}
-		private void on_menu_activated(Gnomenu.MenuItem? item) {
-			if (item!=this.get("/0")) return;
-			update(true);
-		}
-		private void on_item_activated(Gnomenu.MenuItem? item) {
-			if (item.submenu!=null) return;
+
+			/** Then handle the window action menu */
 			if (!(item.user_data is Wnck.Window)) return;	
 			Wnck.Window window = item.user_data as Wnck.Window;
 			
@@ -123,37 +108,70 @@ public extern string* __get_task_name_by_pid(int pid);
 					}
 					break;
 				default:
-					set_iconify_destination(window); /* make sure that it goes to the switcher */
-					
-					Wnck.Workspace workspace = window.get_workspace();
-					if ((window.is_active()) 
-					&& (window.is_visible_on_workspace(workspace))) {
-						window.minimize();
-						return;
-					}
+					/** dirty trick to ignore the activate
+					 * signal on the item with the wnck action menu */
 
-					// Ensure viewport visibility
-					Wnck.Screen screen = window.get_screen();
-
-					int current_workspace_x = workspace.get_viewport_x();
-					int current_workspace_y = workspace.get_viewport_y();
-					int x,y,w,h;
-					(item.user_data as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
-
-					screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
-					
-					window.activate(Gtk.get_current_event_time());
-					workspace.activate(Gtk.get_current_event_time());
-					window.unminimize(Gtk.get_current_event_time());
-					
-					// ensure is on top
-					window.make_above();
-					window.unmake_above();
-
-					//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
+					if (item.submenu != null) return;
+					perhaps_minimize_window(window);
 					break;
 			}
 		}
+
+		/** 
+		 * Minimize a window if it is not minimized.
+		 * restore it if minimized.
+		 *
+		 */
+		private void perhaps_minimize_window(Wnck.Window window) {
+			set_iconify_destination(window); /* make sure that it goes to the switcher */
+			
+			Wnck.Workspace workspace = window.get_workspace();
+			if ((window.is_active()) 
+			&& (window.is_visible_on_workspace(workspace))) {
+				window.minimize();
+				return;
+			}
+
+			// Ensure viewport visibility
+			Wnck.Screen screen = window.get_screen();
+
+			int current_workspace_x = workspace.get_viewport_x();
+			int current_workspace_y = workspace.get_viewport_y();
+			int x,y,w,h;
+			(window as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+
+			screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
+			
+			window.activate(Gtk.get_current_event_time());
+			workspace.activate(Gtk.get_current_event_time());
+			window.unminimize(Gtk.get_current_event_time());
+			
+			// ensure is on top
+			window.make_above();
+			window.unmake_above();
+
+			//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
+		
+		
+		}
+		private string remove_path(string txt, string separator) {
+			long co = txt.length-1;
+			while ((co>=0) && (txt.substring(co, 1)!=separator)) {
+				co--;
+			}
+			string ret = txt.substring(co+1,(txt.length-co-1));
+			return ret;
+		}
+		private void set_iconify_destination(Wnck.Window window) {
+			int ax = 0;
+			int ay = 0;
+			this.window.get_origin(out ax, out ay);
+			window.set_icon_geometry(ax,
+									 ay,
+						 			 allocation.width,
+									 allocation.height);
+		}
+
 		private bool is_in_sight(Wnck.Window window) {
 			return (window.is_in_viewport(_current_window.get_workspace()) &&
 					!window.is_minimized() &&
@@ -318,7 +336,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			return scaled_icon;
 		}
 		private void update(bool include_menu = false) {
-			Gnomenu.MenuItem item = this.get("/0");
+			Gnomenu.MenuItem item = this.get("/switcher");
 
 			/* prevent the menu to be updated while visible so causing the applet to block */
 			if(item.submenu != null)
@@ -358,27 +376,25 @@ public extern string* __get_task_name_by_pid(int pid);
 					s = replace(s, "%sub_menu%", do_xml_menu());
 					Parser.parse(this, s);
 					
-					Gnomenu.MenuItem misd = this.get("/0/show_desktop");
+					Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
 					if (misd!=null) {
 						misd.user_data = find_desktop();
-						misd.activate += on_item_activated;
 					}
 					
 					weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 					foreach(weak Wnck.Window window in windows) {
-						Gnomenu.MenuItem mi = this.get("/0/_" + window.get_xid().to_string());
+						Gnomenu.MenuItem mi = this.get("/switcher/_" + window.get_xid().to_string());
 						if (mi != null) {
 							mi.user_data = window;
-							mi.activate += on_item_activated;
 						}
 						if (window.is_active())
-							setup_window_actions_menu("/0/" + mi.id + "/", window);
+							setup_window_actions_menu("/switcher/" + mi.id + "/", window);
 					}	
 				} else {
 					if (_show_window_actions) {
 						s = replace(s, "%sub_menu%", do_action_menu(_current_window));
 						Parser.parse(this, s);
-						setup_window_actions_menu("/0/", _current_window);
+						setup_window_actions_menu("/switcher/", _current_window);
 					}
 				}
 			} else {
@@ -398,11 +414,10 @@ public extern string* __get_task_name_by_pid(int pid);
 								"unstick",
 								"close"};
 			for (int co=0; co<actions.length; co++) {
-				try {
-					Gnomenu.MenuItem si = this.get(prefix +	actions[co]);
-					si.activate += on_item_activated;
+				Gnomenu.MenuItem si = this.get(prefix +	actions[co]);
+				if(si != null) {
 					si.user_data = window;
-				} catch (Error e) {}
+				}
 			}
 		}
 		public Wnck.Window? current_window {
