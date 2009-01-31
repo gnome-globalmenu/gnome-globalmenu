@@ -24,7 +24,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		</menu>
 	</item>
 </menu>""";
-		private const string ITEM_TEMPLATE = """<item type="image" id="_%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true"/>""";
+		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true"/>""";
 		private string NOWIN_TEMPLATE = """<item label="%no_windows%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private string NOACT_TEMPLATE = """<item label="%no_actions%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private GLib.HashTable<string,string> program_list;
@@ -74,9 +74,8 @@ public extern string* __get_task_name_by_pid(int pid);
 				return;
 			}
 
-			/** Then handle the window action menu */
-			if (!(item.user_data is Wnck.Window)) return;	
-			Wnck.Window window = item.user_data as Wnck.Window;
+			/** Then handle the window actions */
+			Wnck.Window window = item_to_window(item);
 			
 			switch(item.id) {
 				case "minimize":
@@ -314,19 +313,35 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		private Gdk.Pixbuf rescale_pixbuf(Gdk.Pixbuf icon, int scaled_size) {
-			icon = current_window.get_icon();
+		private Gdk.Pixbuf guess_icon(int scaled_size, Gdk.Pixbuf[] icons) {
+			Gdk.Pixbuf icon = null;
+			int min_dist = 99999;
+			int best_size = 0;
+			foreach(Gdk.Pixbuf i in icons) {
+				int size = i.height;
+				if(i.get_width() > size)
+					size = i.width;
+				int dist = size - scaled_size;
+				if(dist > 0 && dist < min_dist) {
+					min_dist = dist;
+					icon = i;
+					best_size = size;
+				}
+			}
 
-			int size = icon.height;
-			if(icon.get_width() > size)
-				size = icon.width;
-
-			double ratio = (double)scaled_size/(double)size;
+			/* This should never happen. In case it happens
+			 * return something to make sure it doesn't crash*/
+			if(icon == null) return icons[0];
+			double ratio = (double)scaled_size/(double)best_size;
+			int scaled_width = (int) (icon.width * ratio);
+			int scaled_height = (int) (icon.height * ratio);
+			if(scaled_width <= 0) scaled_width = 1;
+			if(scaled_height <= 0) scaled_height = 1;
 			Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
 				Gdk.Colorspace.RGB,
 				icon.has_alpha, 8,
-				(int) (icon.width * ratio),
-				(int) (icon.height * ratio)
+				scaled_width,
+				scaled_height
 				);
 
 			icon.scale(scaled_icon,
@@ -336,11 +351,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			return scaled_icon;
 		}
 		private void update(bool include_menu = false) {
-			Gnomenu.MenuItem item = this.get("/switcher");
-
+			/* root and menu are then used for the window list */
+			Gnomenu.MenuItem root = this.get("/switcher");
+			Gtk.Menu menu = root.submenu;
 			/* prevent the menu to be updated while visible so causing the applet to block */
-			if(item.submenu != null)
-				item.submenu.popdown();	
+			if(menu != null)
+				menu.popdown();	
 			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
@@ -362,8 +378,14 @@ public extern string* __get_task_name_by_pid(int pid);
 				int scaled_size = allocation.height;
 				if(allocation.width < scaled_size)
 					scaled_size = allocation.width;
+
+				scaled_size -= 2;
+
+				Gdk.Pixbuf[] icons = {
+					current_window.get_mini_icon(),
+					current_window.get_icon()};
 				s = replace(s, "%icon%", "pixbuf:" + 
-					pixbuf_encode_b64(rescale_pixbuf(current_window.get_mini_icon(), scaled_size - 2)));
+						pixbuf_encode_b64(guess_icon(scaled_size, icons)));
 					
 			} else {
 				s = replace(s, "%type%", "normal");
@@ -378,18 +400,19 @@ public extern string* __get_task_name_by_pid(int pid);
 					
 					Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
 					if (misd!=null) {
-						misd.user_data = find_desktop();
+						override_item_window(misd, find_desktop());
 					}
 					
-					weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-					foreach(weak Wnck.Window window in windows) {
-						Gnomenu.MenuItem mi = this.get("/switcher/_" + window.get_xid().to_string());
-						if (mi != null) {
-							mi.user_data = window;
+					foreach(Gtk.Widget widget in menu.get_children()) {
+						Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
+						Wnck.Window window = item_to_window(item);
+						if(window == null) continue;
+						if (window.is_active()) {
+							setup_window_actions_menu(
+									"/switcher/" + item.id + "/", 
+									window);
 						}
-						if (window.is_active())
-							setup_window_actions_menu("/switcher/" + mi.id + "/", window);
-					}	
+					}
 				} else {
 					if (_show_window_actions) {
 						s = replace(s, "%sub_menu%", do_action_menu(_current_window));
@@ -416,9 +439,28 @@ public extern string* __get_task_name_by_pid(int pid);
 			for (int co=0; co<actions.length; co++) {
 				Gnomenu.MenuItem si = this.get(prefix +	actions[co]);
 				if(si != null) {
-					si.user_data = window;
+					override_item_window(si, window);
 				}
 			}
+		}
+
+		/**
+		 * The following 3 functions map item to window and verse vesa
+		 *
+		 */
+		private Gnomenu.MenuItem? window_to_item(Wnck.Window window) {
+			return this.get("/switcher/XID" + window.get_xid().to_string());
+		}
+		private void override_item_window(Gnomenu.MenuItem item, Wnck.Window? window) {
+			item.user_data = window;
+		}
+		private Wnck.Window? item_to_window(Gnomenu.MenuItem item) {
+			string id = item.id;
+			if(item.user_data != null) return item.user_data as Wnck.Window;
+			if(id.has_prefix("XID")) {
+				return Wnck.Window.get(id.offset(3).to_ulong());
+			}
+			return null;
 		}
 		public Wnck.Window? current_window {
 			get {
