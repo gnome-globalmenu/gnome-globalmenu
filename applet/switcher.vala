@@ -13,10 +13,10 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_window_actions = true;
 		private Wnck.Window _current_window;
 		
-		private static const string ICON_CLOSE = """pixbuf:R2RrUAAAAL0CAQACAAAAQAAAABAAAAAQswAAAACCAAAA/4YAAAAAggAAAP+GAAAAAIMAAAD/hAAAAACDAAAA/4cAAAAAgwAAAP+CAAAAAIMAAAD/iQAAAACGAAAA/4sAAAAAhAAAAP+MAAAAAIQAAAD/iwAAAACGAAAA/4kAAAAAgwAAAP+CAAAAAIMAAAD/hwAAAACDAAAA/4QAAAAAgwAAAP+GAAAAAIIAAAD/hgAAAACCAAAA/7MAAAAA""";
-		private static const string ICON_MAXIMIZE = """pixbuf:R2RrUAAAAL0CAQACAAAAQAAAABAAAAAQswAAAACKAAAA/4YAAAAAigAAAP+GAAAAAIoAAAD/hgAAAAABAAAA/4ji4t4AAQAAAP+GAAAAAAEAAAD/iOLi3gABAAAA/4YAAAAAAQAAAP+I4uLeAAEAAAD/hgAAAAABAAAA/4ji4t4AAQAAAP+GAAAAAAEAAAD/iOLi3gABAAAA/4YAAAAAAQAAAP+I4uLeAAEAAAD/hgAAAACKAAAA/7MAAAAA""";
-		private static const string ICON_MINIMIZE = """pixbuf:R2RrUAAAAEACAQACAAAAQAAAABAAAAAQ/wAAAACkAAAAAIoAAAD/hgAAAACKAAAA/4YAAAAAigAAAP+zAAAAAA==""";
-		
+		private static const string ICON_CLOSE = "wnck-stock-delete";
+		private static const string ICON_MAXIMIZE = "wnck-stock-maximize";
+		private static const string ICON_MINIMIZE = "wnck-stock-minimize";
+
 		private const string MENU_TEMPLATE = """<menu>
 	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
 		<menu>
@@ -34,6 +34,14 @@ public extern string* __get_task_name_by_pid(int pid);
 		public Switcher() {
 		}
 
+		static construct {
+			/* To load wnck-stock-delete
+			 * wnck-stock-maximize
+			 * wnck-stock-minimize
+			 * */
+			GLib.Type type = typeof(Wnck.ActionMenu);
+			type.class_ref(); 
+		}
 		construct {
 			try {
 				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
