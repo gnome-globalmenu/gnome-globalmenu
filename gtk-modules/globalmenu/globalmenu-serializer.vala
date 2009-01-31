@@ -60,6 +60,9 @@ namespace GlobalMenuGTK {
 			if(menuitem is TearoffMenuItem) return;
 			indent();
 			sb.append("<item");
+
+			sb.append(Markup.printf_escaped(" id=\"W%lu\"", (ulong)menuitem));
+
 			label_sb.erase(0, -1);
 			last_item_empty = true;
 			guessed_type = null;

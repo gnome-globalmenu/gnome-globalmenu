@@ -13,16 +13,28 @@ namespace GlobalMenuGTK {
 			FIXME: implement the revision */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
-				int position = token.to_int();
-				List<weak Widget> children = gtk_container_get_children(shell);
 				MenuItem item = null;
-				foreach(weak Widget child in children) {
-					if(child is TearoffMenuItem) continue;
-					if(position == 0) {
-						item = child as MenuItem;
-						break;
+				List<weak Widget> children = gtk_container_get_children(shell);
+				if(token.has_prefix("W")) {
+					ulong pointer = token.offset(1).to_ulong();
+					/*Widget Pointer*/
+					foreach(weak Widget child in children) {
+						if((ulong) child == pointer) {
+							item = child as MenuItem;
+							break;
+						}
 					}
-					position--;
+				} else {
+					/*assume it is an id*/
+					int position = token.to_int();
+					foreach(weak Widget child in children) {
+						if(child is TearoffMenuItem) continue;
+						if(position == 0) {
+							item = child as MenuItem;
+							break;
+						}
+						position--;
+					}
 				}
 				if( i == tokens.length - 1 /*last token in the path*/) return item;
 				if(item == null) return null;
