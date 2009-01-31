@@ -1,5 +1,5 @@
 %define 	base_version 	0.7.2
-%define 	svn_version 	svn2160
+%define 	svn_version 	svn2190
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	2%{?dist}
@@ -16,13 +16,19 @@ Requires(post): GConf2
 Requires(preun): GConf2
 
 %description
-GNOME Global Menu project aims to improve GNOME toward a Document Centric Desktop Environment. Global Menu is a menu bar shared with every window in this screen/session. This package extends GTK and gnome panel in a way such that Global Menu can be enabled on all GTK applications.
+GNOME Global Menu is a centralized menu bar for all windows on a particular screen/session. This package extends GTK and gnome panel so that Global Menu can be enabled on all GTK applications.
 
 %package		common
-Summary:		Shared configurations and translations of Global Menu packages
+Summary:		Shared data and libraries  of Global Menu packages
 Group:			User Interface/Desktops
 %description	common
-This package contains shared configurations and translations of various Global Menu packages.
+This package contains shared data and libraries of various Global Menu packages.
+
+%package		devel
+Summary:		Header files for writing Global Menu applets
+Group:			User Interface/Desktops
+%description	devel
+This package contains header files for writing Global Menu applet in Gtk.
 
 %package 		gtkmodule
 Summary:		Gtk Plugin Module of Global Menu
@@ -68,6 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT/%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
+rm -f $RPM_BUILD_ROOT/%{_libdir}/libgnomenu.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -95,6 +102,26 @@ gconftool-2 --makefile-uninstall-rule \
 %defattr(-,root,root,-)
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png
+%{_libdir}/libgnomenu-0.7.2.so.2
+%{_libdir}/libgnomenu-0.7.2.so.2.0.0
+%{_libdir}/libgnomenu.so
+%{_libdir}/pkgconfig/libgnomenu.pc
+
+%files devel
+%{_includedir}/libgnomenu/globalmenu.h
+%{_includedir}/libgnomenu/gnomenu.h
+%{_includedir}/libgnomenu/helper.h
+%{_includedir}/libgnomenu/keygrab.h
+%{_includedir}/libgnomenu/label.h
+%{_includedir}/libgnomenu/menu.h
+%{_includedir}/libgnomenu/menubar.h
+%{_includedir}/libgnomenu/menubarbox.h
+%{_includedir}/libgnomenu/menuitem.h
+%{_includedir}/libgnomenu/menushellutils.h
+%{_includedir}/libgnomenu/monitor.h
+%{_includedir}/libgnomenu/parser.h
+%{_includedir}/libgnomenu/serializer.h
+%{_includedir}/libgnomenu/window.h
 
 %files gnome-panel
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
