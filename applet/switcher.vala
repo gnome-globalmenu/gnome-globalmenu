@@ -19,12 +19,10 @@ public extern string* __get_task_name_by_pid(int pid);
 
 		private const string MENU_TEMPLATE = """<menu>
 	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
-		<menu>
-			%sub_menu%
-		</menu>
+			%submenu%
 	</item>
 </menu>""";
-		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true"/>""";
+		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true">%submenu%</item>""";
 		private string NOWIN_TEMPLATE = """<item label="%no_windows%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private string NOACT_TEMPLATE = """<item label="%no_actions%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private GLib.HashTable<string,string> program_list;
@@ -195,37 +193,37 @@ public extern string* __get_task_name_by_pid(int pid);
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 			foreach(weak Wnck.Window window in windows) {
 				if (!window.is_skip_pager()) {
-					string item = replace(ITEM_TEMPLATE, 
-										  "%label%",
-										  cut_string(window.get_name(), _max_size));
+					string font = "";
+					string submenu_xml = "";
 					if (window.is_active()) {
-						item = replace(item, "%font%", "bold");
-						item = replace(item, "/>","><menu>" + do_action_menu(window) + "</menu></item>"); 
+						font = "bold";
+						submenu_xml = do_action_menu(window);
 					} else {
-						if (window.is_minimized())
-							item = replace(item, "%font%", "italic"); else
-							item = replace(item, "%font%", "");
+						if (window.is_minimized()) {
+							font = "italic";
+						}
 					}
+					string[] substs = {
+						"%label%", cut_string(window.get_name(), _max_size),
+						"%font%", font,
+						"%submenu%", submenu_xml,
+						"%pixdata%", pixbuf_encode_b64(window.get_mini_icon()),
+						"%id%", window.get_xid().to_string()
+					};
 					
-					item = replace(item,
-								   "%pixdata%",
-								   pixbuf_encode_b64(window.get_mini_icon()));
-					item = replace(item, "%id%", window.get_xid().to_string());
+					string item = Template.replace(ITEM_TEMPLATE, substs);
 					items+=item;
 				}
 			}
 			if (items=="") {
-				items = replace(ITEM_TEMPLATE, "%label%", " " + _("no windows") + " ");
-				items = replace(items, "%font%", "");
-				items = replace(items, "pixbuf:%pixdata%", "theme:gtk-about");
-				items = replace(items, "sensitive=\"true\"", "sensitive=\"false\"");
+				items = NOWIN_TEMPLATE;
 			} else {
 				if (_current_window.get_window_type() != Wnck.WindowType.DESKTOP) {
 					items += "<item id=\"separator3\" type=\"separator\"/>";
 					items += "<item id=\"show_desktop\" type=\"image\" icon=\"pixbuf:" + pixbuf_encode_b64(find_desktop().get_mini_icon()) + "\" label=\"" + _("Show _Desktop") + "\"/>";
 				}
 			}
-			return items;
+			return "<menu>" + items + "</menu>";
 		}
 		private string do_action_menu(Wnck.Window? window) {
 			if (window.get_window_type() == Wnck.WindowType.DESKTOP) return NOACT_TEMPLATE;
@@ -257,7 +255,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			if (ret=="")
 				ret = NOACT_TEMPLATE;
-			return ret;
+			return "<menu>" + ret + "</menu>";
 		}
 		private Wnck.Window find_desktop() {
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
@@ -403,7 +401,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (include_menu) {
 				remove_all();
 				if (_show_window_list) {
-					s = replace(s, "%sub_menu%", do_xml_menu());
+					s = replace(s, "%submenu%", do_xml_menu());
 					Parser.parse(this, s);
 					
 					Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
@@ -423,13 +421,13 @@ public extern string* __get_task_name_by_pid(int pid);
 					}
 				} else {
 					if (_show_window_actions) {
-						s = replace(s, "%sub_menu%", do_action_menu(_current_window));
+						s = replace(s, "%submenu%", do_action_menu(_current_window));
 						Parser.parse(this, s);
 						setup_window_actions_menu("/switcher/", _current_window);
 					}
 				}
 			} else {
-				s = replace(s, "%sub_menu%", "");
+				s = replace(s, "%submenu%", "<menu/>");
 				Parser.parse(this, s);
 			}
 		}

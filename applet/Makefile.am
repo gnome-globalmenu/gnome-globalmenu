@@ -9,6 +9,7 @@ VALASOURCES = \
 	main.vala \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
+	template.vala \
 	gnomemenuhelper.vala \
 	$(NULL)
 
