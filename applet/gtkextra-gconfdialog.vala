@@ -64,8 +64,8 @@ using GConf;
 
 		private void addEntry(GConf.Entry entry) {
 			Gtk.Box row = new Gtk.HBox(false, 0);
-       		string schema_name = entry.get_schema_name();
-       		weak GConfCompat.Schema schema = (GConfCompat.Schema)_default_client.get_schema(schema_name);
+
+       		GConf.Schema schema = get_schema(entry);
        			
        		Gtk.Image info = new Gtk.Image.from_stock("gtk-dialog-info", Gtk.IconSize.BUTTON);
        		info.tooltip_text = schema.get_long_desc();
@@ -76,7 +76,7 @@ using GConf;
        		row.pack_start(label, false, false, 2);
        			
        		Gtk.Widget widget;
-       		switch(schema.get_type()) {
+       		switch(gconf_schema_get_type(schema)) {
        			case ValueType.BOOL:
        				widget = new Gtk.CheckButton();
        				(widget as Gtk.CheckButton).active = _default_client.get_bool(entry.key);
@@ -129,12 +129,21 @@ using GConf;
 			}
 		}
 		
+		private GConf.Schema get_schema(GConf.Entry entry) {
+			weak string schema_name = entry.get_schema_name();
+
+			if(schema_name == null) {
+				critical("schema not found for entry %s", entry.get_key());
+				return new GConf.Schema();
+			} else {
+				return gconf_client_get_schema(_default_client, schema_name);
+			}
+		}
 		private void onResetButtonPressed(Gtk.Button widget) {
 			Gtk.Widget target = (Gtk.Widget)widget.user_data;
 			weak GConf.Entry entry = (GConf.Entry)target.user_data;
-			string schema_name = entry.get_schema_name();
-			weak GConfCompat.Schema schema = (GConfCompat.Schema)_default_client.get_schema(schema_name);
-			switch(schema.get_type()) {
+			GConf.Schema schema = get_schema(entry);
+			switch(gconf_schema_get_type(schema)) {
        			case ValueType.BOOL:
        				(target as Gtk.CheckButton).active = schema.get_default_value().get_bool();
        				break;
