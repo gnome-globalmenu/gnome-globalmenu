@@ -188,12 +188,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			pixdata.from_pixbuf(pixbuf, true);
 			return Base64.encode(pixdata.serialize());
 		}
-		private string fix_xml(string src) {
-			string ret = src;
-			ret = replace(ret, "&", "&amp;");
-			ret = replace(ret, "\"", "&quot;");
-			return ret;
-		}
+
 		private string do_xml_menu() {
 			if (!_show_window_list) return "";
 			string items="";
@@ -211,7 +206,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						}
 					}
 					string[] substs = {
-						"%label%", fix_xml(cut_string(window.get_name(), _max_size)),
+						"%label%", Markup.escape_text(cut_string(window.get_name(), _max_size)),
 						"%font%", font,
 						"%submenu%", submenu_xml,
 						"%pixdata%", pixbuf_encode_b64(window.get_mini_icon()),
@@ -382,7 +377,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				_label = cut_string(get_program_name(current_window), _max_size);
 			
 			string s = MENU_TEMPLATE;
-			s = replace(s, "%label%", fix_xml(_label));
+			s = replace(s, "%label%", Markup.escape_text(_label));
 			if (_show_icon) {
 				if (_show_label)
 					s = replace(s, "%type%", "image"); else
