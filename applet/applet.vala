@@ -153,9 +153,12 @@ public class Applet : Panel.Applet {
 						"Packaging:",
 						"sstasyuk <sstasyuk@gmail.com>",
 						"David Watson <dwatson031@gmail.com>",
-						"Valiant Wing <Valiant.Wing@gmail.com>"};
+						"Valiant Wing <Valiant.Wing@gmail.com>",
+						null};
 	
-	static const string[] APPLET_ADOCUMENTERS = {"Pierre Slamich <pierre.slamich@gmail.com>"};
+	static const string[] APPLET_ADOCUMENTERS = {
+		"Pierre Slamich <pierre.slamich@gmail.com>", 
+		null};
 
 	static const BonoboUI.Verb[] verbs = { 
 			{"About", on_about_clicked, null},
