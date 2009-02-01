@@ -28,7 +28,6 @@ libdyn_patch_la_SOURCES = \
 	$(NULL)
 
 libdyn_patch_la_LIBADD = \
-		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
 		$(NULL)
 
@@ -38,7 +37,7 @@ libdyn_patch_la_LDFLAGS = \
 		-no-undefined \
 		$(NULL)
 libdyn_patch_la_CPPFLAGS = \
-	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
+	  -I$(top_srcdir) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
 	  -Werror \

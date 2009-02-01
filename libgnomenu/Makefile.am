@@ -28,8 +28,8 @@ libgnomenu_la_SOURCES = \
 						gmarkup-backport.c \
 						menushellutils-ccode.c 
 
-libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
-libgnomenu_la_LIBADD = $(GTK_LIBS) $(GLIB_LIBS) $(WNCK_LIBS)
+libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
+libgnomenu_la_LIBADD = $(WNCK_LIBS)
 libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION)
 
 pkgconfigdir = $(libdir)/pkgconfig

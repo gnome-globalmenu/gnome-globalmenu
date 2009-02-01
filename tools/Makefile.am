@@ -6,6 +6,7 @@ noinst_PROGRAMS = $(VALASOURCES:.vala=)
 SUFFIXES = .vala .c
 .vala.c:
 	$(VALAC) -C --pkg gtk+-2.0 $^
+	touch $@
 
 AM_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER)
 BUILT_SOURCES = $(STAMP)

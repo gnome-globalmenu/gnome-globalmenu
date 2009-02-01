@@ -57,15 +57,11 @@ GlobalMenu_PanelApplet_LDFLAGS = \
 		$(NULL)
 
 GlobalMenu_PanelApplet_LDADD = \
-		$(GLIB_LIBS) \
-		$(GTK_LIBS) \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
-		$(GLIB_CFLAGS) \
-		$(GTK_CFLAGS) \
 		$(WNCK_CFLAGS) \
 		$(GNOME_PANEL_CFLAGS) \
 		-I$(top_srcdir) \
