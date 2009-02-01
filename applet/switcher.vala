@@ -17,7 +17,8 @@ public extern string* __get_task_name_by_pid(int pid);
 		private static const string ICON_MAXIMIZE = "wnck-stock-maximize";
 		private static const string ICON_MINIMIZE = "wnck-stock-minimize";
 
-		private const string MENU_TEMPLATE = """<menu>
+		private const string MENU_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
+<menu>
 	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
 			%submenu%
 	</item>
@@ -187,6 +188,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			pixdata.from_pixbuf(pixbuf, true);
 			return Base64.encode(pixdata.serialize());
 		}
+		private string fix_xml(string src) {
+			string ret = src;
+			ret = replace(ret, "&", "&amp;");
+			ret = replace(ret, "\"", "&quot;");
+			return ret;
+		}
 		private string do_xml_menu() {
 			if (!_show_window_list) return "";
 			string items="";
@@ -204,7 +211,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						}
 					}
 					string[] substs = {
-						"%label%", cut_string(window.get_name(), _max_size),
+						"%label%", fix_xml(cut_string(window.get_name(), _max_size)),
 						"%font%", font,
 						"%submenu%", submenu_xml,
 						"%pixdata%", pixbuf_encode_b64(window.get_mini_icon()),
@@ -375,7 +382,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				_label = cut_string(get_program_name(current_window), _max_size);
 			
 			string s = MENU_TEMPLATE;
-			s = replace(s, "%label%", _label);
+			s = replace(s, "%label%", fix_xml(_label));
 			if (_show_icon) {
 				if (_show_label)
 					s = replace(s, "%type%", "image"); else
