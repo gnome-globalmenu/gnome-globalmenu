@@ -13,9 +13,9 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_window_actions = true;
 		private Wnck.Window _current_window;
 		
-		private static const string ICON_CLOSE = "wnck-stock-delete";
+		/*private static const string ICON_CLOSE = "wnck-stock-delete";
 		private static const string ICON_MAXIMIZE = "wnck-stock-maximize";
-		private static const string ICON_MINIMIZE = "wnck-stock-minimize";
+		private static const string ICON_MINIMIZE = "wnck-stock-minimize";*/
 
 		private const string MENU_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <menu>
@@ -26,6 +26,21 @@ public extern string* __get_task_name_by_pid(int pid);
 		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true">%submenu%</item>""";
 		private string NOWIN_TEMPLATE = """<item label="%no_windows%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private string NOACT_TEMPLATE = """<item label="%no_actions%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
+		private string WINACT_TEMPLATE = """<menu>
+	<item id="maximize" type="image" icon="wnck-stock-maximize" label="%labelmaximize%" visible="%visiblemaximize%" />
+	<item id="minimize" type="image" icon="wnck-stock-minimize" label="%labelminimize%" visible="%visibleminimize%" />
+	<item id="unmaximize" type="normal" label="%labelunmaximize%" visible="%visibleunmaximize%" />
+	<item id="move" type="normal" label="%labelmove%" visible="%visiblemove%" />
+	<item id="resize" type="normal" label="%labelresize%" visible="%visibleresize%" />
+	<item id="separator1" type="separator" visible="%visibleseparator1%" />
+	<item id="untopmost" type="check" state="toggled" label="%labeluntopmost%" visible="%visibleuntopmost%" />
+	<item id="topmost" type="check" state="untoggled" label="%labeltopmost%" visible="%visibletopmost%" />
+	<item id="unstick" type="check" state="toggled" label="%labelunstick%" visible="%visibleunstick%" />
+	<item id="stick" type="check" state="untoggled" label="%labelstick%" visible="%visiblestick%" />
+	<item id="separator2" type="separator" visible="%visibleseparator2%" />
+	<item id="close" type="image" icon="wnck-stock-delete" label="%labelclose%" visible="%visibleclose%" />
+</menu>""";
+
 		private GLib.HashTable<string,string> program_list;
 		
 		private bool disposed = false;
@@ -54,8 +69,25 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (program_list.lookup("nautilus")==null)
 				program_list.insert("nautilus", _("File Manager"));
 				
-			NOWIN_TEMPLATE = replace(NOWIN_TEMPLATE, "%no_windows%", _("no windows"));
-			NOACT_TEMPLATE = replace(NOACT_TEMPLATE, "%no_actions%", _("no actions"));
+			NOWIN_TEMPLATE = Template.replace_simple(NOWIN_TEMPLATE, "%no_windows%", _("no windows"));
+			NOACT_TEMPLATE = Template.replace_simple(NOACT_TEMPLATE, "%no_actions%", _("no actions"));
+			
+			string[] substs = {
+				"%labelminimize%", _("Mi_nimize"), "%visiblemaximize%", "%visiblemaximize%",
+				"%labelmaximize%", _("Ma_ximize"), "%visibleminimize%", "%visibleminimize%",
+				"%labelunmaximize%", _("Unma_ximize"), "%visibleunmaximize%", "%visibleunmaximize%",
+				"%labelmove%", _("_Move"), "%visiblemove%", "%visiblemove%",
+				"%labelresize%", _("_Resize"), "%visibleresize", "%visibleresize%",
+				"%visibleseparator1%", "%visibleseparator1%",
+				"%labeluntopmost%", _("Always on _Top"), "%visibleuntopmost%", "%visibleuntopmost%",
+				"%labeltopmost%", _("Always on _Top"), "%visibletopmost%", "%visibletopmost%",
+				"%labelunstick%", _("_Always on visible Workspace"), "%visibleunstick%", "%visibleunstick%",
+				"%labelstick%", _("_Always on visible Workspace"), "%visiblestick%", "%visiblestick%",
+				"%visibleseparator2%", "%visibleseparator2%",
+				"%labelclose%", _("_Close"), "%visibleclose%", "%visibleclose%"
+			};
+			
+			WINACT_TEMPLATE = Template.replace(WINACT_TEMPLATE, substs);
 		}
 
 		public override void dispose() {
@@ -67,12 +99,12 @@ public extern string* __get_task_name_by_pid(int pid);
 		private string replace(string source, string find, string replacement) {
 			/* replaces the string.replace method which depends on GLib.RegEx >= 2.12 */
 			string[] buf = source.split(find);
-			string ret = "";
+			StringBuilder sb = new StringBuilder("");
 			for (int co=0; co<buf.length; co++) {
-				ret+=buf[co];
-				if (co!=(buf.length-1)) ret+=replacement;
+				sb.append(buf[co]);
+				if (co!=(buf.length-1)) sb.append(replacement);
 			}
-			return ret;
+			return sb.str;
 		}
 
 		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
@@ -228,36 +260,24 @@ public extern string* __get_task_name_by_pid(int pid);
 			return "<menu>" + items + "</menu>";
 		}
 		private string do_action_menu(Wnck.Window? window) {
-			if (window.get_window_type() == Wnck.WindowType.DESKTOP) return NOACT_TEMPLATE;
-			
-			string ret = "";
-			if ((window.get_actions() & Wnck.WindowActions.MINIMIZE)!=0) 
-				ret += "<item id=\"minimize\" type=\"image\" icon=\"" + ICON_MINIMIZE + "\" label=\"" + _("Mi_nimize") + "\"/>";
-			if ((window.get_actions() & Wnck.WindowActions.MAXIMIZE)!=0) 
-				if (!window.is_maximized())
-					ret += "<item id=\"maximize\" type=\"image\" icon=\"" + ICON_MAXIMIZE + "\" label=\"" + _("Ma_ximize") + "\"/>"; else
-					ret += "<item id=\"unmaximize\" type=\"normal\" label=\"" + _("Unma_ximize") + "\"/>";
-			if ((window.get_actions() & Wnck.WindowActions.MOVE)!=0)
-				ret += "<item id=\"move\" type=\"normal\" label=\"" + _("_Move") + "\"/>";
-			if ((window.get_actions() & Wnck.WindowActions.RESIZE)!=0)
-				ret += "<item id=\"resize\" type=\"normal\" label=\"" + _("_Resize") + "\"/>";
-			if ((window.get_actions() & Wnck.WindowActions.ABOVE)!=0) {
-				ret += "<item id=\"separator1\" type=\"separator\"/>";
-				if (window.is_above())
-					ret += "<item id=\"untopmost\" type=\"check\" state=\"toggled\" label=\"" + _("Always on _Top") + "\"/>"; else
-					ret += "<item id=\"topmost\" type=\"check\" state=\"untoggled\" label=\"" + _("Always on _Top") + "\"/>";
-			}
-			if (window.is_sticky())
-				ret += "<item id=\"unstick\" type=\"check\" state=\"toggled\" label=\"" + _("_Always on visible Workspace") + "\"/>"; else
-				ret += "<item id=\"stick\" type=\"check\" state=\"untoggled\" label=\"" + _("_Always on visible Workspace") + "\"/>";
+			if (window.get_window_type() ==  Wnck.WindowType.DESKTOP)
+				return "<menu>" + NOACT_TEMPLATE + "</menu>";
 				
-			if ((window.get_actions() & Wnck.WindowActions.CLOSE)!=0) {
-				ret += "<item id=\"separator2\" type=\"separator\"/>";
-				ret += "<item id=\"close\" type=\"image\" icon=\"" + ICON_CLOSE + "\" label=\"" + _("_Close") + "\"/>";
-			}
-			if (ret=="")
-				ret = NOACT_TEMPLATE;
-			return "<menu>" + ret + "</menu>";
+			string[] substs = {
+				"%visibleminimize%", ((window.get_actions() & Wnck.WindowActions.MINIMIZE)!=0).to_string(),
+				"%visiblemaximize%", (((window.get_actions() & Wnck.WindowActions.MAXIMIZE)!=0) && !window.is_maximized()).to_string(),
+				"%visibleunmaximize%", (((window.get_actions() & Wnck.WindowActions.MAXIMIZE)!=0) && window.is_maximized()).to_string(),
+				"%visiblemove%", ((window.get_actions() & Wnck.WindowActions.MOVE)!=0).to_string(),
+				"%visibleresize", ((window.get_actions() & Wnck.WindowActions.RESIZE)!=0).to_string(),
+				"%visibleseparator1%", ((window.get_actions() & Wnck.WindowActions.ABOVE)!=0).to_string(),
+				"%visibleuntopmost%", (((window.get_actions() & Wnck.WindowActions.ABOVE)!=0) && window.is_above()).to_string(),
+				"%visibletopmost%", (((window.get_actions() & Wnck.WindowActions.ABOVE)!=0) && !window.is_above()).to_string(),
+				"%visibleunstick%", (window.is_sticky()).to_string(),
+				"%visiblestick%", (!window.is_sticky()).to_string(),
+				"%visibleseparator2%", ((window.get_actions() & Wnck.WindowActions.CLOSE)!=0).to_string(),
+				"%visibleclose%", ((window.get_actions() & Wnck.WindowActions.CLOSE)!=0).to_string()
+			};
+			return Template.replace(WINACT_TEMPLATE, substs);
 		}
 		private Wnck.Window find_desktop() {
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
