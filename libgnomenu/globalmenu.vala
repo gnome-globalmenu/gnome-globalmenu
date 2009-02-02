@@ -29,6 +29,7 @@ namespace Gnomenu {
 		}
 		private void attach_to_screen(Gdk.Screen screen) {
 			_root_gnomenu_window = new Window(get_root_window());
+			_root_gnomenu_window.set_key_widget(this);
 			grab_menu_bar_key(_root_gnomenu_window);
 		}
 		private void detach_from_screen(Gdk.Screen screen) {
@@ -45,9 +46,8 @@ namespace Gnomenu {
 			}
 		}
 		public void switch_to(ulong xid) {
-			current_window = new Window.foreign(xid);
+			current_window = Window.foreign_new(xid);
 			if(current_window != null) {
-				current_window.set_key_widget(this);
 				current_window.menu_context_changed += (window) => {
 					update();
 				};
@@ -55,7 +55,7 @@ namespace Gnomenu {
 			}
 		}
 		private void update() {
-			string context = current_window.menu_context;
+			weak string context = current_window.menu_context;
 			if(context != null) {
 				try {
 					Parser.parse(this, context);

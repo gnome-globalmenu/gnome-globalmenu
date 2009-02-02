@@ -18,24 +18,32 @@ namespace Gnomenu {
 	 */
 	public class Window : GLib.Object {
 		public Gdk.Window window {
-			get; construct set;
+			get {
+				return _window;
+			} 
+			construct set {
+				if(_window != null) 
+					_window.remove_filter(event_filter);
+				_window = value;
+				if(_window != null) 
+					_window.add_filter(event_filter);
+			}
 		}
+		private Gdk.Window _window;
 		private Gtk.Widget key_widget;
 		private bool disposed = false;
 		public Window (Gdk.Window window) {
 			this.window = window;
 		}
-		public Window.foreign (ulong xid) {
+		public static Window? foreign_new (ulong xid) {
 			Gdk.Window gdk_window;
 			gdk_window = gdk_window_lookup(xid);
 			if(gdk_window == null ) {
 				gdk_window = gdk_window_foreign_new(xid);
 			}
-			this.window = gdk_window;
+			return new Window(gdk_window);
 		}
 		construct {
-			if(window != null);
-			window.add_filter(event_filter);
 			property_notify_event += (t, prop) => {
 				if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
 					menu_context_changed();
@@ -51,8 +59,7 @@ namespace Gnomenu {
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
-				if(window != null)
-				window.remove_filter(event_filter);
+				window = null;
 			}
 		}
 		private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event gdk_ev) {
@@ -73,12 +80,13 @@ namespace Gnomenu {
 				case Xlib.EventType.KeyPress:
 					if(key_widget != null &&
 						key_widget.window != null) {
+						/* Send a Fake key press event to the key widget
+						 * if it is realized. */
 						Gdk.Window gwin = key_widget.window;
 						Xlib.Window xwin = Xlib.Window.from_gdk(gwin);
 						weak Xlib.Display xd = Xlib.Display.from_gdk(Gdk.Display.get_default());
 						event.window = xwin;
 						Xlib.SendEvent(xd, xwin, false, 0, event);
-						message("send key");
 					}
 				break;
 			
