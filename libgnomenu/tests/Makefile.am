@@ -5,13 +5,13 @@ TEST_PROGS +=  $(noinst_PROGRAMS)
 noinst_PROGRAMS =$(VALASOURCES:.vala=)
 endif
 
-VALASOURCES = test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala test-leak.vala test-globalmenu.vala
+VALASOURCES = test-xlib.vala test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala test-leak.vala test-globalmenu.vala
 
 STAMP = $(VALASOURCES:.vala=.c)
 SUFFIXES = .vala .c
 
 .vala.c:
-	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu $^
+	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=$(top_srcdir)/libgnomenu --pkg testman --pkg gtk+-2.0 --pkg gnomenu --pkg xlib $^ 
 	if [ $@ == test-leak.c ]; then bash patch.sh; fi;
 	touch $@
 

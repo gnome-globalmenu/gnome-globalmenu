@@ -7,14 +7,16 @@ namespace Gnomenu {
 			base("/Grab");
 
 			add("Grab", () => {
-				Gtk.Window root = Window.new_from_gdk_window(Gdk.get_default_root_window());
-				window.show();
+				Window root = new Window(Gdk.get_default_root_window());
+				root.set_key_widget(window);
+				window.add(new Label("Switch to another window and Press a"));
+				window.show_all();
 
-				uint keyval = Gdk.keyval_from_name("F10");
-				if(false == grab_key(root.window, keyval, 0)) {
+				uint keyval = Gdk.keyval_from_name("A");
+				if(false == root.grab_key(keyval, 0)) {
 					message("grab failed");
 				}
-				root.key_press_event += (window, event) => {
+				window.key_press_event += (w, event) => {
 					message("key: %s", Gdk.keyval_name(event.keyval));
 				};
 				Gtk.main();
