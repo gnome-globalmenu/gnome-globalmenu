@@ -421,7 +421,6 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			
 			if (include_menu) {
-				remove_all();
 				if (_show_window_list) {
 					s = replace(s, "%submenu%", do_xml_menu());
 					Parser.parse(this, s);
