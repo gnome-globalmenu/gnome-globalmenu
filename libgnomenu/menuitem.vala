@@ -477,7 +477,12 @@ namespace Gnomenu {
 			/*see patch.sh! */
 			bool include_internals = false;
 			if(include_internals) {
-				if(_item_type == MenuItemType.IMAGE)
+				/*_image_widget still can be null
+				 * if item type is IMAGE,
+				 * -- forall can be called during the construction
+				 *  of the widget by remove_child()*/
+				if(_item_type == MenuItemType.IMAGE
+				&& _image_widget != null)
 					callback(_image_widget);
 			}
 			base.forall(callback, data);
