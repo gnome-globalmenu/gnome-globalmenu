@@ -344,7 +344,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private Gdk.Pixbuf guess_icon(int scaled_size, Gdk.Pixbuf[] icons) {
 			Gdk.Pixbuf icon = null;
 			int min_dist = 99999;
-			int best_size = 0;
+			int best_size = 16;
 			foreach(Gdk.Pixbuf i in icons) {
 				int size = i.height;
 				if(i.get_width() > size)
@@ -361,10 +361,10 @@ public extern string* __get_task_name_by_pid(int pid);
 			 * return something to make sure it doesn't crash*/
 			if(icon == null) return icons[0];
 			double ratio = (double)scaled_size/(double)best_size;
+			if(ratio < 0) ratio = 1.0;
 			int scaled_width = (int) (icon.width * ratio);
 			int scaled_height = (int) (icon.height * ratio);
-			if(scaled_width <= 0) scaled_width = 1;
-			if(scaled_height <= 0) scaled_height = 1;
+
 			Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
 				Gdk.Colorspace.RGB,
 				icon.has_alpha, 8,
