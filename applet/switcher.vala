@@ -12,10 +12,6 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
 		private Wnck.Window _current_window;
-		
-		/*private static const string ICON_CLOSE = "wnck-stock-delete";
-		private static const string ICON_MAXIMIZE = "wnck-stock-maximize";
-		private static const string ICON_MINIMIZE = "wnck-stock-minimize";*/
 
 		private const string MENU_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <menu>
@@ -238,7 +234,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						}
 					}
 					string[] substs = {
-						"%label%", Markup.escape_text(cut_string(window.get_name(), _max_size)),
+						"%label%", Markup.escape_text(replace(cut_string(window.get_name(), _max_size), "_", "__")),
 						"%font%", font,
 						"%submenu%", submenu_xml,
 						"%pixdata%", pixbuf_encode_b64(window.get_mini_icon()),
@@ -328,6 +324,8 @@ public extern string* __get_task_name_by_pid(int pid);
 					/* fixes a problem with some apps like Archive Manager
 					 * Add any other affected application in cases below here */
 					case "file-roller":
+					case "evince":
+					case "eog":
 						if (program_list.lookup(process_name)==null)
 							program_list.insert(process_name, ret);	
 						break;
@@ -397,7 +395,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				_label = cut_string(get_program_name(current_window), _max_size);
 			
 			string s = MENU_TEMPLATE;
-			s = replace(s, "%label%", Markup.escape_text(_label));
+			s = replace(s, "%label%", Markup.escape_text(replace(_label, "_", "__")));
 			if (_show_icon) {
 				if (_show_label)
 					s = replace(s, "%type%", "image"); else
