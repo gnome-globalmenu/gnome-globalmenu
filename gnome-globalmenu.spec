@@ -1,8 +1,8 @@
-%define 	base_version 	0.7.2
-%define 	svn_version 	svn2205
+%define 	base_version 	0.7.3
+%define 	svn_version 	svn2220
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	Global Menu for GNOME
 
 Group:		User Interface/Desktops
@@ -102,8 +102,8 @@ gconftool-2 --makefile-uninstall-rule \
 %defattr(-,root,root,-)
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png
-%{_libdir}/libgnomenu-0.7.2.so.2
-%{_libdir}/libgnomenu-0.7.2.so.2.0.0
+%{_libdir}/libgnomenu-0.7.3.so.2
+%{_libdir}/libgnomenu-0.7.3.so.2.0.0
 %{_libdir}/libgnomenu.so
 %{_libdir}/pkgconfig/libgnomenu.pc
 
