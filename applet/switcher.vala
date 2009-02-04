@@ -326,6 +326,7 @@ public extern string* __get_task_name_by_pid(int pid);
 					case "file-roller":
 					case "evince":
 					case "eog":
+					case "soffice.bin":
 						if (program_list.lookup(process_name)==null)
 							program_list.insert(process_name, ret);	
 						break;
