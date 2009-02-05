@@ -157,7 +157,8 @@ public extern string* __get_task_name_by_pid(int pid);
 		 *
 		 */
 		private void perhaps_minimize_window(Wnck.Window window) {
-			set_iconify_destination(window); /* make sure that it goes to the switcher */
+			if (!guess_dock_is_around())
+					set_iconify_destination(window);
 			
 			Wnck.Workspace workspace = window.get_workspace();
 			if ((window.is_active()) 
@@ -469,7 +470,20 @@ public extern string* __get_task_name_by_pid(int pid);
 				}
 			}
 		}
-
+		private bool guess_dock_is_around() {
+			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+			foreach(weak Wnck.Window window in windows)
+				if (window.get_window_type() == Wnck.WindowType.DOCK) {
+					switch(window.get_application().get_name()) {
+						case "cairo-dock":
+						case "avant-window-navigator":
+							/* add any other known dock having a task bar */
+							return true;
+							break;
+					}
+				}
+			return false;
+		}
 		/**
 		 * The following 3 functions map item to window and verse vesa
 		 *
@@ -494,6 +508,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			set {
 				_current_window = value;
+				if (!guess_dock_is_around())
+					set_iconify_destination(_current_window);
 				/* always refresh !*/
 				update();
 			}
