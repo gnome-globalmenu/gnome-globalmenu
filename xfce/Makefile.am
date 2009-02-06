@@ -13,7 +13,7 @@ desktopfile_in_in_files = GlobalMenu_XFCEPlugin.desktop.in.in
 desktopfile_in_files = GlobalMenu_XFCEPlugin.desktop.in
 @INTLTOOL_DESKTOP_RULE@
 $(desktopfile_in_files): $(desktopfile_in_in_files) Makefile
-	sed -e "s|@LOCATION@|$(libexecdir)/xfce4/panel-plugins|" $< > $@
+	sed -e "s|@LOCATION@|$(XFCE4_PANEL_PLUGIN_DIR)|" $< > $@
 
 GlobalMenu_XFCEPlugin_SOURCES = main.c
 GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
