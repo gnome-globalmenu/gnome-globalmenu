@@ -140,8 +140,8 @@ AS_IF([test "x$with_xfce4_panel" != xno],
 		with_xfce4_panel=true;
 		AC_SUBST(XFCE4_PANEL_CFLAGS)
 		AC_SUBST(XFCE4_PANEL_LIBS)
-		XFCE4_PANEL_PLUGIN_DIR="$($PKG_CONFIG --variable=externalplugindir libxfce4panel-1.0)"
-		XFCE4_PANEL_DESKTOP_DIR="$($PKG_CONFIG --variable=desktopdatadir libxfce4panel-1.0)"
+		XFCE4_PANEL_PLUGIN_DIR="$($PKG_CONFIG --variable=libexecdir libxfce4panel-1.0)/xfce4/panel-plugins"
+		XFCE4_PANEL_DESKTOP_DIR="$($PKG_CONFIG --variable=datadir libxfce4panel-1.0)/xfce4/panel-plugins"
 		AC_SUBST(XFCE4_PANEL_PLUGIN_DIR)
 		AC_SUBST(XFCE4_PANEL_DESKTOP_DIR)
 		],
