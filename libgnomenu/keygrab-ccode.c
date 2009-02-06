@@ -1,5 +1,6 @@
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
+#include <gdk/gdkkeysyms.h>
 
 /**
  * maybe_grab_key:
@@ -70,3 +71,4 @@ gboolean gnomenu_grab_key(GdkWindow * grab_window, guint keyval, GdkModifierType
 gboolean gnomenu_ungrab_key(GdkWindow * grab_window, guint keyval, GdkModifierType state) {
 	return maybe_grab_key(grab_window, keyval, state, FALSE);
 }
+

@@ -9,28 +9,19 @@ namespace Gnomenu {
 		TestWindow() {
 			base("/Window");
 
-			add("Native/Applet", () => {
-				test_window = new Window(WindowType.TOPLEVEL);
-				test_window.realize();
-				test_window.destroy += Gtk.main_quit;
-				test_window.menu_event += (window, path) => {
-						message("menu item %s is activated", path);
+			add("newwindow", () => {
+				window.add(new Label("Expecting a lot of property notify events"));
+				window.show_all();
+				Gtk.Window dup = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
+				dup.show_all();
+				Window new_win = new Window(window.window);
+				new_win.set_key_widget(dup);
+				dup.key_press_event += (d, e) => {
+					message("key press event");
 				};
-				test_window.show_all();
-				test_window.menu_context =
-					"""<menu><item label="See"/></menu>""";
-				Gtk.main();
-			});
-			add("Foreign", () => {
-				message("Test skipped");
-				return;
-				test_window = Window.new_from_native(0x4a0000c);
-				Button btn = new Button.with_label("hello\nhhhh\n");
-				btn.visible = true;
-				btn.clicked += Gtk.main_quit;
-				test_window.add(btn);
-				test_window.show_all();
-
+				new_win.property_notify_event += (n, e) => {
+					message("property event: %s", e);
+				};
 				Gtk.main();
 			});
 		}

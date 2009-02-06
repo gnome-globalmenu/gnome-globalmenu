@@ -16,81 +16,85 @@ namespace Gnomenu {
 	 * it also addes the menu-context property and menu-event signal.
 	 *
 	 */
-	public class Window : Gtk.Window {
-		/**
-		 * If the window is not realized (this.window == null)
-		 */
-		public bool invalid {get {return window == null;}}
-		public bool is_foreign {get; construct; }
-		public ulong xid {get {return _xid;}}
-		private Widget old_user_data = null;
-		public Window (WindowType type) {
-			this.type = type;
-			is_foreign = false;
+	public class Window : GLib.Object {
+		public Gdk.Window window {
+			get {
+				return _window;
+			} 
+			construct set {
+				if(_window != null) 
+					_window.remove_filter(event_filter);
+				_window = value;
+				if(_window != null) 
+					_window.add_filter(event_filter);
+			}
 		}
-		private Window.foreign() {
-			this.type = WindowType.POPUP;
-			is_foreign = true;
+		private Gdk.Window _window;
+		private Gtk.Widget key_widget;
+		private bool disposed = false;
+		public Window (Gdk.Window window) {
+			this.window = window;
 		}
-		public static Window? new_from_native(ulong native) {
+		public static Window? foreign_new (ulong xid) {
 			Gdk.Window gdk_window;
-			gdk_window = gdk_window_lookup(native);
+			gdk_window = gdk_window_lookup(xid);
 			if(gdk_window == null ) {
-				gdk_window = gdk_window_foreign_new(native);
+				gdk_window = gdk_window_foreign_new(xid);
 			}
-			Window rt = new_from_gdk_window(gdk_window);
-			return rt;
-		}
-		public static Window? new_from_gdk_window(Gdk.Window window) {
-			bool _is_foreign;
-			_is_foreign = false;
-			if(window != null) {
-				if(
-					window.get_window_type() == Gdk.WindowType.FOREIGN ||
-					window.get_window_type() == Gdk.WindowType.ROOT
-				)
-				_is_foreign = true;
-			}
-			if(!_is_foreign) return null;
-
-			Window rt = new Window.foreign();
-			rt._xid = gdk_window_xid(window);
-			rt.set_events(rt.get_events() 
-			| Gdk.EventMask.PROPERTY_CHANGE_MASK
-			);
-			rt.window = window;
-			message("create: %p ref_count= %u", window, window.ref_count);
-			rt.window.set_events((Gdk.EventMask)rt.get_events());
-			rt.set_flags(WidgetFlags.REALIZED);
-			rt.window.get_user_data(&(rt.old_user_data));
-			rt.window.set_user_data(rt);
-			/* To avoid a warning, 
-			 * perhaps it is problematic */
-			rt.style.attach(rt.window);
-			return rt;
+			return new Window(gdk_window);
 		}
 		construct {
-			disposed = false;
+			property_notify_event += (t, prop) => {
+				if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
+					menu_context_changed();
+				}
+				if(prop == NET_GLOBALMENU_MENU_EVENT) {
+					menu_event(get(NET_GLOBALMENU_MENU_EVENT));
+				}
+			};
 		}
-		/**
-		 * the xml representation of the menu of the window
-		 */
-		public string? menu_context {
-			get {
-				_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
-				return _menu_context;
+		public void set_key_widget(Gtk.Widget widget) {
+			key_widget = widget;
+		}
+		public override void dispose() {
+			if(!disposed) {
+				disposed = true;
+				window = null;
 			}
-			set {
-				_menu_context = value;
-				set(NET_GLOBALMENU_MENU_CONTEXT, value);
+		}
+		private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event gdk_ev) {
+			if(disposed) {
+				critical("event_filter invoked on a disposed window");
+				return Gdk.FilterReturn.CONTINUE;
 			}
+			weak Xlib.AnyEvent event = (Xlib.AnyEvent) xevent;
+			Gdk.Event ev = gdk_ev; /* copy the gdk_event*/
+			switch(event.type) {
+				case Xlib.EventType.PropertyNotify:
+					ev.type = Gdk.EventType.PROPERTY_NOTIFY;
+					ev.property.atom = ((Xlib.PropertyEvent) event).atom.to_gdk();
+					ev.property.time = ((Xlib.PropertyEvent) event).time;
+					ev.property.state = ((Xlib.PropertyEvent) event).state;
+					property_notify_event(ev.property.atom.name());
+				break;
+				case Xlib.EventType.KeyPress:
+					if(key_widget != null &&
+						key_widget.window != null) {
+						/* Send a Fake key press event to the key widget
+						 * if it is realized. */
+						Gdk.Window gwin = key_widget.window;
+						Xlib.Window xwin = Xlib.Window.from_gdk(gwin);
+						weak Xlib.Display xd = Xlib.Display.from_gdk(Gdk.Display.get_default());
+						event.window = xwin;
+						Xlib.SendEvent(xd, xwin, false, 0, event);
+					}
+				break;
+			
+			}
+			return Gdk.FilterReturn.CONTINUE;
 		}
-		/**
-		 * emitted when a menu item is activated
-		 */
-		public void emit_menu_event (string path) {
-			set(NET_GLOBALMENU_MENU_EVENT, path);
-		}
+		public signal void property_notify_event(string name);
+
 		public string? get(string property_name) {
 			return get_by_atom(Gdk.Atom.intern(property_name, false));	
 		}
@@ -98,7 +102,6 @@ namespace Gnomenu {
 			set_by_atom(Gdk.Atom.intern(property_name, false), value);	
 		}
 		public string? get_by_atom(Gdk.Atom atom) {
-			if(invalid) return null;
 			string context;
 			Gdk.Atom actual_type;
 			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
@@ -115,7 +118,6 @@ namespace Gnomenu {
 			return context;
 		}
 		public void set_by_atom(Gdk.Atom atom, string? value) {
-			return_if_fail(!invalid);
 			if(value != null) {
 				Gdk.Atom type = Gdk.Atom.intern("STRING", false);
 				gdk_property_change(window,
@@ -129,6 +131,26 @@ namespace Gnomenu {
 				Gdk.property_delete(window, atom);
 			}
 		}
+		/**
+		 * the xml representation of the menu of the window
+		 */
+		private string _menu_context;
+		public string? menu_context {
+			get {
+				_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
+				return _menu_context;
+			}
+			set {
+				set(NET_GLOBALMENU_MENU_CONTEXT, value);
+			}
+		}
+		/**
+		 * emitted when a menu item is activated
+		 */
+		public void emit_menu_event (string path) {
+			set(NET_GLOBALMENU_MENU_EVENT, path);
+		}
+
 		/**
 		 * globally grab a key to this window.
 		 *
@@ -153,79 +175,6 @@ namespace Gnomenu {
 		 * (Not useful in GlobalMenu.PanelApplet).
 		 */
 		public signal void menu_event(string path);
-
-		private bool disposed;
-
-		private ulong _xid;
-		private string _menu_context;
-		public override void realize() {
-			if(is_foreign) return;
-			base.realize();
-		}
-		public override void map() { 
-			if(is_foreign) return; 
-			base.map();
-		} 
-		public override void unmap() { 
-			if(is_foreign) return;
-			base.unmap();
-		}
-		public override bool map_event(Gdk.Event event) {
-			/* Here we ignore the default Gtk.Window.map_event
-			 * there is a workaround in Gtk.Window.map_event:
-			 *
-			 * if the widget is not mapped, the wrapped Gdk.Window
-			 * is hiden.
-			 *
-			 * but for a foreign window, we never try to set the
-			 * mapped state of the widget. The workaround
-			 * will think there is a buggy wm, and 
-			 * hide the foreign window. 
-			 *
-			 * We don't expect that to happen. If the default handler
-			 * is not disabled for for foreign windows,
-			 * every time the workspace is switched a lot of windows
-			 * will disappear.
-			 */
-			if(is_foreign) return false;
-			return base.map_event(event);
-		}
-		public override bool expose_event(Gdk.EventExpose event) { 
-			if(is_foreign) return false;
-			return base.expose_event(event);
-		}
-
-		public override void unrealize() {
-			if(is_foreign) return;
-			base.unrealize();
-		}
-
-		public override bool event (Gdk.Event event) {
-			if(old_user_data != null) {
-				old_user_data.event(event);
-			}	
-			return false;
-		}
-		public override bool property_notify_event(Gdk.EventProperty event) {
-			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_EVENT, false)) {
-				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
-			}
-			if(event.atom == Gdk.Atom.intern(NET_GLOBALMENU_MENU_CONTEXT, false)) {
-				menu_context_changed();
-			}
-			return false;
-		}
-		public override void dispose () {
-			if(is_foreign) {
-				if(!disposed) {
-					disposed = true;
-					window.set_user_data(old_user_data);
-					/*Don't destroy it ever*/
-					window = null;
-					unset_flags(WidgetFlags.REALIZED);
-				}
-			}
-			base.dispose();
-		}
+		
 	}
 }
