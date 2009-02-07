@@ -85,10 +85,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			
 			WINACT_TEMPLATE = Template.replace(WINACT_TEMPLATE, substs);
 			
-			/* Parser must be invoked BEFORE the activate signal is emitted
-			 * in order to ensure proper functioning with Compiz 
-			 * It's a bit dirty but it works */
-			button_press_event += on_press;
+			/* fixes a rendering issue with Compiz */
+			this.deactivate += on_deactivate;
 		}
 
 		public override void dispose() {
@@ -107,14 +105,12 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			return sb.str;
 		}
-		private bool on_press(Switcher s, Gdk.EventButton e) {
-			update(true);
-			button_press_event -= on_press;
-			return false;
+		private void on_deactivate() {
+			update(false);
 		}
 		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
 			if(item.path == "/switcher") {		
-				//update(true);
+				update(true);
 				return;
 			}
 
@@ -158,7 +154,6 @@ public extern string* __get_task_name_by_pid(int pid);
 					perhaps_minimize_window(window);
 					break;
 			}
-			button_press_event += on_press;
 		}
 
 		/** 
@@ -394,7 +389,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			Gtk.Menu menu = root.submenu;
 			/* prevent the menu to be updated while visible so causing the applet to block */
 			if(menu != null)
-				menu.popdown();	
+				menu.popdown();
 			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
@@ -460,8 +455,6 @@ public extern string* __get_task_name_by_pid(int pid);
 			} else {
 				s = replace(s, "%submenu%", "<menu/>");
 				Parser.parse(this, s);
-				button_press_event -= on_press;
-				button_press_event += on_press;
 			}
 		}
 		private void setup_window_actions_menu(string prefix, Wnck.Window window) {
