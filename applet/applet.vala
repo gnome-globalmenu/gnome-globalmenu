@@ -103,11 +103,18 @@ public class Applet : Panel.Applet {
 		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
+				/*Don't think this is still applicable,
+				 * and it causes Issue 314; With MAC-OSX theme,
+				 * the pixmap is 0x01 -- how could GTK allow this
+				 * nonsense pixmap and won't fail?
+
 				bg.pixmap = this.style.bg_pixmap[(int)StateType.NORMAL];
 				bg.color = this.style.bg[(int)StateType.NORMAL];
 				if (bg.pixmap==null)
 					bg.type = BackgroundType.COLOR; else
 					bg.type = BackgroundType.PIXMAP;
+
+			*********/
 			break;
 			case Panel.AppletBackgroundType.COLOR_BACKGROUND:
 				bg.type = BackgroundType.COLOR;
