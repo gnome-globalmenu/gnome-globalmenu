@@ -78,17 +78,6 @@ namespace Gnomenu {
 				}
 			}
 		}
-		/**
-		 * the position of the menu item in the menushell,
-		 * starting from 0.
-		 *
-		 * Notice that although this property is not readonly,
-		 * it should be change only by the MenuShell 
-		 * (perahsp also Parser)
-		 */
-		public int item_position {
-			get { return _position;} 
-		}
 
 		/**
 		 * the id of the menu item.
@@ -299,7 +288,6 @@ namespace Gnomenu {
 		private string _icon;
 		private string _accel_text;
 		private string _id;
-		private int _position;
 		private Gravity _gravity;
 		private MenuItemType _item_type;
 		private MenuItemState _item_state;
@@ -598,7 +586,6 @@ namespace Gnomenu {
 			if(text == null)
 				text = item_path;
 
-			message("item_path %p = %s", this, item_path);
 			MenuLabel label = get_label_widget();;
 			assert(label != null);
 			label.label = text;
@@ -637,7 +624,8 @@ namespace Gnomenu {
 			}
 		}
 		public override void parent_set(Gtk.Widget old_parent) {
-			update_label_text();
+			if(parent != null)
+				update_label_text();
 		}
 		private void create_labels() {
 			assert(item_type_has_label(_item_type));

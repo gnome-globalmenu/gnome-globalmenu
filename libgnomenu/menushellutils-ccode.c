@@ -50,14 +50,13 @@ static void gmsgip_foreach_cb(GtkWidget * child, gpointer data[]) {
 	if(child == foo) {
 		*found = TRUE;
 	}
-	if(!*found) *i++;
+	if(!*found) (*i)++;
 }
 gint gtk_menu_shell_get_item_position(GtkMenuShell *menu_shell, GtkMenuItem * item) {
 	gint i = 0;
 	gboolean found = FALSE;
 	gpointer data[] = {&i, &found, item};
 	gtk_container_foreach((GtkContainer*)menu_shell, (GtkCallback)gmsgip_foreach_cb, data);
-	if(i != 0) g_message("i= %d", i);
 	if(found)
 		return i;
 	else
