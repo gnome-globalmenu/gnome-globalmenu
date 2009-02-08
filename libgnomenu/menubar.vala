@@ -575,10 +575,6 @@ namespace Gnomenu {
 			base.insert(child, position);
 			(child as MenuItem).gravity = gravity;
 		}
-		public void remove_all() {
-			gtk_menu_shell_truncate(this, 0);
-		}	
-		
 		
 		/******
 		 * Gnomenu.Shell interface

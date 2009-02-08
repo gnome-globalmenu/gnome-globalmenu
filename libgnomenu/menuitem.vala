@@ -257,9 +257,11 @@ namespace Gnomenu {
 				queue_draw();
 			}
 		}
+		private bool _item_visible;
 		public bool item_visible {
-			get { return visible;}
-			set { visible = value;}
+			get { return _item_visible;}
+			set { _item_visible = value;
+				visible = _item_visible && !_truncated;}
 		}
 		public bool item_sensitive {
 			get { return sensitive;}
@@ -280,7 +282,7 @@ namespace Gnomenu {
 		public bool truncated {
 			set {
 				_truncated = value;
-				visible = !truncated;
+				visible = _item_visible && !truncated;
 			}
 			get {
 				return _truncated;
@@ -596,6 +598,7 @@ namespace Gnomenu {
 			if(text == null)
 				text = item_path;
 
+			message("item_path %p = %s", this, item_path);
 			MenuLabel label = get_label_widget();;
 			assert(label != null);
 			label.label = text;

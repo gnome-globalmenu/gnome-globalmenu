@@ -5,10 +5,10 @@ namespace Gnomenu {
 	 * convert the widget representation to xml representation.
 	 */
 	public class Serializer {
-		public static string to_string(Gtk.Widget widget, bool pretty_print = false) {
+		public static string to_string(GLib.Object obj, bool pretty_print = false) {
 			var s = new Serializer();
 			s.pretty_print = pretty_print;
-			s.visit(widget);
+			s.visit(obj);
 			return s.sb.str;
 		}
 
@@ -20,8 +20,8 @@ namespace Gnomenu {
 			if(node is Shell) {
 				visit_shell(node as Shell);
 			}
-			if(node is MenuItem) {
-				visit_item(node as MenuItem);
+			if(node is Item) {
+				visit_item(node as Item);
 			}
 		}
 		private void visit_shell(Shell shell) {
@@ -44,15 +44,15 @@ namespace Gnomenu {
 				newline();
 			}
 		}
-		private void visit_item(MenuItem item) {
-			if(item.submenu != null) {
+		private void visit_item(Item item) {
+			if(item.sub_shell != null) {
 				indent();
 				sb.append_printf("<item");
 				visit_item_attributes(item);
 				sb.append_c('>');
 				newline();
 				level++;
-				visit_shell(item.submenu as Shell);
+				visit_shell(item.sub_shell);
 				level--;
 				indent();
 				sb.append_printf("</item>");
@@ -65,7 +65,7 @@ namespace Gnomenu {
 				newline();
 			}
 		}
-		private void visit_item_attributes(MenuItem item) {
+		private void visit_item_attributes(Item item) {
 			if(item.item_label != null) {
 				sb.append(Markup.printf_escaped(" label=\"%s\"", item.item_label));
 			}

@@ -43,21 +43,25 @@ GtkMenuItem * gtk_menu_shell_get_item(GtkMenuShell * menu_shell, gint position) 
 			(GtkCallback)gmsg_foreach_cb, data);
 	return (GtkMenuItem*) data[2];
 }
+static void gmsgip_foreach_cb(GtkWidget * child, gpointer data[]) {
+	gint * i = data[0];
+	gboolean * found = data[1];
+	GtkWidget * foo = data[2];
+	if(child == foo) {
+		*found = TRUE;
+	}
+	if(!*found) *i++;
+}
 gint gtk_menu_shell_get_item_position(GtkMenuShell *menu_shell, GtkMenuItem * item) {
 	gint i = 0;
 	gboolean found = FALSE;
-	GList * children = gtk_container_get_children(GTK_CONTAINER(menu_shell));
-	GList * iter;
-	for(iter = children; iter; iter = iter->next) {
-		if(iter->data == item) {
-			found = TRUE;
-			break;
-		}
-		i++;	
-	}
-	g_list_free(children);
-	if(!found) i = -1;
-	return i;
+	gpointer data[] = {&i, &found, item};
+	gtk_container_foreach((GtkContainer*)menu_shell, (GtkCallback)gmsgip_foreach_cb, data);
+	if(i != 0) g_message("i= %d", i);
+	if(found)
+		return i;
+	else
+		return -1;
 }
 static void gmsl_foreach(GtkWidget * child, gpointer data[]) {
 	gint * length = data[0];
