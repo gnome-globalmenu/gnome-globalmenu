@@ -68,29 +68,15 @@ namespace Gnomenu {
 			return null;
 		}
 		public int get_item_position(Item item) {
-			int i = 0;
-			foreach(weak Widget child in gtk_container_get_children(this)) {
-				if(child == item as Widget) {
-					return i;	
-				}
-				i++;
-			}
-			return -1;
-		}
-		public void truncate(int length) {
-			gtk_menu_shell_truncate(this, length);
+			return gtk_menu_shell_get_item_position(this, item as MenuItem);
 		}
 		public int length {
 			get {
-				return gtk_menu_shell_length(this);
+				return gtk_menu_shell_length_without_truncated(this);
 			}
-		
-		}
-		public void insert_item(Item item, int pos) {
-			this.insert(item as MenuItem, pos);
-		}
-		public void remove_item(Item item) {
-			this.remove(item as MenuItem);
+			set {
+				gtk_menu_shell_truncate(this, value);
+			}
 		}
 	}
 }

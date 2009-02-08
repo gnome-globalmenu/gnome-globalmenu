@@ -1,7 +1,9 @@
 namespace Gnomenu {
 	public interface Item: GLib.Object {
 		public abstract Shell shell {get;}
-		public abstract Shell sub_shell {get; set;}
+		public abstract Shell sub_shell {get;}
+		public abstract bool has_sub_shell {get; set;}
+
 		public Shell? toplevel_shell {get {
 			weak Item item = this;
 			weak Shell parent = shell;

@@ -61,10 +61,23 @@ namespace Gnomenu {
 		}}
 		public Shell sub_shell{get {
 			return this.submenu as Shell;
-		} 
-		set {
-			this.submenu = value as Menu;
 		}}
+		private Menu _submenu_cache = new Menu();
+		public bool has_sub_shell {
+			get {
+				return this.submenu != null;
+			}
+			set {
+				if(value) {
+					this.submenu = _submenu_cache;
+				} else {
+					if(this.submenu != null) {
+						this.submenu.popdown();
+					}
+					this.submenu = null;
+				}
+			}
+		}
 		/**
 		 * the position of the menu item in the menushell,
 		 * starting from 0.

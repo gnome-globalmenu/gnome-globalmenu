@@ -35,7 +35,7 @@ namespace Gnomenu {
 
 		int position;
 		bool inside_item;
-		bool item_has_submenu;
+		bool item_has_sub_shell;
 		Parser child_parser; /*to hold the ref count*/
 
 		private void start_element (MarkupParseContext context, 
@@ -49,30 +49,20 @@ namespace Gnomenu {
 						 * <menu> <item/><item/><item/> </menu>
 						 */
 					} else {
-		//				weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
-						if(item.sub_shell == null) {
-							item.sub_shell = (Menu) item.get_data("_saved_menu_");
-						}	
 						child_parser = new Parser();
+						item.has_sub_shell = true;
 						child_parser.shell = item.sub_shell;
 						g_markup_parse_context_push(context, functions, child_parser);
-						item_has_submenu = true;
+						item_has_sub_shell = true;
 					}
 				break;
 				case "item":
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
 					item = shell.get_item(position) as MenuItem;
-					if(item != null) {
-						setup_item(item, attribute_names, attribute_values);
-					} else {
-						item = new MenuItem();
-						item.set_data_full("_saved_menu_", (new Menu()).ref(), g_object_unref);
-						shell.append_item(item);
-						setup_item(item, attribute_names, attribute_values);
-					}
+					setup_item(item, attribute_names, attribute_values);
 					inside_item = true;
-					item_has_submenu = false;
+					item_has_sub_shell = false;
 				break;
 				default:
 					throw new MarkupError.UNKNOWN_ELEMENT("unkown element");
@@ -141,16 +131,15 @@ namespace Gnomenu {
 					if(inside_item) {
 						/* stop the child parser */
 						g_markup_parse_context_pop(context);
-						gtk_menu_shell_truncate(child_parser.shell, child_parser.position);
+						child_parser.shell.length = child_parser.position;
 						child_parser = null;
 					} else {
-						gtk_menu_shell_truncate(shell, position);
+						shell.length = position;
 					}
 					break;
 				case "item":
-					if(!item_has_submenu) {
-		//				var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
-						item.sub_shell = null;
+					if(!item_has_sub_shell) {
+						item.has_sub_shell = false;
 					}
 					inside_item = false;
 					position++;
