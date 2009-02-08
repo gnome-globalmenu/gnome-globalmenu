@@ -109,7 +109,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			update(false);
 		}
 		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
-			if(item.path == "/switcher") {		
+			if(item.item_path == "/switcher") {		
 				update(true);
 				return;
 			}
@@ -118,7 +118,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			Wnck.Window window = item_to_window(item);
 			if (window == null) return;
 			
-			switch(item.id) {
+			switch(item.item_id) {
 				case "minimize":
 					window.minimize(); break;
 				case "maximize":
@@ -441,7 +441,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						if(window == null) continue;
 						if (window.is_active()) {
 							setup_window_actions_menu(
-									"/switcher/" + item.id + "/", 
+									"/switcher/" + item.item_id + "/", 
 									window);
 						}
 					}
@@ -500,7 +500,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			item.user_data = window;
 		}
 		private Wnck.Window? item_to_window(Gnomenu.MenuItem item) {
-			string id = item.id;
+			string id = item.item_id;
 			if(item.user_data != null) return item.user_data as Wnck.Window;
 			if(id.has_prefix("XID")) {
 				return Wnck.Window.get(id.offset(3).to_ulong());
