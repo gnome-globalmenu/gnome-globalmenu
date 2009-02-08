@@ -17,22 +17,22 @@ namespace Gnomenu {
 		}	
 
 		private void visit(GLib.Object node) {
-			if(node is MenuShell) {
-				visit_shell(node as MenuShell);
+			if(node is Shell) {
+				visit_shell(node as Shell);
 			}
 			if(node is MenuItem) {
 				visit_item(node as MenuItem);
 			}
 		}
-		private void visit_shell(MenuShell shell) {
+		private void visit_shell(Shell shell) {
 			int i;
-			if(gtk_menu_shell_length(shell) > 0) {
+			if(shell.length > 0) {
 				indent();
 				sb.append_printf("<menu>");
 				newline();
 				level++;
-				for(i = 0; i< gtk_menu_shell_length(shell); i++) {
-					visit(gtk_menu_shell_get_item(shell, i));
+				for(i = 0; i< shell.length; i++) {
+					visit(shell.get_item(i));
 				}
 				level--;
 				indent();
@@ -52,7 +52,7 @@ namespace Gnomenu {
 				sb.append_c('>');
 				newline();
 				level++;
-				visit_shell(item.submenu);
+				visit_shell(item.submenu as Shell);
 				level--;
 				indent();
 				sb.append_printf("</item>");

@@ -32,7 +32,7 @@ namespace Gnomenu {
 			Memory.copy(&this.functions, &parser_funcs, sizeof(MarkupParser));
 		}
 		MarkupParser functions;
-		MenuShell shell;
+		Shell shell;
 		MenuBar topmost;
 		MenuItem item;
 
@@ -57,7 +57,7 @@ namespace Gnomenu {
 							item.submenu = (Menu) item.get_data("_saved_menu_");
 						}	
 						child_parser = new Parser();
-						child_parser.shell = item.submenu;
+						child_parser.shell = item.submenu as Shell;
 						child_parser.topmost = this.topmost;
 						g_markup_parse_context_push(context, functions, child_parser);
 						item_has_submenu = true;
@@ -72,7 +72,7 @@ namespace Gnomenu {
 					} else {
 						item = new MenuItem();
 						item.set_data_full("_saved_menu_", (new Menu()).ref(), g_object_unref);
-						shell.append(item);
+						shell.append_item(item);
 						item.position = position;
 						item.menubar = topmost;
 						setup_item(item, attribute_names, attribute_values);

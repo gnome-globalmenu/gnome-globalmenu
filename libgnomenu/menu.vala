@@ -1,7 +1,7 @@
 using Gtk;
 
 namespace Gnomenu {
-	public class Menu : Gtk.Menu {
+	public class Menu : Gtk.Menu, Gnomenu.Shell {
 		public Menu() { }	
 		/*
 		 * We don't do dispose, but gtk won't reset these pointers
@@ -10,17 +10,6 @@ namespace Gnomenu {
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
-				/*
-				 * This is more or less a problem with
-				 * GTK.
-				 * these pointers are not set to zero.
-				 *
-				 * following code Doesn't work
-				 */
-				/*
-				toplevel.set_colormap(null);
-				set_colormap(null);
-				*/
 			}
 			base.dispose();
 		}
@@ -59,6 +48,41 @@ namespace Gnomenu {
 				}
 
 			}
+		}
+		/******
+		 * Gnomenu.Shell interface
+		 ********* */
+		private MenuItem? _owner;
+		public MenuItem? owner {
+			get {
+				return _owner;
+			}
+			set { _owner = value;}
+		}
+		public MenuItem? get_item(int position) {
+			return gtk_menu_shell_get_item(this, position) as MenuItem;
+		}
+		public MenuItem? get_item_by_id(string id) {
+			foreach(weak Widget child in gtk_container_get_children(this)) {
+				MenuItem item = child as MenuItem;
+				if(item.id == id) return item;
+			}
+			return null;
+		}
+		public void truncate(int length) {
+			gtk_menu_shell_truncate(this, length);
+		}
+		public int length {
+			get {
+				return gtk_menu_shell_length(this);
+			}
+		
+		}
+		public void insert_item(MenuItem item, int pos) {
+			this.insert(item, pos);
+		}
+		public void remove_item(MenuItem item) {
+			this.remove(item);
 		}
 	}
 }

@@ -46,7 +46,7 @@ namespace Gnomenu {
 	 * changing the text gravity,
 	 * looking up item (and subitems) by path.
 	 */
-	public class MenuBar : Gtk.MenuBar {
+	public class MenuBar : Gtk.MenuBar, Shell {
 		public MenuBar() {}
 		const uint PROP_IMPORTANT = 1;
 	static const string OVERFLOWER_TEMPLATE =
@@ -226,13 +226,13 @@ namespace Gnomenu {
 		public MenuItem? get(string path) {
 			string[] tokens = path.split_set("/", -1);
 			tokens.length = (int) strv_length(tokens);
-			MenuShell shell = this;
+			Shell shell = this;
 			/*
 			weak string rev = tokens[0];
 			FIXME: check rev */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
-				List<weak Widget> children = gtk_container_get_children(shell);
+				List<weak Widget> children = gtk_container_get_children(shell as Gtk.MenuShell);
 				MenuItem item = null;
 				foreach(weak Widget child in children) {
 					MenuItem child_item = child as MenuItem;
@@ -247,7 +247,7 @@ namespace Gnomenu {
 				}
 				if(i == tokens.length - 1 /*last token, maybe found*/) return item;	
 				if(item == null /*intermediate item is not found*/) return null; 
-				shell = item.submenu;
+				shell = item.submenu as Shell;
 				if(shell == null /*intermediate menu is not found*/) return null;
 			}
 			return null;
@@ -579,5 +579,41 @@ namespace Gnomenu {
 		public void remove_all() {
 			gtk_menu_shell_truncate(this, 0);
 		}	
+		
+		
+		/******
+		 * Gnomenu.Shell interface
+		 ********* */
+		public MenuItem? owner {
+			get {
+				return null;
+			}
+			set { }
+		}
+		public MenuItem? get_item(int position) {
+			return gtk_menu_shell_get_item(this, position) as MenuItem;
+		}
+		public MenuItem? get_item_by_id(string id) {
+			foreach(weak Widget child in gtk_container_get_children(this)) {
+				MenuItem item = child as MenuItem;
+				if(item.id == id) return item;
+			}
+			return null;
+		}
+		public void truncate(int length) {
+			gtk_menu_shell_truncate(this, length);
+		}
+		public int length {
+			get {
+				return gtk_menu_shell_length(this);
+			}
+		
+		}
+		public void insert_item(MenuItem item, int pos) {
+			this.insert(item, pos);
+		}
+		public void remove_item(MenuItem item) {
+			this.remove(item);
+		}
 	}
 }

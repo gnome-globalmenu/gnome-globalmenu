@@ -5,6 +5,7 @@ VALASOURCES = \
 	helper.vala \
 	parser.vala \
 	serializer.vala \
+	menushell.vala \
 	menu.vala \
 	menubar.vala \
 	menuitem.vala \
