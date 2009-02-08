@@ -19,7 +19,7 @@ namespace Gnomenu {
 	 * on the menu bar is also invoked.
 	 * 
 	 */
-	public class MenuItem : Gtk.MenuItem {
+	public class MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		public MenuItem() { }
 
 		static int icon_width;
@@ -55,11 +55,16 @@ namespace Gnomenu {
 			}
 			base.dispose();
 		}
-		/**
-		 * a back-reference to the toplevel menubar
-		 */
-		public MenuBar? menubar { get; set; }
 
+		public Shell shell {get {
+			return parent as Shell;
+		}}
+		public Shell sub_shell{get {
+			return this.submenu as Shell;
+		} 
+		set {
+			this.submenu = value as Menu;
+		}}
 		/**
 		 * the position of the menu item in the menushell,
 		 * starting from 0.
@@ -68,7 +73,7 @@ namespace Gnomenu {
 		 * it should be change only by the MenuShell 
 		 * (perahsp also Parser)
 		 */
-		public int position {
+		public int item_position {
 			get { return _position;} 
 			set {
 				if(_position == value) return;
@@ -84,7 +89,7 @@ namespace Gnomenu {
 		 * id is used to construct the path to uniquely represent
 		 * the item in the menubar.
 		 */
-		public string? id { 
+		public string? item_id { 
 			get { return _id; }
 		   	set { 
 				if(_id == value) return;
@@ -97,7 +102,7 @@ namespace Gnomenu {
 		 * the label text in the item.
 		 *
 		 */
-		public string? label {
+		public string? item_label {
 			get { return _label; }
 			set {
 				if(_label == value) return;
@@ -113,7 +118,7 @@ namespace Gnomenu {
 		 * For now, it can be any of the Gtk stock item
 		 * names.
 		 */
-		public string? icon {
+		public string? item_icon {
 			get { return _icon; }
 			set {
 				if(_icon == value) return;
@@ -127,7 +132,7 @@ namespace Gnomenu {
 		 * Notice that this is nothing more than a text.
 		 * The applet doesn't handle these accelerator keys.
 		 */
-		public string? accel_text {
+		public string? item_accel_text {
 			get { return _accel_text; }
 			set {
 				if(_accel_text == value) return;
@@ -145,7 +150,7 @@ namespace Gnomenu {
 		 * Anything more than "Bold" is not recommend
 		 * since it interacts badly with themes.
 		 */
-		public string? font {
+		public string? item_font {
 			get { return _font; }
 			set {
 				if(_font == value) return;
@@ -154,53 +159,6 @@ namespace Gnomenu {
 			}
 		}
 
-		/**
-		 * Obtain the path of the this item.
-		 *
-		 * The path is constructed by backtracing the 
-		 * menu hierarch until reaching the toplevel menu bar.
-		 *
-		 * Notice that the [rev:] prefix in global menu specification
-		 * is not implemented (yet).
-		 *
-		 * Here are several examples of returned strings:
-		 *
-		 * /0/1/3/0
-		 *
-		 * /File/New/Message
-		 *
-		 * /0/New/Message
-		 *
-		 * 0/New/Message (If the toplevel menu bar is not found).
-		 *
-		 * The return value in the last case should 
-		 * probably be replaced by null.
-		 */
-		public string path {
-			get {
-				MenuItem item = this;
-				MenuShell parent = item.parent as MenuShell;
-				if(id != null)
-					_path = id;
-				else
-					_path = position.to_string();
-
-				while(parent != null && !(parent is MenuBar)) {
-					item = (parent as Menu).get_attach_widget() as MenuItem;
-					if(item == null) break;
-					if(item.id != null) 
-						_path = item.id + "/" + _path;
-					else
-						_path = item.position.to_string() + "/" + _path;
-					parent = item.parent as MenuShell;
-					if(parent == null) break;
-				}
-				if(parent is MenuBar) {
-					_path = "/" + _path;
-				}
-				return _path;
-			}
-		}
 
 		/**
 		 * set/get the type string of the item.
@@ -211,7 +169,7 @@ namespace Gnomenu {
 		 */
 		public string? item_type {
 			get { return item_type_to_string(_item_type); }
-			set construct {
+			set {
 				MenuItemType new_type = item_type_from_string(value);
 				MenuItemType old_type = _item_type;
 				if(new_type == _item_type) return;
@@ -266,7 +224,7 @@ namespace Gnomenu {
 				queue_resize();
 			}
 		}
-		public bool use_underline {
+		public bool item_use_underline {
 			get {
 				return _use_underline;
 			}
@@ -291,6 +249,14 @@ namespace Gnomenu {
 				_item_state = new_state;
 				queue_draw();
 			}
+		}
+		public bool item_visible {
+			get { return visible;}
+			set { visible = value;}
+		}
+		public bool item_sensitive {
+			get { return sensitive;}
+			set { sensitive = value;}
 		}
 		public Gravity gravity {
 			get { return _gravity; }
@@ -488,7 +454,7 @@ namespace Gnomenu {
 			base.forall(callback, data);
 		}
 		public override void activate() {
-			menubar.activate(this);
+			(toplevel_shell as MenuBar).activate(this);
 		}
 		private void update_show_image() {
 			if(_image_widget != null) {
@@ -621,12 +587,12 @@ namespace Gnomenu {
 			string text;
 			text = _label;
 			if(text == null)
-				text = path;
+				text = item_path;
 
 			MenuLabel label = get_label_widget();;
 			assert(label != null);
 			label.label = text;
-			label.accel = accel_text;
+			label.accel = _accel_text;
 		}
 		private void update_label_underline() {
 			if(!item_type_has_label(_item_type)) return;
@@ -637,16 +603,16 @@ namespace Gnomenu {
 		private void update_image() {
 			if(_item_type != MenuItemType.IMAGE
 			&& _item_type != MenuItemType.ICON) return;
-			if(icon != null && icon.has_prefix("theme:")) {
-				weak string icon_name = icon.offset(6);
+			if(_icon != null && _icon.has_prefix("theme:")) {
+				weak string icon_name = _icon.offset(6);
 				image.set_from_icon_name(icon_name, IconSize.MENU);
 			} else 
-			if(icon != null && icon.has_prefix("file:")) {
-				weak string filename = icon.offset(5);
+			if(_icon != null && _icon.has_prefix("file:")) {
+				weak string filename = _icon.offset(5);
 				image.set_from_file(filename);
 			} else 
-			if(icon != null && icon.has_prefix("pixbuf:")) {
-				weak string b64data = icon.offset(7);
+			if(_icon != null && _icon.has_prefix("pixbuf:")) {
+				weak string b64data = _icon.offset(7);
 				int len = 0;
 				uchar [] data = Base64.decode(b64data, out len);
 				Gdk.Pixdata pixdata = {0};
@@ -654,10 +620,10 @@ namespace Gnomenu {
 				Gdk.Pixbuf pixbuf = gdk_pixbuf_from_pixdata(pixdata, true);
 				image.set_from_pixbuf(pixbuf);
 			} else 
-			if(icon != null && icon.has_prefix("custom:")) {
+			if(_icon != null && _icon.has_prefix("custom:")) {
 				/*Do nothing*/
 			} else {
-				image.set_from_stock(icon, IconSize.MENU);
+				image.set_from_stock(_icon, IconSize.MENU);
 			}
 		}
 		public override void parent_set(Gtk.Widget old_parent) {

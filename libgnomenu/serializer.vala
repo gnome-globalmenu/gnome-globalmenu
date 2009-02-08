@@ -66,8 +66,8 @@ namespace Gnomenu {
 			}
 		}
 		private void visit_item_attributes(MenuItem item) {
-			if(item.label != null) {
-				sb.append(Markup.printf_escaped(" label=\"%s\"", item.label));
+			if(item.item_label != null) {
+				sb.append(Markup.printf_escaped(" label=\"%s\"", item.item_label));
 			}
 			if(item.item_type != null) {
 				sb.append(Markup.printf_escaped(" type=\"%s\"", item.item_type));
@@ -75,23 +75,23 @@ namespace Gnomenu {
 			if(item.item_state != null) {
 				sb.append(Markup.printf_escaped(" state=\"%s\"", item.item_state));
 			}
-			if(item.font != null) {
-				sb.append(Markup.printf_escaped(" font=\"%s\"", item.font));
+			if(item.item_font != null) {
+				sb.append(Markup.printf_escaped(" font=\"%s\"", item.item_font));
 			}
-			if(item.id != null) {
-				sb.append(Markup.printf_escaped(" id=\"%s\"", item.id));
+			if(item.item_id != null) {
+				sb.append(Markup.printf_escaped(" id=\"%s\"", item.item_id));
 			}
-			if(item.visible == false) {
+			if(item.item_visible == false) {
 				sb.append(" visible=\"false\"");
 			}
-			if(item.sensitive == false) {
+			if(item.item_sensitive == false) {
 				sb.append(" sensitive=\"false\"");
 			}
-			if(item.use_underline == false) {
+			if(item.item_use_underline == false) {
 				sb.append(" underline=\"false\"");
 			}
-			if(item.icon != null) {
-				sb.append(Markup.printf_escaped(" icon=\"%s\"", item.icon));
+			if(item.item_icon != null) {
+				sb.append(Markup.printf_escaped(" icon=\"%s\"", item.item_icon));
 			}
 		}
 

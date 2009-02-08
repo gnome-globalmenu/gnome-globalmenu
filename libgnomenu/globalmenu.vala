@@ -6,7 +6,7 @@ namespace Gnomenu {
 		construct {
 			activate += (menubar, item) => {
 				if(current_window != null) {
-					current_window.emit_menu_event(item.path);
+					current_window.emit_menu_event(item.item_path);
 				}
 			};
 			key_press_event += (t, event) => {

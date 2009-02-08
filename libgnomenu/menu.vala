@@ -52,20 +52,18 @@ namespace Gnomenu {
 		/******
 		 * Gnomenu.Shell interface
 		 ********* */
-		private MenuItem? _owner;
-		public MenuItem? owner {
+		public Item? owner {
 			get {
-				return _owner;
+				return get_attach_widget() as Item;
 			}
-			set { _owner = value;}
 		}
-		public MenuItem? get_item(int position) {
-			return gtk_menu_shell_get_item(this, position) as MenuItem;
+		public Item? get_item(int position) {
+			return gtk_menu_shell_get_item(this, position) as Item;
 		}
-		public MenuItem? get_item_by_id(string id) {
+		public Item? get_item_by_id(string id) {
 			foreach(weak Widget child in gtk_container_get_children(this)) {
-				MenuItem item = child as MenuItem;
-				if(item.id == id) return item;
+				Item item = child as Item;
+				if(item.item_id == id) return item;
 			}
 			return null;
 		}
@@ -78,11 +76,11 @@ namespace Gnomenu {
 			}
 		
 		}
-		public void insert_item(MenuItem item, int pos) {
-			this.insert(item, pos);
+		public void insert_item(Item item, int pos) {
+			this.insert(item as MenuItem, pos);
 		}
-		public void remove_item(MenuItem item) {
-			this.remove(item);
+		public void remove_item(Item item) {
+			this.remove(item as MenuItem);
 		}
 	}
 }

@@ -11,7 +11,6 @@ namespace Gnomenu {
 			var parser = new Parser();
 			var timer = new Timer();
 			parser.shell = menubar;
-			parser.topmost = menubar;
 			MarkupParseContext context = 
 				new MarkupParseContext(parser.functions, 0, parser, null);
 			context.parse(description, -1);
@@ -23,7 +22,6 @@ namespace Gnomenu {
 			position = 0; 
 			inside_item = false;
 			this.shell = null;
-			this.topmost = null;
 			MarkupParser parser_funcs = {
 					start_element,
 					end_element,
@@ -33,8 +31,7 @@ namespace Gnomenu {
 		}
 		MarkupParser functions;
 		Shell shell;
-		MenuBar topmost;
-		MenuItem item;
+		Item item;
 
 		int position;
 		bool inside_item;
@@ -53,12 +50,11 @@ namespace Gnomenu {
 						 */
 					} else {
 		//				weak MenuItem item = gtk_menu_shell_get_item(shell, position) as MenuItem;
-						if(item.submenu == null) {
-							item.submenu = (Menu) item.get_data("_saved_menu_");
+						if(item.sub_shell == null) {
+							item.sub_shell = (Menu) item.get_data("_saved_menu_");
 						}	
 						child_parser = new Parser();
-						child_parser.shell = item.submenu as Shell;
-						child_parser.topmost = this.topmost;
+						child_parser.shell = item.sub_shell;
 						g_markup_parse_context_push(context, functions, child_parser);
 						item_has_submenu = true;
 					}
@@ -66,15 +62,14 @@ namespace Gnomenu {
 				case "item":
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
-					item = gtk_menu_shell_get_item(shell, position) as MenuItem;
+					item = shell.get_item(position) as MenuItem;
 					if(item != null) {
 						setup_item(item, attribute_names, attribute_values);
 					} else {
 						item = new MenuItem();
 						item.set_data_full("_saved_menu_", (new Menu()).ref(), g_object_unref);
 						shell.append_item(item);
-						item.position = position;
-						item.menubar = topmost;
+						item.item_position = position;
 						setup_item(item, attribute_names, attribute_values);
 					}
 					inside_item = true;
@@ -84,7 +79,7 @@ namespace Gnomenu {
 					throw new MarkupError.UNKNOWN_ELEMENT("unkown element");
 			}
 		}
-		private void setup_item(MenuItem item, 
+		private void setup_item(Item item, 
 				string[] attr_names, 
 				string[] attr_vals) {
 			weak string label = null;
@@ -129,17 +124,16 @@ namespace Gnomenu {
 			if(underline != false)
 				underline = true;
 
-			item.truncated = false;
-			item.id = id;
-			item.visible = visible;
-			item.use_underline = underline;
-			item.sensitive = sensitive;
+			item.item_id = id;
+			item.item_visible = visible;
+			item.item_use_underline = underline;
+			item.item_sensitive = sensitive;
 			item.item_type = type;
-			item.accel_text = accel;
-			item.label = label;
-			item.icon= icon;
+			item.item_accel_text = accel;
+			item.item_label = label;
+			item.item_icon= icon;
 			item.item_state = state;
-			item.font = font;
+			item.item_font = font;
 		}
 		private void end_element (MarkupParseContext context, 
 				string element_name) throws MarkupError {
@@ -157,7 +151,7 @@ namespace Gnomenu {
 				case "item":
 					if(!item_has_submenu) {
 		//				var item = gtk_menu_shell_get_item(shell, position) as MenuItem;
-						item.submenu = null;
+						item.sub_shell = null;
 					}
 					inside_item = false;
 					position++;
