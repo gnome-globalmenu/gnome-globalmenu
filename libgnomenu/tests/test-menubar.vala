@@ -148,7 +148,7 @@ namespace Gnomenu {
 			return 0;
 		}
 		static void activate(MenuBar menubar, MenuItem item) {
-			message("act: %s", item.path);
+			message("act: %s", item.item_path);
 			Parser.parse(menubar, test2);
 		}
 	}
