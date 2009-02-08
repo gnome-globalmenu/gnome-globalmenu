@@ -7,10 +7,10 @@ namespace Gnomenu {
 	 * A sub-parser is created if a sumne is encountered.
 	 */
 	public class Parser {
-		public static void parse(MenuBar menubar, string description) throws GLib.Error {
+		public static void parse(Shell shell, string description) throws GLib.Error {
 			var parser = new Parser();
 			var timer = new Timer();
-			parser.shell = menubar;
+			parser.shell = shell;
 			MarkupParseContext context = 
 				new MarkupParseContext(parser.functions, 0, parser, null);
 			context.parse(description, -1);
@@ -59,7 +59,7 @@ namespace Gnomenu {
 				case "item":
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
-					item = shell.get_item(position) as MenuItem;
+					item = shell.get_item(position);
 					setup_item(item, attribute_names, attribute_values);
 					inside_item = true;
 					item_has_sub_shell = false;
