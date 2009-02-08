@@ -1,5 +1,5 @@
 %define 	base_version 	0.7.3
-%define 	svn_version 	svn2220
+%define 	svn_version 	svn2258
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -122,6 +122,9 @@ gconftool-2 --makefile-uninstall-rule \
 %{_includedir}/libgnomenu/parser.h
 %{_includedir}/libgnomenu/serializer.h
 %{_includedir}/libgnomenu/window.h
+%{_includedir}/libgnomenu/interface-item.h
+%{_includedir}/libgnomenu/interface-shell.h
+
 
 %files gnome-panel
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
