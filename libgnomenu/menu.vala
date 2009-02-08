@@ -67,6 +67,16 @@ namespace Gnomenu {
 			}
 			return null;
 		}
+		public int get_item_position(Item item) {
+			int i = 0;
+			foreach(weak Widget child in gtk_container_get_children(this)) {
+				if(child == item as Widget) {
+					return i;	
+				}
+				i++;
+			}
+			return -1;
+		}
 		public void truncate(int length) {
 			gtk_menu_shell_truncate(this, length);
 		}

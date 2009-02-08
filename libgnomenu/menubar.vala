@@ -253,7 +253,6 @@ namespace Gnomenu {
 			return null;
 		}
 
-
 		/**
 		 * returns an xml representation of the overflown menubar.
 		 * The difference between the returned string and the
@@ -601,6 +600,16 @@ namespace Gnomenu {
 		}
 		public void truncate(int length) {
 			gtk_menu_shell_truncate(this, length);
+		}
+		public int get_item_position(Item item) {
+			int i = 0;
+			foreach(weak Widget child in gtk_container_get_children(this)) {
+				if(child == item as Widget) {
+					return i;	
+				}
+				i++;
+			}
+			return -1;
 		}
 		public int length {
 			get {

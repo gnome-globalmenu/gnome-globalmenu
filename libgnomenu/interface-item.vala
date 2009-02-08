@@ -15,7 +15,9 @@ namespace Gnomenu {
 			}
 			return parent;
 		} }
-		public abstract int item_position {get; set;}
+		public abstract int item_position {get {
+			return shell.get_item_position(this);
+		}}
 		public abstract string? item_id {get; set;}
 
 		public abstract string? item_type {get; set;}

@@ -69,7 +69,6 @@ namespace Gnomenu {
 						item = new MenuItem();
 						item.set_data_full("_saved_menu_", (new Menu()).ref(), g_object_unref);
 						shell.append_item(item);
-						item.item_position = position;
 						setup_item(item, attribute_names, attribute_values);
 					}
 					inside_item = true;

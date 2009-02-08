@@ -75,12 +75,6 @@ namespace Gnomenu {
 		 */
 		public int item_position {
 			get { return _position;} 
-			set {
-				if(_position == value) return;
-				_position = value;
-				if(_id == null && _label == null)
-				update_label_text();
-			}
 		}
 
 		/**
