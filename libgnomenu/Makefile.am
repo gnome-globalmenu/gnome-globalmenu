@@ -51,6 +51,7 @@ endif
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi xlib.vapi
+	bash patch.sh backup
 	$(VALAC) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi xlib.vapi
 	bash patch.sh
 
