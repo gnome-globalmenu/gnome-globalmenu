@@ -11,6 +11,7 @@ VALASOURCES = \
 	switcher.vala \
 	template.vala \
 	gnomemenuhelper.vala \
+	workspaceselector.vala \
 	$(NULL)
 
 if WITH_GNOME_PANEL

@@ -33,6 +33,7 @@ public extern string* __get_task_name_by_pid(int pid);
 	<item id="topmost" type="check" state="untoggled" label="%labeltopmost%" visible="%visibletopmost%" />
 	<item id="unstick" type="check" state="toggled" label="%labelunstick%" visible="%visibleunstick%" />
 	<item id="stick" type="check" state="untoggled" label="%labelstick%" visible="%visiblestick%" />
+	<item id="workspaces" type="normal" label="%labelworkspaces%" />
 	<item id="separator2" type="separator" visible="%visibleseparator2%" />
 	<item id="close" type="image" icon="wnck-stock-delete" label="%labelclose%" visible="%visibleclose%" />
 </menu>""";
@@ -79,6 +80,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				"%labeltopmost%", _("Always on _Top"), "%visibletopmost%", "%visibletopmost%",
 				"%labelunstick%", _("_Always on visible Workspace"), "%visibleunstick%", "%visibleunstick%",
 				"%labelstick%", _("_Always on visible Workspace"), "%visiblestick%", "%visiblestick%",
+				"%labelworkspaces%", _("_Workspace..."),
 				"%visibleseparator2%", "%visibleseparator2%",
 				"%labelclose%", _("_Close"), "%visibleclose%", "%visibleclose%"
 			};
@@ -146,6 +148,10 @@ public extern string* __get_task_name_by_pid(int pid);
 						if (is_in_sight(w))
 							w.minimize();
 					}
+					break;
+				case "workspaces":
+					WorkspaceSelector ws = new WorkspaceSelector(_current_window);
+					ws.show();
 					break;
 				default:
 					/** dirty trick to ignore the activate
@@ -467,6 +473,7 @@ public extern string* __get_task_name_by_pid(int pid);
 								"untopmost",
 								"stick",
 								"unstick",
+								"workspaces",
 								"close"};
 			for (int co=0; co<actions.length; co++) {
 				Gnomenu.MenuItem si = this.get(prefix +	actions[co]);
