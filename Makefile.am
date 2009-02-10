@@ -29,7 +29,7 @@ include $(top_srcdir)/Makefile.configmake
 include $(top_srcdir)/Makefile.config
 include $(top_srcdir)/Makefile.licenses
 
-schemadir   = @GCONF_SCHEMA_FILE_DIR@
+schemadir   = $(GCONF_SCHEMA_FILE_DIR)
 schema_in_files = gnome-globalmenu.schemas.in
 schema_DATA = $(schema_in_files:.in=)
 @INTLTOOL_SCHEMAS_RULE@
@@ -37,7 +37,7 @@ schema_DATA = $(schema_in_files:.in=)
 if GCONF_SCHEMAS_INSTALL
 
 install-data-local:
-	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) gconftool-2 --makefile-install-rule $(schema_DATA)
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) $(GCONFTOOL) --makefile-install-rule $(top_builddir)/$(schema_DATA)
 else
 install-data-local:
 endif
