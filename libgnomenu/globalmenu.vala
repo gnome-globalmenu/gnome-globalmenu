@@ -27,15 +27,26 @@ namespace Gnomenu {
 				return true;
 			};
 		}
+		private void regrab_menu_bar_key() {
+			message("regrab menu_bar key");
+			ungrab_menu_bar_key();	
+			grab_menu_bar_key();	
+		}
 		private void attach_to_screen(Gdk.Screen screen) {
 			_root_gnomenu_window = new Window(get_root_window());
 			_root_gnomenu_window.set_key_widget(this);
-			grab_menu_bar_key(_root_gnomenu_window);
+			grab_menu_bar_key();
+
+			Settings settings = get_settings();
+			settings.notify["gtk-menu-bar-accel"] += regrab_menu_bar_key;
+				
 		}
 		private void detach_from_screen(Gdk.Screen screen) {
 			if(_root_gnomenu_window != null) {
-				ungrab_menu_bar_key(_root_gnomenu_window);
+				ungrab_menu_bar_key();
 			}
+			Settings settings = get_settings();
+			settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
 			_root_gnomenu_window = null;
 		}
 		public override void screen_changed(Gdk.Screen previous_screen) {
@@ -67,23 +78,23 @@ namespace Gnomenu {
 			}
 			hide();
 		}
-		private void ungrab_menu_bar_key(Gnomenu.Window window) {
-			int keyval = (int) window.get_data("menu-bar-keyval");
+		private void ungrab_menu_bar_key() {
+			int keyval = (int) _root_gnomenu_window.get_data("menu-bar-keyval");
 			Gdk.ModifierType mods = 
-				(Gdk.ModifierType) window.get_data("menu-bar-keymods");
+				(Gdk.ModifierType) _root_gnomenu_window.get_data("menu-bar-keymods");
 
-			window.ungrab_key(keyval, mods);
-			window.set_data("menu-bar-keyval", null);
-			window.set_data("menu-bar-keymods", null);
+			_root_gnomenu_window.ungrab_key(keyval, mods);
+			_root_gnomenu_window.set_data("menu-bar-keyval", null);
+			_root_gnomenu_window.set_data("menu-bar-keymods", null);
 		}
-		private void grab_menu_bar_key(Gnomenu.Window window) {
+		private void grab_menu_bar_key() {
 			/*FIXME: listen to changes in GTK_SETTINGS.*/
 			int keyval;
 			Gdk.ModifierType mods;
 			get_accel_key(out keyval, out mods);
-			window.grab_key(keyval, mods);
-			window.set_data("menu-bar-keyval", (void*) keyval);
-			window.set_data("menu-bar-keymods", (void*) mods);
+			_root_gnomenu_window.grab_key(keyval, mods);
+			_root_gnomenu_window.set_data("menu-bar-keyval", (void*) keyval);
+			_root_gnomenu_window.set_data("menu-bar-keymods", (void*) mods);
 		}	
 		/**
 		 * return the accelerator key combination for invoking menu bars
