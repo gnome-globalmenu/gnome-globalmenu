@@ -245,11 +245,12 @@ public extern string* __get_task_name_by_pid(int pid);
 							font = "italic";
 						}
 					}
+
 					string[] substs = {
 						"%label%", Markup.escape_text(replace(cut_string(window.get_name(), _max_size), "_", "__")),
 						"%font%", font,
 						"%submenu%", submenu_xml,
-						"%pixdata%", pixbuf_encode_b64(window.get_mini_icon()),
+						"%pixdata%", pixbuf_encode_b64(guess_icon(window)),
 						"%id%", window.get_xid().to_string()
 					};
 					
@@ -262,7 +263,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			} else {
 				if (_current_window.get_window_type() != Wnck.WindowType.DESKTOP) {
 					items += "<item id=\"separator3\" type=\"separator\"/>";
-					items += "<item id=\"show_desktop\" type=\"image\" icon=\"pixbuf:" + pixbuf_encode_b64(find_desktop().get_mini_icon()) + "\" label=\"" + _("Show _Desktop") + "\"/>";
+					items += "<item id=\"show_desktop\" type=\"image\" icon=\"pixbuf:" + pixbuf_encode_b64(guess_icon(find_desktop())) + "\" label=\"" + _("Show _Desktop") + "\"/>";
 				}
 			}
 			return "<menu>" + items + "</menu>";
@@ -352,16 +353,30 @@ public extern string* __get_task_name_by_pid(int pid);
 			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
 			return txt;
 		}
-		private Gdk.Pixbuf guess_icon(int scaled_size, Gdk.Pixbuf[] icons) {
+		private Gdk.Pixbuf guess_icon(Wnck.Window window, int width = -1, int height = -1) {
+			Gdk.Pixbuf[] icons = {
+				window.get_mini_icon(),
+				window.get_icon()};
+			return guess_icon_array(icons, width, height);	
+		}
+		private Gdk.Pixbuf guess_icon_array(Gdk.Pixbuf[] icons, int width, int height) {
 			Gdk.Pixbuf icon = null;
 			int min_dist = 99999;
 			int best_size = 16;
+			if(height == -1 || width == -1) {
+				Gtk.icon_size_lookup(Gtk.IconSize.MENU, out width, out height);
+			}
+			int scaled_size = height;
+			if(width < scaled_size)
+				scaled_size = width;
+
 			foreach(Gdk.Pixbuf i in icons) {
 				int size = i.height;
 				if(i.get_width() > size)
 					size = i.width;
 				int dist = size - scaled_size;
-				if(dist > 0 && dist < min_dist) {
+				if(dist < 0) dist = -dist;
+				if(dist < min_dist) {
 					min_dist = dist;
 					icon = i;
 					best_size = size;
@@ -414,17 +429,13 @@ public extern string* __get_task_name_by_pid(int pid);
 					s = replace(s, "%type%", "image"); else
 					s = replace(s, "%type%", "icon");
 				
-				int scaled_size = allocation.height;
-				if(allocation.width < scaled_size)
-					scaled_size = allocation.width;
+				int width = allocation.width - 2;
+				int height = allocation.height - 2;
+				if(width <= 0) width = -1;
+				if(height <= 0) height = -1;
 
-				scaled_size -= 2;
-
-				Gdk.Pixbuf[] icons = {
-					current_window.get_mini_icon(),
-					current_window.get_icon()};
 				s = replace(s, "%icon%", "pixbuf:" + 
-						pixbuf_encode_b64(guess_icon(scaled_size, icons)));
+						pixbuf_encode_b64(guess_icon(current_window, width, height)));
 					
 			} else {
 				s = replace(s, "%type%", "normal");
