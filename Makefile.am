@@ -1,4 +1,5 @@
 NULL =
+ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = tools tests libgnomenu applet xfce gtk-modules po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 

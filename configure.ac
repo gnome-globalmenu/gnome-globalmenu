@@ -1,5 +1,6 @@
 AC_INIT(gnome-globalmenu, [0.7.3], [rainwoodman@gmail.com], [gnome-globalmenu])
 
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.9 tar-ustar])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
