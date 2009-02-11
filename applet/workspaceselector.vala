@@ -5,11 +5,15 @@ using Wnck;
 class WorkspaceSelector : Gtk.Window {
 	private Wnck.Window? target;
 	private const int WIDTH = 128;
+	private GLib.List<WorkspaceItem> workspaces;
 	
 	public WorkspaceSelector(Wnck.Window? window) {
 		target = window;
+        do_menu();
+	}
+	construct {
 		this.name = "WorkspaceSelector";
-        this.set_type_hint(Gdk.WindowTypeHint.DOCK);
+        this.set_type_hint(Gdk.WindowTypeHint.MENU);
         this.window_position = Gtk.WindowPosition.CENTER_ALWAYS;
         this.resizable = false;
         this.allow_grow = false;
@@ -21,28 +25,43 @@ class WorkspaceSelector : Gtk.Window {
         }
         this.default_width = 100;
         this.default_height = 100;
-        this.show();
-
         this.leave_notify_event += on_leave_notify;
-        
-        do_menu();
+        this.button_press_event += on_button_press;
+		this.button_release_event += on_button_release;
 	}
 	
 	private bool on_leave_notify(WorkspaceSelector wss, Gdk.EventCrossing event) {
-		this.destroy();
+		if (event.state==0)
+			this.destroy();
+		return false;
+	}
+	private bool on_button_press(WorkspaceSelector wss, Gdk.EventButton event) {
 		return false;
 	}
 	
+	private bool on_button_release(WorkspaceSelector wss, Gdk.EventButton event) {
+		if (selected_item == null) return false;
+		
+		/* TODO: move the window! */
+		
+		
+		/* then exit */
+		this.destroy();
+		return false;
+	}
 	private void do_menu() {
 		VBox rows = new VBox(true, 0);
 		HBox row;
 		int nth_vdesktop = 0;				   
 		for (int nrow=0; nrow<nrows; nrow++) {
 			row = new HBox(true, 0);
-			rows.pack_start(row, true, true, 2);
+			rows.pack_start(row, true, true, 0);
 			for (int ncol=0; ncol<ncols; ncol++) {
-				Gtk.Image i = new Gtk.Image.from_pixbuf(get_mini_screenshot(nth_vdesktop));
-				row.pack_start(i, true, true, 2);
+				WorkspaceItem wi = new WorkspaceItem.with_pixbuf(get_mini_screenshot(nth_vdesktop));
+				row.pack_start(wi, true, true, 0);
+				wi.viewport_x = ncol * screen_width;
+				wi.viewport_y = nrow * screen_height;
+				workspaces.append(wi);
 				nth_vdesktop++;
 			}
 		}
@@ -120,5 +139,84 @@ class WorkspaceSelector : Gtk.Window {
 		get {
 			return target.get_workspace().get_height();
 		}
+	}
+	public WorkspaceItem selected_item {
+		get {
+			foreach(weak WorkspaceItem wi in workspaces)
+				if (wi.selected) return wi;
+			return null;
+		}
+	}
+}
+
+
+/* WorkspaceItem */
+
+class WorkspaceItem : Gtk.EventBox {
+	public int viewport_x;
+	public int viewport_y;
+	
+	private Gtk.Image _image;
+	private int _margin = 6;
+	private bool _selected = false;
+	
+	public WorkspaceItem() {
+		_image = null;
+		this.show();
+	}
+	public WorkspaceItem.with_pixbuf(Gdk.Pixbuf pixbuf) {
+		image = new Gtk.Image.from_pixbuf(pixbuf);
+		this.show_all();
+	}
+	construct {
+		this.style = rc_get_style(new Gtk.Menu());
+		this.leave_notify_event += on_leave_notify;
+		this.enter_notify_event += on_enter_notify;
+	}
+	
+	public Gtk.Image image {
+		get { return _image; }
+		set {
+			if (_image!=null)
+				remove(_image);
+			_image = value;
+			if (_image!=null)
+				add(_image);
+			update();
+		}
+	}
+	public int margin {
+		get { return _margin; }
+		set {
+			_margin = value;
+			update();
+		}
+	}
+	public bool selected {
+		get { 
+			return _selected;
+		}
+		set {
+			_selected = value;
+			if (_selected)
+				set_state(Gtk.StateType.SELECTED); else
+				set_state(Gtk.StateType.NORMAL);
+		}
+	}
+	private void update() {
+		if (image==null) return;
+		this.width_request = image.pixbuf.width + margin * 2;
+		this.height_request = image.pixbuf.height + margin * 2;
+	}
+	
+	private bool on_leave_notify(WorkspaceItem wi, Gdk.EventCrossing event) {
+		if (event.state==0)
+			selected = false;
+		return false;
+	}
+	
+	private bool on_enter_notify(WorkspaceItem wi, Gdk.EventCrossing event) {
+		selected = true;
+		return false;
 	}
 }
