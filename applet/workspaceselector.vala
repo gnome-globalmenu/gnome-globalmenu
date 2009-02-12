@@ -61,6 +61,7 @@ class WorkspaceSelector : Gtk.Window {
 				row.pack_start(wi, true, true, 0);
 				wi.viewport_x = ncol * screen_width;
 				wi.viewport_y = nrow * screen_height;
+				wi.current = ((current_row == nrow) && (current_column == ncol));
 				workspaces.append(wi);
 				nth_vdesktop++;
 			}
@@ -140,6 +141,16 @@ class WorkspaceSelector : Gtk.Window {
 			return target.get_workspace().get_height();
 		}
 	}
+	public int current_column {
+		get {
+			return target.get_workspace().get_viewport_x() / screen_width;
+		}
+	}
+	public int current_row {
+		get {
+			return target.get_workspace().get_viewport_y() / screen_height;
+		}
+	}
 	public WorkspaceItem selected_item {
 		get {
 			foreach(weak WorkspaceItem wi in workspaces)
@@ -159,6 +170,7 @@ class WorkspaceItem : Gtk.EventBox {
 	private Gtk.Image _image;
 	private int _margin = 6;
 	private bool _selected = false;
+	private bool _current = false;
 	
 	public WorkspaceItem() {
 		_image = null;
@@ -203,6 +215,13 @@ class WorkspaceItem : Gtk.EventBox {
 				set_state(Gtk.StateType.NORMAL);
 		}
 	}
+	public bool current {
+		get { return _current; }
+		set {
+			_current = value;
+			if (_current) selected = true;
+		}
+	}
 	private void update() {
 		if (image==null) return;
 		this.width_request = image.pixbuf.width + margin * 2;
@@ -210,7 +229,7 @@ class WorkspaceItem : Gtk.EventBox {
 	}
 	
 	private bool on_leave_notify(WorkspaceItem wi, Gdk.EventCrossing event) {
-		if (event.state==0)
+		if ((event.state==0) && (!_current))
 			selected = false;
 		return false;
 	}
