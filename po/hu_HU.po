@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gnome2-globalmenu-1.0-RC\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-29 14:43+0100\n"
-"PO-Revision-Date: 2009-01-17 16:55+0100\n"
+"PO-Revision-Date: 2009-02-12 12:00+0100\n"
 "Last-Translator: Juhász Ádám <jadaml@gmail.com>\n"
 "Language-Team: hu_HU <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -26,9 +26,8 @@ msgid "Size of check or radio indicator"
 msgstr "Jelölőnégyzet vagy rádiógomb mérete"
 
 #: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
-#, fuzzy
 msgid "Be verbose"
-msgstr "Bőbeszédűen"
+msgstr "Részletes kimenet"
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 #, fuzzy
@@ -115,44 +114,43 @@ msgstr "Online súgó"
 
 #: ../applet/switcher.c:469 ../applet/switcher.c:1271
 msgid "no windows"
-msgstr "ne legyen ablakok"
+msgstr "nincsenek ablakok"
 
 #: ../applet/switcher.c:497
-#, fuzzy
 msgid "Show _Desktop"
-msgstr "Asztal"
+msgstr "Asztal _megjelenítése"
 
 #: ../applet/switcher.c:526
 msgid "Mi_nimize"
-msgstr ""
+msgstr "Mi_nimalizálás"
 
 #: ../applet/switcher.c:538
 msgid "Ma_ximize"
-msgstr ""
+msgstr "Ma_ximalizálás"
 
 #: ../applet/switcher.c:548
 msgid "Unma_ximize"
-msgstr ""
+msgstr "_Eredeti méret"
 
 #: ../applet/switcher.c:560
 msgid "_Move"
-msgstr ""
+msgstr "_Mozgatás"
 
 #: ../applet/switcher.c:571
 msgid "_Resize"
-msgstr ""
+msgstr "Át_méretezés"
 
 #: ../applet/switcher.c:586 ../applet/switcher.c:596
 msgid "Always on _Top"
-msgstr ""
+msgstr "Mindig _felül"
 
 #: ../applet/switcher.c:608 ../applet/switcher.c:618
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "Mindig a látható m_unkaterületen"
 
 #: ../applet/switcher.c:632
 msgid "_Close"
-msgstr ""
+msgstr "_Bezárás"
 
 #: ../applet/switcher.c:767
 msgid "Desktop"
@@ -163,9 +161,8 @@ msgid "File Manager"
 msgstr "Fájl kerelő"
 
 #: ../applet/switcher.c:1273
-#, fuzzy
 msgid "no actions"
-msgstr "Ablak műveletek"
+msgstr "Nincs műveletek"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
@@ -185,7 +182,7 @@ msgid ""
 "loaded."
 msgstr ""
 "Ha ez az érték igaz, akkor libglobalmenu-gnome, a GTK beépülő a Globális "
-"Mnühözbe van töltve."
+"Menühöz be van töltve."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Label"
