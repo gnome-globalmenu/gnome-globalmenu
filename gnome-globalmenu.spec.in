@@ -1,19 +1,24 @@
 %define 	base_version 	@PACKAGE_VERSION@
 %define 	svn_version 	@SVNVERSION@
+
+# automatic svn version detection
+%if %(test x%{svn_version} == x || test x%{svn_version} == xexported; echo $?)
+%define full_version	%{base_version}.svn%{svn_version}
+%else
+%define full_version	%{base_version}
+%endif
+
+# special steps in rhel5
 %if %(test x%{?dist} == x.el5x ; echo $?)
 %define 	not_rhel5 0
 %else
 %define 	not_rhel5 1
 %endif
+
 Name:		gnome-globalmenu
-%if %(test x%{svn_version} == x || test x%{svn_version} == xexported; echo $?)
-Version:	%{base_version}.svn%{svn_version}
-%else
-Version:	%{base_version}
-%endif
+Version:	%{full_version}
 Release:	1%{?dist}
 Summary:	Global Menu for GNOME
-
 Group:		User Interface/Desktops
 License:	GPLv2+
 URL:		http://code.google.com/p/gnome2-globalmenu/
@@ -132,8 +137,8 @@ gconftool-2 --makefile-uninstall-rule \
 %defattr(-,root,root,-)
 %{_sysconfdir}/gconf/schemas/gnome-globalmenu.schemas
 %{_datadir}/pixmaps/globalmenu.png
-%{_libdir}/libgnomenu-0.7.3.so.2
-%{_libdir}/libgnomenu-0.7.3.so.2.0.0
+%{_libdir}/libgnomenu-%{base_version}.so.2
+%{_libdir}/libgnomenu-%{base_version}.so.2.0.0
 %{_libdir}/libgnomenu.so
 %{_libdir}/pkgconfig/libgnomenu.pc
 
@@ -176,6 +181,11 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
 
 %changelog
+* Thu Feb 14 2009 Feng Yu <rainwoodman@gmail.com>
+- Valentine's day. 
+- Update to version (post) 0.7.3.
+- Generate the versioned .spec file from .spec.in with configure
+- Build on rhel5.
 * Thu Jan 8 2009 Feng Yu <rainwoodman@gmail.com>
 - Add XFCE4 plugin
 * Thu Jan 8 2009 Feng Yu <rainwoodman@gmail.com>
