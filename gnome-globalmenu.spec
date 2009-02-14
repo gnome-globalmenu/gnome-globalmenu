@@ -16,7 +16,9 @@ Requires(post): GConf2
 Requires(preun): GConf2
 
 %description
-GNOME Global Menu is a centralized menu bar for all windows on a particular screen/session. This package extends GTK and gnome panel so that Global Menu can be enabled on all GTK applications.
+GNOME Global Menu is a centralized menu bar for all windows on a particular 
+screen/session. This package extends GTK and gnome panel so that Global Menu 
+can be enabled on all GTK applications.
 
 %package		common
 Summary:		Shared data and libraries  of Global Menu packages
@@ -36,7 +38,8 @@ Group: 			User Interface/Desktops
 Requires:		gtk2
 Requires:		gnome-globalmenu-common
 %description	gtkmodule
-The Gtk Plugin Module of Global Menu adds global menu feature to any GTK applications on the fly without the need of modifying the source code.
+The Gtk Plugin Module of Global Menu adds global menu feature to any GTK 
+applications on the fly without the need of modifying the source code.
 
 %package		gnome-panel
 Summary:		GNOME panel applet of Global Menu
@@ -48,7 +51,9 @@ Requires:		libnotify
 Requires:		gnome-menus
 Requires:		gnome-globalmenu-common
 %description 	gnome-panel
-The GNOME panel applet of Global Menu is a representation of Global Menu with GTK widgets. The applet can be inserted to the default top panel to provide access to the Global Menu of the applications. 
+The GNOME panel applet of Global Menu is a representation of Global Menu 
+with GTK widgets. The applet can be inserted to the default top panel to 
+provide access to the Global Menu of the applications. 
 The applet also provides limited window management functionalities.
 
 %package		xfce-panel
@@ -59,7 +64,9 @@ Requires:		xfce4-panel
 Requires:		libwnck
 Requires:		gnome-globalmenu-common
 %description 	xfce-panel
-The XFCE panel applet of Global Menu is a representation of Global Menu with GTK widgets. The applet can be inserted to the default top panel to provide access to the Global Menu of the applications. 
+The XFCE panel applet of Global Menu is a representation of Global Menu 
+with GTK widgets. The applet can be inserted to the default top panel 
+to provide access to the Global Menu of the applications. 
 
 %prep
 %setup -q -n %{name}-%{base_version}
@@ -108,6 +115,7 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/pkgconfig/libgnomenu.pc
 
 %files devel
+%defattr(-,root,root,-)
 %{_includedir}/libgnomenu/globalmenu.h
 %{_includedir}/libgnomenu/gnomenu.h
 %{_includedir}/libgnomenu/helper.h
@@ -127,14 +135,18 @@ gconftool-2 --makefile-uninstall-rule \
 
 
 %files gnome-panel
+%defattr(-,root,root,-)
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
 %{_libexecdir}/GlobalMenu.PanelApplet
+
 %files xfce-panel
+%defattr(-,root,root,-)
 %{_datadir}/xfce4/panel-plugins/GlobalMenu_XFCEPlugin.desktop
 %{_libexecdir}/xfce4/panel-plugins/GlobalMenu.XFCEPlugin
 %{_datadir}/pixmaps/globalmenu-xfce.png
 
 %files gtkmodule
+%defattr(-,root,root,-)
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
 
