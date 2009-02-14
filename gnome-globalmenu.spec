@@ -1,6 +1,10 @@
 %define 	base_version 	0.7.3
-%define 	svn_version 	svn2293
-%define has_xfce 0
+%define 	svn_version 	svn2300
+%if %(test x%{?dist} == x.el5x ; echo $?)
+%define 	not_rhel5 0
+%else
+%define 	not_rhel5 1
+%endif
 Name:		gnome-globalmenu
 Version:	%{base_version}.%{svn_version}
 Release:	1%{?dist}
@@ -16,7 +20,7 @@ BuildRequires: gnome-panel-devel
 BuildRequires: libnotify-devel
 BuildRequires: gnome-menus-devel
 
-%if %{has_xfce}
+%if %{not_rhel5}
 BuildRequires: xfce4-panel-devel
 %endif
 
@@ -65,7 +69,7 @@ with GTK widgets. The applet can be inserted to the default top panel to
 provide access to the Global Menu of the applications. 
 The applet also provides limited window management functionalities.
 
-%if %{has_xfce}
+%if %{not_rhel5}
 %package		xfce-panel
 Summary:		XFCE panel applet of Global Menu
 Group:			User Interface/Desktops
@@ -84,10 +88,11 @@ to provide access to the Global Menu of the applications.
 
 
 %build
-%if %{has_xfce}
+%if %{not_rhel5}
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --with-xfce4-panel
 %else
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --without-xfce4-panel
+patch -p0 < libgnomenu-rhel5.patch
 %endif
 make %{?_smp_mflags}
 
@@ -154,7 +159,7 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
 %{_libexecdir}/GlobalMenu.PanelApplet
 
-%if %{has_xfce}
+%if %{not_rhel5}
 %files xfce-panel
 %defattr(-,root,root,-)
 %{_datadir}/xfce4/panel-plugins/GlobalMenu_XFCEPlugin.desktop
