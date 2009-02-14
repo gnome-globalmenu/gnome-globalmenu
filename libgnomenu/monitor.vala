@@ -27,8 +27,10 @@ public class Monitor: GLib.Object {
 
 			_wnck_screen = new_screen;
 			if(_wnck_screen != null) {
-				_wnck_screen.force_update();
 				attach_to_screen(_wnck_screen);
+				/* sync to wnck status, may invoke a whole bunch of
+				 * signals */
+				_wnck_screen.force_update();
 			}
 		}
 	}
@@ -115,7 +117,9 @@ public class Monitor: GLib.Object {
 					break;
 			}
 		}
-		if(old == _current_window) return;
+		if(old == _current_window) {
+			return;
+		}
 		if(old != null) {
 			window_changed(old.get_xid());
 		} else {
@@ -134,8 +138,6 @@ public class Monitor: GLib.Object {
 		screen.active_window_changed += on_active_window_changed;
 		Wnck.Window new_desktop = find_desktop(screen);
 		_desktop = new_desktop;
-
-		on_active_window_changed(screen, null);
 	}
 }
 }
