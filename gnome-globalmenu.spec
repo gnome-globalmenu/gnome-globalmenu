@@ -9,7 +9,13 @@ Group:		User Interface/Desktops
 License:	GPLv2+
 URL:		http://code.google.com/p/gnome2-globalmenu/
 Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.gz
-BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{base_version}-%{release}-XXXXXXX)
+BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRequires: libXres-devel
+BuildRequires: gnome-panel-devel
+BuildRequires: libnotify-devel
+BuildRequires: gnome-menus-devel
+BuildRequires: xfce-panel-devel
+
 
 Requires(pre): GConf2
 Requires(post): GConf2
