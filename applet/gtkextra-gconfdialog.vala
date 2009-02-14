@@ -134,7 +134,11 @@ using GConf;
 
 			if(schema_name == null) {
 				critical("schema not found for entry %s", entry.get_key());
-				return new GConf.Schema();
+				GConf.Schema rt = new GConf.Schema();
+				rt.set_short_desc(entry.get_key());
+				rt.set_long_desc("This key lacks a schema");
+				rt.set_type(ValueType.STRING);
+				return rt;
 			} else {
 				return gconf_client_get_schema(_default_client, schema_name);
 			}
