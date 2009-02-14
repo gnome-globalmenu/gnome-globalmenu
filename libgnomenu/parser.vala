@@ -14,6 +14,7 @@ namespace Gnomenu {
 			context.parse(description, -1);
 			message("Parser consumed: %lf for %ld bytes", timer.elapsed(null),
 					description.size());
+			ENABLE_LIBCOMPAT();
 		}
 
 		private class State {

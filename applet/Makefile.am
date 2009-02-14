@@ -50,7 +50,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=gconf-2.0 \
 	--pkg=gnomenu \
 	--pkg=libnotify \
-	$(VALASOURCES) bindings.vapi
+	$(VALASOURCES) bindings.vapi ../libcompat/libcompat.vapi
 	bash patch.sh
 	touch $@
 
@@ -61,6 +61,7 @@ GlobalMenu_PanelApplet_LDFLAGS = \
 GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
+		../libcompat/libcompat.la \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
@@ -80,6 +81,7 @@ icons_DATA = globalmenu.png
 EXTRA_DIST = \
 	$(STAMP) \
 	patch.sh \
+	bindings.vapi \
 	libpanelapplet-2.0.vapi \
 	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \

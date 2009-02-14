@@ -43,6 +43,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool disposed = false;
 
 		public Switcher() {
+			ENABLE_LIBCOMPAT();
 		}
 
 		static construct {

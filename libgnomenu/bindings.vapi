@@ -35,4 +35,17 @@ public bool gdk_property_change (Gdk.Window window,
 [CCode ( cname = "GDK_WINDOW_XID", cheader_filename="gdk/gdkx.h")]
 public ulong gdk_window_xid(Gdk.Window window);
 
+[NoArrayLength]
+public static bool g_markup_collect_attributes(string element_name, [CCode (array_length = false)] string[] attribute_names, [CCode (array_length = false)] string[] attribute_values, out GLib.Error? error, GMarkupCollectType type, string first_name, ...);
+
+[CCode (cprefix = "G_MARKUP_COLLECT_", has_type_id = false)]
+public enum GMarkupCollectType {
+	INVALID,
+	STRING,
+	STRDUP,
+	BOOLEAN,
+	TRISTATE,
+	OPTIONAL
+}
+
 Gdk.Pixbuf gdk_pixbuf_from_pixdata(Gdk.Pixdata pixdata, bool copy_pixels) throws GLib.Error;
