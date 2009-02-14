@@ -14,7 +14,7 @@ BuildRequires: libXres-devel
 BuildRequires: gnome-panel-devel
 BuildRequires: libnotify-devel
 BuildRequires: gnome-menus-devel
-BuildRequires: xfce-panel-devel
+BuildRequires: xfce4-panel-devel
 
 
 Requires(pre): GConf2
