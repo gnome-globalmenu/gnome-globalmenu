@@ -8,7 +8,12 @@ struct _WnckActionMenu {
 };
 
 static void wnck_action_menu_class_init (struct _WnckActionMenuClass * klass) {
-	GtkMenu * menu = wnck_create_window_action_menu(NULL);
+	WnckScreen * screen = wnck_screen_get_default();
+	GList * list = wnck_screen_get_windows(screen);
+	g_assert(list != NULL);
+	WnckWindow * window = list->data;
+	g_assert(window != NULL);
+	GtkMenu * menu = wnck_create_window_action_menu(window);
 	if(menu != NULL)
 		g_object_unref(menu);
 }

@@ -22,34 +22,17 @@ public class Applet : Panel.Applet {
 	~Applet() {
 	}
 
-	private void ensure_monitor() {
-		/* this is to workaround the issue that
-		 * screen_changed is invoked by GTK before
-		 * the instance constructor is invoked */
-		if(monitor == null) {
-			monitor = new Monitor();
-			monitor.window_changed += on_window_changed;
-		}
-	}
 	construct {
 		disposed = false;
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
-		ensure_monitor(); 
-		/* 
-		 * already ensured by screen_changed signal, 
-		 * leave it to remind us the monitor is already there.
-		*/
-		menubars = new MenuBarBox();
 		menubars.visible = true;
 		add(menubars);
 
-		selector = new Switcher();
 		selector.visible = true;
 		menubars.add(selector);
 		setup_popup_menu(selector);
 
-		main_menubar = new GlobalMenu();
 		main_menubar.min_length = 12;  /*Then it will have a overflown item*/
 		setup_popup_menu(main_menubar);
 
@@ -66,14 +49,16 @@ public class Applet : Panel.Applet {
 		AppletBackgroundType bgtype;
 		bgtype = get_background(out color, out pixmap);
 		(this as Panel.Applet).change_background(bgtype, color, pixmap);
+
+		monitor.window_changed += on_window_changed;
 	}
 
 
-	private Monitor monitor;
-	private MenuBarBox menubars;
+	private Monitor monitor = new Monitor();
+	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed;
-	private GlobalMenu main_menubar;
-	private Switcher selector;
+	private GlobalMenu main_menubar = new GlobalMenu();
+	private Switcher selector = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
 	public override void screen_changed(Gdk.Screen previous_screen) {
@@ -85,7 +70,6 @@ public class Applet : Panel.Applet {
 			old_settings.notify -= check_module;
 		}
 		if(screen != null) {
-			ensure_monitor();
 			check_module();
 			monitor.screen = screen;
 			get_settings().notify["gtk-modules"] += check_module;
@@ -235,7 +219,11 @@ public class Applet : Panel.Applet {
 							"Global Menu Plugin is not enabled on this Desktop. "
 							+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", null);
 		}
+		try {
 		notify_no_plugin.show();
+		} catch (GLib.Error e) {
+			/*ignore the error*/
+		}
 	
 	}
 	public override void realize() {

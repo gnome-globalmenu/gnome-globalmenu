@@ -26,8 +26,10 @@ public class Monitor: GLib.Object {
 
 
 			_wnck_screen = new_screen;
-			attach_to_screen(_wnck_screen);
-
+			if(_wnck_screen != null) {
+				_wnck_screen.force_update();
+				attach_to_screen(_wnck_screen);
+			}
 		}
 	}
 
@@ -121,19 +123,19 @@ public class Monitor: GLib.Object {
 		}
 	}
 	private void detach_from_screen(Wnck.Screen screen) {
-		_wnck_screen.window_opened -= on_window_opened;
-		_wnck_screen.window_closed -= on_window_closed;
-		_wnck_screen.active_window_changed -= on_active_window_changed;
+		screen.window_opened -= on_window_opened;
+		screen.window_closed -= on_window_closed;
+		screen.active_window_changed -= on_active_window_changed;
 		_desktop = null;
 	}
 	private void attach_to_screen(Wnck.Screen screen) {
-		_wnck_screen.window_closed += on_window_closed;
-		_wnck_screen.window_opened += on_window_opened;
-		_wnck_screen.active_window_changed += on_active_window_changed;
-		Wnck.Window new_desktop = find_desktop(_wnck_screen);
+		screen.window_closed += on_window_closed;
+		screen.window_opened += on_window_opened;
+		screen.active_window_changed += on_active_window_changed;
+		Wnck.Window new_desktop = find_desktop(screen);
 		_desktop = new_desktop;
 
-		_wnck_screen.active_window_changed (null);
+		on_active_window_changed(screen, null);
 	}
 }
 }
