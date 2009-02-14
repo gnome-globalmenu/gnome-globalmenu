@@ -51,6 +51,7 @@ public class Applet : Panel.Applet {
 		(this as Panel.Applet).change_background(bgtype, color, pixmap);
 
 		monitor.window_changed += on_window_changed;
+		on_window_changed(monitor, 0);
 	}
 
 
