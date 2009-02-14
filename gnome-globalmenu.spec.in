@@ -1,12 +1,16 @@
-%define 	base_version 	0.7.3
-%define 	svn_version 	svn2300
+%define 	base_version 	@PACKAGE_VERSION@
+%define 	svn_version 	@SVNVERSION@
 %if %(test x%{?dist} == x.el5x ; echo $?)
 %define 	not_rhel5 0
 %else
 %define 	not_rhel5 1
 %endif
 Name:		gnome-globalmenu
-Version:	%{base_version}.%{svn_version}
+%if %(test x%{svn_version} == x || test x%{svn_version} == xexported; echo $?)
+Version:	%{base_version}.svn%{svn_version}
+%else
+Version:	%{base_version}
+%endif
 Release:	1%{?dist}
 Summary:	Global Menu for GNOME
 
@@ -15,7 +19,6 @@ License:	GPLv2+
 URL:		http://code.google.com/p/gnome2-globalmenu/
 Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.gz
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
-BuildRequires: libXres-devel
 BuildRequires: gnome-panel-devel
 BuildRequires: libnotify-devel
 BuildRequires: gnome-menus-devel

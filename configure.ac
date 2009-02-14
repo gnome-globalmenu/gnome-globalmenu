@@ -163,7 +163,7 @@ AC_SUBST(GTK_MODULES_DIR)
 
 # svnversion
 AC_PATH_PROG(SVNVERSION_BIN, [svnversion])
-SVNVERSION=`$SVNVERSION_BIN`
+SVNVERSION=`$SVNVERSION_BIN|sed -e 's;:;-;g'`
 AC_SUBST(SVNVERSION)
 AC_DEFINE_UNQUOTED(SVNVERSION, "$SVNVERSION", [svn version if appropriate])
 
@@ -173,6 +173,7 @@ AC_SUBST(abs_top_srcdir)
 
 AC_CONFIG_FILES(
 	[Makefile
+	gnome-globalmenu.spec
 	libcompat/Makefile
 	libgnomenu/Makefile
 	libgnomenu/tests/Makefile
