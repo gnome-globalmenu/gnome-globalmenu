@@ -4,39 +4,66 @@ namespace Gnomenu {
 	/**
 	 * Parser converts xml to widgets.
 	 *
-	 * A sub-parser is created if a sumne is encountered.
 	 */
 	public class Parser {
 		public static void parse(Shell shell, string description) throws GLib.Error {
-			var parser = new Parser();
+			var parser = new Parser(shell);
 			var timer = new Timer();
-			parser.shell = shell;
 			MarkupParseContext context = 
-				new MarkupParseContext(parser.functions, 0, parser, null);
+				new MarkupParseContext(parser_functions, 0, parser, null);
 			context.parse(description, -1);
 			message("Parser consumed: %lf for %ld bytes", timer.elapsed(null),
 					description.size());
 		}
 
-		Parser () {
-			position = 0; 
-			inside_item = false;
-			this.shell = null;
-			MarkupParser parser_funcs = {
-					start_element,
-					end_element,
-					null, null, null
-			};
-			Memory.copy(&this.functions, &parser_funcs, sizeof(MarkupParser));
+		private class State {
+			public Shell shell;
+			/* counting from zero, the position of current item.
+			 * when the menu tag is closed,
+			 * this number is also used to truncated the shell.
+			 * */
+			public int position;
+			public Item item {
+				owned get {
+					return shell.get_item(position);
+				}
+			}
+			/* item_has_sub_shell is used to defer the removal of the
+			 * sub menu shell to the close tag of the item, when
+			 * we are 100% sure whether there is a sub shell or not.
+			 *
+			 * because we can't blindly set item.has_sub_shell = false at the
+			 * open tag handler. Doing so will get the popup submenus 
+			 * crazy if they were already popped up.
+			 * */
+			public bool item_has_sub_shell;
+			public State(Shell shell) {
+				this.shell = shell;
+				item_has_sub_shell = false;
+				position = 0;
+			}
 		}
-		MarkupParser functions;
-		Shell shell;
-		Item item;
 
-		int position;
-		bool inside_item;
-		bool item_has_sub_shell;
-		Parser child_parser; /*to hold the ref count*/
+		Parser (Shell shell) {
+			stack = new Queue<State>();
+			State bootstrap = new State(shell);
+			is_bootstrapping = true;
+			stack.push_tail(bootstrap);
+		}
+
+		static const MarkupParser parser_functions = {
+			start_element,
+			end_element,
+			null, null, null
+		};
+
+		Queue<State> stack;
+		bool is_bootstrapping;
+		weak State state  {
+			get {
+				return stack.peek_tail();
+			}
+		}
 
 		private void start_element (MarkupParseContext context, 
 				string element_name, 
@@ -44,25 +71,22 @@ namespace Gnomenu {
 				string[] attribute_values) throws MarkupError {
 			switch(element_name){
 				case "menu":
-					if(inside_item == false) {
-						/*Ignore it, allowing 
-						 * <menu> <item/><item/><item/> </menu>
-						 */
-					} else {
-						child_parser = new Parser();
-						item.has_sub_shell = true;
-						child_parser.shell = item.sub_shell;
-						g_markup_parse_context_push(context, functions, child_parser);
-						item_has_sub_shell = true;
+					if(!is_bootstrapping) {
+						/*if this is not the root <menu> entry
+						 * aka, we are at
+						 * <menu><item><MENU>*/
+						state.item.has_sub_shell = true;
+						state.item_has_sub_shell = true;
+						/* nested the menu, change state*/
+						stack.push_tail(new State(state.item.sub_shell));
 					}
 				break;
 				case "item":
+					is_bootstrapping = false;
 					/*NOTE: after the first time we has(position) == false,
 					 * it should be false forever)*/
-					item = shell.get_item(position);
-					setup_item(item, attribute_names, attribute_values);
-					inside_item = true;
-					item_has_sub_shell = false;
+					setup_item(state.item, attribute_names, attribute_values);
+					state.item_has_sub_shell = false;
 				break;
 				default:
 					throw new MarkupError.UNKNOWN_ELEMENT("unkown element");
@@ -128,21 +152,19 @@ namespace Gnomenu {
 				string element_name) throws MarkupError {
 			switch(element_name) {
 				case "menu":
-					if(inside_item) {
-						/* stop the child parser */
-						g_markup_parse_context_pop(context);
-						child_parser.shell.length = child_parser.position;
-						child_parser = null;
-					} else {
-						shell.length = position;
-					}
+					/* truncate the shell, */
+					state.shell.length = state.position;
+					/* then move back to the parent shell.
+					 * notice the bootstrap state is also
+					 * popped out.
+					 **/
+					stack.pop_tail();
 					break;
 				case "item":
-					if(!item_has_sub_shell) {
-						item.has_sub_shell = false;
+					if(!state.item_has_sub_shell) {
+						state.item.has_sub_shell = false;
 					}
-					inside_item = false;
-					position++;
+					state.position++;
 				break;
 			}
 		}
