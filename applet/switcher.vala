@@ -214,8 +214,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			this.window.get_origin(out ax, out ay);
 			window.set_icon_geometry(ax,
 									 ay,
-						 			 allocation.width,
-									 allocation.height);
+						 			 8,
+									 8);
 		}
 
 		private bool is_in_sight(Wnck.Window window) {
@@ -531,7 +531,8 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			set {
 				_current_window = value;
-				if (!guess_dock_is_around())
+				if ((!guess_dock_is_around()) && 
+				    (_current_window.get_window_type() != Wnck.WindowType.DESKTOP))
 					set_iconify_destination(_current_window);
 				/* always refresh !*/
 				update();
