@@ -35,6 +35,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
 	task-utils-c.c \
+	x-utils-c.c \
 	$(NULL)
 
 
