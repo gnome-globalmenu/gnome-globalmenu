@@ -1,0 +1,22 @@
+--- monitor.c	2009-02-14 17:41:28.000000000 -0500
++++ monitor.c.bak	2009-02-14 17:40:09.000000000 -0500
+@@ -29,7 +29,7 @@
+ static void gnomenu_monitor_update_current_window (GnomenuMonitor* self);
+ static void _gnomenu_monitor_on_window_opened_wnck_screen_window_opened (WnckScreen* _sender, WnckWindow* window, gpointer self);
+ static void _gnomenu_monitor_on_window_closed_wnck_screen_window_closed (WnckScreen* _sender, WnckWindow* window, gpointer self);
+-static void _gnomenu_monitor_on_active_window_changed_wnck_screen_active_window_changed (WnckScreen* _sender, gpointer self);
++static void _gnomenu_monitor_on_active_window_changed_wnck_screen_active_window_changed (WnckScreen* _sender, WnckWindow* previous_window, gpointer self);
+ static void gnomenu_monitor_detach_from_screen (GnomenuMonitor* self, WnckScreen* screen);
+ static void gnomenu_monitor_attach_to_screen (GnomenuMonitor* self, WnckScreen* screen);
+ static GObject * gnomenu_monitor_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+@@ -207,8 +207,8 @@
+ }
+ 
+ 
+-static void _gnomenu_monitor_on_active_window_changed_wnck_screen_active_window_changed (WnckScreen* _sender, gpointer self) {
+-	gnomenu_monitor_on_active_window_changed (self, _sender, NULL);
++static void _gnomenu_monitor_on_active_window_changed_wnck_screen_active_window_changed (WnckScreen* _sender, WnckWindow* previous_window, gpointer self) {
++	gnomenu_monitor_on_active_window_changed (self, _sender, previous_window);
+ }
+ 
+ 
