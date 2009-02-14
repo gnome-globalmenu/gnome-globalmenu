@@ -1,5 +1,4 @@
 #include <glib.h>
-#define GMARKUP_BACKPORT_STUB "stub to be loaded by vala"
 #if GLIB_MINOR_VERSION < 16
 #include <stdarg.h>
 G_BEGIN_DECLS

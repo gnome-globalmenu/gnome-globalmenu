@@ -1,6 +1,6 @@
 NULL =
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = tools tests libgnomenu applet xfce gtk-modules po
+SUBDIRS = tools tests libcompat libgnomenu applet xfce gtk-modules po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
@@ -13,6 +13,7 @@ EXTRA_DIST = \
 	gnome-globalmenu.schemas.in \
 	gnome-globalmenu.spec \
 	patch.sh \
+	m4 \
 	$(NULL)
 
 DISTCLEANFILES = \
