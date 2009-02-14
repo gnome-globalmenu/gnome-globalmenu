@@ -210,12 +210,13 @@ public extern string* __get_task_name_by_pid(int pid);
 			return ret;
 		}
 		private void set_iconify_destination(Wnck.Window window) {
+			if(!this.is_realized()) return;
 			int ax = 0;
 			int ay = 0;
 			this.window.get_origin(out ax, out ay);
 			window.set_icon_geometry(ax,
 									 ay,
-						 			 8,
+									 8,
 									 8);
 		}
 
