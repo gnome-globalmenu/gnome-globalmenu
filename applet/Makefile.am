@@ -39,7 +39,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(NULL)
 
 
-$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps
+$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps bindings.vapi
 	$(VALAC) -C --vapidir=. \
 	--vapidir=$(top_srcdir)/libgnomenu \
 	--pkg=gtk+-2.0 \
