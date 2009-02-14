@@ -266,7 +266,7 @@ public class Applet : Panel.Applet {
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		dialog.version = Config.VERSION;
-		dialog.website = "http://code.google.com/p/gnome2-globalmenu/w/list";
+		dialog.website = "http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral";
 		dialog.website_label = _("On-line help");
 		dialog.logo_icon_name = "gtk-help";
 		dialog.set_icon_name("gtk-help");
