@@ -12,7 +12,6 @@ EXTRA_DIST = \
 	intltool-update.in \
 	gnome-globalmenu.schemas.in \
 	gnome-globalmenu.spec \
-	libgnomenu-rhel5.patch \
 	patch.sh \
 	m4 \
 	$(NULL)
