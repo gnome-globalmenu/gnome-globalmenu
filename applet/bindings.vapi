@@ -14,3 +14,8 @@ namespace WnckCompat {
 	}
 }
 public Gdk.Pixbuf gdk_pixbuf_scale_simple(Gdk.Pixbuf src, int width, int height, Gdk.InterpType interp_type);
+
+namespace Bonobo {
+	[CCode (cheader_filename = "bonobo/bonobo-main.h")]
+	public static bool init ([CCode (array_length_pos = 0.9)] ref unowned string[] argv);
+}
