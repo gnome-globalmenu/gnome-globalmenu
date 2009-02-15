@@ -37,7 +37,10 @@ AM_GLIB_GNU_GETTEXT
 GETTEXT_PACKAGE=gnome-globalmenu
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
 AC_SUBST(GETTEXT_PACKAGE)
-
+if test "x$localedir" == x; then
+localedir='${datadir}/locale'
+AC_SUBST(localedir)
+fi
 # Check for Vala
 AC_SUBST(VALA_REQUIRED, [0.5.6])
 AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
