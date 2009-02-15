@@ -15,6 +15,14 @@ public int main(string[] args) {
 	GLib.OptionContext context = new GLib.OptionContext("- GlobalMenu.PanelApplet");
 	context.set_help_enabled (true);
 	context.add_main_entries(options, null);
+	context.add_group(Gtk.get_option_group(true));
+	context.add_group(Bonobo.Activation.get_goption_group());
+
+	try {
+	context.parse(ref args);
+	} catch(GLib.Error e) {
+		error("parsing options failed: %s", e.message);	
+	}
 
 	if(!verbose) {
 		LogFunc handler = (domain, level, message) => { };
@@ -38,7 +46,7 @@ public int main(string[] args) {
 """);
 
 	Gtk.init(ref args);
-	if(!Bonobo.init(ref args)) {
+	if(!Bonobo.init(ref args.length, args)) {
 		error("Cannot initialize bonobo.");
 	}
 

@@ -17,5 +17,9 @@ public Gdk.Pixbuf gdk_pixbuf_scale_simple(Gdk.Pixbuf src, int width, int height,
 
 namespace Bonobo {
 	[CCode (cheader_filename = "bonobo/bonobo-main.h")]
-	public static bool init ([CCode (array_length_pos = 0.9)] ref unowned string[] argv);
+	public bool init (ref int argc, [CCode (array_length = false)] string[] argv);
+	namespace Activation {
+		[CCode (cheader_filename = "bonobo-activation/bonobo-activation-init.h")]
+		public GLib.OptionGroup get_goption_group();
+	}
 }
