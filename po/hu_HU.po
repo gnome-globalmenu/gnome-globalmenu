@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome2-globalmenu-1.0-RC\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-29 14:43+0100\n"
+"POT-Creation-Date: 2009-02-14 19:05-0500\n"
 "PO-Revision-Date: 2009-02-12 12:00+0100\n"
 "Last-Translator: Juhász Ádám <jadaml@gmail.com>\n"
 "Language-Team: hu_HU <LL@li.org>\n"
@@ -15,17 +15,17 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1305
+#: ../libgnomenu/menuitem.c:1306
 #, fuzzy
 msgid "Indicator Size"
 msgstr "Kijelző mérete"
 
-#: ../libgnomenu/menuitem.c:1305
+#: ../libgnomenu/menuitem.c:1306
 #, fuzzy
 msgid "Size of check or radio indicator"
 msgstr "Jelölőnégyzet vagy rádiógomb mérete"
 
-#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Be verbose"
 msgstr "Részletes kimenet"
 
@@ -60,109 +60,85 @@ msgstr ""
 "Amelyeket figyelmen kívül hagy a beépülő modul.\n"
 "\t\t"
 
-#: ../applet/applet.c:38
+#: ../applet/applet.c:40
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:312
-msgid ""
-"\n"
-"<popup name=\"button3\">\n"
-"\t<menuitem name=\"Preferences\" \n"
-"\t\tverb=\"Preferences\" \n"
-"\t\t_label=\"_Preferences\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem name=\"Help\" \n"
-"\t\tverb=\"Help\" \n"
-"\t\t_label=\"_Help\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem name=\"About\" \n"
-"\t\tverb=\"About\" _label=\"_About...\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-about\"/>\n"
-"</popup>\n"
-"\t\t"
+#: ../applet/applet.c:296
+msgid "_Preferences"
 msgstr ""
-"\n"
-"<popup name=\"button3\">\n"
-"\t<menuitem name=\"Preferences\" \n"
-"\t\tverb=\"Preferences\" \n"
-"\t\t_label=\"_Tulajdonságok\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem name=\"Help\" \n"
-"\t\tverb=\"Help\" \n"
-"\t\t_label=\"_Súgó\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem name=\"About\" \n"
-"\t\tverb=\"About\" _label=\"_Névjegy...\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-about\"/>\n"
-"</popup>\n"
-"\t\t"
 
-#: ../applet/applet.c:446
+#: ../applet/applet.c:296
+msgid "_Help"
+msgstr ""
+
+#: ../applet/applet.c:296
+msgid "_About"
+msgstr ""
+
+#: ../applet/applet.c:449
 msgid "Project Home"
 msgstr "Projekt honlap"
 
-#: ../applet/applet.c:469
+#: ../applet/applet.c:472
 msgid "On-line help"
 msgstr "Online súgó"
 
-#: ../applet/switcher.c:469 ../applet/switcher.c:1271
-msgid "no windows"
-msgstr "nincsenek ablakok"
-
-#: ../applet/switcher.c:497
+#: ../applet/switcher.c:533
 msgid "Show _Desktop"
 msgstr "Asztal _megjelenítése"
 
-#: ../applet/switcher.c:526
-msgid "Mi_nimize"
-msgstr "Mi_nimalizálás"
-
-#: ../applet/switcher.c:538
-msgid "Ma_ximize"
-msgstr "Ma_ximalizálás"
-
-#: ../applet/switcher.c:548
-msgid "Unma_ximize"
-msgstr "_Eredeti méret"
-
-#: ../applet/switcher.c:560
-msgid "_Move"
-msgstr "_Mozgatás"
-
-#: ../applet/switcher.c:571
-msgid "_Resize"
-msgstr "Át_méretezés"
-
-#: ../applet/switcher.c:586 ../applet/switcher.c:596
-msgid "Always on _Top"
-msgstr "Mindig _felül"
-
-#: ../applet/switcher.c:608 ../applet/switcher.c:618
-msgid "_Always on visible Workspace"
-msgstr "Mindig a látható m_unkaterületen"
-
-#: ../applet/switcher.c:632
-msgid "_Close"
-msgstr "_Bezárás"
-
-#: ../applet/switcher.c:767
+#: ../applet/switcher.c:721
 msgid "Desktop"
 msgstr "Asztal"
 
-#: ../applet/switcher.c:1268
+#: ../applet/switcher.c:1422
 msgid "File Manager"
 msgstr "Fájl kerelő"
 
-#: ../applet/switcher.c:1273
+#: ../applet/switcher.c:1425
+msgid "no windows"
+msgstr "nincsenek ablakok"
+
+#: ../applet/switcher.c:1427
 msgid "no actions"
 msgstr "Nincs műveletek"
+
+#: ../applet/switcher.c:1441
+msgid "Mi_nimize"
+msgstr "Mi_nimalizálás"
+
+#: ../applet/switcher.c:1441
+msgid "Ma_ximize"
+msgstr "Ma_ximalizálás"
+
+#: ../applet/switcher.c:1441
+msgid "Unma_ximize"
+msgstr "_Eredeti méret"
+
+#: ../applet/switcher.c:1441
+msgid "_Move"
+msgstr "_Mozgatás"
+
+#: ../applet/switcher.c:1441
+msgid "_Resize"
+msgstr "Át_méretezés"
+
+#: ../applet/switcher.c:1441
+msgid "Always on _Top"
+msgstr "Mindig _felül"
+
+#: ../applet/switcher.c:1441
+msgid "_Always on visible Workspace"
+msgstr "Mindig a látható m_unkaterületen"
+
+#: ../applet/switcher.c:1441
+msgid "_Workspace..."
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Close"
+msgstr "_Bezárás"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
@@ -237,3 +213,42 @@ msgstr "Globális Menü beépülő XFCE Panelhez"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "A Globális Menü Beépülő XFCE Panelhez"
+
+#~ msgid ""
+#~ "\n"
+#~ "<popup name=\"button3\">\n"
+#~ "\t<menuitem name=\"Preferences\" \n"
+#~ "\t\tverb=\"Preferences\" \n"
+#~ "\t\t_label=\"_Preferences\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-preferences\"/>\n"
+#~ "\t<menuitem name=\"Help\" \n"
+#~ "\t\tverb=\"Help\" \n"
+#~ "\t\t_label=\"_Help\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-help\"/>\n"
+#~ "\t<menuitem name=\"About\" \n"
+#~ "\t\tverb=\"About\" _label=\"_About...\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-about\"/>\n"
+#~ "</popup>\n"
+#~ "\t\t"
+#~ msgstr ""
+#~ "\n"
+#~ "<popup name=\"button3\">\n"
+#~ "\t<menuitem name=\"Preferences\" \n"
+#~ "\t\tverb=\"Preferences\" \n"
+#~ "\t\t_label=\"_Tulajdonságok\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-preferences\"/>\n"
+#~ "\t<menuitem name=\"Help\" \n"
+#~ "\t\tverb=\"Help\" \n"
+#~ "\t\t_label=\"_Súgó\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-help\"/>\n"
+#~ "\t<menuitem name=\"About\" \n"
+#~ "\t\tverb=\"About\" _label=\"_Névjegy...\" \n"
+#~ "\t\tpixtype=\"stock\" \n"
+#~ "\t\tpixname=\"gtk-about\"/>\n"
+#~ "</popup>\n"
+#~ "\t\t"

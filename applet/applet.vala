@@ -175,25 +175,33 @@ public class Applet : Panel.Applet {
 			};
 		}	
 
-		string applet_menu_xml = _("""
+		string applet_menu_xml_template = """
 <popup name="button3">
 	<menuitem name="Preferences" 
 		verb="Preferences" 
-		_label="_Preferences" 
+		_label="@Preferences@"
 		pixtype="stock" 
 		pixname="gtk-preferences"/>
 	<menuitem name="Help" 
 		verb="Help" 
-		_label="_Help" 
+		_label="@Help@"
 		pixtype="stock" 
 		pixname="gtk-help"/>
 	<menuitem name="About" 
-		verb="About" _label="_About..." 
+		verb="About" 
+		_label="@_About...@"
 		pixtype="stock" 
 		pixname="gtk-about"/>
 </popup>
-		""");
+		""";
 		    
+		string[] subs = {
+			"@Preferences@", _("_Preferences"),
+			"@Help@", _("_Help"),
+			"@About@", _("_About")
+		};
+		string applet_menu_xml = Template.replace(applet_menu_xml_template, subs);
+
 		setup_menu (applet_menu_xml, verbs, this);
 
 		get_prefs();

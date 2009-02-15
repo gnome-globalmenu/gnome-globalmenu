@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-29 14:43+0100\n"
+"POT-Creation-Date: 2009-02-14 19:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../libgnomenu/menuitem.c:1305
+#: ../libgnomenu/menuitem.c:1306
 msgid "Indicator Size"
 msgstr ""
 
-#: ../libgnomenu/menuitem.c:1305
+#: ../libgnomenu/menuitem.c:1306
 msgid "Size of check or radio indicator"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.c:23
+#: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Be verbose"
 msgstr ""
 
@@ -53,90 +53,84 @@ msgid ""
 "\t\t"
 msgstr ""
 
-#: ../applet/applet.c:38
+#: ../applet/applet.c:40
 msgid "globalmenu-panel-applet"
 msgstr ""
 
-#: ../applet/applet.c:312
-msgid ""
-"\n"
-"<popup name=\"button3\">\n"
-"\t<menuitem name=\"Preferences\" \n"
-"\t\tverb=\"Preferences\" \n"
-"\t\t_label=\"_Preferences\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-preferences\"/>\n"
-"\t<menuitem name=\"Help\" \n"
-"\t\tverb=\"Help\" \n"
-"\t\t_label=\"_Help\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-help\"/>\n"
-"\t<menuitem name=\"About\" \n"
-"\t\tverb=\"About\" _label=\"_About...\" \n"
-"\t\tpixtype=\"stock\" \n"
-"\t\tpixname=\"gtk-about\"/>\n"
-"</popup>\n"
-"\t\t"
+#: ../applet/applet.c:296
+msgid "_Preferences"
 msgstr ""
 
-#: ../applet/applet.c:446
+#: ../applet/applet.c:296
+msgid "_Help"
+msgstr ""
+
+#: ../applet/applet.c:296
+msgid "_About"
+msgstr ""
+
+#: ../applet/applet.c:449
 msgid "Project Home"
 msgstr ""
 
-#: ../applet/applet.c:469
+#: ../applet/applet.c:472
 msgid "On-line help"
 msgstr ""
 
-#: ../applet/switcher.c:469 ../applet/switcher.c:1271
-msgid "no windows"
-msgstr ""
-
-#: ../applet/switcher.c:497
+#: ../applet/switcher.c:533
 msgid "Show _Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:526
-msgid "Mi_nimize"
-msgstr ""
-
-#: ../applet/switcher.c:538
-msgid "Ma_ximize"
-msgstr ""
-
-#: ../applet/switcher.c:548
-msgid "Unma_ximize"
-msgstr ""
-
-#: ../applet/switcher.c:560
-msgid "_Move"
-msgstr ""
-
-#: ../applet/switcher.c:571
-msgid "_Resize"
-msgstr ""
-
-#: ../applet/switcher.c:586 ../applet/switcher.c:596
-msgid "Always on _Top"
-msgstr ""
-
-#: ../applet/switcher.c:608 ../applet/switcher.c:618
-msgid "_Always on visible Workspace"
-msgstr ""
-
-#: ../applet/switcher.c:632
-msgid "_Close"
-msgstr ""
-
-#: ../applet/switcher.c:767
+#: ../applet/switcher.c:721
 msgid "Desktop"
 msgstr ""
 
-#: ../applet/switcher.c:1268
+#: ../applet/switcher.c:1422
 msgid "File Manager"
 msgstr ""
 
-#: ../applet/switcher.c:1273
+#: ../applet/switcher.c:1425
+msgid "no windows"
+msgstr ""
+
+#: ../applet/switcher.c:1427
 msgid "no actions"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "Mi_nimize"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "Ma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "Unma_ximize"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Move"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Resize"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "Always on _Top"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Always on visible Workspace"
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Workspace..."
+msgstr ""
+
+#: ../applet/switcher.c:1441
+msgid "_Close"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:1
