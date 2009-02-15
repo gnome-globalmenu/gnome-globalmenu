@@ -2,7 +2,7 @@
 %define 	svn_version 	@SVNVERSION@
 
 # automatic svn version detection
-%if %(test x%{svn_version} == x || test x%{svn_version} == xexported; echo $?)
+%if %(test x%{svn_version} == x ; echo $?)
 %define full_version	%{base_version}.svn%{svn_version}
 %else
 %define full_version	%{base_version}

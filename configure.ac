@@ -166,7 +166,7 @@ AC_SUBST(GTK_MODULES_DIR)
 
 # svnversion
 AC_PATH_PROG(SVNVERSION_BIN, [svnversion])
-SVNVERSION=`$SVNVERSION_BIN|sed -e 's;:;-;g'`
+SVNVERSION=`$SVNVERSION_BIN|sed -e 's;:;-;g' -e 's;exported;;'`
 AC_SUBST(SVNVERSION)
 AC_DEFINE_UNQUOTED(SVNVERSION, "$SVNVERSION", [svn version if appropriate])
 
