@@ -100,7 +100,6 @@ to provide access to the Global Menu of the applications.
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --with-xfce4-panel
 %else
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --without-xfce4-panel
-patch -p0 < libgnomenu-rhel5.patch
 %endif
 make %{?_smp_mflags}
 
