@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:05-0500\n"
+"POT-Creation-Date: 2009-02-14 19:13-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -72,7 +72,11 @@ msgstr ""
 msgid "Project Home"
 msgstr "Sito Web Progetto"
 
-#: ../applet/applet.c:472
+#: ../applet/applet.c:455
+msgid "translator-credits"
+msgstr ""
+
+#: ../applet/applet.c:473
 msgid "On-line help"
 msgstr "Guida in linea"
 

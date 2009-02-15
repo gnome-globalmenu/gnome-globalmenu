@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:05-0500\n"
+"POT-Creation-Date: 2009-02-14 19:13-0500\n"
 "PO-Revision-Date: 2008-12-30 01:00+0000\n"
 "Last-Translator: acidrums4 <acidrums4@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -80,7 +80,11 @@ msgstr ""
 msgid "Project Home"
 msgstr "Inicio del Proyecto"
 
-#: ../applet/applet.c:472
+#: ../applet/applet.c:455
+msgid "translator-credits"
+msgstr ""
+
+#: ../applet/applet.c:473
 msgid "On-line help"
 msgstr "Ayuda en línea"
 

@@ -189,7 +189,7 @@ public class Applet : Panel.Applet {
 		pixname="gtk-help"/>
 	<menuitem name="About" 
 		verb="About" 
-		_label="@_About...@"
+		_label="@About@"
 		pixtype="stock" 
 		pixname="gtk-about"/>
 </popup>
@@ -264,6 +264,7 @@ public class Applet : Panel.Applet {
 		dialog.logo_icon_name = APPLET_ICON;
 		dialog.authors = APPLET_AUTHORS;
 		dialog.documenters = APPLET_ADOCUMENTERS;
+		dialog.translator_credits = _("translator-credits");
 		dialog.set_icon_name("gtk-about");
        	dialog.run();
        	dialog.destroy();

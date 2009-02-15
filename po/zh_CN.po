@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.7.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:05-0500\n"
+"POT-Creation-Date: 2009-02-14 19:13-0500\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -24,7 +24,7 @@ msgstr "显示调试信息"
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "禁用GdkPixbuf的序列化"
 
 #: ../gtk-modules/globalmenu/module-main.c:29
 msgid "Disable the Plugin"
@@ -69,7 +69,11 @@ msgstr "关于(_A)"
 msgid "Project Home"
 msgstr "项目主页"
 
-#: ../applet/applet.c:472
+#: ../applet/applet.c:455
+msgid "translator-credits"
+msgstr "Yu Feng"
+
+#: ../applet/applet.c:473
 msgid "On-line help"
 msgstr "在线帮助"
 
@@ -198,8 +202,6 @@ msgstr "- 全局菜单 XFCE 面板插件"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "- 全局菜单 XFCE 面板插件"
-
-
 
 #~ msgid "Log file %s is not accessible. Fallback to stderr. %s"
 #~ msgstr "日志文件 %s 不可写。将记录到标准错误输出流。%s"

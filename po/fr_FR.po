@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:05-0500\n"
+"POT-Creation-Date: 2009-02-14 19:13-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator:  pierre.slamich <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,7 +72,12 @@ msgstr "_A Propos"
 msgid "Project Home"
 msgstr "Page Internet du Projet"
 
-#: ../applet/applet.c:472
+#: ../applet/applet.c:455
+#, fuzzy
+msgid "translator-credits"
+msgstr "pierre.slamich"
+
+#: ../applet/applet.c:473
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
@@ -242,9 +247,6 @@ msgstr "Applet Menu Global pour GNOME"
 
 #~ msgid "Show active window icon"
 #~ msgstr "Afficher l'icône de la fenêtre active"
-
-#~ msgid "translator_credits"
-#~ msgstr "pierre.slamich"
 
 #~ msgid "Global Menu applet factory"
 #~ msgstr "Fabrique d'applet de Menu Global"

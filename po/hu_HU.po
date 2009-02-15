@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome2-globalmenu-1.0-RC\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:05-0500\n"
+"POT-Creation-Date: 2009-02-14 19:13-0500\n"
 "PO-Revision-Date: 2009-02-12 12:00+0100\n"
 "Last-Translator: Juhász Ádám <jadaml@gmail.com>\n"
 "Language-Team: hu_HU <LL@li.org>\n"
@@ -80,7 +80,11 @@ msgstr ""
 msgid "Project Home"
 msgstr "Projekt honlap"
 
-#: ../applet/applet.c:472
+#: ../applet/applet.c:455
+msgid "translator-credits"
+msgstr ""
+
+#: ../applet/applet.c:473
 msgid "On-line help"
 msgstr "Online súgó"
 
