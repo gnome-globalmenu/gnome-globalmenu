@@ -38,6 +38,7 @@ class WorkspaceSelector : Gtk.Window {
         this.leave_notify_event += on_leave_notify;
         this.button_press_event += on_button_press;
 		this.button_release_event += on_button_release;
+		this.style = rc_get_style(new Gtk.Menu());
 	}
 	
 	private bool on_leave_notify(WorkspaceSelector wss, Gdk.EventCrossing event) {
@@ -90,6 +91,7 @@ class WorkspaceSelector : Gtk.Window {
 		follow = new Gtk.CheckButton.with_label(_("Follow the window"));
 		follow.active = true;
 		rows.pack_start(follow, true, true, 0);
+		follow.style = rc_get_style(new Gtk.MenuItem());
 		this.add(rows);
 		this.show_all();
 	}
@@ -194,7 +196,7 @@ class WorkspaceItem : Gtk.EventBox {
 		this.show_all();
 	}
 	construct {
-		this.style = rc_get_style(new Gtk.Menu());
+		this.style = rc_get_style(new Gtk.MenuItem());
 		this.leave_notify_event += on_leave_notify;
 		this.enter_notify_event += on_enter_notify;
 	}
