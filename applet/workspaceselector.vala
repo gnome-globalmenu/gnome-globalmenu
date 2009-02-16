@@ -16,7 +16,7 @@ class WorkspaceSelector : Gtk.Window {
 	private Wnck.Window? target;
 	private const int WIDTH = 128;
 	private GLib.List<WorkspaceItem> workspaces;
-	
+	private Gtk.CheckButton follow;
 	public WorkspaceSelector(Wnck.Window? window) {
 		target = window;
         do_menu();
@@ -61,12 +61,17 @@ class WorkspaceSelector : Gtk.Window {
 		y += selected_item.viewport_y - target.get_workspace().get_viewport_y();
 		window.move(x, y);
 		
+		/* perhaps go with it */
+		if (follow.active) 
+			target.get_screen().move_viewport(selected_item.viewport_x,
+											  selected_item.viewport_y);
+		
 		/* then exit */
 		this.destroy();
 		return false;
 	}
 	private void do_menu() {
-		VBox rows = new VBox(true, 0);
+		VBox rows = new VBox(false, 0);
 		HBox row;
 		int nth_vdesktop = 0;				   
 		for (int nrow=0; nrow<nrows; nrow++) {
@@ -82,7 +87,9 @@ class WorkspaceSelector : Gtk.Window {
 				nth_vdesktop++;
 			}
 		}
-		
+		follow = new Gtk.CheckButton.with_label(_("Follow the window"));
+		follow.active = true;
+		rows.pack_start(follow, true, true, 0);
 		this.add(rows);
 		this.show_all();
 	}
