@@ -473,6 +473,7 @@ public extern string* __get_task_name_by_pid(int pid);
 						setup_window_actions_menu("/switcher/", _current_window);
 					}
 				}
+				this.get("/switcher").submenu.append(new SearchBoxMenuItem());
 			} else {
 				s = replace(s, "%submenu%", "<menu/>");
 				Parser.parse(this, s);
@@ -580,5 +581,26 @@ public extern string* __get_task_name_by_pid(int pid);
 				_show_window_actions = value;
 				update();
 			}
+		}
+	}
+
+	public class SearchBoxMenuItem : Gtk.ImageMenuItem {
+		private Gtk.TextView textbox;
+		public SearchBoxMenuItem() {
+		}
+		construct {
+			this.image = new Gtk.Image.from_icon_name("search", Gtk.IconSize.MENU);
+			textbox = new Gtk.TextView();
+			textbox.editable = true;
+			textbox.cursor_visible = true;
+			textbox.sensitive = true;
+			textbox.buffer.set_text("Type here...", -1);
+			this.add(textbox);
+			this.show_all();
+		}
+		
+		public override void activate_item() {
+		}
+		public override void activate() {
 		}
 	}
