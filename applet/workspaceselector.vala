@@ -53,16 +53,13 @@ class WorkspaceSelector : Gtk.Window {
 		if (selected_item == null) return false;
 		
 		/* move the window! */
-		int x, y, w, h;
-		(target as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+		Gdk.Window window = (Gdk.Window?)Gdk.x11_xid_table_lookup((uint32)target.get_xid());
+		if (window==null) return false;
+		int x, y;
+		window.get_root_origin(out x, out y);
 		x += selected_item.viewport_x - target.get_workspace().get_viewport_x();
 		y += selected_item.viewport_y - target.get_workspace().get_viewport_y();
-		
-		/* TOFIX: x and y are always shifted... perhaps by window decoration size? */
-		
-		target.set_geometry(Wnck.WindowGravity.CURRENT,
-							Wnck.WindowMoveResizeMask.X | Wnck.WindowMoveResizeMask.Y,
-							x, y, w, h);
+		window.move(x, y);
 		
 		/* then exit */
 		this.destroy();
