@@ -52,8 +52,17 @@ class WorkspaceSelector : Gtk.Window {
 	private bool on_button_release(WorkspaceSelector wss, Gdk.EventButton event) {
 		if (selected_item == null) return false;
 		
-		/* TODO: move the window! */
+		/* move the window! */
+		int x, y, w, h;
+		(target as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+		x += selected_item.viewport_x - target.get_workspace().get_viewport_x();
+		y += selected_item.viewport_y - target.get_workspace().get_viewport_y();
 		
+		/* TOFIX: x and y are always shifted... perhaps by window decoration size? */
+		
+		target.set_geometry(Wnck.WindowGravity.CURRENT,
+							Wnck.WindowMoveResizeMask.X | Wnck.WindowMoveResizeMask.Y,
+							x, y, w, h);
 		
 		/* then exit */
 		this.destroy();
@@ -212,14 +221,14 @@ class WorkspaceItem : Gtk.EventBox {
 			_selected = value;
 			if (_selected)
 				set_state(Gtk.StateType.SELECTED); else
-				set_state(Gtk.StateType.NORMAL);
+				if (!current) set_state(Gtk.StateType.NORMAL);
 		}
 	}
 	public bool current {
 		get { return _current; }
 		set {
 			_current = value;
-			if (_current) selected = true;
+			if (_current) set_state(Gtk.StateType.SELECTED);
 		}
 	}
 	private void update() {
@@ -229,7 +238,7 @@ class WorkspaceItem : Gtk.EventBox {
 	}
 	
 	private bool on_leave_notify(WorkspaceItem wi, Gdk.EventCrossing event) {
-		if ((event.state==0) && (!_current))
+		if (event.state==0)
 			selected = false;
 		return false;
 	}
