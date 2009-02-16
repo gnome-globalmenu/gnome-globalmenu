@@ -211,13 +211,15 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		private void set_iconify_destination(Wnck.Window window) {
 			if(!this.is_realized()) return;
-			int ax = 0;
-			int ay = 0;
-			this.window.get_origin(out ax, out ay);
-			window.set_icon_geometry(ax,
-									 ay,
-									 8,
-									 8);
+			if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
+				int ax = 0;
+				int ay = 0;
+				this.window.get_origin(out ax, out ay);
+				window.set_icon_geometry(ax,
+										 ay,
+										 8,
+										 8);
+			}
 		}
 
 		private bool is_in_sight(Wnck.Window window) {
@@ -533,8 +535,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			set {
 				_current_window = value;
-				if ((!guess_dock_is_around()) && 
-				    (_current_window.get_window_type() != Wnck.WindowType.DESKTOP))
+				if (!guess_dock_is_around())
 					set_iconify_destination(_current_window);
 				/* always refresh !*/
 				update();
