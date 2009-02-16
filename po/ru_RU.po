@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:13-0500\n"
+"POT-Creation-Date: 2009-02-16 13:02+0100\n"
 "PO-Revision-Date: 2009-01-13 20:53+0300\n"
 "Last-Translator: Sergey Bekharsky <mr.alinaki@gmail.com>\n"
 "Language-Team: ru-RU <LL@li.org>\n"
@@ -76,61 +76,61 @@ msgstr ""
 msgid "On-line help"
 msgstr "Помощь онлайн"
 
-#: ../applet/switcher.c:533
+#: ../applet/switcher.c:535
 #, fuzzy
 msgid "Show _Desktop"
 msgstr "Рабочий стол"
 
-#: ../applet/switcher.c:721
+#: ../applet/switcher.c:723
 msgid "Desktop"
 msgstr "Рабочий стол"
 
-#: ../applet/switcher.c:1422
+#: ../applet/switcher.c:1417
 msgid "File Manager"
 msgstr "Файл-менеджер"
 
-#: ../applet/switcher.c:1425
+#: ../applet/switcher.c:1420
 msgid "no windows"
 msgstr "нет окон"
 
-#: ../applet/switcher.c:1427
+#: ../applet/switcher.c:1422
 #, fuzzy
 msgid "no actions"
 msgstr "Управление окнами"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Mi_nimize"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Ma_ximize"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Unma_ximize"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Move"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Resize"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Always on _Top"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Always on visible Workspace"
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Workspace..."
 msgstr ""
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Close"
 msgstr ""
 

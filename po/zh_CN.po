@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-globalmenu-0.7.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-02-14 19:13-0500\n"
+"POT-Creation-Date: 2009-02-16 13:02+0100\n"
 "PO-Revision-Date: 2008-03-14 00:48-0400\n"
 "Last-Translator: Yu <rainwoodman@gmail.com>\n"
 "Language-Team: zh-CN <LL@li.org>\n"
@@ -77,59 +77,59 @@ msgstr "Yu Feng"
 msgid "On-line help"
 msgstr "在线帮助"
 
-#: ../applet/switcher.c:533
+#: ../applet/switcher.c:535
 msgid "Show _Desktop"
 msgstr "显示桌面(_D)"
 
-#: ../applet/switcher.c:721
+#: ../applet/switcher.c:723
 msgid "Desktop"
 msgstr "桌面"
 
-#: ../applet/switcher.c:1422
+#: ../applet/switcher.c:1417
 msgid "File Manager"
 msgstr "文件管理器"
 
-#: ../applet/switcher.c:1425
+#: ../applet/switcher.c:1420
 msgid "no windows"
 msgstr "没有文档"
 
-#: ../applet/switcher.c:1427
+#: ../applet/switcher.c:1422
 msgid "no actions"
 msgstr "无可用窗口操作"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Mi_nimize"
 msgstr "最小化(_N)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Ma_ximize"
 msgstr "最大化(_X)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Unma_ximize"
 msgstr "还原(_X)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Move"
 msgstr "移动(_M)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Resize"
 msgstr "改变大小(_R)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "Always on _Top"
 msgstr "置于顶端(_T)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Always on visible Workspace"
 msgstr "总是可见(_A)"
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Workspace..."
 msgstr "工作区(_W)..."
 
-#: ../applet/switcher.c:1441
+#: ../applet/switcher.c:1436
 msgid "_Close"
 msgstr "关闭(_C)"
 

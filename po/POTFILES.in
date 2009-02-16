@@ -5,6 +5,7 @@ gtk-modules/globalmenu/module-main.c
 applet/main.c
 applet/applet.c
 applet/switcher.c
+applet/workspaceselector.c
 gnome-globalmenu.schemas.in
 applet/GlobalMenu_PanelApplet.server.in.in
 xfce/GlobalMenu_XFCEPlugin.desktop.in.in
