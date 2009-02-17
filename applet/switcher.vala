@@ -12,7 +12,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
 		private Wnck.Window _current_window;
-
+		
 		private const string MENU_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <menu>
 	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
@@ -192,16 +192,11 @@ public extern string* __get_task_name_by_pid(int pid);
 			screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
 			
 			window.activate(Gtk.get_current_event_time());
-			workspace.activate(Gtk.get_current_event_time());
 			window.unminimize(Gtk.get_current_event_time());
-			
+				
 			// ensure is on top
 			window.make_above();
-			window.unmake_above();
-
-			//TOFIX: if the window is on another workspace and it is minimized, it doesn't unminimize automatically.
-		
-		
+			window.unmake_above();	
 		}
 		private string remove_path(string txt, string separator) {
 			long co = txt.length-1;

@@ -17,6 +17,8 @@ class WorkspaceSelector : Gtk.Window {
 	private const int WIDTH = 128;
 	private GLib.List<WorkspaceItem> workspaces;
 	private Gtk.CheckButton follow;
+	private uint iid = 0;
+	
 	public WorkspaceSelector(Wnck.Window? window) {
 		target = window;
         do_menu();
@@ -40,8 +42,12 @@ class WorkspaceSelector : Gtk.Window {
 		this.button_release_event += on_button_release;
 		this.style = rc_get_style(new Gtk.Menu());
 	}
-	
+	public override void dispose() {
+		target = null;
+		base.dispose();
+	}
 	private bool on_leave_notify(WorkspaceSelector wss, Gdk.EventCrossing event) {
+		if (iid!=0) return false;
 		if (event.state==0)
 			this.destroy();
 		return false;
@@ -63,11 +69,19 @@ class WorkspaceSelector : Gtk.Window {
 		window.move(x, y);
 		
 		/* perhaps go with it */
-		if (follow.active) 
+		if (follow.active) {
 			target.get_screen().move_viewport(selected_item.viewport_x,
 											  selected_item.viewport_y);
-		
-		/* then exit */
+			
+			/* Give Compiz the time to complete viewport moving animation */
+			iid = GLib.Timeout.add(1000, on_viewport_moved); 
+		} else {
+			this.destroy();
+		}
+		return false;
+	}
+	private bool on_viewport_moved() {
+		target.activate(Gtk.get_current_event_time());
 		this.destroy();
 		return false;
 	}
