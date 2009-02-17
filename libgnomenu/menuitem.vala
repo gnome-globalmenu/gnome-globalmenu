@@ -37,7 +37,7 @@ namespace Gnomenu {
 
 		construct {
 			disposed = false;
-			_item_type = MenuItemType.NORMAL;
+			_item_type = Item.Type.NORMAL;
 			_cached_label_widget = new MenuLabel();
 			_cached_image_widget = new Image();
 			_cached_arrow_widget = new Arrow(gravity_to_arrow_type(_gravity), ShadowType.NONE);
@@ -166,37 +166,37 @@ namespace Gnomenu {
 		public string? item_type {
 			get { return item_type_to_string(_item_type); }
 			set {
-				MenuItemType new_type = item_type_from_string(value);
-				MenuItemType old_type = _item_type;
+				Item.Type new_type = item_type_from_string(value);
+				Item.Type old_type = _item_type;
 				if(new_type == _item_type) return;
 				_item_type = new_type;
 				switch(_item_type) {
-					case MenuItemType.SEPARATOR:
+					case Item.Type.SEPARATOR:
 						remove_child();
 					break;
-					case MenuItemType.NORMAL:
-					case MenuItemType.IMAGE:
-					case MenuItemType.CHECK:
-					case MenuItemType.RADIO:
-						if(old_type != MenuItemType.NORMAL
-						&& old_type != MenuItemType.IMAGE
-						&& old_type != MenuItemType.RADIO
-						&& old_type != MenuItemType.CHECK
+					case Item.Type.NORMAL:
+					case Item.Type.IMAGE:
+					case Item.Type.CHECK:
+					case Item.Type.RADIO:
+						if(old_type != Item.Type.NORMAL
+						&& old_type != Item.Type.IMAGE
+						&& old_type != Item.Type.RADIO
+						&& old_type != Item.Type.CHECK
 						) {
 							remove_child();
 							create_labels();
 							update_label_text();
 						}
 					break;
-					case MenuItemType.ARROW:
-						if(old_type != MenuItemType.ARROW) {
+					case Item.Type.ARROW:
+						if(old_type != Item.Type.ARROW) {
 							remove_child();
 							create_arrow();
 							update_arrow_type();
 						}
 					break;
-					case MenuItemType.ICON:
-						if(old_type != MenuItemType.ICON) {
+					case Item.Type.ICON:
+						if(old_type != Item.Type.ICON) {
 							remove_child();
 							_icon_widget = new Image();
 							_icon_widget.visible = true;
@@ -205,7 +205,7 @@ namespace Gnomenu {
 						}
 					break;
 				}
-				if(_item_type == MenuItemType.IMAGE) {
+				if(_item_type == Item.Type.IMAGE) {
 					_image_widget = _cached_image_widget;
 					_image_widget.sensitive = true;
 					_image_widget.set_parent(this);
@@ -240,7 +240,7 @@ namespace Gnomenu {
 		public string? item_state {
 			get { return item_state_to_string(_item_state); }
 			set {
-				MenuItemState new_state = item_state_from_string(value);
+				Item.State new_state = item_state_from_string(value);
 				if(new_state == _item_state) return;
 				_item_state = new_state;
 				queue_draw();
@@ -289,8 +289,8 @@ namespace Gnomenu {
 		private string _accel_text;
 		private string _id;
 		private Gravity _gravity;
-		private MenuItemType _item_type;
-		private MenuItemState _item_state;
+		private Item.Type _item_type;
+		private Item.State _item_state;
 		private bool _use_underline = false;
 
 		private Image _cached_image_widget;
@@ -307,9 +307,9 @@ namespace Gnomenu {
 
 		public Gtk.Image? image {
 			get {
-				if(_item_type == MenuItemType.IMAGE)
+				if(_item_type == Item.Type.IMAGE)
 					return _image_widget;
-				if(_item_type == MenuItemType.ICON)
+				if(_item_type == Item.Type.ICON)
 					return _icon_widget;
 				return null;
 			}
@@ -331,11 +331,11 @@ namespace Gnomenu {
 			style_get("toggle-spacing", &toggle_spacing,
 				"indicator-size", &indicator_size, null);
 			switch(_item_type) {
-				case MenuItemType.CHECK:
-				case MenuItemType.RADIO:
+				case Item.Type.CHECK:
+				case Item.Type.RADIO:
 					*((int*) requisition ) = indicator_size + toggle_spacing;
 				break;
-				case MenuItemType.IMAGE:
+				case Item.Type.IMAGE:
 					if(!_show_image) {
 						*((int*) requisition) = 0;
 						break;
@@ -395,7 +395,7 @@ namespace Gnomenu {
 				break;
 			}
 			switch(_item_type) {
-				case MenuItemType.CHECK:
+				case Item.Type.CHECK:
 					Gtk.paint_check(style,
 						window,
 						(StateType)state,
@@ -408,7 +408,7 @@ namespace Gnomenu {
 						indicator_size,
 						indicator_size);
 				break;
-				case MenuItemType.RADIO:
+				case Item.Type.RADIO:
 					Gtk.paint_option(style,
 						window,
 						(StateType)state,
@@ -444,7 +444,7 @@ namespace Gnomenu {
 				 * if item type is IMAGE,
 				 * -- forall can be called during the construction
 				 *  of the widget by remove_child()*/
-				if(_item_type == MenuItemType.IMAGE
+				if(_item_type == Item.Type.IMAGE
 				&& _image_widget != null)
 					callback(_image_widget);
 			}
@@ -495,12 +495,12 @@ namespace Gnomenu {
 			update_show_image();
 		}
 		public override void size_request(out Requisition req) {
-			if(_item_type == MenuItemType.IMAGE) {
+			if(_item_type == Item.Type.IMAGE) {
 				Requisition image_req;
 				_image_widget.size_request(out image_req); 
 				/*Then throw it away*/
 			}
-			if(_item_type == MenuItemType.ICON) {
+			if(_item_type == Item.Type.ICON) {
 				int horizontal_padding = 0;
 				style_get ("horizontal-padding", 
 						&horizontal_padding,
@@ -514,7 +514,7 @@ namespace Gnomenu {
 		}
 		public override void size_allocate(Gdk.Rectangle a) {
 			Gdk.Rectangle ca = {0, 0, 0, 0};
-			if(_item_type == MenuItemType.ICON) {
+			if(_item_type == Item.Type.ICON) {
 				int horizontal_padding = 0;
 				style_get ("horizontal-padding", 
 						&horizontal_padding,
@@ -533,7 +533,7 @@ namespace Gnomenu {
 			} else {
 				base.size_allocate(a);
 			}
-			if(_item_type == MenuItemType.IMAGE) {
+			if(_item_type == Item.Type.IMAGE) {
 				/*FIXME: alignment !*/
 				int toggle_spacing = 0;
 				Requisition icon_req;
@@ -598,8 +598,8 @@ namespace Gnomenu {
 			label.use_underline = _use_underline;
 		}
 		private void update_image() {
-			if(_item_type != MenuItemType.IMAGE
-			&& _item_type != MenuItemType.ICON) return;
+			if(_item_type != Item.Type.IMAGE
+			&& _item_type != Item.Type.ICON) return;
 			if(_icon != null && _icon.has_prefix("theme:")) {
 				weak string icon_name = _icon.offset(6);
 				image.set_from_icon_name(icon_name, IconSize.MENU);
@@ -645,14 +645,14 @@ namespace Gnomenu {
 			if(child != null) remove(child);
 		}
 		private void create_arrow() {
-			assert(_item_type == MenuItemType.ARROW);
+			assert(_item_type == Item.Type.ARROW);
 			add(_cached_arrow_widget);
 			_cached_arrow_widget.visible = true;
 			_cached_arrow_widget.sensitive = true;
 			update_arrow_type();
 		}
 		private void update_arrow_type() {
-			if(_item_type != MenuItemType.ARROW) return;
+			if(_item_type != Item.Type.ARROW) return;
 			(get_child() as Arrow).set(gravity_to_arrow_type(_gravity), ShadowType.NONE);
 		}
 	}

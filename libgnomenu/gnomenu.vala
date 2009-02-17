@@ -2,95 +2,81 @@ namespace Gnomenu {
 	public const string NET_GLOBALMENU_MENU_CONTEXT = "_NET_GLOBALMENU_MENU_CONTEXT";
 	public const string NET_GLOBALMENU_MENU_EVENT = "_NET_GLOBALMENU_MENU_EVENT";
 
-	public enum MenuItemType {
-		NORMAL = 0,
-		CHECK = 1,
-		RADIO = 2,
-		IMAGE = 3,
-		SEPARATOR = 4,
-		ARROW = 5,
-		ICON = 6,
-	}
-	public enum MenuItemState {
-		UNTOGGLED = 0,
-		TOGGLED = 1,
-		TRISTATE = 2,
-	}
-	protected MenuItemState item_state_from_string(string? str) {
+	protected Item.State item_state_from_string(string? str) {
 		switch(str) {
 			case "true":
 			case "toggled":
 			case "t":
 			case "1":
-				return MenuItemState.TOGGLED;
+				return Item.State.TOGGLED;
 			case "false":
 			case "untoggled":
 			case "f":
 			case "0":
-				return MenuItemState.UNTOGGLED;
+				return Item.State.UNTOGGLED;
 			case null:
 			default:
-				return MenuItemState.TRISTATE;
+				return Item.State.TRISTATE;
 		}
 	}
-	protected weak string? item_state_to_string(MenuItemState state) {
+	protected weak string? item_state_to_string(Item.State state) {
 		switch(state) {
-			case MenuItemState.UNTOGGLED:
+			case Item.State.UNTOGGLED:
 				return "untoggled";
-			case MenuItemState.TOGGLED:
+			case Item.State.TOGGLED:
 				return "toggled";
-			case MenuItemState.TRISTATE:
+			case Item.State.TRISTATE:
 				return null;
 		}
 		return null;
 	}
-	protected MenuItemType item_type_from_string(string? str) {
+	protected Item.Type item_type_from_string(string? str) {
 		switch(str) {
 			case "check":
 			case "c":
-				return MenuItemType.CHECK;
+				return Item.Type.CHECK;
 			case "radio":
 			case "r":
-				return MenuItemType.RADIO;
+				return Item.Type.RADIO;
 			case "image":
 			case "i":
-				return MenuItemType.IMAGE;
+				return Item.Type.IMAGE;
 			case "arrow":
 			case "a":
-				return MenuItemType.ARROW;
+				return Item.Type.ARROW;
 			case "separator":
 			case "s":
-				return MenuItemType.SEPARATOR;
+				return Item.Type.SEPARATOR;
 			case "icon":
-				return MenuItemType.ICON;
+				return Item.Type.ICON;
 			case null:
 			default:
-				return MenuItemType.NORMAL;
+				return Item.Type.NORMAL;
 		}
 	}
-	protected bool item_type_has_label(MenuItemType type) {
-		if(type == MenuItemType.NORMAL
-		|| type == MenuItemType.IMAGE
-		|| type == MenuItemType.CHECK
-		|| type == MenuItemType.RADIO
+	protected bool item_type_has_label(Item.Type type) {
+		if(type == Item.Type.NORMAL
+		|| type == Item.Type.IMAGE
+		|| type == Item.Type.CHECK
+		|| type == Item.Type.RADIO
 		) return true;
 		return false;	
 	}
-	protected weak string? item_type_to_string(MenuItemType type) {
+	protected weak string? item_type_to_string(Item.Type type) {
 		switch(type) {
-			case MenuItemType.CHECK:
+			case Item.Type.CHECK:
 				return "check";
-			case MenuItemType.RADIO:
+			case Item.Type.RADIO:
 				return "radio";
-			case MenuItemType.NORMAL:
+			case Item.Type.NORMAL:
 				return null;
-			case MenuItemType.IMAGE:
+			case Item.Type.IMAGE:
 				return "image";
-			case MenuItemType.ICON:
+			case Item.Type.ICON:
 				return "icon";
-			case MenuItemType.ARROW:
+			case Item.Type.ARROW:
 				return "arrow";
-			case MenuItemType.SEPARATOR:
+			case Item.Type.SEPARATOR:
 				return "separator";
 		}
 		return null;

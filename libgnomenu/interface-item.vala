@@ -1,5 +1,19 @@
 namespace Gnomenu {
 	public interface Item: GLib.Object {
+		public enum Type {
+			NORMAL = 0,
+			CHECK = 1,
+			RADIO = 2,
+			IMAGE = 3,
+			SEPARATOR = 4,
+			ARROW = 5,
+			ICON = 6,
+		}
+		public enum State {
+			UNTOGGLED = 0,
+			TOGGLED = 1,
+			TRISTATE = 2,
+		}
 		public abstract Shell shell {get;}
 		public abstract Shell sub_shell {get;}
 		public abstract bool has_sub_shell {get; set;}
