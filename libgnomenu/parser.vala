@@ -142,11 +142,11 @@ namespace Gnomenu {
 			item.item_visible = visible;
 			item.item_use_underline = underline;
 			item.item_sensitive = sensitive;
-			item.item_type = type;
+			item.item_type = Item.type_from_string(type);
 			item.item_accel_text = accel;
 			item.item_label = label;
 			item.item_icon= icon;
-			item.item_state = state;
+			item.item_state = Item.state_from_string(state);
 			item.item_font = font;
 		}
 		private void end_element (MarkupParseContext context, 

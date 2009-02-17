@@ -163,13 +163,12 @@ namespace Gnomenu {
 		 * { @link item_type_to_string }
 		 *
 		 */
-		public string? item_type {
-			get { return item_type_to_string(_item_type); }
+		public Item.Type item_type {
+			get { return _item_type; }
 			set {
-				Item.Type new_type = item_type_from_string(value);
+				if(value == _item_type) return;
 				Item.Type old_type = _item_type;
-				if(new_type == _item_type) return;
-				_item_type = new_type;
+				_item_type = value;
 				switch(_item_type) {
 					case Item.Type.SEPARATOR:
 						remove_child();
@@ -237,12 +236,11 @@ namespace Gnomenu {
 		 *
 		 * { @link item_state_to_string }
 		 */
-		public string? item_state {
-			get { return item_state_to_string(_item_state); }
+		public Item.State item_state {
+			get { return _item_state; }
 			set {
-				Item.State new_state = item_state_from_string(value);
-				if(new_state == _item_state) return;
-				_item_state = new_state;
+				if(value == _item_state) return;
+				_item_state = value; 
 				queue_draw();
 			}
 		}
@@ -261,7 +259,7 @@ namespace Gnomenu {
 			set {
 				if(_gravity == value) return;
 				_gravity = value;
-				if(item_type_has_label(_item_type))
+				if(Item.type_has_label(_item_type))
 					get_label_widget().gravity = value;
 				update_arrow_type();
 			}
@@ -580,7 +578,7 @@ namespace Gnomenu {
 			bin_child.modify_font(desc);
 		}
 		private void update_label_text() {
-			if(!item_type_has_label(_item_type)) return;
+			if(!Item.type_has_label(_item_type)) return;
 			string text;
 			text = _label;
 			if(text == null)
@@ -592,7 +590,7 @@ namespace Gnomenu {
 			label.accel = _accel_text;
 		}
 		private void update_label_underline() {
-			if(!item_type_has_label(_item_type)) return;
+			if(!Item.type_has_label(_item_type)) return;
 			MenuLabel label = get_label_widget();;
 			assert(label != null);
 			label.use_underline = _use_underline;
@@ -628,7 +626,7 @@ namespace Gnomenu {
 				update_label_text();
 		}
 		private void create_labels() {
-			assert(item_type_has_label(_item_type));
+			assert(Item.type_has_label(_item_type));
 			_cached_label_widget.visible = true;
 			_cached_label_widget.sensitive = true;
 			_cached_label_widget.gravity = gravity;
@@ -654,6 +652,17 @@ namespace Gnomenu {
 		private void update_arrow_type() {
 			if(_item_type != Item.Type.ARROW) return;
 			(get_child() as Arrow).set(gravity_to_arrow_type(_gravity), ShadowType.NONE);
+		}
+		public static ShadowType item_state_to_shadow_type(Item.State state) {
+			switch(state) {
+				case Item.State.TOGGLED:
+					return ShadowType.IN;
+				case Item.State.UNTOGGLED:
+					return ShadowType.OUT;
+				case Item.State.TRISTATE:
+				default:
+					return ShadowType.ETCHED_IN;
+			}
 		}
 	}
 }

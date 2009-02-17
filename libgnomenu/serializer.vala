@@ -69,11 +69,13 @@ namespace Gnomenu {
 			if(item.item_label != null) {
 				sb.append(Markup.printf_escaped(" label=\"%s\"", item.item_label));
 			}
-			if(item.item_type != null) {
-				sb.append(Markup.printf_escaped(" type=\"%s\"", item.item_type));
+			if(item.item_type != Item.Type.NORMAL) {
+				sb.append(Markup.printf_escaped(" type=\"%s\"", 
+							Item.type_to_string(item.item_type)));
 			}
-			if(item.item_state != null) {
-				sb.append(Markup.printf_escaped(" state=\"%s\"", item.item_state));
+			if(item.item_state != Item.State.TRISTATE) {
+				sb.append(Markup.printf_escaped(" state=\"%s\"", 
+							Item.state_to_string(item.item_state)));
 			}
 			if(item.item_font != null) {
 				sb.append(Markup.printf_escaped(" font=\"%s\"", item.item_font));

@@ -1,5 +1,6 @@
 namespace Gnomenu {
 	public interface Item: GLib.Object {
+		[CCode (cname = "GnomenuItemType")]
 		public enum Type {
 			NORMAL = 0,
 			CHECK = 1,
@@ -9,6 +10,7 @@ namespace Gnomenu {
 			ARROW = 5,
 			ICON = 6,
 		}
+		[CCode (cname = "GnomenuItemState")]
 		public enum State {
 			UNTOGGLED = 0,
 			TOGGLED = 1,
@@ -36,11 +38,11 @@ namespace Gnomenu {
 		}}
 		public abstract string? item_id {get; set;}
 
-		public abstract string? item_type {get; set;}
+		public abstract Item.Type item_type {get; set;}
 		public abstract bool item_use_underline {get; set;}
 		public abstract bool item_sensitive{get; set;}
 		public abstract bool item_visible{get; set;}
-		public abstract string? item_state {get; set;}
+		public abstract Item.State item_state {get; set;}
 		public abstract string? item_label {get; set;}
 		public abstract string? item_icon {get; set;}
 		public abstract string? item_accel_text {get; set;}
@@ -91,5 +93,85 @@ namespace Gnomenu {
 			sb.prepend_unichar('/');
 			return sb.str;
 		}}
+
+		public static Item.State state_from_string(string? str) {
+			switch(str) {
+				case "true":
+				case "toggled":
+				case "t":
+				case "1":
+					return Item.State.TOGGLED;
+				case "false":
+				case "untoggled":
+				case "f":
+				case "0":
+					return Item.State.UNTOGGLED;
+				case null:
+				default:
+					return Item.State.TRISTATE;
+			}
+		}
+		public static weak string? state_to_string(Item.State state) {
+			switch(state) {
+				case Item.State.UNTOGGLED:
+					return "untoggled";
+				case Item.State.TOGGLED:
+					return "toggled";
+				case Item.State.TRISTATE:
+					return null;
+			}
+			return null;
+		}
+		public static Item.Type type_from_string(string? str) {
+			switch(str) {
+				case "check":
+				case "c":
+					return Item.Type.CHECK;
+				case "radio":
+				case "r":
+					return Item.Type.RADIO;
+				case "image":
+				case "i":
+					return Item.Type.IMAGE;
+				case "arrow":
+				case "a":
+					return Item.Type.ARROW;
+				case "separator":
+				case "s":
+					return Item.Type.SEPARATOR;
+				case "icon":
+					return Item.Type.ICON;
+				case null:
+				default:
+					return Item.Type.NORMAL;
+			}
+		}
+		public static bool type_has_label(Item.Type type) {
+			if(type == Item.Type.NORMAL
+			|| type == Item.Type.IMAGE
+			|| type == Item.Type.CHECK
+			|| type == Item.Type.RADIO
+			) return true;
+			return false;	
+		}
+		public static weak string? type_to_string(Item.Type type) {
+			switch(type) {
+				case Item.Type.CHECK:
+					return "check";
+				case Item.Type.RADIO:
+					return "radio";
+				case Item.Type.NORMAL:
+					return null;
+				case Item.Type.IMAGE:
+					return "image";
+				case Item.Type.ICON:
+					return "icon";
+				case Item.Type.ARROW:
+					return "arrow";
+				case Item.Type.SEPARATOR:
+					return "separator";
+			}
+			return null;
+		}
 	}
 }

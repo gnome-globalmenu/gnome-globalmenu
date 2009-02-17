@@ -40,17 +40,6 @@ namespace Gnomenu {
 				return ArrowType.DOWN;
 		}
 	}
-	protected ShadowType item_state_to_shadow_type(Item.State state) {
-		switch(state) {
-			case Item.State.TOGGLED:
-				return ShadowType.IN;
-			case Item.State.UNTOGGLED:
-				return ShadowType.OUT;
-			case Item.State.TRISTATE:
-			default:
-				return ShadowType.ETCHED_IN;
-		}
-	}
 
 }
 
