@@ -21,17 +21,7 @@ namespace Gnomenu {
 		public abstract bool has_sub_shell {get; set;}
 
 		public Shell? toplevel_shell {get {
-			weak Item item = this;
-			weak Shell parent = shell;
-			while(parent != null) {
-				item = parent.owner;
-				if(item != null) {
-					parent = item.shell;
-				} else {
-					break;
-				}
-			}
-			return parent;
+			return shell.toplevel_shell;
 		} }
 		public int item_position {get {
 			return shell.get_item_position(this);
