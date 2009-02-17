@@ -602,11 +602,15 @@ public extern string* __get_task_name_by_pid(int pid);
 			textbox.can_focus = true;
 			textbox.text = "Type here...";
 			textbox.is_focus = true;
-			this.set_focus_child(textbox);
+			
 			this.add(textbox);
 			this.show_all();
-
+			this.set_focus_child(textbox);
+			
 			textbox.state = Gtk.StateType.NORMAL;
+			textbox.state_changed += (box, previous_state) => {
+				textbox.state = Gtk.StateType.NORMAL;
+			};
 			textbox.changed += (box) => {
 				Gnomenu.Menu shell = parent as Gnomenu.Menu;
 				Gnomenu.MenuItem item = find_item();
