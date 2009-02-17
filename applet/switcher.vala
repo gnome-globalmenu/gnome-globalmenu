@@ -624,6 +624,9 @@ public extern string* __get_task_name_by_pid(int pid);
 				if(item != null)
 					shell.activate_item(item, true);
 			};
+			this.state_changed += (_this, previous_state) => {
+				this.state = Gtk.StateType.NORMAL;
+			};
 		}
 		
 		public Gnomenu.MenuItem? find_item() {
