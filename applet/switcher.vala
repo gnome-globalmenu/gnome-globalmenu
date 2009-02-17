@@ -39,6 +39,7 @@ public extern string* __get_task_name_by_pid(int pid);
 </menu>""";
 
 		private GLib.HashTable<string,string> program_list;
+		private SearchBoxMenuItem search_box  = new SearchBoxMenuItem();
 		
 		private bool disposed = false;
 
@@ -59,7 +60,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
 				s = replace(s, "%sub-menu%", "");
 				Parser.parse(this, s);
-				this.get("/switcher")._submenu_cache.append(new SearchBoxMenuItem());
+				this.get("/switcher")._submenu_cache.append(search_box);
 				this.activate += on_activate;
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
@@ -412,6 +413,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		private void update(bool include_menu = false) {
 			/* root and menu are then used for the window list */
 			Gnomenu.MenuItem root = this.get("/switcher");
+			search_box.text = "";
 			Gtk.Menu menu = root.submenu;
 			/* prevent the menu to be updated while visible so causing the applet to block */
 			if(menu != null)
@@ -459,6 +461,7 @@ public extern string* __get_task_name_by_pid(int pid);
 					
 					foreach(Gtk.Widget widget in menu.get_children()) {
 						Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
+						if(item == null) continue;
 						Wnck.Window window = item_to_window(item);
 						if(window == null) continue;
 						if (window.is_active()) {
@@ -585,25 +588,67 @@ public extern string* __get_task_name_by_pid(int pid);
 	}
 
 	public class SearchBoxMenuItem : Gtk.ImageMenuItem {
-		private Gtk.Entry textbox;
+		private Gtk.Entry textbox = new Gtk.Entry();
+		public string text {
+			get { return textbox.text;}
+			set { textbox.text = value; }
+		}
 		public SearchBoxMenuItem() {
 		}
 		construct {
 			this.image = new Gtk.Image.from_icon_name("search", Gtk.IconSize.MENU);
-			textbox = new Gtk.Entry();
 			textbox.editable = true;
 			textbox.sensitive = true;
 			textbox.can_focus = true;
 			textbox.text = "Type here...";
 			textbox.is_focus = true;
-			textbox.activates_default = true;
+			this.set_focus_child(textbox);
 			this.add(textbox);
 			this.show_all();
+
+			textbox.state = Gtk.StateType.NORMAL;
+			textbox.changed += (box) => {
+				Gnomenu.Menu shell = parent as Gnomenu.Menu;
+				Gnomenu.MenuItem item = find_item();
+				if(item != null)
+					shell.select_item(item);
+			};
+
+			textbox.activate += (box) => {
+				Gnomenu.Menu shell = parent as Gnomenu.Menu;
+				Gnomenu.MenuItem item = find_item();
+				if(item != null)
+					shell.activate_item(item, true);
+			};
 		}
 		
+		public Gnomenu.MenuItem? find_item() {
+			Gnomenu.Shell shell = parent as Gnomenu.Shell;
+			for(int i = 0; i < shell.length; i++) {
+				Gnomenu.MenuItem item = shell.get_item(i) as Gnomenu.MenuItem;
+				if(item.item_label != null &&
+				item.item_label.has_prefix(textbox.text)) {
+					return item as Gnomenu.MenuItem;
+				}
+			}
+			return null;	
+		}
+
+		public override void parent_set(Gtk.Widget previous_parent) {
+			if(previous_parent!=null) {
+				previous_parent.key_press_event -= steal_key_press_event;
+			}
+			base.parent_set(previous_parent);
+			if(parent != null) {
+				parent.key_press_event += steal_key_press_event;
+			}
+		}
+		private bool steal_key_press_event(Gtk.Widget widget, 
+				Gdk.EventKey event) {
+			return textbox.key_press_event(event);
+		}
 		public override void activate_item() {
 		}
 		public override void activate() {
-			
 		}
 	}
