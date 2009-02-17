@@ -207,8 +207,8 @@ namespace Gnomenu {
 				}
 				if(_item_type == MenuItemType.IMAGE) {
 					_image_widget = _cached_image_widget;
-					_image_widget.set_parent(this);
 					_image_widget.sensitive = true;
+					_image_widget.set_parent(this);
 					_image_widget.visible = _show_image;
 					update_image();
 				} else {
