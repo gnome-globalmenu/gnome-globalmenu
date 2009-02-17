@@ -5,12 +5,16 @@ static void gmsg_foreach_cb(GtkWidget * child, gpointer data[]) {
 	gint * pos = data[0];
 	GtkMenuShell * menu_shell = data[1];
 	if(*pos == 0) data[2] = child;
+	if(GNOMENU_IS_MENU_ITEM(child))
 	(*pos) --;
 }
 void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 	GList * children = gtk_container_get_children(menu_shell);
 	GList * iter;
-	gint l = g_list_length(children);
+	gint l = 0;
+	for(iter = children; iter; iter = iter->next) {
+		if(GNOMENU_IS_MENU_ITEM(iter->data)) l ++;
+	}
 	if( l < length) {
 		int i;
 		for(i = l; i < length; i++) {
@@ -21,12 +25,14 @@ void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 		children = gtk_container_get_children(menu_shell);
 	}
 	for(iter = g_list_last(children); iter; iter = iter->prev) {
+		if(GNOMENU_IS_MENU_ITEM(iter->data)) {
 		if(l > length) {
 			gnomenu_menu_item_set_truncated(iter->data, TRUE);
 		} else {
 			gnomenu_menu_item_set_truncated(iter->data, FALSE);
 		}
 		l--;
+		}
 	}
 	g_list_free(children);
 }
@@ -50,7 +56,7 @@ static void gmsgip_foreach_cb(GtkWidget * child, gpointer data[]) {
 	if(child == foo) {
 		*found = TRUE;
 	}
-	if(!*found) (*i)++;
+	if(!*found && GNOMENU_IS_MENU_ITEM(child)) (*i)++;
 }
 gint gtk_menu_shell_get_item_position(GtkMenuShell *menu_shell, GtkMenuItem * item) {
 	gint i = 0;
@@ -64,7 +70,8 @@ gint gtk_menu_shell_get_item_position(GtkMenuShell *menu_shell, GtkMenuItem * it
 }
 static void gmsl_foreach(GtkWidget * child, gpointer data[]) {
 	gint * length = data[0];
-	if(!gnomenu_menu_item_get_truncated((GnomenuMenuItem*)child)) (*length) ++;
+	if( GNOMENU_IS_MENU_ITEM(child) &&		
+	!gnomenu_menu_item_get_truncated((GnomenuMenuItem*)child)) (*length) ++;
 }
 gint gtk_menu_shell_length_without_truncated(GtkMenuShell * menu_shell) {
 	gint length = 0;

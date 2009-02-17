@@ -59,6 +59,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
 				s = replace(s, "%sub-menu%", "");
 				Parser.parse(this, s);
+				this.get("/switcher")._submenu_cache.append(new SearchBoxMenuItem());
 				this.activate += on_activate;
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
@@ -473,7 +474,6 @@ public extern string* __get_task_name_by_pid(int pid);
 						setup_window_actions_menu("/switcher/", _current_window);
 					}
 				}
-				this.get("/switcher").submenu.append(new SearchBoxMenuItem());
 			} else {
 				s = replace(s, "%submenu%", "<menu/>");
 				Parser.parse(this, s);

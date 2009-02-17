@@ -62,7 +62,7 @@ namespace Gnomenu {
 		public Shell sub_shell{get {
 			return this.submenu as Shell;
 		}}
-		private Menu _submenu_cache = new Menu();
+		public Menu _submenu_cache = new Menu();
 		public bool has_sub_shell {
 			get {
 				return this.submenu != null;
