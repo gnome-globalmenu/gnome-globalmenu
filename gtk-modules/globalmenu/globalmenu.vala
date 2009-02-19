@@ -118,12 +118,15 @@ namespace GlobalMenuGTK {
 		GLib.Type panel_applet_type = GLib.Type.from_name("PanelApplet");
 		GLib.Type gnomenu_menu_bar_type = GLib.Type.from_name("GnomenuMenuBar");
 		GLib.Type panel_menu_bar_type = GLib.Type.from_name("PanelMenuBar");
+		GLib.Type gtk_notebook_type = GLib.Type.from_name("GtkNotebook");
 		while(parent is Gtk.Widget) {
 			GLib.Type type = parent.get_type();
 
 			if(type.is_a(panel_applet_type)
 			|| type.is_a(gnomenu_menu_bar_type)
-			|| type.is_a(panel_menu_bar_type))  {
+			|| type.is_a(panel_menu_bar_type)
+			|| type.is_a(gtk_notebook_type)
+			)  {
 				debug("menu bar skipped");
 				return true;
 			}
