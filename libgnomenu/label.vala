@@ -4,11 +4,10 @@ namespace Gnomenu {
 
 	public class MenuLabel: Gtk.Container {
 		public MenuLabel() {
-			_accel_widget = new Label("");
 			_accel_widget.visible = false;
-			_label_widget = new Label("");
 			_label_widget.visible = false;
 			_label_widget.use_underline = true;
+			_label_widget.ellipsize = Pango.EllipsizeMode.END;
 			add(_label_widget);
 			add(_accel_widget);
 			child_set(_accel_widget, "alignment", Pango.Alignment.RIGHT, null);
@@ -67,6 +66,14 @@ namespace Gnomenu {
 				_label_widget.use_underline = _use_underline;
 			}
 		}
+		public int max_width_chars {
+			get {
+				return _label_widget.max_width_chars;
+			}
+			set {
+				_label_widget.max_width_chars = value;
+			}
+		}
 		public string label {
 			get {
 				return _label;
@@ -122,8 +129,8 @@ namespace Gnomenu {
 			props.remove(child);
 		}
 
-		private Label _label_widget;
-		private Label _accel_widget;
+		private Label _label_widget = new Label("");
+		private Label _accel_widget = new Label("");
 		private string _label;
 		private string _accel;
 		private bool _use_underline;
@@ -180,6 +187,7 @@ namespace Gnomenu {
 			int y = a.y;
 			int num_vis = 0;
 			int expand = 0;
+			int remains = 0;
 			foreach(Widget child in children) {
 				if(!child.visible) continue;
 				num_vis++;
@@ -188,10 +196,12 @@ namespace Gnomenu {
 				case Gravity.LEFT:
 				case Gravity.RIGHT:
 					expand = allocation.height - requisition.height;
+					remains = allocation.height;
 					break;
 				case Gravity.UP:
 				case Gravity.DOWN:
 					expand = allocation.width - requisition.width;
+					remains = allocation.width;
 					break;
 			}
 			if(expand < 0) expand = 0;
@@ -209,6 +219,9 @@ namespace Gnomenu {
 						ca.y = y;
 						ca.width = a.width;
 						ca.height = cr.height + expand/num_vis;
+						if(ca.height > remains) ca.height = remains;
+						remains -= (ca.height + padding);
+						if(remains < 1) remains = 1;
 						y += (ca.height + padding);
 						switch(alignment) {
 							case Pango.Alignment.LEFT:
@@ -226,6 +239,9 @@ namespace Gnomenu {
 						ca.x = x;
 						ca.y = y;
 						ca.width = cr.width + expand/num_vis;
+						if(ca.width > remains) ca.width = remains;
+						remains -= (ca.width + padding);
+						if(remains < 1) remains = 1;
 						ca.height = a.height;
 						x += (ca.width + padding);
 						switch(alignment) {

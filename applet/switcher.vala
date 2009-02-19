@@ -6,20 +6,23 @@ public extern string* __get_task_name_by_pid(int pid);
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
-		private int _max_size = 30;
+		private int _max_size = -1;
 		private bool _show_icon = false;
 		private bool _show_label = true;
 		private bool _show_window_list = true;
 		private bool _show_window_actions = true;
+			/* root and menu are then used for the window list */
+		Gnomenu.MenuItem _label_item;
+	   
 		private Wnck.Window _current_window;
 		
 		private const string MENU_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <menu>
-	<item id="switcher" label="%label%" font="bold" type="%type%" icon="%icon%">
+	<item id="switcher" underline="false" label="%label%" font="bold" type="%type%" icon="%icon%">
 			%submenu%
 	</item>
 </menu>""";
-		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" font="%font%" icon="pixbuf:%pixdata%" sensitive="true">%submenu%</item>""";
+		private const string ITEM_TEMPLATE = """<item type="image" id="XID%id%" label="%label%" underline="false" font="%font%" icon="pixbuf:%pixdata%" sensitive="true">%submenu%</item>""";
 		private string NOWIN_TEMPLATE = """<item label="%no_windows%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private string NOACT_TEMPLATE = """<item label="%no_actions%" type="image" icon="theme:gtk-about" sensitive="false" font="italic"/>""";
 		private string WINACT_TEMPLATE = """<menu>
@@ -60,7 +63,8 @@ public extern string* __get_task_name_by_pid(int pid);
 				string s = replace(MENU_TEMPLATE, "%label%","Global Menu Bar");
 				s = replace(s, "%sub-menu%", "");
 				Parser.parse(this, s);
-				this.get("/switcher")._submenu_cache.append(search_box);
+				_label_item = this.get_item(0) as Gnomenu.MenuItem;
+				_label_item._submenu_cache.append(search_box);
 				this.activate += on_activate;
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
@@ -114,7 +118,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			update(false);
 		}
 		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
-			if(item.item_path == "/switcher") {		
+			if(item == _label_item) {		
 				update(true);
 				return;
 			}
@@ -248,7 +252,7 @@ public extern string* __get_task_name_by_pid(int pid);
 					}
 
 					string[] substs = {
-						"%label%", Markup.escape_text(replace(cut_string(window.get_name(), _max_size), "_", "__")),
+						"%label%", Markup.escape_text(window.get_name()),
 						"%font%", font,
 						"%submenu%", submenu_xml,
 						"%pixdata%", pixbuf_encode_b64(guess_icon(window)),
@@ -406,10 +410,9 @@ public extern string* __get_task_name_by_pid(int pid);
 			return scaled_icon;
 		}
 		private void update(bool include_menu = false) {
-			/* root and menu are then used for the window list */
-			Gnomenu.MenuItem root = this.get("/switcher");
+
 			search_box.text = "";
-			Gtk.Menu menu = root.submenu;
+			Gtk.Menu menu = _label_item.submenu;
 			/* prevent the menu to be updated while visible so causing the applet to block */
 			if(menu != null)
 				menu.popdown();
@@ -421,11 +424,13 @@ public extern string* __get_task_name_by_pid(int pid);
 			
 			Wnck.WindowType wt = current_window.get_window_type();
 			if (wt==Wnck.WindowType.DOCK) 
-				_label = ""; else
-				_label = cut_string(get_program_name(current_window), _max_size);
+				_label = ""; 
+			else
+				_label = get_program_name(current_window);
 			
+
 			string s = MENU_TEMPLATE;
-			s = replace(s, "%label%", Markup.escape_text(replace(_label, "_", "__")));
+			s = replace(s, "%label%", Markup.escape_text(_label));
 			if (_show_icon) {
 				if (_show_label)
 					s = replace(s, "%type%", "image"); else
@@ -457,6 +462,9 @@ public extern string* __get_task_name_by_pid(int pid);
 					foreach(Gtk.Widget widget in menu.get_children()) {
 						Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
 						if(item == null) continue;
+						item.max_width_chars = 30; /* Some sane value?
+													libgnomenu's default
+													is 30*/
 						Wnck.Window window = item_to_window(item);
 						if(window == null) continue;
 						if (window.is_active()) {
@@ -540,11 +548,24 @@ public extern string* __get_task_name_by_pid(int pid);
 				update();
 			}
 		}
+		public override void size_request(out Requisition req) {
+			base.size_request(out req);
+			if(max_size > 0 && req.width > max_size) {
+				/* if max_size == -1, we don't truncate it*/
+				
+				req.width = max_size;
+			}
+		}
+		public override void size_allocate(Gdk.Rectangle alloc) {
+			base.size_allocate(alloc);
+			_label_item.size_allocate(alloc);
+		}
 		public int max_size {
 			get { return _max_size; }
 			set {
 				if(_max_size == value) return;
 				_max_size = value;
+				if(_max_size < 40) _max_size = -1;
 				update();
 			}
 		}

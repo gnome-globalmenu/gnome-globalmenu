@@ -56,6 +56,16 @@ namespace Gnomenu {
 			base.dispose();
 		}
 
+		private int _max_width_chars = 30;
+		public int max_width_chars {
+			get {
+				return _max_width_chars;
+			}
+			set {
+				_max_width_chars = value;
+				update_label_text();
+			}
+		}
 		public Shell shell {get {
 			return parent as Shell;
 		}}
@@ -588,6 +598,7 @@ namespace Gnomenu {
 			assert(label != null);
 			label.label = text;
 			label.accel = _accel_text;
+			label.max_width_chars = _max_width_chars;
 		}
 		private void update_label_underline() {
 			if(!Item.type_has_label(_item_type)) return;

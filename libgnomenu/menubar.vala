@@ -590,6 +590,7 @@ namespace Gnomenu {
 		public Item? get_item_by_id(string id) {
 			foreach(weak Widget child in gtk_container_get_children(this)) {
 				Item item = child as Item;
+				if(item == null) continue;
 				if(item.item_id == id) return item;
 			}
 			return null;

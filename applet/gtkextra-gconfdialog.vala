@@ -89,7 +89,7 @@ using GConf;
        				/* TODO: connect changed signal to eventhandler */
        				break;
        			case ValueType.INT:
-       				widget = new Gtk.SpinButton.with_range(-100, 100, 1);
+       				widget = new Gtk.SpinButton.with_range(-100, 200, 1);
        				(widget as Gtk.SpinButton).value = _default_client.get_int(entry.key);
        				(widget as Gtk.SpinButton).value_changed += onSpinButtonValueChanged;
        				break;
