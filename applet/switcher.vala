@@ -352,12 +352,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			}
 			return ret; 
 		}
-		private string cut_string(string txt, int max) {
-			if (max<1) return txt;
-			if (max<=3) return "...";
-			if (txt.length>max) return txt.substring(0, (max-3)) + "...";
-			return txt;
-		}
+
 		private Gdk.Pixbuf guess_icon(Wnck.Window window, int width = -1, int height = -1) {
 			Gdk.Pixbuf[] icons = {
 				window.get_mini_icon(),
