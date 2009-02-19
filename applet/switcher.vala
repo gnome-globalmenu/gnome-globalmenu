@@ -408,9 +408,6 @@ public extern string* __get_task_name_by_pid(int pid);
 
 			search_box.text = "";
 			Gtk.Menu menu = _label_item.submenu;
-			/* prevent the menu to be updated while visible so causing the applet to block */
-			if(menu != null)
-				menu.popdown();
 			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
