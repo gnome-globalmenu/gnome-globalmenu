@@ -404,7 +404,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			/* can't use scale_simple because the vala binding is wrong*/
 			return scaled_icon;
 		}
-		private void update(bool include_menu = false) {
+		private void update(bool include_menu) {
 
 			search_box.text = "";
 			Gtk.Menu menu = _label_item.submenu;
@@ -537,7 +537,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				if (!guess_dock_is_around())
 					set_iconify_destination(_current_window);
 				/* always refresh !*/
-				update();
+				update(true);
 			}
 		}
 		public override void size_request(out Requisition req) {
@@ -558,7 +558,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				if(_max_size == value) return;
 				_max_size = value;
 				if(_max_size < 40) _max_size = -1;
-				update();
+				update(true);
 			}
 		}
 		public bool show_icon {
@@ -566,7 +566,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			set {
 				if(_show_icon == value) return;
 				_show_icon = value;
-				update();
+				update(true);
 			}
 		}
 		public bool show_label {
@@ -574,7 +574,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			set {
 				if(_show_label == value) return;
 				_show_label = value;
-				update();
+				update(true);
 			}
 		}
 		public bool show_window_list {
@@ -582,7 +582,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			set {
 				if(_show_window_list == value) return;
 				_show_window_list = value;
-				update();
+				update(true);
 			}
 		}
 		public bool show_window_actions {
@@ -590,7 +590,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			set {
 				if(_show_window_actions == value) return;
 				_show_window_actions = value;
-				update();
+				update(true);
 			}
 		}
 	}
