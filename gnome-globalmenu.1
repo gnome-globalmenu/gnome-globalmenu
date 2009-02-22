@@ -1,0 +1,63 @@
+.\" Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.\" Please adjust this date whenever revising the manpage.
+.\" 
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+
+.TH "GNOME-GLOBALMENU" "1" "03. Feb. 2009" "Benjamin Marwell" ""
+
+.SH "NAME"
+gnome\-globalmenu \- Global Menu for GNOME
+.SH "SYNOPSIS"
+.PP 
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics,
+.\" respectively.
+Global\ Menu is the globally-shared menu bar of all applications launched in your desktop session. 
+.br
+Global Menu consists two components: 
+.br
+- GTK Plugin (libglobalmenu-gnome.so) 
+.br
+- gnome-panel applet (GlobalMenu.PanelApplet). The applet also acts as a window selector.
+.br
+On XFCE, a minimal applet (GlobalMenu.XfcePlugin) is also implemented.
+.SH "INSTALLATION"
+.LP 
+After installation, Add to applet "Global Menu Panel Applet" to the panel, and enable the GTK plugin from the preference dialog of the applet.
+
+.SH "ENVIRONMENT VARIABLES"
+.LP
+The behavior of the applet is fully controlled via the preference dialog. The GTK plugin is affected by
+.LP 
+\fBGLOBALMENU_GNOME_ARGS\fP
+.br
+\fB--verbose\fP produce a verbose log.
+.br
+\fB--log-file=<file>\fP write the log into <file>.
+.br
+\fB--disable\fP disable Global Menu.
+.LP
+\fBGTK_MENUBAR_NO_MAC\fP
+.br
+This environment variable constains binary names of the applications for whom the GTK plugin module should be disabled.
+.SH "SEE ALSO"
+.br 
+For the complete and up-to-date documentation, please visit
+\fIhttp://code.google.com/p/gnome2\-globalmenu\fR.
+
+.PP 
+This manual page was origninal written by Benjamin Marwell <b.marwell@gmx.de>,
+for the Debian project (but may be used by others). 
+Rewritten by Yu Feng <rainwoodman@gmail.com> on Feb 22 2009, before integrated into the project.
