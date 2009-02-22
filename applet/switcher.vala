@@ -407,7 +407,6 @@ public extern string* __get_task_name_by_pid(int pid);
 		private void update(bool include_menu) {
 
 			search_box.text = "";
-			Gtk.Menu menu = _label_item.submenu;
 			
 			this.visible = (_show_icon | _show_label);
 			if (!this.visible) return;
@@ -445,6 +444,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				if (_show_window_list) {
 					s = replace(s, "%submenu%", do_xml_menu());
 					Parser.parse(this, s);
+					Gtk.Menu menu = _label_item.submenu;
 					
 					Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
 					if (misd!=null) {
