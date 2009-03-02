@@ -73,6 +73,7 @@ libglobalmenu_gnome_la_LDFLAGS = \
 		-avoid-version \
 		-release $(PACKAGE_VERSION) \
 		-no-undefined \
+		-Wl,--as-needed \
 		-export-dynamic \
 		-module
 

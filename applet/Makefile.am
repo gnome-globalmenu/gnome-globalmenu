@@ -57,6 +57,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 
 GlobalMenu_PanelApplet_LDFLAGS = \
 		-g \
+		-Wl,--as-needed \
 		$(NULL)
 
 GlobalMenu_PanelApplet_LDADD = \

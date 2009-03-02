@@ -140,6 +140,7 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/libgnomenu-%{base_version}.so.2.0.0
 %{_libdir}/libgnomenu.so
 %{_libdir}/pkgconfig/libgnomenu.pc
+%{_mandir}/man1/gnome-globalmenu.1.gz
 
 %files devel
 %defattr(-,root,root,-)

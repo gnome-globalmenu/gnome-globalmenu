@@ -28,9 +28,9 @@ libgnomenu_la_SOURCES = \
 						keygrab-ccode.c \
 						menushellutils-ccode.c 
 
-libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
-libgnomenu_la_LIBADD = $(WNCK_LIBS) ../libcompat/libcompat.la
-libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION)
+libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(WNCK_CFLAGS) $(X11_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
+libgnomenu_la_LIBADD = $(GTK_LIBS) $(WNCK_LIBS) $(X11_LIBS) ../libcompat/libcompat.la
+libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
