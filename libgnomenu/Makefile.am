@@ -30,7 +30,7 @@ libgnomenu_la_SOURCES = \
 
 libgnomenu_la_CPPFLAGS = -I$(top_srcdir) $(GTK_CFLAGS) $(WNCK_CFLAGS) $(X11_CFLAGS) -include $(CONFIG_HEADER) -DWNCK_I_KNOW_THIS_IS_UNSTABLE
 libgnomenu_la_LIBADD = $(GTK_LIBS) $(WNCK_LIBS) $(X11_LIBS) ../libcompat/libcompat.la
-libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined
+libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined -Wl,--as-needed
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
