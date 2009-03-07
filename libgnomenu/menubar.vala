@@ -253,70 +253,6 @@ namespace Gnomenu {
 			return null;
 		}
 
-		/**
-		 * returns an xml representation of the overflown menubar.
-		 * The difference between the returned string and the
-		 * ordinary xml representation is that 
-		 * only overflown items are visible.
-		 */
-		public string? create_overflown_menu() {
-			if(!overflown) return null;
-			StringBuilder sb = new StringBuilder("");
-			sb.append("<menu>");
-			List<weak Widget> children = gtk_container_get_children(this);
-			foreach(weak Widget child in children) {
-				bool need_overflown_item = false;
-				Allocation a = child.allocation;
-				switch(pack_direction) {
-					case PackDirection.LTR:
-						if(a.x + a.width > allocation.width) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.RTL:
-						if(a.x < 0 ) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.BTT:
-						if(a.y < 0 ) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.TTB:
-						if(a.y + a.height > allocation.height) {
-							need_overflown_item = true;
-						}
-					break;
-				}
-				/* This is quirky. But it works
-				 * we first save the visibility flag of
-				 * the child,
-				 * then change it
-				 * our serializer will produce the visible=false
-				 * attribute.
-				 * then we restore it.
-				 *
-				 * Not thread safe.
-				 * */
-				bool vis = child.visible;
-				if(need_overflown_item && vis) {
-					child.set_flags(WidgetFlags.VISIBLE);
-				} else {
-					child.unset_flags(WidgetFlags.VISIBLE);
-				}
-				sb.append(Serializer.to_string(child));
-				if(vis) {
-					child.set_flags(WidgetFlags.VISIBLE);
-				} else {
-					child.unset_flags(WidgetFlags.VISIBLE);
-				}
-			}
-			sb.append("</menu>");
-			return sb.str;
-		}
-
-
 /* Private variables */
 		/**
 		 * Holding the background object
@@ -357,14 +293,13 @@ namespace Gnomenu {
 				if(item.item_id == "_arrow_") {
 					rebuild_overflown_menubar();
 				} else {
-					string stripped_path = overflown_path_to_path(path);
-					if(stripped_path != null) {
-						Gnomenu.MenuItem real_item = get(stripped_path);
-						if(real_item != null)
-							activate(real_item);
-						else {
-							warning("MenuItem %s not found in the main menubar!", stripped_path);
-						}
+					weak string real_item_path = item.item_path.offset(8);
+					Item real_item = get(real_item_path);
+
+					if(real_item != null)
+						this.activate(real_item as MenuItem);
+					else {
+						warning("MenuItem %s not found in the main menubar!", item.item_path);
 					}
 				}
 			
@@ -372,15 +307,46 @@ namespace Gnomenu {
 			return menubar;
 		}
 		private void rebuild_overflown_menubar() {
-			string overflown_menu = create_overflown_menu();
-			if(overflown_menu == null) {
-				overflown_menu = "<menu/>";
-			}
-			string overflower_context = OVERFLOWER_TEMPLATE.printf(overflown_menu);
+			Menu submenu = _overflown_menubar.get_item(0).sub_shell as Menu;
+			StringBuilder sb = new StringBuilder("");
+			sb.append(Serializer.to_string(this));
+			message("%s", sb.str);
 			try {
-				Parser.parse(_overflown_menubar, overflower_context);
+				Parser.parse(submenu, sb.str);
 			} catch(GLib.Error e) {
 				warning("%s", e.message);
+			}
+
+			for(int i = 0; i < this.length; i++) {
+				Item item = this.get_item(i);
+				Item proxy_item = submenu.get_item(i);
+
+				Widget child = item as Widget;
+				bool need_overflown_item = false;
+				Allocation a = child.allocation;
+				switch(pack_direction) {
+					case PackDirection.LTR:
+						if(a.x + a.width > allocation.width) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.RTL:
+						if(a.x < 0 ) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.BTT:
+						if(a.y < 0 ) {
+							need_overflown_item = true;
+						}
+					break;
+					case PackDirection.TTB:
+						if(a.y + a.height > allocation.height) {
+							need_overflown_item = true;
+						}
+					break;
+				}
+				proxy_item.item_visible = item.item_visible && need_overflown_item;
 			}
 		}
 		private string? overflown_path_to_path(string path) {
