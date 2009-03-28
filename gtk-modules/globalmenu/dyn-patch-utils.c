@@ -33,7 +33,7 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	 * to notifier the changes of the menubar.*/
 	if(g_hash_table_lookup(notifiers, menubar)) return;
 
-	source_id = g_idle_add_full(G_PRIORITY_HIGH_IDLE, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
+	source_id = g_timeout_add_full(G_PRIORITY_HIGH_IDLE, 200, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
 
 	if(source_id) {
 	/* to make sure the menubar is alive when it is in the hash table.
