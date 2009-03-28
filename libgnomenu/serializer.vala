@@ -83,6 +83,9 @@ namespace Gnomenu {
 			if(item.item_id != null) {
 				sb.append(Markup.printf_escaped(" id=\"%s\"", item.item_id));
 			}
+			if(item.item_accel_text != null) {
+				sb.append(Markup.printf_escaped(" accel=\"%s\"", item.item_accel_text));
+			}
 			if(item.item_visible == false) {
 				sb.append(" visible=\"false\"");
 			}
