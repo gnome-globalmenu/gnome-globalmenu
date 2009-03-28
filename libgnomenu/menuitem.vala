@@ -570,7 +570,7 @@ namespace Gnomenu {
 						ca.x = a.x + xoffset;
 						if(get_direction() == TextDirection.LTR
 						&& pack_direction == PackDirection.TTB)
-							ca.y = a.y + xoffset;
+							ca.y = a.y + yoffset;
 						else
 							ca.y = a.y + a.height - ca.height- yoffset;
 					break;
