@@ -7,18 +7,20 @@ namespace Gnomenu {
 			_accel_widget.visible = false;
 			_label_widget.visible = false;
 			_label_widget.use_underline = true;
-			_label_widget.ellipsize = Pango.EllipsizeMode.END;
 			add(_label_widget);
 			add(_accel_widget);
 			child_set(_accel_widget, "alignment", Pango.Alignment.RIGHT, null);
 			child_set(_accel_widget, "padding", 10, null);
+			child_set(_label_widget, "ellipsized", true, null);
 		}
 		private struct ChildPropBag {
 			public Pango.Alignment alignment;
 			public int padding;
+			public bool ellipsized;
 		}
 		static const int PROP_ALIGNMENT = 1234;
 		static const int PROP_PADDING = 1235;
+		static const int PROP_ELLIPSIZED = 1236;
 		static construct {
 			install_child_property(PROP_ALIGNMENT,
 					new ParamSpecEnum(
@@ -36,6 +38,15 @@ namespace Gnomenu {
 						"Padding",
 						"the padding on left, both or right",
 						0, 1000, 0,
+						ParamFlags.READABLE |
+						ParamFlags.WRITABLE
+				));
+			install_child_property(PROP_ELLIPSIZED,
+					new ParamSpecBoolean(
+						"ellipsized",
+						"Ellipsized",
+						"if the child is ellipsized",
+						false,
 						ParamFlags.READABLE |
 						ParamFlags.WRITABLE
 				));
@@ -272,6 +283,11 @@ namespace Gnomenu {
 					assert(prop != null);
 					value.set_int(prop->padding);
 				break;
+				case PROP_ELLIPSIZED:
+					ChildPropBag* prop = props.lookup(child);
+					assert(prop != null);
+					value.set_boolean(prop->ellipsized);
+				break;
 			}
 		}
 		public override void set_child_property(Gtk.Widget child, uint id,
@@ -295,13 +311,29 @@ namespace Gnomenu {
 						queue_resize();
 					}
 				break;
+				case PROP_ELLIPSIZED:
+					bool ellipsized = value.get_boolean();
+					ChildPropBag* prop = props.lookup(child);
+					assert(prop != null);
+					if(prop->ellipsized != ellipsized) {
+						prop->ellipsized = ellipsized;
+						if((child as Gtk.Label).angle == 0.0 && ellipsized) {
+							(child as Gtk.Label).ellipsize = Pango.EllipsizeMode.END;
+						} else {
+							(child as Gtk.Label).ellipsize = Pango.EllipsizeMode.NONE;
+						}
+						queue_resize();
+					}
+				break;
 			}
 		
 		}
 		private void update_label_gravity(Label child) {
 			double text_angle = gravity_to_text_angle(gravity);
 			Pango.Alignment alignment = Pango.Alignment.LEFT;
+			bool ellipsized = false;
 		   	child_get(child, "alignment", &alignment, null);
+		   	child_get(child, "ellipsized", &ellipsized, null);
 			double al = 0.0;
 			switch(alignment) {
 				case Pango.Alignment.LEFT:
@@ -325,6 +357,11 @@ namespace Gnomenu {
 				break;
 			}
 			child.angle = text_angle;
+			if(text_angle == 0.0 && ellipsized) {
+				child.ellipsize = Pango.EllipsizeMode.END;
+			} else {
+				child.ellipsize = Pango.EllipsizeMode.NONE;
+			}
 		}
 	}
 
