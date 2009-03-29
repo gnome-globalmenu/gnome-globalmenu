@@ -48,8 +48,7 @@ VALAPKGS = $(VALA_DEFAULT_PKGS) \
 		--pkg gconf-2.0 \
 		--pkg gnomenu \
 		--pkg libnotify \
-		--pkg gdk-x11-2.0 \
-		../libcompat/libcompat.vapi
+		--pkg gdk-x11-2.0 
 
 #@VALA_CCODE_RULES@
 $(STAMP): $(VALASOURCES) 
@@ -64,8 +63,7 @@ $(STAMP): $(VALASOURCES)
 	--pkg=gnomenu \
 	--pkg=libnotify \
 	--pkg=gdk-x11-2.0 \
-	$(VALASOURCES) ../libcompat/libcompat.vapi
-	bash patch.sh
+	$(VALASOURCES) 
 	touch $@
 
 GlobalMenu_PanelApplet_LDFLAGS = \
@@ -85,6 +83,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
+		-include ../libcompat/libcompat.h \
 		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-g \
@@ -96,8 +95,6 @@ icons_DATA = globalmenu.png
 
 EXTRA_DIST = \
 	$(STAMP) \
-	patch.sh \
-	bindings.vapi \
 	$(VALASOURCES) \
 	$(server_in_in_files) \
 	$(icons_DATA) \

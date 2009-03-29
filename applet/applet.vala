@@ -9,9 +9,7 @@ using GConf;
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
 
-	public Applet() {
-		ENABLE_LIBCOMPAT();
-	}
+	public Applet() { }
 	public override void dispose() {
 		if(!disposed) {
 			disposed = true;

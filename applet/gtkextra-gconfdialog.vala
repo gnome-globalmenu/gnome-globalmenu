@@ -25,7 +25,6 @@ using GConf;
 		private GConf.Client _default_client;
 
 		public GConfDialog(string dialog_title) {
-			ENABLE_LIBCOMPAT();
 			title = dialog_title;
 			icon_name = "gtk-preferences";
 		}

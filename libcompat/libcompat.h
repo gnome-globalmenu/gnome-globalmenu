@@ -2,4 +2,3 @@
 #include "ghash-backport.h"
 #include "wnck-fake.h"
 #include "gtk-fake.h"
-#define ENABLE_LIBCOMPAT()
