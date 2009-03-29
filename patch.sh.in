@@ -1,20 +1,5 @@
 #! /bin/bash
 
-VALA_VERSION=@VALA_VERSION@
-
-function backup {
-	for i in $*; do
-		cp -p $i .$i.bak
-	done;
-}
-function check_restore {
-	for i in $*; do
-		if cmp $i .$i.bak; then
-			cp -p .$i.bak $i;
-		fi;
-		rm -f .$i.bak
-	done;
-}
 function patch {
 	edit=$1;
 	shift;
