@@ -155,9 +155,7 @@ namespace Gnomenu {
 				child.style = style;
 			}
 		}
-		public override void forall(Gtk.Callback callback, void* data) {
-			bool include_internals = false;
-
+		public override void forall(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
 			}
 			weak List<weak Label> iter = children;

@@ -69,7 +69,7 @@ public class GlobalMenuGNOME {
 			/******
 			 * this line is causing vala gives two criticals
 			 * */
-			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, g_log_default_handler);
+			Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, (GLib.LogFunc)Log.default_handler);
 			log_stream = null;
 		}
 	}

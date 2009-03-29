@@ -38,9 +38,22 @@ GlobalMenu_PanelApplet_SOURCES = \
 	x-utils-c.c \
 	$(NULL)
 
+VALAFLAGS =
+VALAPKGS = $(VALA_DEFAULT_PKGS) \
+   		--pkg gtk+-2.0 \
+		--pkg libwnck-1.0 \
+		--pkg libpanelapplet-2.0 \
+		--pkg gnome-desktop-2.0 \
+		--pkg libgnome-menu \
+		--pkg gconf-2.0 \
+		--pkg gnomenu \
+		--pkg libnotify \
+		--pkg gdk-x11-2.0 \
+		../libcompat/libcompat.vapi
 
-$(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.deps bindings.vapi
-	$(VALAC) -C --vapidir=. \
+#@VALA_CCODE_RULES@
+$(STAMP): $(VALASOURCES) 
+	$(VALAC) -C $(VALA_DEFAULT_PKGS) --vapidir=. \
 	--vapidir=$(top_srcdir)/libgnomenu \
 	--pkg=gtk+-2.0 \
 	--pkg=libwnck-1.0 \
@@ -51,7 +64,7 @@ $(STAMP): $(VALASOURCES) patch.sh libpanelapplet-2.0.vapi libpanelapplet-2.0.dep
 	--pkg=gnomenu \
 	--pkg=libnotify \
 	--pkg=gdk-x11-2.0 \
-	$(VALASOURCES) bindings.vapi ../libcompat/libcompat.vapi
+	$(VALASOURCES) ../libcompat/libcompat.vapi
 	bash patch.sh
 	touch $@
 
@@ -71,6 +84,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GNOME_PANEL_CFLAGS) \
 		-I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
+		-include glib/gi18n-lib.h \
 		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-g \
@@ -84,8 +98,6 @@ EXTRA_DIST = \
 	$(STAMP) \
 	patch.sh \
 	bindings.vapi \
-	libpanelapplet-2.0.vapi \
-	libpanelapplet-2.0.deps \
 	$(VALASOURCES) \
 	$(server_in_in_files) \
 	$(icons_DATA) \

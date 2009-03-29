@@ -14,7 +14,7 @@ namespace GlobalMenuGTK {
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
 				MenuItem item = null;
-				List<weak Widget> children = gtk_container_get_children(shell);
+				List<weak Widget> children = shell.get_children();
 				if(token.has_prefix("W")) {
 					ulong pointer = token.offset(1).to_ulong();
 					/*Widget Pointer*/

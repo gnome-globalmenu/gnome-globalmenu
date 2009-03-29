@@ -82,7 +82,7 @@ public class Monitor: GLib.Object {
 		if(_current_window == null)
 			update_current_window();
 	}
-	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window previous_window) {
+	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window? previous_window) {
 		update_current_window();
 	}
 

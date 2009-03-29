@@ -10,7 +10,7 @@ endif
 STAMP = $(VALASOURCES:.vala=.c)
 SUFFIXES = .vala .c .glade .ui
 .vala.c:
-	$(VALAC) -C --vapidir=$(top_srcdir)/tests --vapidir=../ --pkg testman --pkg gtk+-2.0 --pkg globalmenu-gnome-private --pkg gmodule-2.0 $^
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --vapidir=$(top_srcdir)/tests --vapidir=../ --pkg testman --pkg gtk+-2.0 --pkg globalmenu-gnome-private --pkg gmodule-2.0 $^
 	touch $@
 
 .glade.ui:

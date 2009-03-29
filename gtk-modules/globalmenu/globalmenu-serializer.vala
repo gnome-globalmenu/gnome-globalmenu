@@ -30,7 +30,7 @@ namespace GlobalMenuGTK {
 			if(widget is Gtk.Container) visit_container(widget as Container);
 		}
 		private void visit_container(Container container) {
-			List<weak Widget> children = gtk_container_get_children(container);
+			List<weak Widget> children = container.get_children();
 			debug("%p has %u children", container, children.length());
 			foreach(weak Widget child in children) {
 				visit(child);

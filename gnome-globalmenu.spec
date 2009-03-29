@@ -1,5 +1,5 @@
-%define 	base_version 	@PACKAGE_VERSION@
-%define 	svn_version 	@SVNVERSION@
+%define 	base_version 	0.7.3
+%define 	svn_version 	2432M
 
 # automatic svn version detection
 %if %(test x%{svn_version} == x ; echo $?)

@@ -191,7 +191,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			int current_workspace_x = workspace.get_viewport_x();
 			int current_workspace_y = workspace.get_viewport_y();
 			int x,y,w,h;
-			(window as WnckCompat.Window).get_geometry(out x, out y, out w, out h);
+			window.get_geometry(out x, out y, out w, out h);
 
 			screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
 			
@@ -649,7 +649,7 @@ public extern string* __get_task_name_by_pid(int pid);
 			return null;	
 		}
 
-		public override void parent_set(Gtk.Widget previous_parent) {
+		public override void parent_set(Gtk.Widget? previous_parent) {
 			if(previous_parent!=null) {
 				previous_parent.key_press_event -= steal_key_press_event;
 			}

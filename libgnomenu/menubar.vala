@@ -160,7 +160,7 @@ namespace Gnomenu {
 			set {
 				if(_gravity == value) return;
 				_gravity = value;
-				foreach(weak Widget child in gtk_container_get_children(this)) {
+				foreach(weak Widget child in get_children()) {
 					(child as MenuItem).gravity = value;
 				}
 				if(_overflown_menubar != null) {
@@ -232,7 +232,7 @@ namespace Gnomenu {
 			FIXME: check rev */
 			for(int i = 1; i < tokens.length; i++) {
 				weak string token = tokens[i];
-				List<weak Widget> children = gtk_container_get_children(shell as Gtk.MenuShell);
+				List<weak Widget> children = (shell as Gtk.MenuShell).get_children();
 				MenuItem item = null;
 				foreach(weak Widget child in children) {
 					MenuItem child_item = child as MenuItem;
@@ -395,14 +395,12 @@ namespace Gnomenu {
 				_overflown_menubar.background = bg;
 			}
 		}
-		public override void forall(Gtk.Callback callback, void* data) {
-			bool include_internals = false;
-
+		public override void forall(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
 				if(_overflown_menubar != null)
 					callback(_overflown_menubar);
 			}
-			base.forall(callback, data);
+			base.forall(include_internals, callback);
 		}
 		public override void realize() {
 			base.realize();
@@ -500,7 +498,7 @@ namespace Gnomenu {
 						"menubar-applet",
 						0, 0, -1, -1);
 			}
-			foreach(weak Widget child in gtk_container_get_children(this)) {
+			foreach(weak Widget child in get_children()) {
 				propagate_expose(child, event);
 			}
 			if(_overflown_menubar != null) {
@@ -554,7 +552,7 @@ namespace Gnomenu {
 			return gtk_menu_shell_get_item(this, position) as Item;
 		}
 		public Item? get_item_by_id(string id) {
-			foreach(weak Widget child in gtk_container_get_children(this)) {
+			foreach(weak Widget child in get_children()) {
 				Item item = child as Item;
 				if(item == null) continue;
 				if(item.item_id == id) return item;

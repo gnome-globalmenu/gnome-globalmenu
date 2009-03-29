@@ -37,9 +37,9 @@ namespace Gnomenu {
 		}
 		public static Window? foreign_new (ulong xid) {
 			Gdk.Window gdk_window;
-			gdk_window = gdk_window_lookup(xid);
+			gdk_window = Gdk.Window.lookup((Gdk.NativeWindow)xid);
 			if(gdk_window == null ) {
-				gdk_window = gdk_window_foreign_new(xid);
+				gdk_window = Gdk.Window.foreign_new((Gdk.NativeWindow)xid);
 			}
 			return new Window(gdk_window);
 		}
@@ -102,25 +102,25 @@ namespace Gnomenu {
 			set_by_atom(Gdk.Atom.intern(property_name, false), value);	
 		}
 		public string? get_by_atom(Gdk.Atom atom) {
-			string context;
+			string context = null;
 			Gdk.Atom actual_type;
 			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
 			int actual_format;
 			int actual_length;
-			gdk_property_get(window,
+			Gdk.property_get(window,
 				atom,
 				type,
 				0, (ulong) long.MAX, false, 
 				out actual_type, 
 				out actual_format, 
 				out actual_length, 
-				out context);
+				&context);
 			return context;
 		}
 		public void set_by_atom(Gdk.Atom atom, string? value) {
 			if(value != null) {
 				Gdk.Atom type = Gdk.Atom.intern("STRING", false);
-				gdk_property_change(window,
+				Gdk.property_change(window,
 					atom, type,
 					8,
 					Gdk.PropMode.REPLACE,

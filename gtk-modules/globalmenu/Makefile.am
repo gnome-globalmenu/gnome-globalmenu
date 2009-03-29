@@ -54,9 +54,8 @@ libglobalmenu_gnome_la_SOURCES = \
 	globalmenu-helper.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES) bindings.vapi patch.sh dyn-patch.vapi
-	$(VALAC) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
-	bash patch.sh
+$(STAMP): $(VALASOURCES) bindings.vapi dyn-patch.vapi
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
 	touch $@
 $(STAMP:.vapi=.deps):
 	echo > $@
@@ -84,7 +83,6 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -g
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
-	 patch.sh \
 	bindings.vapi \
 	dyn-patch.vapi \
 	$(VALASOURCES) \

@@ -77,7 +77,7 @@ using GConf;
        		row.pack_start(label, false, false, 2);
        			
        		Gtk.Widget widget;
-       		switch(gconf_schema_get_type(schema)) {
+       		switch(schema.get_type()) {
        			case ValueType.BOOL:
        				widget = new Gtk.CheckButton();
        				(widget as Gtk.CheckButton).active = _default_client.get_bool(entry.key);
@@ -141,14 +141,14 @@ using GConf;
 				rt.set_type(ValueType.STRING);
 				return rt;
 			} else {
-				return gconf_client_get_schema(_default_client, schema_name);
+				return _default_client.get_schema(schema_name);
 			}
 		}
 		private void onResetButtonPressed(Gtk.Button widget) {
 			Gtk.Widget target = (Gtk.Widget)widget.user_data;
 			weak GConf.Entry entry = (GConf.Entry)target.user_data;
 			GConf.Schema schema = get_schema(entry);
-			switch(gconf_schema_get_type(schema)) {
+			switch(schema.get_type()) {
        			case ValueType.BOOL:
        				(target as Gtk.CheckButton).active = schema.get_default_value().get_bool();
        				break;

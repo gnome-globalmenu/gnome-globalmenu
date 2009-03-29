@@ -1,21 +1,21 @@
 namespace Gnomenu {
+	[CCode (cname = "GnomenuItemType")]
+	public enum ItemType {
+		NORMAL = 0,
+		CHECK = 1,
+		RADIO = 2,
+		IMAGE = 3,
+		SEPARATOR = 4,
+		ARROW = 5,
+		ICON = 6,
+	}
+	[CCode (cname = "GnomenuItemState")]
+	public enum ItemState {
+		UNTOGGLED = 0,
+		TOGGLED = 1,
+		TRISTATE = 2,
+	}
 	public interface Item: GLib.Object {
-		[CCode (cname = "GnomenuItemType")]
-		public enum Type {
-			NORMAL = 0,
-			CHECK = 1,
-			RADIO = 2,
-			IMAGE = 3,
-			SEPARATOR = 4,
-			ARROW = 5,
-			ICON = 6,
-		}
-		[CCode (cname = "GnomenuItemState")]
-		public enum State {
-			UNTOGGLED = 0,
-			TOGGLED = 1,
-			TRISTATE = 2,
-		}
 		public abstract Shell shell {get;}
 		public abstract Shell sub_shell {get;}
 		public abstract bool has_sub_shell {get; set;}
@@ -28,11 +28,11 @@ namespace Gnomenu {
 		}}
 		public abstract string? item_id {get; set;}
 
-		public abstract Item.Type item_type {get; set;}
+		public abstract ItemType item_type {get; set;}
 		public abstract bool item_use_underline {get; set;}
 		public abstract bool item_sensitive{get; set;}
 		public abstract bool item_visible{get; set;}
-		public abstract Item.State item_state {get; set;}
+		public abstract ItemState item_state {get; set;}
 		public abstract string? item_label {get; set;}
 		public abstract string? item_icon {get; set;}
 		public abstract string? item_accel_text {get; set;}
@@ -84,81 +84,81 @@ namespace Gnomenu {
 			return sb.str;
 		}}
 
-		public static Item.State state_from_string(string? str) {
+		public static ItemState state_from_string(string? str) {
 			switch(str) {
 				case "true":
 				case "toggled":
 				case "t":
 				case "1":
-					return Item.State.TOGGLED;
+					return ItemState.TOGGLED;
 				case "false":
 				case "untoggled":
 				case "f":
 				case "0":
-					return Item.State.UNTOGGLED;
+					return ItemState.UNTOGGLED;
 				case null:
 				default:
-					return Item.State.TRISTATE;
+					return ItemState.TRISTATE;
 			}
 		}
-		public static weak string? state_to_string(Item.State state) {
+		public static weak string? state_to_string(ItemState state) {
 			switch(state) {
-				case Item.State.UNTOGGLED:
+				case ItemState.UNTOGGLED:
 					return "untoggled";
-				case Item.State.TOGGLED:
+				case ItemState.TOGGLED:
 					return "toggled";
-				case Item.State.TRISTATE:
+				case ItemState.TRISTATE:
 					return null;
 			}
 			return null;
 		}
-		public static Item.Type type_from_string(string? str) {
+		public static ItemType type_from_string(string? str) {
 			switch(str) {
 				case "check":
 				case "c":
-					return Item.Type.CHECK;
+					return ItemType.CHECK;
 				case "radio":
 				case "r":
-					return Item.Type.RADIO;
+					return ItemType.RADIO;
 				case "image":
 				case "i":
-					return Item.Type.IMAGE;
+					return ItemType.IMAGE;
 				case "arrow":
 				case "a":
-					return Item.Type.ARROW;
+					return ItemType.ARROW;
 				case "separator":
 				case "s":
-					return Item.Type.SEPARATOR;
+					return ItemType.SEPARATOR;
 				case "icon":
-					return Item.Type.ICON;
+					return ItemType.ICON;
 				case null:
 				default:
-					return Item.Type.NORMAL;
+					return ItemType.NORMAL;
 			}
 		}
-		public static bool type_has_label(Item.Type type) {
-			if(type == Item.Type.NORMAL
-			|| type == Item.Type.IMAGE
-			|| type == Item.Type.CHECK
-			|| type == Item.Type.RADIO
+		public static bool type_has_label(ItemType type) {
+			if(type == ItemType.NORMAL
+			|| type == ItemType.IMAGE
+			|| type == ItemType.CHECK
+			|| type == ItemType.RADIO
 			) return true;
 			return false;	
 		}
-		public static weak string? type_to_string(Item.Type type) {
+		public static weak string? type_to_string(ItemType type) {
 			switch(type) {
-				case Item.Type.CHECK:
+				case ItemType.CHECK:
 					return "check";
-				case Item.Type.RADIO:
+				case ItemType.RADIO:
 					return "radio";
-				case Item.Type.NORMAL:
+				case ItemType.NORMAL:
 					return null;
-				case Item.Type.IMAGE:
+				case ItemType.IMAGE:
 					return "image";
-				case Item.Type.ICON:
+				case ItemType.ICON:
 					return "icon";
-				case Item.Type.ARROW:
+				case ItemType.ARROW:
 					return "arrow";
-				case Item.Type.SEPARATOR:
+				case ItemType.SEPARATOR:
 					return "separator";
 			}
 			return null;

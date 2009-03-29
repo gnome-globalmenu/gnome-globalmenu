@@ -61,7 +61,7 @@ namespace Gnomenu {
 			return gtk_menu_shell_get_item(this, position) as Item;
 		}
 		public Item? get_item_by_id(string id) {
-			foreach(weak Widget child in gtk_container_get_children(this)) {
+			foreach(weak Widget child in get_children()) {
 				Item item = child as Item;
 				if(item.item_id == id) return item;
 			}

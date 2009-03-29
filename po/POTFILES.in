@@ -3,6 +3,7 @@ libgnomenu/menuitem.c
 libgnomenu/menubarbox.c
 gtk-modules/globalmenu/module-main.c
 applet/main.c
+applet/main.h
 applet/applet.c
 applet/switcher.c
 applet/workspaceselector.c

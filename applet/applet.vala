@@ -62,7 +62,7 @@ public class Applet : Panel.Applet {
 	private Switcher selector = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
-	public override void screen_changed(Gdk.Screen previous_screen) {
+	public override void screen_changed(Gdk.Screen? previous_screen) {
 		Gdk.Screen screen = get_screen();
 		if(previous_screen != null) {
 			Settings old_settings = Settings.get_for_screen(previous_screen);

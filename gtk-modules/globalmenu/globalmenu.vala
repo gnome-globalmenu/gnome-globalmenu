@@ -45,7 +45,7 @@ namespace GlobalMenuGTK {
 			Signal.lookup("dyn-patch-detached", typeof(MenuBar)),
 			detached_hook_id);
 
-		List<weak Widget> toplevels = gtk_window_list_toplevels();
+		List<weak Widget> toplevels = Gtk.Window.list_toplevels();
 		foreach(Widget toplevel in toplevels) {
 			if(!(toplevel is Window)) continue;
 			MenuBar menubar = (MenuBar) DynPatch.get_menubar(toplevel);
@@ -158,7 +158,7 @@ namespace GlobalMenuGTK {
 		menubar.set("local", value, null);
 	}
 	private MenuBar? find_menubar(Container widget) {
-		List<weak Widget> children = gtk_container_get_children(widget);
+		List<weak Widget> children = widget.get_children();
 		foreach(Widget child in children) {
 			if(child is MenuBar) {
 				MenuBar menubar = child as MenuBar;

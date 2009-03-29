@@ -1,6 +1,9 @@
-AC_INIT(gnome-globalmenu, [0.7.3], [rainwoodman@gmail.com], [gnome-globalmenu])
+AC_INIT(gnome-globalmenu, [0.7.4], [rainwoodman@gmail.com], [gnome-globalmenu])
 
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR([autotools])
+AC_CONFIG_AUX_DIR([autotools])
+AC_SUBST(ACLOCAL_AMFLAGS, "-I autotools")
+
 AM_INIT_AUTOMAKE([1.9 tar-ustar])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
@@ -14,6 +17,7 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
+DOLT
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LDFLAGS)
@@ -42,26 +46,10 @@ localedir='${datadir}/locale'
 AC_SUBST(localedir)
 fi
 # Check for Vala
-AC_SUBST(VALA_REQUIRED, [0.5.6])
-AC_PATH_PROG(VALAC_BIN, [valac `pwd`/vala$PATH_SEPARATOR$PATH])
+VALA_PROG_VALAC(0.5.6)
 
-VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --pkg configmake --pkg licenses --pkg config"
-VALAC="$VALAC_BIN $VALA_DEFAULT_PKGS"
-AC_SUBST(VALAC)
-VALA_VERSION=`$VALAC_BIN --version|sed -e 's/[Vala ]*//'`
-AC_SUBST(VALA_VERSION)
-
-AC_CONFIG_COMMANDS_POST(
-		[
-	   	test x$VALA_VERSION == x$VALA_REQUIRED || 
-		AC_MSG_WARN([
-			This package works with VALA $VALA_REQUIRED;
-			Your have $VALA_VERSION installed;
-			You may experience compilation failure or
-			random runtime failurs.
-			])
-		])
-
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --vapidir \$(top_srcdir)/vapi --pkg configmake --pkg licenses --pkg config"
+AC_SUBST(VALA_DEFAULT_PKGS)
 # check for modules
 
 GLIB_REQUIRED=2.10.0
@@ -180,7 +168,6 @@ AC_SUBST(abs_top_srcdir)
 
 AC_CONFIG_FILES(
 	[Makefile
-	gnome-globalmenu.spec
 	libcompat/Makefile
 	libgnomenu/Makefile
 	libgnomenu/tests/Makefile

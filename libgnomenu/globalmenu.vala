@@ -49,7 +49,7 @@ namespace Gnomenu {
 			settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
 			_root_gnomenu_window = null;
 		}
-		public override void screen_changed(Gdk.Screen previous_screen) {
+		public override void screen_changed(Gdk.Screen? previous_screen) {
 			Gdk.Screen screen = get_screen();
 			if(previous_screen != screen) {
 				if(previous_screen != null) detach_from_screen(previous_screen);
