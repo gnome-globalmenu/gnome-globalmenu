@@ -4,7 +4,7 @@ AC_CONFIG_MACRO_DIR([autotools])
 AC_CONFIG_AUX_DIR([autotools])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I autotools")
 
-AM_INIT_AUTOMAKE([1.9 tar-ustar])
+AM_INIT_AUTOMAKE([1.9 tar-ustar dist-bzip2])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
 
@@ -177,6 +177,7 @@ AC_CONFIG_FILES(
 	xfce/Makefile
 	tests/Makefile
 	tools/Makefile
+	vapi/Makefile
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile

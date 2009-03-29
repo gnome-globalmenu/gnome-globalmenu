@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = tools tests libcompat libgnomenu applet xfce gtk-modules po
+SUBDIRS = tools vapi tests libcompat libgnomenu applet xfce gtk-modules po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
@@ -15,7 +15,6 @@ EXTRA_DIST = \
 	gnome-globalmenu.schemas.in \
 	gnome-globalmenu.spec \
 	patch.sh \
-	m4 \
 	$(NULL)
 
 DISTCLEANFILES = \
