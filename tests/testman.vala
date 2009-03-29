@@ -1,13 +1,14 @@
 using Gtk;
 
 public class TestMan : GLib.Object {
+	public delegate void DataTestFunc();
 	public string uri {get; construct; }
 	public Gtk.Window window;
 	public TestMan(string uri) {
 		this.uri = uri;
 	}
 	public void add(string name, DataTestFunc func) {
-		Test.add_data_func(uri + "/" + name, func);
+		Test.add_data_func(uri + "/" + name, (GLib.DataTestFunc)func);
 	}
 	public void run() {
 		create_test_window();
