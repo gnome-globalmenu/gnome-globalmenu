@@ -21,7 +21,18 @@ _wnck_gdk_pixbuf_get_from_pixmap (GdkPixbuf   *dest,
                                   int          width,
                                   int          height);
 
-
+/*
+GdkPixbuf*
+gdk_pixbuf_get_from_drawable     (GdkPixbuf *dest,
+                                  GdkDrawable *src,
+                                  GdkColormap *cmap,
+                                  int src_x,
+                                  int src_y,
+                                  int dest_x,
+                                  int dest_y,
+                                  int width,
+                                  int height);*/
+                            
 GdkPixbuf*
 _wnck_gdk_pixbuf_get_from_pixmap (GdkPixbuf   *dest,
                                   Pixmap       xpixmap,

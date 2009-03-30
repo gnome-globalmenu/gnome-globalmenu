@@ -11,12 +11,22 @@ _wnck_gdk_pixbuf_get_from_pixmap (Gdk.Pixbuf*   dest,
                                   int          dest_y,
                                   int          width,
                                   int          height);
-                                  
+extern Gdk.Pixbuf*
+gdk_pixbuf_get_from_drawable     (Gdk.Pixbuf *dest,
+                                  Gdk.Drawable *src,
+                                  Gdk.Colormap *cmap,
+                                  int src_x,
+                                  int src_y,
+                                  int dest_x,
+                                  int dest_y,
+                                  int width,
+                                  int height);
+                                    
 class WorkspaceSelector : Gtk.Window {
 	private Wnck.Window? target;
 	private const int WIDTH = 128;
-	private const int ICON_SCALE_RATIO = 5;
-	private const int ICON_ALPHA = 192;
+	private const int ICON_SCALE_RATIO = 6;
+	private const int ICON_ALPHA = 255;
 	private GLib.List<WorkspaceItem> workspaces;
 	private Gtk.CheckButton follow;
 	private uint iid = 0;
@@ -127,19 +137,47 @@ class WorkspaceSelector : Gtk.Window {
 		//string buf = "";
 		foreach(weak Wnck.Window window in windows) {
 			if (window_visible_on_desktop(window, col, row) && (!window.is_skip_pager())) {
+				
 				Gdk.Pixbuf mi = window.get_icon();
 				int x, y, w, h;
 				get_window_abs_geometry(window, out x, out y, out w, out h);
 				x -= col * screen_width;
 				y -= row * screen_height;
 				
-				mi.composite(ss,
-							 x, y,
+				Gdk.Window gwindow = (Gdk.Window?)Gdk.x11_xid_table_lookup((uint32)window.get_xid());
+
+				/* TODO: Draw windows thumbnails rather than grey rectangles
+				 * The following function should help, however it only works
+				 * for windows in selected desktop... further investigation is required
+				
+				Gdk.Pixbuf wi = gdk_pixbuf_get_from_drawable(null,
+											 				 gwindow,
+											 				 null,
+											 				 0, 0,
+											 				 x, y,
+											 				 w, h);*/
+											 				
+				Gdk.Pixbuf wi = new Gdk.Pixbuf(Gdk.Colorspace.RGB,
+											   false,
+											   8,
+											   w, h);
+				wi.fill((uint32)0x7f7f7fff);
+				mi.composite(wi,
+							 0, 0,
 							 mi.get_width()*ICON_SCALE_RATIO, mi.get_height()*ICON_SCALE_RATIO,
-							 x, y,
+							 0, 0,
 							 ICON_SCALE_RATIO, ICON_SCALE_RATIO,
 							 Gdk.InterpType.NEAREST,
 							 ICON_ALPHA);
+				wi.composite(ss,
+							 x, y,
+							 w, h,
+							 x, y,
+							 1, 1,
+							 Gdk.InterpType.NEAREST,
+							 255);	   		   
+				
+							 
 				/*buf += window.get_application().get_name();
 				buf += " " + x.to_string();
 				buf += " " + y.to_string();
