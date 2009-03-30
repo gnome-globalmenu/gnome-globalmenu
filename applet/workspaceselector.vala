@@ -15,6 +15,8 @@ _wnck_gdk_pixbuf_get_from_pixmap (Gdk.Pixbuf*   dest,
 class WorkspaceSelector : Gtk.Window {
 	private Wnck.Window? target;
 	private const int WIDTH = 128;
+	private const int ICON_SCALE_RATIO = 5;
+	private const int ICON_ALPHA = 192;
 	private GLib.List<WorkspaceItem> workspaces;
 	private Gtk.CheckButton follow;
 	private uint iid = 0;
@@ -87,19 +89,17 @@ class WorkspaceSelector : Gtk.Window {
 	}
 	private void do_menu() {
 		VBox rows = new VBox(false, 0);
-		HBox row;
-		int nth_vdesktop = 0;				   
+		HBox row;				   
 		for (int nrow=0; nrow<nrows; nrow++) {
 			row = new HBox(true, 0);
 			rows.pack_start(row, true, true, 0);
 			for (int ncol=0; ncol<ncols; ncol++) {
-				WorkspaceItem wi = new WorkspaceItem.with_pixbuf(get_mini_screenshot(nth_vdesktop));
+				WorkspaceItem wi = new WorkspaceItem.with_pixbuf(get_mini_screenshot(ncol, nrow));
 				row.pack_start(wi, true, true, 0);
 				wi.viewport_x = ncol * screen_width;
 				wi.viewport_y = nrow * screen_height;
 				wi.current = ((current_row == nrow) && (current_column == ncol));
 				workspaces.append(wi);
-				nth_vdesktop++;
 			}
 		}
 		follow = new Gtk.CheckButton.with_label(_("Follow the window"));
@@ -109,7 +109,7 @@ class WorkspaceSelector : Gtk.Window {
 		this.add(rows);
 		this.show_all();
 	}
-	private Gdk.Pixbuf get_mini_screenshot(int nth_vdesktop) {
+	private Gdk.Pixbuf get_mini_screenshot(int col, int row) {
 		/* TODO:
 		 * Render also windows in selected Desktop */
 
@@ -122,7 +122,33 @@ class WorkspaceSelector : Gtk.Window {
                                               			 0, 0,
                                               			 -1, -1);
 		
-		/* created thumbnail Pixbuf */			   
+		/* render visible windows */
+		weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+		//string buf = "";
+		foreach(weak Wnck.Window window in windows) {
+			if (window_visible_on_desktop(window, col, row) && (!window.is_skip_pager())) {
+				Gdk.Pixbuf mi = window.get_icon();
+				int x, y, w, h;
+				get_window_abs_geometry(window, out x, out y, out w, out h);
+				x -= col * screen_width;
+				y -= row * screen_height;
+				
+				mi.composite(ss,
+							 x, y,
+							 mi.get_width()*ICON_SCALE_RATIO, mi.get_height()*ICON_SCALE_RATIO,
+							 x, y,
+							 ICON_SCALE_RATIO, ICON_SCALE_RATIO,
+							 Gdk.InterpType.NEAREST,
+							 ICON_ALPHA);
+				/*buf += window.get_application().get_name();
+				buf += " " + x.to_string();
+				buf += " " + y.to_string();
+				buf += "\n";*/
+			}
+		}
+		//GnomeMenuHelper.message(buf);
+		
+		/* create thumbnail Pixbuf */			   
 		Gdk.Pixbuf pb = new Gdk.Pixbuf(Gdk.Colorspace.RGB,
 									   false,
 									   8,
@@ -139,6 +165,22 @@ class WorkspaceSelector : Gtk.Window {
 				 ratio, ratio,
 				 Gdk.InterpType.BILINEAR); 
 		return pb;
+	}
+	private void get_window_abs_geometry(Wnck.Window window, out int x, out int y, out int w, out int h) {
+		window.get_geometry(out x, out y, out w, out h);
+		
+		Wnck.Workspace workspace = window.get_workspace();
+		x += workspace.get_viewport_x();
+		y += workspace.get_viewport_y();
+	}
+	private bool window_visible_on_desktop(Wnck.Window window, int col, int row) {
+		if (window.is_minimized()) return false;
+		int x, y, w, h;
+		get_window_abs_geometry(window, out x, out y, out w, out h);
+		return ((x >= col*screen_width) &&
+				(x < (col+1)*screen_width) &&
+				(y >= row*screen_height) &&
+				(y < (row+1)*screen_height));
 	}
 	public int nrows {
 		get {
