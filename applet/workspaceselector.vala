@@ -158,10 +158,10 @@ class WorkspaceSelector : Gtk.Window {
 											 				 w, h);*/
 											 				
 				Gdk.Pixbuf wi = new Gdk.Pixbuf(Gdk.Colorspace.RGB,
-											   false,
+											   true,
 											   8,
 											   w, h);
-				wi.fill((uint32)0x7f7f7fff);
+				wi.fill((uint32)0x0000007f);
 				mi.composite(wi,
 							 0, 0,
 							 mi.get_width()*ICON_SCALE_RATIO, mi.get_height()*ICON_SCALE_RATIO,
