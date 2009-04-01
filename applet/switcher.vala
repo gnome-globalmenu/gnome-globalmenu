@@ -123,29 +123,38 @@ public extern string* __get_task_name_by_pid(int pid);
 
 			/** Then handle the window actions */
 			Wnck.Window window = item_to_window(item);
-			if (window == null) return;
+			
+			/* if it is an Action Menu item, try to get reference to parent */
+			if (window == null) {
+				string[] paths = item.item_path.split("/");
+				string parent_path = "";
+				for (int co=0; co<paths.length-1; co++)
+					if (paths[co]!="")
+						parent_path = parent_path.concat("/", paths[co], null);
+				window = item_to_window(this.get(parent_path));
+			}
 			
 			switch(item.item_id) {
 				case "minimize":
-					window.minimize(); break;
+					if (window != null) window.minimize(); break;
 				case "maximize":
-					window.maximize(); break;
+					if (window != null) window.maximize(); break;
 				case "unmaximize":
-					window.unmaximize(); break;
+					if (window != null) window.unmaximize(); break;
 				case "move":
-					window.keyboard_move(); break;
+					if (window != null) window.keyboard_move(); break;
 				case "resize":
-					window.keyboard_size(); break;
+					if (window != null) window.keyboard_size(); break;
 				case "topmost":
-					window.make_above(); break;
+					if (window != null) window.make_above(); break;
 				case "untopmost":
-					window.unmake_above(); break;
+					if (window != null) window.unmake_above(); break;
 				case "stick":
-					window.stick(); break;
+					if (window != null) window.stick(); break;
 				case "unstick":
-					window.unstick(); break;
+					if (window != null) window.unstick(); break;
 				case "close":
-					window.close(Gtk.get_current_event_time()); break;
+					if (window != null) window.close(Gtk.get_current_event_time()); break;
 					break;
 				case "show_desktop":
 					weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
@@ -155,14 +164,14 @@ public extern string* __get_task_name_by_pid(int pid);
 					}
 					break;
 				case "workspaces":
-					WorkspaceSelector ws = new WorkspaceSelector(_current_window);
+					WorkspaceSelector ws = new WorkspaceSelector(window);
 					ws.show();
 					break;
 				default:
 					/** dirty trick to ignore the activate
 					 * signal on the item with the wnck action menu */
 					if (item.submenu != null) return;
-					perhaps_minimize_window(window);
+					if (window != null) perhaps_minimize_window(window);
 					break;
 			}
 		}
@@ -444,10 +453,10 @@ public extern string* __get_task_name_by_pid(int pid);
 					Parser.parse(this, s);
 					Gtk.Menu menu = _label_item.submenu;
 					
-					Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
+					/*Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
 					if (misd!=null) {
 						override_item_window(misd, find_desktop());
-					}
+					}*/
 					
 					foreach(Gtk.Widget widget in menu.get_children()) {
 						Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
@@ -457,17 +466,17 @@ public extern string* __get_task_name_by_pid(int pid);
 													is 30*/
 						Wnck.Window window = item_to_window(item);
 						if(window == null) continue;
-						if (window.is_active()) {
+						/*if (window.is_active()) {
 							setup_window_actions_menu(
 									"/switcher/" + item.item_id + "/", 
 									window);
-						}
+						}*/
 					}
 				} else {
 					if (_show_window_actions) {
 						s = replace(s, "%submenu%", do_action_menu(_current_window));
 						Parser.parse(this, s);
-						setup_window_actions_menu("/switcher/", _current_window);
+						/*setup_window_actions_menu("/switcher/", _current_window);*/
 					}
 				}
 			} else {
@@ -475,7 +484,7 @@ public extern string* __get_task_name_by_pid(int pid);
 				Parser.parse(this, s);
 			}
 		}
-		private void setup_window_actions_menu(string prefix, Wnck.Window window) {
+		/*private void setup_window_actions_menu(string prefix, Wnck.Window window) {
 			string[] actions = {"minimize",
 								"maximize",
 								"unmaximize",
@@ -493,7 +502,7 @@ public extern string* __get_task_name_by_pid(int pid);
 					override_item_window(si, window);
 				}
 			}
-		}
+		}*/
 		private bool guess_dock_is_around() {
 			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 			foreach(weak Wnck.Window window in windows)
@@ -515,12 +524,12 @@ public extern string* __get_task_name_by_pid(int pid);
 		private Gnomenu.MenuItem? window_to_item(Wnck.Window window) {
 			return this.get("/switcher/XID" + window.get_xid().to_string());
 		}
-		private void override_item_window(Gnomenu.MenuItem item, Wnck.Window? window) {
+		/*private void override_item_window(Gnomenu.MenuItem item, Wnck.Window? window) {
 			item.user_data = window;
-		}
+		}*/
 		private Wnck.Window? item_to_window(Gnomenu.MenuItem item) {
 			string id = item.item_id;
-			if(item.user_data != null) return item.user_data as Wnck.Window;
+			//if(item.user_data != null) return item.user_data as Wnck.Window;
 			if(id.has_prefix("XID")) {
 				return Wnck.Window.get(id.offset(3).to_ulong());
 			}
@@ -528,7 +537,7 @@ public extern string* __get_task_name_by_pid(int pid);
 		}
 		public Wnck.Window? current_window {
 			get {
-				return _current_window ;
+				return _current_window;
 			}
 			set {
 				_current_window = value;
