@@ -6,6 +6,7 @@ BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
+	application.vala \
 	main.vala \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
