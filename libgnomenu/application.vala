@@ -1,10 +1,23 @@
 namespace Gnomenu {
 public class Application{
-	public string readable_name;
-	public string exec_path;
-	public string icon_name;
+	public string readable_name {
+		get;
+		private set;
+	}
+	public string exec_path {
+		get;
+		private set;
+	}
+	public string icon_name {
+		get;
+		private set;
+	}
+	public bool not_in_menu {
+		get; 
+		private set;
+	}
 
-	public Wnck.Application wnck_application;
+	public List<Wnck.Application> wnck_applications;
 
 	private Gtk.EventBox _proxy_item;
 	private Gtk.Label name_widget;
@@ -22,11 +35,22 @@ public class Application{
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
+
 	private static bool initialized = false;
-	private static void init(){
+	public static void init(){
 		GMenu.TreeDirectory node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
 		append_node_r(node);
 		initialized = true;
+		Wnck.Screen screen = Wnck.Screen.get_default();
+		weak List<Wnck.Window> list = screen.get_windows();
+		foreach(Wnck.Window wwin in list) {
+			Wnck.Application wapp = wwin.get_application();
+			application_opened(screen, wapp);
+		}
+		screen.application_opened += application_opened;
+		screen.window_opened += window_opened;
+		screen.window_closed += window_closed;
+		screen.application_closed += application_closed;
 	}
 
 	private Application() { }
@@ -41,6 +65,7 @@ public class Application{
 		weak Application rt = dict.lookup(key);
 		if(rt == null) {
 			Application app = new Application();
+			app.not_in_menu = true;
 			app.readable_name = wapp.get_name();
 			app.exec_path = null;
 			app.icon_name = wapp.get_icon_name();
@@ -48,9 +73,22 @@ public class Application{
 			rt = app;
 			applications.prepend(#app);
 		}
-		/*FIXME: listen to wnckscreen.application_open /wnckscreen.application_close!*/
-		rt.wnck_application = wapp;
 		return rt;
+	}
+	public void update() {
+		if(proxy_item == null) return;
+		if(wnck_applications != null) {
+			int n = 0;
+			foreach(Wnck.Application wapp in wnck_applications) {
+				n += wapp.get_n_windows();
+			}
+			status_widget.label = "%u instances, %d windows"
+				.printf(wnck_applications.length(), n);
+		} else {
+			status_widget.label = "not launched";
+		}
+		name_widget.label = readable_name;
+		icon_widget.icon_name = icon_name;
 	}
 	private static void append_node_r(GMenu.TreeDirectory node) {
 		foreach (GMenu.TreeItem item in node.get_contents()) {
@@ -59,6 +97,7 @@ public class Application{
 					GMenu.TreeEntry entry = (GMenu.TreeEntry)item;
 					string key = generate_key(entry);
 					Application app = new Application();
+					app.not_in_menu = false;
 					app.readable_name = entry.get_name();
 					app.exec_path = entry.get_exec();
 					app.icon_name = entry.get_icon();
@@ -70,6 +109,32 @@ public class Application{
 				break;
 			}
 		}	
+	}
+
+	private static void window_opened(Wnck.Screen s, Wnck.Window wwin) {
+		Application app = lookup_from_wnck(wwin.get_application());
+		wwin.set_data("gnomenu-app", app);
+		app.update();
+		
+	}
+	private static void window_closed(Wnck.Screen s, Wnck.Window wwin) {
+		Application app = wwin.get_data("gnomenu-app") as Application;
+		if(app == null)	return;
+		app.update();
+	}
+	private static void application_opened(Wnck.Screen s, Wnck.Application wapp) {
+		Application app = lookup_from_wnck(wapp);
+		app.wnck_applications.prepend(wapp);
+		app.update();
+	}
+	private static void application_closed(Wnck.Screen s, Wnck.Application wapp) {
+		foreach(Application app in applications) {
+			/*Don't use lookup_from_wnck, since no pid now?*/
+			if(app.wnck_applications.find(wapp) != null) {
+				app.wnck_applications.remove(wapp);
+				app.update();
+			}
+		}
 	}
 
 	private void create_proxy_item() {
@@ -84,9 +149,7 @@ public class Application{
 		vbox.pack_start(name_widget, false, false, 0);
 		vbox.pack_start(status_widget, false, false, 0);
 		_proxy_item.add(hbox);
-		name_widget.label = readable_name;
-		status_widget.label = "unknown yet";
-		icon_widget.icon_name = icon_name;
+		update();
 	}
 
 	[CCode (cname = "get_task_name_by_pid")]

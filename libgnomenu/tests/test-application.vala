@@ -11,13 +11,15 @@ namespace Gnomenu {
 				Gtk.Box box = new Gtk.VBox(false, 0);
 				message("%p %p", window, box);
 				Wnck.Screen screen = Wnck.Screen.get_default();
+				Application.init();
 				screen.force_update();
-				weak List<Wnck.Window> list = screen.get_windows();
-				foreach(Wnck.Window win in list) {
-					Application app = Application.lookup_from_wnck(win.get_application());
-					if(app.proxy_item.parent != box) {
-						message("app found %s", app.readable_name);
+				foreach(Application app in Application.applications) {
+					if(app.wnck_applications != null) {
 						box.pack_start_defaults(app.proxy_item);
+						if(app.not_in_menu) {
+						message("%s %s not in menu",app.readable_name, app.exec_path);
+						
+						}
 					}
 				}
 				window.add(box);
