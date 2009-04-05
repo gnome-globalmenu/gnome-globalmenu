@@ -32,10 +32,10 @@ libgnomenu_la_SOURCES = \
 
 libgnomenu_la_CPPFLAGS = \
 			 -I$(top_srcdir) \
+			 $(GMENU_CFLAGS) \
 			 $(GTK_CFLAGS) \
 			 $(WNCK_CFLAGS) \
 			 $(X11_CFLAGS) \
-			 $(GMENU_CFLAGS) \
 			 -include $(CONFIG_HEADER) \
 			 -DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 			 -DGMENU_I_KNOW_THIS_IS_UNSTABLE \

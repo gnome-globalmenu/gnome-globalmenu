@@ -55,8 +55,6 @@ $(STAMP): $(VALASOURCES)
 	--pkg=gtk+-2.0 \
 	--pkg=libwnck-1.0 \
 	--pkg=libpanelapplet-2.0 \
-	--pkg=gnome-desktop-2.0 \
-	--pkg=libgnome-menu \
 	--pkg=gconf-2.0 \
 	--pkg=gnomenu \
 	--pkg=libnotify \
