@@ -1,8 +1,6 @@
 using GLib;
 using Gnomenu;
 using Gtk;
-using GnomeMenuHelper;
-private extern string __get_task_name_by_pid(int pid);
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
@@ -41,7 +39,6 @@ private extern string __get_task_name_by_pid(int pid);
 	<item id="close" type="image" icon="wnck-stock-delete" label="%labelclose%" visible="%visibleclose%" />
 </menu>""";
 
-		private GLib.HashTable<string,string> program_list;
 		private SearchBoxMenuItem search_box  = new SearchBoxMenuItem();
 		
 		private bool disposed = false;
@@ -67,9 +64,6 @@ private extern string __get_task_name_by_pid(int pid);
 			} catch (GLib.Error e) {
 				warning("%s", e.message);
 			}
-			program_list = GnomeMenuHelper.get_flat_list();
-			if (program_list.lookup("nautilus")==null)
-				program_list.insert("nautilus", _("File Manager"));
 				
 			NOWIN_TEMPLATE = Template.replace_simple(NOWIN_TEMPLATE, "%no_windows%", _("no windows"));
 			NOACT_TEMPLATE = Template.replace_simple(NOACT_TEMPLATE, "%no_actions%", _("no actions"));

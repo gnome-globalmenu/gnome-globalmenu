@@ -1,5 +1,5 @@
+namespace Gnomenu {
 public class Application{
-	private extern string get_task_name_by_pid(int pid);
 	public string readable_name;
 	public string exec_path;
 	public string icon_name;
@@ -11,7 +11,6 @@ public class Application{
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
 	private static bool initialized = false;
 	private static void init(){
-		GnomeVFS.init();
 		GMenu.TreeDirectory node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
 		append_node_r(node);
 		initialized = true;
@@ -60,6 +59,8 @@ public class Application{
 		}	
 	}
 
+	[CCode (cname = "get_task_name_by_pid")]
+	private static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {
 		string process_name = get_process_name(app);
 		if ((process_name=="") && (process_name==null)) process_name = app.get_name();
@@ -71,7 +72,7 @@ public class Application{
 	}
 
 	private static string get_process_name(Wnck.Application app) {
-		string txt = __get_task_name_by_pid(app.get_pid());
+		string txt = get_task_name_by_pid(app.get_pid());
 		if ((txt==null) || (txt=="")) return "";
 		string ret = txt.chomp();
 
@@ -146,4 +147,5 @@ public class Application{
 		}
 		return ret;
 	}
+}
 }

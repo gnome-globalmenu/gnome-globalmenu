@@ -17,6 +17,7 @@ VALASOURCES = \
 	keygrab.vala \
 	globalmenu.vala \
 	gnomenu.vala \
+	application.vala \
 	monitor.vala \
 	$(NULL)
 
@@ -26,6 +27,7 @@ libgnomenu_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
 						$(VALASOURCES:.vala=.h) \
 						keygrab-ccode.c \
+						task-utils-c.c \
 						menushellutils-ccode.c 
 
 libgnomenu_la_CPPFLAGS = \
@@ -33,13 +35,16 @@ libgnomenu_la_CPPFLAGS = \
 			 $(GTK_CFLAGS) \
 			 $(WNCK_CFLAGS) \
 			 $(X11_CFLAGS) \
+			 $(GMENU_CFLAGS) \
 			 -include $(CONFIG_HEADER) \
 			 -DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+			 -DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 			 -include ../libcompat/libcompat.h
 
 libgnomenu_la_LIBADD = $(GTK_LIBS) \
 					   $(WNCK_LIBS) \
 					   $(X11_LIBS) \
+					   $(GMENU_LIBS) \
 					   ../libcompat/libcompat.la
 
 libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined -Wl,--as-needed
@@ -61,7 +66,7 @@ endif
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
-	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0
 	bash patch.sh
 
 gnomenu.deps:

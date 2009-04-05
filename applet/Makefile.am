@@ -6,12 +6,10 @@ BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
 	applet.vala \
-	application.vala \
 	main.vala \
 	gtkextra-gconfdialog.vala \
 	switcher.vala \
 	template.vala \
-	gnomemenuhelper.vala \
 	workspaceselector.vala \
 	$(NULL)
 
@@ -35,7 +33,6 @@ $(server_in_files): $(server_in_in_files) Makefile
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	$(VALASOURCES:.vala=.h) \
-	task-utils-c.c \
 	x-utils-c.c \
 	$(NULL)
 
@@ -85,7 +82,6 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
 		-include ../libcompat/libcompat.h \
-		-DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-g \
 		$(NULL)

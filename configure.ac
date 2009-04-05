@@ -74,6 +74,10 @@ PKG_CHECK_MODULES(WNCK, libwnck-1.0 >= $WNCK_REQUIRED)
 AC_SUBST(WNCK_CFLAGS)
 AC_SUBST(WNCK_LIBS)
 
+PKG_CHECK_MODULES(GMENU, libgnome-menu >= $GMENU_REQUIRED)
+AC_SUBST(GMENU_CFLAGS)
+AC_SUBST(GMENU_LIBS)
+
 PKG_CHECK_MODULES(X11, x11 >= $X11_REQUIRED)
 AC_SUBST(X11_CFLAGS)
 AC_SUBST(X11_LIBS)
@@ -108,8 +112,7 @@ AC_ARG_WITH(
 AS_IF([test "x$with_gnome_panel" != xno],
 	[PKG_CHECK_MODULES(GNOME_PANEL, 
 		[	libpanelapplet-2.0 >= $PANEL_REQUIRED, 
-			libnotify >= $NOTIFY_REQUIRED,
-			libgnome-menu >= $GMENU_REQUIRED
+			libnotify >= $NOTIFY_REQUIRED
 		],
 		[
 		with_gnome_panel=true;

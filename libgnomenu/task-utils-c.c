@@ -7,7 +7,7 @@
 
 #include <glib.h>
 
-char* __get_task_name_by_pid(int pid) {
+char* get_task_name_by_pid(int pid) {
 	char linkname[64];
 	int ret;
 	//snprintf(linkname, sizeof(linkname), "/proc/%i/exe", pid);
