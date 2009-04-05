@@ -367,11 +367,12 @@ private extern string __get_task_name_by_pid(int pid);
 			
 			if(current_window == null) return;
 			
+			Application app = Application.lookup_from_wnck(current_window.get_application());
+
 			Wnck.WindowType wt = current_window.get_window_type();
 			if (wt==Wnck.WindowType.DOCK) 
 				_label = ""; 
 			else {
-				Application app = Application.lookup_from_wnck(current_window.get_application());
 				if(app != null) {
 				_label = app.readable_name;
 				} else {
@@ -391,8 +392,7 @@ private extern string __get_task_name_by_pid(int pid);
 				if(width <= 0) width = -1;
 				if(height <= 0) height = -1;
 
-				s = replace(s, "%icon%", "pixbuf:" + 
-						pixbuf_encode_b64(guess_icon(current_window, width, height)));
+				s = replace(s, "%icon%", "theme:"+app.icon_name);
 					
 			} else {
 				s = replace(s, "%type%", "normal");

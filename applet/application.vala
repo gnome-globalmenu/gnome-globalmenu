@@ -2,6 +2,7 @@ public class Application{
 	private extern string get_task_name_by_pid(int pid);
 	public string readable_name;
 	public string exec_path;
+	public string icon_name;
 
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
@@ -14,18 +15,26 @@ public class Application{
 		initialized = true;
 	}
 
-	public Application(string readable_name, string exec_path) {
-		this.readable_name = readable_name;
-		this.exec_path = exec_path;
-	}
+	private Application() { }
+
 	public static unowned Application lookup(string key) {
 		if(!initialized) init();
 		return dict.lookup(key);
 	}
-	public static unowned Application lookup_from_wnck(Wnck.Application app) {
+	public static unowned Application lookup_from_wnck(Wnck.Application wapp) {
 		if(!initialized) init();
-		string key = generate_key_from_wnck(app);
-		return dict.lookup(key);
+		string key = generate_key_from_wnck(wapp);
+		weak Application rt = dict.lookup(key);
+		if(rt == null) {
+			Application app = new Application();
+			app.readable_name = wapp.get_name();
+			app.exec_path = null;
+			app.icon_name = wapp.get_icon_name();
+			dict.insert(key, app);
+			rt = app;
+			applications.prepend(#app);
+		}
+		return rt;
 	}
 	private static void append_node_r(GMenu.TreeDirectory node) {
 		foreach (GMenu.TreeItem item in node.get_contents()) {
@@ -33,7 +42,10 @@ public class Application{
 				case GMenu.TreeItemType.ENTRY:
 					GMenu.TreeEntry entry = (GMenu.TreeEntry)item;
 					string key = generate_key(entry);
-					Application app = new Application(entry.get_name(), entry.get_exec());
+					Application app = new Application();
+					app.readable_name = entry.get_name();
+					app.exec_path = entry.get_exec();
+					app.icon_name = entry.get_icon();
 					dict.insert(key, app);
 					applications.prepend(#app);
 				break;
