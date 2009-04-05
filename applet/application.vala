@@ -4,6 +4,8 @@ public class Application{
 	public string exec_path;
 	public string icon_name;
 
+	public Wnck.Application wnck_application;
+
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
@@ -34,6 +36,8 @@ public class Application{
 			rt = app;
 			applications.prepend(#app);
 		}
+		/*FIXME: listen to wnckscreen.application_open /wnckscreen.application_close!*/
+		rt.wnck_application = wapp;
 		return rt;
 	}
 	private static void append_node_r(GMenu.TreeDirectory node) {
