@@ -1,14 +1,13 @@
 using Gtk;
 
 public class TestMan : GLib.Object {
-	public delegate void DataTestFunc();
 	public string uri {get; construct; }
 	public Gtk.Window window;
 	public TestMan(string uri) {
 		this.uri = uri;
 	}
 	public void add(string name, DataTestFunc func) {
-		Test.add_data_func(uri + "/" + name, (GLib.DataTestFunc)func);
+		Test.add_data_func(uri + "/" + name, func);
 	}
 	public void run() {
 		create_test_window();
@@ -18,6 +17,7 @@ public class TestMan : GLib.Object {
 	}
 	public void create_test_window() {
 		window = new Gtk.Window(WindowType.TOPLEVEL);
+		message("window created");
 		window.delete_event += (window) => {
 			window.hide_on_delete();
 			Gtk.main_quit();

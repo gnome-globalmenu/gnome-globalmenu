@@ -6,6 +6,19 @@ public class Application{
 
 	public Wnck.Application wnck_application;
 
+	private Gtk.EventBox _proxy_item;
+	private Gtk.Label name_widget;
+	private Gtk.Label status_widget;
+	private Gtk.Image icon_widget;
+
+	public Gtk.Widget proxy_item {
+		get {
+			if(_proxy_item == null) {
+				create_proxy_item();
+			}
+			return _proxy_item;
+		}
+	}
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
@@ -57,6 +70,23 @@ public class Application{
 				break;
 			}
 		}	
+	}
+
+	private void create_proxy_item() {
+		_proxy_item = new Gtk.EventBox();
+		name_widget = new Gtk.Label("");
+		status_widget = new Gtk.Label("");
+		icon_widget = new Gtk.Image();
+		Gtk.HBox hbox = new Gtk.HBox(false, 0);
+		Gtk.VBox vbox = new Gtk.VBox(false, 0);
+		hbox.pack_start(icon_widget, false, false, 0);
+		hbox.pack_start(vbox, true, true, 0);
+		vbox.pack_start(name_widget, false, false, 0);
+		vbox.pack_start(status_widget, false, false, 0);
+		_proxy_item.add(hbox);
+		name_widget.label = readable_name;
+		status_widget.label = "unknown yet";
+		icon_widget.icon_name = icon_name;
 	}
 
 	[CCode (cname = "get_task_name_by_pid")]
