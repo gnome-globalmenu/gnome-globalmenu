@@ -6,20 +6,24 @@ public class Application{
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
-	static construct {
+	private static bool initialized = false;
+	private static void init(){
 		GnomeVFS.init();
 		GMenu.TreeDirectory node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
 		append_node_r(node);
+		initialized = true;
 	}
 
 	public Application(string readable_name, string exec_path) {
 		this.readable_name = readable_name;
 		this.exec_path = exec_path;
 	}
-	private unowned Application lookup(string key) {
+	public static unowned Application lookup(string key) {
+		if(!initialized) init();
 		return dict.lookup(key);
 	}
-	private unowned Application lookup_from_wnck(Wnck.Application app) {
+	public static unowned Application lookup_from_wnck(Wnck.Application app) {
+		if(!initialized) init();
 		string key = generate_key_from_wnck(app);
 		return dict.lookup(key);
 	}
@@ -29,7 +33,7 @@ public class Application{
 				case GMenu.TreeItemType.ENTRY:
 					GMenu.TreeEntry entry = (GMenu.TreeEntry)item;
 					string key = generate_key(entry);
-					Application app = new Application(entry.get_exec(), entry.get_name());
+					Application app = new Application(entry.get_name(), entry.get_exec());
 					dict.insert(key, app);
 					applications.prepend(#app);
 				break;

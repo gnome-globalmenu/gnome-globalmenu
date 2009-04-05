@@ -208,8 +208,10 @@ class WorkspaceSelector : Gtk.Window {
 		window.get_geometry(out x, out y, out w, out h);
 		
 		Wnck.Workspace workspace = window.get_workspace();
-		x += workspace.get_viewport_x();
-		y += workspace.get_viewport_y();
+		if(workspace != null) {
+			x += workspace.get_viewport_x();
+			y += workspace.get_viewport_y();
+		}
 	}
 	private bool window_visible_on_desktop(Wnck.Window window, int col, int row) {
 		if (window.is_minimized()) return false;

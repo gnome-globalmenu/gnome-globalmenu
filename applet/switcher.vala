@@ -306,59 +306,6 @@ private extern string __get_task_name_by_pid(int pid);
 				if (window.get_window_type() == Wnck.WindowType.DESKTOP) return window;
 			return null;
 		}
-		private string get_process_name(Wnck.Window window) {
-			string txt = __get_task_name_by_pid(window.get_pid());
-			if ((txt==null) || (txt=="")) return "";
-			string ret = txt.chomp();
-
-			if (ret.substring(ret.length-4,4)==".exe")
-				return ret; // is a wine program
-			
-			ret = remove_path(ret.split(" ")[0], "/");
-			switch(ret) {
-			case "mono":
-			case "python":
-			case "python2.5":
-			case "vmplayer":
-				string[] buf = txt.chomp().split(" ");
-				if (buf.length<2)
-					return ret; else
-					return remove_path(buf[1], "/");
-				break;
-			case "wine":
-				return window.get_application().get_name();
-				break;
-			}
-			return ret;
-		}
-		private string get_program_name(Wnck.Window window) {
-			if (window.get_window_type() == Wnck.WindowType.DESKTOP)
-				return _("Desktop");
-			
-			string process_name = get_process_name(window);
-			if ((process_name=="") && (process_name==null)) process_name = window.get_application().get_name();
-
-			string ret = program_list.lookup(process_name);
-			if (ret == null) {
-				/* try by removing .real (i.e. Skype bug) */
-				ret = program_list.lookup(replace(process_name, ".real", ""));
-			}
-			if (ret == null) {
-				ret = window.get_name();
-				switch (process_name) {
-					/* fixes a problem with some apps like Archive Manager
-					 * Add any other affected application in cases below here */
-					case "file-roller":
-					case "evince":
-					case "eog":
-					case "soffice.bin":
-						if (program_list.lookup(process_name)==null)
-							program_list.insert(process_name, ret);	
-						break;
-				}
-			}
-			return ret; 
-		}
 
 		private Gdk.Pixbuf guess_icon(Wnck.Window window, int width = -1, int height = -1) {
 			Gdk.Pixbuf[] icons = {
@@ -423,9 +370,14 @@ private extern string __get_task_name_by_pid(int pid);
 			Wnck.WindowType wt = current_window.get_window_type();
 			if (wt==Wnck.WindowType.DOCK) 
 				_label = ""; 
-			else
-				_label = get_program_name(current_window);
-			
+			else {
+				Application app = Application.lookup_from_wnck(current_window.get_application());
+				if(app != null) {
+				_label = app.readable_name;
+				} else {
+				_label = "app unknown shouldn't see this";
+				}
+			}
 
 			string s = MENU_TEMPLATE;
 			s = replace(s, "%label%", Markup.escape_text(_label));
