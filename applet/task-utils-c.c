@@ -39,5 +39,5 @@ char* __get_task_name_by_pid(int pid) {
 			r = g_string_append_c(r, ' ');
 	}
 		
-	return r->str;
+	return g_string_free(r, FALSE);
 }

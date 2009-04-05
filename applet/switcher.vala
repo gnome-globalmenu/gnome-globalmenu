@@ -2,7 +2,7 @@ using GLib;
 using Gnomenu;
 using Gtk;
 using GnomeMenuHelper;
-public extern string* __get_task_name_by_pid(int pid);
+private extern string __get_task_name_by_pid(int pid);
 	
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
