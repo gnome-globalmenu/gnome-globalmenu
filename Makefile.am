@@ -13,7 +13,6 @@ EXTRA_DIST = \
 	intltool-merge.in \
 	intltool-update.in \
 	gnome-globalmenu.schemas.in \
-	gnome-globalmenu.spec \
 	patch.sh \
 	$(NULL)
 
