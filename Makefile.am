@@ -9,6 +9,7 @@ man_MANS = gnome-globalmenu.1
 
 EXTRA_DIST = \
 	$(man_MANS) \
+	$(doc_DATA) \
 	intltool-extract.in \
 	intltool-merge.in \
 	intltool-update.in \
@@ -34,6 +35,7 @@ include $(top_srcdir)/Makefile.licenses
 schemadir   = $(GCONF_SCHEMA_FILE_DIR)
 schema_in_files = gnome-globalmenu.schemas.in
 schema_DATA = $(schema_in_files:.in=)
+doc_DATA = README COPYING ChangeLog AUTHORS INSTALL README.XFCE README.GNOME
 @INTLTOOL_SCHEMAS_RULE@
 
 if GCONF_SCHEMAS_INSTALL
@@ -48,7 +50,9 @@ rpm:
 	vim gnome-globalmenu.spec
 	touch `find . -name '*.vala'`
 	make dist
-	rpmbuild -tb $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz
+	cp $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 ~/rpmbuild/SOURCES
+	rpmbuild -bb gnome-globalmenu.spec
 rpm-fast:
 	make dist
-	rpmbuild -tb $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz
+	cp $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 ~/rpmbuild/SOURCES
+	rpmbuild -bb gnome-globalmenu.spec

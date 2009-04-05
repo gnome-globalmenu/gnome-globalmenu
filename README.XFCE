@@ -1,0 +1,18 @@
+Post Installation
+=================
+
+1. Load the GTK Plugin
+
+Create the file ~/.config/xfce4/xinitrc
+
+{{{
+#!/bin/sh
+
+export GTK_MODULES=globalmenu-gnome
+. /etc/xdg/xfce4/xinitrc
+}}}
+
+2. Add the XFCE Plugin to the panel or
+
+Try http://bapoumba.wordpress.com/2008/01/04/add-gnome-applets-to-the-xfce-panel/
+(Not tested) with the GNOME Applet

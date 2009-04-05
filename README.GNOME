@@ -1,0 +1,19 @@
+Post Installation
+================
+
+
+On Gnome 2.24 or newer
+----------------------
+1. Add the applet (GlobalMenu PanelApplet) to the panel.
+2. Enable the Gtk Plugin from the preference window of the applet.
+
+On Gnome 2.22 or older
+----------------------
+
+1. Edit your .bash_profile, add
+
+{{{
+export GTK_MODULES=globalmenu-gnome
+}}}
+
+2. Add the applet (GlobalMenu PanelApplet) to the panel.
