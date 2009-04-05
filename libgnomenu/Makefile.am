@@ -69,10 +69,7 @@ gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0
 	bash patch.sh
 
-gnomenu.deps:
-	echo gtk+-2.0 > $@
-
-BUILT_SOURCES = gnomenu.vapi  gnomenu.deps
+BUILT_SOURCES = gnomenu.vapi
 
 EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh libgnomenu.pc.in libgnomenu-uninstalled.pc.in 
 
