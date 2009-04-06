@@ -386,7 +386,14 @@ using Gtk;
 				if(width <= 0) width = -1;
 				if(height <= 0) height = -1;
 
-				s = replace(s, "%icon%", "theme:"+app.icon_name);
+				message("iconname = %s no_in_menu = %s", 
+						app.icon_name, app.not_in_menu.to_string()
+				);
+				if(app.icon_pixbuf != null) {
+					s = replace(s, "%icon%", "pixbuf:" + pixbuf_encode_b64(app.icon_pixbuf));
+				} else {
+					s = replace(s, "%icon%", "theme:"+app.icon_name);
+				}
 					
 			} else {
 				s = replace(s, "%type%", "normal");

@@ -12,6 +12,11 @@ public class Application{
 		get;
 		private set;
 	}
+	/* has a priority over icon_name */
+	public Gdk.Pixbuf icon_pixbuf {
+		get;
+		private set;
+	}
 	public bool not_in_menu {
 		get; 
 		private set;
@@ -62,17 +67,26 @@ public class Application{
 	public static unowned Application lookup_from_wnck(Wnck.Application wapp) {
 		if(!initialized) init();
 		string key = generate_key_from_wnck(wapp);
+		message("key = %s", key);
 		weak Application rt = dict.lookup(key);
 		if(rt == null) {
 			Application app = new Application();
 			app.not_in_menu = true;
 			app.readable_name = wapp.get_name();
 			app.exec_path = null;
+			/* NOTE: get_icon_name is not implement in wnck.
+			 * Therefore we set icon_pixbuf, which
+			 * indeed has a higher priority in switcher.vala
+			 * */
 			app.icon_name = wapp.get_icon_name();
+
 			dict.insert(key, app);
 			rt = app;
 			applications.prepend(#app);
 		}
+		/* Always use the icon_pixbuf obtained from wnck.*/
+		rt.icon_pixbuf = wapp.get_mini_icon();
+
 		return rt;
 	}
 	public void update() {
@@ -176,6 +190,8 @@ public class Application{
 		ret = ret.split(" ")[0];
 		/* Second, remove the path */
 		weak string path_stripped = ret.rchr(-1, '/');
+		if(path_stripped == null) path_stripped = ret;
+		else path_stripped = path_stripped.offset(1); /*remove /*/
 		switch(path_stripped) {
 		case "mono":
 		case "python":
@@ -189,7 +205,7 @@ public class Application{
 		case "wine":
 			return app.get_name();
 		}
-		return ret;
+		return path_stripped;
 	}
 
 /* FIXME: 
