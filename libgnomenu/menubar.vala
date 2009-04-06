@@ -87,8 +87,6 @@ namespace Gnomenu {
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
-				_overflown_item.unparent();
-				_overflown_item= null;
 			}
 			base.dispose();
 		}
