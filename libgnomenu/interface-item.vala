@@ -39,6 +39,17 @@ namespace Gnomenu {
 		public abstract string? item_font {get; set;}
 
 
+		public bool is_child_of(Item possible_parent) {
+			Shell parent_shell;
+			Item parent_item = this;
+			for(parent_item = this; 
+				parent_item != null && parent_item != possible_parent; 
+				parent_shell = parent_item.shell, parent_item = parent_shell.owner) {
+				continue;
+			}
+				
+			return parent_item != null;
+		}
 		public string item_path_name {owned get {
 			if(item_id != null)
 				return item_id;

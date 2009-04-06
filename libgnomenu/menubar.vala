@@ -95,6 +95,37 @@ namespace Gnomenu {
 		/**
 		 * This signal is emitted when a child item is activated
 		 */
+		public virtual void emit_activate(MenuItem item) {
+			if(item == _overflown_item) {
+				rebuild_overflown_menu();
+				return;
+			} 
+			if(item.is_child_of(_overflown_item)) {
+				string path = overflown_path_to_path(item.item_path);
+				message("real_item is %s", path);
+				MenuItem real_item = get(path);
+				real_item.activate();
+			}
+			activate(item);
+		}
+		private string? overflown_path_to_path(string path) {
+			int slashes = 0;
+			StringBuilder sb = new StringBuilder("");
+			/***
+			 * path = "00001234:/0/1/234/512";
+			 * sb =   "00001234:  /1/234/512";
+			 */
+			for(int i = 0; i < path.length; i++) {
+				if( path[i] == '/') {
+					slashes ++;
+				}
+				if(slashes != 1) 
+					sb.append_unichar(path[i]);
+			}
+			if(slashes > 1) 
+				return sb.str;
+			return null;
+		}
 		public signal void activate(MenuItem item);
 
 		/**
@@ -203,7 +234,7 @@ namespace Gnomenu {
 		 * return a strong reference of the menu item if found;
 		 * null if not.
 		 */
-		public MenuItem? get(string path) {
+		public new MenuItem? get(string path) {
 			string[] tokens = path.split_set("/", -1);
 			tokens.length = (int) strv_length(tokens);
 			Shell shell = this;
@@ -264,21 +295,18 @@ namespace Gnomenu {
 			_overflown_item.style = style;
 			_overflown_item.has_sub_shell = true;
 			_overflown_item.visible = true;
+			_overflown_item.item_id = "_arrow_";
 			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			try {
 				Parser.parse(shell ,OVERFLOWER_TEMPLATE.printf("<menu/>"));
 			} catch(GLib.Error e) {
 				warning("%s", e.message);
 			}
-			_overflown_item.activate += (obj) => {
-				rebuild_overflown_menu();
-			};
 		}
 		private void rebuild_overflown_menu() {
 			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			StringBuilder sb = new StringBuilder("");
 			sb.append(Serializer.to_string(this));
-			message("%s", sb.str);
 			try {
 				Parser.parse(shell, sb.str);
 			} catch(GLib.Error e) {
@@ -319,24 +347,6 @@ namespace Gnomenu {
 			}
 			return lhs > rhs;
 		}
-		private string? overflown_path_to_path(string path) {
-			int slashes = 0;
-			StringBuilder sb = new StringBuilder("");
-			/***
-			 * path = "00001234:/0/1/234/512";
-			 * sb =   "00001234:  /1/234/512";
-			 */
-			for(int i = 0; i < path.length; i++) {
-				if( path[i] == '/') {
-					slashes ++;
-				}
-				if(slashes != 1) 
-					sb.append_unichar(path[i]);
-			}
-			if(slashes > 1) 
-				return sb.str;
-			return null;
-		}
 		private void reset_bg_pixmap() {
 			if(background.type != BackgroundType.PIXMAP) return;
 			if(0 != (get_flags() & WidgetFlags.REALIZED)) {
@@ -359,10 +369,34 @@ namespace Gnomenu {
 				queue_draw();
 			}
 		}
+		public override bool move_selected(int distance) {
+			if(active_menu_item == _overflown_item) {
+				if(distance == 1) {
+					select_first(true);
+				} else {
+					for(int i = this.length - 1; i >= 0; i--) {
+						Item item = this.get_item(i);
+
+						Widget child = item as Widget;
+						if(!child_need_overflown_item(child)) {
+							select_item(child);
+						}
+					}
+				}
+				return true;
+			} else {
+
+				/*FIXME:
+				 * Move from the last visible item to _overflown_item
+				 * or from the first visible item to _overflown_item
+				 */
+
+				return base.move_selected(distance);
+			}
+		}
 		public override void forall(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
-				if(_overflown_item != null)
-					callback(_overflown_item);
+				callback(_overflown_item);
 			}
 			base.forall(include_internals, callback);
 		}
@@ -436,7 +470,6 @@ namespace Gnomenu {
 					Widget child = item as Widget;
 					child.set_child_visible(true);
 				}
-			
 			}
 			if(need_reset_bg_pixmap) {
 				reset_bg_pixmap();
@@ -453,7 +486,6 @@ namespace Gnomenu {
 						0, 0, -1, -1);
 			}
 			foreach(weak Widget child in get_children()) {
-
 				propagate_expose(child, event);
 			}
 			propagate_expose(_overflown_item, event);

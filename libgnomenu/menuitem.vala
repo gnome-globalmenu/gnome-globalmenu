@@ -457,7 +457,7 @@ namespace Gnomenu {
 			base.forall(include_internals, callback);
 		}
 		public override void activate() {
-			(toplevel_shell as MenuBar).activate(this);
+			(toplevel_shell as MenuBar).emit_activate(this);
 		}
 		private void update_show_image() {
 			if(_image_widget != null) {
