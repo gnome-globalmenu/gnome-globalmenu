@@ -52,8 +52,8 @@ msgid ""
 msgstr ""
 "Diese Parameter sollten der Variable GLOBALMENU_GNOME_ARGS anstelle der "
 "Befehlszeile zugeordnet werden.\n"
-"\t\tACHTUNG: Die Variable GTK_MENUBAR_NO_MAC enthält die Anwendungen, die vom "
-"Plugin ignoriert werden sollen.\n"
+"\t\tACHTUNG: Die Variable GTK_MENUBAR_NO_MAC enthält die Anwendungen, die "
+"vom Plugin ignoriert werden sollen.\n"
 "\t\t"
 
 #: ../applet/applet.c:40
@@ -143,7 +143,8 @@ msgstr "S_chließen"
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
 msgstr ""
-"Einträge des Fenstermenüs zum Menü des Namens der aktiven Anwendung hinzufügen"
+"Einträge des Fenstermenüs zum Menü des Namens der aktiven Anwendung "
+"hinzufügen"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Enable Global Menu For GTK applications"
