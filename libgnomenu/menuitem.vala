@@ -290,7 +290,6 @@ namespace Gnomenu {
 
 		private bool _truncated;
 
-		private string _path; /*merely a buffer*/
 		private string _font;
 		private string _label;
 		private string _icon;

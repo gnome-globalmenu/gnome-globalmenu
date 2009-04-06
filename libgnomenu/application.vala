@@ -186,10 +186,8 @@ public class Application{
 				return ret; 
 			else
 				return buf[1].rchr(-1, '/');
-			break;
 		case "wine":
 			return app.get_name();
-			break;
 		}
 		return ret;
 	}

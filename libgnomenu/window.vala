@@ -95,10 +95,10 @@ namespace Gnomenu {
 		}
 		public signal void property_notify_event(string name);
 
-		public string? get(string property_name) {
+		public new string? get(string property_name) {
 			return get_by_atom(Gdk.Atom.intern(property_name, false));	
 		}
-		public void set(string property_name, string? value) {
+		public new void set(string property_name, string? value) {
 			set_by_atom(Gdk.Atom.intern(property_name, false), value);	
 		}
 		public string? get_by_atom(Gdk.Atom atom) {
