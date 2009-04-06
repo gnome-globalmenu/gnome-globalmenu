@@ -1,4 +1,20 @@
 namespace Gnomenu {
+	/******
+	 * The binary executable name is used as the key to link 
+	 * Wnck with GMenu.
+	 *
+	 * If the bin exec starts with wine, mono, python, use
+	 * the application's full name. (Although usually app and
+	 * dists don't agree on the same name!)
+	 *
+	 * the policy is sub-opt, because
+	 * one executable can actually be multiple applications,
+	 *
+	 * Example: NXClient Openoffice
+	 *
+	 * Known problem: Openoffice suite apps always show up 
+	 * as one Openoffice app (the last found one in GMenu).
+	 * */
 public class Application{
 	public string readable_name {
 		get;
@@ -43,6 +59,7 @@ public class Application{
 
 	private static bool initialized = false;
 	public static void init(){
+		if(initialized) return;
 		GMenu.TreeDirectory node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
 		append_node_r(node);
 		initialized = true;
@@ -60,14 +77,22 @@ public class Application{
 
 	private Application() { }
 
+	public static unowned Application add_application(string key) {
+		Application app = new Application();
+		unowned Application rt = app;
+		dict.insert(key, app);
+		applications.prepend(#app);
+		return rt;
+	}
+
 	public static unowned Application lookup(string key) {
-		if(!initialized) init();
+		init();
 		return dict.lookup(key);
 	}
 	public static unowned Application lookup_from_wnck(Wnck.Application wapp) {
-		if(!initialized) init();
+		init();
 		string key = generate_key_from_wnck(wapp);
-		message("key = %s", key);
+		message("wnck key = %s", key);
 		weak Application rt = dict.lookup(key);
 		if(rt == null) {
 			Application app = new Application();
@@ -110,6 +135,7 @@ public class Application{
 				case GMenu.TreeItemType.ENTRY:
 					GMenu.TreeEntry entry = (GMenu.TreeEntry)item;
 					string key = generate_key(entry);
+					message("gmenu key = %s", key);
 					Application app = new Application();
 					app.not_in_menu = false;
 					app.readable_name = entry.get_name();
@@ -169,90 +195,71 @@ public class Application{
 	[CCode (cname = "get_task_name_by_pid")]
 	private static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {
-		string process_name = get_process_name(app);
-		if ((process_name=="") && (process_name==null)) process_name = app.get_name();
-
-		if(process_name.has_suffix(".real")) {
-			return process_name.substring(0, - 5);
-		}
-		return process_name;
+		return get_process_name(app);
 	}
 
 	private static string get_process_name(Wnck.Application app) {
-		string txt = get_task_name_by_pid(app.get_pid());
-		if ((txt==null) || (txt=="")) return "";
-		string ret = txt.chomp();
+		string cmdline = get_task_name_by_pid(app.get_pid());
+		string[] args;
+		if (cmdline == null || cmdline =="") return app.get_name();
 
-		if (ret.has_suffix(".exe"))
-			return ret; // is a wine program
-		
-		/* First, remove the parameters */
-		ret = ret.split(" ")[0];
-		/* Second, remove the path */
-		weak string path_stripped = ret.rchr(-1, '/');
-		if(path_stripped == null) path_stripped = ret;
-		else path_stripped = path_stripped.offset(1); /*remove /*/
-		switch(path_stripped) {
-		case "mono":
-		case "python":
-		case "python2.5":
-		case "vmplayer":
-			string[] buf = txt.chomp().split(" ");
-			if (buf.length<2)
-				return ret; 
-			else
-				return buf[1].rchr(-1, '/');
-		case "wine":
+		try {
+			GLib.Shell.parse_argv(cmdline, out args);
+
+			string basename = Path.get_basename(args[0]);
+
+			switch(basename) {
+				case "mono":
+				case "python":
+				case "python2.5":
+				case "wine":
+				return app.get_name();
+				case "swriter.bin":
+				return "openoffice.org";
+			}
+			return basename;
+		} catch (GLib.Error e) {
 			return app.get_name();
 		}
-		return path_stripped;
 	}
 
 /* FIXME: 
  * The following functions are 
  * to be replaced by a manually written normalizer with StringBuilder*/
 	private static string generate_key(GMenu.TreeEntry entry ) {
-		string txt = entry.get_exec();
-		txt = adjust_spaces(txt);
-		
-		string[] buf = txt.split(" ");
-		int cc=0;
-		while(buf[cc]=="env") cc+=2;
-		while(buf[cc]=="wine") cc++;
-		txt = buf[cc];
-		
-		long co = txt.length-1;
-		while ((co>=0) && (txt.substring(co, 1)!="/")) {
-			co--;
+		string[] args;
+		StringBuilder sb = new StringBuilder("");
+		bool exec = true;
+		try {
+			GLib.Shell.parse_argv(entry.get_exec(), out args);
+			for(int i = 0; i< args.length; i++) {
+				if(args[i] == "env") {
+					while(args[i+1].chr(-1, '=')!= null) i++;
+					continue;
+				}
+				
+				if(exec) {
+					string basename = Path.get_basename(args[i]);
+					switch(basename) {
+						/*For those aliens, use the entry name
+						 * and hope the app set the application
+						 * name to the same value.*/
+						case "mono":
+						case "wine":
+						case "python":
+						case "python2.5":
+						return entry.get_name();
+					}
+					sb.append(basename);
+					exec = false;
+				} else {
+					/*ignore other parameters */
+				}
+			}
+			return sb.str;
+		} catch(GLib.Error e) {
+			return entry.get_exec();
 		}
-		txt = txt.substring(co+1,(txt.length-co-1));
-		txt = replace(txt, "&nbsp;", " ");
-		txt = replace(txt, "\"", "");
-		return txt;
-	}
-	private static string replace(string source, string find, string replacement) {
-		/* replaces the string.replace method which depends on GLib.RegEx >= 2.12 */
-		string[] buf = source.split(find);
-		return join(buf, replacement);
-	}
-	private static string join(string[] buf, string separator) {
-		string ret = "";
-		for (int co=0; co<buf.length; co++) {
-			ret+=buf[co];
-			if (co!=(buf.length-1)) ret+=separator;
-		}
-		return ret;
-	}
-	private static string adjust_spaces(string source) {
-		string ret = "";
-		bool quoted = false;
-		for (int co=0; co<source.length; co++) {
-			if (source[co]=='"') quoted = !quoted;
-			if ((source[co]==' ') && quoted)
-				ret += "&nbsp;"; else
-				ret += source.substring(co, 1);
-		}
-		return ret;
 	}
 }
 }
