@@ -82,14 +82,13 @@ namespace Gnomenu {
 			 * however then test-menubar will
 			 * fail to build due to a vala bug in 0.5.1*/
 			_min_length = -1;
+			setup_overflown_item();
 		}
 		public override void dispose() {
 			if(!disposed) {
 				disposed = true;
-				if(_overflown_menubar != null) {
-					_overflown_menubar.unparent();
-					_overflown_menubar = null;
-				}
+				_overflown_item.unparent();
+				_overflown_item= null;
 			}
 			base.dispose();
 		}
@@ -129,9 +128,6 @@ namespace Gnomenu {
 							style = null;
 							RcStyle rc_style = new RcStyle();
 							modify_style(rc_style);
-							if(_overflown_menubar != null) {
-								_overflown_menubar.background = value;
-							}
 						}
 					break;
 					case BackgroundType.COLOR:
@@ -139,9 +135,6 @@ namespace Gnomenu {
 						|| (old_type == _background.type
 						&& !old_color.equal(_background.color))) {
 							modify_bg(StateType.NORMAL, _background.color);
-							if(_overflown_menubar != null) {
-								_overflown_menubar.background = value;
-							}
 						}
 					break;
 					case BackgroundType.PIXMAP:
@@ -163,9 +156,7 @@ namespace Gnomenu {
 				foreach(weak Widget child in get_children()) {
 					(child as MenuItem).gravity = value;
 				}
-				if(_overflown_menubar != null) {
-					_overflown_menubar.gravity = value;
-				}
+				_overflown_item.gravity = value;
 			}
 		}
 		/**
@@ -195,17 +186,6 @@ namespace Gnomenu {
 		public int min_length {
 			get { return _min_length;}
 		   	set {
-				if(value >= 0 && _overflown_menubar == null) {
-					_overflown_menubar = create_overflown_menubar();
-					if((get_flags() & WidgetFlags.REALIZED) != 0) {
-						unrealize();
-						realize();
-					}
-				}
-				if(value < 0 && _overflown_menubar != null) {
-					_overflown_menubar.unparent();
-					_overflown_menubar = null;
-				}
 				_min_length = value;
 				queue_resize();
 			}
@@ -263,7 +243,8 @@ namespace Gnomenu {
 		 */
 		private Gravity _gravity;
 
-		private MenuBar _overflown_menubar;
+		private MenuItem _overflown_item = new Gnomenu.MenuItem();
+
 		private int _min_length;
 
 		private Requisition real_requisition;
@@ -274,80 +255,69 @@ namespace Gnomenu {
 
 		public override void style_set(Style? old_style) {
 			base.style_set(old_style);
-			if(_overflown_menubar != null) {
-				_overflown_menubar.style = style;
-			}
+			_overflown_item.style = this.style;
 			reset_bg_pixmap();
 		}
-		private MenuBar create_overflown_menubar() {
-			MenuBar menubar = new MenuBar();
-			menubar.set_parent(this);
-			menubar.style = style;
+
+		private void setup_overflown_item() {
+			_overflown_item.set_parent(this);
+			_overflown_item.style = style;
+			_overflown_item.has_sub_shell = true;
+			_overflown_item.visible = true;
+			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			try {
-				Parser.parse(menubar,OVERFLOWER_TEMPLATE.printf("<menu/>"));
+				Parser.parse(shell ,OVERFLOWER_TEMPLATE.printf("<menu/>"));
 			} catch(GLib.Error e) {
 				warning("%s", e.message);
 			}
-			menubar.activate += (menubar, item) => {
-				string path = item.item_path;
-				if(item.item_id == "_arrow_") {
-					rebuild_overflown_menubar();
-				} else {
-					weak string real_item_path = item.item_path.offset(8);
-					Item real_item = get(real_item_path);
-
-					if(real_item != null)
-						this.activate(real_item as MenuItem);
-					else {
-						warning("MenuItem %s not found in the main menubar!", item.item_path);
-					}
-				}
-			
+			_overflown_item.activate += (obj) => {
+				rebuild_overflown_menu();
 			};
-			return menubar;
 		}
-		private void rebuild_overflown_menubar() {
-			Menu submenu = _overflown_menubar.get_item(0).sub_shell as Menu;
+		private void rebuild_overflown_menu() {
+			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			StringBuilder sb = new StringBuilder("");
 			sb.append(Serializer.to_string(this));
 			message("%s", sb.str);
 			try {
-				Parser.parse(submenu, sb.str);
+				Parser.parse(shell, sb.str);
 			} catch(GLib.Error e) {
 				warning("%s", e.message);
 			}
 
 			for(int i = 0; i < this.length; i++) {
 				Item item = this.get_item(i);
-				Item proxy_item = submenu.get_item(i);
+				Item proxy_item = shell.get_item(i);
 
 				Widget child = item as Widget;
-				bool need_overflown_item = false;
-				Allocation a = child.allocation;
-				switch(pack_direction) {
-					case PackDirection.LTR:
-						if(a.x + a.width > allocation.width) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.RTL:
-						if(a.x < 0 ) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.BTT:
-						if(a.y < 0 ) {
-							need_overflown_item = true;
-						}
-					break;
-					case PackDirection.TTB:
-						if(a.y + a.height > allocation.height) {
-							need_overflown_item = true;
-						}
-					break;
-				}
-				proxy_item.item_visible = item.item_visible && need_overflown_item;
+				proxy_item.item_visible = item.item_visible && child_need_overflown_item(child);
 			}
+		}
+		private bool child_need_overflown_item(Gtk.Widget child) {
+			int lhs = 0;
+			int rhs = 0;
+			Allocation a = child.allocation;
+			Allocation oa = _overflown_item.allocation;
+			switch(pack_direction) {
+				case PackDirection.LTR:
+					lhs = a.x + a.width;
+					rhs = allocation.width - oa.width;
+
+				break;
+				case PackDirection.RTL:
+					lhs = 0 + oa.width;
+					rhs = a.x;
+				break;
+				case PackDirection.BTT:
+					lhs = 0 + oa.height;
+					rhs = a.y;
+				break;
+				case PackDirection.TTB:
+					lhs = a.y + a.height;
+					rhs = allocation.height - oa.height;
+				break;
+			}
+			return lhs > rhs;
 		}
 		private string? overflown_path_to_path(string path) {
 			int slashes = 0;
@@ -388,34 +358,20 @@ namespace Gnomenu {
 				style.set_background(window, StateType.NORMAL);
 				queue_draw();
 			}
-			if(_overflown_menubar != null) {
-				Background bg = background.clone();
-				bg.offset_x += (_overflown_menubar.allocation.x - allocation.x) ;
-				bg.offset_y += (_overflown_menubar.allocation.y - allocation.y) ;
-				_overflown_menubar.background = bg;
-			}
 		}
 		public override void forall(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
-				if(_overflown_menubar != null)
-					callback(_overflown_menubar);
+				if(_overflown_item != null)
+					callback(_overflown_item);
 			}
 			base.forall(include_internals, callback);
 		}
 		public override void realize() {
 			base.realize();
-			/* because it is possible that the bg is set before this widget is realized*/
-			if(_overflown_menubar != null) {
-				_overflown_menubar.set_parent_window(get_parent_window());
-				_overflown_menubar.realize();
-			}
 			reset_bg_pixmap();
 		}
 		public override void map() {
 			base.map();
-			if(_overflown_menubar != null && _overflown_menubar.visible) {
-				_overflown_menubar.map();
-			}
 		}
 		public override void size_allocate(Gdk.Rectangle a) {
 			bool need_reset_bg_pixmap = false;
@@ -430,59 +386,57 @@ namespace Gnomenu {
 			background.offset_y += delta_y;
 			
 			allocation = (Allocation) a; /*To make 'overflown' happy*/
-			if(_overflown_menubar != null) {
-				Gdk.Rectangle oa = {0, 0, 0, 0};
-				Gdk.Rectangle ba = a;
-				Requisition or;
-				_overflown_menubar.get_child_requisition(out or);
-				if(!overflown) {
-					_overflown_menubar.visible = false;
-				} else {
-					switch(pack_direction) {
-						case PackDirection.TTB:
-							oa.height = or.height;
-							oa.width = a.width;
-							oa.x = a.x;
-							oa.y = a.y + a.height - oa.height;
-							ba.height -= oa.height;
-							ba.y = a.y;
-							break;
-						case PackDirection.BTT:
-							oa.height = or.height;
-							oa.width = a.width;
-							oa.x = a.x;
-							oa.y = a.y;
-							ba.height -= oa.height;
-							ba.y = a.y + oa.height;
-							break;
-						case PackDirection.RTL:
-							oa.height = a.height;
-							oa.width = or.width;
-							oa.x = a.x;
-							oa.y = a.y;
-							ba.width -= oa.width;
-							ba.x = oa.width;
-							break;
-						default:
-						case PackDirection.LTR:
-							oa.width = or.width;
-							oa.height = a.height;
-							oa.x = a.x + a.width - oa.width;
-							oa.y = a.y;
-							ba.width -= oa.width;
-							break;
-					}
+
+			Gdk.Rectangle oa = {0, 0, 0, 0};
+			Requisition or;
+			base.size_allocate(a);
+			_overflown_item.get_child_requisition(out or);
+			switch(pack_direction) {
+				case PackDirection.TTB:
+					oa.height = or.height;
+					oa.width = a.width;
+					oa.x = a.x;
+					oa.y = a.y + a.height - oa.height;
+					break;
+				case PackDirection.BTT:
+					oa.height = or.height;
+					oa.width = a.width;
+					oa.x = a.x;
+					oa.y = a.y;
+					break;
+				case PackDirection.RTL:
+					oa.height = a.height;
+					oa.width = or.width;
+					oa.x = a.x;
+					oa.y = a.y;
+					break;
+				default:
+				case PackDirection.LTR:
+					oa.width = or.width;
+					oa.height = a.height;
+					oa.x = a.x + a.width - oa.width;
+					oa.y = a.y;
+					break;
+			}
+			_overflown_item.size_allocate(oa);
+
+			if(overflown) {
+				_overflown_item.set_child_visible(true);
+				for(int i = 0; i < this.length; i++) {
+					Item item = this.get_item(i);
+
+					Widget child = item as Widget;
+					child.set_child_visible(!child_need_overflown_item(child));
 				}
-				base.size_allocate(ba);
-				real_allocation = (Allocation)ba;
-				allocation = (Allocation) a;
-				if(overflown) {
-					_overflown_menubar.size_allocate(oa);
-					_overflown_menubar.visible = true;
+			} else {
+				_overflown_item.set_child_visible(false);
+				for(int i = 0; i < this.length; i++) {
+					Item item = this.get_item(i);
+
+					Widget child = item as Widget;
+					child.set_child_visible(true);
 				}
-			} else  {
-				base.size_allocate(a);
-				real_allocation = (Allocation)a;
+			
 			}
 			if(need_reset_bg_pixmap) {
 				reset_bg_pixmap();
@@ -499,11 +453,10 @@ namespace Gnomenu {
 						0, 0, -1, -1);
 			}
 			foreach(weak Widget child in get_children()) {
+
 				propagate_expose(child, event);
 			}
-			if(_overflown_menubar != null) {
-			//	propagate_expose(_overflown_menubar, event);
-			}
+			propagate_expose(_overflown_item, event);
 			return false;
 		}
 		public override bool focus_out_event (Gdk.EventFocus event) {
@@ -519,8 +472,8 @@ namespace Gnomenu {
 			req = real_requisition;
 			if(min_length >= 0) {
 				Requisition r = {0, 0};
-				if(_overflown_menubar != null) {
-					_overflown_menubar.size_request(out r);
+				if(_overflown_item!= null) {
+					_overflown_item.size_request(out r);
 				}
 				switch(pack_direction) {
 					case PackDirection.TTB:
