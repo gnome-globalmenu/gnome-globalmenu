@@ -1,5 +1,5 @@
 %define base_version 	0.7.4
-%define full_version	%{base_version}_svn2658
+%define full_version	%{base_version}_svn2480
 
 Name:		gnome-globalmenu
 Version:	%{full_version}

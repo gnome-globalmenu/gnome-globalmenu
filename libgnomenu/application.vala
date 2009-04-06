@@ -202,7 +202,7 @@ public class Application{
 	}
 
 	[CCode (cname = "get_task_name_by_pid")]
-	private static extern string get_task_name_by_pid(int pid);
+	public static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {
 		return get_process_name(app);
 	}
