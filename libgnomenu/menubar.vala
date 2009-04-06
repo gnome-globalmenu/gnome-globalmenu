@@ -296,6 +296,7 @@ namespace Gnomenu {
 			_overflown_item.has_sub_shell = true;
 			_overflown_item.visible = true;
 			_overflown_item.item_id = "_arrow_";
+			_overflown_item.item_type = ItemType.ARROW;
 			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			try {
 				Parser.parse(shell ,OVERFLOWER_TEMPLATE.printf("<menu/>"));
