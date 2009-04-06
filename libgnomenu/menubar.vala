@@ -303,6 +303,7 @@ namespace Gnomenu {
 			}
 		}
 		private void rebuild_overflown_menu() {
+			message("rebuild_overflown_menu");
 			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			StringBuilder sb = new StringBuilder("");
 			sb.append(Serializer.to_string(this));
@@ -428,27 +429,27 @@ namespace Gnomenu {
 				case PackDirection.TTB:
 					oa.height = or.height;
 					oa.width = a.width;
-					oa.x = a.x;
-					oa.y = a.y + a.height - oa.height;
+					oa.x = 0;
+					oa.y = a.height - oa.height;
 					break;
 				case PackDirection.BTT:
 					oa.height = or.height;
 					oa.width = a.width;
-					oa.x = a.x;
-					oa.y = a.y;
+					oa.x = 0; 
+					oa.y = 0;
 					break;
 				case PackDirection.RTL:
 					oa.height = a.height;
 					oa.width = or.width;
-					oa.x = a.x;
-					oa.y = a.y;
+					oa.x = 0;
+					oa.y = 0;
 					break;
 				default:
 				case PackDirection.LTR:
 					oa.width = or.width;
 					oa.height = a.height;
-					oa.x = a.x + a.width - oa.width;
-					oa.y = a.y;
+					oa.x = a.width - oa.width;
+					oa.y = 0;
 					break;
 			}
 			_overflown_item.size_allocate(oa);

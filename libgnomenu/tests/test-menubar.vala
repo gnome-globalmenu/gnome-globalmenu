@@ -86,7 +86,7 @@ namespace Gnomenu {
 				Parser.parse( menubar, test1);
 				Parser.parse( menubar, test1);
 				menubar.modify_bg(StateType.NORMAL, color);
-				menubar.gravity = Gravity.UP;
+				menubar.gravity = Gravity.DOWN;
 				menubar.min_length = 20;
 				window.resize(20, 20);
 				window.show();
