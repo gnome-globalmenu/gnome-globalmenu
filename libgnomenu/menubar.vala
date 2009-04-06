@@ -278,8 +278,6 @@ namespace Gnomenu {
 
 		private Requisition real_requisition;
 
-		private Allocation real_allocation; /*minus the overflown*/
-
 		private bool disposed;
 
 		public override void style_set(Style? old_style) {
@@ -357,8 +355,8 @@ namespace Gnomenu {
 				assert(cairo != null);
 				assert(_background.pixmap is Gdk.Drawable);
 				Gdk.cairo_set_source_pixmap(cairo, _background.pixmap, 
-						-(_background.offset_x + real_allocation.x - allocation.x), 
-						-(_background.offset_y + real_allocation.y - allocation.y));
+						-(_background.offset_x), 
+						-(_background.offset_y));
 				weak Cairo.Pattern pattern = cairo.get_source();
 				pattern.set_extend(Cairo.Extend.REPEAT);
 				cairo.rectangle (0, 0, allocation.width, allocation.height);
