@@ -27,9 +27,9 @@ public class Applet : Panel.Applet {
 		menubars.visible = true;
 		add(menubars);
 
-		selector.visible = true;
-		menubars.add(selector);
-		setup_popup_menu(selector);
+		switcher.visible = true;
+		menubars.add(switcher);
+		setup_popup_menu(switcher);
 
 		main_menubar.min_length = 12;  /*Then it will have a overflown item*/
 		setup_popup_menu(main_menubar);
@@ -57,7 +57,7 @@ public class Applet : Panel.Applet {
 	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed;
 	private GlobalMenu main_menubar = new GlobalMenu();
-	private Switcher selector = new Switcher();
+	private Switcher switcher = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
 	public override void screen_changed(Gdk.Screen? previous_screen) {
@@ -79,7 +79,7 @@ public class Applet : Panel.Applet {
 		ulong xid = monitor.current_xid;
 		Wnck.Window window = Wnck.Window.get(xid);
 		if(window is Wnck.Window) {
-			selector.current_window = window;
+			switcher.current_window = window;
 		}
 		main_menubar.switch_to(xid);
 	}
@@ -238,11 +238,11 @@ public class Applet : Panel.Applet {
 
 	}
 	private void get_prefs() {
-		selector.max_size = gconf_get_int("title_max_width");
-		selector.show_icon = gconf_get_bool("show_icon");
-		selector.show_label = gconf_get_bool("show_name");
-		selector.show_window_actions = gconf_get_bool("show_window_actions");
-		selector.show_window_list = gconf_get_bool("show_window_list");
+		switcher.max_size = gconf_get_int("title_max_width");
+		switcher.show_icon = gconf_get_bool("show_icon");
+		switcher.show_label = gconf_get_bool("show_name");
+		switcher.show_window_actions = gconf_get_bool("show_window_actions");
+		switcher.show_window_list = gconf_get_bool("show_window_list");
 	}
 	private static void on_about_clicked (BonoboUI.Component component,
                                           void* user_data, string cname) {
