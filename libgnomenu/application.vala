@@ -16,6 +16,8 @@ namespace Gnomenu {
 	 * as one Openoffice app (the last found one in GMenu).
 	 * */
 public class Application{
+	private string key;
+
 	public string readable_name {
 		get;
 		private set;
@@ -96,6 +98,7 @@ public class Application{
 		weak Application rt = dict.lookup(key);
 		if(rt == null) {
 			Application app = new Application();
+			app.key = key;
 			app.not_in_menu = true;
 			app.readable_name = wapp.get_name();
 			app.exec_path = null;
@@ -137,6 +140,7 @@ public class Application{
 					string key = generate_key(entry);
 					message("gmenu key = %s", key);
 					Application app = new Application();
+					app.key = key;
 					app.not_in_menu = false;
 					app.readable_name = entry.get_name();
 					app.exec_path = entry.get_exec();
@@ -173,6 +177,11 @@ public class Application{
 			if(app.wnck_applications.find(wapp) != null) {
 				app.wnck_applications.remove(wapp);
 				app.update();
+			}
+			if(app.wnck_applications == null && app.not_in_menu = true) {
+				/*TODO: After merging the code to Monitor, fire a signal*/
+				dict.remove(app.key);
+				applications.remove(app);
 			}
 		}
 	}
