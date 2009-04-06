@@ -164,9 +164,8 @@ msgid "Show/Hide the name of the active application"
 msgstr "显示活动程序的标准名称"
 
 #: ../gnome-globalmenu.schemas.in.h:9
-#, fuzzy
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "活动应用程序名称的最大长度"
+msgstr "活动应用程序名称的最大长度(以像素计)"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Uses active application lablel as application switcher"
