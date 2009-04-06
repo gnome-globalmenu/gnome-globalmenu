@@ -80,7 +80,6 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
 		-include ../libcompat/libcompat.h \
-		-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 		-g \
 		$(NULL)
 

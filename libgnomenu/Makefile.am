@@ -37,8 +37,6 @@ libgnomenu_la_CPPFLAGS = \
 			 $(WNCK_CFLAGS) \
 			 $(X11_CFLAGS) \
 			 -include $(CONFIG_HEADER) \
-			 -DWNCK_I_KNOW_THIS_IS_UNSTABLE \
-			 -DGMENU_I_KNOW_THIS_IS_UNSTABLE \
 			 -include ../libcompat/libcompat.h
 
 libgnomenu_la_LIBADD = $(GTK_LIBS) \

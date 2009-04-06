@@ -36,6 +36,11 @@ AC_ARG_ENABLE(
 	[ USE_TESTS=true ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$USE_TESTS" == xtrue])
 
+# misc defines
+AC_DEFINE(WNCK_I_KNOW_THIS_IS_UNSTABLE, 1, [libwnck is happy with this])
+AC_DEFINE(GMENU_I_KNOW_THIS_IS_UNSTABLE, 1,[libgnome-menus is happy with this])
+AC_DEFINE(GDataTestFunc, void*, [Workaround GDataTestFunc problem])
+
 # intl
 IT_PROG_INTLTOOL
 AM_GLIB_GNU_GETTEXT
