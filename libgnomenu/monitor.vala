@@ -55,7 +55,7 @@ public class Monitor: GLib.Object {
 		disposed = false;
 	}
 
-	public void dispose() {
+	public override void dispose() {
 		if(!disposed) {
 			disposed = true;
 			detach_from_screen(_wnck_screen);			
