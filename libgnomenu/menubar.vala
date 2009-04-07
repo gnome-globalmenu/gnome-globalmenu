@@ -103,7 +103,9 @@ namespace Gnomenu {
 				message("real_item is %s", path);
 				MenuItem real_item = get(path);
 				real_item.activate();
+				return;
 			}
+			message("item %s activated", item.item_path);
 			activate(item);
 		}
 		private string? overflown_path_to_path(string path) {
