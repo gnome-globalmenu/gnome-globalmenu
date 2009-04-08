@@ -7,7 +7,7 @@ Version:	%{base_version}
 Release:	4.%{alphatag}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
-License:	GPLv3
+License:	GPLv2 and LGPLv2
 URL:		http://code.google.com/p/gnome2-globalmenu/
 Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
@@ -150,10 +150,11 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
-* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2482
+* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2484
 - Bump to a pre0.5 svn snapshot.
-- Replace rhel5 with rhel (suggested by Chirst)
+- Replace rhel5 with rhel (suggested by Christoph Wickert)
 - Added README.XFCE README.GNOME COPYING
+- Correct the license
 
 * Sun Mar 8 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4
 - Remove the -common package, merge it to the main package.
