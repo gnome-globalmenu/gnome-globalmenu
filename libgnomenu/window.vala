@@ -53,7 +53,8 @@ namespace Gnomenu {
 				}
 			};
 		}
-		public void set_key_widget(Gtk.Widget widget) {
+		/*must be a toplevel */
+		public void set_key_widget(Gtk.Widget? widget) {
 			key_widget = widget;
 		}
 		public override void dispose() {

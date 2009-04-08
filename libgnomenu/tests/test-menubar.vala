@@ -10,7 +10,7 @@ namespace Gnomenu {
 		static string test1 =
 """
 <menu>
-	<item id="Go">
+	<item label="_Go" id="Go">
 		<menu>
 			<item id="Here" type="c"/>
 			<item id="There" type="i" icon="gtk-go-down"/>

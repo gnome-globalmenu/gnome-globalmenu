@@ -9,24 +9,34 @@ namespace Gnomenu {
 					current_window.emit_menu_event(item.item_path);
 				}
 			};
-			key_press_event += (t, event) => {
-				uint keyval;
-				Gdk.ModifierType mods;
-				get_accel_key(out keyval, out mods);
-				if(event.keyval == keyval &&
-					(event.state & Gtk.accelerator_get_default_mod_mask())
-					== (mods & Gtk.accelerator_get_default_mod_mask())) {
-					/* We chain up to the toplevel key_press_event,
-					 * which is listened by all the menubars within
-					 * the applet*/
-					Gtk.Widget toplevel = get_toplevel();
-					if(toplevel != null) 
-						toplevel.key_press_event(event);
-					return false;
-				}
-				return true;
-			};
 		}
+		private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
+
+		private void grab_mnemonic_keys() {
+			Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
+			foreach(Gtk.Widget widget in get_children()) {
+				Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
+				if(item == null) continue;
+				Gnomenu.MenuLabel label = item.get_child() as Gnomenu.MenuLabel;
+				if(label == null) continue;
+				uint keyval = label.mnemonic_keyval;
+				message("grabbing key for %s:%u", label.label, keyval);
+				if(current_window != null)
+					current_window.grab_key(keyval, mods);
+				keys.insert(keyval, widget);
+			}
+		}
+
+		private void ungrab_mnemonic_keys() {
+			Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
+			foreach(uint keyval in keys.get_keys()) {
+				message("ungrabbing %u", keyval);
+				if(current_window != null)
+					current_window.ungrab_key(keyval, mods);
+			}
+			keys.remove_all();
+		}
+
 		private void regrab_menu_bar_key() {
 			message("regrab menu_bar key");
 			ungrab_menu_bar_key();	
@@ -34,20 +44,33 @@ namespace Gnomenu {
 		}
 		private void attach_to_screen(Gdk.Screen screen) {
 			_root_gnomenu_window = new Window(get_root_window());
-			_root_gnomenu_window.set_key_widget(this);
+			_root_gnomenu_window.set_key_widget(this.get_toplevel());
 			grab_menu_bar_key();
-
+			grab_mnemonic_keys();
 			Settings settings = get_settings();
 			settings.notify["gtk-menu-bar-accel"] += regrab_menu_bar_key;
 				
 		}
 		private void detach_from_screen(Gdk.Screen screen) {
 			if(_root_gnomenu_window != null) {
+				_root_gnomenu_window.set_key_widget(null);
 				ungrab_menu_bar_key();
+				ungrab_mnemonic_keys();
 			}
 			Settings settings = get_settings();
 			settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
 			_root_gnomenu_window = null;
+		}
+		public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
+			this.get_toplevel().key_press_event += (w, event) => {
+				message("key %s", event.str);
+				Gtk.Widget widget = keys.lookup(event.keyval);
+				if(widget != null) {
+					widget.mnemonic_activate(true);
+					return true;
+				}
+				return false;
+			};
 		}
 		public override void screen_changed(Gdk.Screen? previous_screen) {
 			Gdk.Screen screen = get_screen();
@@ -57,15 +80,18 @@ namespace Gnomenu {
 			}
 		}
 		public void switch_to(ulong xid) {
+			ungrab_mnemonic_keys();
 			current_window = Window.foreign_new(xid);
 			if(current_window != null) {
 				current_window.menu_context_changed += (window) => {
 					update();
 				};
 				update();	
+				current_window.set_key_widget(this.get_toplevel());
 			}
 		}
 		private void update() {
+			ungrab_mnemonic_keys();
 			weak string context = current_window.menu_context;
 			if(context != null) {
 				try {
@@ -74,8 +100,10 @@ namespace Gnomenu {
 					warning("%s", e.message);	
 				}
 				show();
+				grab_mnemonic_keys();
 				return;
 			}
+			grab_mnemonic_keys();
 			hide();
 		}
 		private void ungrab_menu_bar_key() {

@@ -119,16 +119,25 @@ namespace Gnomenu {
 				return _label_widget;
 			}
 		}
+		public uint mnemonic_keyval {
+			get {
+				return _label_widget.get_mnemonic_keyval();
+			}
+		}
 		construct {
 			props = new HashTable<weak Widget, ChildPropBag*>.full(direct_hash, direct_equal,
 				null, free);
 			set_flags(WidgetFlags.NO_WINDOW);
 		}
+
 		public override void add(Widget child) {
 			if(!(child is Label)) {
 				warning("only GtkLabel is accepted");
 				return;
 			}
+			child.mnemonic_activate += (obj, arg1) => {
+				message("mnemonic activate: %s", (obj as Gtk.Label).label);
+			};
 			children.append(child as Label);
 			child.set_parent(this);
 			props.insert(child, (ChildPropBag*)malloc0(sizeof(ChildPropBag)));

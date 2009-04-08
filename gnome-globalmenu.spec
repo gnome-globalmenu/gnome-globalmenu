@@ -1,5 +1,5 @@
 %define base_version 	0.7.4
-%define alphatag 20080407svn2482
+%define alphatag 20080407svn2487
 
 Name:		gnome-globalmenu
 Version:	%{base_version}
@@ -56,7 +56,9 @@ Requires:		gnome-globalmenu = %{version}-%{release}
 The GNOME panel applet of Global Menu is a representation of Global Menu 
 with GTK widgets. The applet can be inserted to the default top panel to 
 provide access to the Global Menu of the applications. 
-The applet also provides limited window management functionalities.
+The applet also provides limited window management functionalities. 
+Please refer to /usr/share/doc/gnome-globalmenu/README.GNOME 
+for post-installation configurations.
 
 %if 0%{?rhel}
 %else
@@ -69,6 +71,8 @@ Requires:		gnome-globalmenu = %{version}-%{release}
 The XFCE panel applet of Global Menu is a representation of Global Menu 
 with GTK widgets. The applet can be inserted to the default top panel 
 to provide access to the Global Menu of the applications. 
+Please refer to /usr/share/doc/gnome-globalmenu/README.XFCE 
+for post installation configuations.
 %endif
 
 %prep
@@ -150,7 +154,7 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
-* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2484
+* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2487
 - Bump to a pre0.5 svn snapshot.
 - Replace rhel5 with rhel (suggested by Christoph Wickert)
 - Added README.XFCE README.GNOME COPYING
