@@ -23,11 +23,11 @@ public class MenuBarBox: Gtk.Container {
 			return _pack_direction;
 		}
 		set {
-			if(_pack_direction == value) return;
 			foreach(Gnomenu.MenuBar menubar in children) {
 				menubar.pack_direction = value;
 				menubar.child_pack_direction = value;
 			}
+			if(_pack_direction == value) return;
 			_pack_direction = value;
 			queue_resize();
 		}
@@ -182,6 +182,18 @@ public class MenuBarBox: Gtk.Container {
 					rev_x -= ca.width;
 					x += ca.width;
 				break;
+				case PackDirection.TTB:
+					ca.width = a.width;
+					if(expand) {
+						ca.height = (a.height - non_expand_a)/num_of_expands;
+						if(ca.height < 0) ca.height = 0;
+					} else {
+						ca.height = cr.height;
+					}
+					ca.x = x;
+					ca.y = y;
+					y += ca.height;
+				break;
 				case PackDirection.BTT:
 					ca.width = a.width;
 					if(expand) {
@@ -193,18 +205,6 @@ public class MenuBarBox: Gtk.Container {
 					ca.x = x;
 					ca.y = rev_y - ca.height;
 					rev_y -= ca.height;
-					y += ca.height;
-				break;
-				case PackDirection.TTB:
-					ca.width = a.width;
-					if(expand) {
-						ca.height = (a.height - non_expand_a)/num_of_expands;
-						if(ca.height < 0) ca.height = 0;
-					} else {
-						ca.height = cr.height;
-					}
-					ca.x = x;
-					ca.y = y;
 					y += ca.height;
 				break;
 			}

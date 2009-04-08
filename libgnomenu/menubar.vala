@@ -424,6 +424,7 @@ namespace Gnomenu {
 			Gdk.Rectangle oa = {0, 0, 0, 0};
 			Requisition or;
 			base.size_allocate(a);
+
 			_overflown_item.get_child_requisition(out or);
 			switch(pack_direction) {
 				case PackDirection.TTB:

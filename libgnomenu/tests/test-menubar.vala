@@ -99,6 +99,17 @@ namespace Gnomenu {
 				window.show();
 				Gtk.main();
 			});
+			add("VertOverflown", () => {
+				Parser.parse( menubar, test1);
+				menubar.modify_bg(StateType.NORMAL, color);
+				menubar.gravity = Gravity.RIGHT;
+				menubar.min_length = 20;
+				menubar.pack_direction = Gtk.PackDirection.BTT;
+				window.resize(20, 20);
+				window.show();
+				assert(menubar.overflown == true);
+				Gtk.main();
+			});
 
 			add("get", () => {
 				Parser.parse( menubar, test1);

@@ -508,10 +508,6 @@ using Gtk;
 				req.width = max_size;
 			}
 		}
-		public override void size_allocate(Gdk.Rectangle alloc) {
-			base.size_allocate(alloc);
-			_label_item.size_allocate(alloc);
-		}
 		public int max_size {
 			get { return _max_size; }
 			set {
