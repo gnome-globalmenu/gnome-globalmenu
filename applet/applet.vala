@@ -116,18 +116,22 @@ public class Applet : Panel.Applet {
 			case AppletOrient.UP:
 				menubars.gravity = Gravity.DOWN;
 				menubars.pack_direction = PackDirection.LTR;
+				menubars.child_pack_direction = PackDirection.LTR;
 			break;
 			case AppletOrient.DOWN:
 				menubars.gravity = Gravity.DOWN;
 				menubars.pack_direction = PackDirection.LTR;
+				menubars.child_pack_direction = PackDirection.LTR;
 			break;
 			case AppletOrient.LEFT:
 				menubars.gravity = Gravity.LEFT;
 				menubars.pack_direction = PackDirection.TTB;
+				menubars.child_pack_direction = PackDirection.TTB;
 			break;
 			case AppletOrient.RIGHT:
 				menubars.gravity = Gravity.RIGHT;
-				menubars.pack_direction = PackDirection.BTT;
+				menubars.pack_direction = PackDirection.TTB;
+				menubars.child_pack_direction = PackDirection.TTB;
 			break;
 		}
 	}

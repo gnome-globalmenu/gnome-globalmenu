@@ -19,12 +19,18 @@ public class MenuBarBox: Gtk.Container {
 					));
 	}
 	public PackDirection pack_direction {
+		/* The child menubar's child pack direction is the same
+		 * as this menubox's pack direction,
+		 * whilst the child menubar's pack direction is the same
+		 * as this menubox's child pack direction.
+		 *
+		 * This is to provide a sane layout for the vertical left
+		 * panel*/
 		get {
 			return _pack_direction;
 		}
 		set {
 			foreach(Gnomenu.MenuBar menubar in children) {
-				menubar.pack_direction = value;
 				menubar.child_pack_direction = value;
 			}
 			if(_pack_direction == value) return;
@@ -32,6 +38,20 @@ public class MenuBarBox: Gtk.Container {
 			queue_resize();
 		}
 	}
+	public PackDirection child_pack_direction {
+		get {
+			return _child_pack_direction;
+		}
+		set {
+			foreach(Gnomenu.MenuBar menubar in children) {
+				menubar.pack_direction = value;
+			}
+			if(_child_pack_direction == value) return;
+			_child_pack_direction = value;
+			queue_resize();
+		}
+	}
+
 	public Gnomenu.Gravity gravity {
 		get {
 			return _gravity;
@@ -65,6 +85,7 @@ public class MenuBarBox: Gtk.Container {
 
 	private HashTable<weak Widget, ChildPropBag*> props;
 	private PackDirection _pack_direction;
+	private PackDirection _child_pack_direction;
 	private Gnomenu.Gravity _gravity;
 
 	private List<weak Gnomenu.MenuBar> children;
