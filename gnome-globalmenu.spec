@@ -1,12 +1,13 @@
 %define base_version 	0.7.4
-%define full_version	%{base_version}_svn2481
+%define alphatag 20080407svn2482
 
 Name:		gnome-globalmenu
-Version:	%{full_version}
-Release:	4%{?dist}
+Version:	%{base_version}
+#Release:	4%{?dist}
+Release:	4.%{alphatag}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
-License:	GPLv2+
+License:	GPLv3
 URL:		http://code.google.com/p/gnome2-globalmenu/
 Source0:		http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
@@ -22,7 +23,7 @@ Requires(pre): GConf2
 Requires(post): GConf2
 Requires(preun): GConf2
 
-%if 0%{?rhel5}
+%if 0%{?rhel}
 %else
 BuildRequires: xfce4-panel-devel
 %endif
@@ -57,7 +58,7 @@ with GTK widgets. The applet can be inserted to the default top panel to
 provide access to the Global Menu of the applications. 
 The applet also provides limited window management functionalities.
 
-%if 0%{?rhel5}
+%if 0%{?rhel}
 %else
 %package -n		xfce4-globalmenu-plugin
 Summary:		XFCE panel applet of Global Menu
@@ -75,7 +76,7 @@ to provide access to the Global Menu of the applications.
 
 
 %build
-%if 0%{?rhel5}
+%if 0%{?rhel}
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --without-xfce4-panel
 %else
 %configure --disable-schemas-install --disable-static --disable-tests --with-gnome-panel --with-xfce4-panel
@@ -139,7 +140,7 @@ gconftool-2 --makefile-uninstall-rule \
 %{_libdir}/bonobo/servers/GlobalMenu_PanelApplet.server
 %{_libexecdir}/GlobalMenu.PanelApplet
 
-%if 0%{?rhel5}
+%if 0%{?rhel}
 %else
 %files -n xfce4-globalmenu-plugin
 %defattr(-,root,root,-)
@@ -149,6 +150,11 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
+* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2482
+- Bump to a pre0.5 svn snapshot.
+- Replace rhel5 with rhel (suggested by Chirst)
+- Added README.XFCE README.GNOME COPYING
+
 * Sun Mar 8 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4
 - Remove the -common package, merge it to the main package.
 
