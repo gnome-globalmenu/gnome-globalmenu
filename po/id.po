@@ -1,0 +1,208 @@
+# Indonesian translation for globalmenu
+# Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
+# This file is distributed under the same license as the globalmenu package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: globalmenu\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2009-04-06 02:06-0400\n"
+"PO-Revision-Date: 2009-04-12 06:00+0000\n"
+"Last-Translator: Taufiq <cahsowan@yahoo.com>\n"
+"Language-Team: Indonesian <id@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2009-04-13 16:16+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#: ../libgnomenu/menuitem.c:1337
+msgid "Indicator Size"
+msgstr "Ukuran Indikator"
+
+#: ../libgnomenu/menuitem.c:1337
+msgid "Size of check or radio indicator"
+msgstr "Ukuran indikator cek atau radio"
+
+#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.h:18
+msgid "Be verbose"
+msgstr "Model verbose"
+
+#: ../gtk-modules/globalmenu/module-main.c:29
+msgid "disable serializing pixbuf"
+msgstr "Nonaktifkan pixbuf berurut"
+
+#: ../gtk-modules/globalmenu/module-main.c:29
+msgid "Disable the Plugin"
+msgstr "Nonaktifkan plugin"
+
+#: ../gtk-modules/globalmenu/module-main.c:29
+msgid "File to save the log, default to ~/.gnomenu.log"
+msgstr "Berkas untuk menyimpan catatan, biasanya di ~/.gnomenu.log"
+
+#: ../gtk-modules/globalmenu/module-main.c:157
+msgid "- Global Menu plugin Module for GTK"
+msgstr "Modul plugin Global Menu untuk GTK"
+
+#: ../gtk-modules/globalmenu/module-main.c:158
+msgid ""
+"These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
+"instead of the command line.\n"
+"\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
+"ignored by the plugin.\n"
+"\t\t"
+msgstr ""
+
+#: ../applet/applet.c:39
+msgid "globalmenu-panel-applet"
+msgstr "panel-applet-globalmenu"
+
+#: ../applet/applet.c:294
+msgid "_Preferences"
+msgstr "_Pengaturan"
+
+#: ../applet/applet.c:294
+msgid "_Help"
+msgstr "_Bantuan"
+
+#: ../applet/applet.c:294
+msgid "_About"
+msgstr "_Tentang"
+
+#: ../applet/applet.c:447
+msgid "Project Home"
+msgstr "Pusat Proyek"
+
+#: ../applet/applet.c:453
+msgid "translator-credits"
+msgstr ""
+"Launchpad Contributions:\n"
+"  Taufiq https://launchpad.net/~cahsowan"
+
+#: ../applet/applet.c:471
+msgid "On-line help"
+msgstr "Bantuan on-line"
+
+#: ../applet/switcher.c:597
+msgid "Show _Desktop"
+msgstr "Tampilkan _Desktop"
+
+#: ../applet/switcher.c:1305
+msgid "no windows"
+msgstr "Tanpa Bingkai Jendela"
+
+#: ../applet/switcher.c:1307
+msgid "no actions"
+msgstr "Tanpa Tindakan"
+
+#: ../applet/switcher.c:1321
+msgid "Mi_nimize"
+msgstr "_Kecilkan"
+
+#: ../applet/switcher.c:1321
+msgid "Ma_ximize"
+msgstr "_Perbesar"
+
+#: ../applet/switcher.c:1321
+msgid "Unma_ximize"
+msgstr "Kem_balikan Ukuran"
+
+#: ../applet/switcher.c:1321
+msgid "_Move"
+msgstr "_Pindahkan"
+
+#: ../applet/switcher.c:1321
+msgid "_Resize"
+msgstr "_Ubah ukuran"
+
+#: ../applet/switcher.c:1321
+msgid "Always on _Top"
+msgstr "Selalu di _Atas"
+
+#: ../applet/switcher.c:1321
+msgid "_Always on visible Workspace"
+msgstr "_Selalu ada di ruang yang tampak"
+
+#: ../applet/switcher.c:1321
+msgid "_Workspace..."
+msgstr "_Ruang Kerja"
+
+#: ../applet/switcher.c:1321
+msgid "_Close"
+msgstr "_Tutup"
+
+#: ../applet/workspaceselector.c:228
+msgid "Follow the window"
+msgstr "Ikuti bingkai jendela"
+
+#: ../gnome-globalmenu.schemas.in.h:1
+msgid "Add window action menu entries to active application name menu"
+msgstr ""
+"Tambahkan daftar menu aktivitas window kedalam nama menu aplikasi aktif"
+
+#: ../gnome-globalmenu.schemas.in.h:2
+msgid "Enable Global Menu For GTK applications"
+msgstr "Aktifkan Global Menu pada aplikasi GTK"
+
+#: ../gnome-globalmenu.schemas.in.h:3
+msgid "Icon"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:4
+msgid ""
+"If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
+"loaded."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:5
+msgid "Label"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:6
+msgid "Max title length"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:7
+msgid "Show/Hide the icon of the active window"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:8
+msgid "Show/Hide the name of the active application"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:9
+msgid "The maximum length of name of the active application, in pixels"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:10
+msgid "Uses active application lablel as application switcher"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:11
+msgid "Window Actions"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:12
+msgid "Window List"
+msgstr ""
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
+msgid "Global Menu Panel Applet"
+msgstr ""
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
+msgid "GlobalMenu.PanelApplet Factory"
+msgstr ""
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
+msgid "The factory to build GlobalMenu.PanelApplet objects"
+msgstr ""
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
+msgid "Global Menu Plugin for XFCE Panel"
+msgstr ""
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
+msgid "The Global Menu Plugin for XFCE Panel"
+msgstr ""
