@@ -368,7 +368,8 @@ using Gtk;
 				_label = ""; 
 			else {
 				if(app != null) {
-				_label = app.readable_name;
+				_label = (current_window.get_window_type()==Wnck.WindowType.DESKTOP) ?
+						 _("Desktop") : app.readable_name;
 				} else {
 				_label = "app unknown shouldn't see this";
 				}
