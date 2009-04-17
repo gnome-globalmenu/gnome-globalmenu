@@ -464,6 +464,7 @@ using Gtk;
 					switch(window.get_application().get_name()) {
 						case "cairo-dock":
 						case "avant-window-navigator":
+						case "Do":
 							/* add any other known dock having a task bar */
 							return true;
 							break;
