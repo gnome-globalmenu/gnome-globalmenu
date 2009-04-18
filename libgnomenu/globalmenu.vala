@@ -64,12 +64,18 @@ namespace Gnomenu {
 		public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
 			this.get_toplevel().key_press_event += (w, event) => {
 				message("key %s", event.str);
-				Gtk.Widget widget = keys.lookup(event.keyval);
-				if(widget != null) {
-					widget.mnemonic_activate(true);
-					return true;
-				}
+				//Gtk.Widget widget = keys.lookup(event.keyval);
+				//if(widget != null) {
+				//	widget.mnemonic_activate(true);
+				//	return true;
+				//}
 				return false;
+			};
+			(this.get_toplevel() as Gtk.Window).keys_changed += (window) => {
+				GLib.Type type = typeof(Gtk.Window);
+				WindowClass window_class = (WindowClass) type.class_ref();
+				window_class.keys_changed(window);
+				message("keys changed");
 			};
 		}
 		public override void screen_changed(Gdk.Screen? previous_screen) {

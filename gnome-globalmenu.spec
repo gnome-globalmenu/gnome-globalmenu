@@ -1,5 +1,5 @@
 %define base_version 	0.7.4
-%define alphatag 20080407svn2487
+%define alphatag 20080407svn2489
 
 Name:		gnome-globalmenu
 Version:	%{base_version}
@@ -154,11 +154,12 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
-* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2487
+* Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2489
 - Bump to a pre0.5 svn snapshot.
 - Replace rhel5 with rhel (suggested by Christoph Wickert)
 - Added README.XFCE README.GNOME COPYING
 - Correct the license
+- initial support of Alt-<Key>s
 
 * Sun Mar 8 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4
 - Remove the -common package, merge it to the main package.

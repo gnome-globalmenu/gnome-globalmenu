@@ -95,7 +95,7 @@ namespace Gnomenu {
 				if(value ==  null) {
 					_label_widget.visible = false;
 				} else {
-					_label_widget.label = value;
+					_label_widget.set_text_with_mnemonic(value);
 					_label_widget.visible = true;
 				}
 				queue_resize();
@@ -123,6 +123,10 @@ namespace Gnomenu {
 			get {
 				return _label_widget.get_mnemonic_keyval();
 			}
+		}
+		public override bool mnemonic_activate (bool arg1) {
+			message("mnemonic_activate %s", arg1.to_string());
+			return _label_widget.mnemonic_activate(arg1);
 		}
 		construct {
 			props = new HashTable<weak Widget, ChildPropBag*>.full(direct_hash, direct_equal,
@@ -179,8 +183,8 @@ namespace Gnomenu {
 			r.width = 0;
 			r.height = 0;
 			foreach(Widget child in children) {
-				if(!child.visible) continue;
 				child.size_request(out cr);
+				if(!child.visible) continue;
 				int padding = 0;
 				child_get(child, "padding", &padding, null);
 				switch(gravity) {

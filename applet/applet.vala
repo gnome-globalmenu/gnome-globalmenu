@@ -52,7 +52,6 @@ public class Applet : Panel.Applet {
 		on_window_changed(monitor, 0);
 	}
 
-
 	private Monitor monitor = new Monitor();
 	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed;

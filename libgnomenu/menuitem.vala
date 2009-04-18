@@ -258,7 +258,8 @@ namespace Gnomenu {
 		public bool item_visible {
 			get { return _item_visible;}
 			set { _item_visible = value;
-				visible = _item_visible && !_truncated;}
+				visible = value;
+			}
 		}
 		public bool item_sensitive {
 			get { return sensitive;}
@@ -280,6 +281,7 @@ namespace Gnomenu {
 			set {
 				_truncated = value;
 				visible = _item_visible && !truncated;
+				set_child_visible(!_truncated);
 			}
 			get {
 				return _truncated;
