@@ -228,7 +228,9 @@ public class Applet : Panel.Applet {
 			}
 			notify_no_plugin = new Notify.Notification("No Global Menu?", 
 							"Global Menu Plugin is not enabled on this Desktop. "
-							+ "Enable the plugin from the preferences dialog in the right-click menu.", "globalmenu", null);
+							+ "Enable the plugin from the preferences dialog in the right-click menu,"
+							+ "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
+							, "globalmenu", null);
 		}
 		try {
 		notify_no_plugin.show();
