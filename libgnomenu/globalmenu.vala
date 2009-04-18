@@ -109,7 +109,6 @@ namespace Gnomenu {
 				grab_mnemonic_keys();
 				return;
 			}
-			grab_mnemonic_keys();
 			hide();
 		}
 		private void ungrab_menu_bar_key() {
