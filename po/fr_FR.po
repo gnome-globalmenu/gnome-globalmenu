@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-06 02:06-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-18 18:03-0400\n"
 "PO-Revision-Date: 2009-04-11 17:30+0000\n"
 "Last-Translator: ayoli <ayolinux@gmail.com>\n"
 "Language-Team: French <fr@li.org>\n"
@@ -17,41 +17,39 @@ msgstr ""
 "X-Launchpad-Export-Date: 2009-04-13 16:16+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
 msgstr "Taille de l'indicateur"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
 msgstr "Taille de l'indicateur à cocher ou radio"
 
-#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.h:18
+#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "Mode bavard"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:79
 msgid "disable serializing pixbuf"
 msgstr "désactiver la sérialisation pixbuf"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:80
 msgid "Disable the Plugin"
 msgstr "Désactiver le Greffon"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:81
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Fichier où enregistrer le journal, par défaut ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:157
+#: ../gtk-modules/globalmenu/module-main.vala:96
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- Module GTK du greffon Global Menu"
 
-#: ../gtk-modules/globalmenu/module-main.c:158
+#: ../gtk-modules/globalmenu/module-main.vala:98
+#, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
-"instead of the command line.\n"
-"\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
-"ignored by the plugin.\n"
-"\t\t"
+"instead of the command line."
 msgstr ""
 "Ces paramètres doivent être fournis dans l'environnement "
 "GLOBALMENU_GNOME_ARGS au lieu de la ligne de commande.\n"
@@ -59,85 +57,113 @@ msgstr ""
 "le greffon doit ignorer.\n"
 "\t\t"
 
-#: ../applet/applet.c:39
+#: ../applet/applet.vala:138
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:200
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:201
 msgid "_Help"
 msgstr "_Aide"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:202
 msgid "_About"
 msgstr "À _propos"
 
-#: ../applet/applet.c:447
+#: ../applet/applet.vala:230
+msgid "No Global Menu?"
+msgstr ""
+
+#: ../applet/applet.vala:231
+#, fuzzy
+msgid "The Global Menu Plugin is not enabled on this desktop."
+msgstr "Le Greffon Menu Global pour le tableau de bord de XFCE"
+
+#: ../applet/applet.vala:232
+msgid ""
+"Enable the plugin by accessing the preferences dialog via a right-click,"
+msgstr ""
+
+#: ../applet/applet.vala:233
+msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
+msgstr ""
+
+#: ../applet/applet.vala:266
 msgid "Project Home"
 msgstr "Site Internet du Projet"
 
-#: ../applet/applet.c:453
+#: ../applet/applet.vala:272
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  Pierre Slamich https://launchpad.net/~pierre-slamich"
 
-#: ../applet/applet.c:471
+#: ../applet/applet.vala:284
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
-#: ../applet/switcher.c:597
-msgid "Show _Desktop"
-msgstr "Montrer le _Bureau"
+#: ../applet/applet.vala:295
+#, fuzzy
+msgid "Global Menu Applet Preferences"
+msgstr "Applet Menu Global"
 
-#: ../applet/switcher.c:1305
+#: ../applet/switcher.vala:68
 msgid "no windows"
 msgstr "aucune fenêtre"
 
-#: ../applet/switcher.c:1307
+#: ../applet/switcher.vala:69
 msgid "no actions"
 msgstr "aucune action"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:72
 msgid "Mi_nimize"
 msgstr "_Réduire"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:73
 msgid "Ma_ximize"
 msgstr "Ma_ximiser"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:74
 msgid "Unma_ximize"
 msgstr "R_estaurer"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:75
 msgid "_Move"
 msgstr "Déplacer"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:76
 msgid "_Resize"
 msgstr "_Redimensionner"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
 msgstr "Toujours au pre_mier plan"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
 msgstr "_Toujours sur l'espace de travail visible"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:82
 msgid "_Workspace..."
 msgstr "_Espace de Travail..."
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:84
 msgid "_Close"
 msgstr "_Fermer"
 
-#: ../applet/workspaceselector.c:228
+#: ../applet/switcher.vala:272
+msgid "Show _Desktop"
+msgstr "Montrer le _Bureau"
+
+#: ../applet/switcher.vala:372
+#, fuzzy
+msgid "Desktop"
+msgstr "Montrer le _Bureau"
+
+#: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
 msgstr "Suivre la fenêtre"
 
@@ -180,13 +206,12 @@ msgid "Show/Hide the name of the active application"
 msgstr "Afficher/Cacher le nom de l'application active"
 
 #: ../gnome-globalmenu.schemas.in.h:9
-msgid "The maximum length of name of the active application, in pixels"
-msgstr "La longueur maximale du nom de l'application active, en pixels"
+msgid "Switch among applications via the application name label"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-msgid "Uses active application lablel as application switcher"
-msgstr ""
-"Utilise l'intitulé de l'application active en tant que permutateur de fenêtre"
+msgid "The maximum length of name of the active application, in pixels"
+msgstr "La longueur maximale du nom de l'application active, en pixels"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Window Actions"
@@ -215,3 +240,8 @@ msgstr "Greffon Menu Global pour le tableau de bord de XFCE"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Le Greffon Menu Global pour le tableau de bord de XFCE"
+
+#~ msgid "Uses active application lablel as application switcher"
+#~ msgstr ""
+#~ "Utilise l'intitulé de l'application active en tant que permutateur de "
+#~ "fenêtre"

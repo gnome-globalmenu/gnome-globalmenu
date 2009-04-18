@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-06 02:06-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-18 18:03-0400\n"
 "PO-Revision-Date: 2009-04-12 06:50+0000\n"
 "Last-Translator: dfoxpro <dfoxpro@gmail.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -17,41 +17,39 @@ msgstr ""
 "X-Launchpad-Export-Date: 2009-04-13 16:16+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
 msgstr "Tamaño del indicador"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
 msgstr "Tamaño del indicador de radio o de la casilla"
 
-#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.h:18
+#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "Proporcionar detalles"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:79
 msgid "disable serializing pixbuf"
 msgstr "Deshabilitar serialización de pixbuf"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:80
 msgid "Disable the Plugin"
 msgstr "Deshabilitar el agregado"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:81
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Archivo a guardar el log, por defecto se usara ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:157
+#: ../gtk-modules/globalmenu/module-main.vala:96
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- Modulo del agregado para GTK, Global Menu"
 
-#: ../gtk-modules/globalmenu/module-main.c:158
+#: ../gtk-modules/globalmenu/module-main.vala:98
+#, fuzzy
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
-"instead of the command line.\n"
-"\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
-"ignored by the plugin.\n"
-"\t\t"
+"instead of the command line."
 msgstr ""
 "Estos parámetros deben de ser entregados en el entorno GLOBALMENU_GNOME_ARGS "
 "en vez de la linea de comando\n"
@@ -59,85 +57,113 @@ msgstr ""
 "ignorará el agregado\n"
 "\t\t"
 
-#: ../applet/applet.c:39
+#: ../applet/applet.vala:138
 msgid "globalmenu-panel-applet"
 msgstr "agregado-panel-globalmenu"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:200
 msgid "_Preferences"
 msgstr "_Preferencias"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:201
 msgid "_Help"
 msgstr "_Ayuda"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:202
 msgid "_About"
 msgstr "_Acerca"
 
-#: ../applet/applet.c:447
+#: ../applet/applet.vala:230
+msgid "No Global Menu?"
+msgstr ""
+
+#: ../applet/applet.vala:231
+#, fuzzy
+msgid "The Global Menu Plugin is not enabled on this desktop."
+msgstr "Menu global de aplicaciones para el Panel XFCE"
+
+#: ../applet/applet.vala:232
+msgid ""
+"Enable the plugin by accessing the preferences dialog via a right-click,"
+msgstr ""
+
+#: ../applet/applet.vala:233
+msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
+msgstr ""
+
+#: ../applet/applet.vala:266
 msgid "Project Home"
 msgstr "Página principal del Proyecto"
 
-#: ../applet/applet.c:453
+#: ../applet/applet.vala:272
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  dfoxpro https://launchpad.net/~dfoxpro"
 
-#: ../applet/applet.c:471
+#: ../applet/applet.vala:284
 msgid "On-line help"
 msgstr "Ayuda en línea"
 
-#: ../applet/switcher.c:597
-msgid "Show _Desktop"
-msgstr "Mostrar _Escritorio"
+#: ../applet/applet.vala:295
+#, fuzzy
+msgid "Global Menu Applet Preferences"
+msgstr "Menu global de aplicaciones"
 
-#: ../applet/switcher.c:1305
+#: ../applet/switcher.vala:68
 msgid "no windows"
 msgstr "Sin ventanas"
 
-#: ../applet/switcher.c:1307
+#: ../applet/switcher.vala:69
 msgid "no actions"
 msgstr "Sin acciones"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:72
 msgid "Mi_nimize"
 msgstr "Mi_nimizar"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:73
 msgid "Ma_ximize"
 msgstr "Ma_ximizar"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:74
 msgid "Unma_ximize"
 msgstr "_Restaurar"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:75
 msgid "_Move"
 msgstr "_Mover"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:76
 msgid "_Resize"
 msgstr "_Redimensionar"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
 msgstr "Siempre _encima"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
 msgstr "Siempre en el área de trabajo _visible"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:82
 msgid "_Workspace..."
 msgstr "_Área de trabajo"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:84
 msgid "_Close"
 msgstr "_Cerrar"
 
-#: ../applet/workspaceselector.c:228
+#: ../applet/switcher.vala:272
+msgid "Show _Desktop"
+msgstr "Mostrar _Escritorio"
+
+#: ../applet/switcher.vala:372
+#, fuzzy
+msgid "Desktop"
+msgstr "Mostrar _Escritorio"
+
+#: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
 msgstr "Seguir la ventana"
 
@@ -180,13 +206,12 @@ msgid "Show/Hide the name of the active application"
 msgstr "Mostrar/Ocultar el nombre de la aplicación activa"
 
 #: ../gnome-globalmenu.schemas.in.h:9
-msgid "The maximum length of name of the active application, in pixels"
-msgstr "La longitud máxima en pixeles del nombre del aplicación activa"
+msgid "Switch among applications via the application name label"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-msgid "Uses active application lablel as application switcher"
-msgstr ""
-"Usar la etiqueta de la aplicación activa como cambiador de aplicaciones"
+msgid "The maximum length of name of the active application, in pixels"
+msgstr "La longitud máxima en pixeles del nombre del aplicación activa"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Window Actions"
@@ -215,3 +240,7 @@ msgstr "Agregado Global Menu para el Panel XFCE"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Menu global de aplicaciones para el Panel XFCE"
+
+#~ msgid "Uses active application lablel as application switcher"
+#~ msgstr ""
+#~ "Usar la etiqueta de la aplicación activa como cambiador de aplicaciones"

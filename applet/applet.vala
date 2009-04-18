@@ -226,10 +226,11 @@ public class Applet : Panel.Applet {
 					return;
 				}
 			}
-			notify_no_plugin = new Notify.Notification("No Global Menu?", 
-							"Global Menu Plugin is not enabled on this Desktop. "
-							+ "Enable the plugin from the preferences dialog in the right-click menu,"
-							+ "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
+			notify_no_plugin = new Notify.Notification(
+							_("No Global Menu?"), 
+							_("The Global Menu Plugin is not enabled on this desktop.") +
+							_("Enable the plugin by accessing the preferences dialog via a right-click,") +
+							_("or by exporting GTK_MODULES=globalmenu-gnome in your profile.")
 							, "globalmenu", null);
 		}
 		try {
@@ -291,7 +292,7 @@ public class Applet : Panel.Applet {
 
 		Applet _this = (Applet) user_data;
 
-		GConfDialog gcd = new GConfDialog("Applet preferences");
+		GConfDialog gcd = new GConfDialog(_("Global Menu Applet Preferences"));
 		
 		gcd.add_key("/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome");
 		gcd.add_subkeys(_this.get_preferences_key(),

@@ -39,7 +39,7 @@
 		<default>TRUE</default>
 		<locale name="C">
 			<short>Window List</short>
-			<long>Uses active application lablel as application switcher</long>
+			<long>Switch among applications via the application name label</long>
 		</locale>
 	</schema>
 	<schema>
