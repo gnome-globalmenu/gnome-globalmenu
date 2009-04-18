@@ -213,7 +213,8 @@ public class Applet : Panel.Applet {
 		Settings settings = get_settings();
 		if(settings == null) return;
 		string modules = settings.gtk_modules;
-			
+		modules += Environment.get_variable("GTK_MODULES");
+
 		if(modules != null && modules.str("globalmenu") != null) {
 			return;
 		}
