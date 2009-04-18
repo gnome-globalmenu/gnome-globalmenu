@@ -1,10 +1,10 @@
-%define base_version 	0.7.4
-%define alphatag 20080407svn2489
+%define base_version 	0.7.5
+%define alphatag 20080418svn2499
 
 Name:		gnome-globalmenu
 Version:	%{base_version}
 #Release:	4%{?dist}
-Release:	4.%{alphatag}
+Release:	0.1.%{alphatag}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
 License:	GPLv2 and LGPLv2
@@ -154,6 +154,8 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
+* Tue Apr 18 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.5-0.1.20080418svn2499
+- Bump to pre0.5 svn 2499
 * Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2489
 - Bump to a pre0.5 svn snapshot.
 - Replace rhel5 with rhel (suggested by Christoph Wickert)
