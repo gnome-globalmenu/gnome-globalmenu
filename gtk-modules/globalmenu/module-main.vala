@@ -6,6 +6,7 @@ public class GlobalMenuGNOME {
 	private static bool disabled = false;
 	private static bool initialized = false;
 	private static bool disable_pixbuf = false;
+	private static bool hybrid = false;
 
 	private static string log_file_name = null;
 	private static FileStream log_stream;
@@ -25,7 +26,10 @@ public class GlobalMenuGNOME {
 			DynPatch.init();
 			GlobalMenuGTK.Flags flags = 0;
 			if(disable_pixbuf) {
-				flags = GlobalMenuGTK.Flags.DISABLE_PIXBUF;
+				flags |= GlobalMenuGTK.Flags.DISABLE_PIXBUF;
+			}
+			if(hybrid) {
+				flags |= GlobalMenuGTK.Flags.HYBRID;
 			}
 			GlobalMenuGTK.init(flags);
 		}
@@ -79,6 +83,7 @@ public class GlobalMenuGNOME {
 		{"disable-pixbuf", 'P', 0, OptionArg.NONE, ref disable_pixbuf, N_("disable serializing pixbuf"), null},
 		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
 		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to ~/.gnomenu.log"), null},
+		{"hybrid", 'h', 0, OptionArg.NONE, ref hybrid, N_("Enable hybrid mode"), null},
 		{null}
 	};
 

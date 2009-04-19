@@ -63,6 +63,8 @@ namespace GlobalMenuGTK {
 
 			sb.append(Markup.printf_escaped(" id=\"W%lu\"", (ulong)menuitem));
 
+			if(hybrid) sb.append(" client-side=\"1\"");
+
 			label_sb.erase(0, -1);
 			last_item_empty = true;
 			guessed_type = null;

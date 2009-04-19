@@ -70,25 +70,43 @@ namespace Gnomenu {
 			return parent as Shell;
 		}}
 		public Shell sub_shell{get {
-			return this.submenu as Shell;
+			return _submenu_cache as Shell;
 		}}
 		public Menu _submenu_cache = new Menu();
-		public bool has_sub_shell {
-			get {
-				return this.submenu != null;
-			}
-			set {
-				if(value) {
+		private bool _has_sub_shell = false;
+		private bool _client_side_sub_shell = false;
+
+		private void maybe_connect_cached_submenu() {
+			if(_has_sub_shell && !_client_side_sub_shell) {
+				message("maybe?");
+				if(this.submenu != _submenu_cache) {
 					this.submenu = _submenu_cache;
-				} else {
-					if(this.submenu != null) {
-						this.submenu.popdown();
-					}
-					this.submenu = null;
 				}
+			} else {
+				if(this.submenu != null) {
+					this.submenu.popdown();
+				}
+				this.submenu = null;
 			}
 		}
 
+		public bool has_sub_shell {
+			get {
+				return _has_sub_shell;
+			}
+			set {
+				_has_sub_shell = value;
+				maybe_connect_cached_submenu();
+			}
+		}
+
+		public bool client_side_sub_shell {
+			get { return _client_side_sub_shell; }
+			set { 
+				_client_side_sub_shell = value;
+				maybe_connect_cached_submenu();
+			}
+		}
 		/**
 		 * the id of the menu item.
 		 *

@@ -19,6 +19,7 @@ namespace Gnomenu {
 		public abstract Shell shell {get;}
 		public abstract Shell sub_shell {get;}
 		public abstract bool has_sub_shell {get; set;}
+		public abstract bool client_side_sub_shell {get; set;}
 
 		public Shell? toplevel_shell {get {
 			return shell.toplevel_shell;

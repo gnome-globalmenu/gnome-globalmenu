@@ -105,6 +105,7 @@ namespace Gnomenu {
 			bool sensitive = true;
 			bool visible = true;
 			bool underline = true;
+			bool client_side = false;
 			g_markup_collect_attributes("item", attr_names, attr_vals, null,
 					GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
 					"label", &label, 
@@ -126,6 +127,8 @@ namespace Gnomenu {
 					"underline", &underline, 
 					GMarkupCollectType.TRISTATE,
 					"sensitive", &sensitive, 
+					GMarkupCollectType.TRISTATE,
+					"client-side", &client_side,
 					GMarkupCollectType.INVALID
 					);
 			if(visible != false)
@@ -137,6 +140,9 @@ namespace Gnomenu {
 			if(underline != false)
 				underline = true;
 
+			if(client_side != true) {
+				client_side = false;
+			}
 			item.item_id = id;
 			item.item_visible = visible;
 			item.item_use_underline = underline;
@@ -147,6 +153,7 @@ namespace Gnomenu {
 			item.item_icon= icon;
 			item.item_state = Item.state_from_string(state);
 			item.item_font = font;
+			item.client_side_sub_shell = client_side;
 		}
 		private void end_element (MarkupParseContext context, 
 				string element_name) throws MarkupError {
