@@ -300,7 +300,6 @@ namespace Gnomenu {
 			set {
 				_truncated = value;
 				visible = _item_visible && !truncated;
-				set_child_visible(!_truncated);
 			}
 			get {
 				return _truncated;
