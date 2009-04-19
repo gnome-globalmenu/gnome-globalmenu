@@ -45,7 +45,7 @@ namespace Gnomenu {
 			}
 		}
 		private void visit_item(Item item) {
-			if(item.sub_shell != null) {
+			if(item.has_sub_shell) {
 				indent();
 				sb.append_printf("<item");
 				visit_item_attributes(item);
