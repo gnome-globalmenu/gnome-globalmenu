@@ -208,6 +208,7 @@ namespace GlobalMenuGTK {
 			if(menubar != null) {
 				MenuItem item = Locator.locate(menubar, path);
 				if(item != null) {
+					item.select();
 					item.activate();
 					debug("item %p is activated", item);
 					if(item.submenu != null) {
