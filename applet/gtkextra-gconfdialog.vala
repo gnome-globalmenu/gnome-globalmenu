@@ -37,6 +37,7 @@ using GConf;
 		construct {
 			_default_client = GConf.Client.get_default();
 			//vbox.width_request = 320;
+			add_button("gtk-close", Gtk.ResponseType.CLOSE);
 		}
 		public void add_key(string key) {
 			try {
@@ -63,16 +64,18 @@ using GConf;
 		}
 
 		private void addEntry(GConf.Entry entry) {
-			Gtk.Box row = new Gtk.HBox(false, 0);
-
        		GConf.Schema schema = get_schema(entry);
-       			
+			weak string tooltip = schema.get_long_desc();
+
+			Gtk.Box row = new Gtk.HBox(false, 0);
+       		
        		Gtk.Image info = new Gtk.Image.from_stock("gtk-dialog-info", Gtk.IconSize.BUTTON);
-       		info.tooltip_text = schema.get_long_desc();
+       		info.tooltip_text = tooltip;
        		row.pack_start(info, false, false, 2);
-       			
+       		
        		Gtk.Label label = new Gtk.Label(schema.get_short_desc());
        		label.justify = Gtk.Justification.LEFT;
+			label.tooltip_text = tooltip;
        		row.pack_start(label, false, false, 2);
        			
        		Gtk.Widget widget;
@@ -95,13 +98,14 @@ using GConf;
        			default:
        				return;
 			}
+			widget.tooltip_text = tooltip;
 			widget.user_data = entry;
 				
 			row.pack_start(new Gtk.EventBox(), true, true, 2);
 			row.pack_start(widget, false, false, 2);
 				
 			Gtk.Button button = new Gtk.Button();
-			button.tooltip_text = "Resets to default value";
+			button.tooltip_text = _("Reset to the default value");
 			button.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.BUTTON));
 			button.user_data = widget;
 			button.clicked += onResetButtonPressed;
@@ -110,6 +114,7 @@ using GConf;
 				
        		row.show_all();
        		vbox.pack_start(row, true, true, 2);
+
 		}
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
 			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
