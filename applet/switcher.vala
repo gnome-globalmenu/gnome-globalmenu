@@ -600,7 +600,8 @@ using Gtk;
 			for(int i = 0; i < shell.length; i++) {
 				Gnomenu.MenuItem item = shell.get_item(i) as Gnomenu.MenuItem;
 				if(item.item_label != null &&
-				item.item_label.has_prefix(textbox.text)) {
+					item.item_label.casefold()
+					.has_prefix(textbox.text.casefold())) {
 					return item as Gnomenu.MenuItem;
 				}
 			}
