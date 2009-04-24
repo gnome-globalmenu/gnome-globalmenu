@@ -9,6 +9,8 @@ extern GQuark __TOPLEVEL__;
 extern GTimer * timer;
 extern GHashTable * notifiers;
 
+static GStaticRecMutex _menubar_mutex = G_STATIC_MUTEX_INIT;
+
 static gulong buffered_changes = 0;
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar);
 static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode);
@@ -17,6 +19,7 @@ static void _dyn_patch_submenu_notify(GtkWidget * widget, GParamSpec * pspec, Gt
 static void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar);
 
 void dyn_patch_discover_menubars(DiscoverMode mode) {
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	GList * toplevels = gtk_window_list_toplevels();
 	GList * iter;
 	for(iter = toplevels; iter; iter = iter->next) {
@@ -24,9 +27,11 @@ void dyn_patch_discover_menubars(DiscoverMode mode) {
 		dpdm_transverse(GTK_WIDGET(window), &mode);
 	}
 	g_list_free(toplevels);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 
 void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	guint source_id;
 	buffered_changes++;
 	/* if their is a pending notifier, do nothing. wait for that notifier
@@ -43,23 +48,33 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	} else {
 		/* should never get to here */
 	}
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
-	if(GTK_IS_MENU_BAR(widget)) return GTK_MENU_BAR(widget);
-	return g_object_get_qdata((GObject*)widget, __MENUBAR__);
+	GtkMenuBar * rt = NULL;
+	g_static_rec_mutex_lock(&_menubar_mutex);
+	if(GTK_IS_MENU_BAR(widget)) rt = GTK_MENU_BAR(widget);
+	rt = g_object_get_qdata((GObject*)widget, __MENUBAR__);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
+	return rt;
 }
+
 
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	g_object_set_qdata_full(G_OBJECT(menubar), __TOPLEVEL__, g_object_ref(window), g_object_unref);
 	g_object_set_qdata_full(G_OBJECT(window), __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	g_signal_emit_by_name(menubar, "dyn-patch-attached", window, NULL);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 void dyn_patch_detach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	g_signal_emit_by_name(menubar, "dyn-patch-detached", window, NULL);
 	g_object_set_qdata(G_OBJECT(window), __MENUBAR__, NULL);
 	g_object_set_qdata(G_OBJECT(menubar), __TOPLEVEL__, NULL);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 
 GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar) {
@@ -67,6 +82,7 @@ GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar) {
 }
 void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_continue(timer);
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	GtkMenuBar * old = dyn_patch_get_menubar(widget);
 	if(old && old != menubar) {
 		g_debug("Detaching hooks on Widget %p of menubar %p", widget, old);
@@ -133,6 +149,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 		}
 	}
 	g_timer_stop(timer);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 
 static void dpdm_transverse(GtkWidget * widget, DiscoverMode * mode) {
@@ -178,6 +195,7 @@ static void dyn_patch_set_menubar(GtkWidget * widget, GtkMenuBar * menubar) {
 
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	GDK_THREADS_ENTER();
+	g_static_rec_mutex_lock(&_menubar_mutex);
 	g_debug("Changed: %p", menubar);
 	g_object_set_qdata((GObject*)menubar, __DIRTY__, NULL);
 	g_signal_emit_by_name(menubar, "dyn-patch-changed", NULL);
@@ -191,6 +209,7 @@ static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar) {
 	/* The reference on the menubar by this notifier is removed after
 	 * the source is removed by the hash table.*/
 	g_hash_table_remove(notifiers, menubar);
+	g_static_rec_mutex_unlock(&_menubar_mutex);
 	GDK_THREADS_LEAVE();
 	/*already removed, do'nt want glib get into troubles for removing the
 	 * source again.*/
