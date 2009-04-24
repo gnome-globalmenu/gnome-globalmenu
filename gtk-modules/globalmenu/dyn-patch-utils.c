@@ -9,7 +9,7 @@ extern GQuark __TOPLEVEL__;
 extern GTimer * timer;
 extern GHashTable * notifiers;
 
-static GStaticRecMutex _menubar_mutex = G_STATIC_MUTEX_INIT;
+static GStaticRecMutex _menubar_mutex = G_STATIC_REC_MUTEX_INIT;
 
 static gulong buffered_changes = 0;
 static gboolean _dyn_patch_emit_changed(GtkMenuBar * menubar);
