@@ -111,11 +111,15 @@ namespace Gnomenu {
 		}
 		public signal void select(MenuItem item);
 		public virtual void emit_select(MenuItem item) {
+			if(item == _overflown_item) {
+				return;
+			}
 			if(item.is_child_of(_overflown_item)) {
 				string path = overflown_path_to_path(item.item_path);
 				debug("real_item is %s", path);
 				MenuItem real_item = get(path);
 				select(real_item);
+				return;
 			}
 			debug("item %s selected", item.item_path);
 			select(item);
