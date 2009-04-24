@@ -7,132 +7,154 @@ msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-06 02:06-0400\n"
+"POT-Creation-Date: 2009-04-18 18:03-0400\n"
 "PO-Revision-Date: 2009-04-12 06:00+0000\n"
 "Last-Translator: Taufiq <cahsowan@yahoo.com>\n"
 "Language-Team: Indonesian <id@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-13 16:16+0000\n"
+"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
 msgstr "Ukuran Indikator"
 
-#: ../libgnomenu/menuitem.c:1337
+#: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
 msgstr "Ukuran indikator cek atau radio"
 
-#: ../gtk-modules/globalmenu/module-main.c:29 ../applet/main.h:18
+#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "Model verbose"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:79
 msgid "disable serializing pixbuf"
 msgstr "Nonaktifkan pixbuf berurut"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:80
 msgid "Disable the Plugin"
 msgstr "Nonaktifkan plugin"
 
-#: ../gtk-modules/globalmenu/module-main.c:29
+#: ../gtk-modules/globalmenu/module-main.vala:81
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Berkas untuk menyimpan catatan, biasanya di ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.c:157
+#: ../gtk-modules/globalmenu/module-main.vala:96
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Modul plugin Global Menu untuk GTK"
 
-#: ../gtk-modules/globalmenu/module-main.c:158
+#: ../gtk-modules/globalmenu/module-main.vala:98
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
-"instead of the command line.\n"
-"\t\tNOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be "
-"ignored by the plugin.\n"
-"\t\t"
+"instead of the command line."
 msgstr ""
 
-#: ../applet/applet.c:39
+#: ../applet/applet.vala:138
 msgid "globalmenu-panel-applet"
 msgstr "panel-applet-globalmenu"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:200
 msgid "_Preferences"
 msgstr "_Pengaturan"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:201
 msgid "_Help"
 msgstr "_Bantuan"
 
-#: ../applet/applet.c:294
+#: ../applet/applet.vala:202
 msgid "_About"
 msgstr "_Tentang"
 
-#: ../applet/applet.c:447
+#: ../applet/applet.vala:230
+msgid "No Global Menu?"
+msgstr ""
+
+#: ../applet/applet.vala:231
+msgid "The Global Menu Plugin is not enabled on this desktop."
+msgstr ""
+
+#: ../applet/applet.vala:232
+msgid ""
+"Enable the plugin by accessing the preferences dialog via a right-click,"
+msgstr ""
+
+#: ../applet/applet.vala:233
+msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
+msgstr ""
+
+#: ../applet/applet.vala:266
 msgid "Project Home"
 msgstr "Pusat Proyek"
 
-#: ../applet/applet.c:453
+#: ../applet/applet.vala:272
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  Taufiq https://launchpad.net/~cahsowan"
 
-#: ../applet/applet.c:471
+#: ../applet/applet.vala:284
 msgid "On-line help"
 msgstr "Bantuan on-line"
 
-#: ../applet/switcher.c:597
-msgid "Show _Desktop"
-msgstr "Tampilkan _Desktop"
+#: ../applet/applet.vala:295
+msgid "Global Menu Applet Preferences"
+msgstr ""
 
-#: ../applet/switcher.c:1305
+#: ../applet/switcher.vala:68
 msgid "no windows"
 msgstr "Tanpa Bingkai Jendela"
 
-#: ../applet/switcher.c:1307
+#: ../applet/switcher.vala:69
 msgid "no actions"
 msgstr "Tanpa Tindakan"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:72
 msgid "Mi_nimize"
 msgstr "_Kecilkan"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:73
 msgid "Ma_ximize"
 msgstr "_Perbesar"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:74
 msgid "Unma_ximize"
 msgstr "Kem_balikan Ukuran"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:75
 msgid "_Move"
 msgstr "_Pindahkan"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:76
 msgid "_Resize"
 msgstr "_Ubah ukuran"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
 msgstr "Selalu di _Atas"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
 msgstr "_Selalu ada di ruang yang tampak"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:82
 msgid "_Workspace..."
 msgstr "_Ruang Kerja"
 
-#: ../applet/switcher.c:1321
+#: ../applet/switcher.vala:84
 msgid "_Close"
 msgstr "_Tutup"
 
-#: ../applet/workspaceselector.c:228
+#: ../applet/switcher.vala:272
+msgid "Show _Desktop"
+msgstr "Tampilkan _Desktop"
+
+#: ../applet/switcher.vala:372
+msgid "Desktop"
+msgstr ""
+
+#: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
 msgstr "Ikuti bingkai jendela"
 
@@ -172,11 +194,11 @@ msgid "Show/Hide the name of the active application"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:9
-msgid "The maximum length of name of the active application, in pixels"
+msgid "Switch among applications via the application name label"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-msgid "Uses active application lablel as application switcher"
+msgid "The maximum length of name of the active application, in pixels"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:11

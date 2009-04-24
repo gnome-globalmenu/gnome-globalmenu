@@ -1,4 +1,4 @@
-# Simplified Chinese translation for globalmenu
+# German translation for globalmenu
 # Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the globalmenu package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-04-18 18:03-0400\n"
-"PO-Revision-Date: 2009-04-19 19:19+0000\n"
-"Last-Translator: Yu Feng <Unknown>\n"
-"Language-Team: Simplified Chinese <zh_CN@li.org>\n"
+"PO-Revision-Date: 2009-04-20 20:00+0000\n"
+"Last-Translator: atomfrede <Unknown>\n"
+"Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,211 +19,212 @@ msgstr ""
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "复选指示器的大小"
+msgstr ""
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr "单选指示器的大小"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr "显示调试信息"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:79
 msgid "disable serializing pixbuf"
-msgstr "禁用 pixbuf 位图信息持续化"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:80
 msgid "Disable the Plugin"
-msgstr "禁用本插件"
+msgstr "Plugin deaktivieren"
 
 #: ../gtk-modules/globalmenu/module-main.vala:81
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "把日志保存到文件中，缺省文件是 ~/.gnomenu.log"
+msgstr "Speicherort des Log-Files; Standard: ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:96
 msgid "- Global Menu plugin Module for GTK"
-msgstr "- 全局菜单 GTK 插件"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:98
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
-msgstr "要将这些参数提供给Global Menu, 请将其放置于环境变量 GLOBALMENU_GNOME_ARGS 中。"
+msgstr ""
 
 #: ../applet/applet.vala:138
 msgid "globalmenu-panel-applet"
-msgstr "全局菜单小程序"
+msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.vala:200
 msgid "_Preferences"
-msgstr "首选项(_P)"
+msgstr "_Einstellungen"
 
 #: ../applet/applet.vala:201
 msgid "_Help"
-msgstr "帮助(_H)"
+msgstr "_Hilfe"
 
 #: ../applet/applet.vala:202
 msgid "_About"
-msgstr "关于(_A)"
+msgstr "_Über"
 
 #: ../applet/applet.vala:230
 msgid "No Global Menu?"
-msgstr "没有全局菜单？"
+msgstr "Kein Globalesmenu?"
 
 #: ../applet/applet.vala:231
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr "没有加载全局菜单 GTK 插件。"
+msgstr "Global Menu Plugin ist nicht aktiviert"
 
 #: ../applet/applet.vala:232
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr "要激活插件，可从首选项进行设置。"
+msgstr ""
 
 #: ../applet/applet.vala:233
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr "或者在环境变量中导出 GTK_MODULES=globalmenu-gnome"
+msgstr ""
 
 #: ../applet/applet.vala:266
 msgid "Project Home"
-msgstr "项目主页"
+msgstr "Projektseite"
 
 #: ../applet/applet.vala:272
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Yu Feng https://launchpad.net/~rainwoodman"
+"  Thomas Trummer https://launchpad.net/~truetom\n"
+"  atomfrede https://launchpad.net/~atomfrede"
 
 #: ../applet/applet.vala:284
 msgid "On-line help"
-msgstr "在线帮助"
+msgstr "Online-Hilfe"
 
 #: ../applet/applet.vala:295
 msgid "Global Menu Applet Preferences"
-msgstr "全局菜单首选项"
+msgstr "Global Menu Einstellungen"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr "没有窗口"
+msgstr ""
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr "无可用操作"
+msgstr ""
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr "最小化(_N)"
+msgstr "_Minimieren"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr "最大化(_X)"
+msgstr "Ma_ximieren"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "取消最大化(_X)"
+msgstr "_Wiederherstellen"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr "移动(_M)"
+msgstr "_Verschieben"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr "改变大小(_R)"
+msgstr "_Größe ändern"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr "常居顶端(_T)"
+msgstr "_Immer im Vordergrund"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr "总是可见(_A)"
+msgstr "Immer auf der sichtbaren Arbeitsfläche"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr "工作区(_W)..."
+msgstr ""
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "关闭(_C)"
+msgstr "_Schließen"
 
 #: ../applet/switcher.vala:272
 msgid "Show _Desktop"
-msgstr "显示桌面(_D)"
+msgstr "_Desktop anzeigen"
 
 #: ../applet/switcher.vala:372
 msgid "Desktop"
-msgstr "桌面"
+msgstr ""
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr "跟随窗口"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add window action menu entries to active application name menu"
-msgstr "在应用程序名字标签的子菜单中包括窗口操作"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Enable Global Menu For GTK applications"
-msgstr "启用 GTK 程序的全局菜单支持"
+msgstr "Globales Menü für GTK Anwendungen verwenden"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Icon"
-msgstr "图标"
+msgstr "Symbol"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
-msgstr "如果本设置被激活，全局菜单的 GTK 插件 (libglobalmenu-gnome) 会被加载。"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Label"
-msgstr "标签"
+msgstr "Beschriftung"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Max title length"
-msgstr "标题最大长度"
+msgstr "Maximale Titellänge"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Show/Hide the icon of the active window"
-msgstr "显示/隐藏活动窗口的图标"
+msgstr "Zeige/Verstecke das Symbol des aktiven Fensters"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid "Show/Hide the name of the active application"
-msgstr "显示/隐藏活动程序的名称"
+msgstr "Zeige/Verstecke den Namen der aktiven Anwendung"
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Switch among applications via the application name label"
-msgstr "利用应用程序标签来切换活动程序。"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "活动程序名称标签的最大长度，以像素计。"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Window Actions"
-msgstr "窗口操作"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Window List"
-msgstr "窗口列表"
+msgstr "Fensterliste"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr "全局菜单小程序"
+msgstr "Global Menu Panelobjekt"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr "全局菜单小程序工厂"
+msgstr "GlobalMenu.PanelApplet Factory"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr "组建全局菜单面板小程序的工厂"
+msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr "全局菜单 XFCE 面板插件"
+msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr "全局菜单 XFCE 面板插件"
+msgstr ""
