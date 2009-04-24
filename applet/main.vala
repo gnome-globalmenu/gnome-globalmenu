@@ -26,7 +26,8 @@ public int main(string[] args) {
 
 	if(!verbose) {
 		LogFunc handler = (domain, level, message) => { };
-		Log.set_handler ("Gnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
+		Log.set_handler ("libgnomenu", LogLevelFlags.LEVEL_DEBUG, handler);
+		Log.set_handler (null, LogLevelFlags.LEVEL_DEBUG, handler);
 	}
 
 	Gtk.rc_parse_string("""

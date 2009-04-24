@@ -20,7 +20,7 @@ namespace Gnomenu {
 				Gnomenu.MenuLabel label = item.get_child() as Gnomenu.MenuLabel;
 				if(label == null) continue;
 				uint keyval = label.mnemonic_keyval;
-				message("grabbing key for %s:%u", label.label, keyval);
+				debug("grabbing key for %s:%u", label.label, keyval);
 				if(current_window != null)
 					current_window.grab_key(keyval, mods);
 				keys.insert(keyval, widget);
@@ -30,7 +30,7 @@ namespace Gnomenu {
 		private void ungrab_mnemonic_keys() {
 			Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
 			foreach(uint keyval in keys.get_keys()) {
-				message("ungrabbing %u", keyval);
+				debug("ungrabbing %u", keyval);
 				if(current_window != null)
 					current_window.ungrab_key(keyval, mods);
 			}
@@ -38,7 +38,7 @@ namespace Gnomenu {
 		}
 
 		private void regrab_menu_bar_key() {
-			message("regrab menu_bar key");
+			debug("regrab menu_bar key");
 			ungrab_menu_bar_key();	
 			grab_menu_bar_key();	
 		}
@@ -63,7 +63,7 @@ namespace Gnomenu {
 		}
 		public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
 			this.get_toplevel().key_press_event += (w, event) => {
-				message("key %s", event.str);
+				debug("key %s", event.str);
 				//Gtk.Widget widget = keys.lookup(event.keyval);
 				//if(widget != null) {
 				//	widget.mnemonic_activate(true);
@@ -75,7 +75,7 @@ namespace Gnomenu {
 				GLib.Type type = typeof(Gtk.Window);
 				WindowClass window_class = (WindowClass) type.class_ref();
 				window_class.keys_changed(window);
-				message("keys changed");
+				debug("keys changed");
 			};
 		}
 		public override void screen_changed(Gdk.Screen? previous_screen) {

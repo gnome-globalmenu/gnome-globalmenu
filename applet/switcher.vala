@@ -387,7 +387,7 @@ using Gtk;
 				if(width <= 0) width = -1;
 				if(height <= 0) height = -1;
 
-				message("iconname = %s no_in_menu = %s", 
+				debug ("iconname = %s no_in_menu = %s", 
 						app.icon_name, app.not_in_menu.to_string()
 				);
 				if(app.icon_pixbuf != null) {

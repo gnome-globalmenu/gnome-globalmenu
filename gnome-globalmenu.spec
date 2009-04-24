@@ -1,9 +1,9 @@
 %define base_version 	0.7.5
-%define alphatag 20080418svn2507
+%define alphatag 20080418svn2511
 
 Name:		gnome-globalmenu
 Version:	%{base_version}
-#Release:	4%{?dist}
+#Release:	1%{?dist}
 Release:	0.1.%{alphatag}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
@@ -154,6 +154,8 @@ gconftool-2 --makefile-uninstall-rule \
 %endif
 
 %changelog
+* Tue Apr 18 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.5-0.1.20080418svn2511
+- Update to 0.7.5
 * Tue Apr 18 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.5-0.1.20080418svn2507
 - Bump to pre0.5
 * Tue Apr 7 2009 Feng Yu <rainwoodman@gmail.com> - 0.7.4-4.20080407svn2489

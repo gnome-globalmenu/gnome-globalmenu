@@ -94,7 +94,7 @@ public class Application{
 	public static unowned Application lookup_from_wnck(Wnck.Application wapp) {
 		init();
 		string key = generate_key_from_wnck(wapp);
-		message("wnck key = %s", key);
+		debug("wnck key = %s", key);
 		weak Application rt = dict.lookup(key);
 		if(rt == null) {
 			Application app = new Application();
@@ -138,7 +138,7 @@ public class Application{
 				case GMenu.TreeItemType.ENTRY:
 					GMenu.TreeEntry entry = (GMenu.TreeEntry)item;
 					string key = generate_key(entry);
-					message("gmenu key = %s", key);
+					debug("gmenu key = %s", key);
 					Application app = new Application();
 					app.key = key;
 					app.not_in_menu = false;

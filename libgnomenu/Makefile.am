@@ -36,6 +36,7 @@ libgnomenu_la_CPPFLAGS = \
 			 $(GTK_CFLAGS) \
 			 $(WNCK_CFLAGS) \
 			 $(X11_CFLAGS) \
+			 -DG_LOG_DOMAIN=\"libgnomenu\" \
 			 -include $(CONFIG_HEADER) \
 			 -include ../libcompat/libcompat.h
 

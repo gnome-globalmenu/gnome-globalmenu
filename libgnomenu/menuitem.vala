@@ -78,7 +78,7 @@ namespace Gnomenu {
 
 		private void maybe_connect_cached_submenu() {
 			if(_has_sub_shell && !_client_side_sub_shell) {
-				message("maybe?");
+				debug("maybe?");
 				if(this.submenu != _submenu_cache) {
 					this.submenu = _submenu_cache;
 				}

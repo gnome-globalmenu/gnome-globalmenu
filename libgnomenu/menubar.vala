@@ -100,12 +100,12 @@ namespace Gnomenu {
 			} 
 			if(item.is_child_of(_overflown_item)) {
 				string path = overflown_path_to_path(item.item_path);
-				message("real_item is %s", path);
+				debug("real_item is %s", path);
 				MenuItem real_item = get(path);
 				real_item.activate();
 				return;
 			}
-			message("item %s activated", item.item_path);
+			debug("item %s activated", item.item_path);
 			activate(item);
 		}
 		private string? overflown_path_to_path(string path) {
@@ -303,7 +303,7 @@ namespace Gnomenu {
 			}
 		}
 		private void rebuild_overflown_menu() {
-			message("rebuild_overflown_menu");
+			debug("rebuild_overflown_menu");
 			Gnomenu.Shell shell = _overflown_item.sub_shell;
 			StringBuilder sb = new StringBuilder("");
 			sb.append(Serializer.to_string(this));

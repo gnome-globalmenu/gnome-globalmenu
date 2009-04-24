@@ -12,7 +12,7 @@ namespace Gnomenu {
 			MarkupParseContext context = 
 				new MarkupParseContext(parser_functions, 0, parser, null);
 			context.parse(description, -1);
-			message("Parser consumed: %lf for %ld bytes", timer.elapsed(null),
+			debug("Parser consumed: %lf for %ld bytes", timer.elapsed(null),
 					description.size());
 		}
 

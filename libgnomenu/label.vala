@@ -125,7 +125,7 @@ namespace Gnomenu {
 			}
 		}
 		public override bool mnemonic_activate (bool arg1) {
-			message("mnemonic_activate %s", arg1.to_string());
+			debug("mnemonic_activate %s", arg1.to_string());
 			return _label_widget.mnemonic_activate(arg1);
 		}
 		construct {
@@ -140,7 +140,7 @@ namespace Gnomenu {
 				return;
 			}
 			child.mnemonic_activate += (obj, arg1) => {
-				message("mnemonic activate: %s", (obj as Gtk.Label).label);
+				debug("mnemonic activate: %s", (obj as Gtk.Label).label);
 			};
 			children.append(child as Label);
 			child.set_parent(this);
