@@ -93,6 +93,7 @@ namespace Gnomenu {
 		/**
 		 * This signal is emitted when a child item is activated
 		 */
+		public signal void activate(MenuItem item);
 		public virtual void emit_activate(MenuItem item) {
 			if(item == _overflown_item) {
 				rebuild_overflown_menu();
@@ -108,6 +109,18 @@ namespace Gnomenu {
 			debug("item %s activated", item.item_path);
 			activate(item);
 		}
+		public signal void select(MenuItem item);
+		public virtual void emit_select(MenuItem item) {
+			if(item.is_child_of(_overflown_item)) {
+				string path = overflown_path_to_path(item.item_path);
+				debug("real_item is %s", path);
+				MenuItem real_item = get(path);
+				select(real_item);
+			}
+			debug("item %s selected", item.item_path);
+			select(item);
+		}
+
 		private string? overflown_path_to_path(string path) {
 			int slashes = 0;
 			StringBuilder sb = new StringBuilder("");
@@ -126,7 +139,6 @@ namespace Gnomenu {
 				return sb.str;
 			return null;
 		}
-		public signal void activate(MenuItem item);
 
 		/**
 		 * To change the background of the menubar,

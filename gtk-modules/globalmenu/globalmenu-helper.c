@@ -24,6 +24,16 @@ char * gdk_window_get_menu_event (GdkWindow * window) {
 	gdk_property_get(window, atom, type, 0, G_MAXINT, FALSE, &actual_type, &actual_format, &actual_length, &rt);
 	return rt;
 }
+char * gdk_window_get_menu_select(GdkWindow * window) {
+	GdkAtom atom = gdk_atom_intern(GNOMENU_NET_GLOBALMENU_MENU_SELECT, FALSE);
+	GdkAtom type = gdk_atom_intern("STRING", FALSE);
+	GdkAtom actual_type = NULL;
+	gint actual_format;
+	gint actual_length;
+	char * rt = NULL;
+	gdk_property_get(window, atom, type, 0, G_MAXINT, FALSE, &actual_type, &actual_format, &actual_length, &rt);
+	return rt;
+}
 gboolean gdk_window_get_desktop_hint (GdkWindow * window) {
 	Display * display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default());
 	Atom atom;

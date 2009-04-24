@@ -9,6 +9,11 @@ namespace Gnomenu {
 					current_window.emit_menu_event(item.item_path);
 				}
 			};
+			select += (menubar, item) => {
+				if(current_window != null) {
+					current_window.emit_menu_select(item.item_path, null);
+				}
+			};
 		}
 		private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
 

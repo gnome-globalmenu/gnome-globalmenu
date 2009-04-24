@@ -14,6 +14,9 @@ namespace GlobalMenuGTK {
 	[CCode (cname = "gdk_window_get_menu_event")]
 	protected extern string gdk_window_get_menu_event (Gdk.Window window);
 
+	[CCode (cname = "gdk_window_get_menu_select")]
+	protected extern string gdk_window_get_menu_select (Gdk.Window window);
+
 	protected ulong changed_hook_id;
 	protected ulong attached_hook_id;
 	protected ulong detached_hook_id;
@@ -211,9 +214,24 @@ namespace GlobalMenuGTK {
 			if(menubar != null) {
 				MenuItem item = Locator.locate(menubar, path);
 				if(item != null) {
-					item.select();
 					item.activate();
 					debug("item %p is activated", item);
+				} else {
+					warning("item lookup failure");
+				}
+			} else {
+				warning("menubar lookup failure");
+			}
+		}
+		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_SELECT", false)) {
+			string path = gdk_window_get_menu_select(window.window);
+			MenuBar menubar = DynPatch.get_menubar(window);
+			debug("path = %s", path);
+			if(menubar != null) {
+				MenuItem item = Locator.locate(menubar, path);
+				if(item != null) {
+					item.select();
+					debug("item %p is selected", item);
 					if(item.submenu != null) {
 						if(hybrid == false) {
 							item.submenu.show();

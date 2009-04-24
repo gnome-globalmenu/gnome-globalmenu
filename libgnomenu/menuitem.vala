@@ -478,6 +478,10 @@ namespace Gnomenu {
 		public override void activate() {
 			(toplevel_shell as MenuBar).emit_activate(this);
 		}
+		public override void select() {
+			(toplevel_shell as MenuBar).emit_select(this);
+			base.select();
+		}
 		private void update_show_image() {
 			if(_image_widget != null) {
 				_image_widget.visible = _show_image;
