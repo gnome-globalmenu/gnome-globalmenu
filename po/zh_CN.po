@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-18 18:03-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-23 22:00-0400\n"
 "PO-Revision-Date: 2009-04-19 19:19+0000\n"
 "Last-Translator: Yu Feng <Unknown>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
@@ -25,31 +25,37 @@ msgstr "复选指示器的大小"
 msgid "Size of check or radio indicator"
 msgstr "单选指示器的大小"
 
-#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
+#: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "显示调试信息"
 
-#: ../gtk-modules/globalmenu/module-main.vala:79
+#: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
 msgstr "禁用 pixbuf 位图信息持续化"
 
-#: ../gtk-modules/globalmenu/module-main.vala:80
+#: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
 msgstr "禁用本插件"
 
-#: ../gtk-modules/globalmenu/module-main.vala:81
+#: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "把日志保存到文件中，缺省文件是 ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.vala:96
+#: ../gtk-modules/globalmenu/module-main.vala:86
+msgid "Enable hybrid mode"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- 全局菜单 GTK 插件"
 
-#: ../gtk-modules/globalmenu/module-main.vala:98
+#: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
-msgstr "要将这些参数提供给Global Menu, 请将其放置于环境变量 GLOBALMENU_GNOME_ARGS 中。"
+msgstr ""
+"要将这些参数提供给Global Menu, 请将其放置于环境变量 GLOBALMENU_GNOME_ARGS "
+"中。"
 
 #: ../applet/applet.vala:138
 msgid "globalmenu-panel-applet"

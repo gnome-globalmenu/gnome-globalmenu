@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-18 18:03-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-23 22:00-0400\n"
 "PO-Revision-Date: 2009-04-21 11:44+0000\n"
 "Last-Translator: Konstantin Khazov <kvk@kvk.pp.ru>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -25,27 +25,31 @@ msgstr "Размер индикатора"
 msgid "Size of check or radio indicator"
 msgstr "Размер флажка или индикатора выбора"
 
-#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
+#: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "Подробный вывод"
 
-#: ../gtk-modules/globalmenu/module-main.vala:79
+#: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
 msgstr "отключить сериализации pixbuf"
 
-#: ../gtk-modules/globalmenu/module-main.vala:80
+#: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
 msgstr "Отключить плагин"
 
-#: ../gtk-modules/globalmenu/module-main.vala:81
+#: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "Файл лога, по умолчанию ~/.gnomenu.log"
 
-#: ../gtk-modules/globalmenu/module-main.vala:96
+#: ../gtk-modules/globalmenu/module-main.vala:86
+msgid "Enable hybrid mode"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
 msgstr "- Плагин глобального меню для GTK"
 
-#: ../gtk-modules/globalmenu/module-main.vala:98
+#: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
@@ -78,8 +82,7 @@ msgstr "Плагин глобального меню не включен для 
 #: ../applet/applet.vala:232
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr ""
-"Включите этот плагин для доступа к диалогу настроек по правому щелчку,"
+msgstr "Включите этот плагин для доступа к диалогу настроек по правому щелчку,"
 
 #: ../applet/applet.vala:233
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."

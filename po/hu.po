@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2009-04-18 18:03-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-23 22:00-0400\n"
 "PO-Revision-Date: 2009-04-19 14:00+0000\n"
 "Last-Translator: jadaml <Unknown>\n"
 "Language-Team: Hungarian <hu@li.org>\n"
@@ -25,27 +25,31 @@ msgstr ""
 msgid "Size of check or radio indicator"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.vala:78 ../applet/main.vala:7
+#: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
 msgstr "Részletes kimenet"
 
-#: ../gtk-modules/globalmenu/module-main.vala:79
+#: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
 msgstr ""
 
-#: ../gtk-modules/globalmenu/module-main.vala:80
+#: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
 msgstr "Beépülő letiltása"
 
-#: ../gtk-modules/globalmenu/module-main.vala:81
+#: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "A log fájl mentési útvonala (Alap: ~/.gnomenu.log)"
 
-#: ../gtk-modules/globalmenu/module-main.vala:96
+#: ../gtk-modules/globalmenu/module-main.vala:86
+msgid "Enable hybrid mode"
+msgstr ""
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
 msgstr "Globális Menü beépülő modul a GTK-hoz"
 
-#: ../gtk-modules/globalmenu/module-main.vala:98
+#: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
