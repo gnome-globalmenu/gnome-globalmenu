@@ -57,6 +57,10 @@ namespace Gnomenu {
 					if(arr != null && arr.length >=1)
 						menu_select(arr[0], arr[1]);
 				}
+				if(prop == NET_GLOBALMENU_MENU_DESELECT) {
+					string value = get(NET_GLOBALMENU_MENU_DESELECT);
+					menu_deselect(value);
+				}
 			};
 		}
 		/*must be a toplevel */
@@ -169,6 +173,13 @@ namespace Gnomenu {
 		}
 
 		/**
+		 * emitted when a menu item is deselected 
+		 */
+		public void emit_menu_deselect(string path) {
+				set(NET_GLOBALMENU_MENU_DESELECT, path);
+		}
+
+		/**
 		 * globally grab a key to this window.
 		 *
 		 * return false if failed.
@@ -193,10 +204,15 @@ namespace Gnomenu {
 		 */
 		public signal void menu_event(string path);
 		/**
-		 * emitted when the a menu item is activated.
+		 * emitted when the a menu item is selected
 		 * (Not useful in GlobalMenu.PanelApplet).
 		 */
 		public signal void menu_select(string path, string? pos);
+		/**
+		 * emitted when the a menu item is deselected.
+		 * (Not useful in GlobalMenu.PanelApplet).
+		 */
+		public signal void menu_deselect(string path);
 		
 	}
 }

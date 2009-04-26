@@ -12,10 +12,7 @@ namespace GlobalMenuGTK {
 	[CCode (cname = "gdk_window_set_menu_context")]
 	protected extern void gdk_window_set_menu_context (Gdk.Window window, string? context);
 	[CCode (cname = "gdk_window_get_menu_event")]
-	protected extern string gdk_window_get_menu_event (Gdk.Window window);
-
-	[CCode (cname = "gdk_window_get_menu_select")]
-	protected extern string gdk_window_get_menu_select (Gdk.Window window);
+	protected extern string gdk_window_get_menu_event (Gdk.Window window, Gdk.Atom atom);
 
 	protected ulong changed_hook_id;
 	protected ulong attached_hook_id;
@@ -206,47 +203,65 @@ namespace GlobalMenuGTK {
 				typeof(Widget), menubar, null);
 			
 	}
+	private MenuItem? lookup_item(Window window, string path) {
+		MenuBar menubar = DynPatch.get_menubar(window);
+		debug("path = %s", path);
+		if(menubar != null) {
+			MenuItem item = Locator.locate(menubar, path);
+			if(item != null) {
+				debug("item %p is activated", item);
+				return item;
+			} else {
+				warning("item lookup failure");
+				return null;
+			}
+		} else {
+			warning("menubar lookup failure");
+			return null;
+		}
+	}
 	private bool window_property_notify_event (Window window, Gdk.EventProperty event) {
 		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false)) {
-			string path = gdk_window_get_menu_event(window.window);
-			MenuBar menubar = DynPatch.get_menubar(window);
-			debug("path = %s", path);
-			if(menubar != null) {
-				MenuItem item = Locator.locate(menubar, path);
-				if(item != null) {
-					item.activate();
-					debug("item %p is activated", item);
-				} else {
-					warning("item lookup failure");
+			var path = gdk_window_get_menu_event(window.window, event.atom);
+			var item = lookup_item(window, path);
+			if(item != null) item.activate();
+		}
+		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_HIGHLIGHT", false) ||
+		   event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_SELECT", false)
+		) {
+			var path = gdk_window_get_menu_event(window.window, event.atom);
+			var item = lookup_item(window, path);
+			if(item != null) {
+				item.select();
+				debug("item %p is selected", item);
+				if(item.submenu != null) {
+					if(hybrid == false)
+						item.submenu.show();
+					 else {
+						debug("client side popup");
+						item.submenu.popup(null, null, null, 3, 
+							Gtk.get_current_event_time()
+							);
+					}
 				}
-			} else {
-				warning("menubar lookup failure");
 			}
 		}
-		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_SELECT", false)) {
-			string path = gdk_window_get_menu_select(window.window);
-			MenuBar menubar = DynPatch.get_menubar(window);
-			debug("path = %s", path);
-			if(menubar != null) {
-				MenuItem item = Locator.locate(menubar, path);
-				if(item != null) {
-					item.select();
-					debug("item %p is selected", item);
-					if(item.submenu != null) {
-						if(hybrid == false) {
-							item.submenu.show();
-						} else {
-							debug("client side popup");
-							item.submenu.popup(null, null, null, 3, 
-								Gtk.get_current_event_time()
-								);
-						}
+		if(event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_DEHIGHLIGHT", false) ||
+		   event.atom == Gdk.Atom.intern("_NET_GLOBALMENU_MENU_DESELECT", false)
+		) {
+			var path = gdk_window_get_menu_event(window.window, event.atom);
+			var item = lookup_item(window, path);
+			if(item != null) {
+				item.deselect();
+				debug("item %p is selected", item);
+				if(item.submenu != null) {
+					if(hybrid == false)
+						item.submenu.hide();
+					 else {
+						debug("client side popup");
+						item.submenu.popdown();
 					}
-				} else {
-					warning("item lookup failure");
 				}
-			} else {
-				warning("menubar lookup failure");
 			}
 		}
 		return false;

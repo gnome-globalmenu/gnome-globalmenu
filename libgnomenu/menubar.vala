@@ -90,6 +90,15 @@ namespace Gnomenu {
 			}
 			base.dispose();
 		}
+		private MenuItem resolve_item_maybe_from_overflown(MenuItem item) {
+			if(item.is_child_of(_overflown_item)) {
+				string path = overflown_path_to_path(item.item_path);
+				debug("real_item is %s", path);
+				MenuItem real_item = get(path);
+				return real_item;
+			}
+			return item;	
+		}
 		/**
 		 * This signal is emitted when a child item is activated
 		 */
@@ -99,30 +108,24 @@ namespace Gnomenu {
 				rebuild_overflown_menu();
 				return;
 			} 
-			if(item.is_child_of(_overflown_item)) {
-				string path = overflown_path_to_path(item.item_path);
-				debug("real_item is %s", path);
-				MenuItem real_item = get(path);
-				real_item.activate();
-				return;
-			}
 			debug("item %s activated", item.item_path);
-			activate(item);
+			activate(resolve_item_maybe_from_overflown(item));
 		}
+
 		public signal void select(MenuItem item);
+		public signal void deselect(MenuItem item);
 		public virtual void emit_select(MenuItem item) {
 			if(item == _overflown_item) {
 				return;
 			}
-			if(item.is_child_of(_overflown_item)) {
-				string path = overflown_path_to_path(item.item_path);
-				debug("real_item is %s", path);
-				MenuItem real_item = get(path);
-				select(real_item);
+			debug("item %s selected", item.item_path);
+			select(resolve_item_maybe_from_overflown(item));
+		}
+		public virtual void emit_deselect(MenuItem item) {
+			if(item == _overflown_item) {
 				return;
 			}
-			debug("item %s selected", item.item_path);
-			select(item);
+			deselect(resolve_item_maybe_from_overflown(item));
 		}
 
 		private string? overflown_path_to_path(string path) {

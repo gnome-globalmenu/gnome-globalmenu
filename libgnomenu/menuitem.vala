@@ -482,6 +482,10 @@ namespace Gnomenu {
 			(toplevel_shell as MenuBar).emit_select(this);
 			base.select();
 		}
+		public override void deselect() {
+			(toplevel_shell as MenuBar).emit_deselect(this);
+			base.deselect();
+		}
 		private void update_show_image() {
 			if(_image_widget != null) {
 				_image_widget.visible = _show_image;
