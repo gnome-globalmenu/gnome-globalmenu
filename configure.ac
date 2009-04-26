@@ -1,4 +1,4 @@
-AC_INIT(gnome-globalmenu, [0.7.5], [rainwoodman@gmail.com], [gnome-globalmenu])
+AC_INIT(gnome-globalmenu, [0.7.6], [rainwoodman@gmail.com], [gnome-globalmenu])
 
 AC_CONFIG_MACRO_DIR([autotools])
 AC_CONFIG_AUX_DIR([autotools])

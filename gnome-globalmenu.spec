@@ -1,10 +1,10 @@
-%define base_version 	0.7.5
-#%define alphatag 20080418svn2511
+%define base_version 	0.7.6
+%define alphatag 20080423svn2524
 
 Name:		gnome-globalmenu
 Version:	%{base_version}
-Release:	1%{?dist}
-#Release:	0.1.%{alphatag}
+#Release:	1%{?dist}
+Release:	0.1.%{alphatag}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
 License:	GPLv2 and LGPLv2
