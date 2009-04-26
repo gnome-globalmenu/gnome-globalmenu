@@ -9,7 +9,12 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin);
 XFCE_PANEL_PLUGIN_REGISTER_EXTERNAL ( xfce_panel_plugin_init);
 
 static void on_window_changed(GnomenuMonitor * monitor, ulong prev, XfcePanelPlugin * plugin);
+static void null_log_handler(const gchar * domain, GLogLevelFlags level, const gchar* message, gpointer userdata) {
+	return;
+}
 static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
+	g_log_set_handler("libgnomenu", G_LOG_LEVEL_DEBUG, null_log_handler, NULL);
+
 	gtk_rc_parse_string(
 		"style \"globalmenu_event_box_style\"\n"
 		"{\n"
