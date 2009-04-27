@@ -36,8 +36,10 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 	buffered_changes++;
 	/* if their is a pending notifier, do nothing. wait for that notifier
 	 * to notifier the changes of the menubar.*/
-	if(g_hash_table_lookup(notifiers, menubar)) return;
-
+	if(g_hash_table_lookup(notifiers, menubar)) {
+		g_static_rec_mutex_unlock(&_menubar_mutex);
+		return;
+	}
 	source_id = g_timeout_add_full(G_PRIORITY_HIGH_IDLE, 200, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
 
 	if(source_id) {
@@ -109,7 +111,10 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	if(menubar != NULL) {
 		gboolean local = FALSE;
 		g_object_get(menubar, "local", &local, NULL);
-		if(local) return;
+		if(local) {
+			g_static_rec_mutex_unlock(&_menubar_mutex);
+			return;
+		}
 	}
 	dyn_patch_set_menubar(widget, menubar);
 
