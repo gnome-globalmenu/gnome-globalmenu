@@ -18,7 +18,7 @@ public class TestMan : GLib.Object {
 	public void create_test_window() {
 		window = new Gtk.Window(WindowType.TOPLEVEL);
 		message("window created");
-		window.delete_event += (window) => {
+		window.delete_event += (window, event ) => {
 			window.hide_on_delete();
 			Gtk.main_quit();
 			window.unrealize();
