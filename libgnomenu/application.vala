@@ -62,9 +62,15 @@ public class Application{
 	private static bool initialized = false;
 	public static void init(){
 		if(initialized) return;
-		GMenu.TreeDirectory node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
-		append_node_r(node);
 		initialized = true;
+		
+		GMenu.TreeDirectory node;
+		
+		node = GMenu.Tree.lookup("applications.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
+		append_node_r(node);
+		node = GMenu.Tree.lookup("settings.menu", GMenu.TreeFlags.INCLUDE_EXCLUDED).get_root_directory();
+		append_node_r(node);
+		
 		Wnck.Screen screen = Wnck.Screen.get_default();
 		weak List<Wnck.Window> list = screen.get_windows();
 		foreach(Wnck.Window wwin in list) {
