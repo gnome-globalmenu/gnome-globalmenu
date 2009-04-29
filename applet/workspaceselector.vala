@@ -115,7 +115,12 @@ class WorkspaceSelector : Gtk.Window {
 		follow = new Gtk.CheckButton.with_label(_("Follow the window"));
 		follow.active = true;
 		rows.pack_start(follow, true, true, 0);
+		
 		follow.style = rc_get_style(new Gtk.MenuItem());
+		foreach(weak Gtk.Widget w in follow.get_children())
+			if (w.get_type()==typeof(Gtk.Label))
+				w.style = follow.style;
+		
 		this.add(rows);
 		this.show_all();
 	}
