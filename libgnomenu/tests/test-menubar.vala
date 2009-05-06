@@ -78,7 +78,6 @@ namespace Gnomenu {
 			add("usability", () => {
 					assert(window is Gtk.Window);
 				Parser.parse( menubar, test1);
-				menubar.min_length = -1;
 				window.show();		
 				Gtk.main();
 			});
@@ -87,7 +86,6 @@ namespace Gnomenu {
 				Parser.parse( menubar, test1);
 				menubar.modify_bg(StateType.NORMAL, color);
 				menubar.gravity = Gravity.DOWN;
-				menubar.min_length = 20;
 				window.resize(20, 20);
 				window.show();
 				assert(menubar.overflown == true);
@@ -103,7 +101,6 @@ namespace Gnomenu {
 				Parser.parse( menubar, test1);
 				menubar.modify_bg(StateType.NORMAL, color);
 				menubar.gravity = Gravity.RIGHT;
-				menubar.min_length = 20;
 				menubar.pack_direction = Gtk.PackDirection.BTT;
 				window.resize(20, 20);
 				window.show();
@@ -119,7 +116,6 @@ namespace Gnomenu {
 			});
 			add("sensitive", () => {
 				Parser.parse( menubar, test1);
-				menubar.min_length = -1;
 				window.show();
 				/*
 				   won't compile before vala 0.5.7

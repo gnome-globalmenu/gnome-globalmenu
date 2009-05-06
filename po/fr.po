@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-23 22:00-0400\n"
+"POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-04-20 18:01+0000\n"
 "Last-Translator: pyluyten <Unknown>\n"
 "Language-Team: French <fr@li.org>\n"
@@ -57,55 +57,55 @@ msgstr ""
 "Ces paramètres devraient être fournis par l'environnement "
 "GLOBALMENU_GNOME_ARGS plutôt que par la ligne de commande."
 
-#: ../applet/applet.vala:138
+#: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.vala:200
+#: ../applet/applet.vala:216
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: ../applet/applet.vala:201
+#: ../applet/applet.vala:217
 msgid "_Help"
 msgstr "_Aide"
 
-#: ../applet/applet.vala:202
+#: ../applet/applet.vala:218
 msgid "_About"
 msgstr "À _propos"
 
-#: ../applet/applet.vala:230
+#: ../applet/applet.vala:246
 msgid "No Global Menu?"
 msgstr "Pas de Global Menu?"
 
-#: ../applet/applet.vala:231
+#: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
 msgstr "Le greffon Global Menu n'est pas activé sur ce bureau."
 
-#: ../applet/applet.vala:232
+#: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr "Activez le greffon en accédant au préférences par un click-doit."
 
-#: ../applet/applet.vala:233
+#: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 msgstr "Ou en exportant GTK_MODULES=globalmenu-gnome dans votre profil."
 
-#: ../applet/applet.vala:266
+#: ../applet/applet.vala:283
 msgid "Project Home"
 msgstr "Site Internet du Projet"
 
-#: ../applet/applet.vala:272
+#: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  Pierre Slamich https://launchpad.net/~pierre-slamich\n"
 "  pyluyten https://launchpad.net/~py"
 
-#: ../applet/applet.vala:284
+#: ../applet/applet.vala:313
 msgid "On-line help"
 msgstr "Aide en Ligne"
 
-#: ../applet/applet.vala:295
+#: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
 msgstr "Préférences du greffon Global Menu"
 
@@ -153,11 +153,11 @@ msgstr "_Espace de Travail..."
 msgid "_Close"
 msgstr "_Fermer"
 
-#: ../applet/switcher.vala:272
+#: ../applet/switcher.vala:249
 msgid "Show _Desktop"
 msgstr "Montrer le _Bureau"
 
-#: ../applet/switcher.vala:372
+#: ../applet/switcher.vala:292
 msgid "Desktop"
 msgstr "Bureau"
 
@@ -166,20 +166,41 @@ msgid "Follow the window"
 msgstr "Suivre la fenêtre"
 
 #: ../gnome-globalmenu.schemas.in.h:1
+msgid "Add a handle to the applet"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
 msgstr ""
 "Ajouter au menu du titre de l'application active un menu d'actions sur la "
 "fenêtre"
 
-#: ../gnome-globalmenu.schemas.in.h:2
+#: ../gnome-globalmenu.schemas.in.h:3
+msgid "Disable checking the GTK plugin module at startup"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:4
+msgid ""
+"Disable checking the GTK plugin module at startup. If you know the module is "
+"loaded but for some reasons the applet cannot correctly detect this fact, "
+"set this key to true to skip the checking."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
 msgstr "Activer Global Menu pour les applications GTK"
 
-#: ../gnome-globalmenu.schemas.in.h:3
-msgid "Icon"
-msgstr "Icône"
+#: ../gnome-globalmenu.schemas.in.h:6
+#, fuzzy
+msgid "Enable the Window Actions"
+msgstr "Actions de la fênetre"
 
-#: ../gnome-globalmenu.schemas.in.h:4
+#: ../gnome-globalmenu.schemas.in.h:7
+#, fuzzy
+msgid "Enabled the Window List"
+msgstr "Liste des fenêtres"
+
+#: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
@@ -187,37 +208,43 @@ msgstr ""
 "Si cette clé est vraie, libglobalmenu-gnome, le greffon GTK de Global Menu "
 "est chargé."
 
-#: ../gnome-globalmenu.schemas.in.h:5
-msgid "Label"
-msgstr "Libellé"
+#: ../gnome-globalmenu.schemas.in.h:9
+msgid "Maximum length of the title area"
+msgstr ""
 
-#: ../gnome-globalmenu.schemas.in.h:6
-msgid "Max title length"
-msgstr "Longueur maximale du titre"
-
-#: ../gnome-globalmenu.schemas.in.h:7
-msgid "Show/Hide the icon of the active window"
+#: ../gnome-globalmenu.schemas.in.h:10
+#, fuzzy
+msgid "Show the icon of the action window in the applet"
 msgstr "Afficher/Masquer l'icône de l'application active"
 
-#: ../gnome-globalmenu.schemas.in.h:8
-msgid "Show/Hide the name of the active application"
+#: ../gnome-globalmenu.schemas.in.h:11
+#, fuzzy
+msgid "Show the icon of the active window in the applet when enabled."
+msgstr "Afficher/Masquer l'icône de l'application active"
+
+#: ../gnome-globalmenu.schemas.in.h:12
+#, fuzzy
+msgid "Show the name of the active application in the applet"
 msgstr "Afficher/Cacher le nom de l'application active"
 
-#: ../gnome-globalmenu.schemas.in.h:9
+#: ../gnome-globalmenu.schemas.in.h:13
+#, fuzzy
+msgid "Show the name of the active application in the applet when enabled"
+msgstr "Afficher/Cacher le nom de l'application active"
+
+#: ../gnome-globalmenu.schemas.in.h:14
+msgid ""
+"Specify if the applet has a handle. When the handle is enabled, the applet "
+"will not expand to occupy the remaining empty area on the panel."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
 msgstr "Passez d'une application à l'autre par leur nom"
 
-#: ../gnome-globalmenu.schemas.in.h:10
+#: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
 msgstr "La longueur maximale du nom de l'application active, en pixels"
-
-#: ../gnome-globalmenu.schemas.in.h:11
-msgid "Window Actions"
-msgstr "Actions de la fênetre"
-
-#: ../gnome-globalmenu.schemas.in.h:12
-msgid "Window List"
-msgstr "Liste des fenêtres"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
@@ -238,3 +265,12 @@ msgstr "Greffon Menu Global pour le tableau de bord de XFCE"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "Le Greffon Menu Global pour le tableau de bord de XFCE"
+
+#~ msgid "Icon"
+#~ msgstr "Icône"
+
+#~ msgid "Label"
+#~ msgstr "Libellé"
+
+#~ msgid "Max title length"
+#~ msgstr "Longueur maximale du titre"

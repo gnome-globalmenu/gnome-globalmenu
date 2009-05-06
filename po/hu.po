@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-04-23 22:00-0400\n"
+"POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-04-19 14:00+0000\n"
 "Last-Translator: jadaml <Unknown>\n"
 "Language-Team: Hungarian <hu@li.org>\n"
@@ -57,54 +57,54 @@ msgstr ""
 "Ezeket a paraméterek a GLOBALMENU_GNOME_ARGS környezetben kell megadni, nem "
 "a parancssorban."
 
-#: ../applet/applet.vala:138
+#: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.vala:200
+#: ../applet/applet.vala:216
 msgid "_Preferences"
 msgstr "_Tulajdonságok"
 
-#: ../applet/applet.vala:201
+#: ../applet/applet.vala:217
 msgid "_Help"
 msgstr "_Súgó"
 
-#: ../applet/applet.vala:202
+#: ../applet/applet.vala:218
 msgid "_About"
 msgstr "_Névjegy"
 
-#: ../applet/applet.vala:230
+#: ../applet/applet.vala:246
 msgid "No Global Menu?"
 msgstr ""
 
-#: ../applet/applet.vala:231
+#: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
 msgstr ""
 
-#: ../applet/applet.vala:232
+#: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
 
-#: ../applet/applet.vala:233
+#: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 msgstr "vagy a GTK_MODULES=globalmenu-gnome exportálásával a profiljába."
 
-#: ../applet/applet.vala:266
+#: ../applet/applet.vala:283
 msgid "Project Home"
 msgstr "Projekt honlap"
 
-#: ../applet/applet.vala:272
+#: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  jadaml https://launchpad.net/~jadaml"
 
-#: ../applet/applet.vala:284
+#: ../applet/applet.vala:313
 msgid "On-line help"
 msgstr "Online segítség"
 
-#: ../applet/applet.vala:295
+#: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
 msgstr ""
 
@@ -152,11 +152,11 @@ msgstr "_Munkaterület..."
 msgid "_Close"
 msgstr ""
 
-#: ../applet/switcher.vala:272
+#: ../applet/switcher.vala:249
 msgid "Show _Desktop"
 msgstr "Asztal _megjelenítése"
 
-#: ../applet/switcher.vala:372
+#: ../applet/switcher.vala:292
 msgid "Desktop"
 msgstr "Asztal"
 
@@ -165,55 +165,82 @@ msgid "Follow the window"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:1
+msgid "Add a handle to the applet"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
 msgstr ""
 "Ablak műveleti menübejegyzések hozzáadása az aktív alkalmazásnév menühöz"
 
-#: ../gnome-globalmenu.schemas.in.h:2
+#: ../gnome-globalmenu.schemas.in.h:3
+msgid "Disable checking the GTK plugin module at startup"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:4
+msgid ""
+"Disable checking the GTK plugin module at startup. If you know the module is "
+"loaded but for some reasons the applet cannot correctly detect this fact, "
+"set this key to true to skip the checking."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
 msgstr "Globális Menü engedélyezése GTK-hoz"
 
-#: ../gnome-globalmenu.schemas.in.h:3
-msgid "Icon"
-msgstr "Ikon"
+#: ../gnome-globalmenu.schemas.in.h:6
+#, fuzzy
+msgid "Enable the Window Actions"
+msgstr "Ablak műveletek"
 
-#: ../gnome-globalmenu.schemas.in.h:4
+#: ../gnome-globalmenu.schemas.in.h:7
+#, fuzzy
+msgid "Enabled the Window List"
+msgstr "Ablak lista"
+
+#: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
 
-#: ../gnome-globalmenu.schemas.in.h:5
-msgid "Label"
-msgstr "Címke"
-
-#: ../gnome-globalmenu.schemas.in.h:6
-msgid "Max title length"
-msgstr "Maximális cím hossz"
-
-#: ../gnome-globalmenu.schemas.in.h:7
-msgid "Show/Hide the icon of the active window"
-msgstr "Aktív ablak ikonjának megjelenítése/elrejtése"
-
-#: ../gnome-globalmenu.schemas.in.h:8
-msgid "Show/Hide the name of the active application"
-msgstr "Aktív alkalmazás nevének megjelenítése/elrejtése"
-
 #: ../gnome-globalmenu.schemas.in.h:9
-msgid "Switch among applications via the application name label"
+msgid "Maximum length of the title area"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-msgid "The maximum length of name of the active application, in pixels"
-msgstr "Az aktív alkalmazás nevének maximális hossza képpontban"
+#, fuzzy
+msgid "Show the icon of the action window in the applet"
+msgstr "Aktív ablak ikonjának megjelenítése/elrejtése"
 
 #: ../gnome-globalmenu.schemas.in.h:11
-msgid "Window Actions"
-msgstr "Ablak műveletek"
+#, fuzzy
+msgid "Show the icon of the active window in the applet when enabled."
+msgstr "Aktív ablak ikonjának megjelenítése/elrejtése"
 
 #: ../gnome-globalmenu.schemas.in.h:12
-msgid "Window List"
-msgstr "Ablak lista"
+#, fuzzy
+msgid "Show the name of the active application in the applet"
+msgstr "Aktív alkalmazás nevének megjelenítése/elrejtése"
+
+#: ../gnome-globalmenu.schemas.in.h:13
+#, fuzzy
+msgid "Show the name of the active application in the applet when enabled"
+msgstr "Aktív alkalmazás nevének megjelenítése/elrejtése"
+
+#: ../gnome-globalmenu.schemas.in.h:14
+msgid ""
+"Specify if the applet has a handle. When the handle is enabled, the applet "
+"will not expand to occupy the remaining empty area on the panel."
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:15
+msgid "Switch among applications via the application name label"
+msgstr ""
+
+#: ../gnome-globalmenu.schemas.in.h:16
+msgid "The maximum length of name of the active application, in pixels"
+msgstr "Az aktív alkalmazás nevének maximális hossza képpontban"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
@@ -234,3 +261,12 @@ msgstr ""
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "A Globális Menu Beépülő XFCE panelhoz"
+
+#~ msgid "Icon"
+#~ msgstr "Ikon"
+
+#~ msgid "Label"
+#~ msgstr "Címke"
+
+#~ msgid "Max title length"
+#~ msgstr "Maximális cím hossz"

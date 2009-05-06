@@ -5,14 +5,25 @@ namespace Gnomenu {
 public class MenuBarBox: Gtk.Container {
 	private struct ChildPropBag {
 		public bool expand;
+		public bool shrink;
 	}
 	static const int PROP_EXPAND = 1234;
+	static const int PROP_SHRINK = 1235;
 	static construct {
 		install_child_property(PROP_EXPAND,
 				new ParamSpecBoolean(
 					"expand",
 					"Expand",
 					"the child will expand if set to true",
+					false,
+					ParamFlags.READABLE |
+					ParamFlags.WRITABLE
+					));
+		install_child_property(PROP_SHRINK,
+				new ParamSpecBoolean(
+					"shrink",
+					"shrink",
+					"the child will shrink if set to true",
 					false,
 					ParamFlags.READABLE |
 					ParamFlags.WRITABLE
@@ -90,6 +101,11 @@ public class MenuBarBox: Gtk.Container {
 
 	private List<weak Gnomenu.MenuBar> children;
 
+	private int[] size_hints;
+	
+	public unowned int[] get_size_hints() {
+		return size_hints;	
+	}
 	public override void forall(bool include_internals, Gtk.Callback callback) {
 		if(include_internals) {
 
@@ -121,26 +137,37 @@ public class MenuBarBox: Gtk.Container {
 		r.width = 0;
 		r.height = 0;
 		Requisition cr;
+		List<int> hints = null;
 		foreach(Gnomenu.MenuBar menubar in children) {
 			if(!menubar.visible) continue;
 			menubar.size_request(out cr);
+			bool shrink = false;
+			child_get(menubar, "shrink", &shrink);
 			switch(pack_direction) {
 				case PackDirection.LTR:
 				case PackDirection.RTL:
 						r.height = r.height>cr.height?r.height:cr.height;
+						hints.prepend(r.width + 2);
 						r.width += cr.width;
+						hints.prepend(r.width + 1);
 				break;
 				case PackDirection.BTT:
 				case PackDirection.TTB:
 						r.width = r.width>cr.width?r.width:cr.width;
+						hints.prepend(r.height + 2);
 						r.height += cr.height;
+						hints.prepend(r.height + 1);
 				break;
 			}
 		}
+		size_hints = new int[hints.length()];
+		int i = 0;
+		foreach(int val in hints) {
+			size_hints[i] = val;
+			i++;
+		}
 	}
-	public override void map() {
-		base.map();
-	}
+
 	public override void size_allocate(Gdk.Rectangle a) {
 		allocation = (Allocation) a;
 		Requisition cr;
@@ -150,37 +177,37 @@ public class MenuBarBox: Gtk.Container {
 		int rev_x = a.width;
 		int rev_y = a.height;
 
-		int num_of_expands = 0;
-		int non_expand_a = 0;
+		int num_of_shrinks = 0;
+		int non_shrink_a = 0;
 
 		foreach(Gnomenu.MenuBar menubar in children) {
 			if(!menubar.visible) continue;
-			bool expand = false;
-			child_get(menubar, "expand", &expand, null);
-			if(expand) num_of_expands++;
+			bool shrink = false;
+			child_get(menubar, "shrink", &shrink, null);
+			if(shrink) num_of_shrinks++;
 			else {
 				menubar.get_child_requisition(out cr);
 				switch(pack_direction) {
 					case PackDirection.LTR:
 					case PackDirection.RTL:
-						non_expand_a += cr.width;
+						non_shrink_a += cr.width;
 					break;
 					case PackDirection.BTT:
 					case PackDirection.TTB:
-						non_expand_a += cr.height;
+						non_shrink_a += cr.height;
 					break;
 				}
 			}
 		}
 		foreach(Gnomenu.MenuBar menubar in children) {
-			bool expand = false;
+			bool shrink = false;
 			if(!menubar.visible) continue;
 			menubar.get_child_requisition(out cr);
-			child_get(menubar, "expand", &expand, null);
+			child_get(menubar, "shrink", &shrink, null);
 			switch(pack_direction) {
 				case PackDirection.LTR:
-					if(expand) {
-						ca.width = (a.width - non_expand_a)/num_of_expands;
+					if(shrink) {
+						ca.width = (a.width - non_shrink_a)/num_of_shrinks;
 						if(ca.width < 0) ca.width = 0;
 					} else {
 						ca.width = cr.width;
@@ -191,8 +218,8 @@ public class MenuBarBox: Gtk.Container {
 					x += ca.width;
 				break;
 				case PackDirection.RTL:
-					if(expand) {
-						ca.width = (a.width - non_expand_a)/num_of_expands;
+					if(shrink) {
+						ca.width = (a.width - non_shrink_a)/num_of_shrinks;
 						if(ca.width < 0) ca.width = 0;
 					} else {
 						ca.width = cr.width;
@@ -205,8 +232,8 @@ public class MenuBarBox: Gtk.Container {
 				break;
 				case PackDirection.TTB:
 					ca.width = a.width;
-					if(expand) {
-						ca.height = (a.height - non_expand_a)/num_of_expands;
+					if(shrink) {
+						ca.height = (a.height - non_shrink_a)/num_of_shrinks;
 						if(ca.height < 0) ca.height = 0;
 					} else {
 						ca.height = cr.height;
@@ -217,8 +244,8 @@ public class MenuBarBox: Gtk.Container {
 				break;
 				case PackDirection.BTT:
 					ca.width = a.width;
-					if(expand) {
-						ca.height = (a.height - non_expand_a)/num_of_expands;
+					if(shrink) {
+						ca.height = (a.height - non_shrink_a)/num_of_shrinks;
 						if(ca.height < 0) ca.height = 0;
 					} else {
 						ca.height = cr.height;
@@ -240,6 +267,10 @@ public class MenuBarBox: Gtk.Container {
 				ChildPropBag* prop = props.lookup(child);
 				value.set_boolean(prop->expand);
 			break;
+			case PROP_SHRINK:
+				ChildPropBag* prop = props.lookup(child);
+				value.set_boolean(prop->shrink);
+			break;
 		}
 	}
 	public override void set_child_property(Gtk.Widget child, uint id,
@@ -250,6 +281,14 @@ public class MenuBarBox: Gtk.Container {
 				ChildPropBag* prop = props.lookup(child);
 				if(prop->expand != expand) {
 					prop->expand = expand;
+					queue_resize();
+				}
+			break;
+			case PROP_SHRINK:
+				bool shrink = value.get_boolean();
+				ChildPropBag* prop = props.lookup(child);
+				if(prop->shrink != shrink ) {
+					prop->shrink = shrink;
 					queue_resize();
 				}
 			break;

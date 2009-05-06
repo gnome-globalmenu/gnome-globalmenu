@@ -8,6 +8,40 @@ using GConf;
 [CCode (cname = "GlobalMenuPanelApplet")]
 public class Applet : Panel.Applet {
 	public static const string IID = "OAFIID:GlobalMenu_PanelApplet";
+	static const string applet_menu_xml_template = """
+<popup name="button3">
+	<menuitem name="Preferences" 
+		verb="Preferences" 
+		_label="@Preferences@"
+		pixtype="stock" 
+		pixname="gtk-preferences"/>
+	<menuitem name="Help" 
+		verb="Help" 
+		_label="@Help@"
+		pixtype="stock" 
+		pixname="gtk-help"/>
+	<menuitem name="About" 
+		verb="About" 
+		_label="@About@"
+		pixtype="stock" 
+		pixname="gtk-about"/>
+</popup>
+	""";
+	static string[] subs = {
+			"@Preferences@", _("_Preferences"),
+			"@Help@", _("_Help"),
+			"@About@", _("_About")
+		};
+	static const string APPLET_NAME = _("globalmenu-panel-applet");
+	static const string APPLET_ICON = "globalmenu";
+	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
+	
+	static const BonoboUI.Verb[] verbs = { 
+		{"About", (BonoboUI.VerbFn) applet_menu_clicked, null},
+		{"Help", (BonoboUI.VerbFn) applet_menu_clicked, null},
+		{"Preferences", (BonoboUI.VerbFn) applet_menu_clicked, null},
+		{null, null, null}
+	};
 
 	public Applet() { }
 	public override void dispose() {
@@ -17,11 +51,8 @@ public class Applet : Panel.Applet {
 		}
 		base.dispose();	
 	}
-	~Applet() {
-	}
 
 	construct {
-		disposed = false;
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
 		menubars.visible = true;
@@ -31,15 +62,13 @@ public class Applet : Panel.Applet {
 		menubars.add(switcher);
 		setup_popup_menu(switcher);
 
-		main_menubar.min_length = 12;  /*Then it will have a overflown item*/
 		setup_popup_menu(main_menubar);
 
 		menubars.add(main_menubar);
-		menubars.child_set(main_menubar, "expand", true, null);	/*Let the main_menubar use the remaining space in the applet.*/
-
+		menubars.child_set(main_menubar, "shrink", true, null);
 
 		/*init panel */
-		flags = (Panel.AppletFlags.EXPAND_MINOR | Panel.AppletFlags.EXPAND_MAJOR );
+		has_handle = false;
 		set_background_widget(this);
 
 		Gdk.Color color;
@@ -54,11 +83,36 @@ public class Applet : Panel.Applet {
 
 	private Monitor monitor = new Monitor();
 	private MenuBarBox menubars = new MenuBarBox();
-	private bool disposed;
+	private bool disposed = false;
 	private GlobalMenu main_menubar = new GlobalMenu();
 	private Switcher switcher = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
+
+	private bool initialized = false;
+	public bool disable_module_check = false;
+	private bool _has_handle = false;
+	public bool has_handle {
+		set {
+			if(value) {
+				flags = (0
+				| Panel.AppletFlags.HAS_HANDLE
+				| Panel.AppletFlags.EXPAND_MINOR  
+				| Panel.AppletFlags.EXPAND_MAJOR
+				);
+			} else {
+				flags = (0
+				| Panel.AppletFlags.EXPAND_MINOR  
+				| Panel.AppletFlags.EXPAND_MAJOR
+				);
+				set_size_hints(null, 0);
+			}
+			_has_handle = value;
+		}
+		get {
+			return _has_handle;
+		}
+	}
 	public override void screen_changed(Gdk.Screen? previous_screen) {
 		Gdk.Screen screen = get_screen();
 		if(previous_screen != null) {
@@ -82,6 +136,7 @@ public class Applet : Panel.Applet {
 		}
 		main_menubar.switch_to(xid);
 	}
+
 	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
 		switch(type){
@@ -111,55 +166,40 @@ public class Applet : Panel.Applet {
 		menubars.background = bg;
 	}
 	public override void change_orient(AppletOrient orient) {
+		update_size();
+	}
+	public override void change_size(uint size) {
+		update_size();
+	}
+	private void update_size() {
 		switch(orient) {
 			case AppletOrient.UP:
 				menubars.gravity = Gravity.DOWN;
 				menubars.pack_direction = PackDirection.LTR;
 				menubars.child_pack_direction = PackDirection.LTR;
+				menubars.set_size_request((int)size, -1);
 			break;
 			case AppletOrient.DOWN:
 				menubars.gravity = Gravity.DOWN;
 				menubars.pack_direction = PackDirection.LTR;
 				menubars.child_pack_direction = PackDirection.LTR;
+				menubars.set_size_request((int)size, -1);
 			break;
 			case AppletOrient.LEFT:
 				menubars.gravity = Gravity.LEFT;
 				menubars.pack_direction = PackDirection.TTB;
 				menubars.child_pack_direction = PackDirection.TTB;
+				menubars.set_size_request(-1, (int)size);
 			break;
 			case AppletOrient.RIGHT:
 				menubars.gravity = Gravity.RIGHT;
 				menubars.pack_direction = PackDirection.TTB;
 				menubars.child_pack_direction = PackDirection.TTB;
+				menubars.set_size_request(-1, (int)size);
 			break;
 		}
 	}
 	
-	static const string APPLET_NAME = _("globalmenu-panel-applet");
-	static const string APPLET_ICON = "globalmenu";
-	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
-	static const string[] APPLET_AUTHORS = {"Coding:",
-						"Yu Feng <rainwoodman@gmail.com>",
-						"Mingxi Wu <fengshenx@gmail.com>",
-						"bis0n.lives <bis0n.lives@gmail.com>",
-						"Luca Viggiani <lviggiani@gmail.com>",
-						"",
-						"Packaging:",
-						"sstasyuk <sstasyuk@gmail.com>",
-						"David Watson <dwatson031@gmail.com>",
-						"Valiant Wing <Valiant.Wing@gmail.com>",
-						null};
-	
-	static const string[] APPLET_ADOCUMENTERS = {
-		"Pierre Slamich <pierre.slamich@gmail.com>", 
-		null};
-
-	static const BonoboUI.Verb[] verbs = { 
-			{"About", on_about_clicked, null},
-			{"Help", on_help_clicked, null},
-			{"Preferences", on_preferences_clicked, null},
-			{null, null, null}
-		};
 		    
 	public void init() {
 		/* Connect to gconf */
@@ -176,140 +216,162 @@ public class Applet : Panel.Applet {
 			};
 		}	
 
-		string applet_menu_xml_template = """
-<popup name="button3">
-	<menuitem name="Preferences" 
-		verb="Preferences" 
-		_label="@Preferences@"
-		pixtype="stock" 
-		pixname="gtk-preferences"/>
-	<menuitem name="Help" 
-		verb="Help" 
-		_label="@Help@"
-		pixtype="stock" 
-		pixname="gtk-help"/>
-	<menuitem name="About" 
-		verb="About" 
-		_label="@About@"
-		pixtype="stock" 
-		pixname="gtk-about"/>
-</popup>
-		""";
 		    
-		string[] subs = {
-			"@Preferences@", _("_Preferences"),
-			"@Help@", _("_Help"),
-			"@About@", _("_About")
-		};
 		string applet_menu_xml = Template.replace(applet_menu_xml_template, subs);
 
 		setup_menu (applet_menu_xml, verbs, this);
 
 		get_prefs();
-	
+
+		initialized = true;
+		check_module();
 	}
 
 	private void check_module() {
-		Settings settings = get_settings();
-		if(settings == null) return;
-		string modules = settings.gtk_modules;
-		modules += Environment.get_variable("GTK_MODULES");
+		if(!initialized) return;
+		if(disable_module_check) return;
 
-		if(modules != null && modules.str("globalmenu") != null) {
-			return;
+		string modules = Environment.get_variable("GTK_MODULES");
+		if(modules == null) modules = "";
+		Settings settings = get_settings();
+		if(settings != null) {
+			modules += settings.gtk_modules;
 		}
-		
-		if(notify_no_plugin == null) {
-			if(!Notify.is_initted()) {
-				if(!Notify.init(APPLET_NAME)) {
-					critical("libnotify is not initialized");	
-					return;
-				}
-			}
-			notify_no_plugin = new Notify.Notification(
-							_("No Global Menu?"), 
-							_("The Global Menu Plugin is not enabled on this desktop.") +
-							_("Enable the plugin by accessing the preferences dialog via a right-click,") +
-							_("or by exporting GTK_MODULES=globalmenu-gnome in your profile.")
-							, "globalmenu", null);
-		}
+
+		if(modules.str("globalmenu") != null) return;
+
 		try {
-		notify_no_plugin.show();
+			Notify.init(APPLET_NAME);
+			notify_no_plugin = new Notify.Notification(
+				_("No Global Menu?"), 
+				_("The Global Menu Plugin is not enabled on this desktop.") +
+				_("Enable the plugin by accessing the preferences dialog via a right-click,") +
+				_("or by exporting GTK_MODULES=globalmenu-gnome in your profile.")
+				, "globalmenu", null);
+		
+			notify_no_plugin.show();
 		} catch (GLib.Error e) {
 			/*ignore the error*/
+			warning("notify library doesn't work as intended");
 		}
 	
 	}
-	public override void realize() {
-		base.realize();
 
-	}
 	private void get_prefs() {
 		switcher.max_size = gconf_get_int("title_max_width");
 		switcher.show_icon = gconf_get_bool("show_icon");
 		switcher.show_label = gconf_get_bool("show_name");
 		switcher.show_window_actions = gconf_get_bool("show_window_actions");
 		switcher.show_window_list = gconf_get_bool("show_window_list");
+		this.has_handle = gconf_get_bool("has_handle");
+		this.disable_module_check = gconf_get_bool("disable_module_check");
 	}
-	private static void on_about_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-//		Applet _this = (Applet) user_data;
-		
+
+	[CCode (instance_pos = 1.1)]
+	private void applet_menu_clicked (BonoboUI.Component component, 
+			string cname) {
+		switch(cname) {
+			case "About":
+				show_about();
+			break;
+			case "Preferences":
+				show_preferences();
+			break;
+			case "Help":
+				show_help();
+			break;
+		}
+    }
+
+	private void show_about() {
        	var dialog = new Gtk.AboutDialog();
        	dialog.program_name = APPLET_NAME;
 		string ver = Config.VERSION;
-		if(Config.SVNVERSION.length > 0 ){
-			ver += ".svn" + Config.SVNVERSION;
-		}
 		dialog.version = ver;
 		dialog.website = "http://code.google.com/p/gnome2-globalmenu";
 		dialog.website_label = _("Project Home");
 		dialog.wrap_license = false;
-		dialog.license = Licenses.GPLv2;
+		try {
+			string license = null;
+			FileUtils.get_contents(Config.DOCDIR + "/COPYING", out license);
+			dialog.license = license;
+		} catch(FileError e) {
+			warning("%s", e.message);
+		}
+		try {
+			string authors = null;
+			FileUtils.get_contents(Config.DOCDIR + "/AUTHORS", out authors);
+			string[] authors_array = authors.split("\n");
+			dialog.authors = authors_array;
+		} catch(FileError e) {
+			warning("%s", e.message);
+		}
 		dialog.logo_icon_name = APPLET_ICON;
-		dialog.authors = APPLET_AUTHORS;
-		dialog.documenters = APPLET_ADOCUMENTERS;
 		dialog.translator_credits = _("translator-credits");
 		dialog.set_icon_name("gtk-about");
        	dialog.run();
        	dialog.destroy();
-    }
-    private static void on_help_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-//		Applet _this = (Applet) user_data;
-       	var dialog = new Gtk.AboutDialog();
-       	dialog.program_name = APPLET_NAME;
-		dialog.version = Config.VERSION;
-		dialog.website = "http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral";
-		dialog.website_label = _("On-line help");
-		dialog.logo_icon_name = "gtk-help";
-		dialog.set_icon_name("gtk-help");
-       	dialog.run();
-       	dialog.destroy();
-    }
-    private static void on_preferences_clicked (BonoboUI.Component component,
-                                          void* user_data, string cname) {
-
-		Applet _this = (Applet) user_data;
-
+	
+	
+	}
+	private void show_preferences() {
 		GConfDialog gcd = new GConfDialog(_("Global Menu Applet Preferences"));
 		
-		gcd.add_key("/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome");
-		gcd.add_subkeys(_this.get_preferences_key(),
-							new string[]{
-								"show_icon",
-								"show_name",
-								"title_max_width",
-								"show_window_actions",
-								"show_window_list"});
+		string root = get_preferences_key();
 
-		gcd.run();
+		gcd.add_key_group(
+			_("System Preferences"),
+			new string[] {
+				"/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome",
+				root + "/disable_module_check"
+			}
+		);
+
+		gcd.add_key_group(
+			_("Applet Behaviors"),
+			new string[]{
+				root + "/has_handle",
+				root + "/show_icon",
+				root + "/show_name",
+				root + "/title_max_width",
+				root + "/show_window_actions",
+				root + "/show_window_list"
+			}
+		);
+
+		switch(gcd.run()) {
+			case Gtk.ResponseType.HELP:
+				show_help();
+				break;
+		}
 		gcd.destroy();
     }
+	private void show_help() {
+		try {
+		Gnome.url_show("http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral");
+		} catch(GLib.Error e) {
+			warning("%s", e.message);
+		}
+	}
 	public override bool button_press_event(Gdk.EventButton event) {
 		if(event.button == 3)
 		return control.do_popup(event.button, event.time);
 		return false;
+	}
+
+	public override void size_request(out Gtk.Requisition req) {
+		base.size_request(out req);	
+		unowned int[] hints = menubars.get_size_hints();
+		assert(hints.length % 2 == 0);
+		if(has_handle) {
+			/* This is to workaround a problem with gnome panel.
+			 * gnome panel won't handle size_hints correctly if
+			 * the applet has no handle.
+			 *
+			 * Take a look at the sample code of gnome-panel/applets/wncklets
+			 * */
+			set_size_hints(hints, 0);
+		}
 	}
 
 	private void setup_popup_menu(Gtk.Widget widget) {

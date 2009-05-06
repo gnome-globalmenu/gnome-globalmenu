@@ -59,8 +59,8 @@ namespace Gnomenu {
 	   			shell = new MenuBar();
 				string test3;
 				string test4;
-				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/libgnomenu/tests/evo-nolabel.xml", out test3, null);
-				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/libgnomenu/tests/evo.xml", out test4, null);
+				FileUtils.get_contents("./evo-nolabel.xml", out test3, null);
+				FileUtils.get_contents("./evo.xml", out test4, null);
 				Parser.parse(shell, test3);
 				Parser.parse(shell, test3);
 				Parser.parse(shell, test3);

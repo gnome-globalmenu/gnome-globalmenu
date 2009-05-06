@@ -49,7 +49,7 @@ namespace GConf {
 		public bool get_bool (string key) throws GLib.Error;
 		public static unowned GConf.Client get_default ();
 		public unowned GConf.Value get_default_from_schema (string key) throws GLib.Error;
-		public unowned GConf.Entry get_entry (string key, string locale, bool use_schema_default) throws GLib.Error;
+		public unowned GConf.Entry get_entry (string key, string? locale, bool use_schema_default) throws GLib.Error;
 		public double get_float (string key) throws GLib.Error;
 		public static unowned GConf.Client get_for_engine (GConf.Engine engine);
 		public int get_int (string key) throws GLib.Error;

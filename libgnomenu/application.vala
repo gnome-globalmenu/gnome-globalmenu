@@ -81,6 +81,10 @@ public class Application{
 		screen.window_opened += window_opened;
 		screen.window_closed += window_closed;
 		screen.application_closed += application_closed;
+		unowned List<AppInfo> appinfos = AppInfo.get_all();
+		foreach(var appinfo in appinfos) {
+			message("%s", appinfo.get_executable());
+		}
 	}
 
 	private Application() { }

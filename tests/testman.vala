@@ -1,5 +1,6 @@
 using Gtk;
 
+public static extern string TOP_SRCDIR;
 public class TestMan : GLib.Object {
 	public string uri {get; construct; }
 	public Gtk.Window window;

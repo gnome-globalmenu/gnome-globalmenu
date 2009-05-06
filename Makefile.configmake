@@ -56,7 +56,6 @@ configmake.h: Makefile.configmake Makefile
 	  echo '#define PKGINCLUDEDIR "$(pkgincludedir)"'; \
 	  echo '#define PKGLIBDIR "$(pkglibdir)"'; \
 	  echo '#define PKGLIBEXECDIR "$(pkglibexecdir)"'; \
-	  echo '#define ABSTOPSRCDIR "$(abs_top_srcdir)"'; \
 	} | sed '/""/d' > $@-t
 	mv $@-t $@
 BUILT_SOURCES += configmake.h configmake.vapi

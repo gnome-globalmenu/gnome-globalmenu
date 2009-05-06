@@ -16,13 +16,13 @@ namespace GnomenuGtk {
 			add("test", () => {
 				Builder builder = new Builder();
 				try {
-					builder.add_from_file(Config.ABSTOPSRCDIR + rel_path +"/tests/test-unload.ui");
+					builder.add_from_file("./test-unload.ui");
 				} catch(GLib.Error e) {
 					critical("%s", e.message);
 				}
 				window = builder.get_object("test_window") as Window;
 				chooser = builder.get_object("chooser") as FileChooser;
-				chooser.set_filename(Config.ABSTOPSRCDIR + rel_path + "/.libs/libglobalmenu-gnome.so");
+				chooser.set_filename("./libglobalmenu-gnome.so");
 				load = builder.get_object("load") as Button;
 				unload = builder.get_object("unload") as Button;
 				load.clicked += load_module;

@@ -14,22 +14,10 @@ namespace Gnomenu {
 			base.dispose();
 		}
 		static construct {
-			Gtk.Settings.install_property(
-					new ParamSpecBoolean("use-rgba-colormap",
-						"use RGBA colormap if possible",
-						"Use RGBA colormap if possible",
-						false,
-						ParamFlags.READABLE | ParamFlags.WRITABLE));
 		}
 		construct {
-			get_settings().notify["use-rgba-colormap"] += (settings) => {
-				bool val = false;
-				settings.get("use-rgba-colormap", &val, null);
-				use_rgba_colormap = val;
-			};
-			bool val = false;
-			get_settings().get("use-rgba-colormap", &val, null);
-			use_rgba_colormap = val;
+			weak string rgba = Environment.get_variable("LIBGNOMENU_ENABLE_RGBA");
+			use_rgba_colormap = (rgba != null);
 		}
 		private bool disposed = false;
 		private bool _use_rgba_colormap = false;

@@ -13,13 +13,33 @@
 	  </locale>
 	</schema>
 	<schema>
+		<key>/schemas/apps/globalmenu-panel-applet/prefs/disable_module_check</key>
+		<owner>globalmenu-panel-applet</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Disable checking the GTK plugin module at startup</short>
+			<long>Disable checking the GTK plugin module at startup. If you know the module is loaded but for some reasons the applet cannot correctly detect this fact, set this key to true to skip the checking.</long>
+		</locale>
+	</schema>
+	<schema>
+		<key>/schemas/apps/globalmenu-panel-applet/prefs/has_handle</key>
+		<owner>globalmenu-panel-applet</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Add a handle to the applet</short>
+			<long>Specify if the applet has a handle. When the handle is enabled, the applet will not expand to occupy the remaining empty area on the panel.</long>
+		</locale>
+	</schema>
+	<schema>
 		<key>/schemas/apps/globalmenu-panel-applet/prefs/show_icon</key>
 		<owner>globalmenu-panel-applet</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
-			<short>Icon</short>
-			<long>Show/Hide the icon of the active window</long>
+			<short>Show the icon of the action window in the applet</short>
+			<long>Show the icon of the active window in the applet when enabled.</long>
 		</locale>
 	</schema>
 	<schema>
@@ -28,8 +48,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Label</short>
-			<long>Show/Hide the name of the active application</long>
+			<short>Show the name of the active application in the applet</short>
+			<long>Show the name of the active application in the applet when enabled</long>
 		</locale>
 	</schema>
 	<schema>
@@ -38,7 +58,7 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Window List</short>
+			<short>Enabled the Window List</short>
 			<long>Switch among applications via the application name label</long>
 		</locale>
 	</schema>
@@ -48,7 +68,7 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Window Actions</short>
+			<short>Enable the Window Actions</short>
 			<long>Add window action menu entries to active application name menu</long>
 		</locale>
 	</schema>
@@ -58,7 +78,7 @@
 		<type>int</type>
 		<default>-1</default>
 		<locale name="C">
-			<short>Max title length</short>
+			<short>Maximum length of the title area</short>
 			<long>The maximum length of name of the active application, in pixels</long>
 		</locale>
 	</schema>

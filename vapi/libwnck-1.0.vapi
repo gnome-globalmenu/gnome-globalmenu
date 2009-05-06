@@ -177,9 +177,9 @@ namespace Wnck {
 	public class Tasklist : Gtk.Container, Atk.Implementor, Gtk.Buildable {
 		public int get_minimum_height ();
 		public int get_minimum_width ();
-		public int get_size_hint_list (int n_elements);
+		public unowned int[] get_size_hint_list ();
 		[CCode (type = "GtkWidget*", has_construct_function = false)]
-		public Tasklist (Wnck.Screen screen);
+		public Tasklist (Wnck.Screen? screen = null);
 		[NoWrapper]
 		public virtual void pad1 ();
 		[NoWrapper]

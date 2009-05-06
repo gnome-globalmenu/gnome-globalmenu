@@ -30,7 +30,6 @@ CLEANFILES =
 
 include $(top_srcdir)/Makefile.configmake
 include $(top_srcdir)/Makefile.config
-include $(top_srcdir)/Makefile.licenses
 
 schemadir   = $(GCONF_SCHEMA_FILE_DIR)
 schema_in_files = gnome-globalmenu.schemas.in

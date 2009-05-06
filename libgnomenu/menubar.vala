@@ -76,12 +76,6 @@ namespace Gnomenu {
 		construct {
 			disposed = false;
 			_background = new Background();
-			/*This is quirky. min_length should be 
-			 * a 'constrcut set' property, and this 
-			 * value should be set in CreateMethod,
-			 * however then test-menubar will
-			 * fail to build due to a vala bug in 0.5.1*/
-			_min_length = -1;
 			setup_overflown_item();
 		}
 		public override void dispose() {
@@ -217,27 +211,12 @@ namespace Gnomenu {
 				switch(pack_direction) {
 					case PackDirection.TTB:
 					case PackDirection.BTT:
-						return allocation.height < real_requisition.height;
+						return allocation.height < requisition.height;
 					case PackDirection.LTR:
 					case PackDirection.RTL:
 					default:
-						return allocation.width < real_requisition.width;
+						return allocation.width < requisition.width;
 				}
-			}
-		}
-		/* minimal length of the menubar.
-		 * if >= 0,
-		 * the menu bar will report this length to 
-		 * either width or height in ::request
-		 *
-		 * Notice that initally this value is <0,
-		 * to avoid a recursion of new MenuBar();
-		 * */
-		public int min_length {
-			get { return _min_length;}
-		   	set {
-				_min_length = value;
-				queue_resize();
 			}
 		}
 		
@@ -294,10 +273,6 @@ namespace Gnomenu {
 		private Gravity _gravity;
 
 		private MenuItem _overflown_item = new Gnomenu.MenuItem();
-
-		private int _min_length;
-
-		private Requisition real_requisition;
 
 		private bool disposed;
 
@@ -520,25 +495,11 @@ namespace Gnomenu {
 			return false;
 		}
 		public override void size_request(out Requisition req) {
-			base.size_request(out real_requisition);
-			req = real_requisition;
-			if(min_length >= 0) {
-				Requisition r = {0, 0};
-				if(_overflown_item!= null) {
-					_overflown_item.size_request(out r);
-				}
-				switch(pack_direction) {
-					case PackDirection.TTB:
-					case PackDirection.BTT:
-						req.height = min_length>r.height? min_length: r.height;
-					break;
-					case PackDirection.LTR:
-					case PackDirection.RTL:
-					default:
-						req.width = min_length>r.width?min_length:r.width;
-					break;
-				}
-			}
+			Requisition r = {0, 0};
+			base.size_request(out req);
+			_overflown_item.size_request(out r);
+			if(r.width > req.width) req.width = r.width;
+			if(r.height > req.height) req.height = r.height;
 		}
 		public override void insert(Widget child, int position) {
 			base.insert(child, position);

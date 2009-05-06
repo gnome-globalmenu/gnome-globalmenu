@@ -54,7 +54,7 @@ fi
 # Check for Vala
 VALA_PROG_VALAC(0.5.6)
 
-VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --vapidir \$(top_srcdir)/vapi --pkg configmake --pkg licenses --pkg config"
+VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --vapidir \$(top_srcdir)/vapi --pkg configmake --pkg config"
 AC_SUBST(VALA_DEFAULT_PKGS)
 # check for modules
 
@@ -166,10 +166,10 @@ GTK_MODULES_DIR="$($PKG_CONFIG --variable=libdir gtk+-2.0)/gtk-2.0/modules"
 AC_SUBST(GTK_MODULES_DIR)
 
 # svnversion
-AC_PATH_PROG(SVNVERSION_BIN, [svnversion])
-SVNVERSION=`$SVNVERSION_BIN|sed -e 's;:;_;g' -e 's;exported;;'`
-AC_SUBST(SVNVERSION)
-AC_DEFINE_UNQUOTED(SVNVERSION, "$SVNVERSION", [svn version if appropriate])
+dnl AC_PATH_PROG(SVNVERSION_BIN, [svnversion])
+dnl SVNVERSION=`$SVNVERSION_BIN|sed -e 's;:;_;g' -e 's;exported;;'`
+dnl AC_SUBST(SVNVERSION)
+dnl AC_DEFINE_UNQUOTED(SVNVERSION, "$SVNVERSION", [svn version if appropriate])
 
 # old automake fix
 AC_SUBST(abs_top_srcdir)

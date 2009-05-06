@@ -29,95 +29,101 @@ using GConf;
 			icon_name = "gtk-preferences";
 		}
 
-		public GConfDialog.with_subkeys(string key, string dialog_title, string[]? subkeys = null) {
-			title = dialog_title;
-			icon_name = "gtk-preferences";
-			add_subkeys(key, subkeys);
-		}
 		construct {
 			_default_client = GConf.Client.get_default();
 			//vbox.width_request = 320;
-			add_button("gtk-close", Gtk.ResponseType.CLOSE);
-		}
-		public void add_key(string key) {
-			try {
-				weak GConf.Entry entry = _default_client.get_entry(key, null, true);
-				if(entry != null) addEntry(entry);
-			} catch (GLib.Error e) {
-				warning("%s", e.message);
-			}
-		}
-		public void add_subkeys(string key, string[]? subkeys= null) {
-			try {
-				weak GLib.SList<GConf.Entry> prefs = _default_client.all_entries(key);
-				if (subkeys == null) {
-					foreach(weak GConf.Entry entry in prefs)
-						addEntry(entry);
-				} else {
-					foreach(weak string subkey in subkeys) {
-						add_key(key + "/" + subkey);
-					}
-				}
-			} catch(GLib.Error e) {
-				warning("%s", e.message);
-			}
+			add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE);
+			add_button(Gtk.STOCK_HELP, Gtk.ResponseType.HELP);
 		}
 
-		private void addEntry(GConf.Entry entry) {
-       		GConf.Schema schema = get_schema(entry);
+		public void add_key_group(string group_name, string[] keys) {
+			var frame = new Gtk.Frame(group_name);
+			var alignment = new Gtk.Alignment(0.0f, 0.0f, 1.0f, 1.0f);
+			var box = new Gtk.VBox(false, 0);
+			var label_widget = frame.label_widget;
+			label_widget.modify_font(Pango.FontDescription.from_string("Bold"));
+			frame.border_width = 10;
+			frame.add(alignment);
+			alignment.add(box);
+			alignment.left_padding = 10;
+//			frame.shadow_type = Gtk.ShadowType.NONE;
+			try {
+			foreach(weak string key in keys) {
+				var widget = create_proxy_widget(key);
+				box.pack_start(widget, false, false, 5);
+			} } catch(GLib.Error e) {
+				warning("%s", e.message);
+			}
+			vbox.pack_start(frame, true, false, 0);
+			frame.show_all();
+		}
+
+		private Gtk.Widget create_proxy_widget(string key) throws GLib.Error {
+			GConf.Entry entry = _default_client.get_entry(key, null, true);
+       		GConf.Schema schema = safely_get_schema(entry);
 			weak string tooltip = schema.get_long_desc();
 
 			Gtk.Box row = new Gtk.HBox(false, 0);
        		
-       		Gtk.Image info = new Gtk.Image.from_stock("gtk-dialog-info", Gtk.IconSize.BUTTON);
-       		info.tooltip_text = tooltip;
-       		row.pack_start(info, false, false, 2);
-       		
        		Gtk.Label label = new Gtk.Label(schema.get_short_desc());
        		label.justify = Gtk.Justification.LEFT;
 			label.tooltip_text = tooltip;
-       		row.pack_start(label, false, false, 2);
        			
-       		Gtk.Widget widget;
+       		Gtk.Widget action_widget;
+			Gtk.Widget render_widget;
        		switch(schema.get_type()) {
        			case ValueType.BOOL:
-       				widget = new Gtk.CheckButton();
-       				(widget as Gtk.CheckButton).active = _default_client.get_bool(entry.key);
-       				(widget as Gtk.CheckButton).clicked += onCheckButtonActivated;
+       				var checkbox = new Gtk.CheckButton();
+       				checkbox.active = _default_client.get_bool(entry.key);
+       				checkbox.clicked += onCheckButtonActivated;
+					checkbox.add(label);
+					render_widget = checkbox;
+					action_widget = render_widget;
        				break;
        			case ValueType.STRING:
-       				widget = new Gtk.Entry();
-       				(widget as Gtk.Entry).text = _default_client.get_string(entry.key);
+       				var entrybox = new Gtk.Entry();
+					var box = new Gtk.HBox(false, 0);
+       				entrybox.text = _default_client.get_string(entry.key);
        				/* TODO: connect changed signal to eventhandler */
+					box.pack_start(label, false, false, 2);
+					box.pack_start(entrybox, false, false, 2);
+					action_widget = entrybox;
+					render_widget = box;
        				break;
        			case ValueType.INT:
-       				widget = new Gtk.SpinButton.with_range(-100, 200, 1);
-       				(widget as Gtk.SpinButton).value = _default_client.get_int(entry.key);
-       				(widget as Gtk.SpinButton).value_changed += onSpinButtonValueChanged;
+					var box = new Gtk.HBox(false, 0);
+       				var spin = new Gtk.SpinButton.with_range(-100, 200, 1);
+       				spin.value = _default_client.get_int(entry.key);
+       				spin.value_changed += onSpinButtonValueChanged;
+					box.pack_start(label, false, false, 2);
+					box.pack_start(spin, false, false, 2);
+					action_widget = spin;
+					render_widget = box;
        				break;
        			default:
-       				return;
+       				return new Gtk.EventBox();
 			}
-			widget.tooltip_text = tooltip;
-			widget.user_data = entry;
+			action_widget.tooltip_text = tooltip;
+			action_widget.set_data("gconf-entry", entry);
+			action_widget.set_data("gconf-schema", schema);
 				
-			row.pack_start(new Gtk.EventBox(), true, true, 2);
-			row.pack_start(widget, false, false, 2);
-				
-			Gtk.Button button = new Gtk.Button();
-			button.tooltip_text = _("Reset to the default value");
-			button.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.BUTTON));
-			button.user_data = widget;
-			button.clicked += onResetButtonPressed;
-				
-			row.pack_start(button, false, false, 2);
-				
-       		row.show_all();
-       		vbox.pack_start(row, true, true, 2);
+			Gtk.Button reset = new Gtk.Button.from_stock(Gtk.STOCK_CLEAR);
+			reset.tooltip_text = _("Reset to the default value");
+//			reset.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.SMALL_TOOLBAR));
+			reset.set_data("gconf-entry", entry);
+			reset.set_data("gconf-schema", schema);
+			reset.set_data("target", action_widget);
 
+			reset.clicked += onResetButtonPressed;
+				
+			row.pack_start(render_widget, false, false, 2);
+			row.pack_end(reset, false, false, 2);
+				
+				
+			return row;
 		}
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
-			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
+			var entry = (GConf.Entry)widget.get_data("gconf-entry");
 			try {
 				_default_client.set_bool(entry.key, widget.active);
 			} catch (GLib.Error e) {
@@ -126,7 +132,7 @@ using GConf;
 		}
 		
 		private void onSpinButtonValueChanged(Gtk.SpinButton widget) {
-			weak GConf.Entry entry = (GConf.Entry)widget.user_data;
+			var entry = (GConf.Entry)widget.get_data("gconf-entry");
 			try {
 				_default_client.set_int(entry.key, (int)widget.value);
 			} catch (GLib.Error e) {
@@ -134,7 +140,11 @@ using GConf;
 			}
 		}
 		
-		private GConf.Schema get_schema(GConf.Entry entry) {
+		/**
+		 * Safely obtain a schema for the entry.
+		 * If no schema is found, return a fake schema.
+		 */
+		private GConf.Schema safely_get_schema(GConf.Entry entry) {
 			weak string schema_name = entry.get_schema_name();
 
 			if(schema_name == null) {
@@ -149,18 +159,21 @@ using GConf;
 			}
 		}
 		private void onResetButtonPressed(Gtk.Button widget) {
-			Gtk.Widget target = (Gtk.Widget)widget.user_data;
-			weak GConf.Entry entry = (GConf.Entry)target.user_data;
-			GConf.Schema schema = get_schema(entry);
+			weak GConf.Schema schema = (GConf.Schema)widget.get_data("gconf-schema");
+			weak GConf.Value default_value = schema.get_default_value();
+			var target = (Gtk.Widget)widget.get_data("target");
 			switch(schema.get_type()) {
        			case ValueType.BOOL:
-       				(target as Gtk.CheckButton).active = schema.get_default_value().get_bool();
+       				var checkbutton = target as Gtk.CheckButton;
+					checkbutton.active = default_value.get_bool();
        				break;
        			case ValueType.STRING:
-       				(target as Gtk.Entry).text = schema.get_default_value().get_string();
+					var entrybox = target as Gtk.Entry;
+       				entrybox.text = default_value.get_string();
        				break;
        			case ValueType.INT:
-       				(target as Gtk.SpinButton).value = schema.get_default_value().get_int();
+       				var spin = target as Gtk.SpinButton;
+					spin.value = default_value.get_int();
        				break;
 				}
 		}

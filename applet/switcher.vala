@@ -96,16 +96,6 @@ using Gtk;
 				current_window = null;
 			}
 		}
-		private string replace(string source, string find, string replacement) {
-			/* replaces the string.replace method which depends on GLib.RegEx >= 2.12 */
-			string[] buf = source.split(find);
-			StringBuilder sb = new StringBuilder("");
-			for (int co=0; co<buf.length; co++) {
-				sb.append(buf[co]);
-				if (co!=(buf.length-1)) sb.append(replacement);
-			}
-			return sb.str;
-		}
 		private void on_deactivate() {
 			update(false);
 		}
@@ -203,14 +193,6 @@ using Gtk;
 			window.make_above();
 			window.unmake_above();	
 		}
-		private string remove_path(string txt, string separator) {
-			long co = txt.length-1;
-			while ((co>=0) && (txt.substring(co, 1)!=separator)) {
-				co--;
-			}
-			string ret = txt.substring(co+1,(txt.length-co-1));
-			return ret;
-		}
 		private void set_iconify_destination(Wnck.Window window) {
 			if(!this.is_realized()) return;
 			if (window.get_window_type() != Wnck.WindowType.DESKTOP) {
@@ -228,11 +210,6 @@ using Gtk;
 			return (window.is_in_viewport(_current_window.get_workspace()) &&
 					!window.is_minimized() &&
 					!window.is_skip_pager());
-		}
-		private string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
-			Gdk.Pixdata pixdata = {0};
-			pixdata.from_pixbuf(pixbuf, true);
-			return Base64.encode(pixdata.serialize());
 		}
 
 		private string do_xml_menu() {
@@ -294,64 +271,7 @@ using Gtk;
 			};
 			return Template.replace(WINACT_TEMPLATE, substs);
 		}
-		private Wnck.Window find_desktop() {
-			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-			foreach(weak Wnck.Window window in windows)
-				if (window.get_window_type() == Wnck.WindowType.DESKTOP) return window;
-			return null;
-		}
 
-		private Gdk.Pixbuf guess_icon(Wnck.Window window, int width = -1, int height = -1) {
-			Gdk.Pixbuf[] icons = {
-				window.get_mini_icon(),
-				window.get_icon()};
-			return guess_icon_array(icons, width, height);	
-		}
-		private Gdk.Pixbuf guess_icon_array(Gdk.Pixbuf[] icons, int width, int height) {
-			Gdk.Pixbuf icon = null;
-			int min_dist = 99999;
-			int best_size = 16;
-			if(height == -1 || width == -1) {
-				Gtk.icon_size_lookup(Gtk.IconSize.MENU, out width, out height);
-			}
-			int scaled_size = height;
-			if(width < scaled_size)
-				scaled_size = width;
-
-			foreach(Gdk.Pixbuf i in icons) {
-				int size = i.height;
-				if(i.get_width() > size)
-					size = i.width;
-				int dist = size - scaled_size;
-				if(dist < 0) dist = -dist;
-				if(dist < min_dist) {
-					min_dist = dist;
-					icon = i;
-					best_size = size;
-				}
-			}
-
-			/* This should never happen. In case it happens
-			 * return something to make sure it doesn't crash*/
-			if(icon == null) return icons[0];
-			double ratio = (double)scaled_size/(double)best_size;
-			if(ratio < 0) ratio = 1.0;
-			int scaled_width = (int) (icon.width * ratio);
-			int scaled_height = (int) (icon.height * ratio);
-
-			Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
-				Gdk.Colorspace.RGB,
-				icon.has_alpha, 8,
-				scaled_width,
-				scaled_height
-				);
-
-			icon.scale(scaled_icon,
-					0, 0, scaled_icon.width, scaled_icon.height,
-					0, 0, ratio, ratio, Gdk.InterpType.BILINEAR);
-			/* can't use scale_simple because the vala binding is wrong*/
-			return scaled_icon;
-		}
 		private void update(bool include_menu) {
 
 			search_box.text = "";
@@ -457,21 +377,6 @@ using Gtk;
 				}
 			}
 		}*/
-		private bool guess_dock_is_around() {
-			weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
-			foreach(weak Wnck.Window window in windows)
-				if (window.get_window_type() == Wnck.WindowType.DOCK) {
-					switch(window.get_application().get_name()) {
-						case "cairo-dock":
-						case "avant-window-navigator":
-						case "Do":
-							/* add any other known dock having a task bar */
-							return true;
-							break;
-					}
-				}
-			return false;
-		}
 		/**
 		 * The following 3 functions map item to window and verse vesa
 		 *
@@ -553,76 +458,181 @@ using Gtk;
 		}
 	}
 
-	public class SearchBoxMenuItem : Gtk.ImageMenuItem {
-		private Gtk.Entry textbox = new Gtk.Entry();
-		public string text {
-			get { return textbox.text;}
-			set { textbox.text = value; }
-		}
-		public SearchBoxMenuItem() {
-		}
-		construct {
-			this.image = new Gtk.Image.from_icon_name("search", Gtk.IconSize.MENU);
-			textbox.editable = true;
-			textbox.sensitive = true;
-			textbox.can_focus = true;
-			textbox.text = "Type here...";
-			textbox.is_focus = true;
-			
-			this.add(textbox);
-			this.show_all();
-			this.set_focus_child(textbox);
-			
-			textbox.state = Gtk.StateType.NORMAL;
-			textbox.state_changed += (box, previous_state) => {
-				textbox.state = Gtk.StateType.NORMAL;
-			};
-			textbox.changed += (box) => {
-				Gnomenu.Menu shell = parent as Gnomenu.Menu;
-				Gnomenu.MenuItem item = find_item();
-				if(item != null)
-					shell.select_item(item);
-			};
-
-			textbox.activate += (box) => {
-				Gnomenu.Menu shell = parent as Gnomenu.Menu;
-				Gnomenu.MenuItem item = find_item();
-				if(item != null)
-					shell.activate_item(item, true);
-			};
-			this.state_changed += (_this, previous_state) => {
-				this.state = Gtk.StateType.NORMAL;
-			};
-		}
+private class SearchBoxMenuItem : Gtk.ImageMenuItem {
+	private Gtk.Entry textbox = new Gtk.Entry();
+	public string text {
+		get { return textbox.text;}
+		set { textbox.text = value; }
+	}
+	public SearchBoxMenuItem() {
+	}
+	construct {
+		this.image = new Gtk.Image.from_icon_name("search", Gtk.IconSize.MENU);
+		textbox.editable = true;
+		textbox.sensitive = true;
+		textbox.can_focus = true;
+		textbox.text = "Type here...";
+		textbox.is_focus = true;
 		
-		public Gnomenu.MenuItem? find_item() {
-			Gnomenu.Shell shell = parent as Gnomenu.Shell;
-			for(int i = 0; i < shell.length; i++) {
-				Gnomenu.MenuItem item = shell.get_item(i) as Gnomenu.MenuItem;
-				if(item.item_label != null &&
-					item.item_label.casefold()
-					.has_prefix(textbox.text.casefold())) {
-					return item as Gnomenu.MenuItem;
-				}
-			}
-			return null;	
-		}
+		this.add(textbox);
+		this.show_all();
+		this.set_focus_child(textbox);
+		
+		textbox.state = Gtk.StateType.NORMAL;
+		textbox.state_changed += (box, previous_state) => {
+			textbox.state = Gtk.StateType.NORMAL;
+		};
+		textbox.changed += (box) => {
+			Gnomenu.Menu shell = parent as Gnomenu.Menu;
+			Gnomenu.MenuItem item = find_item();
+			if(item != null)
+				shell.select_item(item);
+		};
 
-		public override void parent_set(Gtk.Widget? previous_parent) {
-			if(previous_parent!=null) {
-				previous_parent.key_press_event -= steal_key_press_event;
+		textbox.activate += (box) => {
+			Gnomenu.Menu shell = parent as Gnomenu.Menu;
+			Gnomenu.MenuItem item = find_item();
+			if(item != null)
+				shell.activate_item(item, true);
+		};
+		this.state_changed += (_this, previous_state) => {
+			this.state = Gtk.StateType.NORMAL;
+		};
+	}
+	
+	public Gnomenu.MenuItem? find_item() {
+		Gnomenu.Shell shell = parent as Gnomenu.Shell;
+		for(int i = 0; i < shell.length; i++) {
+			Gnomenu.MenuItem item = shell.get_item(i) as Gnomenu.MenuItem;
+			if(item.item_label != null &&
+				item.item_label.casefold()
+				.has_prefix(textbox.text.casefold())) {
+				return item as Gnomenu.MenuItem;
 			}
-			base.parent_set(previous_parent);
-			if(parent != null) {
-				parent.key_press_event += steal_key_press_event;
-			}
 		}
-		private bool steal_key_press_event(Gtk.Widget widget, 
-				Gdk.EventKey event) {
-			return textbox.key_press_event(event);
+		return null;	
+	}
+
+	public override void parent_set(Gtk.Widget? previous_parent) {
+		if(previous_parent!=null) {
+			previous_parent.key_press_event -= steal_key_press_event;
 		}
-		public override void activate_item() {
-		}
-		public override void activate() {
+		base.parent_set(previous_parent);
+		if(parent != null) {
+			parent.key_press_event += steal_key_press_event;
 		}
 	}
+	private bool steal_key_press_event(Gtk.Widget widget, 
+			Gdk.EventKey event) {
+		return textbox.key_press_event(event);
+	}
+	public override void activate_item() {
+	}
+	public override void activate() {
+	}
+}
+
+
+/**
+ * Toolhelp routines
+ *
+ * */
+private Gdk.Pixbuf guess_icon(Wnck.Window window, int width = -1, int height = -1) {
+	Gdk.Pixbuf[] icons = {
+		window.get_mini_icon(),
+		window.get_icon()};
+	return guess_icon_array(icons, width, height);	
+}
+private Gdk.Pixbuf guess_icon_array(Gdk.Pixbuf[] icons, int width, int height) {
+	Gdk.Pixbuf icon = null;
+	int min_dist = 99999;
+	int best_size = 16;
+	if(height == -1 || width == -1) {
+		Gtk.icon_size_lookup(Gtk.IconSize.MENU, out width, out height);
+	}
+	int scaled_size = height;
+	if(width < scaled_size)
+		scaled_size = width;
+
+	foreach(Gdk.Pixbuf i in icons) {
+		int size = i.height;
+		if(i.get_width() > size)
+			size = i.width;
+		int dist = size - scaled_size;
+		if(dist < 0) dist = -dist;
+		if(dist < min_dist) {
+			min_dist = dist;
+			icon = i;
+			best_size = size;
+		}
+	}
+
+	/* This should never happen. In case it happens
+	 * return something to make sure it doesn't crash*/
+	if(icon == null) return icons[0];
+	double ratio = (double)scaled_size/(double)best_size;
+	if(ratio < 0) ratio = 1.0;
+	int scaled_width = (int) (icon.width * ratio);
+	int scaled_height = (int) (icon.height * ratio);
+
+	Gdk.Pixbuf scaled_icon = new Gdk.Pixbuf(
+		Gdk.Colorspace.RGB,
+		icon.has_alpha, 8,
+		scaled_width,
+		scaled_height
+		);
+
+	icon.scale(scaled_icon,
+			0, 0, scaled_icon.width, scaled_icon.height,
+			0, 0, ratio, ratio, Gdk.InterpType.BILINEAR);
+	/* can't use scale_simple because the vala binding is wrong*/
+	return scaled_icon;
+}
+
+private bool guess_dock_is_around() {
+	weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+	foreach(weak Wnck.Window window in windows)
+		if (window.get_window_type() == Wnck.WindowType.DOCK) {
+			switch(window.get_application().get_name()) {
+				case "cairo-dock":
+				case "avant-window-navigator":
+				case "Do":
+					/* add any other known dock having a task bar */
+					return true;
+					break;
+			}
+		}
+	return false;
+}
+
+private Wnck.Window? find_desktop() {
+	weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
+	foreach(weak Wnck.Window window in windows)
+		if (window.get_window_type() == Wnck.WindowType.DESKTOP) return window;
+	return null;
+}
+
+private string replace(string source, string find, string replacement) {
+	/* replaces the string.replace method which depends on GLib.RegEx >= 2.12 */
+	string[] buf = source.split(find);
+	StringBuilder sb = new StringBuilder("");
+	for (int co=0; co<buf.length; co++) {
+		sb.append(buf[co]);
+		if (co!=(buf.length-1)) sb.append(replacement);
+	}
+	return sb.str;
+}
+
+private string remove_path(string txt, string separator) {
+	long co = txt.length-1;
+	while ((co>=0) && (txt.substring(co, 1)!=separator)) {
+		co--;
+	}
+	string ret = txt.substring(co+1,(txt.length-co-1));
+	return ret;
+}
+private string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
+	Gdk.Pixdata pixdata = {0};
+	pixdata.from_pixbuf(pixbuf, true);
+	return Base64.encode(pixdata.serialize());
+}

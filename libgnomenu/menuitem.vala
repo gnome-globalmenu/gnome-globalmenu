@@ -610,7 +610,8 @@ namespace Gnomenu {
 			else 
 				desc = null;
 			weak Widget bin_child = get_child();
-			bin_child.modify_font(desc);
+			if(bin_child != null)
+				bin_child.modify_font(desc);
 		}
 		private void update_label_text() {
 			if(!Item.type_has_label(_item_type)) return;

@@ -267,7 +267,7 @@ class WorkspaceSelector : Gtk.Window {
 			return target.get_workspace().get_viewport_y() / screen_height;
 		}
 	}
-	public WorkspaceItem selected_item {
+	public WorkspaceItem? selected_item {
 		get {
 			foreach(weak WorkspaceItem wi in workspaces)
 				if (wi.selected) return wi;

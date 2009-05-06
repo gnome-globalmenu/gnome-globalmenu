@@ -40,7 +40,7 @@ namespace Gnomenu {
 				shell = new MenuBar();
 				window.add(shell);
 				string test3;
-				FileUtils.get_contents(Config.ABSTOPSRCDIR + "/libgnomenu/tests/evo-nolabel.xml", out test3, null);
+				FileUtils.get_contents("./evo-nolabel.xml", out test3, null);
 				Parser.parse(shell as MenuBar, test3);
 //				mem_profile();
 				for(i = 0; i< 10; i++) {

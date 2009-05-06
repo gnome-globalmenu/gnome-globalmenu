@@ -1,5 +1,5 @@
 %define base_version 	0.7.6
-%define alphatag 20080423svn2524
+%define alphatag 20080423svn2525
 
 Name:		gnome-globalmenu
 Version:	%{base_version}

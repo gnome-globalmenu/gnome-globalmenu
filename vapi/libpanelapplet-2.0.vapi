@@ -28,7 +28,7 @@ namespace Panel {
 		public string get_preferences_key ();
 		public void add_preferences(string schema_dir) throws GLib.Error;
 		public static int factory_main (string iid, GLib.Type applet_type, AppletFactoryCallback callback);
-		public void set_background_widget (Gtk.Widget widget);
+		public void set_background_widget (Gtk.Widget? widget);
 		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
 		public void setup_menu (string xml, [CCode (array_length = false)]BonoboUI.Verb[] verb_list, void* data);
 		public Bonobo.Control control {get;}
@@ -49,6 +49,7 @@ namespace Panel {
 		public void gconf_set_string(string key, string value) throws GLib.Error;
 		public int gconf_get_int(string key) throws GLib.Error;
 		public void gconf_set_int(string key) throws GLib.Error;
+		public void set_size_hints(int[]? size_hints, int base_size);
 	}
 	[CCode (cprefix = "PANEL_APPLET_ORIENT_")]
 	public enum AppletOrient {
