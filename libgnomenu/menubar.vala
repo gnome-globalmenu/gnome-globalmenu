@@ -198,7 +198,8 @@ namespace Gnomenu {
 				if(_gravity == value) return;
 				_gravity = value;
 				foreach(weak Widget child in get_children()) {
-					(child as MenuItem).gravity = value;
+					if(child is MenuItem)
+						(child as MenuItem).gravity = value;
 				}
 				_overflown_item.gravity = value;
 			}
