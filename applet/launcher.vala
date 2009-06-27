@@ -32,7 +32,21 @@ public class Launcher : Gnomenu.MenuBar {
 				item.visible = true;
 				menu.append(item);
 			}
-			menu.show_all();
+			Gtk.MenuItem more = new Gtk.MenuItem.with_label("more...");
+			more.visible = true;
+			menu.append(more);
+			more.submenu = new Gtk.Menu();
+			foreach(var app in Gnomenu.Application.applications) {
+				if(app.wnck_applications != null) continue;
+				ProxyItem item = new ProxyItem();
+				item.application = app;
+				item.visible = true;
+				item.activate += (obj) => {
+					Gdk.spawn_command_line_on_screen(get_screen(),
+						obj.application.exec_path);
+				};
+				more.submenu.append(item);
+			}
 		};
 	}
 
