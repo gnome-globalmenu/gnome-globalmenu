@@ -42,19 +42,11 @@ public class Application{
 
 	public List<Wnck.Application> wnck_applications;
 
-	private Gtk.EventBox _proxy_item;
+	private Gtk.Item _proxy_item;
 	private Gtk.Label name_widget;
 	private Gtk.Label status_widget;
 	private Gtk.Image icon_widget;
 
-	public Gtk.Widget proxy_item {
-		get {
-			if(_proxy_item == null) {
-				create_proxy_item();
-			}
-			return _proxy_item;
-		}
-	}
 	public static List<Application> applications;
 	public static HashTable<string, unowned Application> dict
 		= new HashTable<string, unowned Application>(str_hash, str_equal);
@@ -128,7 +120,7 @@ public class Application{
 		return rt;
 	}
 	public void update() {
-		if(proxy_item == null) return;
+		if(_proxy_item == null) return;
 		if(wnck_applications != null) {
 			int n = 0;
 			foreach(Wnck.Application wapp in wnck_applications) {
@@ -196,8 +188,15 @@ public class Application{
 		}
 	}
 
-	private void create_proxy_item() {
-		_proxy_item = new Gtk.EventBox();
+	public Gtk.Item get_proxy_item() {
+		if(_proxy_item != null) return _proxy_item;
+		_proxy_item = new Gtk.MenuItem();
+		fill_widget(_proxy_item);
+		return _proxy_item;
+	}
+
+	public void fill_widget(Gtk.Bin bin) {
+
 		name_widget = new Gtk.Label("");
 		status_widget = new Gtk.Label("");
 		icon_widget = new Gtk.Image();
@@ -207,10 +206,11 @@ public class Application{
 		hbox.pack_start(vbox, true, true, 0);
 		vbox.pack_start(name_widget, false, false, 0);
 		vbox.pack_start(status_widget, false, false, 0);
-		_proxy_item.add(hbox);
 		update();
+		bin.add(hbox);
 	}
 
+	
 	[CCode (cname = "get_task_name_by_pid")]
 	public static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {

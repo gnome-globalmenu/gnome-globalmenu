@@ -8,7 +8,7 @@ VALASOURCES = \
 	applet.vala \
 	main.vala \
 	gtkextra-gconfdialog.vala \
-	switcher.vala \
+	launcher.vala \
 	template.vala \
 	workspaceselector.vala \
 	$(NULL)
@@ -32,7 +32,6 @@ $(server_in_files): $(server_in_in_files) Makefile
 
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
-	$(VALASOURCES:.vala=.h) \
 	x-utils-c.c \
 	$(NULL)
 

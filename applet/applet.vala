@@ -58,12 +58,12 @@ public class Applet : Panel.Applet {
 		menubars.visible = true;
 		add(menubars);
 
-		switcher.visible = true;
-		menubars.add(switcher);
-		setup_popup_menu(switcher);
-
 		setup_popup_menu(main_menubar);
+		setup_popup_menu(launcher);
 
+
+		launcher.visible = true;
+		menubars.add(launcher);
 		menubars.add(main_menubar);
 		menubars.child_set(main_menubar, "shrink", true, null);
 
@@ -85,7 +85,7 @@ public class Applet : Panel.Applet {
 	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed = false;
 	private GlobalMenu main_menubar = new GlobalMenu();
-	private Switcher switcher = new Switcher();
+	private Launcher launcher = new Launcher();
 
 	private Notify.Notification notify_no_plugin;
 
@@ -131,9 +131,6 @@ public class Applet : Panel.Applet {
 	private void on_window_changed (Monitor monitor, ulong prev_xid) {
 		ulong xid = monitor.current_xid;
 		Wnck.Window window = Wnck.Window.get(xid);
-		if(window is Wnck.Window) {
-			switcher.current_window = window;
-		}
 		main_menubar.switch_to(xid);
 	}
 
@@ -258,11 +255,6 @@ public class Applet : Panel.Applet {
 	}
 
 	private void get_prefs() {
-		switcher.max_size = gconf_get_int("title_max_width");
-		switcher.show_icon = gconf_get_bool("show_icon");
-		switcher.show_label = gconf_get_bool("show_name");
-		switcher.show_window_actions = gconf_get_bool("show_window_actions");
-		switcher.show_window_list = gconf_get_bool("show_window_list");
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
 	}

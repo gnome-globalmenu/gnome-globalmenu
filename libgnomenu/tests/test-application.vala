@@ -15,7 +15,9 @@ namespace Gnomenu {
 				screen.force_update();
 				foreach(Application app in Application.applications) {
 					if(app.wnck_applications != null) {
-						box.pack_start_defaults(app.proxy_item);
+						Gtk.EventBox e = new Gtk.EventBox();
+						app.fill_widget(e);
+						box.pack_start_defaults(e);
 						if(app.not_in_menu) {
 						message("%s %s not in menu",app.readable_name, app.exec_path);
 						
