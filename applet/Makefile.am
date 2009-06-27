@@ -76,7 +76,7 @@ GlobalMenu_PanelApplet_LDADD = \
 GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(WNCK_CFLAGS) \
 		$(GNOME_PANEL_CFLAGS) \
-		-I$(top_srcdir) \
+		-I$(top_srcdir)/libgnomenu \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
 		-include ../libcompat/libcompat.h \

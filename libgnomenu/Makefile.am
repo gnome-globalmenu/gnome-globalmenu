@@ -25,7 +25,7 @@ lib_LTLIBRARIES = libgnomenu.la
 
 libgnomenu_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
-						$(VALASOURCES:.vala=.h) \
+						libgnomenu.h \
 						keygrab-ccode.c \
 						task-utils-c.c \
 						menushellutils-ccode.c 
@@ -52,7 +52,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
 
 libgnomenu_includedir = $(includedir)/libgnomenu
-libgnomenu_include_HEADERS = $(VALASOURCES:.vala=.h)
+libgnomenu_include_HEADERS = libgnomenu.h
 if WITH_GIR
 typelibdir = $(TYPELIBDIR)
 typelib_DATA = Gnomenu-1.0.typelib
@@ -65,7 +65,7 @@ endif
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
-	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0
 	bash patch.sh
 
 BUILT_SOURCES = gnomenu.vapi

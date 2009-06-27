@@ -504,7 +504,7 @@ namespace Gnomenu {
 				}
 			}
 		}
-		private static void show_image_notify(Gtk.Settings settings) {
+		private void show_image_notify(Gtk.Settings settings, ParamSpec pspec) {
 			List<weak Gtk.Window> toplevels = Gtk.Window.list_toplevels();
 			foreach(Gtk.Container c in toplevels) {
 				show_image_notify_r(c, settings);

@@ -37,7 +37,8 @@ libdyn_patch_la_LDFLAGS = \
 		-no-undefined \
 		$(NULL)
 libdyn_patch_la_CPPFLAGS = \
-	  -I$(top_srcdir) $(GTK_CFLAGS) \
+	  -I$(top_srcdir)/libgnomenu \
+	  $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
 	  -Werror \
@@ -50,13 +51,13 @@ libglobalmenu_gnome_LTLIBRARIES = \
 
 libglobalmenu_gnome_la_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
-	$(VALASOURCES:.vala=.h) \
 	globalmenu-helper.c \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) bindings.vapi dyn-patch.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
 	touch $@
+
 $(STAMP:.vapi=.deps):
 	echo > $@
 

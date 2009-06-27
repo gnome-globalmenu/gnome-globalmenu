@@ -14,6 +14,7 @@ namespace Gnomenu {
 			base.dispose();
 		}
 		static construct {
+			MenuItem _include_menu_item_definiation;
 		}
 		construct {
 			weak string rgba = Environment.get_variable("LIBGNOMENU_ENABLE_RGBA");

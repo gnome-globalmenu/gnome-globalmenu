@@ -52,7 +52,7 @@ localedir='${datadir}/locale'
 AC_SUBST(localedir)
 fi
 # Check for Vala
-VALA_PROG_VALAC(0.5.6)
+VALA_PROG_VALAC(0.7.3)
 
 VALA_DEFAULT_PKGS="--vapidir \$(top_srcdir) --vapidir \$(top_srcdir)/vapi --pkg configmake --pkg config"
 AC_SUBST(VALA_DEFAULT_PKGS)

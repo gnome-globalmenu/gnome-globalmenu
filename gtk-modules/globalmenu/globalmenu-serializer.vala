@@ -1,7 +1,6 @@
 using Gtk;
 namespace GlobalMenuGTK {
-	[Compact]
-	protected class Serializer {
+	internal class Serializer {
 		Serializer () {
 		
 		}
