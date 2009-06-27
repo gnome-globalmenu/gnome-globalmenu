@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include <libgnomenu/menuitem.h>
+#include <libgnomenu/libgnomenu.h>
 
 static void gmsg_foreach_cb(GtkWidget * child, gpointer data[]) {
 	gint * pos = data[0];

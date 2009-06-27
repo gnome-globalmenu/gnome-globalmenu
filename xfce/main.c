@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
-#include "libgnomenu/globalmenu.h"
-#include "libgnomenu/monitor.h"
+#include "libgnomenu/libgnomenu.h"
 
 #include <libxfce4panel/xfce-panel-plugin.h>
 

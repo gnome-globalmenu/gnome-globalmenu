@@ -32,7 +32,6 @@ $(server_in_files): $(server_in_in_files) Makefile
 
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
-	$(VALASOURCES:.vala=.h) \
 	x-utils-c.c \
 	$(NULL)
 

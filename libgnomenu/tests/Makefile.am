@@ -17,7 +17,7 @@ SUFFIXES = .vala .c
 	if [ $@ == test-leak.c ]; then bash patch.sh; fi;
 	touch $@
 
-AM_CPPFLAGS = -I$(top_srcdir)/libgnomenu $(GTK_CFLAGS) $(GLIB_CFLAGS) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) 
+AM_CPPFLAGS = -I$(top_srcdir)/libgnomenu -I$(top_srcdir)/tests $(GTK_CFLAGS) $(GLIB_CFLAGS) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) 
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libgnomenu.la ../../tests/libtestman.la
 # default rules doesn't include the .h files!

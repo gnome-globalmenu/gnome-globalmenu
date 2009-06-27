@@ -17,6 +17,7 @@ $(desktopfile_in_files): $(desktopfile_in_in_files) Makefile
 
 GlobalMenu_XFCEPlugin_SOURCES = main.c
 GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
+						$(WNCK_CFLAGS) \
 						-I$(top_srcdir) \
 						-include $(CONFIG_HEADER) \
 						-g 
