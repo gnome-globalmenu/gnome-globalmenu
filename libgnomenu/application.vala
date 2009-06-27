@@ -119,21 +119,8 @@ public class Application{
 
 		return rt;
 	}
-	public void update() {
-		if(_proxy_item == null) return;
-		if(wnck_applications != null) {
-			int n = 0;
-			foreach(Wnck.Application wapp in wnck_applications) {
-				n += wapp.get_n_windows();
-			}
-			status_widget.label = "%u instances, %d windows"
-				.printf(wnck_applications.length(), n);
-		} else {
-			status_widget.label = "not launched";
-		}
-		name_widget.label = readable_name;
-		icon_widget.icon_name = icon_name;
-	}
+	public signal void update();
+
 	private static void append_node_r(GMenu.TreeDirectory node) {
 		foreach (GMenu.TreeItem item in node.get_contents()) {
 			switch(item.get_type()) {
@@ -188,29 +175,6 @@ public class Application{
 		}
 	}
 
-	public Gtk.Item get_proxy_item() {
-		if(_proxy_item != null) return _proxy_item;
-		_proxy_item = new Gtk.MenuItem();
-		fill_widget(_proxy_item);
-		return _proxy_item;
-	}
-
-	public void fill_widget(Gtk.Bin bin) {
-
-		name_widget = new Gtk.Label("");
-		status_widget = new Gtk.Label("");
-		icon_widget = new Gtk.Image();
-		Gtk.HBox hbox = new Gtk.HBox(false, 0);
-		Gtk.VBox vbox = new Gtk.VBox(false, 0);
-		hbox.pack_start(icon_widget, false, false, 0);
-		hbox.pack_start(vbox, true, true, 0);
-		vbox.pack_start(name_widget, false, false, 0);
-		vbox.pack_start(status_widget, false, false, 0);
-		update();
-		bin.add(hbox);
-	}
-
-	
 	[CCode (cname = "get_task_name_by_pid")]
 	public static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {
