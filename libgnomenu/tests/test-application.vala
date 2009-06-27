@@ -16,7 +16,6 @@ namespace Gnomenu {
 				foreach(Application app in Application.applications) {
 					if(app.wnck_applications != null) {
 						Gtk.EventBox e = new Gtk.EventBox();
-						app.fill_widget(e);
 						box.pack_start_defaults(e);
 						if(app.not_in_menu) {
 						message("%s %s not in menu",app.readable_name, app.exec_path);
