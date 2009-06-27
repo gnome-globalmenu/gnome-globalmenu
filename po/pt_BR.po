@@ -8,30 +8,30 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-11 16:47+0000\n"
-"Last-Translator: Denis Franco <Unknown>\n"
+"PO-Revision-Date: 2009-06-22 13:16+0000\n"
+"Last-Translator: Thiago Negri <evohunz@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
+"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "Tamanho do Indicador"
+msgstr "Tamanho do indicador"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr ""
+msgstr "Tamanho da caixa de seleção ou botão de rádio"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr ""
+msgstr "Seja descritivo"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "Desabilitar a serialização do pixbuf"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
@@ -39,21 +39,23 @@ msgstr "Desabilitar o Plugin"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Arquivo para salvar o registro, padrão a ~/.gnomenu.log"
+msgstr "Arquivo para gravar o log, padrão em ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "Ativar o modo híbrido"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
-msgstr "- Módulo plugin do Menu Global para GTK"
+msgstr "Módulo do plugin do Menu Global para GTK"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
+"Estes parâmetros devem ser fornecidos no ambiente GLOBALMENU_GNOME_ARGS no "
+"lugar da linha de comando."
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
@@ -65,28 +67,30 @@ msgstr "_Preferências"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr "Ajuda (_Help)"
+msgstr "Aj_uda"
 
 #: ../applet/applet.vala:218
 msgid "_About"
-msgstr "Sobre [_A]"
+msgstr "_Sobre"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Nenhum Menu Global?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "O plug-in do Menu Global não está habilitado nesta área de trabalho."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
+"Ative o plug-in acessando o diálogo de preferências com um clique no botão "
+"direito,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "ou por exportar GTK_MODULES=globalmenu-gnome em seu perfil."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
@@ -96,8 +100,11 @@ msgstr "Página do projeto"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Daniel Ribeiro https://launchpad.net/~danielrmt\n"
 "  Denis Franco https://launchpad.net/~pumpkin-link\n"
-"  danielrmt https://launchpad.net/~danielrmt"
+"  Duda Weyll https://launchpad.net/~weyll\n"
+"  SauloAndrade https://launchpad.net/~sauloandrade\n"
+"  Thiago Negri https://launchpad.net/~evohunz"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -105,7 +112,7 @@ msgstr "Ajuda on-line"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Preferências do miniaplicativo do Menu Global"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
@@ -125,7 +132,7 @@ msgstr "Ma_ximizar"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "Desfazer ma_ximizar"
+msgstr "_Restaurar"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
@@ -141,31 +148,31 @@ msgstr "Sempre no _topo"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr "Sempre no esp_aço de trabalho visível"
+msgstr "_Sempre no espaço de trabalho visível"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr "Espaço de trabalho...(_W)"
+msgstr "_Espaço de trabalho"
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "Fechar(_C)"
+msgstr "_Fechar"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Mostrar _Desktop"
+msgstr "Mostrar Área de _Trabalho"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "Área de trabalho"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr "Sigar a janela"
+msgstr "Seguir a janela"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Adicionar um manipulador para o miniaplicativo"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -173,7 +180,7 @@ msgstr "Adiciona uma entrada no menu para a aplicação ativa"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Desativar a verificação do módulo de plugin GTK na inicialização"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -181,20 +188,22 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Desativar a verificação do módulo de plugin GTK na inicialização. Se você "
+"sabe que o módulo está carregado mas por alguma razão o miniaplicativo não "
+"consegue detectá-lo, defina esta chave como verdadeira para pular a "
+"verificação."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr "Ativar Menu Global para aplicativos GTL"
+msgstr "Ativar Menu Global para aplicativos GTK"
 
 #: ../gnome-globalmenu.schemas.in.h:6
-#, fuzzy
 msgid "Enable the Window Actions"
-msgstr "Ações da janela"
+msgstr "Habilitar Ações de Janelas"
 
 #: ../gnome-globalmenu.schemas.in.h:7
-#, fuzzy
 msgid "Enabled the Window List"
-msgstr "Lista de janelas"
+msgstr "Habilitar Lista de Janelas"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
@@ -206,37 +215,36 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Tamanho máximo da área de título da janela"
 
 #: ../gnome-globalmenu.schemas.in.h:10
-#, fuzzy
 msgid "Show the icon of the action window in the applet"
-msgstr "Exibir/Ocultar o ícone da janela ativa"
+msgstr "Exibir o ícone da janela no miniaplicativo"
 
 #: ../gnome-globalmenu.schemas.in.h:11
-#, fuzzy
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr "Exibir/Ocultar o ícone da janela ativa"
+msgstr "Exibe o ícone da janela ativa no miniaplicativo quando habilitado."
 
 #: ../gnome-globalmenu.schemas.in.h:12
-#, fuzzy
 msgid "Show the name of the active application in the applet"
-msgstr "Exibir/Ocultar o nome do aplicativo ativo"
+msgstr "Exibir o nome da aplicação ativa no miniaplicativo"
 
 #: ../gnome-globalmenu.schemas.in.h:13
-#, fuzzy
 msgid "Show the name of the active application in the applet when enabled"
-msgstr "Exibir/Ocultar o nome do aplicativo ativo"
+msgstr "Exibe o nome da aplicação ativa no miniaplicativo quando habilitado"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Especifica se o miniaplicativo possui um manipulador. Quando o manipulador "
+"está ativado, o miniaplicativo não irá expandir para ocupar a área vazia do "
+"painel."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Alterne entre aplicações pelo rótulo do aplicativo"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
@@ -261,12 +269,3 @@ msgstr "Miniaplicativo Global Menu para o Painel do XFCE"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "O miniaplicativo Global Menu para o Painel do XFCE"
-
-#~ msgid "Icon"
-#~ msgstr "Ícone"
-
-#~ msgid "Label"
-#~ msgstr "Rótulo"
-
-#~ msgid "Max title length"
-#~ msgstr "Largura máxima do título"

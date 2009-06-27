@@ -8,22 +8,22 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-19 14:00+0000\n"
+"PO-Revision-Date: 2009-06-12 11:17+0000\n"
 "Last-Translator: jadaml <Unknown>\n"
 "Language-Team: Hungarian <hu@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
+"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr ""
+msgstr "Kijelző mérete"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr ""
+msgstr "A jelölőnégyzet vagy választógomb kijelző mérete"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
@@ -31,7 +31,7 @@ msgstr "Részletes kimenet"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "pixbuf sorosításának letiltása"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
@@ -43,7 +43,7 @@ msgstr "A log fájl mentési útvonala (Alap: ~/.gnomenu.log)"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "Hibrid mód engedélyezése"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
@@ -75,16 +75,18 @@ msgstr "_Névjegy"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Nincs Globális Menü?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "A Globális Menü beépülő nincs engedélyezve ezen az asztalon"
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
+"Beépülő engedélyezése, a tulajdonságok párbeszéd ablakon keresztül, jobb "
+"egér kattintással."
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
@@ -106,7 +108,7 @@ msgstr "Online segítség"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Globális Menü Kisalkalmazás Tulajdonságai"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
@@ -118,7 +120,7 @@ msgstr "nincsenek műveletek"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr ""
+msgstr "Mi_nimalizálás"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
@@ -150,7 +152,7 @@ msgstr "_Munkaterület..."
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr ""
+msgstr "_Bezárás"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
@@ -162,11 +164,11 @@ msgstr "Asztal"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr ""
+msgstr "Ablak követése"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Kezelő a kisalkalmazáshoz rendelése"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -175,7 +177,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "A GTK beépülő modul indulásának ellenőrzésének letiltása indításkor"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -183,50 +185,52 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Letiltja a rendszer indításkor a GTK beépülő modul ellenőrzését. Ha tudja, "
+"hogy a modul be lett töltve, de a kisalkalmazás nem tudja ezt helyesen "
+"megállapítani, akkor állítsa igazra ezt a mezőt, hogy kihagyja az "
+"ellenőrzést."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
 msgstr "Globális Menü engedélyezése GTK-hoz"
 
 #: ../gnome-globalmenu.schemas.in.h:6
-#, fuzzy
 msgid "Enable the Window Actions"
-msgstr "Ablak műveletek"
+msgstr "Ablak műveletek engedélyezése"
 
 #: ../gnome-globalmenu.schemas.in.h:7
-#, fuzzy
 msgid "Enabled the Window List"
-msgstr "Ablak lista"
+msgstr "Ablak lista engedélyezése"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
+"Ha ez a kulcs igaz, akkor a libglobalmenu-gnome, a Globális Menü GTK "
+"beépülője be van töltve."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "A címke terület macimális hossza"
 
 #: ../gnome-globalmenu.schemas.in.h:10
-#, fuzzy
 msgid "Show the icon of the action window in the applet"
-msgstr "Aktív ablak ikonjának megjelenítése/elrejtése"
+msgstr "Aktív ablak ikonjának megjelenítése a kisalkalmazáson"
 
 #: ../gnome-globalmenu.schemas.in.h:11
-#, fuzzy
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr "Aktív ablak ikonjának megjelenítése/elrejtése"
+msgstr ""
+"Aktív ablak ikonjának megjelenítése a kisalkalmazásban, ha engedélyezi."
 
 #: ../gnome-globalmenu.schemas.in.h:12
-#, fuzzy
 msgid "Show the name of the active application in the applet"
-msgstr "Aktív alkalmazás nevének megjelenítése/elrejtése"
+msgstr "Aktív ablak nevének megjelenítése a kisalkalmazásban"
 
 #: ../gnome-globalmenu.schemas.in.h:13
-#, fuzzy
 msgid "Show the name of the active application in the applet when enabled"
-msgstr "Aktív alkalmazás nevének megjelenítése/elrejtése"
+msgstr ""
+"Megjeleníti az aktív alkalmazás nevét a kisalkalmazásban, ha engedélyezi"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -244,7 +248,7 @@ msgstr "Az aktív alkalmazás nevének maximális hossza képpontban"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr ""
+msgstr "Globális Menü Panel Kisalkalmazás"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
@@ -256,17 +260,8 @@ msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Globális Menü Beépülő XFCE panelhoz"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "A Globális Menu Beépülő XFCE panelhoz"
-
-#~ msgid "Icon"
-#~ msgstr "Ikon"
-
-#~ msgid "Label"
-#~ msgstr "Címke"
-
-#~ msgid "Max title length"
-#~ msgstr "Maximális cím hossz"

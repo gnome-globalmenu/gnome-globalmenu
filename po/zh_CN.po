@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-19 19:19+0000\n"
-"Last-Translator: Yu Feng <Unknown>\n"
+"PO-Revision-Date: 2009-04-30 02:09+0000\n"
+"Last-Translator: skatiger <skatiger@gmail.com>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
+"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -43,7 +43,7 @@ msgstr "把日志保存到文件中，缺省文件是 ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "激活混合模式"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
@@ -98,7 +98,8 @@ msgstr "项目主页"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Yu Feng https://launchpad.net/~rainwoodman"
+"  Yu Feng https://launchpad.net/~rainwoodman\n"
+"  skatiger https://launchpad.net/~skatiger"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -188,14 +189,12 @@ msgid "Enable Global Menu For GTK applications"
 msgstr "启用 GTK 程序的全局菜单支持"
 
 #: ../gnome-globalmenu.schemas.in.h:6
-#, fuzzy
 msgid "Enable the Window Actions"
-msgstr "窗口操作"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:7
-#, fuzzy
 msgid "Enabled the Window List"
-msgstr "窗口列表"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
@@ -208,24 +207,20 @@ msgid "Maximum length of the title area"
 msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:10
-#, fuzzy
 msgid "Show the icon of the action window in the applet"
-msgstr "显示/隐藏活动窗口的图标"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:11
-#, fuzzy
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr "显示/隐藏活动窗口的图标"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:12
-#, fuzzy
 msgid "Show the name of the active application in the applet"
-msgstr "显示/隐藏活动程序的名称"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:13
-#, fuzzy
 msgid "Show the name of the active application in the applet when enabled"
-msgstr "显示/隐藏活动程序的名称"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -260,12 +255,3 @@ msgstr "全局菜单 XFCE 面板插件"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "全局菜单 XFCE 面板插件"
-
-#~ msgid "Icon"
-#~ msgstr "图标"
-
-#~ msgid "Label"
-#~ msgstr "标签"
-
-#~ msgid "Max title length"
-#~ msgstr "标题最大长度"

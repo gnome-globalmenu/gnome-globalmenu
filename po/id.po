@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-12 06:00+0000\n"
-"Last-Translator: Taufiq <cahsowan@yahoo.com>\n"
+"PO-Revision-Date: 2009-06-26 12:29+0000\n"
+"Last-Translator: Tom Gregory <Unknown>\n"
 "Language-Team: Indonesian <id@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
+"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -43,7 +43,7 @@ msgstr "Berkas untuk menyimpan catatan, biasanya di ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "Aktifkan mode hibrida"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
@@ -54,6 +54,8 @@ msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
+"Parameter tersebut harus dapat disuplai dalam lingkungan "
+"GLOBALMENU_GNOME_ARGS daripada diketik pada baris perintah."
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
@@ -61,7 +63,7 @@ msgstr "panel-applet-globalmenu"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "_Pengaturan"
+msgstr "_Preferensi"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
@@ -73,20 +75,21 @@ msgstr "_Tentang"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Tidak ada Global Menu?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "Plugin Global Menu tidak diaktifkan pada area kerja ini."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
+"Aktifkan plugin dengan cara mengakses jendela pengaturan via klik-kanan."
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "atau dengan mengekspor GTK_MODULES=globalmenu-gnome pada profil Anda."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
@@ -96,7 +99,8 @@ msgstr "Pusat Proyek"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Taufiq https://launchpad.net/~cahsowan"
+"  Taufiq https://launchpad.net/~cahsowan\n"
+"  Tom Gregory https://launchpad.net/~tom-postnix"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -104,7 +108,7 @@ msgstr "Bantuan on-line"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Pengaturan Global Menu Aplet"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
@@ -112,7 +116,7 @@ msgstr "Tanpa Bingkai Jendela"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr "Tanpa Tindakan"
+msgstr "Tanpa tindakan"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
@@ -144,7 +148,7 @@ msgstr "_Selalu ada di ruang yang tampak"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr "_Ruang Kerja"
+msgstr "_Area Kerja"
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
@@ -156,7 +160,7 @@ msgstr "Tampilkan _Desktop"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "Layar Kerja Utama"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
@@ -164,7 +168,7 @@ msgstr "Ikuti bingkai jendela"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Tambahkan aturan pada aplet"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -173,7 +177,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Nonaktifkan pemeriksaan terhadap modul plugin GTK saat mulai"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -181,6 +185,10 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Nonaktifkan pemeriksaan terhadap modul plugin GTK saat mulai. Jika Anda "
+"mengetahui bahwa modul telah dimasukan tetapi karena beberapa alasan aplet "
+"tidak dapat terdeteksi, ubah aturan ini menjadi true untuk melewati "
+"pemeriksaan."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
@@ -188,68 +196,76 @@ msgstr "Aktifkan Global Menu pada aplikasi GTK"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr ""
+msgstr "Aktifkan Jendela"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Aktifkan List Jendela"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
+"Jika kuncinya benar, libglobalmenu-gnome, plugin GTK untuk Global Menu telah "
+"dimasukan."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Panjang maksimum untuk area judul"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Perlihatkan ikon terhadap jendela yang aktif pada aplet"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
 msgstr ""
+"Perlihatkan ikon terhadap jendela yang aktif pada aplet ketika jendela telah "
+"diaktifkan"
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Perlihatkan nama aplikasi yang aktif pada aplet"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
 msgstr ""
+"Perlihatkan nama aplikasi yang aktif pada aplet ketika aplikasi telah "
+"diaktifkan"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Spesifikasikan jika aplet memiliki aturan. Ketika aturan diaktifkan, aplet "
+"tidak akan memakai sisa area pada panel."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Berpindah antar aplikasi via label nama aplikasi"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr ""
+msgstr "Panjang nama maksimum terhadap aplikasi aktif, dalam piksel."
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr ""
+msgstr "Panel Aplet Global Menu"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr ""
+msgstr "Pabrikasi GlobalMenu.PanelApplet"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr ""
+msgstr "Tempat pengolah untuk membangun obyek GlobalMenu.PanelApplet"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Plugin Global Menu untuk Panel XFCE"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Plugin Global Menu untuk Panel XFCE"

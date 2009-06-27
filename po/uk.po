@@ -1,4 +1,4 @@
-# Swedish translation for globalmenu
+# Ukrainian translation for globalmenu
 # Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the globalmenu package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-27 13:19+0000\n"
-"Last-Translator: Daniel Nylander <yeager@ubuntu.com>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"PO-Revision-Date: 2009-06-17 20:14+0000\n"
+"Last-Translator: Brabadu <brabadu@gmail.com>\n"
+"Language-Team: Ukrainian <uk@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,43 +19,43 @@ msgstr ""
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "Indikatorstorlek"
+msgstr "Розмір індикатора"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr "Storlek på kryss- eller radioindikator"
+msgstr "Розмір радіо-індикатора або індикатора-вибору"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr "Var informativ"
+msgstr "Докладний вивід"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr "inaktivera serialisering av pixbuf"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
-msgstr "Inaktivera insticksmodulen"
+msgstr "Вимкнути додаток"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Fil för att spara loggfilen, som standard till ~/.gnomenu.log"
+msgstr "Файл для збереження журналу, по замовченню до ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr "Aktivera hybridläge"
+msgstr "Увімкнути гібридний режим"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
-msgstr "- Insticksmodul för global menyrad för GTK"
+msgstr "- Модуль Додатку Глобального Меню для GTK"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
-"Dessa parametrar ska anges i miljövariabeln GLOBALMENU_GNOME_ARGS istället "
-"för på kommandoraden."
+"Ці параметри мають бути передані у змінних середовища GLOBALMENU_GNOME_ARGS, "
+"а не через командний рядок."
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
@@ -63,109 +63,106 @@ msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "_Inställningar"
+msgstr "_Параметри"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr "_Hjälp"
+msgstr "_Довідка"
 
 #: ../applet/applet.vala:218
 msgid "_About"
-msgstr "_Om"
+msgstr "Про програм_у"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr "Ingen Global meny?"
+msgstr "Немає Глобального Меню?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr "Insticksmodulen Global meny är inte aktiverad på detta skrivbord."
+msgstr "Додаток Глобальне Меню не активований."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr ""
-"Aktivera insticksmodulen genom att öppna inställningsdialogen med ett "
-"högerklick."
+msgstr "Активуйте додаток у діалозі параметрів, натиснувши праву кнопку миші,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr "eller genom att exportera GTK_MODULES=globalmenu-gnome i din profil."
+msgstr "або експортуючи GTK_MODULES=globalmenu-gnome у Ваш профіль."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr "Projektets webbplats"
+msgstr "Домашня сторінка проекту"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Daniel Nylander https://launchpad.net/~yeager\n"
-"  Dojan5 https://launchpad.net/~joel-lundborg-gmail"
+"  Brabadu https://launchpad.net/~boryslavlarin"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
-msgstr "Hjälp på nätet"
+msgstr "Онлайн допомога"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr "Inställningar för panelprogrammet Global meny"
+msgstr "Параметри аплету Глобальне Меню"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr "inga fönster"
+msgstr ""
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr "inga åtgärder"
+msgstr ""
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr "Mi_nimera"
+msgstr "З_горнути"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr "Ma_ximera"
+msgstr "_Розгорнути"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "Avma_ximera"
+msgstr "Відновити _попередній розмір"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr "_Flytta"
+msgstr "Перем_істити"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr "Ändra _storlek"
+msgstr "Змінити _розмір"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr "Alltid _överst"
+msgstr "Завжди звер_ху"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr "_Alltid på den synliga arbetsytan"
+msgstr "Завжди на _видимій робочій стільниці"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr "Ar_betsyta..."
+msgstr "Робоча _стільниця"
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "S_täng"
+msgstr "_Закрити"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Visa s_krivbordet"
+msgstr "П_оказати Робочу стільницю"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr "Skrivbord"
+msgstr "Стільниця"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr "Följ fönstret"
+msgstr "Слідкувати за вікном"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
@@ -173,11 +170,11 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
-msgstr "Lägg till åtgärdsmenyobjekt till det aktiva programmets namnmeny"
+msgstr "Додати пункти меню  для дій вікна, що активують меню програми"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Вимкнути перевірку модулів додатків GTK при старті"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -185,46 +182,49 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Вимкнути перевірку модулів додатків GTK при старті. Якщо Ви знаєте, що "
+"модуль завантажений, але за деяких причин аплет не може коректно "
+"відслідкувати це, активуйте цей пункт, щоб оминати перевірку."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr "Aktivera Global meny för GTK-program"
+msgstr "Активувати Глобальне Меню для програм GTK"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr ""
+msgstr "Дозволити дії над вікнами"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Дозволити список вікон"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
-"Om nyckeln libglobalmenu-gnome är true så är GTK-insticksmodulen Global meny "
-"inläst."
+"Якщо цей пункт активований, тоді завантажується libglobalmenu-gnome, додаток "
+"GTK для Глобального Меню."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Максимальна довжина заголовку"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Показувати іконку активного вікна у аплеті"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "Показує іконку активного вікна, коли активоване."
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Показувати назву активної програми в аплеті"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "Показує назву поточної програми в аплеті, коли активоване."
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -234,28 +234,28 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr "Växla mellan program via programmets namnetikett"
+msgstr "Перемикатись між програмами через позначку імені програми"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "Den maximala längden på namnet på det aktiva programmet, i bildpunkter"
+msgstr "Максимальна довжина назви поточної програми, в пікселях."
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr "Panelprogrammet Global meny"
+msgstr "Аплет панелі «Глобальне меню»"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr "Fabrik för GlobalMenu.PanelApplet"
+msgstr "GlobalMenu.PanelApplet Factory"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr "Fabriken för att bygga GlobalMenu.PanelApplet-objekt"
+msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr "Insticksmodulen Global meny för XFCE-panel"
+msgstr "Додаток Глобальне Меню для панелі XFCE"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr "Insticksmodulen Global meny för XFCE-panelen"
+msgstr "Додаток Глобальне Меню для панелі XFCE"

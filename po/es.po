@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-21 06:40+0000\n"
-"Last-Translator: raziel <zimbiozix@hotmail.com>\n"
+"PO-Revision-Date: 2009-05-25 02:11+0000\n"
+"Last-Translator: adrian <Unknown>\n"
 "Language-Team: Spanish <es@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-04-24 01:40+0000\n"
+"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -39,11 +39,11 @@ msgstr "Deshabilitar el complemento"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Archivo a guardar el log, por defecto se usara ~/.gnomenu.log"
+msgstr "Archivo donde guardar el registro, por defecto se usara ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "Activar modo híbrido"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
@@ -54,8 +54,8 @@ msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
-"Esos parametros deben de ser proveidos en la seccion  GLOBALMENU_GNOME_ARGS  "
-"y no en la linea de comando"
+"Esos parámetros deben darse en la sección GLOBALMENU_GNOME_ARGS en vez de "
+"por línea de órdenes"
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
@@ -63,7 +63,7 @@ msgstr "complemento-panel-globalmenu"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "Opciones"
+msgstr "_Preferencias"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
@@ -75,34 +75,36 @@ msgstr "_Acerca de"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr "Sin Global Menu?"
+msgstr "¿Sin Global Menu?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr "El complemento Menu Global no esta habilitado en este escritorio"
+msgstr "El complemento Menu Global no está habilitado en este escritorio."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
-"Habilite el complemento accesando al dialogo de opciones por medio del boton "
-"derecho de su ratón,"
+"Habilite el complemento accediendo al diálogo de opciones pulsando con el "
+"botón derecho de su ratón,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 msgstr ""
-"O exportando la extension GTK_MODULES=globalmenu-gnome dentro de su perfil."
+"o exportando la extension GTK_MODULES=globalmenu-gnome dentro de su perfil."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr "Página principal del Proyecto"
+msgstr "Página principal del proyecto"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Amaeth https://launchpad.net/~dfoxpro\n"
+"  DiegoJ https://launchpad.net/~diegojromerolopez\n"
 "  Fidelinho https://launchpad.net/~fidel-vales\n"
-"  dfoxpro https://launchpad.net/~dfoxpro\n"
+"  huzzam https://launchpad.net/~clarinet\n"
 "  raziel https://launchpad.net/~zimbiozix"
 
 #: ../applet/applet.vala:313
@@ -115,11 +117,11 @@ msgstr "Opciones de Global Menu"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr "Sin ventanas"
+msgstr "sin ventanas"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr "Sin acciones"
+msgstr "sin acciones"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
@@ -159,7 +161,7 @@ msgstr "_Cerrar"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Mostrar _Escritorio"
+msgstr "Mostrar _escritorio"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
@@ -171,7 +173,7 @@ msgstr "Seguir la ventana"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Añadir un ancla a esta miniaplicación"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -181,7 +183,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Desactivar la comprobación del módulo de complementos GTK al iniciar"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -189,68 +191,71 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Desactivar la comprobación del módulo de complementos GTK al iniciar. Si "
+"quiere que este módulo se cargue pero por algunas razones la miniapliación "
+"no puede detectar este hecho correctamente, seleccione esta opción para "
+"omitir esta comprobación."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
 msgstr "Activar Global Menu para las aplicaciones GTK"
 
 #: ../gnome-globalmenu.schemas.in.h:6
-#, fuzzy
 msgid "Enable the Window Actions"
-msgstr "Acciones de ventana"
+msgstr "Activar acciones de ventanas"
 
 #: ../gnome-globalmenu.schemas.in.h:7
-#, fuzzy
 msgid "Enabled the Window List"
-msgstr "Lista de ventanas"
+msgstr "Activar la lista de ventanas"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
-"si esta llave es correcta, el complemento GTK para Global Menu, "
-"libglobalmenu-gnome, será cargado."
+"si esta llave es correcta se cargará el complemento GTK para Global Menu "
+"libglobalmenu-gnome."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Longitud máxima de zona de título"
 
 #: ../gnome-globalmenu.schemas.in.h:10
-#, fuzzy
 msgid "Show the icon of the action window in the applet"
-msgstr "Mostrar/Ocultar el ícono de la ventana activa"
+msgstr "Mostrar el icono de la ventana de acción en la miniaplicación"
 
 #: ../gnome-globalmenu.schemas.in.h:11
-#, fuzzy
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr "Mostrar/Ocultar el ícono de la ventana activa"
+msgstr ""
+"Mostrar el icono de la ventan activa en la miniaplicación cuando esté "
+"activada."
 
 #: ../gnome-globalmenu.schemas.in.h:12
-#, fuzzy
 msgid "Show the name of the active application in the applet"
-msgstr "Mostrar/Ocultar el nombre de la aplicación activa"
+msgstr "Mostrar el nombre de la aplicación activa en la miniaplicación"
 
 #: ../gnome-globalmenu.schemas.in.h:13
-#, fuzzy
 msgid "Show the name of the active application in the applet when enabled"
-msgstr "Mostrar/Ocultar el nombre de la aplicación activa"
+msgstr ""
+"Mostrar el nombre de la aplicación activa en la miniaplicación si está activa"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Indicar si la miniaplicación está anclada. Cuando se ancla, la "
+"miniaplicación no se expandirá ocupando el área vacía del panel."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
 msgstr ""
-"Cambie de entre las aplicaciones a travéz de la etiqueta del nombre de la "
+"Cambie de entre las aplicaciones a través de la etiqueta del nombre de la "
 "aplicación"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "La longitud máxima, en pixeles, del nombre del aplicación activa"
+msgstr "La longitud máxima del nombre de la aplicación activa en píxeles"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
@@ -271,12 +276,3 @@ msgstr "Complemento Global Menu para el Panel XFCE"
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
 msgstr "El Complemento Global Menu para XFCE Panel"
-
-#~ msgid "Icon"
-#~ msgstr "Icono"
-
-#~ msgid "Label"
-#~ msgstr "Etiqueta"
-
-#~ msgid "Max title length"
-#~ msgstr "Longitud máxima del título"
