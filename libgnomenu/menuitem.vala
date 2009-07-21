@@ -645,7 +645,7 @@ namespace Gnomenu {
 			} else 
 			if(_icon != null && _icon.has_prefix("pixbuf:")) {
 				weak string b64data = _icon.offset(7);
-				int len = 0;
+				size_t len = 0;
 				uchar [] data = Base64.decode(b64data, out len);
 				Gdk.Pixdata pixdata = {0};
 				pixdata.deserialize(data);

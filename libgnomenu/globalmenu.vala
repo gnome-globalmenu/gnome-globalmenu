@@ -132,7 +132,7 @@ namespace Gnomenu {
 		}
 		private void grab_menu_bar_key() {
 			/*FIXME: listen to changes in GTK_SETTINGS.*/
-			int keyval;
+			uint keyval;
 			Gdk.ModifierType mods;
 			get_accel_key(out keyval, out mods);
 			_root_gnomenu_window.grab_key(keyval, mods);
