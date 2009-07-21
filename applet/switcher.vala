@@ -1,7 +1,8 @@
 using GLib;
 using Gnomenu;
 using Gtk;
-	
+extern int system(string arg);
+
 	public class Switcher : Gnomenu.MenuBar {
 		private string _label;
 		private int _max_size = -1;
@@ -185,13 +186,16 @@ using Gtk;
 			window.get_geometry(out x, out y, out w, out h);
 
 			screen.move_viewport(current_workspace_x + x, current_workspace_y + y);
+			system("sleep 0.5");
+			
+			window.unminimize(Gtk.get_current_event_time());
+			system("sleep 0.5");
 			
 			window.activate(Gtk.get_current_event_time());
-			window.unminimize(Gtk.get_current_event_time());
-				
+			
 			// ensure is on top
-			window.make_above();
-			window.unmake_above();	
+			//window.make_above();
+			//window.unmake_above();	
 		}
 		private void set_iconify_destination(Wnck.Window window) {
 			if(!this.is_realized()) return;
