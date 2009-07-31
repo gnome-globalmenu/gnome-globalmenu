@@ -155,7 +155,7 @@ using GConf;
 				rt.set_type(ValueType.STRING);
 				return rt;
 			} else {
-				return _default_client.get_schema(schema_name);
+				return _default_client.get_schema(schema_name).copy();
 			}
 		}
 		private void onResetButtonPressed(Gtk.Button widget) {

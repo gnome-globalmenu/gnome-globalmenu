@@ -55,9 +55,9 @@ namespace GConf {
 		public int get_int (string key) throws GLib.Error;
 		public unowned GLib.SList get_list (string key, GConf.ValueType list_type) throws GLib.Error;
 		public bool get_pair (string key, GConf.ValueType car_type, GConf.ValueType cdr_type, void* car_retloc, void* cdr_retloc) throws GLib.Error;
-		public GConf.Schema get_schema (string key) throws GLib.Error;
+		public unowned GConf.Schema get_schema (string key) throws GLib.Error;
 		public unowned string get_string (string key) throws GLib.Error;
-		public unowned GConf.Value get_without_default (string key) throws GLib.Error;
+		public GConf.Value get_without_default (string key) throws GLib.Error;
 		public bool key_is_writable (string key) throws GLib.Error;
 		public void notify (string key);
 		public uint notify_add (string namespace_section, owned GConf.ClientNotifyFunc func) throws GLib.Error;
@@ -189,7 +189,7 @@ namespace GConf {
 	[Compact]
 	[CCode (copy_function = "gconf_schema_copy", cheader_filename = "gconf/gconf.h")]
 	public class Schema {
-		public unowned GConf.Schema copy ();
+		public GConf.Schema copy ();
 		public GConf.ValueType get_car_type ();
 		public GConf.ValueType get_cdr_type ();
 		public unowned GConf.Value get_default_value ();
@@ -296,8 +296,8 @@ namespace GConf {
 	}
 	[CCode (cheader_filename = "gconf/gconf.h")]
 	public delegate void ChangeSetForeachFunc (GConf.ChangeSet cs, string key, GConf.Value value);
-	[CCode (cheader_filename = "gconf/gconf.h")]
-	public static delegate void ClientErrorHandlerFunc (GConf.Client client, GLib.Error error);
+	[CCode (cheader_filename = "gconf/gconf.h", has_target = false)]
+	public delegate void ClientErrorHandlerFunc (GConf.Client client, GLib.Error error);
 	[CCode (cheader_filename = "gconf/gconf.h")]
 	public delegate void ClientNotifyFunc (GConf.Client client, uint cnxn_id, GConf.Entry entry);
 	[CCode (cheader_filename = "gconf/gconf.h")]
