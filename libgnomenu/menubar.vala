@@ -388,11 +388,11 @@ namespace Gnomenu {
 				return base.move_selected(distance);
 			}
 		}
-		public override void forall(bool include_internals, Gtk.Callback callback) {
+		public override void forall_internal(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
 				callback(_overflown_item);
 			}
-			base.forall(include_internals, callback);
+			base.forall_internal(include_internals, callback);
 		}
 		public override void realize() {
 			base.realize();

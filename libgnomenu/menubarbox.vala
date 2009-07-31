@@ -106,7 +106,7 @@ public class MenuBarBox: Gtk.Container {
 	public unowned int[] get_size_hints() {
 		return size_hints;	
 	}
-	public override void forall(bool include_internals, Gtk.Callback callback) {
+	public override void forall_internal(bool include_internals, Gtk.Callback callback) {
 		if(include_internals) {
 
 		}

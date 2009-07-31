@@ -463,7 +463,7 @@ namespace Gnomenu {
 		 * should be kept here.
 		 *
 		 */
-		public override void forall(bool include_internals, Gtk.Callback callback) {
+		public override void forall_internal(bool include_internals, Gtk.Callback callback) {
 			if(include_internals) {
 				/*_image_widget still can be null
 				 * if item type is IMAGE,
@@ -473,7 +473,7 @@ namespace Gnomenu {
 				&& _image_widget != null)
 					callback(_image_widget);
 			}
-			base.forall(include_internals, callback);
+			base.forall_internal(include_internals, callback);
 		}
 		public override void activate() {
 			(toplevel_shell as MenuBar).emit_activate(this);
