@@ -348,7 +348,8 @@ public class Applet : Panel.Applet {
     }
 	private void show_help() {
 		try {
-		Gnome.url_show("http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral");
+		Gtk.show_uri(null, "http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral",
+		Gdk.CURRENT_TIME);
 		} catch(GLib.Error e) {
 			warning("%s", e.message);
 		}
