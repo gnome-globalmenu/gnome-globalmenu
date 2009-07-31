@@ -78,9 +78,10 @@ namespace Gnomenu {
 				critical("event_filter invoked on a disposed window");
 				return Gdk.FilterReturn.CONTINUE;
 			}
-			weak Xlib.AnyEvent event = (Xlib.AnyEvent) xevent;
-			Gdk.Event ev = gdk_ev; /* copy the gdk_event*/
-			switch(event.type) {
+			void * pointer = &xevent;
+			Xlib.AnyEvent* event = (Xlib.AnyEvent*) pointer;
+			Gdk.Event ev = gdk_ev.copy(); /* copy the gdk_event*/
+			switch(event->type) {
 				case Xlib.EventType.PropertyNotify:
 					ev.type = Gdk.EventType.PROPERTY_NOTIFY;
 					ev.property.atom = ((Xlib.PropertyEvent) event).atom.to_gdk();
@@ -96,7 +97,7 @@ namespace Gnomenu {
 						Gdk.Window gwin = key_widget.window;
 						Xlib.Window xwin = Xlib.Window.from_gdk(gwin);
 						weak Xlib.Display xd = Xlib.Display.from_gdk(Gdk.Display.get_default());
-						event.window = xwin;
+						event->window = xwin;
 						Xlib.SendEvent(xd, xwin, false, 0, event);
 					}
 				break;
@@ -125,7 +126,7 @@ namespace Gnomenu {
 				out actual_type, 
 				out actual_format, 
 				out actual_length, 
-				&context);
+				out context);
 			return context;
 		}
 		public void set_by_atom(Gdk.Atom atom, string? value) {
