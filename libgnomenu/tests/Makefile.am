@@ -20,5 +20,4 @@ SUFFIXES = .vala .c
 AM_CPPFLAGS = -I$(top_srcdir)/libgnomenu -I$(top_srcdir)/tests $(GTK_CFLAGS) $(GLIB_CFLAGS) $(WNCK_CFLAGS) -include $(CONFIG_HEADER) 
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libgnomenu.la ../../tests/libtestman.la
-# default rules doesn't include the .h files!
-EXTRA_DIST += $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h) evo-nolabel.xml evo.xml
+EXTRA_DIST += $(STAMP) $(VALASOURCES) evo-nolabel.xml evo.xml

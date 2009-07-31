@@ -21,4 +21,4 @@ test_unload_LDADD = $(GTK_LIBS) $(GLIB_LIBS) $(top_builddir)/tests/libtestman.la
 AM_CPPFLAGS = -I$(srcdir)/.. $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER) -I$(top_srcdir)/tests
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libglobalmenu-gnome.la $(top_builddir)/tests/libtestman.la
-EXTRA_DIST += $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h) test-unload.ui test-unload.glade
+EXTRA_DIST += $(STAMP) $(VALASOURCES) test-unload.ui test-unload.glade

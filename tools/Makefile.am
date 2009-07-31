@@ -1,4 +1,10 @@
-
+##
+##
+##
+## DEPRECATED
+##
+##
+##
 VALASOURCES = image-to-vala.vala
 STAMPS = $(VALASOURCES:.vala=.c)
 noinst_PROGRAMS = $(VALASOURCES:.vala=)
@@ -13,4 +19,4 @@ BUILT_SOURCES = $(STAMP)
 
 LDADD = $(GTK_LIBS) $(GLIB_LIBS)
 
-EXTRA_DIST = $(STAMP) $(VALASOURCES) $(VALASOURCES:.vala=.h) $(VALASOURCES:.vala=.c)
+EXTRA_DIST = $(STAMP) $(VALASOURCES)  $(VALASOURCES:.vala=.c)
