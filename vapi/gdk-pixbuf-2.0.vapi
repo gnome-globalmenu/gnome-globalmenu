@@ -9,11 +9,11 @@ namespace Gdk {
 		public void composite (Gdk.Pixbuf dest, int dest_x, int dest_y, int dest_width, int dest_height, double offset_x, double offset_y, double scale_x, double scale_y, Gdk.InterpType interp_type, int overall_alpha);
 		public void composite_color (Gdk.Pixbuf dest, int dest_x, int dest_y, int dest_width, int dest_height, double offset_x, double offset_y, double scale_x, double scale_y, Gdk.InterpType interp_type, int overall_alpha, int check_x, int check_y, int check_size, uint32 color1, uint32 color2);
 		public unowned Gdk.Pixbuf composite_color_simple (int dest_width, int dest_height, Gdk.InterpType interp_type, int overall_alpha, int check_size, uint32 color1, uint32 color2);
-		public unowned Gdk.Pixbuf copy ();
+		public Gdk.Pixbuf copy ();
 		public void copy_area (int src_x, int src_y, int width, int height, Gdk.Pixbuf dest_pixbuf, int dest_x, int dest_y);
 		public static GLib.Quark error_quark ();
 		public void fill (uint32 pixel);
-		public unowned Gdk.Pixbuf flip (bool horizontal);
+		public Gdk.Pixbuf flip (bool horizontal);
 		[CCode (has_construct_function = false)]
 		public Pixbuf.from_data ([CCode (array_length = false)] uchar[] data, Gdk.Colorspace colorspace, bool has_alpha, int bits_per_sample, int width, int height, int rowstride, Gdk.PixbufDestroyNotify? destroy_fn);
 		[CCode (has_construct_function = false)]
@@ -45,7 +45,7 @@ namespace Gdk {
 		public int get_width ();
 		[CCode (has_construct_function = false)]
 		public Pixbuf (Gdk.Colorspace colorspace, bool has_alpha, int bits_per_sample, int width, int height);
-		public unowned Gdk.Pixbuf rotate_simple (Gdk.PixbufRotation angle);
+		public Gdk.Pixbuf rotate_simple (Gdk.PixbufRotation angle);
 		public void saturate_and_pixelate (Gdk.Pixbuf dest, float saturation, bool pixelate);
 		public bool save (string filename, string type, ...) throws GLib.Error;
 		public bool save_to_buffer (string buffer, size_t buffer_size, string type, ...) throws GLib.Error;
