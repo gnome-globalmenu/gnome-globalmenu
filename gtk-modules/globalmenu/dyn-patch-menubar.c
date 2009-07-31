@@ -144,7 +144,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 				  G_SIGNAL_RUN_FIRST,
 				  0, 
 				  NULL, NULL,
-				  gtk_marshal_VOID__VOID,
+				  g_cclosure_marshal_VOID__VOID,
 				  G_TYPE_NONE, 0);
 		}
 		SIGNAL_ATTACHED = g_signal_lookup("dyn-patch-attached", G_OBJECT_CLASS_TYPE (klass));
@@ -155,7 +155,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 				  G_SIGNAL_RUN_FIRST,
 				  0, 
 				  NULL, NULL,
-				  gtk_marshal_VOID__OBJECT,
+				  g_cclosure_marshal_VOID__OBJECT,
 				  G_TYPE_NONE, 1, GTK_TYPE_WINDOW);
 		}
 		SIGNAL_DETACHED = g_signal_lookup("dyn-patch-detached", G_OBJECT_CLASS_TYPE (klass));
@@ -166,7 +166,7 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 				  G_SIGNAL_RUN_FIRST,
 				  0, 
 				  NULL, NULL,
-				  gtk_marshal_VOID__OBJECT,
+				  g_cclosure_marshal_VOID__OBJECT,
 				  G_TYPE_NONE, 1, GTK_TYPE_WINDOW);
 		}
 	} else {	
