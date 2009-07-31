@@ -42,8 +42,11 @@ AC_DEFINE(GMENU_I_KNOW_THIS_IS_UNSTABLE, 1,[libgnome-menus is happy with this])
 AC_DEFINE(GDataTestFunc, void*, [Workaround GDataTestFunc problem])
 
 # intl
-IT_PROG_INTLTOOL
 AM_GLIB_GNU_GETTEXT
+# The following lines replaces glib-gettext with autopoint which doesn't work with GNOME
+#AM_GNU_GETTEXT(external)
+#AM_GNU_GETTEXT_VERSION(0.14.5)
+IT_PROG_INTLTOOL
 GETTEXT_PACKAGE=gnome-globalmenu
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [gettext package])
 AC_SUBST(GETTEXT_PACKAGE)
