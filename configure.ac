@@ -188,7 +188,6 @@ AC_CONFIG_FILES(
 	applet/Makefile
 	xfce/Makefile
 	tests/Makefile
-	tools/Makefile
 	vapi/Makefile
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
