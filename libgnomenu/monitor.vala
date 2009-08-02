@@ -72,7 +72,6 @@ public class Monitor: GLib.Object {
 			_desktop = null;
 		}
 		if(window == _current_window) {
-			window.set_data("window-closed", window);
 			update_current_window();
 		}
 	}
@@ -113,7 +112,6 @@ public class Monitor: GLib.Object {
 					break;
 				default:
 					_current_window = _desktop;
-					old.set_data("window-closed", null);
 					break;
 			}
 		}

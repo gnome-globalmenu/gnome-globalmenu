@@ -96,28 +96,29 @@ namespace Gnomenu {
 			}
 		}
 		public void switch_to(ulong xid) {
-			ungrab_mnemonic_keys();
 			current_window = Window.foreign_new(xid);
 			if(current_window != null) {
 				current_window.menu_context_changed += (window) => {
 					update();
 				};
-				update();	
 				current_window.set_key_widget(this.get_toplevel());
 			}
+			update();
 		}
 		private void update() {
 			ungrab_mnemonic_keys();
-			weak string context = current_window.menu_context;
-			if(context != null) {
-				try {
-					Parser.parse(this, context);
-				} catch(GLib.Error e) {
-					warning("%s", e.message);	
+			if(current_window != null) {
+				weak string context = current_window.menu_context;
+				if(context != null) {
+					try {
+						Parser.parse(this, context);
+					} catch(GLib.Error e) {
+						warning("%s", e.message);	
+					}
+					show();
+					grab_mnemonic_keys();
+					return;
 				}
-				show();
-				grab_mnemonic_keys();
-				return;
 			}
 			hide();
 		}

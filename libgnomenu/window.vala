@@ -41,6 +41,7 @@ namespace Gnomenu {
 			if(gdk_window == null ) {
 				gdk_window = Gdk.Window.foreign_new((Gdk.NativeWindow)xid);
 			}
+			if(gdk_window == null) return null;
 			return new Window(gdk_window);
 		}
 		construct {
