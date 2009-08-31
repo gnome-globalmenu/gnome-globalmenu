@@ -10,15 +10,8 @@ namespace Gnomenu {
 		TestGlobalMenu () {
 			base("/GlobalMenu");
 			add("widget", () => {
-				box = new VBox(false, 0);
 				menubar = new GlobalMenu();
-				entry = new Entry();
-				box.pack_start_defaults(entry);
-				box.pack_start_defaults(menubar);
-				entry.activate += (the_entry) => {
-					menubar.switch_to(entry.text.to_ulong());
-				};
-				window.add(box);
+				window.add(menubar);
 				window.show_all();
 				Gtk.main();
 			});

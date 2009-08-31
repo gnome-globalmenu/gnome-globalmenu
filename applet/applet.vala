@@ -65,6 +65,12 @@ public class Applet : Panel.Applet {
 		setup_popup_menu(main_menubar);
 
 		menubars.add(main_menubar);
+
+		switcher.current_window = Wnck.Window.get(main_menubar.current_window.xid);
+		main_menubar.notify["current-window"] += () => {
+			switcher.current_window = Wnck.Window.get(main_menubar.current_window.xid);
+		};
+
 		menubars.child_set(main_menubar, "shrink", true, null);
 
 		/*init panel */
@@ -77,11 +83,8 @@ public class Applet : Panel.Applet {
 		bgtype = get_background(out color, out pixmap);
 		(this as Panel.Applet).change_background(bgtype, color, pixmap);
 
-		monitor.window_changed += on_window_changed;
-		on_window_changed(monitor, 0);
 	}
 
-	private Monitor monitor = new Monitor();
 	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed = false;
 	private GlobalMenu main_menubar = new GlobalMenu();
@@ -123,19 +126,10 @@ public class Applet : Panel.Applet {
 		}
 		if(screen != null) {
 			check_module();
-			monitor.screen = screen;
 			get_settings().notify["gtk-modules"] += check_module;
 		}
 	}
 
-	private void on_window_changed (Monitor monitor, ulong prev_xid) {
-		ulong xid = monitor.current_xid;
-		Wnck.Window window = Wnck.Window.get(xid);
-		if(window is Wnck.Window) {
-			switcher.current_window = window;
-		}
-		main_menubar.switch_to(xid);
-	}
 
 	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();

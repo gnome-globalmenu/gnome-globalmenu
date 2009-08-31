@@ -17,6 +17,7 @@ namespace Gnomenu {
 	 *
 	 */
 	public class Window : GLib.Object {
+		private Gdk.Window _window;
 		public Gdk.Window window {
 			get {
 				return _window;
@@ -29,9 +30,17 @@ namespace Gnomenu {
 					_window.add_filter(event_filter);
 			}
 		}
-		private Gdk.Window _window;
+		public uint xid {
+			get {
+				if(_window != null)
+					return Gdk.x11_drawable_get_xid(_window);
+				return 0;
+			}
+		}
+
 		private Gtk.Widget key_widget;
 		private bool disposed = false;
+
 		public Window (Gdk.Window window) {
 			this.window = window;
 		}
@@ -44,6 +53,7 @@ namespace Gnomenu {
 			if(gdk_window == null) return null;
 			return new Window(gdk_window);
 		}
+
 		construct {
 			property_notify_event += (t, prop) => {
 				if(prop == NET_GLOBALMENU_MENU_CONTEXT) {

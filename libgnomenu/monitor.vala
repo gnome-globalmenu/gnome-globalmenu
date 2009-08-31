@@ -2,70 +2,69 @@ using Gnomenu;
 
 namespace Gnomenu {
 public class Monitor: GLib.Object {
-	private Wnck.Screen? gdk_to_wnck_screen (Gdk.Screen? screen) {
+	private static Wnck.Screen? gdk_screen_to_wnck_screen (Gdk.Screen? screen) {
 		if(screen != null)
 			return Wnck.Screen.get(screen.get_number());
 		return null;
 	}
-	private Gdk.Screen _screen;
-	public Gdk.Screen screen {
+
+	private Gtk.Widget _widget;
+
+	public Gtk.Widget widget {
 		get {
-			return _screen;	
-		}
+			return _widget;
+		} 
 		set {
-			Wnck.Screen new_screen = gdk_to_wnck_screen(value);
-			if(new_screen == null) {
-				new_screen = Wnck.Screen.get_default();
+			if(_widget != value) {
+				if(_widget != null) {
+					_widget.screen_changed -= widget_screen_changed;
+					widget_screen_changed(_widget, null);
+				}
+				_widget = value;
 			}
-			if(new_screen == _wnck_screen) return;
-			_screen = value;
-
-			if(_wnck_screen != null) {
-				detach_from_screen(_wnck_screen);
+			if(_widget != null) {
+				//attach
+				_widget.screen_changed += widget_screen_changed;
 			}
 
-
-			_wnck_screen = new_screen;
-			if(_wnck_screen != null) {
-				attach_to_screen(_wnck_screen);
-				/* sync to wnck status, may invoke a whole bunch of
-				 * signals */
-				_wnck_screen.force_update();
-			}
 		}
 	}
 
-	public ulong current_xid {
+	private void widget_screen_changed(Gtk.Widget widget, Gdk.Screen? prev_screen) {
+		detach_from_screen();
+		_screen = gdk_screen_to_wnck_screen(widget.get_screen());
+		attach_to_screen();
+	}
+
+	public abstract signal void active_window_changed(Gnomenu.Window? prev_window);
+
+	public Gnomenu.Window _active_window = null;
+	public Gnomenu.Window active_window {
 		get {
-			if(_current_window != null) {
-				return _current_window.get_xid();
-			}
-			return 0;
-		}	
+			return _active_window;
+		}
+		private set {
+			Gnomenu.Window old = _active_window;
+			_active_window = value;
+			active_window_changed(old);
+		}
 	}
 
-	public abstract signal void window_changed(ulong old_xid);
-	
-	public Monitor() {
-	
-	}
-
-	construct {
-		screen = Gdk.Screen.get_default();
-		disposed = false;
+	public Monitor(Gtk.Widget widget) {
+		this.widget = widget;
 	}
 
 	public override void dispose() {
 		if(!disposed) {
 			disposed = true;
-			detach_from_screen(_wnck_screen);			
+			detach_from_screen();
 		}
 	}
-	private Wnck.Screen? _wnck_screen;
-	private Wnck.Window _desktop;
-	private Wnck.Window _current_window;
+	private Wnck.Screen? _screen = null;
+	private Wnck.Window? _desktop = null;
+	private Wnck.Window? _current_window = null;
 
-	private bool disposed;
+	private bool disposed = false;
 
 	private void on_window_closed(Wnck.Screen screen, Wnck.Window window) {
 		if(_desktop == window) {
@@ -75,35 +74,44 @@ public class Monitor: GLib.Object {
 			update_current_window();
 		}
 	}
+
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
 			_desktop = window;
 		if(_current_window == null)
 			update_current_window();
 	}
+
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window? previous_window) {
 		update_current_window();
 	}
 
-	private Wnck.Window? find_desktop(Wnck.Screen screen) {
-		weak List<weak Wnck.Window> windows = screen.get_windows();
+	private void update_desktop_window() {
+		weak List<weak Wnck.Window> windows = _screen.get_windows();
+		_desktop = null;
 		foreach(weak Wnck.Window window in windows) {
 			if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
-				/*Vala should ref it*/
-				return window;
+				_desktop = window;
 			}
 		}
-		return null;
 	}
 	private void update_current_window() {
 		Wnck.Window old = _current_window;
-		_current_window = _wnck_screen.get_active_window();
-		if(_current_window == null)
+		_current_window = _screen.get_active_window();
+
+		if(_current_window == null) {
+			/* Try to use the desktop window if there is no current window
+			 * AKA fallback to nautilus desktop menubar if there is no current window
+			 * */
 			_current_window = _desktop;
+		}
+
 		if(_current_window != null) {
+			/* Look for the transient_for(or Parent) window */
 			weak Wnck.Window transient_for = _current_window.get_transient();
-			if(transient_for != null) 
+			if(transient_for != null) {
 				_current_window = transient_for;
+			}
 			switch(_current_window.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
 				case Wnck.WindowType.DESKTOP:
@@ -116,26 +124,35 @@ public class Monitor: GLib.Object {
 			}
 		}
 		if(old == _current_window) {
+			/* if the current_window is not changed, do nothing */
 			return;
 		}
-		if(old != null) {
-			window_changed(old.get_xid());
-		} else {
-			window_changed(0);
+		/* emit the window changed signal */
+		active_window = Window.foreign_new(_current_window.get_xid());
+
+	}
+	private void detach_from_screen() {
+		if(_screen != null) {
+			_screen.window_opened -= on_window_opened;
+			_screen.window_closed -= on_window_closed;
+			_screen.active_window_changed -= on_active_window_changed;
 		}
-	}
-	private void detach_from_screen(Wnck.Screen screen) {
-		screen.window_opened -= on_window_opened;
-		screen.window_closed -= on_window_closed;
-		screen.active_window_changed -= on_active_window_changed;
 		_desktop = null;
+		_current_window = null;
 	}
-	private void attach_to_screen(Wnck.Screen screen) {
-		screen.window_closed += on_window_closed;
-		screen.window_opened += on_window_opened;
-		screen.active_window_changed += on_active_window_changed;
-		Wnck.Window new_desktop = find_desktop(screen);
-		_desktop = new_desktop;
+	private void attach_to_screen() {
+		if(_screen != null) {
+			/* sync to wnck status, may invoke a whole bunch of
+			 * signals, therefore we do it before connecting signals */
+			_screen.force_update();
+
+			_screen.window_closed += on_window_closed;
+			_screen.window_opened += on_window_opened;
+			_screen.active_window_changed += on_active_window_changed;
+
+			update_desktop_window();
+			update_current_window();
+		}
 	}
 }
 }

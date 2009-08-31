@@ -1,9 +1,18 @@
 using Gtk; 
 namespace Gnomenu {
 	public class GlobalMenu : MenuBar {
-		private Window current_window;
+		[CCode (notify = true)]
+		public Window current_window {get; private set;}
+
 		private Window _root_gnomenu_window;
+		private Gnomenu.Monitor active_window_monitor;
+
 		construct {
+			active_window_monitor = new Monitor(this);
+			active_window_monitor.active_window_changed += (mon, prev) => {
+				current_window = active_window_monitor.active_window;
+				update();
+			};
 			activate += (menubar, item) => {
 				if(current_window != null) {
 					current_window.emit_menu_event(item.item_path);
@@ -95,19 +104,14 @@ namespace Gnomenu {
 				if(screen != null) attach_to_screen(screen);
 			}
 		}
-		public void switch_to(ulong xid) {
-			current_window = Window.foreign_new(xid);
+
+		private void update() {
+			ungrab_mnemonic_keys();
 			if(current_window != null) {
 				current_window.menu_context_changed += (window) => {
 					update();
 				};
 				current_window.set_key_widget(this.get_toplevel());
-			}
-			update();
-		}
-		private void update() {
-			ungrab_mnemonic_keys();
-			if(current_window != null) {
 				weak string context = current_window.menu_context;
 				if(context != null) {
 					try {
