@@ -1,15 +1,14 @@
-%global base_version 0.7.6
 %global pkgdocdir %{_docdir}/%{name}-%{version}
 #%define alphatag 20080418svn2511
 
 Name:		gnome-globalmenu
-Version:	%{base_version}
-Release:	3%{?dist}
+Version:	0.7.6
+Release:	4%{?dist}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
 License:	GPLv2 and LGPLv2
 URL:		http://code.google.com/p/gnome2-globalmenu/
-Source0:	http://gnome2-globalmenu.googlecode.com/files/gnome-globalmenu-%{base_version}.tar.bz2
+Source0:	http://gnome2-globalmenu.googlecode.com/files/%{name}-%{version}.tar.bz2
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
 BuildRequires: libwnck-devel
 BuildRequires: intltool
@@ -82,7 +81,7 @@ for post installation configuations.
 %endif
 
 %prep
-%setup -q -n %{name}-%{base_version}
+%setup -q -n %{name}-%{version}
 
 
 %build
@@ -136,11 +135,11 @@ fi
 %defattr(-,root,root,-)
 %doc %{pkgdocdir}/*
 %{_datadir}/pixmaps/globalmenu.png
-%{_libdir}/libgnomenu-%{base_version}.so.2
-%{_libdir}/libgnomenu-%{base_version}.so.2.0.0
+%{_libdir}/libgnomenu-%{version}.so.2
+%{_libdir}/libgnomenu-%{version}.so.2.0.0
 %{_mandir}/man1/gnome-globalmenu.1.gz
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{base_version}.so
+%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{version}.so
 
 %files devel
 %defattr(-,root,root,-)

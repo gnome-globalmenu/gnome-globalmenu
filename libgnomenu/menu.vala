@@ -3,25 +3,15 @@ using Gtk;
 namespace Gnomenu {
 	public class Menu : Gtk.Menu, Gnomenu.Shell {
 		public Menu() { }	
-		/*
-		 * We don't do dispose, but gtk won't reset these pointers
-		 * related to the colormaps and valgrind won't be happy.
-		 */
-		public override void dispose() {
-			if(!disposed) {
-				disposed = true;
-			}
-			base.dispose();
-		}
 		static construct {
 			MenuItem _include_menu_item_definiation;
 		}
 		construct {
-			weak string rgba = Environment.get_variable("LIBGNOMENU_ENABLE_RGBA");
-			use_rgba_colormap = (rgba != null);
+			use_rgba_colormap = default_use_rgba_colormap;
 		}
 		private bool disposed = false;
 		private bool _use_rgba_colormap = false;
+		public static bool default_use_rgba_colormap;
 		public bool use_rgba_colormap {
 			get {
 				return _use_rgba_colormap;

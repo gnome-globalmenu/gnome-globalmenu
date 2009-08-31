@@ -82,5 +82,15 @@
 			<long>The maximum length of name of the active application, in pixels</long>
 		</locale>
 	</schema>
+	<schema>
+		<key>/schemas/apps/globalmenu-panel-applet/prefs/use_rgba_colormap</key>
+		<owner>globalmenu-panel-applet</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Enable the RGBA support(experimental)</short>
+			<long>Enable the RGBA support for submenus. Restart the applet to take effects.</long>
+		</locale>
+	</schema>
 </schemalist>
 </gconfschemafile>

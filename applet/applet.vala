@@ -263,6 +263,7 @@ public class Applet : Panel.Applet {
 		switcher.show_label = gconf_get_bool("show_name");
 		switcher.show_window_actions = gconf_get_bool("show_window_actions");
 		switcher.show_window_list = gconf_get_bool("show_window_list");
+		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
 	}
@@ -335,7 +336,8 @@ public class Applet : Panel.Applet {
 				root + "/show_name",
 				root + "/title_max_width",
 				root + "/show_window_actions",
-				root + "/show_window_list"
+				root + "/show_window_list",
+				root + "/use_rgba_colormap"
 			}
 		);
 
