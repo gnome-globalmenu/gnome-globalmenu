@@ -44,19 +44,3 @@ install-data-local:
 else
 install-data-local:
 endif
-
-rpm: 
-	vim gnome-globalmenu.spec
-	touch `find . -name '*.vala'`
-	make dist
-	cp $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 ~/rpmbuild/SOURCES
-	rpmbuild -bb gnome-globalmenu.spec
-
-srpm-fast:
-	make dist
-	cp $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 ~/rpmbuild/SOURCES
-	rpmbuild -bs gnome-globalmenu.spec
-rpm-fast:
-	make dist
-	cp $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.bz2 ~/rpmbuild/SOURCES
-	rpmbuild -bb gnome-globalmenu.spec
