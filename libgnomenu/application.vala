@@ -1,4 +1,3 @@
-namespace Gnomenu {
 	/******
 	 * The binary executable name is used as the key to link 
 	 * Wnck with GMenu.
@@ -15,7 +14,7 @@ namespace Gnomenu {
 	 * Known problem: Openoffice suite apps always show up 
 	 * as one Openoffice app (the last found one in GMenu).
 	 * */
-public class Application{
+public class Gnomenu.Application{
 	private string key;
 
 	public string readable_name {
@@ -93,7 +92,7 @@ public class Application{
 		Application app = new Application();
 		unowned Application rt = app;
 		dict.insert(key, app);
-		applications.prepend(#app);
+		applications.prepend((owned)app);
 		return rt;
 	}
 
@@ -120,7 +119,7 @@ public class Application{
 
 			dict.insert(key, app);
 			rt = app;
-			applications.prepend(#app);
+			applications.prepend((owned)app);
 		}
 		/* Always use the icon_pixbuf obtained from wnck.*/
 		rt.icon_pixbuf = wapp.get_mini_icon();
@@ -156,7 +155,7 @@ public class Application{
 					app.exec_path = entry.get_exec();
 					app.icon_name = entry.get_icon();
 					dict.insert(key, app);
-					applications.prepend(#app);
+					applications.prepend((owned)app);
 				break;
 				case GMenu.TreeItemType.DIRECTORY:
 					append_node_r((GMenu.TreeDirectory)item);
@@ -280,5 +279,4 @@ public class Application{
 			return entry.get_exec();
 		}
 	}
-}
 }

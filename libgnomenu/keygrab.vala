@@ -1,5 +1,3 @@
-using Gtk;
-
 namespace Gnomenu {
 	/**
 	 * grab a key to a Gdk.Window.

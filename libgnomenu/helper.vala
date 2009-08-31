@@ -1,6 +1,3 @@
-using Gtk;
-
-
 namespace Gnomenu {
 	public enum BackgroundType {
 		NONE = 0,
@@ -14,7 +11,7 @@ namespace Gnomenu {
 		RIGHT = 3
 	}
 
-	protected double gravity_to_text_angle(Gravity g) {
+	internal double gravity_to_text_angle(Gravity g) {
 		switch(g) {
 			case Gravity.UP:
 				return 180;
@@ -27,17 +24,17 @@ namespace Gnomenu {
 				return 0;
 		}
 	}
-	protected ArrowType gravity_to_arrow_type(Gravity g) {
+	internal Gtk.ArrowType gravity_to_arrow_type(Gravity g) {
 		switch(g) {
 			case Gravity.UP:
-				return ArrowType.UP;
+				return Gtk.ArrowType.UP;
 			case Gravity.LEFT:
-				return ArrowType.LEFT;
+				return Gtk.ArrowType.LEFT;
 			case Gravity.RIGHT:
-				return ArrowType.RIGHT;
+				return Gtk.ArrowType.RIGHT;
 			case Gravity.DOWN:
 			default:
-				return ArrowType.DOWN;
+				return Gtk.ArrowType.DOWN;
 		}
 	}
 

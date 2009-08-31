@@ -1,61 +1,57 @@
-using Gtk;
+public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
+	public Menu() { }	
+	static construct {
+		MenuItem _include_menu_item_definiation;
+	}
+	construct {
+		use_rgba_colormap = default_use_rgba_colormap;
+	}
+	private bool disposed = false;
+	private bool _use_rgba_colormap = false;
+	public static bool default_use_rgba_colormap;
+	public bool use_rgba_colormap {
+		get {
+			return _use_rgba_colormap;
+		}
+		set {
+			if(_use_rgba_colormap == value) return;
+			_use_rgba_colormap = value;
+			Gdk.Screen screen = toplevel.get_screen();
+			Gdk.Colormap colormap = screen.get_rgba_colormap();
+			if(colormap != null) {
+				toplevel.set_colormap(colormap);
+				set_colormap(colormap);
+			}
 
-namespace Gnomenu {
-	public class Menu : Gtk.Menu, Gnomenu.Shell {
-		public Menu() { }	
-		static construct {
-			MenuItem _include_menu_item_definiation;
 		}
-		construct {
-			use_rgba_colormap = default_use_rgba_colormap;
+	}
+	/******
+	 * Gnomenu.Shell interface
+	 ********* */
+	public Item? owner {
+		get {
+			return get_attach_widget() as Item;
 		}
-		private bool disposed = false;
-		private bool _use_rgba_colormap = false;
-		public static bool default_use_rgba_colormap;
-		public bool use_rgba_colormap {
-			get {
-				return _use_rgba_colormap;
-			}
-			set {
-				if(_use_rgba_colormap == value) return;
-				_use_rgba_colormap = value;
-				Gdk.Screen screen = toplevel.get_screen();
-				Gdk.Colormap colormap = screen.get_rgba_colormap();
-				if(colormap != null) {
-					toplevel.set_colormap(colormap);
-					set_colormap(colormap);
-				}
-
-			}
+	}
+	public Item? get_item(int position) {
+		return gtk_menu_shell_get_item(this, position) as Item;
+	}
+	public Item? get_item_by_id(string id) {
+		foreach(var child in get_children()) {
+			var item = child as Item;
+			if(item.item_id == id) return item;
 		}
-		/******
-		 * Gnomenu.Shell interface
-		 ********* */
-		public Item? owner {
-			get {
-				return get_attach_widget() as Item;
-			}
+		return null;
+	}
+	public int get_item_position(Item item) {
+		return gtk_menu_shell_get_item_position(this, item as MenuItem);
+	}
+	public int length {
+		get {
+			return gtk_menu_shell_length_without_truncated(this);
 		}
-		public Item? get_item(int position) {
-			return gtk_menu_shell_get_item(this, position) as Item;
-		}
-		public Item? get_item_by_id(string id) {
-			foreach(weak Widget child in get_children()) {
-				Item item = child as Item;
-				if(item.item_id == id) return item;
-			}
-			return null;
-		}
-		public int get_item_position(Item item) {
-			return gtk_menu_shell_get_item_position(this, item as MenuItem);
-		}
-		public int length {
-			get {
-				return gtk_menu_shell_length_without_truncated(this);
-			}
-			set {
-				gtk_menu_shell_truncate(this, value);
-			}
+		set {
+			gtk_menu_shell_truncate(this, value);
 		}
 	}
 }
