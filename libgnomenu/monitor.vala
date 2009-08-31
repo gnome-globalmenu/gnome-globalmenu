@@ -1,7 +1,5 @@
-using Gnomenu;
 
-namespace Gnomenu {
-public class Monitor: GLib.Object {
+internal class Gnomenu.Monitor: GLib.Object {
 	private static Wnck.Screen? gdk_screen_to_wnck_screen (Gdk.Screen? screen) {
 		if(screen != null)
 			return Wnck.Screen.get(screen.get_number());
@@ -154,5 +152,4 @@ public class Monitor: GLib.Object {
 			update_current_window();
 		}
 	}
-}
 }
