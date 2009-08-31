@@ -1,4 +1,4 @@
-include $(top_srcdir)/Makefile.decl
+include $(top_srcdir)/Makefile.gtest
 
 
 STAMP = testman.vapi
