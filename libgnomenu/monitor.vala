@@ -44,7 +44,7 @@ public class Monitor: GLib.Object {
 		}	
 	}
 
-	public virtual signal void window_changed(ulong old_xid);
+	public abstract signal void window_changed(ulong old_xid);
 	
 	public Monitor() {
 	
