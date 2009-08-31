@@ -1,4 +1,4 @@
-include $(top_srcdir)/Makefile.decl
+include $(top_srcdir)/Makefile.gtest
 
 if ENABLE_TESTS
 TEST_PROGS +=  $(noinst_PROGRAMS)
