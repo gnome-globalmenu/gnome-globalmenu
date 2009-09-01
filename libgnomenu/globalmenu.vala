@@ -110,7 +110,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 				update();
 			};
 			current_window.set_key_widget(this.get_toplevel());
-			weak string context = current_window.menu_context;
+			var context = current_window.get_menu_context();
 			if(context != null) {
 				try {
 					Parser.parse(this, context);

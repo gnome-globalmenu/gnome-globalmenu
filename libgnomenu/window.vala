@@ -100,24 +100,30 @@ public class Gnomenu.Window : GLib.Object {
 		}
 		return Gdk.FilterReturn.CONTINUE;
 	}
+	private Gnomenu.Window get_target() {
+		if(transient != null) {
+			return transient.get_target();
+		}
+		return this;
+	}
 	public virtual signal void property_notify_event(string? prop) { }
 	/* FIXME: Will be fixed in VALA 0.7.6*/
 	void property_notify_event_default_handler (string? prop){
 		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
-			this.menu_context_changed();
+			get_target().menu_context_changed();
 		}
 		if(prop == NET_GLOBALMENU_MENU_EVENT) {
-			menu_event(get(NET_GLOBALMENU_MENU_EVENT));
+			get_target().menu_event(get(NET_GLOBALMENU_MENU_EVENT));
 		}
 		if(prop == NET_GLOBALMENU_MENU_SELECT) {
 			string value = get(NET_GLOBALMENU_MENU_SELECT);
 			var arr = value.split("@");
 			if(arr != null && arr.length >=1)
-				menu_select(arr[0], arr[1]);
+				get_target().menu_select(arr[0], arr[1]);
 		}
 		if(prop == NET_GLOBALMENU_MENU_DESELECT) {
 			string value = get(NET_GLOBALMENU_MENU_DESELECT);
-			menu_deselect(value);
+			get_target().menu_deselect(value);
 		}
 		if(prop == WM_TRANSIENT_FOR) {
 			update_transient();
@@ -126,16 +132,19 @@ public class Gnomenu.Window : GLib.Object {
 
 	private void update_transient() {
 		var wnck_window = Wnck.Window.get(xid);
+		Gnomenu.Window new_transient = null;
+		Gnomenu.Window old = transient;
+		transient_changed(old);
 		if(wnck_window != null) {
 			var wnck_transient = wnck_window.get_transient();
 			if(wnck_transient != null) {
 				var gnomenu_window = foreign_new(wnck_transient.get_xid());
-				transient = gnomenu_window;
-				message("transient: %s", transient.get("WM_CLASS"));
-				return;
+				new_transient = gnomenu_window;
+				debug("transient-for = '%s'", new_transient.get("WM_CLASS"));
 			}
 		}
-		transient = null;
+		transient = new_transient;
+		transient_changed(old);
 	}
 
 	public new string? get(string property_name) {
@@ -176,46 +185,44 @@ public class Gnomenu.Window : GLib.Object {
 			Gdk.property_delete(window, atom);
 		}
 	}
-	[CCode (notify = true)]
+
 	public Gnomenu.Window transient {
 		get;
-		private set;
+		set;
 	}
 	/**
-	 * the xml representation of the menu of the window
+	 * get the xml representation of the menu of the window
 	 */
-	private string _menu_context;
-	public string? menu_context {
-		get {
-			_menu_context = get(NET_GLOBALMENU_MENU_CONTEXT);
-			return _menu_context;
-		}
-		set {
-			set(NET_GLOBALMENU_MENU_CONTEXT, value);
-		}
+	public string? get_menu_context() {
+		return get_target().get(NET_GLOBALMENU_MENU_CONTEXT);
+		
+	}
+	public void set_menu_context(string? value) {
+		get_target().set(NET_GLOBALMENU_MENU_CONTEXT, value);
 	}
 	/**
-	 * emitted when a menu item is activated
+	 * emit the remote event indicating  menu item is activated
 	 */
 	public void emit_menu_event (string path) {
-		set(NET_GLOBALMENU_MENU_EVENT, path);
+		get_target().set(NET_GLOBALMENU_MENU_EVENT, path);
 	}
 
 	/**
-	 * emitted when a menu item is selected 
+	 * emit a remote event indicating a menu item is selected,
+	 * pos is a hint for the position to popup the submenu(if there is one)
 	 */
 	public void emit_menu_select(string path, string? pos) {
 		if(pos != null)
-			set(NET_GLOBALMENU_MENU_SELECT, path + "@" + pos);
+			get_target().set(NET_GLOBALMENU_MENU_SELECT, path + "@" + pos);
 		else
-			set(NET_GLOBALMENU_MENU_SELECT, path);
+			get_target().set(NET_GLOBALMENU_MENU_SELECT, path);
 	}
 
 	/**
-	 * emitted when a menu item is deselected 
+	 * emit a remote event indicating a menu item is selected,
 	 */
 	public void emit_menu_deselect(string path) {
-			set(NET_GLOBALMENU_MENU_DESELECT, path);
+		get_target().set(NET_GLOBALMENU_MENU_DESELECT, path);
 	}
 
 	/**
@@ -235,23 +242,28 @@ public class Gnomenu.Window : GLib.Object {
 	}
 	/**
 	 * emitted when the menu context has changed.
+	 * or the menu context of the transient_for window has changed;
 	 */
 	public signal void menu_context_changed();
 	/**
 	 * emitted when the a menu item is activated.
+	 * or the menu context of the transient_for window has changed;
 	 * (Not useful in GlobalMenu.PanelApplet).
 	 */
 	public signal void menu_event(string path);
 	/**
 	 * emitted when the a menu item is selected
+	 * or the menu context of the transient_for window has changed;
 	 * (Not useful in GlobalMenu.PanelApplet).
 	 */
 	public signal void menu_select(string path, string? pos);
 	/**
 	 * emitted when the a menu item is deselected.
+	 * or the menu context of the transient_for window has changed;
 	 * (Not useful in GlobalMenu.PanelApplet).
 	 */
 	public signal void menu_deselect(string path);
 	
+	public signal void transient_changed(Gnomenu.Window? prev_transient);
 }
 }
