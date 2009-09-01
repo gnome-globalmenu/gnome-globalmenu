@@ -213,9 +213,9 @@ namespace GlobalMenuGTK {
 					ulong pixmap_xid = 0;
 					ulong mask_xid = 0;
 					if(image.pixmap != null) 
-						pixmap_xid = gdk_drawable_xid(image.pixmap);
+						pixmap_xid = Gdk.x11_drawable_get_xid(image.pixmap);
 					if(image.mask != null) 
-						mask_xid = gdk_drawable_xid(image.mask);
+						mask_xid = Gdk.x11_drawable_get_xid(image.mask);
 					sb.append(Markup.printf_escaped(" icon=\"pixmap:%lu,%lu\"", 
 						pixmap_xid, mask_xid));
 				}

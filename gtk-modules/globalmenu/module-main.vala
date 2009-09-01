@@ -1,7 +1,6 @@
 using Gtk;
 
-[Compact]
-public class GlobalMenuGNOME {
+public static class GlobalMenuGNOME {
 	private static bool verbose = false;
 	private static bool disabled = false;
 	private static bool initialized = false;

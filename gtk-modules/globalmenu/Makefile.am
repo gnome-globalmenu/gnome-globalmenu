@@ -56,7 +56,7 @@ libglobalmenu_gnome_la_SOURCES = \
 	$(NULL)
 
 $(STAMP): $(VALASOURCES) bindings.vapi dyn-patch.vapi
-	$(VALAC) $(VALA_DEFAULT_PKGS) -H globalmenu-gnome-private.h -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
+	$(VALAC) $(VALA_DEFAULT_PKGS) -H globalmenu-gnome-private.h -C --basedir=$(top_srcdir) --pkg gmodule-2.0 --pkg gtk+-2.0 --pkg gdk-x11-2.0 --library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES)
 	touch $@
 
 $(STAMP:.vapi=.deps):

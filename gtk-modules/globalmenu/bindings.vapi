@@ -7,5 +7,3 @@ namespace GLib {
 public void* default_handler;
 	}
 }
-[CCode (cname="GDK_DRAWABLE_XID", cheader_filename="gdk/gdkx.h")]
-public ulong gdk_drawable_xid(Gdk.Drawable drawable);
