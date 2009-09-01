@@ -15,6 +15,12 @@
  *
  */
 public class Gnomenu.Window : GLib.Object {
+	private static const string WM_TRANSIENT_FOR = "WM_TRANSIENT_FOR";
+
+	construct {
+		update_transient();
+		property_notify_event += property_notify_event_default_handler;
+	}
 	private Gdk.Window _window;
 	public Gdk.Window window {
 		get {
@@ -52,26 +58,6 @@ public class Gnomenu.Window : GLib.Object {
 		return new Window(gdk_window);
 	}
 
-	construct {
-		property_notify_event += (t, prop) => {
-			if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
-				menu_context_changed();
-			}
-			if(prop == NET_GLOBALMENU_MENU_EVENT) {
-				menu_event(get(NET_GLOBALMENU_MENU_EVENT));
-			}
-			if(prop == NET_GLOBALMENU_MENU_SELECT) {
-				string value = get(NET_GLOBALMENU_MENU_SELECT);
-				var arr = value.split("@");
-				if(arr != null && arr.length >=1)
-					menu_select(arr[0], arr[1]);
-			}
-			if(prop == NET_GLOBALMENU_MENU_DESELECT) {
-				string value = get(NET_GLOBALMENU_MENU_DESELECT);
-				menu_deselect(value);
-			}
-		};
-	}
 	/*must be a toplevel */
 	public void set_key_widget(Gtk.Widget? widget) {
 		key_widget = widget;
@@ -114,7 +100,43 @@ public class Gnomenu.Window : GLib.Object {
 		}
 		return Gdk.FilterReturn.CONTINUE;
 	}
-	public signal void property_notify_event(string name);
+	public virtual signal void property_notify_event(string? prop) { }
+	/* FIXME: Will be fixed in VALA 0.7.6*/
+	void property_notify_event_default_handler (string? prop){
+		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
+			this.menu_context_changed();
+		}
+		if(prop == NET_GLOBALMENU_MENU_EVENT) {
+			menu_event(get(NET_GLOBALMENU_MENU_EVENT));
+		}
+		if(prop == NET_GLOBALMENU_MENU_SELECT) {
+			string value = get(NET_GLOBALMENU_MENU_SELECT);
+			var arr = value.split("@");
+			if(arr != null && arr.length >=1)
+				menu_select(arr[0], arr[1]);
+		}
+		if(prop == NET_GLOBALMENU_MENU_DESELECT) {
+			string value = get(NET_GLOBALMENU_MENU_DESELECT);
+			menu_deselect(value);
+		}
+		if(prop == WM_TRANSIENT_FOR) {
+			update_transient();
+		}
+	}
+
+	private void update_transient() {
+		var wnck_window = Wnck.Window.get(xid);
+		if(wnck_window != null) {
+			var wnck_transient = wnck_window.get_transient();
+			if(wnck_transient != null) {
+				var gnomenu_window = foreign_new(wnck_transient.get_xid());
+				transient = gnomenu_window;
+				message("transient: %s", transient.get("WM_CLASS"));
+				return;
+			}
+		}
+		transient = null;
+	}
 
 	public new string? get(string property_name) {
 		return get_by_atom(Gdk.Atom.intern(property_name, false));	
@@ -122,6 +144,7 @@ public class Gnomenu.Window : GLib.Object {
 	public new void set(string property_name, string? value) {
 		set_by_atom(Gdk.Atom.intern(property_name, false), value);	
 	}
+
 	public string? get_by_atom(Gdk.Atom atom) {
 		string context = null;
 		Gdk.Atom actual_type;
@@ -138,6 +161,7 @@ public class Gnomenu.Window : GLib.Object {
 			out context);
 		return context;
 	}
+
 	public void set_by_atom(Gdk.Atom atom, string? value) {
 		if(value != null) {
 			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
@@ -151,6 +175,11 @@ public class Gnomenu.Window : GLib.Object {
 		} else {
 			Gdk.property_delete(window, atom);
 		}
+	}
+	[CCode (notify = true)]
+	public Gnomenu.Window transient {
+		get;
+		private set;
 	}
 	/**
 	 * the xml representation of the menu of the window

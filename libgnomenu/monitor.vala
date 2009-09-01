@@ -106,10 +106,6 @@ internal class Gnomenu.Monitor: GLib.Object {
 
 		if(_current_window != null) {
 			/* Look for the transient_for(or Parent) window */
-			weak Wnck.Window transient_for = _current_window.get_transient();
-			if(transient_for != null) {
-				_current_window = transient_for;
-			}
 			switch(_current_window.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
 				case Wnck.WindowType.DESKTOP:
@@ -127,7 +123,6 @@ internal class Gnomenu.Monitor: GLib.Object {
 		}
 		/* emit the window changed signal */
 		active_window = Window.foreign_new(_current_window.get_xid());
-
 	}
 	private void detach_from_screen() {
 		if(_screen != null) {
