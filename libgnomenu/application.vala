@@ -82,7 +82,7 @@ public class Gnomenu.Application{
 		screen.application_closed += application_closed;
 		unowned List<AppInfo> appinfos = AppInfo.get_all();
 		foreach(var appinfo in appinfos) {
-			message("%s", appinfo.get_executable());
+			debug("%s", appinfo.get_executable());
 		}
 	}
 
