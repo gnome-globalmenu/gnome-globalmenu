@@ -86,7 +86,7 @@ namespace Gnomenu {
 				Parser.parse( menubar, test1);
 				menubar.modify_bg(StateType.NORMAL, color);
 				menubar.gravity = Gravity.DOWN;
-				window.resize(20, 20);
+				window.set_size_request(20, 20);
 				window.show();
 				assert(menubar.overflown == true);
 				Gtk.main();
@@ -102,7 +102,7 @@ namespace Gnomenu {
 				menubar.modify_bg(StateType.NORMAL, color);
 				menubar.gravity = Gravity.RIGHT;
 				menubar.pack_direction = Gtk.PackDirection.BTT;
-				window.resize(20, 20);
+				window.set_size_request(20, 20);
 				window.show();
 				assert(menubar.overflown == true);
 				Gtk.main();
@@ -117,17 +117,14 @@ namespace Gnomenu {
 			add("sensitive", () => {
 				Parser.parse( menubar, test1);
 				window.show();
-				/*
-				   won't compile before vala 0.5.7
 				menubar.activate += (menubar, i) => {
 					MenuItem item = menubar.get("/Go");
 					item.sensitive = !item.sensitive;
-					if(item.item_type == "image")
-						item.item_type = "seperator";
+					if(item.item_type == ItemType.IMAGE)
+						item.item_type = ItemType.SEPARATOR;
 					else
-						item.item_type = "image";
+						item.item_type = ItemType.IMAGE;
 				};
-				*/
 				Gtk.main();
 			});
 			add("TTB", () => {
