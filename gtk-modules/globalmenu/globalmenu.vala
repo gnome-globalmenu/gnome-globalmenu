@@ -206,6 +206,12 @@ namespace GlobalMenuGTK {
 	private void window_realize(Gtk.Window window) {
 		MenuBar menubar = DynPatch.get_menubar(window);
 		if(menubar != null) {
+			weak Gtk.Window _window = DynPatch.get_window(menubar);
+			if(window != _window) {
+				critical(
+				"window(%p) is not equal to the window stored in the menubar (%p)", 
+					window, _window);
+			}
 			update_menu_context(menubar);
 		}
 	}
