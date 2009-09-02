@@ -36,29 +36,18 @@ GlobalMenu_PanelApplet_SOURCES = \
 	x-utils-c.c \
 	$(NULL)
 
-VALAFLAGS =
-VALAPKGS = $(VALA_DEFAULT_PKGS) \
-   		--pkg gtk+-2.0 \
-		--pkg libwnck-1.0 \
-		--pkg libpanelapplet-2.0 \
-		--pkg gnome-desktop-2.0 \
-		--pkg libgnome-menu \
-		--pkg gconf-2.0 \
-		--pkg gnomenu \
-		--pkg libnotify \
-		--pkg gdk-x11-2.0 
-
 #@VALA_CCODE_RULES@
 $(STAMP): $(VALASOURCES) 
-	$(VALAC) -C $(VALA_DEFAULT_PKGS) --vapidir=. \
-	--vapidir=$(top_srcdir)/libgnomenu \
-	--pkg=gtk+-2.0 \
-	--pkg=libwnck-1.0 \
-	--pkg=libpanelapplet-2.0 \
-	--pkg=gconf-2.0 \
-	--pkg=gnomenu \
-	--pkg=libnotify \
-	--pkg=gdk-x11-2.0 \
+	$(VALAC) -C $(VALA_DEFAULT_PKGS) --vapidir . \
+	--vapidir $(top_srcdir)/libgnomenu \
+	--pkg gtk+-2.0 \
+	--pkg libwnck-1.0 \
+	--pkg libpanelapplet-2.0 \
+	--pkg gconf-2.0 \
+	--pkg gnomenu \
+	--pkg libgnome-menu \
+	--pkg libnotify \
+	--pkg gdk-x11-2.0 \
 	$(VALASOURCES) 
 	touch $@
 
