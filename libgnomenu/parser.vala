@@ -104,7 +104,7 @@ public class Gnomenu.Parser {
 		bool visible = true;
 		bool underline = true;
 		bool client_side = false;
-		Markup.collect_attributes("item", attr_names, attr_vals, null,
+		collect_attributes("item", attr_names, attr_vals,
 				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"label", &label, 
 				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
@@ -126,8 +126,7 @@ public class Gnomenu.Parser {
 				Markup.CollectType.TRISTATE,
 				"sensitive", &sensitive, 
 				Markup.CollectType.TRISTATE,
-				"client-side", &client_side,
-				Markup.CollectType.INVALID
+				"client-side", &client_side
 				);
 		if(visible != false)
 			visible = true;

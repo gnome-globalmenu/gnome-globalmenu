@@ -79,16 +79,8 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		_root_window = null;
 	}
 	public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
-		this.get_toplevel().key_press_event += (w, event) => {
-			debug("key %s", event.str);
-			//Gtk.Widget widget = keys.lookup(event.keyval);
-			//if(widget != null) {
-			//	widget.mnemonic_activate(true);
-			//	return true;
-			//}
-			return false;
-		};
 		(this.get_toplevel() as Gtk.Window).keys_changed += (window) => {
+			/* Manually chain-up to the default keys_changed handler */
 			GLib.Type type = typeof(Gtk.Window);
 			var window_class = (Gtk.WindowClass) type.class_ref();
 			window_class.keys_changed(window);
