@@ -13,7 +13,7 @@ VALASOURCES = \
 	window.vala \
 	menubarbox.vala \
 	menushellutils.vala \
-	label.vala \
+	menulabel.vala \
 	keygrab.vala \
 	globalmenu.vala \
 	gnomenu.vala \
