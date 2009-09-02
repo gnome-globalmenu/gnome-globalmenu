@@ -34,6 +34,7 @@ $(server_in_files): $(server_in_in_files) Makefile
 GlobalMenu_PanelApplet_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
 	x-utils-c.c \
+	task-utils-c.c \
 	$(NULL)
 
 #@VALA_CCODE_RULES@

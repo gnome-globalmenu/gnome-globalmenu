@@ -4,7 +4,7 @@ AC_CONFIG_MACRO_DIR([autotools])
 AC_CONFIG_AUX_DIR([autotools])
 AC_SUBST(ACLOCAL_AMFLAGS, "-I autotools")
 
-AM_INIT_AUTOMAKE([1.9 tar-ustar dist-bzip2])
+AM_INIT_AUTOMAKE([1.9 tar-ustar dist-bzip2 subdir-objects])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
 

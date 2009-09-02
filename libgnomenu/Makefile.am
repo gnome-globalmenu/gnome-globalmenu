@@ -2,22 +2,21 @@ NULL=
 SUBDIRS = . tests
 
 VALASOURCES = \
-	helper.vala \
+	globalmenu.vala \
+	gnomenu.vala \
+	monitor.vala \
+	window.vala \
 	parser.vala \
 	serializer.vala \
 	interface-shell.vala \
 	interface-item.vala \
-	menu.vala \
-	menubar.vala \
-	menuitem.vala \
-	window.vala \
-	menubarbox.vala \
-	menushellutils.vala \
-	menulabel.vala \
-	keygrab.vala \
-	globalmenu.vala \
-	gnomenu.vala \
-	monitor.vala \
+	widgets/menu.vala \
+	widgets/menubar.vala \
+	widgets/menuitem.vala \
+	widgets/menubarbox.vala \
+	widgets/menulabel.vala \
+	utils/menushellutils.vala \
+	utils/keygrab.vala \
 	$(NULL)
 
 lib_LTLIBRARIES = libgnomenu.la
@@ -25,9 +24,8 @@ lib_LTLIBRARIES = libgnomenu.la
 libgnomenu_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
 						libgnomenu.h \
-						keygrab-ccode.c \
-						task-utils-c.c \
-						menushellutils-ccode.c 
+						ccode/keygrab-ccode.c \
+						ccode/menushellutils-ccode.c 
 
 libgnomenu_la_CPPFLAGS = \
 			 -I$(top_srcdir) \
