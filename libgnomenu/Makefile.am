@@ -17,7 +17,6 @@ VALASOURCES = \
 	keygrab.vala \
 	globalmenu.vala \
 	gnomenu.vala \
-	application.vala \
 	monitor.vala \
 	$(NULL)
 
@@ -65,7 +64,7 @@ endif
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
-	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h --pkg gtk+-2.0 --pkg libwnck-1.0 --pkg xlib --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0 --pkg gdk-x11-2.0
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h --pkg gtk+-2.0 --pkg libwnck-1.0 --library $(@:.vapi=) $(VALASOURCES) bindings.vapi --pkg libgnome-menu --pkg gnome-desktop-2.0 --pkg gdk-x11-2.0
 	bash patch.sh
 
 BUILT_SOURCES = gnomenu.vapi

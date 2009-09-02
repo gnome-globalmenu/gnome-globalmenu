@@ -5,6 +5,7 @@ STAMP = vala-stamp
 BUILT_SOURCES = $(STAMP)
 
 VALASOURCES = \
+	application.vala \
 	applet.vala \
 	main.vala \
 	gtkextra-gconfdialog.vala \

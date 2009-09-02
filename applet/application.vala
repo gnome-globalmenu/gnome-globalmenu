@@ -14,7 +14,7 @@
 	 * Known problem: Openoffice suite apps always show up 
 	 * as one Openoffice app (the last found one in GMenu).
 	 * */
-public class Gnomenu.Application{
+public class Application{
 	private string key;
 
 	public string readable_name {
