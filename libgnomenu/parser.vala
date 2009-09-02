@@ -104,30 +104,30 @@ public class Gnomenu.Parser {
 		bool visible = true;
 		bool underline = true;
 		bool client_side = false;
-		g_markup_collect_attributes("item", attr_names, attr_vals, null,
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+		Markup.collect_attributes("item", attr_names, attr_vals, null,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"label", &label, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"type", &type, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"state", &state, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"font", &font, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"id", &id, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"icon", &icon, 
-				GMarkupCollectType.STRING | GMarkupCollectType.OPTIONAL,
+				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"accel", &accel, 
-				GMarkupCollectType.TRISTATE,
+				Markup.CollectType.TRISTATE,
 				"visible", &visible, 
-				GMarkupCollectType.TRISTATE,
+				Markup.CollectType.TRISTATE,
 				"underline", &underline, 
-				GMarkupCollectType.TRISTATE,
+				Markup.CollectType.TRISTATE,
 				"sensitive", &sensitive, 
-				GMarkupCollectType.TRISTATE,
+				Markup.CollectType.TRISTATE,
 				"client-side", &client_side,
-				GMarkupCollectType.INVALID
+				Markup.CollectType.INVALID
 				);
 		if(visible != false)
 			visible = true;
