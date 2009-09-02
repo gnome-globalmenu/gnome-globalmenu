@@ -66,9 +66,12 @@ GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget) {
 
 void dyn_patch_attach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
 	g_static_rec_mutex_lock(&_menubar_mutex);
+	g_object_ref(window);
+	/** Protect the window so that it doesn't get freed if the old toplevel is the same **/
 	g_object_set_qdata_full(G_OBJECT(menubar), __TOPLEVEL__, g_object_ref(window), g_object_unref);
 	g_object_set_qdata_full(G_OBJECT(window), __MENUBAR__, g_object_ref(menubar), g_object_unref);
 	g_signal_emit_by_name(menubar, "dyn-patch-attached", window, NULL);
+	g_object_unref(window);
 	g_static_rec_mutex_unlock(&_menubar_mutex);
 }
 void dyn_patch_detach_menubar(GtkWindow * window, GtkMenuBar * menubar) {
