@@ -193,7 +193,6 @@ AC_CONFIG_FILES(
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile
 	po/Makefile.in
-	patch.sh
 	])
 
 AC_OUTPUT

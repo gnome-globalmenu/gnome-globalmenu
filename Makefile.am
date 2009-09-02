@@ -14,7 +14,6 @@ EXTRA_DIST = \
 	intltool-merge.in \
 	intltool-update.in \
 	gnome-globalmenu.schemas.in \
-	patch.sh \
 	$(NULL)
 
 DISTCLEANFILES = \

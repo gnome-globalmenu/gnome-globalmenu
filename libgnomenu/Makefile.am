@@ -61,7 +61,7 @@ SUFFIXES = .gir .typelib
 endif 
 
 #VALAC=/home/rainwoodman/Projects/vala/compiler/valac
-gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
+gnomenu.vapi: $(VALASOURCES) bindings.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h \
 		--library $(@:.vapi=) $(VALASOURCES) \
 		bindings.vapi \
@@ -69,9 +69,8 @@ gnomenu.vapi: $(VALASOURCES) patch.sh bindings.vapi
 		--pkg libwnck-1.0 \
 		--pkg gnome-desktop-2.0 \
 		--pkg gdk-x11-2.0
-	bash patch.sh
 
 BUILT_SOURCES = gnomenu.vapi
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps patch.sh bindings.vapi Gnomenu-1.0.gir patch-gir.sh libgnomenu.pc.in libgnomenu-uninstalled.pc.in 
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps bindings.vapi Gnomenu-1.0.gir libgnomenu.pc.in libgnomenu-uninstalled.pc.in 
 
