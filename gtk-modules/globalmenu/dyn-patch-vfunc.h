@@ -1,3 +1,5 @@
+#ifndef __DYN_PATCH_VFUNC
+#define __DYN_PATCH_VFUNC
 
 typedef void (*DynPatcherFunc)(GType type);
 
@@ -48,3 +50,4 @@ void dyn_patch_release_type(GType type);
 		klass->method = dyn_patch_load_vfunc(#type, #method); \
 	}
 
+#endif /* __DYN_PATCH_VFUNC */

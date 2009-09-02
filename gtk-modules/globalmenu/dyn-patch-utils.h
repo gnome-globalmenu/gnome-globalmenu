@@ -1,3 +1,7 @@
+#ifndef __DYN_PATCH_UTILS
+#define __DYN_PATCH_UTILS
+
+#include <gtk/gtk.h>
 
 typedef enum {
 	DISCOVER_MODE_INIT,
@@ -13,3 +17,5 @@ void dyn_patch_set_menubar_r(GtkWidget * head, GtkMenuBar * menubar);
 GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar);
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget);
 void dyn_patch_discover_menubars(DiscoverMode mode);
+
+#endif /* __DYN_PATCH_UTILS */
