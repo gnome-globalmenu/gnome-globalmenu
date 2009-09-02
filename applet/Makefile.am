@@ -59,11 +59,13 @@ GlobalMenu_PanelApplet_LDFLAGS = \
 GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
+		$(GMENU_LIBS) \
 		../libcompat/libcompat.la \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(WNCK_CFLAGS) \
+		$(GMENU_CFLAGS) \
 		$(GNOME_PANEL_CFLAGS) \
 		-I$(top_srcdir)/libgnomenu \
 		-include $(CONFIG_HEADER) \
