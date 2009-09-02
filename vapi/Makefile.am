@@ -9,5 +9,4 @@ gtk+-2.0.vapi \
 libpanelapplet-2.0.deps \
 libpanelapplet-2.0.vapi \
 libwnck-1.0.deps \
-libwnck-1.0.vapi \
-xlib.vapi
+libwnck-1.0.vapi

@@ -8,7 +8,7 @@ liblegacy_support_la_SOURCES= gmarkup-backport.h \
 					   wnck-fake.c \
 					   wnck-fake.h \
 					   gtk-fake.h \
-					   libcompat.h
+					   legacy-support.h
 
 liblegacy_support_la_CPPFLAGS = -I$(top_srcdir) \
 		-include $(CONFIG_HEADER) \
