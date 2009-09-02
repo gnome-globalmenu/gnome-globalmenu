@@ -73,9 +73,12 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 	private bool _has_sub_shell = false;
 	private bool _client_side_sub_shell = false;
 
+	/**
+	 * This function connects the cached submenu
+	 * if we don't use the client_side sub_shell
+	 * */
 	private void maybe_connect_cached_submenu() {
 		if(_has_sub_shell && !_client_side_sub_shell) {
-			debug("maybe?");
 			if(this.submenu != _submenu_cache) {
 				this.submenu = _submenu_cache;
 			}
