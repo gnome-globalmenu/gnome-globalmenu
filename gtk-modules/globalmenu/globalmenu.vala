@@ -208,7 +208,7 @@ namespace GlobalMenuGTK {
 		if(menubar != null) {
 			weak Gtk.Window _window = DynPatch.get_window(menubar);
 			if(window != _window) {
-				critical(
+				error(
 				"window(%p) is not equal to the window stored in the menubar (%p)", 
 					window, _window);
 			}
