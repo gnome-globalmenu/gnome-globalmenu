@@ -98,24 +98,30 @@ namespace GlobalMenuGTK {
 			[CCode (array_length_pos = 1.9) ]
 			Value[] param_values
 	) {
-		MenuBar self = param_values[0].get_object() as MenuBar;
-		if(self != null) {
-			if(menubar_get_local(self)) return true;
-			if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
-			Gtk.Window toplevel = DynPatch.get_window(self);
-
-			if(toplevel != null) {
-				if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
-					gdk_window_set_menu_context(toplevel.window, 
-							Serializer.to_string(self)
-							);
-				}
-			}
+		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
+		MenuBar menubar = param_values[0].get_object() as MenuBar;
+		if(menubar != null) {
 			debug("changed_eh");
-		} 
+			update_menu_context(menubar);
+		}
 		return true;
 	}
 
+	private void update_menu_context(MenuBar menubar) {
+		/* Ignore local menu bars */
+		if(menubar_get_local(menubar)) return;
+
+		Gtk.Window toplevel = DynPatch.get_window(menubar);
+
+		if(toplevel != null) {
+			if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
+				gdk_window_set_menu_context(toplevel.window, 
+						Serializer.to_string(menubar)
+						);
+			}
+		}
+		
+	}
 	private bool menubar_should_be_skipped(MenuBar menubar) {
 		weak Gtk.Widget parent = menubar;
 		GLib.Type panel_applet_type = GLib.Type.from_name("PanelApplet");
@@ -199,9 +205,9 @@ namespace GlobalMenuGTK {
 
 	private void window_realize(Gtk.Window window) {
 		MenuBar menubar = DynPatch.get_menubar(window);
-		Signal.emit_by_name(menubar, "dyn-patch-changed", 
-				typeof(Widget), menubar, null);
-			
+		if(menubar != null) {
+			update_menu_context(menubar);
+		}
 	}
 	private MenuItem? lookup_item(Window window, string path) {
 		MenuBar menubar = DynPatch.get_menubar(window);
