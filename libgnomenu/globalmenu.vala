@@ -78,14 +78,22 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
 		_root_window = null;
 	}
+	private void chainup_key_changed(Gtk.Window window) {
+		GLib.Type type = typeof(Gtk.Window);
+		var window_class = (Gtk.WindowClass) type.class_ref();
+		debug("chainup to Gtk.Window keys changed");
+		window_class.keys_changed(window);
+	}
 	public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
-		(this.get_toplevel() as Gtk.Window).keys_changed += (window) => {
-			/* Manually chain-up to the default keys_changed handler */
-			GLib.Type type = typeof(Gtk.Window);
-			var window_class = (Gtk.WindowClass) type.class_ref();
-			window_class.keys_changed(window);
-			debug("keys changed");
-		};
+		var toplevel = this.get_toplevel() as Gtk.Plug;
+		/* Manually chain-up to the default keys_changed handler,
+		 * Working around a problem with GtkPlug/GtkSocket */
+		if(toplevel != null) {
+			toplevel.keys_changed += chainup_key_changed;
+		}
+		if((old_toplevel as Gtk.Plug)!= null) {
+			(old_toplevel as Gtk.Plug).keys_changed -= chainup_key_changed;
+		}
 	}
 	public override void screen_changed(Gdk.Screen? previous_screen) {
 		Gdk.Screen screen = get_screen();
