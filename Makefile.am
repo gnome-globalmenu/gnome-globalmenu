@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = vapi tests libcompat libgnomenu applet xfce gtk-modules po
+SUBDIRS = vapi tests legacy-support libgnomenu applet xfce gtk-modules po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \

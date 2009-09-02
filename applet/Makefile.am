@@ -60,7 +60,7 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		$(GMENU_LIBS) \
-		../libcompat/libcompat.la \
+		../legacy-support/liblegacy-support.la \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \
@@ -70,7 +70,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		-I$(top_srcdir)/libgnomenu \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
-		-include ../libcompat/libcompat.h \
+		-include ../legacy-support/legacy-support.h \
 		-g \
 		$(NULL)
 

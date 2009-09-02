@@ -36,12 +36,12 @@ libgnomenu_la_CPPFLAGS = \
 			 $(X11_CFLAGS) \
 			 -DG_LOG_DOMAIN=\"libgnomenu\" \
 			 -include $(CONFIG_HEADER) \
-			 -include ../libcompat/libcompat.h
+			 -include ../legacy-support/legacy-support.h
 
 libgnomenu_la_LIBADD = $(GTK_LIBS) \
 					   $(WNCK_LIBS) \
 					   $(X11_LIBS) \
-					   ../libcompat/libcompat.la
+					   ../legacy-support/liblegacy-support.la
 
 libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined -Wl,--as-needed
 

@@ -180,7 +180,7 @@ AC_SUBST(abs_top_srcdir)
 
 AC_CONFIG_FILES(
 	[Makefile
-	libcompat/Makefile
+	legacy-support/Makefile
 	libgnomenu/Makefile
 	libgnomenu/tests/Makefile
 	libgnomenu/libgnomenu.pc
