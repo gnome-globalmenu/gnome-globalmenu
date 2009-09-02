@@ -22,7 +22,10 @@ GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
 						-include $(CONFIG_HEADER) \
 						-g 
 
-GlobalMenu_XFCEPlugin_LDADD = $(XFCE4_PANEL_LIBS) \
+GlobalMenu_XFCEPlugin_LDADD = \
+			$(WNCK_LIBS) \
+			$(GTK_LIBS) \
+			$(XFCE4_PANEL_LIBS) \
 			../libgnomenu/libgnomenu.la
 
 EXTRA_DIST = \

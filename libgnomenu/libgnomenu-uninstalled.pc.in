@@ -10,3 +10,4 @@ Requires: gtk+-2.0
 Version: @VERSION@
 Libs: ${pc_top_builddir}/${pcfiledir}/libgnomenu.la
 Cflags: -I${pc_top_builddir}/${pcfiledir}
+Requires: gtk+-2.0 libwnck-1.0

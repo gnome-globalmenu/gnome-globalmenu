@@ -38,12 +38,9 @@ libgnomenu_la_CPPFLAGS = \
 			 -include $(CONFIG_HEADER) \
 			 -include ../legacy-support/legacy-support.h
 
-libgnomenu_la_LIBADD = $(GTK_LIBS) \
-					   $(WNCK_LIBS) \
-					   $(X11_LIBS) \
-					   ../legacy-support/liblegacy-support.la
+libgnomenu_la_LIBADD = ../legacy-support/liblegacy-support.la
 
-libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -no-undefined -Wl,--as-needed
+libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -Wl,--as-needed
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc

@@ -57,10 +57,10 @@ GlobalMenu_PanelApplet_LDFLAGS = \
 		$(NULL)
 
 GlobalMenu_PanelApplet_LDADD = \
+		$(GTK_LIBS) \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		$(GMENU_LIBS) \
-		../legacy-support/liblegacy-support.la \
 		../libgnomenu/libgnomenu.la \
 		$(NULL)
 GlobalMenu_PanelApplet_CPPFLAGS = \

@@ -9,3 +9,5 @@ Requires: gtk+-2.0
 Version: @VERSION@
 Libs: -L${libdir} -lgnomenu
 Cflags: -I${includedir}/libgnomenu
+Requires: gtk+-2.0 libwnck-1.0
+
