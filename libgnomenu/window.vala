@@ -26,12 +26,12 @@ public class Gnomenu.Window : GLib.Object {
 		get {
 			return _window;
 		} 
-		construct set {
+		set {
 			if(_window != null) 
-				_window.remove_filter(event_filter);
+				_window.remove_filter(this.event_filter);
 			_window = value;
 			if(_window != null) 
-				_window.add_filter(event_filter);
+				_window.add_filter(this.event_filter);
 		}
 	}
 	public uint xid {
@@ -68,35 +68,35 @@ public class Gnomenu.Window : GLib.Object {
 			window = null;
 		}
 	}
-	private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event gdk_ev) {
+	[CCode (instance_pos = -1)]
+	private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event event) {
+		void* pointer = &xevent;
+		X.Event * e = (X.Event*)pointer;
+		return real_event_filter(e, event);
+	}
+	[CCode (cname="XSendEvent")]
+	internal extern static X.Status XSendEvent(X.Display display, 
+			X.Window target, bool flag, long mask, X.Event * event);
+
+	[CCode (instance_pos = -1)]
+	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
 		if(disposed) {
 			critical("event_filter invoked on a disposed window");
 			return Gdk.FilterReturn.CONTINUE;
 		}
-		void * pointer = &xevent;
-		Xlib.AnyEvent* event = (Xlib.AnyEvent*) pointer;
-		Gdk.Event ev = gdk_ev.copy(); /* copy the gdk_event*/
-		switch(event->type) {
-			case Xlib.EventType.PropertyNotify:
-				ev.type = Gdk.EventType.PROPERTY_NOTIFY;
-				ev.property.atom = ((Xlib.PropertyEvent) event).atom.to_gdk();
-				ev.property.time = ((Xlib.PropertyEvent) event).time;
-				ev.property.state = ((Xlib.PropertyEvent) event).state;
-				property_notify_event(ev.property.atom.name());
+		switch(xevent->type) {
+			case X.EventType.PropertyNotify:
+				string name = Gdk.x11_xatom_to_atom(xevent->xproperty.atom).name();
+				property_notify_event(name);
 			break;
-			case Xlib.EventType.KeyPress:
-				if(key_widget != null &&
-					key_widget.window != null) {
-					/* Send a Fake key press event to the key widget
-					 * if it is realized. */
-					Gdk.Window gwin = key_widget.window;
-					Xlib.Window xwin = Xlib.Window.from_gdk(gwin);
-					weak Xlib.Display xd = Xlib.Display.from_gdk(Gdk.Display.get_default());
-					event->window = xwin;
-					Xlib.SendEvent(xd, xwin, false, 0, event);
-				}
+			case X.EventType.KeyPress:
+				if(key_widget == null || key_widget.window == null) break;
+				/* If there is a key listener widget, redirect the event to the widget's window */
+				X.Window new_target= (X.Window) Gdk.x11_drawable_get_xid(key_widget.window);
+				unowned X.Display display = (X.Display) Gdk.x11_drawable_get_xdisplay(key_widget.window);
+				xevent->xany.window = new_target;
+				XSendEvent(display, new_target, false, 0, xevent);
 			break;
-		
 		}
 		return Gdk.FilterReturn.CONTINUE;
 	}
