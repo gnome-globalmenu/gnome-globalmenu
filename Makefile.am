@@ -33,7 +33,8 @@ include $(top_srcdir)/Makefile.config
 schemadir   = $(GCONF_SCHEMA_FILE_DIR)
 schema_in_files = gnome-globalmenu.schemas.in
 schema_DATA = $(schema_in_files:.in=)
-doc_DATA = README COPYING ChangeLog AUTHORS INSTALL README.XFCE README.GNOME
+doc_DATA = README COPYING ChangeLog AUTHORS INSTALL \
+	README.XFCE README.GNOME README.RHEL5
 @INTLTOOL_SCHEMAS_RULE@
 
 if GCONF_SCHEMAS_INSTALL

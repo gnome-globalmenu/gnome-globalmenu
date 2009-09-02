@@ -1,0 +1,5 @@
+Package maintainer please look at legacy-support/patch.sh
+
+libwnck shipped with RHEL5 differs from the one that VALA supports,
+
+therefore the compiled CCode has to be patched before compiling.
