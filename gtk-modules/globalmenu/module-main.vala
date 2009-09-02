@@ -1,9 +1,10 @@
 using Gtk;
 
-public static class GlobalMenuGNOME {
+public static class GlobalMenuModule {
 	private static bool verbose = false;
 	private static bool disabled = false;
 	private static bool initialized = false;
+	private static bool patch_only = false;
 	private static bool disable_pixbuf = false;
 	private static bool hybrid = false;
 
@@ -30,7 +31,9 @@ public static class GlobalMenuGNOME {
 			if(hybrid) {
 				flags |= GlobalMenuGTK.Flags.HYBRID;
 			}
-			GlobalMenuGTK.init(flags);
+			if(!patch_only) {
+				GlobalMenuGTK.init(flags);
+			}
 		}
 		deferred_init_id = 0;
 		return false;
@@ -64,7 +67,8 @@ public static class GlobalMenuGNOME {
 			}
 			if(initialized) {
 				DynPatch.uninit_vfuncs();
-				GlobalMenuGTK.uninit();
+				if(!patch_only)
+					GlobalMenuGTK.uninit();
 				DynPatch.uninit_final();
 			}
 
@@ -81,6 +85,7 @@ public static class GlobalMenuGNOME {
 		{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 		{"disable-pixbuf", 'P', 0, OptionArg.NONE, ref disable_pixbuf, N_("disable serializing pixbuf"), null},
 		{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
+		{"patch-only", 'p', 0, OptionArg.NONE, ref patch_only, N_("Do not make the menu global"), null},
 		{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to ~/.gnomenu.log"), null},
 		{"hybrid", 'h', 0, OptionArg.NONE, ref hybrid, N_("Enable hybrid mode"), null},
 		{null}
