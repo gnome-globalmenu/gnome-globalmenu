@@ -99,7 +99,6 @@ namespace GlobalMenuGTK {
 		if(ihint.run_type != SignalFlags.RUN_FIRST) return true;
 		MenuBar menubar = param_values[0].get_object() as MenuBar;
 		if(menubar != null) {
-			debug("changed_eh");
 			update_menu_context(menubar);
 		}
 		return true;
@@ -111,12 +110,11 @@ namespace GlobalMenuGTK {
 
 		Gtk.Window toplevel = DynPatch.get_window(menubar);
 
-		if(toplevel != null) {
-			if(0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
-				gdk_window_set_menu_context(toplevel.window, 
-						Serializer.to_string(menubar)
-						);
-			}
+		if(toplevel != null && 0 != (toplevel.get_flags() & WidgetFlags.REALIZED)) {
+			debug("modify the menu context on toplevel %p", toplevel);
+			gdk_window_set_menu_context(toplevel.window, 
+					Serializer.to_string(menubar)
+					);
 		}
 		
 	}

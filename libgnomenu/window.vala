@@ -110,6 +110,7 @@ public class Gnomenu.Window : GLib.Object {
 	/* FIXME: Will be fixed in VALA 0.7.6*/
 	void property_notify_event_default_handler (string? prop){
 		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
+			debug("window (%p) prop menu context is reported changed", this);
 			get_target().menu_context_changed();
 		}
 		if(prop == NET_GLOBALMENU_MENU_EVENT) {
@@ -134,7 +135,6 @@ public class Gnomenu.Window : GLib.Object {
 		var wnck_window = Wnck.Window.get(xid);
 		Gnomenu.Window new_transient = null;
 		Gnomenu.Window old = transient;
-		transient_changed(old);
 		if(wnck_window != null) {
 			var wnck_transient = wnck_window.get_transient();
 			if(wnck_transient != null) {
@@ -146,7 +146,7 @@ public class Gnomenu.Window : GLib.Object {
 		transient = new_transient;
 		if(transient != old) {
 			debug("transient changed, %p to %p", old, transient);
-			transient_changed(old);
+			menu_context_changed();
 		}
 	}
 

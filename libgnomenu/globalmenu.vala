@@ -8,7 +8,12 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this);
 		active_window_monitor.active_window_changed += (mon, prev) => {
+			debug("current window changed to %p", current_window);
 			current_window = active_window_monitor.active_window;
+			if(prev != null) {
+				prev.menu_context_changed -= menu_context_changed;
+			}
+			current_window.menu_context_changed += menu_context_changed;
 			update();
 		};
 		activate += (menubar, item) => {
@@ -28,6 +33,16 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		};
 	}
 	private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
+
+	private void menu_context_changed(Gnomenu.Window window) {
+		/*
+		 * If window is not current window, 
+		 * some where around the signal handler connection is wrong
+		 * */
+		assert(window == current_window);
+		debug("menu_context_changed on %p", window);
+		update();
+	}
 
 	private void grab_mnemonic_keys() {
 		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
@@ -106,9 +121,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 	private void update() {
 		ungrab_mnemonic_keys();
 		if(current_window != null) {
-			current_window.menu_context_changed += (window) => {
-				update();
-			};
+			
 			current_window.set_key_widget(this.get_toplevel());
 			var context = current_window.get_menu_context();
 			if(context != null) {

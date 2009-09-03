@@ -40,6 +40,7 @@ void dyn_patch_queue_changed(GtkMenuBar * menubar, GtkWidget * widget) {
 		g_static_rec_mutex_unlock(&_menubar_mutex);
 		return;
 	}
+	g_debug("created a timeout (200ms) to update menubar %p", menubar);
 	source_id = g_timeout_add_full(G_PRIORITY_HIGH_IDLE, 200, (GSourceFunc) _dyn_patch_emit_changed, g_object_ref(menubar), g_object_unref);
 
 	if(source_id) {
