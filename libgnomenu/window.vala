@@ -144,7 +144,10 @@ public class Gnomenu.Window : GLib.Object {
 			}
 		}
 		transient = new_transient;
-		transient_changed(old);
+		if(transient != old) {
+			debug("transient changed, %p to %p", old, transient);
+			transient_changed(old);
+		}
 	}
 
 	public new string? get(string property_name) {
