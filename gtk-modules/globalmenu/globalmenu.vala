@@ -7,8 +7,6 @@ namespace GlobalMenuGTK {
 		DISABLE_PIXBUF = 1,
 		HYBRID = 2,
 	}
-	[CCode (cname = "gtk_widget_get_toplevel_window")]
-	protected extern weak Gtk.Window? gtk_widget_get_toplevel_window (Gtk.Widget widget);
 	[CCode (cname = "gdk_window_set_menu_context")]
 	protected extern void gdk_window_set_menu_context (Gdk.Window window, string? context);
 	[CCode (cname = "gdk_window_get_menu_event")]
