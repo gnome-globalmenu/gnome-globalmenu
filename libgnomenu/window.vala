@@ -18,7 +18,6 @@ public class Gnomenu.Window : GLib.Object {
 	private static const string WM_TRANSIENT_FOR = "WM_TRANSIENT_FOR";
 
 	construct {
-		update_transient();
 		property_notify_event += property_notify_event_default_handler;
 	}
 	private Gdk.Window _window;
@@ -30,16 +29,17 @@ public class Gnomenu.Window : GLib.Object {
 			if(_window != null) 
 				_window.remove_filter(this.event_filter);
 			_window = value;
-			if(_window != null) 
+			if(_window != null) {
+				update_transient();
 				_window.add_filter(this.event_filter);
+			}
 		}
 	}
-	public uint xid {
-		get {
-			if(_window != null)
-				return Gdk.x11_drawable_get_xid(_window);
-			return 0;
-		}
+	public uint get_xid() {
+		if(_window != null)
+			return Gdk.x11_drawable_get_xid(_window);
+		error("getting xid before _window has been initialized");
+		return 0;
 	}
 
 	private Gtk.Widget key_widget;
@@ -127,26 +127,28 @@ public class Gnomenu.Window : GLib.Object {
 			get_target().menu_deselect(value);
 		}
 		if(prop == WM_TRANSIENT_FOR) {
+			message("transient property changed");
 			update_transient();
+			menu_context_changed();
 		}
 	}
 
 	private void update_transient() {
-		var wnck_window = Wnck.Window.get(xid);
-		Gnomenu.Window new_transient = null;
+		var wnck_window = Wnck.Window.get(get_xid());
 		Gnomenu.Window old = transient;
-		if(wnck_window != null) {
-			var wnck_transient = wnck_window.get_transient();
-			if(wnck_transient != null) {
-				var gnomenu_window = foreign_new(wnck_transient.get_xid());
-				new_transient = gnomenu_window;
-				debug("transient-for = '%s'", new_transient.get("WM_CLASS"));
-			}
+		if(wnck_window == null) {
+			error("xwindow %u has been destroyed", get_xid());
+			return;
 		}
-		transient = new_transient;
-		if(transient != old) {
-			debug("transient changed, %p to %p", old, transient);
-			menu_context_changed();
+		var wnck_transient = wnck_window.get_transient();
+		if(wnck_transient == null) {
+			transient = null;
+		} else {
+			ulong new_xid = wnck_transient.get_xid();
+			if(old == null || new_xid != old.get_xid()) {
+				transient = foreign_new(new_xid);
+				message("transient-for changed to = '%s'", transient.get("WM_CLASS"));
+			}
 		}
 	}
 
