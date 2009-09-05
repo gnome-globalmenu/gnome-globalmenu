@@ -23,7 +23,7 @@ DISTCLEANFILES = \
 	$(schema_DATA) \
 	$(NULL)
 
-BUILT_SOURCES =
+BUILT_SOURCES = gnome-globalmenu.schemas
 
 CLEANFILES = 
 

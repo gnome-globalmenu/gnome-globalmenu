@@ -32,9 +32,9 @@ public class Applet : Panel.Applet {
 			"@Help@", _("_Help"),
 			"@About@", _("_About")
 		};
-	static const string APPLET_NAME = _("globalmenu-panel-applet");
+	static const string APPLET_NAME = _("gnome-applet-globalmenu");
 	static const string APPLET_ICON = "globalmenu";
-	static const string GCONF_SCHEMA_DIR = "/schemas/apps/globalmenu-panel-applet/prefs";
+	static const string GCONF_SCHEMA_DIR = "/schemas/apps/gnome-applet-globalmenu/prefs";
 	
 	static const BonoboUI.Verb[] verbs = { 
 		{"About", (BonoboUI.VerbFn) applet_menu_clicked, null},
@@ -257,6 +257,7 @@ public class Applet : Panel.Applet {
 		switcher.show_label = gconf_get_bool("show_name");
 		switcher.show_window_actions = gconf_get_bool("show_window_actions");
 		switcher.show_window_list = gconf_get_bool("show_window_list");
+		switcher.enable_search_box = gconf_get_bool("enable_search_box");
 		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
@@ -331,6 +332,7 @@ public class Applet : Panel.Applet {
 				root + "/title_max_width",
 				root + "/show_window_actions",
 				root + "/show_window_list",
+				root + "/enable_search_box",
 				root + "/use_rgba_colormap"
 			}
 		);

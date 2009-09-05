@@ -47,13 +47,14 @@ using GConf;
 			alignment.add(box);
 			alignment.left_padding = 10;
 //			frame.shadow_type = Gtk.ShadowType.NONE;
-			try {
 			foreach(weak string key in keys) {
+				try {
 				var widget = create_proxy_widget(key);
 				box.pack_start(widget, false, false, 5);
-			} } catch(GLib.Error e) {
-				warning("%s", e.message);
-			}
+				} catch(GLib.Error e) {
+					warning("%s", e.message);
+				}
+			} 
 			vbox.pack_start(frame, true, false, 0);
 			frame.show_all();
 		}

@@ -92,5 +92,25 @@
 			<long>Enable the RGBA support for submenus. Restart the applet to take effects.</long>
 		</locale>
 	</schema>
+	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/use_rgba_colormap</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Enable the RGBA support(experimental)</short>
+			<long>Enable the RGBA support for submenus. Restart the applet to take effects.</long>
+		</locale>
+	</schema>
+	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/enable_search_box</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Add a search box in the drop down menu</short>
+			<long>Add a search box in the dropdown menu, where you can find entries by typing the name.</long>
+		</locale>
+	</schema>
 </schemalist>
 </gconfschemafile>

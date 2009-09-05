@@ -9,6 +9,7 @@ extern int system(string arg);
 		private bool _show_icon = false;
 		private bool _show_label = true;
 		private bool _show_window_list = true;
+		private bool _enable_search_box = true;
 		private bool _show_window_actions = true;
 			/* root and menu are then used for the window list */
 		Gnomenu.MenuItem _label_item;
@@ -450,6 +451,15 @@ extern int system(string arg);
 				if(_show_window_list == value) return;
 				_show_window_list = value;
 				update(true);
+			}
+		}
+		public bool enable_search_box{
+			get { return _enable_search_box; }
+			set {
+				if(_enable_search_box == value) return;
+				_enable_search_box = value;
+				update(true);
+				search_box.visible = _enable_search_box;
 			}
 		}
 		public bool show_window_actions {
