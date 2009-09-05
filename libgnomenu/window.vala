@@ -127,15 +127,22 @@ public class Gnomenu.Window : GLib.Object {
 			get_target().menu_deselect(value);
 		}
 		if(prop == WM_TRANSIENT_FOR) {
-			message("transient property changed");
+			debug("transient property changed");
 			update_transient();
 			menu_context_changed();
 		}
 	}
 
 	private void update_transient() {
+		if( _window.get_window_type() == Gdk.WindowType.ROOT) {
+			/* WNCK doesn't wrap the root window, 
+			 * and the root window doesn't have a transient-for
+			 * */
+			return;
+		}
 		var wnck_window = Wnck.Window.get(get_xid());
 		Gnomenu.Window old = transient;
+
 		if(wnck_window == null) {
 			error("xwindow %u has been destroyed", get_xid());
 			return;
@@ -147,7 +154,7 @@ public class Gnomenu.Window : GLib.Object {
 			ulong new_xid = wnck_transient.get_xid();
 			if(old == null || new_xid != old.get_xid()) {
 				transient = foreign_new(new_xid);
-				message("transient-for changed to = '%s'", transient.get("WM_CLASS"));
+				debug("transient-for changed to = '%s'", transient.get("WM_CLASS"));
 			}
 		}
 	}

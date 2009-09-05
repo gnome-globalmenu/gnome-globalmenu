@@ -6,7 +6,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 	private Gnomenu.Monitor active_window_monitor;
 
 	construct {
-		active_window_monitor = new Gnomenu.Monitor(this);
+		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.active_window_changed += (mon, prev) => {
 			debug("current window changed to %p", current_window);
 			current_window = active_window_monitor.active_window;
@@ -75,6 +75,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		grab_menu_bar_key();	
 	}
 	private void attach_to_screen(Gdk.Screen screen) {
+		active_window_monitor.attach(screen);
 		_root_window = new Window(get_root_window());
 		_root_window.set_key_widget(this.get_toplevel());
 		grab_menu_bar_key();

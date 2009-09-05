@@ -6,31 +6,9 @@ internal class Gnomenu.Monitor: GLib.Object {
 		return null;
 	}
 
-	private Gtk.Widget _widget;
-
-	public Gtk.Widget widget {
-		get {
-			return _widget;
-		} 
-		set {
-			if(_widget != value) {
-				if(_widget != null) {
-					_widget.screen_changed -= widget_screen_changed;
-					widget_screen_changed(_widget, null);
-				}
-				_widget = value;
-			}
-			if(_widget != null) {
-				//attach
-				_widget.screen_changed += widget_screen_changed;
-			}
-
-		}
-	}
-
-	private void widget_screen_changed(Gtk.Widget widget, Gdk.Screen? prev_screen) {
+	public void attach(Gdk.Screen gdk_screen) {
 		detach_from_screen();
-		_screen = gdk_screen_to_wnck_screen(widget.get_screen());
+		_screen = gdk_screen_to_wnck_screen(gdk_screen);
 		attach_to_screen();
 	}
 
@@ -48,8 +26,8 @@ internal class Gnomenu.Monitor: GLib.Object {
 		}
 	}
 
-	public Monitor(Gtk.Widget widget) {
-		this.widget = widget;
+	public Monitor(Gdk.Screen? screen) {
+		attach(screen);
 	}
 
 	public override void dispose() {
@@ -138,7 +116,6 @@ internal class Gnomenu.Monitor: GLib.Object {
 			/* sync to wnck status, may invoke a whole bunch of
 			 * signals, therefore we do it before connecting signals */
 			_screen.force_update();
-
 			_screen.window_closed += on_window_closed;
 			_screen.window_opened += on_window_opened;
 			_screen.active_window_changed += on_active_window_changed;
