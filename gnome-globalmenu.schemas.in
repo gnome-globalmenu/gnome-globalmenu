@@ -13,8 +13,8 @@
 	  </locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/disable_module_check</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/disable_module_check</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
@@ -23,8 +23,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/has_handle</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/has_handle</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
@@ -33,8 +33,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/show_icon</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_icon</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
@@ -43,8 +43,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/show_name</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_name</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
@@ -53,8 +53,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/show_window_list</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_window_list</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
@@ -63,8 +63,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/show_window_actions</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_window_actions</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
@@ -73,8 +73,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/title_max_width</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/title_max_width</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>int</type>
 		<default>-1</default>
 		<locale name="C">
@@ -83,8 +83,8 @@
 		</locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/globalmenu-panel-applet/prefs/use_rgba_colormap</key>
-		<owner>globalmenu-panel-applet</owner>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/use_rgba_colormap</key>
+		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
