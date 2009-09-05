@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-04-27 13:19+0000\n"
 "Last-Translator: Daniel Nylander <yeager@ubuntu.com>\n"
@@ -14,8 +14,20 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#: ../gtk-modules/globalmenu/module-main.vala:84
+msgid "Disable the Plugin"
+msgstr "Inaktivera insticksmodulen"
+
+#: ../applet/applet.vala:283
+msgid "Project Home"
+msgstr "Projektets webbplats"
+
+#: ../applet/applet.vala:313
+msgid "On-line help"
+msgstr "Hjälp på nätet"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
@@ -32,10 +44,6 @@ msgstr "Var informativ"
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
 msgstr "inaktivera serialisering av pixbuf"
-
-#: ../gtk-modules/globalmenu/module-main.vala:84
-msgid "Disable the Plugin"
-msgstr "Inaktivera insticksmodulen"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
@@ -92,20 +100,14 @@ msgstr ""
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 msgstr "eller genom att exportera GTK_MODULES=globalmenu-gnome i din profil."
 
-#: ../applet/applet.vala:283
-msgid "Project Home"
-msgstr "Projektets webbplats"
-
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
 "  Daniel Nylander https://launchpad.net/~yeager\n"
-"  Dojan5 https://launchpad.net/~joel-lundborg-gmail"
-
-#: ../applet/applet.vala:313
-msgid "On-line help"
-msgstr "Hjälp på nätet"
+"  Dojan5 https://launchpad.net/~joel-lundborg-gmail\n"
+"  Martin Andreasson https://launchpad.net/~mandreas\n"
+"  Ulrik Sverdrup https://launchpad.net/~ulrik-sverdrup"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -238,7 +240,8 @@ msgstr "Växla mellan program via programmets namnetikett"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "Den maximala längden på namnet på det aktiva programmet, i bildpunkter"
+msgstr ""
+"Den maximala längden på namnet på det aktiva programmet, i bildpunkter"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"

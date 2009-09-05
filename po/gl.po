@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-05-25 02:23+0000\n"
 "Last-Translator: adrian <Unknown>\n"
@@ -14,7 +14,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -27,7 +27,7 @@ msgstr "Tamaño do indicador de opción ou de verificación"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr ""
+msgstr "Ser detallado"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
@@ -47,7 +47,7 @@ msgstr "Activar o modo híbrido"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
-msgstr ""
+msgstr "- Módulo de complemento de Menú Global para GTK"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -57,7 +57,7 @@ msgstr ""
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
-msgstr ""
+msgstr "applet-do-panel-menu-global"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
@@ -92,12 +92,13 @@ msgstr ""
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr ""
+msgstr "Inicio do proxecto"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Francisco Diéguez https://launchpad.net/~frandieguez\n"
 "  adrian https://launchpad.net/~nomeapelidos"
 
 #: ../applet/applet.vala:313
@@ -171,6 +172,8 @@ msgstr ""
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
 msgstr ""
+"Engada entradas no menú de acción da fiestra para activar o menú de nome de "
+"aplicación"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
@@ -237,15 +240,15 @@ msgstr ""
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr ""
+msgstr "Applet do Panel do Menú Global"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr ""
+msgstr "Factoría GlobalMenu.PanelApplet"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr ""
+msgstr "A factoria para cargar os obxetos GlobalMenu.PanelApplet"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-06-16 14:52+0000\n"
 "Last-Translator: SGC.Alex <sgc.alex@gmail.com>\n"
@@ -14,12 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#: ../libgnomenu/menuitem.vala:30
-msgid "Indicator Size"
-msgstr "Taille de l'indicateur"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
@@ -29,13 +25,39 @@ msgstr "Taille du bouton à cocher ou sélectionner"
 msgid "Be verbose"
 msgstr "Mode verbeux"
 
-#: ../gtk-modules/globalmenu/module-main.vala:83
-msgid "disable serializing pixbuf"
-msgstr "désactiver la sérialisation pixbuf"
-
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
 msgstr "Désactiver le greffon"
+
+#: ../applet/applet.vala:216
+msgid "_Preferences"
+msgstr "_Préférences"
+
+#: ../applet/applet.vala:218
+msgid "_About"
+msgstr "À _propos"
+
+#: ../applet/applet.vala:313
+msgid "On-line help"
+msgstr "Aide en ligne"
+
+#: ../gnome-globalmenu.schemas.in.h:2
+msgid "Add window action menu entries to active application name menu"
+msgstr ""
+"Ajouter le menu d'actions sur la fenêtre dans le menu de titre de "
+"l'application active"
+
+#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
+msgid "Global Menu Panel Applet"
+msgstr "Applet Menu Global"
+
+#: ../libgnomenu/menuitem.vala:30
+msgid "Indicator Size"
+msgstr "Taille de l'indicateur"
+
+#: ../gtk-modules/globalmenu/module-main.vala:83
+msgid "disable serializing pixbuf"
+msgstr "désactiver la sérialisation pixbuf"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
@@ -61,17 +83,9 @@ msgstr ""
 msgid "globalmenu-panel-applet"
 msgstr "globalmenu-panel-applet"
 
-#: ../applet/applet.vala:216
-msgid "_Preferences"
-msgstr "_Préférences"
-
 #: ../applet/applet.vala:217
 msgid "_Help"
 msgstr "_Aide"
-
-#: ../applet/applet.vala:218
-msgid "_About"
-msgstr "À _propos"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
@@ -98,14 +112,12 @@ msgstr "Site Internet du Projet"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Pierre Slamich https://launchpad.net/~pierre-slamich\n"
+"  David Watson https://launchpad.net/~dwatson031\n"
 "  Pierre-Yves Luyten https://launchpad.net/~pyluyten\n"
 "  SGC.Alex https://launchpad.net/~sgc-alex\n"
+"  ayoli https://launchpad.net/~ayolinux\n"
+"  gdfs gsg dfs https://launchpad.net/~tzetz\n"
 "  pyluyten https://launchpad.net/~py"
-
-#: ../applet/applet.vala:313
-msgid "On-line help"
-msgstr "Aide en ligne"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -170,12 +182,6 @@ msgstr "Suivre la fenêtre"
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
 msgstr "Ajouter une poignée à l'applet"
-
-#: ../gnome-globalmenu.schemas.in.h:2
-msgid "Add window action menu entries to active application name menu"
-msgstr ""
-"Ajouter le menu d'actions sur la fenêtre dans le menu de titre de "
-"l'application active"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
@@ -250,10 +256,6 @@ msgstr "Passer d'une application à l'autre par leurs noms"
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
 msgstr "La longueur maximale du nom de l'application active, en pixels"
-
-#: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
-msgid "Global Menu Panel Applet"
-msgstr "Applet Menu Global"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"

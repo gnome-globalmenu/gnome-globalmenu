@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-05-06 11:41+0000\n"
 "Last-Translator: dbrenha <Unknown>\n"
@@ -14,16 +14,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
-
-#: ../libgnomenu/menuitem.vala:30
-msgid "Indicator Size"
-msgstr "Tamanho do Indicador"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
 msgstr "Tamanho do indicador da marca de opção/selecção"
+
+#: ../libgnomenu/menuitem.vala:30
+msgid "Indicator Size"
+msgstr "Tamanho do Indicador"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
@@ -96,7 +96,9 @@ msgstr "Página do Projecto"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Diogo Ferreira https://launchpad.net/~diogo-underdev\n"
 "  Edgar Gonçalves https://launchpad.net/~edgar.goncalves\n"
+"  Francisco Silva https://launchpad.net/~fsilvaportugal\n"
 "  dbrenha https://launchpad.net/~dbrenha"
 
 #: ../applet/applet.vala:313

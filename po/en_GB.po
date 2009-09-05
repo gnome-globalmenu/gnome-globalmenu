@@ -6,15 +6,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-13 15:41+0000\n"
-"Last-Translator: Alex Anthony <Unknown>\n"
+"PO-Revision-Date: 2009-08-24 13:31+0000\n"
+"Last-Translator: rugby471 <Unknown>\n"
 "Language-Team: English (United Kingdom) <en_GB@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -23,7 +23,7 @@ msgstr "Indicator Size"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr ""
+msgstr "Size of tick or radio indicator"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
@@ -31,7 +31,7 @@ msgstr "Be verbose"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "disable serialising pixbuf"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
@@ -43,7 +43,7 @@ msgstr "File to save the log, default to ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "Enable hybrid mode"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
@@ -54,6 +54,8 @@ msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
+"These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
+"instead of the command line."
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
@@ -73,20 +75,21 @@ msgstr "_About"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "No Global Menu?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "The Global Menu Plugin is not enabled on this desktop."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
 msgstr ""
+"Enable the plugin by accessing the preferences dialog via a right-click,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
@@ -96,7 +99,9 @@ msgstr "Project Home"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Alex Anthony https://launchpad.net/~alex-anthony28991"
+"  Alex Anthony https://launchpad.net/~alex-anthony28991\n"
+"  Bruce Cowan https://launchpad.net/~bruce89\n"
+"  rugby471 https://launchpad.net/~rugby471"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -104,7 +109,7 @@ msgstr "On-line help"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Global Menu Applet Preferences"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
@@ -124,7 +129,7 @@ msgstr "Ma_ximise"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr ""
+msgstr "Unma_ximise"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
@@ -156,7 +161,7 @@ msgstr "Show _Desktop"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "Desktop"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
@@ -164,7 +169,7 @@ msgstr "Follow the window"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Add a handle to the applet"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -172,7 +177,7 @@ msgstr "Add window action menu entries to active application name menu"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Disable checking the GTK plugin module at start-up"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -180,6 +185,9 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Disable checking the GTK plugin module at start-up. If you know the module "
+"is loaded but for some reason the applet cannot correctly detect this fact, "
+"set this key to true to skip the checking."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
@@ -187,11 +195,11 @@ msgstr "Enable Global Menu For GTK applications"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr ""
+msgstr "Enable the Window Actions"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Enabled the Window List"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
@@ -203,33 +211,35 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Maximum length of the title area"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Show the icon of the action window in the applet"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "Show the icon of the active window in the applet when enabled."
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Show the name of the active application in the applet"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "Show the name of the active application in the applet when enabled"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Specify if the applet has a handle. When the handle is enabled, the applet "
+"will not expand to occupy the remaining empty area on the panel."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Switch amongst applications via the application name label"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"

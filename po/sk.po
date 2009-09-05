@@ -6,15 +6,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-06-10 22:46+0000\n"
-"Last-Translator: Andrej Pancik <ave@gjgt.sk>\n"
+"PO-Revision-Date: 2009-07-21 12:32+0000\n"
+"Last-Translator: Laco Horváth <6205@centrum.sk>\n"
 "Language-Team: Slovak <sk@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -83,11 +83,11 @@ msgstr "Plugin Global Menu ešte nebol aktivovaný"
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr ""
+msgstr "Povoliť zásuvný modul prístupom cez okno nastavení dvojklikom,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "alebo exportovaním GTK_MODULES=globalmenu-gnome vo vašom profile."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
@@ -97,11 +97,12 @@ msgstr "Domovská stránka projektu"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Andrej Pancik https://launchpad.net/~apancik"
+"  helix84 https://launchpad.net/~helix84\n"
+"  milboy https://launchpad.net/~milboys"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
-msgstr "Online pomocník"
+msgstr "On-line pomocnik"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -109,11 +110,11 @@ msgstr "Nastavenia apletu Global Menu"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr ""
+msgstr "žiadne okná"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr ""
+msgstr "žiadne akcie"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
@@ -141,11 +142,11 @@ msgstr "Vždy na _vrchu"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "_Vždy viditeľné na pracovnej ploche"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr ""
+msgstr "_Pracovná plocha..."
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
@@ -153,7 +154,7 @@ msgstr "_Zavrieť"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr ""
+msgstr "Zobraziť _Pracovnú plochu"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
@@ -161,19 +162,19 @@ msgstr "Pracovná plocha"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr ""
+msgstr "Nasleduj okno"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Pridaj držadlo k apletu"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
-msgstr ""
+msgstr "Pridaj do položiek menu akcie pre okná aktívneho menu aplikácie"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Zakázať kontrolu zásuvného modulu GTK pri štarte"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -181,6 +182,9 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Zakázať kontrolu zásuvného modulu GTK pri štarte. Ak viete že je modul "
+"načítaný ale z nejakého dôvodu tento fakt aplet nezdetekoval správne, "
+"nastavte tento parameter na 'true' pre preskočenie kontroly."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
@@ -199,6 +203,8 @@ msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
+"Ak je nastavené na 'true', libglobalmenu-gnome, GTK zásuvný modul pre "
+"Globálne Menu je načítaný."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
@@ -206,19 +212,19 @@ msgstr "Maximálna dĺžka názvu okna"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Zobraziť ikonu akcie okna v aplete"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "Zobraziť ikonu aktívneho okna v aplete ak je povolený,"
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Zobraziť názov aktívnej aplikácie v aplete"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "Zobraziť názov aktívnej aplikácie v aplete ak je povolený"
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -228,11 +234,11 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Prepínať medzi aplikáciami cez názov aplikácie v menu"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr ""
+msgstr "Maximálna dĺžka názvu aktívnej aplikácie v pixeloch"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
@@ -248,8 +254,8 @@ msgstr "Výrobná trieda objektov GlobalMenu.PanelApplet"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Zásuvný modul Globálneho Menu pre XFCE Panel"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Zásuvný modul Globálneho Menu pre XFCE Panel"

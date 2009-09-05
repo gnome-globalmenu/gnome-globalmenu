@@ -1,4 +1,4 @@
-# Romanian translation for globalmenu
+# Esperanto translation for globalmenu
 # Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the globalmenu package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-07-04 17:42+0000\n"
-"Last-Translator: Daniel Pop <danielpop@ymail.com>\n"
-"Language-Team: Romanian <ro@li.org>\n"
+"PO-Revision-Date: 2009-08-24 18:56+0000\n"
+"Last-Translator: SGC.Alex <sgc.alex@gmail.com>\n"
+"Language-Team: Esperanto <eo@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,15 +19,11 @@ msgstr ""
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "Dimensiune indicator"
-
-#: ../gtk-modules/globalmenu/module-main.vala:101
-msgid "- Global Menu plugin Module for GTK"
-msgstr "- Modulul \"Global Menu\" - plugin pentru GTK"
+msgstr "Indiko mezuro"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr "Dimensiunea bifei / selectorului"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
@@ -39,15 +35,19 @@ msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
-msgstr "Dezactivează Plugin-ul"
+msgstr "Malvalidigi la kromprogramon"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Fisierul pentru scrierea jurnalului (implicit ~/.gnomenu.log)"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr "Activeaza modul hibrid"
+msgstr "Ŝalti hibridan reĝimon"
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
+msgid "- Global Menu plugin Module for GTK"
+msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -57,23 +57,23 @@ msgstr ""
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
-msgstr ""
+msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "_Preferinţe"
+msgstr "_Preferoj"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr "_Ajutor"
+msgstr "_Helpo"
 
 #: ../applet/applet.vala:218
 msgid "_About"
-msgstr "_Despre"
+msgstr "_Pri"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Ĉu ne Global Menu ?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
@@ -90,19 +90,17 @@ msgstr ""
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr "Pagina Proiectului"
+msgstr "Projekto retpaĝo"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Oleg Grom https://launchpad.net/~gromescu\n"
-"  Sorocean Anton https://launchpad.net/~distortedbsd\n"
-"  marcuskoze https://launchpad.net/~tekkro-gmail"
+"  SGC.Alex https://launchpad.net/~sgc-alex"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
-msgstr "Ajutor On-line"
+msgstr "Reta helpo"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -110,63 +108,63 @@ msgstr ""
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr ""
+msgstr "Neniu fenestro"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr ""
+msgstr "Neniu ago"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr "Minimizează"
+msgstr "Mi_nimumigi"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr "Maximizează"
+msgstr "Ma_ksimumigi"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "Restaurează"
+msgstr "Malma_ksimumigi"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr "Mută"
+msgstr "_Movi"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr "Redimensionează"
+msgstr "Ŝanĝi _grandecon"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr ""
+msgstr "Ĉiam supre"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "_Ĉiam sur videbla laborspaco"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr ""
+msgstr "_Laborspaco…"
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "Închide"
+msgstr "_Fermi"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Arată Desktop"
+msgstr "Montri _labortablon"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr "Desktop"
+msgstr "Labortablo"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr ""
+msgstr "Sekvi la fenestron"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Aldoni tenilon al la apleto"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
@@ -174,7 +172,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr "Dezactiveaza verificarea plugin-ului la pornire"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -182,22 +180,18 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
-"Dezactiveaza verificarea plugin-ului pentru GTK la pornire. Daca sunteti "
-"sigur(a) ca modulul este incarcat, dar din diverse motive aplicatia nu "
-"detecteaza corect, setati aceasta optiune la valoarea \"true\" pentru a "
-"evita verificarea."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr "Activeaza Meniul Global pentru aplicatiile GTK"
+msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr "Activeaza meniul ferestrei"
+msgstr "Ŝalti la fenestrajn agojn"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Ŝalti la fenestraron"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
@@ -207,7 +201,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Maksimuma longo de la titolzono"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
@@ -237,7 +231,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "Lungimea maxima pentru titlul aplicatiei active, in pixeli"
+msgstr ""
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"

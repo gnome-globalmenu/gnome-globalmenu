@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-04-16 10:02+0000\n"
 "Last-Translator: Miia Ranta <Unknown>\n"
@@ -14,7 +14,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:30
@@ -47,7 +47,7 @@ msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
-msgstr ""
+msgstr "Global Menu liitännäinen GTK:lle"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -96,7 +96,8 @@ msgstr "Projektin kotisivut"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Miia Ranta https://launchpad.net/~myrtti"
+"  Miia Ranta https://launchpad.net/~myrtti\n"
+"  Wapsi https://launchpad.net/~miikka-veijonen"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -168,7 +169,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
-msgstr ""
+msgstr "Lisää ikkunan/ohjelman toiminnot valitun ohjelman valikkoon"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"

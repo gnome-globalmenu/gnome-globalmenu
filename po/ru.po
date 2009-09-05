@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-05-18 17:55+0000\n"
 "Last-Translator: Nikita Ivanitski <sukinkot@gmail.com>\n"
@@ -14,8 +14,44 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
+msgid "Be verbose"
+msgstr "Подробный вывод"
+
+#: ../gtk-modules/globalmenu/module-main.vala:85
+msgid "File to save the log, default to ~/.gnomenu.log"
+msgstr "Файл журнала, по умолчанию ~/.gnomenu.log"
+
+#: ../applet/applet.vala:169
+msgid "globalmenu-panel-applet"
+msgstr "апплет-панели-глобального меню"
+
+#: ../applet/applet.vala:216
+msgid "_Preferences"
+msgstr "_Параметры"
+
+#: ../applet/applet.vala:313
+msgid "On-line help"
+msgstr "Помощь в сети"
+
+#: ../applet/switcher.vala:249
+msgid "Show _Desktop"
+msgstr "Показать _рабочий стол"
+
+#: ../gnome-globalmenu.schemas.in.h:5
+msgid "Enable Global Menu For GTK applications"
+msgstr "Включить глобальное меню для GTK-приложений"
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
+msgid "Global Menu Plugin for XFCE Panel"
+msgstr "Модуль глобального меню для панели XFCE"
+
+#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
+msgid "The Global Menu Plugin for XFCE Panel"
+msgstr "Модуль глобального меню для панели XFCE"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
@@ -25,10 +61,6 @@ msgstr "Размер индикатора"
 msgid "Size of check or radio indicator"
 msgstr "Размер флажка или индикатора выбора"
 
-#: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
-msgid "Be verbose"
-msgstr "Подробный вывод"
-
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
 msgstr "отключить сериализации pixbuf"
@@ -36,10 +68,6 @@ msgstr "отключить сериализации pixbuf"
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
 msgstr "Отключить плагин"
-
-#: ../gtk-modules/globalmenu/module-main.vala:85
-msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Файл журнала, по умолчанию ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
@@ -56,14 +84,6 @@ msgid ""
 msgstr ""
 "Параметры должны быть применены в переменной окружения "
 "GLOBALMENU_GNOME_ARGS, а не в командной строке."
-
-#: ../applet/applet.vala:169
-msgid "globalmenu-panel-applet"
-msgstr "апплет-панели-глобального меню"
-
-#: ../applet/applet.vala:216
-msgid "_Preferences"
-msgstr "_Параметры"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
@@ -84,7 +104,8 @@ msgstr "Плагин глобального меню не включен для 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr "Включите этот плагин для доступа к диалогу настроек по правому щелчку,"
+msgstr ""
+"Включите этот плагин для доступа к диалогу настроек по правому щелчку,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
@@ -100,11 +121,8 @@ msgstr ""
 "Launchpad Contributions:\n"
 "  Alexander Semyonov https://launchpad.net/~rotuka\n"
 "  Konstantin Khazov https://launchpad.net/~kvk15-ripe\n"
-"  Nikita Ivanitski https://launchpad.net/~sukinkot"
-
-#: ../applet/applet.vala:313
-msgid "On-line help"
-msgstr "Помощь в сети"
+"  Nikita Ivanitski https://launchpad.net/~sukinkot\n"
+"  Oleg Grom https://launchpad.net/~gromescu"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -154,10 +172,6 @@ msgstr "_Рабочее место…"
 msgid "_Close"
 msgstr "_Закрыть"
 
-#: ../applet/switcher.vala:249
-msgid "Show _Desktop"
-msgstr "Показать _рабочий стол"
-
 #: ../applet/switcher.vala:292
 msgid "Desktop"
 msgstr "Рабочий стол"
@@ -187,10 +201,6 @@ msgstr ""
 "Отключить проверку GTK-модуля во время загрузки. Если вы уверены, что модуль "
 "загружен, но по какой-то причине апплет не может обнаружить это, включите "
 "эту опцию, чтобы избежания проверки."
-
-#: ../gnome-globalmenu.schemas.in.h:5
-msgid "Enable Global Menu For GTK applications"
-msgstr "Включить глобальное меню для GTK-приложений"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
@@ -255,11 +265,3 @@ msgstr "Фабрика GlobalMenu.PanelApplet"
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
 msgstr "Фабрика построения объектов GlobalMenu.PanelApplet"
-
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
-msgid "Global Menu Plugin for XFCE Panel"
-msgstr "Модуль глобального меню для панели XFCE"
-
-#: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
-msgid "The Global Menu Plugin for XFCE Panel"
-msgstr "Модуль глобального меню для панели XFCE"

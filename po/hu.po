@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: globalmenu\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
 "PO-Revision-Date: 2009-06-12 11:17+0000\n"
 "Last-Translator: jadaml <Unknown>\n"
@@ -14,8 +14,20 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-06-27 03:04+0000\n"
+"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#: ../gtk-modules/globalmenu/module-main.vala:84
+msgid "Disable the Plugin"
+msgstr "Beépülő letiltása"
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
+msgid "- Global Menu plugin Module for GTK"
+msgstr "Globális Menü beépülő modul a GTK-hoz"
+
+#: ../applet/applet.vala:283
+msgid "Project Home"
+msgstr "Projekt honlap"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
@@ -33,10 +45,6 @@ msgstr "Részletes kimenet"
 msgid "disable serializing pixbuf"
 msgstr "pixbuf sorosításának letiltása"
 
-#: ../gtk-modules/globalmenu/module-main.vala:84
-msgid "Disable the Plugin"
-msgstr "Beépülő letiltása"
-
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
 msgstr "A log fájl mentési útvonala (Alap: ~/.gnomenu.log)"
@@ -44,10 +52,6 @@ msgstr "A log fájl mentési útvonala (Alap: ~/.gnomenu.log)"
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
 msgstr "Hibrid mód engedélyezése"
-
-#: ../gtk-modules/globalmenu/module-main.vala:101
-msgid "- Global Menu plugin Module for GTK"
-msgstr "Globális Menü beépülő modul a GTK-hoz"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -92,15 +96,13 @@ msgstr ""
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
 msgstr "vagy a GTK_MODULES=globalmenu-gnome exportálásával a profiljába."
 
-#: ../applet/applet.vala:283
-msgid "Project Home"
-msgstr "Projekt honlap"
-
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  jadaml https://launchpad.net/~jadaml"
+"  jadaml https://launchpad.net/~jadaml\n"
+"  qw3r https://launchpad.net/~demeter-istvan\n"
+"  sampi https://launchpad.net/~sampi-psy"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
@@ -252,11 +254,11 @@ msgstr "Globális Menü Panel Kisalkalmazás"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr ""
+msgstr "GlobalMenu.PanelApplet Készítő"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr ""
+msgstr "Készítő GlobalMenu.PanelApplet objektumokhoz"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"

@@ -1,4 +1,4 @@
-# Romanian translation for globalmenu
+# Lithuanian translation for globalmenu
 # Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the globalmenu package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-07-04 17:42+0000\n"
-"Last-Translator: Daniel Pop <danielpop@ymail.com>\n"
-"Language-Team: Romanian <ro@li.org>\n"
+"PO-Revision-Date: 2009-08-17 13:15+0000\n"
+"Last-Translator: Gediminas Paulauskas <menesis@pov.lt>\n"
+"Language-Team: Lithuanian <lt@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,162 +19,164 @@ msgstr ""
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "Dimensiune indicator"
-
-#: ../gtk-modules/globalmenu/module-main.vala:101
-msgid "- Global Menu plugin Module for GTK"
-msgstr "- Modulul \"Global Menu\" - plugin pentru GTK"
+msgstr "Indikatoriaus dydis"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr "Dimensiunea bifei / selectorului"
+msgstr "Pažymėjimo arba perjungimo indikatoriaus dydis"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr ""
+msgstr "Išsamūs pranešimai"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "išjungti taškų buferio serializavimą"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
-msgstr "Dezactivează Plugin-ul"
+msgstr "Išjungti įskiepį"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "Fisierul pentru scrierea jurnalului (implicit ~/.gnomenu.log)"
+msgstr "Žurnalo failas (numatytasis ~/.gnomenu.log)"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr "Activeaza modul hibrid"
+msgstr "Įjungti hibridinę veikseną"
+
+#: ../gtk-modules/globalmenu/module-main.vala:101
+msgid "- Global Menu plugin Module for GTK"
+msgstr "Globalaus meniu įskiepio GTK modulis"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
 "These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS "
 "instead of the command line."
 msgstr ""
+"Šie parametrai turėtų būti pateikti GLOBALMENU_GNOME_ARGS aplinkos "
+"kintamajame, o ne komandėje eiilutėje."
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
-msgstr ""
+msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "_Preferinţe"
+msgstr "_Nustatymai"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr "_Ajutor"
+msgstr "_Pagalba"
 
 #: ../applet/applet.vala:218
 msgid "_About"
-msgstr "_Despre"
+msgstr "_Apie"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Nėra globalaus meniu?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "Globalaus meniu įskiepis jūsų darbalaukiui nėra įjungtas."
 
 #: ../applet/applet.vala:248
 msgid ""
 "Enable the plugin by accessing the preferences dialog via a right-click,"
-msgstr ""
+msgstr "Įjunkite įskiepį pasirinkę nustatymų dialogą iš kontekstinio meniu,"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "arba export GTK_MODULES=globalmenu-gnome jūsų profilyje."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr "Pagina Proiectului"
+msgstr "Projekto svetainė"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Oleg Grom https://launchpad.net/~gromescu\n"
-"  Sorocean Anton https://launchpad.net/~distortedbsd\n"
-"  marcuskoze https://launchpad.net/~tekkro-gmail"
+"  Gediminas Paulauskas https://launchpad.net/~menesis\n"
+"  Mantas Kriaučiūnas https://launchpad.net/~mantas"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
-msgstr "Ajutor On-line"
+msgstr "Žinynas internete"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Globalaus meniu įtaiso nustatymai"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr ""
+msgstr "nėra langų"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr ""
+msgstr "nėra veiksmų"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr "Minimizează"
+msgstr "Sumaži_nti"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr "Maximizează"
+msgstr "Iš_didinti"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "Restaurează"
+msgstr "Grąžinti iš iš_didinimo"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr "Mută"
+msgstr "_Perkelti"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr "Redimensionează"
+msgstr "_Keisti dydį"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr ""
+msgstr "Visada virš_uje"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "_Visada matomame darbalaukyje"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr ""
+msgstr "_Darbalaukis..."
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "Închide"
+msgstr "_Užverti"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Arată Desktop"
+msgstr "Rodyti _darbastalį"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr "Desktop"
+msgstr "Darbastalis"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr ""
+msgstr "Sekti langą"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Pridėti rankeną prie įtaiso"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
 msgstr ""
+"Pridėti lango veiksmų meniu punktus prie aktyvios programos pavadinimo meniu"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr "Dezactiveaza verificarea plugin-ului la pornire"
+msgstr "Išjungti GTK įskiepio modulio patikrinimą paleidimo metu"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -182,79 +184,82 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
-"Dezactiveaza verificarea plugin-ului pentru GTK la pornire. Daca sunteti "
-"sigur(a) ca modulul este incarcat, dar din diverse motive aplicatia nu "
-"detecteaza corect, setati aceasta optiune la valoarea \"true\" pentru a "
-"evita verificarea."
+"Išjungti GTK įskiepio modulio patikrinimą paleidimo metu. Jei žinote, kad "
+"modulis buvo įkeltas, tačiau įtaisas kažkodėl negali to fakto teisingai "
+"nustatyti, pakeiskite šio rakto reikšmę į true."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr "Activeaza Meniul Global pentru aplicatiile GTK"
+msgstr "Įjungti globalų meniu GTK programoms"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr "Activeaza meniul ferestrei"
+msgstr "Įtraukti lango veiksmus"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Įtraukti langų sąrašą"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
+"Jei šio rakto reikšmė true, libglobalmenu-gnome, GTK įskiepis reikalingas "
+"globaliam meniu, yra įkeltas."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Maksimalus pavadinimo ilgis"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Rodyti aktyvaus lango ikoną įtaise"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "Rodyti aktyvaus lango ikoną įtaise, jei įjungta."
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Rodyti aktyvios programos pavadinimą įtaise"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "Rodyti aktyvios programos pavadinimą įtaise, jei įjungta."
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Ar įtaisas turi rankeną. Jei rankena įjungta, įtaisas neišsiplės kad "
+"užpildytų visą tuščią vietą skydelyje."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Persijungti tarp programų per programos pavadinimo užrašą"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr "Lungimea maxima pentru titlul aplicatiei active, in pixeli"
+msgstr "Maksimalus aktyvios programos pavadinimo ilgis, taškais"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr ""
+msgstr "Globalaus meniu įtaisas skydeliui"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr ""
+msgstr "GlobalMenu.PanelApplet Factory"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
-msgstr ""
+msgstr "The factory to build GlobalMenu.PanelApplet objects"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Globalaus meniu įskiepis XFCE skydeliui"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "Globalaus meniu įskiepis XFCE skydeliui"
