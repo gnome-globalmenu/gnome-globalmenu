@@ -66,9 +66,9 @@ public class Applet : Panel.Applet {
 
 		menubars.add(main_menubar);
 
-		switcher.current_window = Wnck.Window.get(main_menubar.current_window.xid);
+		switcher.current_window = Wnck.Window.get(main_menubar.current_window.get_xid());
 		main_menubar.notify["current-window"] += () => {
-			switcher.current_window = Wnck.Window.get(main_menubar.current_window.xid);
+			switcher.current_window = Wnck.Window.get(main_menubar.current_window.get_xid());
 		};
 
 		menubars.child_set(main_menubar, "shrink", true, null);
