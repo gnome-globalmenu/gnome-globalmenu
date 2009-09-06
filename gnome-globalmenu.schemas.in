@@ -112,5 +112,15 @@
 			<long>Add a search box in the dropdown menu, where you can find entries by typing the name.</long>
 		</locale>
 	</schema>
+	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/grab_mnemonic_keys</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>TRUE</default>
+		<locale name="C">
+			<short>Allow accessing the menu items by the mnemonic keys</short>
+			<long>Allow accessing the menu items by the mnemonic keys. When this option is disabled, the topmost menu items are not directly accessible from keyboard.</long>
+		</locale>
+	</schema>
 </schemalist>
 </gconfschemafile>

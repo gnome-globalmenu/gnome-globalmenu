@@ -1,6 +1,28 @@
 public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
+	private bool _grab_keys = true;
+
+
+	public bool grab_keys {
+		get {
+			return _grab_keys;
+		}
+		set {
+			_grab_keys = value;
+			update();
+		}
+	}
+
+	private Gnomenu.Window _current_window;
 	[CCode (notify = true)]
-	public Gnomenu.Window current_window {get; private set;}
+	public Gnomenu.Window current_window { get {
+			return _current_window;
+		}
+		private set {
+			var old = _current_window;
+			_current_window = value;
+			update(old);
+		}
+	}
 
 	private Gnomenu.Window _root_window;
 	private Gnomenu.Monitor active_window_monitor;
@@ -8,13 +30,12 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.active_window_changed += (mon, prev) => {
-			debug("current window changed to %p", current_window);
 			current_window = active_window_monitor.active_window;
+			debug("current window changed to %p", current_window);
 			if(prev != null) {
 				prev.menu_context_changed -= menu_context_changed;
 			}
 			current_window.menu_context_changed += menu_context_changed;
-			update();
 		};
 		activate += (menubar, item) => {
 			if(current_window != null) {
@@ -44,7 +65,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		update();
 	}
 
-	private void grab_mnemonic_keys() {
+	private void grab_mnemonic_keys(Gnomenu.Window window) {
 		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
 		foreach(Gtk.Widget widget in get_children()) {
 			Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
@@ -53,18 +74,16 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 			if(label == null) continue;
 			uint keyval = label.mnemonic_keyval;
 			debug("grabbing key for %s:%u", label.label, keyval);
-			if(current_window != null)
-				current_window.grab_key(keyval, mods);
+			window.grab_key(keyval, mods);
 			keys.insert(keyval, widget);
 		}
 	}
 
-	private void ungrab_mnemonic_keys() {
+	private void ungrab_mnemonic_keys(Gnomenu.Window window) {
 		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
 		foreach(uint keyval in keys.get_keys()) {
 			debug("ungrabbing %u", keyval);
-			if(current_window != null)
-				current_window.ungrab_key(keyval, mods);
+			window.ungrab_key(keyval, mods);
 		}
 		keys.remove_all();
 	}
@@ -79,7 +98,9 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		_root_window = new Window(get_root_window());
 		_root_window.set_key_widget(this.get_toplevel());
 		grab_menu_bar_key();
-		grab_mnemonic_keys();
+		if(_grab_keys && _current_window != null) {
+			grab_mnemonic_keys(_current_window);
+		}
 		var settings = get_settings();
 		settings.notify["gtk-menu-bar-accel"] += regrab_menu_bar_key;
 			
@@ -88,7 +109,8 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		if(_root_window != null) {
 			_root_window.set_key_widget(null);
 			ungrab_menu_bar_key();
-			ungrab_mnemonic_keys();
+			if(_current_window != null)
+				ungrab_mnemonic_keys(_current_window);
 		}
 		var settings = get_settings();
 		settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
@@ -119,24 +141,30 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		}
 	}
 
-	private void update() {
-		ungrab_mnemonic_keys();
-		if(current_window != null) {
-			
-			current_window.set_key_widget(this.get_toplevel());
-			var context = current_window.get_menu_context();
-			if(context != null) {
-				try {
-					Parser.parse(this, context);
-				} catch(GLib.Error e) {
-					warning("%s", e.message);	
-				}
-				show();
-				grab_mnemonic_keys();
-				return;
-			}
+	private void update(Gnomenu.Window? prev_window = null) {
+		if(prev_window == null) {
+			prev_window = _current_window;
+		}
+		if(prev_window != null) {
+			/* prev window can still be null */
+			ungrab_mnemonic_keys(prev_window);
+			prev_window.set_key_widget(null);
 		}
 		hide();
+		if(_current_window == null) return;
+		var context = _current_window.get_menu_context();
+		if(context == null) return;
+		try {
+			Parser.parse(this, context);
+			show();
+		} catch(GLib.Error e) {
+			warning("%s", e.message);
+		}
+		if(_grab_keys) {
+			_current_window.set_key_widget(this.get_toplevel());
+			grab_mnemonic_keys(_current_window);
+		}
+		return;
 	}
 	private void ungrab_menu_bar_key() {
 		int keyval = (int) _root_window.get_data("menu-bar-keyval");
