@@ -282,14 +282,19 @@ public class Applet : Panel.Applet {
 			_("Applet Behaviors"),
 			new string[]{
 				root + "/has_handle",
+				root + "/use_rgba_colormap",
+				root + "/grab_mnemonic_keys"
+			}
+		);
+		gcd.add_key_group(
+			_("Switcher"),
+			new string[] {
 				root + "/show_icon",
 				root + "/show_name",
 				root + "/title_max_width",
 				root + "/show_window_actions",
 				root + "/show_window_list",
-				root + "/enable_search_box",
-				root + "/use_rgba_colormap",
-				root + "/grab_mnemonic_keys"
+				root + "/enable_search_box"
 			}
 		);
 		return gcd;
