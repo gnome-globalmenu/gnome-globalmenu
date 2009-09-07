@@ -1,3 +1,11 @@
+/**
+ * MenuLabel is the label used for menu items by Global Menu.
+ *
+ * It is a combination of two labels, one for the main text,
+ * the other for the accel key.
+ * It is not a GtkAccelLabel, because the accel key is merely
+ * for display purpose!
+ */
 public class Gnomenu.MenuLabel: Gtk.Container {
 	public MenuLabel() {
 		_accel_widget.visible = false;
