@@ -132,9 +132,8 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		debug("mnemonic_activate %s", arg1.to_string());
 		return _label_widget.mnemonic_activate(arg1);
 	}
+
 	construct {
-		props = new HashTable<weak Gtk.Widget, ChildPropBag*>.full(direct_hash, direct_equal,
-			null, free);
 		set_flags(Gtk.WidgetFlags.NO_WINDOW);
 	}
 
@@ -151,6 +150,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		props.insert(child, (ChildPropBag*)malloc0(sizeof(ChildPropBag)));
 		update_label_gravity(child as Gtk.Label);
 	}
+
 	public override void remove(Gtk.Widget child) {
 		children.remove_all(child as Gtk.Label);
 		child.unparent();
@@ -165,13 +165,16 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 	private Gravity _gravity;
 
 	private List<weak Gtk.Label> children;
-	private HashTable<weak Gtk.Widget, ChildPropBag*> props;
+	private HashTable<weak Gtk.Widget, ChildPropBag*> props
+	  = new HashTable<weak Gtk.Widget, ChildPropBag*>.full(
+	                direct_hash, direct_equal, null, free);
 
 	public override void style_set(Gtk.Style? old_style) {
 		foreach(var child in children) {
 			child.style = style;
 		}
 	}
+
 	public override void forall_internal(bool include_internals, Gtk.Callback callback) {
 		if(include_internals) {
 		}
@@ -182,6 +185,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 			callback(child);
 		}
 	}
+
 	public override void size_request(out Gtk.Requisition r) {
 		Gtk.Requisition cr;
 		r.width = 0;
@@ -205,6 +209,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 			}
 		}
 	}
+
 	public override void size_allocate(Gdk.Rectangle a) {
 		allocation = (Gtk.Allocation)a;
 		Gtk.Requisition cr;
@@ -214,6 +219,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		int num_vis = 0;
 		int expand = 0;
 		int remains = 0;
+		/* first calculate the remaining space */
 		foreach(var child in children) {
 			if(!child.visible) continue;
 			num_vis++;
@@ -230,6 +236,9 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 				remains = allocation.width;
 				break;
 		}
+		/* remains is the remaining unallocated space */
+		/* expand is expected empty space (should be divided into
+		 * each child */
 		if(expand < 0) expand = 0;
 		foreach(var child in children) {
 			if(!child.visible) continue;
