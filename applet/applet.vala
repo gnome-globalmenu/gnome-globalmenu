@@ -271,7 +271,7 @@ public class Applet : Panel.Applet {
 		string root = get_preferences_key();
 
 		gcd.add_key_group(
-			_("System Preferences"),
+			_("General Settings"),
 			new string[] {
 				"/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome",
 				root + "/disable_module_check"
@@ -279,7 +279,7 @@ public class Applet : Panel.Applet {
 		);
 
 		gcd.add_key_group(
-			_("Applet Behaviors"),
+			_("Global Menu"),
 			new string[]{
 				root + "/has_handle",
 				root + "/use_rgba_colormap",
