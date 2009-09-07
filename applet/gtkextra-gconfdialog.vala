@@ -4,16 +4,19 @@
  * Version: 0.1
  * Date: 2009-12-07
  * License: GPL
- * Description: creates a gconf settings back end dialog 
- * 				automatically from a settings key root.
- * Usage: new GConfDialog (string key, string dialog_title)
+ * Description: creates a gconf settings backend dialog
+ *              automatically from a settings key root.
+ * Usage: new GConfDialog (string dialog_title)
  * Params:
- * 	    string key: the gconf key to connect to (i.e /apps/panel/applets/applet_46/prefs)
- * 		string dislog_title: text to be shown on window title bar
- *		string[] subkeys: used to choose the subkeys to hadle (comprising display order).
- * 			  if null all subkeys will be retieved.
- * 
- * TODO: Only BOOL and INT data types are implemented. STRING is implemented only partially (read)
+ *  string key: the gconf key to connect to (i.e /apps/panel/applets/applet_46/prefs)
+ *  string dislog_title: text to be shown on window title bar
+ *  string[] subkeys: used to choose the subkeys to hadle (comprising display order).
+ *  if null all subkeys will be retieved.
+ *
+ * TODO:
+ *   Only BOOL and INT data types are implemented.
+ *   STRING is implemented only partially (read-only)
+ *
  *******************************/
 
 using GLib;
@@ -23,6 +26,7 @@ using GConf;
 	public class GConfDialog : Gtk.Dialog {
 
 		private GConf.Client _default_client;
+		private Gtk.Notebook notebook = new Gtk.Notebook();
 
 		public GConfDialog(string dialog_title) {
 			title = dialog_title;
@@ -31,86 +35,86 @@ using GConf;
 
 		construct {
 			_default_client = GConf.Client.get_default();
-			//vbox.width_request = 320;
 			add_button(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE);
 			add_button(Gtk.STOCK_HELP, Gtk.ResponseType.HELP);
+
+			vbox.add(notebook);
+			notebook.show();
 		}
 
 		public void add_key_group(string group_name, string[] keys) {
-			var frame = new Gtk.Frame(group_name);
 			var alignment = new Gtk.Alignment(0.0f, 0.0f, 1.0f, 1.0f);
 			var box = new Gtk.VBox(false, 0);
-			var label_widget = frame.label_widget;
-			label_widget.modify_font(Pango.FontDescription.from_string("Bold"));
-			frame.border_width = 10;
-			frame.add(alignment);
-			alignment.add(box);
+			var label_widget = new Gtk.Label(group_name);
+
 			alignment.left_padding = 10;
-//			frame.shadow_type = Gtk.ShadowType.NONE;
+
 			foreach(weak string key in keys) {
 				try {
-				var widget = create_proxy_widget(key);
-				box.pack_start(widget, false, false, 5);
+					var widget = create_proxy_widget(key);
+					box.pack_start(widget, false, false, 5);
 				} catch(GLib.Error e) {
 					warning("%s", e.message);
 				}
-			} 
-			vbox.pack_start(frame, true, false, 0);
-			frame.show_all();
+			}
+
+			alignment.add(box);
+			alignment.show_all();
+			label_widget.show_all();
+			notebook.append_page(alignment, label_widget);
 		}
 
 		private Gtk.Widget create_proxy_widget(string key) throws GLib.Error {
 			GConf.Entry entry = _default_client.get_entry(key, null, true);
-       		GConf.Schema schema = safely_get_schema(entry);
+			GConf.Schema schema = safely_get_schema(entry);
 			weak string tooltip = schema.get_long_desc();
 
 			Gtk.Box row = new Gtk.HBox(false, 0);
-       		
-       		Gtk.Label label = new Gtk.Label(schema.get_short_desc());
-       		label.justify = Gtk.Justification.LEFT;
+			Gtk.Label label = new Gtk.Label(schema.get_short_desc());
+			label.justify = Gtk.Justification.LEFT;
 			label.tooltip_text = tooltip;
-       			
-       		Gtk.Widget action_widget;
+
+			Gtk.Widget action_widget;
 			Gtk.Widget render_widget;
-       		switch(schema.get_type()) {
-       			case ValueType.BOOL:
-       				var checkbox = new Gtk.CheckButton();
-       				checkbox.active = _default_client.get_bool(entry.key);
-       				checkbox.clicked += onCheckButtonActivated;
+			switch(schema.get_type()) {
+				case ValueType.BOOL:
+					var checkbox = new Gtk.CheckButton();
+					checkbox.active = _default_client.get_bool(entry.key);
+					checkbox.clicked += onCheckButtonActivated;
 					checkbox.add(label);
 					render_widget = checkbox;
 					action_widget = render_widget;
-       				break;
-       			case ValueType.STRING:
-       				var entrybox = new Gtk.Entry();
+					break;
+				case ValueType.STRING:
+					var entrybox = new Gtk.Entry();
 					var box = new Gtk.HBox(false, 0);
-       				entrybox.text = _default_client.get_string(entry.key);
-       				/* TODO: connect changed signal to eventhandler */
+					entrybox.text = _default_client.get_string(entry.key);
+					/* TODO: connect changed signal to eventhandler */
 					box.pack_start(label, false, false, 2);
 					box.pack_start(entrybox, false, false, 2);
 					action_widget = entrybox;
 					render_widget = box;
-       				break;
-       			case ValueType.INT:
+					break;
+				case ValueType.INT:
 					var box = new Gtk.HBox(false, 0);
-       				var spin = new Gtk.SpinButton.with_range(-100, 200, 1);
-       				spin.value = _default_client.get_int(entry.key);
-       				spin.value_changed += onSpinButtonValueChanged;
+					var spin = new Gtk.SpinButton.with_range(-100, 200, 1);
+					spin.value = _default_client.get_int(entry.key);
+					spin.value_changed += onSpinButtonValueChanged;
 					box.pack_start(label, false, false, 2);
 					box.pack_start(spin, false, false, 2);
 					action_widget = spin;
 					render_widget = box;
-       				break;
-       			default:
-       				return new Gtk.EventBox();
+					break;
+				default:
+					return new Gtk.EventBox();
 			}
 			action_widget.tooltip_text = tooltip;
 			action_widget.set_data("gconf-entry", entry);
 			action_widget.set_data("gconf-schema", schema);
-				
+
 			Gtk.Button reset = new Gtk.Button.from_stock(Gtk.STOCK_CLEAR);
 			reset.tooltip_text = _("Reset to the default value");
-//			reset.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.SMALL_TOOLBAR));
+			//			reset.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.SMALL_TOOLBAR));
 			reset.set_data("gconf-entry", entry);
 			reset.set_data("gconf-schema", schema);
 			reset.set_data("target", action_widget);
@@ -164,18 +168,18 @@ using GConf;
 			weak GConf.Value default_value = schema.get_default_value();
 			var target = (Gtk.Widget)widget.get_data("target");
 			switch(schema.get_type()) {
-       			case ValueType.BOOL:
-       				var checkbutton = target as Gtk.CheckButton;
+				case ValueType.BOOL:
+					var checkbutton = target as Gtk.CheckButton;
 					checkbutton.active = default_value.get_bool();
-       				break;
-       			case ValueType.STRING:
+					break;
+				case ValueType.STRING:
 					var entrybox = target as Gtk.Entry;
-       				entrybox.text = default_value.get_string();
-       				break;
-       			case ValueType.INT:
-       				var spin = target as Gtk.SpinButton;
+					entrybox.text = default_value.get_string();
+					break;
+				case ValueType.INT:
+					var spin = target as Gtk.SpinButton;
 					spin.value = default_value.get_int();
-       				break;
-				}
+					break;
+			}
 		}
 	}
