@@ -3716,9 +3716,9 @@ namespace Gtk {
 		public int xthickness;
 		public int ythickness;
 		public void apply_default_background (Gdk.Window window, bool set_bg, Gtk.StateType state_type, Gdk.Rectangle area, int x, int y, int width, int height);
-		public unowned Gtk.Style attach (Gdk.Window window);
+		public Gtk.Style attach (Gdk.Window window);
 		[NoWrapper]
-		public virtual unowned Gtk.Style clone ();
+		public virtual Gtk.Style clone ();
 		public virtual void copy ();
 		public void detach ();
 		[NoWrapper]
