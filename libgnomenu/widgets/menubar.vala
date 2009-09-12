@@ -268,16 +268,6 @@ static const string EMPTY_OVERFLOWN_MENU =
 
 	private bool disposed = false;
 
-	public override void style_set(Gtk.Style? old_style) {
-		/* FIXME: do we need to manually chain up the style_set
-		 * to overflown arrow */
-		base.style_set(old_style);
-		_overflown_arrow.style = this.style;
-		/* reset_bg_pixmap is also weird, because it will
-		 * emit a style set! */
-		reset_bg_pixmap();
-	}
-
 	private void setup_overflown_arrow() {
 		/* this function is invoked by construct */
 		_overflown_arrow.set_parent(this);
@@ -368,18 +358,12 @@ static const string EMPTY_OVERFLOWN_MENU =
 		cairo.rectangle (0, 0, allocation.width, allocation.height);
 		cairo.fill();
 
+		Gtk.Style style = this.get_style();
 		/* put the new pixmap into the widget style */
 		style.bg_pixmap[(int)Gtk.StateType.NORMAL] = pixmap;
 
-		/* because style is always already attached to window
-		 * we don't need to handle the possibility of a newly
-		 * created style */
-		/* FIXME: then why the hell need I attach it again? */
-		style.attach(this.window);
 		style.set_background(window, Gtk.StateType.NORMAL);
-		/* make sure the attach_count is reduced */
-		style.detach();
-		/* FIXME: Do we need this redraw */
+		/* we need this redraw to repaint the background */
 		this.queue_draw();
 	}
 	public override bool move_selected(int distance) {
@@ -435,10 +419,7 @@ static const string EMPTY_OVERFLOWN_MENU =
 		background.offset_x += delta_x;
 		background.offset_y += delta_y;
 		
-		/* FIXME: is this line useful at all? */
-		/* update the allocation before base.size_allocate */
-		allocation = (Gtk.Allocation) a;
-
+		/* size_allocate will set allocation to a */
 		base.size_allocate(a);
 
 		/* calculate the allocation of the overflown arrow */
@@ -501,30 +482,10 @@ static const string EMPTY_OVERFLOWN_MENU =
 		}
 	}
 	public override bool expose_event(Gdk.EventExpose event) {
-		/* FIXME: why do we need to paint the focus? */
-		if((get_flags() & Gtk.WidgetFlags.HAS_FOCUS) != 0) {
-			Gtk.paint_focus(style,
-					window,
-					(Gtk.StateType)state,
-					null,
-					this,
-					"menubar-applet",
-					0, 0, -1, -1);
-		}
 		foreach(var child in get_children()) {
 			propagate_expose(child, event);
 		}
 		propagate_expose(_overflown_arrow, event);
-		return false;
-	}
-
-	/* FIXME: remove focus_in/out_event and investigate the effects */
-	public override bool focus_out_event (Gdk.EventFocus event) {
-		queue_draw();
-		return false;
-	}
-	public override bool focus_in_event (Gdk.EventFocus event) {
-		queue_draw();
 		return false;
 	}
 
