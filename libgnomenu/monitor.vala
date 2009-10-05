@@ -54,12 +54,30 @@ internal class Gnomenu.Monitor: GLib.Object {
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
 		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
 			_desktop = window;
+		/* FIXME: see if this condition is needed at all*/
 		if(_current_window == null)
 			update_current_window();
 	}
 
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window? previous_window) {
-		update_current_window();
+		Wnck.Window window = screen.get_active_window();
+		/* This is to workaround a weird issue that wnck always 
+		 * invokes two signals when the active window is changed,
+		 * at least true for metacity:
+		 *
+		 * 1st for active_window = null,
+		 * 2nd for the real active_window.
+		 *
+		 * */
+		if(window == null) {
+			/* two nulls means the desktop is focused
+			 * one null means the previous_window is
+			 * focused */
+			if(previous_window == null)
+				update_current_window();
+		} else {
+			update_current_window();
+		}
 	}
 
 	private void update_desktop_window() {
@@ -73,35 +91,39 @@ internal class Gnomenu.Monitor: GLib.Object {
 	}
 	private void update_current_window() {
 		Wnck.Window old = _current_window;
-		_current_window = _screen.get_active_window();
+		Wnck.Window @new = _screen.get_active_window();
 
-		if(_current_window == null) {
+		if(@new == null) {
 			/* Try to use the desktop window if there is no current window
 			 * AKA fallback to nautilus desktop menubar if there is no current window
 			 * */
 			_current_window = _desktop;
+		} else {
+			_current_window = @new;
+		}
+
+		if(old == _current_window) {
+			/* if the current_window is not changed, do nothing */
+			return;
 		}
 
 		if(_current_window != null) {
-			/* Look for the transient_for(or Parent) window */
 			switch(_current_window.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
-				case Wnck.WindowType.DESKTOP:
 				case Wnck.WindowType.UTILITY:
 				case Wnck.WindowType.DIALOG:
+				case Wnck.WindowType.DESKTOP:
 					break;
 				default:
 					_current_window = _desktop;
 					break;
 			}
 		}
-		if(old == _current_window) {
-			/* if the current_window is not changed, do nothing */
-			return;
-		}
+
 		/* emit the window changed signal */
 		active_window = Window.foreign_new(_current_window.get_xid());
 	}
+
 	private void detach_from_screen() {
 		if(_screen != null) {
 			_screen.window_opened -= on_window_opened;

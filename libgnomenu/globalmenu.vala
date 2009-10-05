@@ -27,11 +27,39 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 	private Gnomenu.Window _root_window;
 	private Gnomenu.Monitor active_window_monitor;
 
+	/* the number(id) of the physical monitor this widget
+	 * resides */
+	private int monitor_num {
+		get {
+			if(!this.is_realized()) {return -1;}
+			Gdk.Screen screen = get_screen();
+			return screen.get_monitor_at_window(this.window);
+		}
+	}
+
+	private int get_monitor_num_at_pointer() {
+		if(window == null) return -1;
+		Gdk.Screen screen = this.get_screen();
+		if(screen == null) return -1;
+		Gdk.Display display = this.get_display();
+		int x, y;
+		display.get_pointer(null, out x, out y, null);
+		return screen.get_monitor_at_point(x, y);
+		
+	}
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.active_window_changed += (mon, prev) => {
-			current_window = active_window_monitor.active_window;
-			debug("current window changed to %p", current_window);
+			Gnomenu.Window @new = active_window_monitor.active_window;
+			int num = this.monitor_num;
+			int win_num = get_monitor_num_at_pointer();
+			if(num != -1 && win_num != -1 && win_num != num) {
+				debug("%p, current window on monitor(%d), me on (%d) skipped", this, num, win_num);
+				return;
+			}
+
+			current_window = @new;
+			debug("%p, current window changed to %p", this, current_window);
 			if(prev != null) {
 				prev.menu_context_changed -= menu_context_changed;
 			}
@@ -53,6 +81,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 			}
 		};
 	}
+
 	private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
 
 	private void menu_context_changed(Gnomenu.Window window) {
