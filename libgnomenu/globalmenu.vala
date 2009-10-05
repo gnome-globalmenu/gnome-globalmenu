@@ -1,4 +1,4 @@
-public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
+public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	private bool _per_monitor_mode = true;
 	public bool per_monitor_mode {
 		get { return _per_monitor_mode;}
