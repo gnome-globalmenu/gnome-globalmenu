@@ -93,7 +93,7 @@ public class Applet : Panel.Applet {
 
 	private MenuBarBox menubars = new MenuBarBox();
 	private bool disposed = false;
-	private GlobalMenu main_menubar = new GlobalMenu();
+	private GlobalMenuBar main_menubar = new GlobalMenuBar();
 	private Switcher switcher = new Switcher();
 
 	private Notify.Notification notify_no_plugin;

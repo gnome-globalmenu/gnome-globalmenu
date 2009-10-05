@@ -3,14 +3,14 @@ using Gnomenu;
 
 
 namespace Gnomenu {
-	class TestGlobalMenu : TestMan {
-		GlobalMenu menubar;
+	class TestGlobalMenuBar : TestMan {
+		GlobalMenuBar menubar;
 		Entry entry;
 		Box box;
-		TestGlobalMenu () {
+		TestGlobalMenuBar () {
 			base("/GlobalMenu");
 			add("widget", () => {
-				menubar = new GlobalMenu();
+				menubar = new GlobalMenuBar();
 				window.add(menubar);
 				window.show_all();
 				Gtk.main();
@@ -20,7 +20,7 @@ namespace Gnomenu {
 		public static int main(string[] args) {
 			Test.init(ref args);
 			Gtk.init(ref args);
-			var t = new TestGlobalMenu();
+			var t = new TestGlobalMenuBar();
 			t.run();
 			return 0;
 		}

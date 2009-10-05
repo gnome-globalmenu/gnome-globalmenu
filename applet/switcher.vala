@@ -101,14 +101,14 @@ extern int system(string arg);
 		private void on_deactivate() {
 			update(false);
 		}
-		private void on_activate(Gnomenu.MenuBar _this, Gnomenu.MenuItem item) {
+		private void on_activate(Gnomenu.Shell _this, Gnomenu.Item item) {
 			if(item == _label_item) {		
 				update(true);
 				return;
 			}
 
 			/** Then handle the window actions */
-			Wnck.Window window = item_to_window(item);
+			Wnck.Window window = item_to_window(item as Gnomenu.MenuItem);
 			
 			/* if it is an Action Menu item, try to get reference to parent */
 			if (window == null) {
@@ -156,7 +156,7 @@ extern int system(string arg);
 				default:
 					/** dirty trick to ignore the activate
 					 * signal on the item with the wnck action menu */
-					if (item.submenu != null) return;
+					if (item.sub_shell != null) return;
 					if (window != null) perhaps_minimize_window(window);
 					break;
 			}

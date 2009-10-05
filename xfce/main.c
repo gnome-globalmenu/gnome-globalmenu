@@ -29,7 +29,7 @@ static void xfce_panel_plugin_init (XfcePanelPlugin * plugin) {
 		"class \"GnomenuMenuBar\" style:highest \"globalmenu_menu_bar_style\"\n"
 	);
 	gtk_widget_reset_rc_styles(plugin);
-	GnomenuGlobalMenu * menubar = gnomenu_global_menu_new();
+	GnomenuGlobalMenuBar * menubar = gnomenu_global_menu_bar_new();
 	g_object_ref_sink(menubar);
 
 	xfce_panel_plugin_add_action_widget(plugin, GTK_WIDGET(plugin));
