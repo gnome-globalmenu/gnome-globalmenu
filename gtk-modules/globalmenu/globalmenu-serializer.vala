@@ -145,8 +145,7 @@ namespace GlobalMenuGTK {
 			debug ("append text = %s", label_text);
 			if(label is AccelLabel) {
 				(label as AccelLabel).refetch();
-				string accel_string = (label as AccelLabel).accel_string;
-				accel_string.strip();
+				string accel_string = (label as AccelLabel).accel_string.strip();
 				if(accel_string.length > 0 && accel_string != "-/-" /*refer to gtkaccellabel.c:802*/ ) {
 					sb.append(Markup.printf_escaped(" accel=\"%s\"", accel_string));
 				}
