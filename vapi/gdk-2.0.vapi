@@ -24,6 +24,8 @@ namespace Gdk {
 		public int size;
 		public weak Gdk.Visual visual;
 		public void* windowing_data;
+		[CCode (has_construct_function = false)]
+		public Colormap (Gdk.Visual visual, bool allocate);
 		public bool alloc_color (Gdk.Color color, bool writeable, bool best_match);
 		public int alloc_colors (Gdk.Color[] colors, bool writeable, bool best_match, bool success);
 		public void change (int ncolors);
@@ -31,8 +33,6 @@ namespace Gdk {
 		public unowned Gdk.Screen get_screen ();
 		public static unowned Gdk.Colormap get_system ();
 		public unowned Gdk.Visual get_visual ();
-		[CCode (has_construct_function = false)]
-		public Colormap (Gdk.Visual visual, bool allocate);
 		public void query_color (ulong pixel, out Gdk.Color _result);
 	}
 	[Compact]
@@ -40,6 +40,8 @@ namespace Gdk {
 	public class Cursor {
 		public uint ref_count;
 		public Gdk.CursorType type;
+		[CCode (has_construct_function = false)]
+		public Cursor (Gdk.CursorType cursor_type);
 		[CCode (has_construct_function = false)]
 		public Cursor.for_display (Gdk.Display display, Gdk.CursorType cursor_type);
 		[CCode (has_construct_function = false)]
@@ -50,8 +52,6 @@ namespace Gdk {
 		public Cursor.from_pixmap (Gdk.Pixmap source, Gdk.Pixmap mask, Gdk.Color fg, Gdk.Color bg, int x, int y);
 		public unowned Gdk.Display get_display ();
 		public unowned Gdk.Pixbuf get_image ();
-		[CCode (has_construct_function = false)]
-		public Cursor (Gdk.CursorType cursor_type);
 	}
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public class Device : GLib.Object {
@@ -108,7 +108,7 @@ namespace Gdk {
 		public void get_maximal_cursor_size (out uint width, out uint height);
 		public virtual int get_n_screens ();
 		public unowned string get_name ();
-		public void get_pointer (out unowned Gdk.Screen screen, int x, int y, Gdk.ModifierType mask);
+		public void get_pointer (out unowned Gdk.Screen screen, out int x, out int y, out Gdk.ModifierType mask);
 		public virtual unowned Gdk.Screen get_screen (int screen_num);
 		public unowned Gdk.Window get_window_at_pointer (int win_x, int win_y);
 		public void keyboard_ungrab (uint32 time_);
@@ -137,7 +137,7 @@ namespace Gdk {
 	}
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public class DisplayManager : GLib.Object {
-		public static unowned Gdk.DisplayManager get ();
+		public static unowned Gdk.DisplayManager @get ();
 		public unowned Gdk.Display get_default_display ();
 		public unowned GLib.SList list_displays ();
 		public void set_default_display (Gdk.Display display);
@@ -171,33 +171,33 @@ namespace Gdk {
 		public unowned Gdk.Image copy_to_image (Gdk.Image image, int src_x, int src_y, int dest_x, int dest_y, int width, int height);
 		[NoWrapper]
 		public virtual unowned Gdk.GC create_gc (Gdk.GCValues values, Gdk.GCValuesMask mask);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_arc")]
 		public virtual void draw_arc (Gdk.GC gc, bool filled, int x, int y, int width, int height, int angle1, int angle2);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_drawable")]
 		public virtual void draw_drawable (Gdk.GC gc, Gdk.Drawable src, int xsrc, int ysrc, int xdest, int ydest, int width, int height);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_glyphs")]
 		public virtual void draw_glyphs (Gdk.GC gc, Pango.Font font, int x, int y, Pango.GlyphString glyphs);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_glyphs_transformed")]
 		public virtual void draw_glyphs_transformed (Gdk.GC gc, Pango.Matrix matrix, Pango.Font font, int x, int y, Pango.GlyphString glyphs);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_image")]
 		public virtual void draw_image (Gdk.GC gc, Gdk.Image image, int xsrc, int ysrc, int xdest, int ydest, int width, int height);
-		[NoWrapper]
-		public virtual void draw_lines (Gdk.GC gc, Gdk.Point points, int npoints);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_lines")]
+		public virtual void draw_lines (Gdk.GC gc, Gdk.Point[] points);
+		[CCode (cname = "gdk_draw_pixbuf")]
 		public virtual void draw_pixbuf (Gdk.GC? gc, Gdk.Pixbuf pixbuf, int src_x, int src_y, int dest_x, int dest_y, int width, int height, Gdk.RgbDither dither, int x_dither, int y_dither);
-		[NoWrapper]
-		public virtual void draw_points (Gdk.GC gc, Gdk.Point points, int npoints);
-		[NoWrapper]
-		public virtual void draw_polygon (Gdk.GC gc, bool filled, Gdk.Point points, int npoints);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_points")]
+		public virtual void draw_points (Gdk.GC gc, Gdk.Point[] points);
+		[CCode (cname = "gdk_draw_polygon")]
+		public virtual void draw_polygon (Gdk.GC gc, bool filled, Gdk.Point[] points);
+		[CCode (cname = "gdk_draw_rectangle")]
 		public virtual void draw_rectangle (Gdk.GC gc, bool filled, int x, int y, int width, int height);
-		[NoWrapper]
-		public virtual void draw_segments (Gdk.GC gc, Gdk.Segment segs, int nsegs);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_segments")]
+		public virtual void draw_segments (Gdk.GC gc, Gdk.Segment[] segs);
+		[CCode (cname = "gdk_draw_text")]
 		public virtual void draw_text (Gdk.Font font, Gdk.GC gc, int x, int y, string text, int text_length);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_text_wc")]
 		public virtual void draw_text_wc (Gdk.Font font, Gdk.GC gc, int x, int y, Gdk.WChar text, int text_length);
-		[NoWrapper]
+		[CCode (cname = "gdk_draw_trapezoids")]
 		public virtual void draw_trapezoids (Gdk.GC gc, Gdk.Trapezoid[] trapezoids);
 		public virtual unowned Gdk.Region get_clip_region ();
 		public virtual unowned Gdk.Colormap get_colormap ();
@@ -238,8 +238,10 @@ namespace Gdk {
 		public Gdk.EventType type;
 		public Gdk.EventVisibility visibility;
 		public Gdk.EventWindowState window_state;
+		[CCode (has_construct_function = false)]
+		public Event (Gdk.EventType type);
 		public Gdk.Event copy ();
-		public static unowned Gdk.Event get ();
+		public static unowned Gdk.Event @get ();
 		public bool get_axis (Gdk.AxisUse axis_use, out double value);
 		public bool get_coords (out double x_win, out double y_win);
 		public static unowned Gdk.Event get_graphics_expose (Gdk.Window window);
@@ -248,8 +250,6 @@ namespace Gdk {
 		public bool get_state (out Gdk.ModifierType state);
 		public uint32 get_time ();
 		public static void handler_set (owned Gdk.EventFunc func);
-		[CCode (has_construct_function = false)]
-		public Event (Gdk.EventType type);
 		public static unowned Gdk.Event peek ();
 		public void put ();
 		public static void request_motions (Gdk.EventMotion event);
@@ -276,12 +276,12 @@ namespace Gdk {
 		public weak Gdk.Colormap colormap;
 		public int ts_x_origin;
 		public int ts_y_origin;
+		[CCode (has_construct_function = false)]
+		public GC (Gdk.Drawable drawable);
 		public void copy (Gdk.GC src_gc);
 		public unowned Gdk.Colormap get_colormap ();
 		public unowned Gdk.Screen get_screen ();
 		public virtual void get_values (Gdk.GCValues values);
-		[CCode (has_construct_function = false)]
-		public GC (Gdk.Drawable drawable);
 		public void offset (int x_offset, int y_offset);
 		public void set_background (Gdk.Color color);
 		public void set_clip_mask (Gdk.Bitmap mask);
@@ -319,10 +319,10 @@ namespace Gdk {
 		public weak Gdk.Visual visual;
 		public int width;
 		public void* windowing_data;
-		public unowned Gdk.Colormap get_colormap ();
-		public uint32 get_pixel (int x, int y);
 		[CCode (has_construct_function = false)]
 		public Image (Gdk.ImageType type, Gdk.Visual visual, int width, int height);
+		public unowned Gdk.Colormap get_colormap ();
+		public uint32 get_pixel (int x, int y);
 		public void put_pixel (int x, int y, uint32 pixel);
 		public void set_colormap (Gdk.Colormap colormap);
 	}
@@ -344,9 +344,9 @@ namespace Gdk {
 	}
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public class PangoRenderer : Pango.Renderer {
-		public static unowned Pango.Renderer get_default (Gdk.Screen screen);
 		[CCode (type = "PangoRenderer*", has_construct_function = false)]
 		public PangoRenderer (Gdk.Screen screen);
+		public static unowned Pango.Renderer get_default (Gdk.Screen screen);
 		public void set_drawable (Gdk.Drawable drawable);
 		public void set_gc (Gdk.GC gc);
 		public void set_override_color (Pango.RenderPart part, Gdk.Color color);
@@ -356,6 +356,8 @@ namespace Gdk {
 	}
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public class Pixmap : Gdk.Drawable {
+		[CCode (has_construct_function = false)]
+		public Pixmap (Gdk.Drawable? drawable, int width, int height, int depth);
 		public static unowned Gdk.Pixmap colormap_create_from_xpm (Gdk.Drawable drawable, Gdk.Colormap colormap, out unowned Gdk.Bitmap mask, Gdk.Color transparent_color, string filename);
 		public static unowned Gdk.Pixmap colormap_create_from_xpm_d (Gdk.Drawable drawable, Gdk.Colormap colormap, out unowned Gdk.Bitmap mask, Gdk.Color transparent_color, string data);
 		public static unowned Gdk.Pixmap create_from_data (Gdk.Drawable drawable, string data, int width, int height, int depth, Gdk.Color fg, Gdk.Color bg);
@@ -366,8 +368,6 @@ namespace Gdk {
 		public static unowned Gdk.Pixmap foreign_new_for_screen (Gdk.Screen screen, Gdk.NativeWindow anid, int width, int height, int depth);
 		public static unowned Gdk.Pixmap lookup (Gdk.NativeWindow anid);
 		public static unowned Gdk.Pixmap lookup_for_display (Gdk.Display display, Gdk.NativeWindow anid);
-		[CCode (has_construct_function = false)]
-		public Pixmap (Gdk.Drawable? drawable, int width, int height, int depth);
 	}
 	[Compact]
 	[CCode (cheader_filename = "gdk/gdk.h")]
@@ -378,14 +378,14 @@ namespace Gdk {
 	[Compact]
 	[CCode (copy_function = "gdk_region_copy", free_function = "gdk_region_destroy", cheader_filename = "gdk/gdk.h")]
 	public class Region {
-		public unowned Gdk.Region copy ();
+		[CCode (has_construct_function = false)]
+		public Region ();
+		public Gdk.Region copy ();
 		public bool empty ();
 		public bool equal (Gdk.Region region2);
 		public void get_clipbox (out Gdk.Rectangle rectangle);
 		public void get_rectangles (Gdk.Rectangle[] rectangles);
 		public void intersect (Gdk.Region source2);
-		[CCode (has_construct_function = false)]
-		public Region ();
 		public void offset (int dx, int dy);
 		public bool point_in (int x, int y);
 		public static Gdk.Region polygon (Gdk.Point[] points, Gdk.FillRule fill_rule);

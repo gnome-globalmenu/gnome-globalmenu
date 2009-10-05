@@ -25,23 +25,21 @@ namespace Panel {
 	public class Applet : Gtk.EventBox {
 		[CCode (has_construct_function = false)]
 		public Applet ();
+		public AppletFlags flags {get; set;}
+		public bool locked_down {get;}
+		public AppletOrient orient {get;}
 		public string get_preferences_key ();
-		public void add_preferences(string schema_dir) throws GLib.Error;
+		public uint size {get;}
+		public void request_focus(uint32 timestamp);
 		public static int factory_main (string iid, GLib.Type applet_type, AppletFactoryCallback callback);
 		public void set_background_widget (Gtk.Widget? widget);
-		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
 		public void setup_menu (string xml, [CCode (array_length = false)]BonoboUI.Verb[] verb_list, void* data);
-		public Bonobo.Control control {get;}
-
 		public virtual signal void change_background (AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap);
 		public virtual signal void change_orient (AppletOrient orient);
 		public virtual signal void change_size (uint size_hint);
+		public virtual signal void move_focus_out_of_applet (Gtk.DirectionType direction);
 
-		public AppletOrient orient {get;}
-		public AppletFlags flags {get; set;}
-		public uint size {get;}
-		public bool locked_down {get;}
-		public void request_focus(uint32 timestamp);
+		public AppletBackgroundType get_background (out Gdk.Color color, out Gdk.Pixmap pixmap);
 
 		public bool gconf_get_bool(string key) throws GLib.Error;
 		public void gconf_set_bool(string key, bool value) throws GLib.Error;
@@ -50,14 +48,11 @@ namespace Panel {
 		public int gconf_get_int(string key) throws GLib.Error;
 		public void gconf_set_int(string key) throws GLib.Error;
 		public void set_size_hints(int[]? size_hints, int base_size);
+
+		public void add_preferences(string schema_dir) throws GLib.Error;
+		public Bonobo.Control control {get;}
 	}
-	[CCode (cprefix = "PANEL_APPLET_ORIENT_")]
-	public enum AppletOrient {
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT
-	}
+
 	[CCode (cprefix = "PANEL_")]
 	public enum AppletBackgroundType {
 		NO_BACKGROUND,
@@ -73,8 +68,17 @@ namespace Panel {
 		HAS_HANDLE
 	}
 
+	[CCode (cprefix = "PANEL_APPLET_ORIENT_")]
+	public enum AppletOrient {
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT
+	}
+
 	public delegate bool AppletFactoryCallback (Applet applet, string iid);
 }
+
 namespace Bonobo {
 	[CCode (cheader_filename = "bonobo/bonobo-main.h")]
 	public bool init (ref int argc, [CCode (array_length = false)] string[] argv);

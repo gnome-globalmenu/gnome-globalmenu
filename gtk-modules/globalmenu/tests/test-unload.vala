@@ -6,13 +6,13 @@ namespace GnomenuGtk {
 		FileChooser chooser = null;
 		Button load = null;
 		Button unload = null;
-		Settings settings = null;
+		Gtk.Settings settings = null;
 		Module module;
 
 		static const string rel_path = "/gtk-modules/globalmenu";
 		TestUnload () {
 			base("/GnomenuGTK/Unload");
-			settings = Settings.get_default();
+			settings = Gtk.Settings.get_default();
 			add("test", () => {
 				Builder builder = new Builder();
 				try {
