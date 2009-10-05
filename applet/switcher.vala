@@ -285,6 +285,9 @@ extern int system(string arg);
 			if (!this.visible) return;
 			
 			if(current_window == null) return;
+
+			if (!guess_dock_is_around())
+				set_iconify_destination(_current_window);
 			
 			Application app = Application.lookup_from_wnck(current_window.get_application());
 
@@ -406,8 +409,6 @@ extern int system(string arg);
 			}
 			set {
 				_current_window = value;
-				if (!guess_dock_is_around())
-					set_iconify_destination(_current_window);
 				/* always refresh !*/
 				update(true);
 			}
