@@ -8,6 +8,18 @@ static void gmsg_foreach_cb(GtkWidget * child, gpointer data[]) {
 	if(GNOMENU_IS_MENU_ITEM(child))
 	(*pos) --;
 }
+void gtk_menu_shell_remove_all(GtkMenuShell * menu_shell) {
+	GList * children = gtk_container_get_children(GTK_CONTAINER(menu_shell));
+	GList * iter;
+	for(iter = children; iter; iter = iter->next) {
+		gtk_container_remove(GTK_CONTAINER(menu_shell), iter->data);
+	}
+}
+/**
+ * Ensures the menu shell has 'length' elements
+ * If it had more elements, set 'truncated' flag on the extra ones.
+ * non-gnomenu-item is not counted.
+ * */
 void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
 	GList * children = gtk_container_get_children(menu_shell);
 	GList * iter;

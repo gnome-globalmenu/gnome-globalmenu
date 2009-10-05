@@ -267,7 +267,7 @@ public class Applet : Panel.Applet {
 		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
 		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
-
+		main_menubar.gnome_shell_mode = true;
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
 	}

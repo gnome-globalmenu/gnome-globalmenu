@@ -11,7 +11,7 @@
 	 * each item has an id,
 	 * associated with a position(after attached to a MenuShell)
 	 *
-	 * MenuItem also holds a back-reference to the toplevel 
+	 * MenuItem also holds a back-reference to the topmost 
 	 * menu bar. When an item is activated, the activated signal
 	 * on the menu bar is also invoked.
 	 * 
@@ -476,14 +476,31 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		base.forall_internal(include_internals, callback);
 	}
 	public override void activate() {
-		(toplevel_shell as MenuBar).emit_activate(this);
+		/* overflown arrow has its own translations */
+		if(topmost_shell is Gnomenu.MenuBar) {
+			Gnomenu.MenuBar menubar = topmost_shell as Gnomenu.MenuBar;
+			menubar.emit_activate(this);
+		} else {
+			debug("activate %s, %p", this.item_path, topmost_shell);
+			topmost_shell.activate(this);
+		}
 	}
 	public override void select() {
-		(toplevel_shell as MenuBar).emit_select(this);
+		if(topmost_shell is Gnomenu.MenuBar) {
+			Gnomenu.MenuBar menubar = topmost_shell as Gnomenu.MenuBar;
+			menubar.emit_select(this);
+		} else {
+			topmost_shell.select(this);
+		}
 		base.select();
 	}
 	public override void deselect() {
-		(toplevel_shell as MenuBar).emit_deselect(this);
+		if(topmost_shell is Gnomenu.MenuBar) {
+			Gnomenu.MenuBar menubar = topmost_shell as Gnomenu.MenuBar;
+			menubar.emit_deselect(this);
+		} else {
+			topmost_shell.deselect(this);
+		}
 		base.deselect();
 	}
 	private void update_show_image() {
@@ -702,3 +719,4 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		}
 	}
 }
+

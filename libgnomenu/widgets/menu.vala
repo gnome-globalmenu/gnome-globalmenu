@@ -9,6 +9,9 @@ public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
 	private bool disposed = false;
 	private bool _use_rgba_colormap = false;
 	public static bool default_use_rgba_colormap;
+	/* if the menu is logically the topmost shell,
+	 * even if it is a submenu of some item */
+	public bool is_topmost { get; set; default = false;}
 	public bool use_rgba_colormap {
 		get {
 			return _use_rgba_colormap;
@@ -30,6 +33,7 @@ public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
 	 ********* */
 	public Item? owner {
 		get {
+			if(is_topmost) return null;
 			return get_attach_widget() as Item;
 		}
 	}

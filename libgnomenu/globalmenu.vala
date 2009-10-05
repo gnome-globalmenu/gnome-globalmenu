@@ -17,7 +17,49 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 			update();
 		}
 	}
+	private bool _gnome_shell_mode = false;
+	private Gnomenu.Shell _main_shell = null;
+	private Gnomenu.Shell main_shell {
+		get {
+			if(_main_shell != null) return _main_shell;
+			return this;
+		}
+		set {
+			if(_main_shell != null) {
+				_main_shell.activate -= item_activated;
+				_main_shell.select -= item_selected;
+				_main_shell.deselect -= item_deselected;
+			}
+			_main_shell = value;
+			if(_main_shell == null) _main_shell = this;
+			_main_shell.activate += item_activated;
+			_main_shell.select += item_selected;
+			_main_shell.deselect += item_deselected;
 
+		}
+	}
+	public bool gnome_shell_mode {
+		get { return _gnome_shell_mode; }
+		set {
+			if(value != _gnome_shell_mode) {
+				_gnome_shell_mode = value;
+				if(!_gnome_shell_mode) {
+					gtk_menu_shell_remove_all(this);
+					main_shell = this;
+				} else {
+					gtk_menu_shell_remove_all(this);
+					Gtk.MenuItem item = new Gtk.MenuItem.with_label("Menu");
+					item.visible = true;
+					this.append(item);
+					Gnomenu.Menu menu = new Gnomenu.Menu();
+					menu.is_topmost = true;
+					item.submenu = menu;
+					main_shell = menu;
+				}
+			}
+			update();
+		}
+	}
 	private Gnomenu.Window _current_window;
 	[CCode (notify = true)]
 	public Gnomenu.Window current_window { get {
@@ -80,27 +122,28 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		}
 	}
 	construct {
+		main_shell = this;
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.active_window_changed += change_active_window;
-		activate += (menubar, item) => {
-			if(current_window != null) {
-				current_window.emit_menu_event(item.item_path);
-			}
-		};
-		select += (menubar, item) => {
-			if(current_window != null) {
-				current_window.emit_menu_select(item.item_path, null);
-			}
-		};
-		deselect += (menubar, item) => {
-			if(current_window != null) {
-				current_window.emit_menu_deselect(item.item_path);
-			}
-		};
 	}
 
 	private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
 
+	private void item_activated (Gnomenu.Shell menubar, Gnomenu.Item item){
+		if(current_window != null) {
+			current_window.emit_menu_event(item.item_path);
+		}
+	}
+	private void item_selected (Gnomenu.Shell menubar, Gnomenu.Item item){
+		if(current_window != null) {
+			current_window.emit_menu_select(item.item_path, null);
+		}
+	}
+	private void item_deselected (Gnomenu.Shell menubar, Gnomenu.Item item){
+		if(current_window != null) {
+			current_window.emit_menu_deselect(item.item_path);
+		}
+	}
 	private void menu_context_changed(Gnomenu.Window window) {
 		/*
 		 * If window is not current window, 
@@ -201,7 +244,7 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		var context = _current_window.get_menu_context();
 		if(context == null) return;
 		try {
-			Parser.parse(this, context);
+			Parser.parse(main_shell, context);
 			show();
 		} catch(GLib.Error e) {
 			warning("%s", e.message);

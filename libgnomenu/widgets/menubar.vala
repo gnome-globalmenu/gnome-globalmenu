@@ -35,7 +35,7 @@ public class Gnomenu.Background {
 /**
  * A fancy menubar used by GlobalMenu.PanelApplet;
  * Not the same as Gtk.MenuBar, Gnomenu.MenuBar also
- * explicityly acts as the toplevel menubar of
+ * explicityly acts as the topmost menubar of
  * its logical descents.
  *
  * It supports changing the background,
@@ -86,10 +86,9 @@ static const string EMPTY_OVERFLOWN_MENU =
 		return item;
 	}
 	/**
-	 * This signal is emitted when a child item is activated
+	 * emit an activate signal if needed.
 	 */
-	public signal void activate(MenuItem item);
-	public virtual void emit_activate(MenuItem item) {
+	internal void emit_activate(MenuItem item) {
 		if(item == _overflown_arrow) {
 			rebuild_overflown_menu();
 			return;
@@ -98,16 +97,14 @@ static const string EMPTY_OVERFLOWN_MENU =
 		activate(resolve_item_maybe_from_overflown(item));
 	}
 
-	public signal void select(MenuItem item);
-	public signal void deselect(MenuItem item);
-	public virtual void emit_select(MenuItem item) {
+	internal void emit_select(MenuItem item) {
 		if(item == _overflown_arrow) {
 			return;
 		}
 		debug("item %s selected", item.item_path);
 		select(resolve_item_maybe_from_overflown(item));
 	}
-	public virtual void emit_deselect(MenuItem item) {
+	internal void emit_deselect(MenuItem item) {
 		if(item == _overflown_arrow) {
 			return;
 		}
@@ -212,46 +209,8 @@ static const string EMPTY_OVERFLOWN_MENU =
 		}
 	}
 	
-	/**
-	 * Look up a child item from a path.
-	 * The path is a string constructed by two parts:
-	 *
-	 * [rev:]/id/id/id
-	 *
-	 * where rev: is an integer stamp, and id can be either
-	 * the id property or the position of the menu item.
-	 *
-	 * return a strong reference of the menu item if found;
-	 * null if not.
-	 */
 	public new MenuItem? get(string path) {
-		string[] tokens = path.split_set("/", -1);
-		tokens.length = (int) strv_length(tokens);
-		Shell shell = this;
-		/*
-		weak string rev = tokens[0];
-		FIXME: check rev */
-		for(int i = 1; i < tokens.length; i++) {
-			weak string token = tokens[i];
-			List<weak Gtk.Widget> children = (shell as Gtk.MenuShell).get_children();
-			MenuItem item = null;
-			foreach(var child in children) {
-				var child_item = child as MenuItem;
-				if(child_item != null) {
-					if(child_item.item_id == token
-					|| (child_item.item_id == null && 
-						child_item.item_position.to_string() == token)) {
-						item = child_item;
-						break;
-					}
-				}
-			}
-			if(i == tokens.length - 1 /*last token, maybe found*/) return item;	
-			if(item == null /*intermediate item is not found*/) return null; 
-			shell = item.submenu as Shell;
-			if(shell == null /*intermediate menu is not found*/) return null;
-		}
-		return null;
+		return this.get_item_by_path(path) as MenuItem;
 	}
 
 /* Private variables */

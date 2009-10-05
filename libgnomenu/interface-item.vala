@@ -21,8 +21,8 @@ namespace Gnomenu {
 		public abstract bool has_sub_shell {get; set;}
 		public abstract bool client_side_sub_shell {get; set;}
 
-		public Shell? toplevel_shell {get {
-			return shell.toplevel_shell;
+		public Shell? topmost_shell {get {
+			return shell.topmost_shell;
 		} }
 		public int item_position {get {
 			return shell.get_item_position(this);
@@ -62,7 +62,7 @@ namespace Gnomenu {
 		 * Obtain the path of the this item.
 		 *
 		 * The path is constructed by backtracing the 
-		 * menu hierarch until reaching the toplevel menu bar.
+		 * menu hierarch until reaching the topmost menu bar.
 		 *
 		 * Notice that the [rev:] prefix in global menu specification
 		 * is not implemented (yet).
@@ -75,7 +75,7 @@ namespace Gnomenu {
 		 *
 		 * /0/New/Message
 		 *
-		 * 0/New/Message (If the toplevel menu bar is not found).
+		 * 0/New/Message (If the topmost menu bar is not found).
 		 *
 		 * The return value in the last case should 
 		 * probably be replaced by null.
