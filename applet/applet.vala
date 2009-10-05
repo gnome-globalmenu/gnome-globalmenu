@@ -363,7 +363,7 @@ public class Applet : Panel.Applet {
 		}
 		gcd.destroy();
     }
-	private void show_help() {
+	private new void show_help() {
 		try {
 		Gtk.show_uri(null, "http://code.google.com/p/gnome2-globalmenu/wiki/HelpCentral",
 		Gdk.CURRENT_TIME);
