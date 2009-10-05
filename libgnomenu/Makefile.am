@@ -2,7 +2,7 @@ NULL=
 SUBDIRS = . tests
 
 VALASOURCES = \
-	globalmenu.vala \
+	globalmenubar.vala \
 	gnomenu.vala \
 	monitor.vala \
 	window.vala \
