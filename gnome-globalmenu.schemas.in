@@ -122,5 +122,15 @@
 			<long>Allow accessing the menu items by the mnemonic keys. When this option is disabled, the topmost menu items are not directly accessible from keyboard.</long>
 		</locale>
 	</schema>
+	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/per_monitor_mode</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>TRUE</default>
+		<locale name="C">
+			<short>Enable per-monitor mode</short>
+			<long>In per-monitor mode, Global Menu tracks the active application on each physical display device. If this mode is disabled, the entire logic screen is treated as a single desktop. If this mode is enabled, each physical device is treated as a desktop.</long>
+		</locale>
+	</schema>
 </schemalist>
 </gconfschemafile>

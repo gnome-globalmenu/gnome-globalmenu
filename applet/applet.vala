@@ -260,6 +260,7 @@ public class Applet : Panel.Applet {
 		switcher.enable_search_box = gconf_get_bool("enable_search_box");
 		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
+		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
 
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
@@ -283,7 +284,8 @@ public class Applet : Panel.Applet {
 			new string[]{
 				root + "/has_handle",
 				root + "/use_rgba_colormap",
-				root + "/grab_mnemonic_keys"
+				root + "/grab_mnemonic_keys",
+				root + "/per_monitor_mode"
 			}
 		);
 		gcd.add_key_group(

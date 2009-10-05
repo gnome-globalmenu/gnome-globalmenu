@@ -1,7 +1,13 @@
 public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
+	private bool _per_monitor_mode = true;
+	public bool per_monitor_mode {
+		get { return _per_monitor_mode;}
+		set {
+			_per_monitor_mode = value;
+			change_active_window(null);
+		}
+	}
 	private bool _grab_keys = true;
-
-
 	public bool grab_keys {
 		get {
 			return _grab_keys;
@@ -47,24 +53,27 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		return screen.get_monitor_at_point(x, y);
 		
 	}
-	construct {
-		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
-		active_window_monitor.active_window_changed += (mon, prev) => {
-			Gnomenu.Window @new = active_window_monitor.active_window;
+	private void change_active_window(Gnomenu.Window? prev) {
+		Gnomenu.Window @new = active_window_monitor.active_window;
+		if(_per_monitor_mode) {
 			int num = this.monitor_num;
 			int win_num = get_monitor_num_at_pointer();
 			if(num != -1 && win_num != -1 && win_num != num) {
 				debug("%p, current window on monitor(%d), me on (%d) skipped", this, num, win_num);
 				return;
 			}
+		}
 
-			current_window = @new;
-			debug("%p, current window changed to %p", this, current_window);
-			if(prev != null) {
-				prev.menu_context_changed -= menu_context_changed;
-			}
-			current_window.menu_context_changed += menu_context_changed;
-		};
+		current_window = @new;
+		debug("%p, current window changed to %p", this, current_window);
+		if(prev != null) {
+			prev.menu_context_changed -= menu_context_changed;
+		}
+		current_window.menu_context_changed += menu_context_changed;
+	}
+	construct {
+		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
+		active_window_monitor.active_window_changed += change_active_window;
 		activate += (menubar, item) => {
 			if(current_window != null) {
 				current_window.emit_menu_event(item.item_path);
