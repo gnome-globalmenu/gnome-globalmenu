@@ -20,6 +20,21 @@ public class Gnomenu.Window : GLib.Object {
 	construct {
 		property_notify_event += property_notify_event_default_handler;
 	}
+	public bool is_on_active_workspace() {
+		var wnck_window = Wnck.Window.get(get_xid());
+		var screen = wnck_window.get_screen();
+		var workspace = screen.get_active_workspace();
+		if(workspace == null) return true;
+		return wnck_window.is_on_workspace(workspace);
+	}
+	public int get_monitor_num() {
+		Gdk.Screen screen = _window.get_screen();
+		/* for desktop we make it universal */
+		if(_window.get_type_hint() == Gdk.WindowTypeHint.DESKTOP) {
+			return -1;
+		}
+		return screen.get_monitor_at_window(_window);
+	}
 	private Gdk.Window _window;
 	public Gdk.Window window {
 		get {

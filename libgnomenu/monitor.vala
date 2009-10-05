@@ -120,8 +120,13 @@ internal class Gnomenu.Monitor: GLib.Object {
 			}
 		}
 
-		/* emit the window changed signal */
-		active_window = Window.foreign_new(_current_window.get_xid());
+		if(_current_window != null) {
+			/* emit the window changed signal */
+			active_window = Window.foreign_new(_current_window.get_xid());
+		} else {
+			/* if there is not even a desktop window */
+			active_window = null;
+		}
 	}
 
 	private void detach_from_screen() {

@@ -51,25 +51,33 @@ public class Gnomenu.GlobalMenu : Gnomenu.MenuBar {
 		int x, y;
 		display.get_pointer(null, out x, out y, null);
 		return screen.get_monitor_at_point(x, y);
-		
 	}
+
 	private void change_active_window(Gnomenu.Window? prev) {
+		if(prev != null) {
+			prev.menu_context_changed -= menu_context_changed;
+		}
 		Gnomenu.Window @new = active_window_monitor.active_window;
 		if(_per_monitor_mode) {
 			int num = this.monitor_num;
-			int win_num = get_monitor_num_at_pointer();
+			int win_num = -1;
+			if(@new != null) win_num = @new.get_monitor_num();
+			if(win_num == -1) win_num = get_monitor_num_at_pointer();
 			if(num != -1 && win_num != -1 && win_num != num) {
 				debug("%p, current window on monitor(%d), me on (%d) skipped", this, num, win_num);
+				if(current_window != null
+				&& !current_window.is_on_active_workspace()) {
+					current_window = null;
+				}
 				return;
 			}
 		}
 
 		current_window = @new;
 		debug("%p, current window changed to %p", this, current_window);
-		if(prev != null) {
-			prev.menu_context_changed -= menu_context_changed;
+		if(current_window != null) {
+			current_window.menu_context_changed += menu_context_changed;
 		}
-		current_window.menu_context_changed += menu_context_changed;
 	}
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
