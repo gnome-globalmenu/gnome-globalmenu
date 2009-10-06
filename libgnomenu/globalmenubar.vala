@@ -31,15 +31,6 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	private Gnomenu.Window _root_window;
 	private Gnomenu.Monitor active_window_monitor;
 
-	/* the number(id) of the physical monitor this widget
-	 * resides */
-	private int monitor_num {
-		get {
-			if(!this.is_realized()) {return -1;}
-			Gdk.Screen screen = get_screen();
-			return screen.get_monitor_at_window(this.window);
-		}
-	}
 
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
@@ -48,6 +39,9 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		active_window_monitor.monitor_num = -1;
 		active_window_monitor.active_window_changed += regrab_keys;
 		active_window_monitor.active_window_changed += emit_active_window_changed;
+		this.activate += item_activated;
+		this.select += item_selected;
+		this.deselect += item_deselected;
 	}
 
 	private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
@@ -127,15 +121,28 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	}
 	public override void hierarchy_changed(Gtk.Widget? old_toplevel) {
 		var toplevel = this.get_toplevel() as Gtk.Plug;
+		if(toplevel != null) {
 		/* Manually chain-up to the default keys_changed handler,
 		 * Working around a problem with GtkPlug/GtkSocket */
-		if(toplevel != null) {
 			toplevel.keys_changed += chainup_key_changed;
+			toplevel.configure_event += sync_monitor_num;
 		}
 		if((old_toplevel as Gtk.Plug)!= null) {
+		/* Manually chain-up to the default keys_changed handler,
+		 * Working around a problem with GtkPlug/GtkSocket */
 			(old_toplevel as Gtk.Plug).keys_changed -= chainup_key_changed;
 		}
+		if(old_toplevel != null)
+			toplevel.configure_event -= sync_monitor_num;
 	}
+
+	private bool sync_monitor_num() {
+		var screen = get_screen();
+		active_window_monitor.monitor_num = 
+		screen.get_monitor_at_window(this.window);
+		return false;
+	}
+
 	public override void screen_changed(Gdk.Screen? previous_screen) {
 		Gdk.Screen screen = get_screen();
 		if(previous_screen != screen) {
@@ -153,7 +160,7 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 			ungrab_mnemonic_keys(prev_window);
 			prev_window.set_key_widget(null);
 		}
-		if(_grab_keys) {
+		if(_grab_keys && active_window != null) {
 			active_window.set_key_widget(this.get_toplevel());
 			grab_mnemonic_keys(active_window);
 		}

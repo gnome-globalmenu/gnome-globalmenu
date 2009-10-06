@@ -20,21 +20,26 @@ public class Gnomenu.Window : GLib.Object {
 	construct {
 		property_notify_event += property_notify_event_default_handler;
 	}
+	internal Wnck.Window? get_wnck_window() {
+		return Wnck.Window.get(get_xid());
+	}
 	public bool is_on_active_workspace() {
-		var wnck_window = Wnck.Window.get(get_xid());
+		var wnck_window = get_wnck_window();
+		/*FIXME: is it ok to return true 
+		 * if the wnck window is destroyed?*/
+		if(wnck_window == null) return true;
 		var screen = wnck_window.get_screen();
 		var workspace = screen.get_active_workspace();
 		if(workspace == null) return true;
 		return wnck_window.is_on_workspace(workspace);
 	}
+
+	private int _monitor_num = -1;
 	public int get_monitor_num() {
-		Gdk.Screen screen = _window.get_screen();
-		/* for desktop we make it universal */
-		if(_window.get_type_hint() == Gdk.WindowTypeHint.DESKTOP) {
-			return -1;
-		}
-		return screen.get_monitor_at_window(_window);
+		return _monitor_num;
 	}
+	public signal void monitor_num_changed(int prev_num);
+
 	private Gdk.Window _window;
 	public Gdk.Window window {
 		get {
@@ -62,6 +67,7 @@ public class Gnomenu.Window : GLib.Object {
 
 	public Window (Gdk.Window window) {
 		this.window = window;
+		recompute_monitor_num();
 	}
 	public static Window? foreign_new (ulong xid) {
 		Gdk.Window gdk_window;
@@ -112,6 +118,9 @@ public class Gnomenu.Window : GLib.Object {
 				xevent->xany.window = new_target;
 				XSendEvent(display, new_target, false, 0, xevent);
 			break;
+			case X.EventType.ConfigureNotify:
+				recompute_monitor_num();
+			break;
 		}
 		return Gdk.FilterReturn.CONTINUE;
 	}
@@ -121,7 +130,20 @@ public class Gnomenu.Window : GLib.Object {
 		}
 		return this;
 	}
-	public virtual signal void property_notify_event(string? prop) { }
+	public signal void property_notify_event(string? prop);
+	private void recompute_monitor_num() {
+		Gdk.Screen screen = _window.get_screen();
+		int old_num = _monitor_num;
+		/* for desktop we make it universal */
+		if(_window.get_type_hint() == Gdk.WindowTypeHint.DESKTOP) {
+			_monitor_num = -1;
+		} else {
+			_monitor_num = screen.get_monitor_at_window(_window);
+		}
+		if(old_num != _monitor_num) {
+			monitor_num_changed(old_num);
+		}
+	}
 	/* FIXME: Will be fixed in VALA 0.7.6*/
 	void property_notify_event_default_handler (string? prop){
 		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
@@ -155,7 +177,7 @@ public class Gnomenu.Window : GLib.Object {
 			 * */
 			return;
 		}
-		var wnck_window = Wnck.Window.get(get_xid());
+		var wnck_window = get_wnck_window();
 		Gnomenu.Window old = transient;
 
 		if(wnck_window == null) {

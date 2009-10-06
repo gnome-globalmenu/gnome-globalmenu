@@ -32,12 +32,34 @@ internal class Gnomenu.Monitor: GLib.Object {
 			rebuild_managed_shell();
 		}
 	}
-	public int monitor_num {get; set;}
+	private int _monitor_num = -1;
+	public int monitor_num {
+		get { return _monitor_num; } 
+		set {
+			if(_monitor_num != value) {
+				_monitor_num = value;
+				/*Because when the monitor num has
+				 * changed, the old active window
+				 * may become inadaquate*/
+				active_window_moved();
+			}
+		}
+	}
 	public bool per_monitor_mode {get; set;}
 
 	public abstract signal void active_window_changed(Gnomenu.Window? prev_window);
 
 	public Gnomenu.Window active_window {get; private set;}
+
+	/* The window has focus, but is on a different monitor num
+	 * thus ignored by this monitor,
+	 * unless per_monitor_mode  is disabled.
+	 * We need this variable to keep track of the movement
+	 * of the focused window.once it is moved into this monitor
+	 * we rebuild the menu shell.
+	 * */
+	private Gnomenu.Window _dummy_window = null;
+	private Gnomenu.Window _desktop_window = null;
 
 	public Monitor(Gdk.Screen? screen) {
 		attach(screen);
@@ -50,26 +72,32 @@ internal class Gnomenu.Monitor: GLib.Object {
 		}
 	}
 	private Wnck.Screen? _screen = null;
-	private Wnck.Window? _desktop = null;
+	private Wnck.Window? _wnck_desktop_window = null;
 	private Wnck.Window? _wnck_active_window = null;
+	private Wnck.Window? _wnck_dummy_window = null;
 
 	private bool disposed = false;
 
+	private bool _wnck_active_window_is_closed = false;
 	private void on_window_closed(Wnck.Screen screen, Wnck.Window window) {
-		if(_desktop == window) {
-			_desktop = null;
+		if(_wnck_desktop_window == window) {
+			update_desktop_window();
 		}
 		if(window == _wnck_active_window) {
-			update_active_window();
+			_wnck_active_window_is_closed = true;
+			wnck_status_changed();
+			_wnck_active_window_is_closed = false;
 		}
 	}
 
 	private void on_window_opened(Wnck.Screen screen, Wnck.Window window) {
-		if(window.get_window_type() == Wnck.WindowType.DESKTOP)
-			_desktop = window;
+		if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
+			update_desktop_window();
+		}
 		/* FIXME: see if this condition is needed at all*/
-		if(_wnck_active_window == null)
-			update_active_window();
+		if(_wnck_active_window == null) {
+			wnck_status_changed();
+		}
 	}
 
 	private void on_active_window_changed (Wnck.Screen screen, Wnck.Window? previous_window) {
@@ -86,23 +114,47 @@ internal class Gnomenu.Monitor: GLib.Object {
 			/* two nulls means the desktop is focused
 			 * one null means the previous_window is
 			 * focused */
-			if(previous_window == null)
-				update_active_window();
+			if(previous_window == null) {
+				wnck_status_changed();
+			}
 		} else {
-			update_active_window();
+			wnck_status_changed();
 		}
 	}
 
 	private void update_desktop_window() {
 		weak List<weak Wnck.Window> windows = _screen.get_windows();
-		_desktop = null;
+		_wnck_desktop_window = null;
 		foreach(weak Wnck.Window window in windows) {
 			if(window.get_window_type() == Wnck.WindowType.DESKTOP) {
-				_desktop = window;
+				_wnck_desktop_window = window;
 			}
 		}
+		if(_wnck_desktop_window != null) {
+			_desktop_window = Window.foreign_new(_wnck_desktop_window.get_xid());
+		} else {
+			_desktop_window = null;
+		}
 	}
-	private void update_active_window() {
+	private bool is_window_on_my_monitor(Gnomenu.Window? win) {
+		/* if not on per monitor mode,
+		 * assume the window is always on my monitor.
+		 * */
+		if(per_monitor_mode == false) return true;
+		int win_num = -1;
+		if(win != null) win_num = win.get_monitor_num();
+		if(win_num == -1) {
+			debug("fallback to use pointer");
+			win_num = get_monitor_num_at_pointer();
+		}
+		if(_per_monitor_mode && _monitor_num != -1 
+		&& win_num != -1 
+		&& win_num != _monitor_num) {
+			return false;
+		}
+		return true;
+	}
+	private void wnck_status_changed() {
 		Wnck.Window wnck_prev = _wnck_active_window;
 		Wnck.Window wnck_new = _screen.get_active_window();
 
@@ -110,71 +162,120 @@ internal class Gnomenu.Monitor: GLib.Object {
 			/* Try to use the desktop window if there is no current window
 			 * AKA fallback to nautilus desktop menubar if there is no current window
 			 * */
-			_wnck_active_window = _desktop;
-		} else {
-			_wnck_active_window = wnck_new;
+			wnck_new = _wnck_desktop_window;
 		}
 
-		if(wnck_prev == _wnck_active_window) {
+		if(wnck_prev == wnck_new) {
 			/* if the current_window is not changed, do nothing */
 			return;
 		}
 
-		if(_wnck_active_window != null) {
-			switch(_wnck_active_window.get_window_type()) {
+		if(wnck_new != null) {
+			switch(wnck_new.get_window_type()) {
 				case Wnck.WindowType.NORMAL:
 				case Wnck.WindowType.UTILITY:
 				case Wnck.WindowType.DIALOG:
 				case Wnck.WindowType.DESKTOP:
 					break;
 				default:
-					_wnck_active_window = _desktop;
+					wnck_new = _wnck_desktop_window;
 					break;
 			}
 		}
-
-		var prev = _active_window;
-		if(prev != null) {
-			prev.menu_context_changed -= rebuild_managed_shell;
-		}
+		update_active_window(wnck_new);
+	}
+	private void update_active_window(Wnck.Window? from_wnck_window) {
+		debug("%p, update_active_window called once", this);
 
 		Gnomenu.Window @new = null;
-		if(_wnck_active_window != null) {
+		if(from_wnck_window != null) {
 			/* emit the window changed signal */
-			@new = Window.foreign_new(_wnck_active_window.get_xid());
+			@new = Window.foreign_new(from_wnck_window.get_xid());
 		} else {
 			/* if there is not even a desktop window */
 			@new = null;
 		}
 
-		int win_num = -1;
-		if(@new != null) win_num = @new.get_monitor_num();
-		if(win_num == -1) win_num = get_monitor_num_at_pointer();
-		if(_per_monitor_mode && _monitor_num != -1 
-		&& win_num != -1 
-		&& win_num != _monitor_num) {
+		if(!is_window_on_my_monitor(@new)) {
 			/* new active window not on the same physical monitor */
-			if(_active_window != null
-			&& !_active_window.is_on_active_workspace()) {
-				/* if the old active_window is not even
-				 * on the current workspace detach from
-				 * the window (so that active window = null)
-				 * */
-				_active_window.menu_context_changed 
-				    -= rebuild_managed_shell;
-				_active_window = null;
+			if(!@new.is_on_active_workspace()) {
+				replace_active_window(_desktop_window);
 			}
-		} else {
-			_active_window = @new;
-			if(_active_window != null) {
-				_active_window.menu_context_changed 
-				    += rebuild_managed_shell;
+			replace_dummy_window(@new);
+			if(_wnck_active_window_is_closed) {
+				replace_active_window(_desktop_window);
 			}
+			debug("%p, not on my monitor", this);
+		} else { /* @new is on my monitor */
+			debug("%p, on my monitor", this);
+			replace_dummy_window(null);
+			replace_active_window(@new);
 		}
-		rebuild_managed_shell();
-		active_window_changed(prev);
 	}
 
+	private void replace_active_window(Gnomenu.Window? @new) {
+		var prev = _active_window;
+		_wnck_active_window = null;
+		if(_active_window != null) {
+			_active_window.menu_context_changed 
+				-= rebuild_managed_shell;
+			_active_window.monitor_num_changed 
+				-= active_window_moved;
+		}
+		_active_window = @new;
+		if(_active_window != null) {
+			_wnck_active_window = _active_window.get_wnck_window();
+			_active_window.menu_context_changed 
+				+= rebuild_managed_shell;
+			_active_window.monitor_num_changed 
+				+= active_window_moved;
+		}
+		active_window_changed(prev);
+		rebuild_managed_shell();
+	}
+
+	private void replace_dummy_window(Gnomenu.Window? @new) {
+		var prev = _dummy_window;
+		_wnck_dummy_window = null;
+		if(_dummy_window != null) {
+			_dummy_window.monitor_num_changed 
+				-= active_window_moved;
+		}
+		_dummy_window = @new;
+		if(_dummy_window != null) {
+			_wnck_dummy_window = _dummy_window.get_wnck_window();
+			_dummy_window.monitor_num_changed 
+				+= active_window_moved;
+		}
+	}
+
+	private void active_window_moved() {
+		if(_dummy_window != null) {
+			debug("dummy window_moved to life");
+			/* there is a dummy window around,
+			 * so the current active window is actually already
+			 * expired. replace it with dummy when the dummy window
+			 * is moved back to this monitor */
+			if(is_window_on_my_monitor(_dummy_window)) {
+				var save = _dummy_window;
+				replace_dummy_window(null);
+				replace_active_window(save);
+			}
+		} else {
+			debug("active window_moved to death");
+			/* this is no dummy window around,
+			 * so the active window is still in
+			 * focus. if the focused active window
+			 * is moved out from my monitor,
+			 * swap dummy and active window.
+			 */
+			if(!is_window_on_my_monitor(_active_window)) {
+				var save = _active_window;
+				replace_active_window(_desktop_window);
+				replace_dummy_window(save);
+			}
+		}
+	}
 	private int get_monitor_num_at_pointer() {
 		if(_screen == null) return -1;
 		var gdk_screen = wnck_screen_to_gdk_screen(_screen);
@@ -193,7 +294,7 @@ internal class Gnomenu.Monitor: GLib.Object {
 		try {
 			Parser.parse(_managed_shell, context);
 		} catch(GLib.Error e) {
-			warning("%s", e.message);
+			critical("%s", e.message);
 		}
 	}
 
@@ -203,7 +304,8 @@ internal class Gnomenu.Monitor: GLib.Object {
 			_screen.window_closed -= on_window_closed;
 			_screen.active_window_changed -= on_active_window_changed;
 		}
-		_desktop = null;
+		_wnck_desktop_window = null;
+		_wnck_dummy_window = null;
 		_wnck_active_window = null;
 	}
 
@@ -217,7 +319,7 @@ internal class Gnomenu.Monitor: GLib.Object {
 			_screen.active_window_changed += on_active_window_changed;
 
 			update_desktop_window();
-			update_active_window();
+			wnck_status_changed();
 		}
 	}
 }
