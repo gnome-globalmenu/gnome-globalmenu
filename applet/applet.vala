@@ -64,14 +64,15 @@ public class Applet : Panel.Applet {
 
 		setup_popup_menu(main_menubar);
 
+		main_menubar.visible = true;
 		menubars.add(main_menubar);
 
-		if(main_menubar.current_window != null) {
-			switcher.current_window = Wnck.Window.get(main_menubar.current_window.get_xid());
+		if(main_menubar.active_window != null) {
+			switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
 		}
-		main_menubar.notify["current-window"] += () => {
-			if(main_menubar.current_window != null) {
-				switcher.current_window = Wnck.Window.get(main_menubar.current_window.get_xid());
+		main_menubar.active_window_changed += () => {
+			if(main_menubar.active_window != null) {
+				switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
 			} else {
 				switcher.current_window = null;
 			}
@@ -267,7 +268,6 @@ public class Applet : Panel.Applet {
 		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
 		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
-		main_menubar.gnome_shell_mode = true;
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
 	}

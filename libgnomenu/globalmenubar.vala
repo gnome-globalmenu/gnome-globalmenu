@@ -1,10 +1,9 @@
 public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	private bool _per_monitor_mode = true;
 	public bool per_monitor_mode {
-		get { return _per_monitor_mode;}
+		get { return active_window_monitor.per_monitor_mode;}
 		set {
-			_per_monitor_mode = value;
-			change_active_window(null);
+			active_window_monitor.per_monitor_mode = value;
 		}
 	}
 	private bool _grab_keys = true;
@@ -14,62 +13,19 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		}
 		set {
 			_grab_keys = value;
-			update();
+			regrab_keys();
 		}
 	}
-	private bool _gnome_shell_mode = false;
-	private Gnomenu.Shell _main_shell = null;
-	private Gnomenu.Shell main_shell {
-		get {
-			if(_main_shell != null) return _main_shell;
-			return this;
-		}
-		set {
-			if(_main_shell != null) {
-				_main_shell.activate -= item_activated;
-				_main_shell.select -= item_selected;
-				_main_shell.deselect -= item_deselected;
-			}
-			_main_shell = value;
-			if(_main_shell == null) _main_shell = this;
-			_main_shell.activate += item_activated;
-			_main_shell.select += item_selected;
-			_main_shell.deselect += item_deselected;
 
+	public Gnomenu.Window active_window { 
+		get {
+			return active_window_monitor.active_window;
 		}
 	}
-	public bool gnome_shell_mode {
-		get { return _gnome_shell_mode; }
-		set {
-			if(value != _gnome_shell_mode) {
-				_gnome_shell_mode = value;
-				if(!_gnome_shell_mode) {
-					gtk_menu_shell_remove_all(this);
-					main_shell = this;
-				} else {
-					gtk_menu_shell_remove_all(this);
-					Gtk.MenuItem item = new Gtk.MenuItem.with_label("Menu");
-					item.visible = true;
-					this.append(item);
-					Gnomenu.Menu menu = new Gnomenu.Menu();
-					menu.is_topmost = true;
-					item.submenu = menu;
-					main_shell = menu;
-				}
-			}
-			update();
-		}
-	}
-	private Gnomenu.Window _current_window;
-	[CCode (notify = true)]
-	public Gnomenu.Window current_window { get {
-			return _current_window;
-		}
-		private set {
-			var old = _current_window;
-			_current_window = value;
-			update(old);
-		}
+
+	public signal void active_window_changed(Gnomenu.Window? prev_window);
+	private void emit_active_window_changed(Gnomenu.Window? prev_window) {
+		active_window_changed(prev_window);
 	}
 
 	private Gnomenu.Window _root_window;
@@ -85,73 +41,31 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		}
 	}
 
-	private int get_monitor_num_at_pointer() {
-		if(window == null) return -1;
-		Gdk.Screen screen = this.get_screen();
-		if(screen == null) return -1;
-		Gdk.Display display = this.get_display();
-		int x, y;
-		display.get_pointer(null, out x, out y, null);
-		return screen.get_monitor_at_point(x, y);
-	}
-
-	private void change_active_window(Gnomenu.Window? prev) {
-		if(prev != null) {
-			prev.menu_context_changed -= menu_context_changed;
-		}
-		Gnomenu.Window @new = active_window_monitor.active_window;
-		if(_per_monitor_mode) {
-			int num = this.monitor_num;
-			int win_num = -1;
-			if(@new != null) win_num = @new.get_monitor_num();
-			if(win_num == -1) win_num = get_monitor_num_at_pointer();
-			if(num != -1 && win_num != -1 && win_num != num) {
-				debug("%p, current window on monitor(%d), me on (%d) skipped", this, num, win_num);
-				if(current_window != null
-				&& !current_window.is_on_active_workspace()) {
-					current_window = null;
-				}
-				return;
-			}
-		}
-
-		current_window = @new;
-		debug("%p, current window changed to %p", this, current_window);
-		if(current_window != null) {
-			current_window.menu_context_changed += menu_context_changed;
-		}
-	}
 	construct {
-		main_shell = this;
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
-		active_window_monitor.active_window_changed += change_active_window;
+		active_window_monitor.managed_shell = this;
+		/*FIXME: How do we sync the monitor_num with the applet? */
+		active_window_monitor.monitor_num = -1;
+		active_window_monitor.active_window_changed += regrab_keys;
+		active_window_monitor.active_window_changed += emit_active_window_changed;
 	}
 
 	private HashTable<uint, Gtk.Widget> keys = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
 
 	private void item_activated (Gnomenu.Shell menubar, Gnomenu.Item item){
-		if(current_window != null) {
-			current_window.emit_menu_event(item.item_path);
+		if(active_window != null) {
+			active_window.emit_menu_event(item.item_path);
 		}
 	}
 	private void item_selected (Gnomenu.Shell menubar, Gnomenu.Item item){
-		if(current_window != null) {
-			current_window.emit_menu_select(item.item_path, null);
+		if(active_window != null) {
+			active_window.emit_menu_select(item.item_path, null);
 		}
 	}
 	private void item_deselected (Gnomenu.Shell menubar, Gnomenu.Item item){
-		if(current_window != null) {
-			current_window.emit_menu_deselect(item.item_path);
+		if(active_window != null) {
+			active_window.emit_menu_deselect(item.item_path);
 		}
-	}
-	private void menu_context_changed(Gnomenu.Window window) {
-		/*
-		 * If window is not current window, 
-		 * some where around the signal handler connection is wrong
-		 * */
-		assert(window == current_window);
-		debug("menu_context_changed on %p", window);
-		update();
 	}
 
 	private void grab_mnemonic_keys(Gnomenu.Window window) {
@@ -187,8 +101,8 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		_root_window = new Window(get_root_window());
 		_root_window.set_key_widget(this.get_toplevel());
 		grab_menu_bar_key();
-		if(_grab_keys && _current_window != null) {
-			grab_mnemonic_keys(_current_window);
+		if(_grab_keys && active_window != null) {
+			grab_mnemonic_keys(active_window);
 		}
 		var settings = get_settings();
 		settings.notify["gtk-menu-bar-accel"] += regrab_menu_bar_key;
@@ -198,8 +112,8 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		if(_root_window != null) {
 			_root_window.set_key_widget(null);
 			ungrab_menu_bar_key();
-			if(_current_window != null)
-				ungrab_mnemonic_keys(_current_window);
+			if(active_window != null)
+				ungrab_mnemonic_keys(active_window);
 		}
 		var settings = get_settings();
 		settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
@@ -230,28 +144,18 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		}
 	}
 
-	private void update(Gnomenu.Window? prev_window = null) {
+	private void regrab_keys(Gnomenu.Window? prev_window = null) {
 		if(prev_window == null) {
-			prev_window = _current_window;
+			prev_window = active_window;
 		}
 		if(prev_window != null) {
 			/* prev window can still be null */
 			ungrab_mnemonic_keys(prev_window);
 			prev_window.set_key_widget(null);
 		}
-		hide();
-		if(_current_window == null) return;
-		var context = _current_window.get_menu_context();
-		if(context == null) return;
-		try {
-			Parser.parse(main_shell, context);
-			show();
-		} catch(GLib.Error e) {
-			warning("%s", e.message);
-		}
 		if(_grab_keys) {
-			_current_window.set_key_widget(this.get_toplevel());
-			grab_mnemonic_keys(_current_window);
+			active_window.set_key_widget(this.get_toplevel());
+			grab_mnemonic_keys(active_window);
 		}
 		return;
 	}
