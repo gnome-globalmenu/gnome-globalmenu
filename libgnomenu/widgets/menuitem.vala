@@ -295,6 +295,18 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		}
 	}
 	
+	private bool _show_underline = true;
+	public bool show_underline {
+		get {
+			return _show_underline;
+		}
+		set {
+			if(_show_underline != value) {
+				_show_underline = value;
+				update_label_text();
+			}
+		}
+	}
 	/*used by MenuShell truncate and the serializer.*/
 	public bool truncated {
 		set {
@@ -630,13 +642,29 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		if(bin_child != null)
 			bin_child.modify_font(desc);
 	}
+	private string remove_underlines(string s) {
+		StringBuilder sb = new StringBuilder("");
+		weak string p;
+		for(p = s; p.get_char() != 0; p = p.next_char()) {
+			unichar c = p.get_char();
+			if(c != '_') {
+				sb.append_unichar(c);
+			}
+		}
+		return sb.str;
+	}
 	private void update_label_text() {
 		if(!Item.type_has_label(_item_type)) return;
-		string text;
-		text = _label;
-		if(text == null)
+		string text = null;
+		if(_label == null) {
 			text = item_path;
-
+		} else {
+			if(!_show_underline) {
+				text = remove_underlines(_label);
+			} else {
+				text = _label;
+			}
+		}
 		var label = get_label_widget();;
 		assert(label != null);
 		label.label = text;

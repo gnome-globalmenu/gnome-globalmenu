@@ -47,8 +47,10 @@ internal class Gnomenu.Monitor: GLib.Object {
 	}
 	public bool per_monitor_mode {get; set;}
 
-	public abstract signal void active_window_changed(Gnomenu.Window? prev_window);
-	public abstract signal void shell_rebuilt();
+	public signal void active_window_changed(Gnomenu.Window? prev_window);
+	public signal void shell_rebuilt();
+	public signal void active_window_lost_focus();
+	public signal void active_window_received_focus();
 
 	public Gnomenu.Window active_window {get; private set;}
 
@@ -173,6 +175,7 @@ internal class Gnomenu.Monitor: GLib.Object {
 		}
 
 		if(wnck_prev == wnck_new) {
+			active_window_received_focus();
 			/* if the current_window is not changed, do nothing */
 			return;
 		}
@@ -213,6 +216,7 @@ internal class Gnomenu.Monitor: GLib.Object {
 				replace_active_window(_desktop_window);
 			}
 			debug("%p, not on my monitor", this);
+			active_window_lost_focus();
 		} else { /* @new is on my monitor */
 			debug("%p, on my monitor", this);
 			replace_dummy_window(null);
