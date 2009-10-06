@@ -33,7 +33,8 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		active_window_monitor.managed_shell = this;
 		/*FIXME: How do we sync the monitor_num with the applet? */
 		active_window_monitor.monitor_num = -1;
-		active_window_monitor.active_window_changed += regrab_keys;
+		active_window_monitor.active_window_changed += regrab_keys0;
+		active_window_monitor.shell_rebuilt += regrab_keys;
 		active_window_monitor.active_window_changed += emit_active_window_changed;
 		this.activate += item_activated;
 		this.select += item_selected;
@@ -63,20 +64,22 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		}
 	}
 
-	private void regrab_keys(Gnomenu.Window? prev_window = null) {
-		if(prev_window == null) {
-			prev_window = active_window;
-		}
+	private bool really_should_grab_keys () {
+		return _grab_keys &&
+			active_window_monitor.has_pointer();
+	}
+	private void regrab_keys() {
+		regrab_keys0(active_window);
+	}
+	private void regrab_keys0(Gnomenu.Window? prev_window) {
 		if(prev_window != null) {
-			/* prev window can still be null */
 			ungrab_mnemonic_keys(prev_window);
 			prev_window.set_key_widget(null);
 		}
-		if(_grab_keys && active_window != null) {
+		if(really_should_grab_keys() && active_window != null) {
 			active_window.set_key_widget(this.get_toplevel());
 			grab_mnemonic_keys(active_window);
 		}
-		return;
 	}
 
 	private void attach_to_screen(Gdk.Screen screen) {
@@ -84,7 +87,7 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		_root_window = new Window(get_root_window());
 		_root_window.set_key_widget(this.get_toplevel());
 		grab_menu_bar_key();
-		if(_grab_keys && active_window != null) {
+		if(really_should_grab_keys() && active_window != null) {
 			grab_mnemonic_keys(active_window);
 		}
 		var settings = get_settings();
@@ -148,6 +151,7 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		window_class.keys_changed(window);
 	}
 	private void _hierarchy_changed_chain_keys(Gtk.Widget? old_toplevel) {
+		warning("chain up hack");
 		var toplevel = this.get_toplevel() as Gtk.Plug;
 		if(toplevel != null) {
 		/* Manually chain-up to the default keys_changed handler,

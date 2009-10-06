@@ -48,9 +48,16 @@ internal class Gnomenu.Monitor: GLib.Object {
 	public bool per_monitor_mode {get; set;}
 
 	public abstract signal void active_window_changed(Gnomenu.Window? prev_window);
+	public abstract signal void shell_rebuilt();
 
 	public Gnomenu.Window active_window {get; private set;}
 
+	public bool has_pointer() {
+		if(_monitor_num == -1) return true;
+		int num = get_monitor_num_at_pointer();
+		if(_monitor_num == num) return true;
+		return false;
+	}
 	/* The window has focus, but is on a different monitor num
 	 * thus ignored by this monitor,
 	 * unless per_monitor_mode  is disabled.
@@ -230,8 +237,8 @@ internal class Gnomenu.Monitor: GLib.Object {
 			_active_window.monitor_num_changed 
 				+= active_window_moved;
 		}
-		active_window_changed(prev);
 		rebuild_managed_shell();
+		active_window_changed(prev);
 	}
 
 	private void replace_dummy_window(Gnomenu.Window? @new) {
@@ -287,14 +294,21 @@ internal class Gnomenu.Monitor: GLib.Object {
 	private void rebuild_managed_shell() {
 		if(_managed_shell == null) return;
 		_managed_shell.length = 0;
-		if(_active_window == null) return;
+		if(_active_window == null) {
+			shell_rebuilt();
+			return;
+		}
 		var context = _active_window.get_menu_context();
-		if(context == null) return;
+		if(context == null) {
+			shell_rebuilt();
+			return;
+		}
 		try {
 			Parser.parse(_managed_shell, context);
 		} catch(GLib.Error e) {
 			critical("%s", e.message);
 		}
+		shell_rebuilt();
 	}
 
 	private void detach_from_screen() {
