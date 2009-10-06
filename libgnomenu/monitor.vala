@@ -235,7 +235,6 @@ internal class Gnomenu.Monitor: GLib.Object {
 	}
 
 	private void replace_dummy_window(Gnomenu.Window? @new) {
-		var prev = _dummy_window;
 		_wnck_dummy_window = null;
 		if(_dummy_window != null) {
 			_dummy_window.monitor_num_changed 

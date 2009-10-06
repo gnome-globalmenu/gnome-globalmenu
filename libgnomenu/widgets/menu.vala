@@ -6,7 +6,6 @@ public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
 	construct {
 		use_rgba_colormap = default_use_rgba_colormap;
 	}
-	private bool disposed = false;
 	private bool _use_rgba_colormap = false;
 	public static bool default_use_rgba_colormap;
 	/* if the menu is logically the topmost shell,

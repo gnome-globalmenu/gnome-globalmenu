@@ -1,5 +1,4 @@
 public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
-	private bool _per_monitor_mode = true;
 	public bool per_monitor_mode {
 		get { return active_window_monitor.per_monitor_mode;}
 		set {
