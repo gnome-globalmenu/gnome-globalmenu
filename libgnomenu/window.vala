@@ -17,9 +17,6 @@
 public class Gnomenu.Window : GLib.Object {
 	private static const string WM_TRANSIENT_FOR = "WM_TRANSIENT_FOR";
 
-	construct {
-		property_notify_event += property_notify_event_default_handler;
-	}
 	internal Wnck.Window? get_wnck_window() {
 		return Wnck.Window.get(get_xid());
 	}
@@ -50,7 +47,7 @@ public class Gnomenu.Window : GLib.Object {
 				_window.remove_filter(this.event_filter);
 			_window = value;
 			if(_window != null) {
-				update_transient();
+				recompute_transient();
 				_window.add_filter(this.event_filter);
 			}
 		}
@@ -124,13 +121,44 @@ public class Gnomenu.Window : GLib.Object {
 		}
 		return Gdk.FilterReturn.CONTINUE;
 	}
-	private Gnomenu.Window get_target() {
-		if(transient != null) {
-			return transient.get_target();
+	private Gnomenu.Window rewire_target {
+		get {
+			if(transient != null)
+				return transient.rewire_target;
+			else return this;
 		}
-		return this;
 	}
-	public signal void property_notify_event(string? prop);
+
+	public virtual signal void property_notify_event(string prop) {
+		if(prop == WM_TRANSIENT_FOR) {
+			debug("transient property changed");
+			recompute_transient();
+			menu_context_changed();
+		} else {
+			rewire_globalmenu_events(prop);
+		}
+	}
+
+	private void rewire_globalmenu_events(string prop) {
+		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
+			debug("window (%p) prop menu context is reported changed", this);
+			rewire_target.menu_context_changed();
+		} else
+		if(prop == NET_GLOBALMENU_MENU_EVENT) {
+			rewire_target.menu_event(get(NET_GLOBALMENU_MENU_EVENT));
+		} else
+		if(prop == NET_GLOBALMENU_MENU_SELECT) {
+			string val = this.get(NET_GLOBALMENU_MENU_SELECT);
+			var arr = val.split("@");
+			if(arr != null && arr.length >=1)
+				rewire_target.menu_select(arr[0], arr[1]);
+		} else
+		if(prop == NET_GLOBALMENU_MENU_DESELECT) {
+			string val = this.get(NET_GLOBALMENU_MENU_DESELECT);
+			rewire_target.menu_deselect(val);
+		}
+		
+	}
 	private void recompute_monitor_num() {
 		Gdk.Screen screen = _window.get_screen();
 		int old_num = _monitor_num;
@@ -144,33 +172,8 @@ public class Gnomenu.Window : GLib.Object {
 			monitor_num_changed(old_num);
 		}
 	}
-	/* FIXME: Will be fixed in VALA 0.7.6*/
-	void property_notify_event_default_handler (string? prop){
-		if(prop == NET_GLOBALMENU_MENU_CONTEXT) {
-			debug("window (%p) prop menu context is reported changed", this);
-			get_target().menu_context_changed();
-		}
-		if(prop == NET_GLOBALMENU_MENU_EVENT) {
-			get_target().menu_event(get(NET_GLOBALMENU_MENU_EVENT));
-		}
-		if(prop == NET_GLOBALMENU_MENU_SELECT) {
-			string value = get(NET_GLOBALMENU_MENU_SELECT);
-			var arr = value.split("@");
-			if(arr != null && arr.length >=1)
-				get_target().menu_select(arr[0], arr[1]);
-		}
-		if(prop == NET_GLOBALMENU_MENU_DESELECT) {
-			string value = get(NET_GLOBALMENU_MENU_DESELECT);
-			get_target().menu_deselect(value);
-		}
-		if(prop == WM_TRANSIENT_FOR) {
-			debug("transient property changed");
-			update_transient();
-			menu_context_changed();
-		}
-	}
 
-	private void update_transient() {
+	private void recompute_transient() {
 		if( _window.get_window_type() == Gdk.WindowType.ROOT) {
 			/* WNCK doesn't wrap the root window, 
 			 * and the root window doesn't have a transient-for
@@ -243,17 +246,17 @@ public class Gnomenu.Window : GLib.Object {
 	 * get the xml representation of the menu of the window
 	 */
 	public string? get_menu_context() {
-		return get_target().get(NET_GLOBALMENU_MENU_CONTEXT);
+		return rewire_target.get(NET_GLOBALMENU_MENU_CONTEXT);
 		
 	}
 	public void set_menu_context(string? value) {
-		get_target().set(NET_GLOBALMENU_MENU_CONTEXT, value);
+		rewire_target.set(NET_GLOBALMENU_MENU_CONTEXT, value);
 	}
 	/**
 	 * emit the remote event indicating  menu item is activated
 	 */
 	public void emit_menu_event (string path) {
-		get_target().set(NET_GLOBALMENU_MENU_EVENT, path);
+		rewire_target.set(NET_GLOBALMENU_MENU_EVENT, path);
 	}
 
 	/**
@@ -262,16 +265,16 @@ public class Gnomenu.Window : GLib.Object {
 	 */
 	public void emit_menu_select(string path, string? pos) {
 		if(pos != null)
-			get_target().set(NET_GLOBALMENU_MENU_SELECT, path + "@" + pos);
+			rewire_target.set(NET_GLOBALMENU_MENU_SELECT, path + "@" + pos);
 		else
-			get_target().set(NET_GLOBALMENU_MENU_SELECT, path);
+			rewire_target.set(NET_GLOBALMENU_MENU_SELECT, path);
 	}
 
 	/**
 	 * emit a remote event indicating a menu item is selected,
 	 */
 	public void emit_menu_deselect(string path) {
-		get_target().set(NET_GLOBALMENU_MENU_DESELECT, path);
+		rewire_target.set(NET_GLOBALMENU_MENU_DESELECT, path);
 	}
 
 	/**
