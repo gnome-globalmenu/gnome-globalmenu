@@ -8,8 +8,8 @@ VALASOURCES = \
 	window.vala \
 	parser.vala \
 	serializer.vala \
-	interface-shell.vala \
-	interface-item.vala \
+	interfaces/shell.vala \
+	interfaces/item.vala \
 	widgets/menu.vala \
 	widgets/menubar.vala \
 	widgets/menuitem.vala \
