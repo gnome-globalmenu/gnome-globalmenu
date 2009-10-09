@@ -17,5 +17,6 @@ void dyn_patch_set_menubar_r(GtkWidget * head, GtkMenuBar * menubar);
 GtkWindow * dyn_patch_get_window(GtkMenuBar * menubar);
 GtkMenuBar * dyn_patch_get_menubar(GtkWidget * widget);
 void dyn_patch_discover_menubars(DiscoverMode mode);
-
+void dyn_patch_set_is_local(GtkMenuBar * menubar, gboolean is_local);
+gboolean dyn_patch_get_is_local(GtkMenuBar * menubar);
 #endif /* __DYN_PATCH_UTILS */

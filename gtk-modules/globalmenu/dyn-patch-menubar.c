@@ -30,8 +30,7 @@ DEFINE_FUNC(void, gtk_menu_bar, hierarchy_changed, (GtkWidget * widget, GtkWidge
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
-	gboolean local = TRUE;
-	g_object_get(widget, "local", &local, NULL);
+	gboolean local = dyn_patch_get_is_local(GTK_MENU_BAR(widget));
   if(!local) {
 
 	  GTK_WIDGET_SET_FLAGS (widget, GTK_MAPPED);
@@ -45,63 +44,35 @@ DEFINE_FUNC(void, gtk_menu_bar, map, (GtkWidget * widget)) {
 	if(vfunc) vfunc(widget);
 }
 
-DEFINE_FUNC(void, gtk_menu_bar, get_property, (GObject * object, guint prop_id, GValue * value, GParamSpec *pspec)) {
-  switch (prop_id)
-    {
-	case PROP_LOCAL:
-		{
-		gint val = GPOINTER_TO_INT(g_object_get_qdata(object, __IS_LOCAL__));
-		gboolean prop_value = TRUE;
-		if(val == 0) prop_value = TRUE; /*default to true*/
-		if(val == 100) prop_value = TRUE;
-		if(val == -100) prop_value = FALSE;
-	  g_value_set_boolean (value, prop_value);
-		}
-	  break;
-    default:
-	  {
-	  VFUNC_TYPE(gtk_menu_bar, get_property) vfunc = CHAINUP(gtk_menu_bar, get_property);
-	  if(vfunc) vfunc(object, prop_id, value, pspec);
-	  }
-      break;
-    }
+
+gboolean dyn_patch_get_is_local(GtkMenuBar * menubar) {
+	gint val = GPOINTER_TO_INT(g_object_get_qdata(G_OBJECT(menubar), __IS_LOCAL__));
+	gboolean prop_value = TRUE;
+	if(val == 0) prop_value = TRUE; /*default to true*/
+	if(val == 100) prop_value = TRUE;
+	if(val == -100) prop_value = FALSE;
+	return prop_value;
 }
 
-DEFINE_FUNC(void, gtk_menu_bar, set_property, 
-	(GObject * object, guint prop_id, const GValue * value, GParamSpec *pspec)) {
-  GtkMenuBar *menubar = GTK_MENU_BAR (object);
-  gboolean is_local;
-  switch (prop_id)
-    {
-	case PROP_LOCAL:
-		is_local = g_value_get_boolean(value);
-		if(is_local) {
-		  g_object_set_qdata(object, __IS_LOCAL__, GINT_TO_POINTER(100));
-		} else {
-		  g_object_set_qdata(object, __IS_LOCAL__, GINT_TO_POINTER(-100));
-		}
-	  if(GTK_WIDGET_MAPPED (menubar))
-		  _gtk_menu_bar_map (GTK_WIDGET(menubar));
-	  gtk_widget_queue_resize(GTK_WIDGET(menubar));
-	  if(is_local)
-		  dyn_patch_set_menubar_r(GTK_WIDGET(menubar), NULL);
-	  else 
-		  dyn_patch_set_menubar_r(GTK_WIDGET(menubar), menubar);
-	  break;
-    default:
-	  {
-	  VFUNC_TYPE(gtk_menu_bar, set_property) vfunc = CHAINUP(gtk_menu_bar, set_property);
-	  if(vfunc) vfunc(object, prop_id, value, pspec);
-	  }
-      break;
-    }
+void dyn_patch_set_is_local(GtkMenuBar * menubar, gboolean is_local) {
+	if(is_local) {
+	  g_object_set_qdata(G_OBJECT(menubar), __IS_LOCAL__, GINT_TO_POINTER(100));
+	} else {
+	  g_object_set_qdata(G_OBJECT(menubar), __IS_LOCAL__, GINT_TO_POINTER(-100));
+	}
+	if(GTK_WIDGET_MAPPED (menubar))
+		_gtk_menu_bar_map (GTK_WIDGET(menubar));
+	gtk_widget_queue_resize(GTK_WIDGET(menubar));
+	if(is_local)
+		dyn_patch_set_menubar_r(GTK_WIDGET(menubar), NULL);
+	else 
+		dyn_patch_set_menubar_r(GTK_WIDGET(menubar), menubar);
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, size_request, (GtkWidget * widget, GtkRequisition * requisition)) {
 	VFUNC_TYPE(gtk_menu_bar, size_request) vfunc = CHAINUP(gtk_menu_bar, size_request);
 	if(vfunc) vfunc(widget, requisition);
-	gboolean local = TRUE;
-	g_object_get(widget, "local", &local, NULL);
+	gboolean local = dyn_patch_get_is_local(GTK_MENU_BAR(widget));
 	if(!local) {
 	  requisition->width = 0;
 	  requisition->height = 0;
@@ -119,23 +90,11 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 	if(menu_bar_type == GTK_TYPE_MENU_BAR) {
 		_gtk_menu_bar_parent_class = g_type_class_peek_parent(klass);
 
-		OVERRIDE_SAVE(klass, gtk_menu_bar, get_property);
-		OVERRIDE_SAVE(klass, gtk_menu_bar, set_property);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, map);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, can_activate_accel);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, size_request);
 		OVERRIDE_SAVE(widget_klass, gtk_menu_bar, hierarchy_changed);
 		
-		if(g_object_class_find_property (klass, "local") == NULL) {
-			g_object_class_install_property (klass,
-					   PROP_LOCAL,
-					   g_param_spec_boolean ("local",
-								  ("Local Menu or Global Menu"),
-								  ("Whether the menu is a local one"),
-								  TRUE,
-								  G_PARAM_READWRITE));
-		}
-
 		SIGNAL_CHANGED = g_signal_lookup("dyn-patch-changed", G_OBJECT_CLASS_TYPE (klass));
 		if (SIGNAL_CHANGED == 0) {
 			SIGNAL_CHANGED =
@@ -171,8 +130,6 @@ void dyn_patch_menu_bar_patcher (GType menu_bar_type) {
 		}
 	} else {	
 
-		OVERRIDE(klass, gtk_menu_bar, get_property);
-		OVERRIDE(klass, gtk_menu_bar, set_property);
 		OVERRIDE(widget_klass, gtk_menu_bar, map);
 		OVERRIDE(widget_klass, gtk_menu_bar, can_activate_accel);
 		OVERRIDE(widget_klass, gtk_menu_bar, size_request);
@@ -184,8 +141,6 @@ void dyn_patch_menu_bar_unpatcher(GType menu_bar_type) {
 	if(!klass) return;
 	GtkWidgetClass * widget_klass =  (GtkWidgetClass*) klass;
 
-	RESTORE(klass, gtk_menu_bar, get_property);
-	RESTORE(klass, gtk_menu_bar, set_property);
 	RESTORE(widget_klass, gtk_menu_bar, map);
 	RESTORE(widget_klass, gtk_menu_bar, can_activate_accel);
 	RESTORE(widget_klass, gtk_menu_bar, size_request);

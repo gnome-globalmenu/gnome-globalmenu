@@ -73,9 +73,9 @@ namespace GlobalMenuGTK {
 		Gtk.Window window = param_values[1].get_object() as Gtk.Window;
 		debug("attached_eh menubar %p to window %p", menubar, window);
 		if(menubar_should_be_skipped(menubar)) {
-			menubar_set_local(menubar, true);
+			DynPatch.set_is_local(menubar, true);
 		} else {
-			menubar_set_local(menubar, false);
+			DynPatch.set_is_local(menubar, false);
 			bonobo_plug_widget_hack(menubar);
 		}
 		bind_menubar_to_window(menubar, window);
@@ -106,7 +106,7 @@ namespace GlobalMenuGTK {
 
 	private void update_menu_context(MenuBar menubar) {
 		/* Ignore local menu bars */
-		if(menubar_get_local(menubar)) return;
+		if(DynPatch.get_is_local(menubar)) return;
 
 		Gtk.Window toplevel = DynPatch.get_window(menubar);
 
@@ -154,14 +154,6 @@ namespace GlobalMenuGTK {
 		} 
 	}
 
-	private bool menubar_get_local(MenuBar menubar) {
-		bool is_local = true;
-		menubar.get("local", &is_local, null);
-		return is_local;
-	}
-	private void menubar_set_local(MenuBar menubar, bool value) {
-		menubar.set("local", value, null);
-	}
 	private MenuBar? find_menubar(Container widget) {
 		List<weak Widget> children = widget.get_children();
 		foreach(Widget child in children) {
@@ -169,10 +161,10 @@ namespace GlobalMenuGTK {
 				MenuBar menubar = child as MenuBar;
 
 				if(menubar_should_be_skipped(menubar)) {
-					menubar_set_local(menubar, true);
+					DynPatch.set_is_local(menubar, true);
 					return null;
 				} else {
-					menubar_set_local(menubar, false);
+					DynPatch.set_is_local(menubar, false);
 					return menubar;
 				}
 			}

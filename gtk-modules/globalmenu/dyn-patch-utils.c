@@ -113,8 +113,7 @@ void dyn_patch_set_menubar_r(GtkWidget * widget, GtkMenuBar * menubar) {
 	g_timer_stop(timer);
 
 	if(menubar != NULL) {
-		gboolean local = FALSE;
-		g_object_get(menubar, "local", &local, NULL);
+		gboolean local = dyn_patch_get_is_local(menubar);
 		if(local) {
 			g_static_rec_mutex_unlock(&_menubar_mutex);
 			return;
