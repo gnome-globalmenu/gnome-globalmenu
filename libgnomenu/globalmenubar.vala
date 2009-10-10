@@ -162,7 +162,7 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 			toplevel.configure_event += sync_monitor_num;
 		}
 		if(old_toplevel != null)
-			toplevel.configure_event -= sync_monitor_num;
+			old_toplevel.configure_event -= sync_monitor_num;
 	}
 
 	private void chainup_key_changed(Gtk.Window window) {
