@@ -55,9 +55,9 @@ libglobalmenu_gnome_la_SOURCES = \
 	globalmenu-helper.c \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES) bindings.vapi dyn-patch.vapi
+$(STAMP): $(VALASOURCES) dyn-patch.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -H globalmenu-gnome-private.h -C --basedir=$(top_srcdir) \
-		--library=$(@:.vapi=) --vapidir=. --pkg bindings --pkg dyn-patch $(VALASOURCES) \
+		--library=$(@:.vapi=) --vapidir=. --pkg dyn-patch $(VALASOURCES) \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
 		--pkg gdk-x11-2.0
@@ -89,7 +89,6 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -g
 
 EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
-	bindings.vapi \
 	dyn-patch.vapi \
 	$(VALASOURCES) \
 	$(NULL)

@@ -477,6 +477,8 @@ namespace Gdk {
 	}
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public class Window : Gdk.Drawable {
+		[CCode (has_construct_function = false)]
+		public Window (Gdk.Window? parent, Gdk.WindowAttr attributes, int attributes_mask);
 		public void add_filter (Gdk.FilterFunc function);
 		public static unowned Gdk.Window at_pointer (out int win_x, out int win_y);
 		public void beep ();
@@ -514,7 +516,6 @@ namespace Gdk {
 		public void get_root_origin (out int x, out int y);
 		public Gdk.WindowState get_state ();
 		public unowned Gdk.Window get_toplevel ();
-		public static unowned GLib.List get_toplevels ();
 		public Gdk.WindowTypeHint get_type_hint ();
 		public unowned Gdk.Region get_update_area ();
 		public void get_user_data (void* data);
@@ -537,8 +538,6 @@ namespace Gdk {
 		public void move (int x, int y);
 		public void move_region (Gdk.Region region, int dx, int dy);
 		public void move_resize (int x, int y, int width, int height);
-		[CCode (has_construct_function = false)]
-		public Window (Gdk.Window parent, Gdk.WindowAttr attributes, int attributes_mask);
 		public unowned GLib.List peek_children ();
 		public static void process_all_updates ();
 		public void process_updates (bool update_children);
@@ -868,8 +867,8 @@ namespace Gdk {
 		public int group;
 		public int level;
 	}
+	[CCode (cheader_filename = "gdk/gdk.h")]
 	[SimpleType]
-	[CCode (type_id = "GDK_TYPE_NATIVE_WINDOW", cheader_filename = "gdk/gdk.h")]
 	public struct NativeWindow {
 	}
 	[CCode (type_id = "GDK_TYPE_PANGO_ATTR_EMBOSS_COLOR", cheader_filename = "gdk/gdk.h")]
@@ -913,9 +912,9 @@ namespace Gdk {
 		public weak uint32[] colors;
 		public int n_colors;
 		public weak GLib.SList info_list;
-		public void free ();
 		[CCode (cname = "gdk_rgb_cmap_new", has_construct_function = false)]
 		public RgbCmap (uint32[] colors);
+		public void free ();
 	}
 	[CCode (type_id = "GDK_TYPE_SEGMENT", cheader_filename = "gdk/gdk.h")]
 	public struct Segment {
@@ -1505,8 +1504,6 @@ namespace Gdk {
 		COMBO,
 		DND
 	}
-	[CCode (cheader_filename = "gdk/gdk.h")]
-	public delegate void DestroyNotify ();
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public delegate void EventFunc (Gdk.Event event);
 	[CCode (cheader_filename = "gdk/gdk.h")]
