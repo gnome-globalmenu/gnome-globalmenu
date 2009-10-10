@@ -70,15 +70,13 @@ public class Applet : Panel.Applet {
 		if(main_menubar.active_window != null) {
 			switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
 		}
-		main_menubar.active_window_changed += () => {
-			if(main_menubar.active_window != null) {
-				switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
-			} else {
-				switcher.current_window = null;
-			}
-		};
-
+		main_menubar.active_window_changed += on_active_window_changed;
+		
 		menubars.child_set(main_menubar, "shrink", true, null);
+
+		this.change_background += on_change_background;
+		this.change_orient += update_size;
+		this.change_size += update_size;
 
 		/*init panel */
 		has_handle = false;
@@ -88,7 +86,7 @@ public class Applet : Panel.Applet {
 		Gdk.Pixmap pixmap;
 		AppletBackgroundType bgtype;
 		bgtype = get_background(out color, out pixmap);
-		(this as Panel.Applet).change_background(bgtype, color, pixmap);
+		on_change_background(bgtype, color, pixmap);
 
 	}
 
@@ -138,7 +136,15 @@ public class Applet : Panel.Applet {
 	}
 
 
-	public override void change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
+	private void on_active_window_changed() {
+		if(main_menubar.active_window != null) {
+			switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
+		} else {
+			switcher.current_window = null;
+		}
+	}
+
+	private void on_change_background(AppletBackgroundType type, Gdk.Color? color, Gdk.Pixmap? pixmap) {
 		Background bg = new Background();
 		switch(type){
 			case Panel.AppletBackgroundType.NO_BACKGROUND:
@@ -166,12 +172,7 @@ public class Applet : Panel.Applet {
 		}
 		menubars.background = bg;
 	}
-	public override void change_orient(AppletOrient orient) {
-		update_size();
-	}
-	public override void change_size(uint size) {
-		update_size();
-	}
+
 	private void update_size() {
 		switch(orient) {
 			case AppletOrient.UP:
@@ -201,7 +202,6 @@ public class Applet : Panel.Applet {
 		}
 	}
 	
-		    
 	public void init() {
 		/* Connect to gconf */
 		try {
@@ -373,7 +373,7 @@ public class Applet : Panel.Applet {
 	}
 	public override bool button_press_event(Gdk.EventButton event) {
 		if(event.button == 3)
-		return control.do_popup(event.button, event.time);
+			return control.do_popup(event.button, event.time);
 		return false;
 	}
 
