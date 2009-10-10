@@ -44,13 +44,6 @@ public class Applet : Panel.Applet {
 	};
 
 	public Applet() { }
-	public override void dispose() {
-		if(!disposed) {
-			disposed = true;
-			set_background_widget(null);
-		}
-		base.dispose();	
-	}
 
 	construct {
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
@@ -91,14 +84,23 @@ public class Applet : Panel.Applet {
 	}
 
 	private MenuBarBox menubars = new MenuBarBox();
-	private bool disposed = false;
 	private GlobalMenuBar main_menubar = new GlobalMenuBar();
 	private Switcher switcher = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
-
 	private bool initialized = false;
-	public bool disable_module_check = false;
+
+	private bool disposed = false;
+	public override void dispose() {
+		if(!disposed) {
+			disposed = true;
+			set_background_widget(null);
+		}
+		base.dispose();
+	}
+
+
+	public bool disable_module_check { get; set; default = false;}
 	private bool _has_handle = false;
 	public bool has_handle {
 		set {
@@ -121,6 +123,7 @@ public class Applet : Panel.Applet {
 			return _has_handle;
 		}
 	}
+
 	public override void screen_changed(Gdk.Screen? previous_screen) {
 		Gdk.Screen screen = get_screen();
 		if(previous_screen != null) {
@@ -215,9 +218,8 @@ public class Applet : Panel.Applet {
 			client.value_changed += (key, value) => {
 				this.get_prefs();
 			};
-		}	
+		}
 
-		    
 		string applet_menu_xml = Template.replace(applet_menu_xml_template, subs);
 
 		setup_menu (applet_menu_xml, verbs, this);
