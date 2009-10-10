@@ -295,23 +295,24 @@ internal class Gnomenu.Monitor: GLib.Object {
 		return gdk_screen.get_monitor_at_point(x, y);
 	}
 
-	private void rebuild_managed_shell() {
-		if(_managed_shell == null) return;
-		_managed_shell.length = 0;
+	public void rebuild_shell(Gnomenu.Shell shell) {
+		shell.length = 0;
 		if(_active_window == null) {
-			shell_rebuilt();
 			return;
 		}
 		var context = _active_window.get_menu_context();
 		if(context == null) {
-			shell_rebuilt();
 			return;
 		}
 		try {
-			Parser.parse(_managed_shell, context);
+			Parser.parse(shell, context);
 		} catch(GLib.Error e) {
 			critical("%s", e.message);
 		}
+	}
+	private void rebuild_managed_shell() {
+		if(_managed_shell == null) return;
+		rebuild_shell(_managed_shell);
 		shell_rebuilt();
 	}
 

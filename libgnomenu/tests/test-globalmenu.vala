@@ -13,6 +13,8 @@ namespace Gnomenu {
 				menubar = new GlobalMenuBar();
 				window.add(menubar);
 				window.show_all();
+				window.set_keep_above(true);
+				window.set_accept_focus(false);
 				Gtk.main();
 			});
 

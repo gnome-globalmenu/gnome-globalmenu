@@ -460,7 +460,8 @@ static const string EMPTY_OVERFLOWN_MENU =
 
 	public override void insert(Gtk.Widget child, int position) {
 		base.insert(child, position);
-		(child as MenuItem).gravity = gravity;
+		if(child is Gnomenu.MenuItem)
+		(child as Gnomenu.MenuItem).gravity = gravity;
 	}
 	
 	/******
