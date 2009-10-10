@@ -4,6 +4,7 @@ SUBDIRS = . tests
 VALASOURCES = \
 	globalmenubar.vala \
 	globalmenuitem.vala \
+	adapter.vala \
 	gnomenu.vala \
 	monitor.vala \
 	window.vala \

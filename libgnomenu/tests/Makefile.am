@@ -7,7 +7,7 @@ endif
 
 #VALASOURCES = test-xlib.vala test-label.vala test-grab.vala test-parser.vala  test-menubar.vala test-window.vala test-leak.vala test-globalmenu.vala test-application.vala
 
-VALASOURCES = test-globalmenuitem.vala test-menubar.vala test-globalmenu.vala
+VALASOURCES = test-adapter.vala test-globalmenuitem.vala test-menubar.vala test-globalmenu.vala
 
 STAMP = $(VALASOURCES:.vala=.c)
 SUFFIXES = .vala .c
