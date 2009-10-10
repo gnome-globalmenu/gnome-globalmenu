@@ -1,0 +1,8 @@
+globalmenu-gnome-private.h
+globalmenu-locator.c
+globalmenu-serializer.c
+globalmenu.c
+module-main.c
+*.vapi
+!*.vala
+!dyn-patch.vapi

@@ -1,0 +1,15 @@
+applet.c
+application.c
+bonobo
+GlobalMenu.PanelApplet
+GlobalMenu_PanelApplet.server
+GlobalMenu_PanelApplet.server.in
+globalmenu.png
+gtkextra-gconfdialog.c
+main.c
+stock_delete.png
+stock_maximize.png
+stock_minimize.png
+switcher.c
+template.c
+workspaceselector.c
