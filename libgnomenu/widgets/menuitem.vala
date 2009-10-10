@@ -64,7 +64,13 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		}
 	}
 	public Shell shell {get {
-		return parent as Shell;
+		weak Shell rt = Adapter.get_adapter(parent as Gtk.MenuShell);
+		if(rt != null) {
+			return rt;
+		} else {
+			return parent as Shell;
+		}
+
 	}}
 	public Shell sub_shell{get {
 		return _submenu_cache as Shell;

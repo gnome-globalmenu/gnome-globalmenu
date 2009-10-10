@@ -35,19 +35,19 @@ namespace Gnomenu {
 	<item type="a"/>
 </menu>
 """;
-		Gnomenu.MenuBar menubar;
+		Gtk.MenuBar menubar;
 		Gnomenu.Adapter adapter;
 		TestAdapter() {
 			base("/GlobalMenu");
 			add("widget", () => {
-				menubar = new Gnomenu.MenuBar();
-				adapter = new Adapter(menubar);
+				menubar = new Gtk.MenuBar();
+				adapter = new GlobalMenuAdapter(menubar);
 				adapter.is_topmost = true;
 				window.add(menubar);
 				window.show_all();
 				window.set_keep_above(true);
 				window.set_accept_focus(false);
-				Parser.parse(adapter, test1);
+				//Parser.parse(adapter, test1);
 				Gtk.main();
 			});
 

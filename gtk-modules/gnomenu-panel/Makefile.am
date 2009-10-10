@@ -14,11 +14,15 @@ vala-ccode: $(VALASOURCES)
 	   --pkg gmodule-2.0 \
 	   --pkg gtk+-2.0 \
 	   --pkg gdk-x11-2.0 \
+	   --pkg gnomenu \
+	   --vapidir ../../libgnomenu \
 	   $(VALASOURCES)
 
 libgnomenu_panel_la_LIBADD = \
 		$(GLIB_LIBS) \
-		$(GTK_LIBS)
+		$(GTK_LIBS) \
+		../../libgnomenu/libgnomenu.la \
+		$(WNCK_LIBS)
 
 libgnomenu_panel_la_LDFLAGS = \
 		-g \
@@ -26,12 +30,14 @@ libgnomenu_panel_la_LDFLAGS = \
 		-avoid-version \
 		-release $(PACKAGE_VERSION) \
 		-no-undefined \
-		-Wl,--as-needed \
 		-export-dynamic \
+		-Wl,--as-needed \
 		-module
 
+
 libgnomenu_panel_la_CPPFLAGS = \
-	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
+	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(WNCK_CFLAGS) \
+	  -I$(top_srcdir)/libgnomenu \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GnomenuPanel\" \
 	  -g
