@@ -1,1 +1,1 @@
-SUBDIRS = globalmenu
+SUBDIRS = globalmenu gnomenu-panel

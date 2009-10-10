@@ -192,6 +192,7 @@ AC_CONFIG_FILES(
 	gtk-modules/Makefile
 	gtk-modules/globalmenu/Makefile
 	gtk-modules/globalmenu/tests/Makefile
+	gtk-modules/gnomenu-panel/Makefile
 	po/Makefile.in
 	])
 
