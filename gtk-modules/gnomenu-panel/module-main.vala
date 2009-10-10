@@ -20,6 +20,7 @@ public static class Plugin {
 		Signal.add_emission_hook(Signal.lookup("hierarchy-changed", panel_menu_bar_type),
 			0, hierarchy_changed, null);
 		
+		hack_all();
 	}
 
 	private static bool hierarchy_changed(SignalInvocationHint ihint,
@@ -41,6 +42,25 @@ public static class Plugin {
 		var adapter = new Gnomenu.GlobalMenuAdapter(widget);
 
 	}
+	private static void hack_all() {
+		List<unowned Gtk.Window> toplevels = Gtk.Window.list_toplevels();
+		foreach(var w in toplevels) {
+			hack_all_r(w);
+		}
+	}
+	private static void hack_all_r(Gtk.Widget w) {
+		if(w.get_type().is_a(panel_menu_bar_type)) {
+			hack(w as Gtk.MenuBar);
+			return;
+		}
+		if(w is Gtk.Container) {
+			var c = w as Gtk.Container;
+			foreach(var child in c.get_children()) {
+				hack_all_r(child);
+			}
+		}
+	}
+
 	private static Module module = null;
 
 	static delegate Type GTypeFunction();
