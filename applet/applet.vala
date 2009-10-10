@@ -57,8 +57,16 @@ public class Applet : Panel.Applet {
 
 		setup_popup_menu(main_menubar);
 
-		main_menubar.visible = true;
 		menubars.add(main_menubar);
+		menubars.add(tiny_menubar);
+
+		main_menubar.visible = true;
+		tiny_menubar.visible = false;
+
+		Gnomenu.MenuItem item = new GlobalMenuItem();
+		item.visible = true;
+		item.item_type = Gnomenu.ItemType.ARROW;
+		tiny_menubar.append(item);
 
 		if(main_menubar.active_window != null) {
 			switcher.current_window = Wnck.Window.get(main_menubar.active_window.get_xid());
@@ -85,6 +93,7 @@ public class Applet : Panel.Applet {
 
 	private MenuBarBox menubars = new MenuBarBox();
 	private GlobalMenuBar main_menubar = new GlobalMenuBar();
+	private Gnomenu.MenuBar tiny_menubar = new Gnomenu.MenuBar();
 	private Switcher switcher = new Switcher();
 
 	private Notify.Notification notify_no_plugin;
@@ -101,6 +110,15 @@ public class Applet : Panel.Applet {
 
 
 	public bool disable_module_check { get; set; default = false;}
+	private bool _tiny_mode = false;
+	public bool tiny_mode {
+		get {return _tiny_mode;}
+		set {
+			_tiny_mode = value;
+			tiny_menubar.visible = value;
+			main_menubar.visible = !value;
+		}
+	}
 	private bool _has_handle = false;
 	public bool has_handle {
 		set {
@@ -272,6 +290,7 @@ public class Applet : Panel.Applet {
 		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
 		this.has_handle = gconf_get_bool("has_handle");
 		this.disable_module_check = gconf_get_bool("disable_module_check");
+		this.tiny_mode = gconf_get_bool("tiny_mode");
 	}
 
 	private Gtk.Dialog get_pref_dialog() {
@@ -283,7 +302,10 @@ public class Applet : Panel.Applet {
 			_("General Settings"),
 			new string[] {
 				"/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome",
-				root + "/disable_module_check"
+				root + "/disable_module_check",
+				root + "/use_rgba_colormap",
+				root + "/per_monitor_mode",
+				root + "/grab_mnemonic_keys"
 			}
 		);
 
@@ -291,11 +313,10 @@ public class Applet : Panel.Applet {
 			_("Global Menu"),
 			new string[]{
 				root + "/has_handle",
-				root + "/use_rgba_colormap",
-				root + "/grab_mnemonic_keys",
-				root + "/per_monitor_mode"
+				root + "/tiny_mode"
 			}
 		);
+
 		gcd.add_key_group(
 			_("Switcher"),
 			new string[] {

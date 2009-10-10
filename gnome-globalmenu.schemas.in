@@ -48,8 +48,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Show the name of the active application in the applet</short>
-			<long>Show the name of the active application in the applet when enabled</long>
+			<short>Display active application's name</short>
+			<long>Display the name of the active application in the applet when enabled</long>
 		</locale>
 	</schema>
 	<schema>
@@ -58,8 +58,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Enabled the Window List</short>
-			<long>Switch among applications via the application name label</long>
+			<short>Enabled window list</short>
+			<long>Add a window list to the application submenu.</long>
 		</locale>
 	</schema>
 	<schema>
@@ -68,8 +68,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Enable the Window Actions</short>
-			<long>Add window action menu entries to active application name menu</long>
+			<short>Enable window management actions</short>
+			<long>Add window action menu (e.g., Close, Minimize) to the application submenu.</long>
 		</locale>
 	</schema>
 	<schema>
@@ -78,18 +78,8 @@
 		<type>int</type>
 		<default>-1</default>
 		<locale name="C">
-			<short>Maximum length of the title area</short>
-			<long>The maximum length of name of the active application, in pixels</long>
-		</locale>
-	</schema>
-	<schema>
-		<key>/schemas/apps/gnome-applet-globalmenu/prefs/use_rgba_colormap</key>
-		<owner>gnome-applet-globalmenu</owner>
-		<type>bool</type>
-		<default>FALSE</default>
-		<locale name="C">
-			<short>Enable the RGBA support(experimental)</short>
-			<long>Enable the RGBA support for submenus. Restart the applet to take effects.</long>
+			<short>Maximum pixel length of application name</short>
+			<long>The maximum length of name of the application name, in pixels. -1 means unlimited</long>
 		</locale>
 	</schema>
 	<schema>
@@ -108,7 +98,7 @@
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
-			<short>Add a search box in the drop down menu</short>
+			<short>Search box in switcher menu</short>
 			<long>Add a search box in the dropdown menu, where you can find entries by typing the name.</long>
 		</locale>
 	</schema>
@@ -118,8 +108,8 @@
 		<type>bool</type>
 		<default>TRUE</default>
 		<locale name="C">
-			<short>Allow accessing the menu items by the mnemonic keys</short>
-			<long>Allow accessing the menu items by the mnemonic keys. When this option is disabled, the topmost menu items are not directly accessible from keyboard.</long>
+			<short>Enable mnemonic keys</short>
+			<long>Accessing the global menu items by the mnemonic keys. When this option is disabled, the topmost menu items are not directly accessible from keyboard.</long>
 		</locale>
 	</schema>
 	<schema>
@@ -130,6 +120,16 @@
 		<locale name="C">
 			<short>Enable per-monitor mode</short>
 			<long>In per-monitor mode, Global Menu tracks the active application on each physical display device. If this mode is disabled, the entire logic screen is treated as a single desktop. If this mode is enabled, each physical device is treated as a desktop.</long>
+		</locale>
+	</schema>
+	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/tiny_mode</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>FALSE</default>
+		<locale name="C">
+			<short>Enable tiny mode</short>
+			<long>In tiny mode, Global Menu is presented in a popup menu.</long>
 		</locale>
 	</schema>
 </schemalist>
