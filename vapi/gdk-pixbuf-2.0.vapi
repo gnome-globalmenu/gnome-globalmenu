@@ -141,8 +141,8 @@ namespace Gdk {
 		public weak uchar[] pixel_data;
 		public bool deserialize ([CCode (array_length_pos = 0.9)] uchar[] stream) throws GLib.Error;
 		public void* from_pixbuf (Gdk.Pixbuf pixbuf, bool use_rle);
-		public unowned uchar[] serialize ();
-		public unowned GLib.StringBuilder to_csource (string name, Gdk.PixdataDumpType dump_type);
+		public uchar[] serialize ();
+		public GLib.StringBuilder to_csource (string name, Gdk.PixdataDumpType dump_type);
 	}
 	[CCode (cprefix = "GDK_COLORSPACE_", cheader_filename = "gdk-pixbuf/gdk-pixdata.h")]
 	public enum Colorspace {
