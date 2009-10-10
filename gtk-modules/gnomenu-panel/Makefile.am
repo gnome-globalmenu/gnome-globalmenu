@@ -17,6 +17,7 @@ vala-ccode: $(VALASOURCES)
 	   --pkg gnomenu \
 	   --vapidir ../../libgnomenu \
 	   $(VALASOURCES)
+	touch $@
 
 libgnomenu_panel_la_LIBADD = \
 		$(GLIB_LIBS) \
