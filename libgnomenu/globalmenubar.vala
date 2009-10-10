@@ -27,7 +27,6 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 
 	public signal void active_window_changed(Gnomenu.Window? prev_window);
 
-
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.managed_shell = this;
@@ -44,6 +43,14 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		this.screen_changed += _screen_changed;
 		this.hierarchy_changed += _hierarchy_changed;
 		this.hierarchy_changed += _hierarchy_changed_chain_keys;
+		this.notify["visible"] += () => {
+			if(visible == false) {
+				active_window_monitor.managed_shell = null;
+			} else {
+				active_window_monitor.managed_shell = this;
+			}
+			
+		};
 	}
 
 	private void emit_active_window_changed(Gnomenu.Window? prev_window) {
@@ -152,8 +159,12 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 
 	private bool sync_monitor_num() {
 		var screen = get_screen();
+		if(this.is_realized()) {
 		active_window_monitor.monitor_num = 
 		screen.get_monitor_at_window(this.window);
+		} else {
+			active_window_monitor.monitor_num = -1;
+		}
 		return false;
 	}
 	private void _hierarchy_changed(Gtk.Widget? old_toplevel) {

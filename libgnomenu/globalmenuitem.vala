@@ -17,13 +17,14 @@ public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
 
 	private Gnomenu.Menu main_shell = null;
 	construct {
-		this.add(new Gtk.Label("dummy"));
+		this.item_label = "Dummy";
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.managed_shell = null;
 		active_window_monitor.monitor_num = -1;
 		active_window_monitor.active_window_changed += emit_active_window_changed;
 		main_shell = new Gnomenu.Menu();
 		this.submenu = main_shell;
+		main_shell.is_topmost = true;
 		main_shell.activate += item_activated;
 		main_shell.select += item_selected;
 		main_shell.deselect += item_deselected;
@@ -65,8 +66,12 @@ public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
 
 	private bool sync_monitor_num() {
 		var screen = get_screen();
+		if(this.is_realized()) {
 		active_window_monitor.monitor_num = 
 		screen.get_monitor_at_window(this.window);
+		} else {
+			active_window_monitor.monitor_num = -1;
+		}
 		return false;
 	}
 
