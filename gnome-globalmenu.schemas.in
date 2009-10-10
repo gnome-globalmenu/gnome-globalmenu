@@ -13,6 +13,17 @@
 	  </locale>
 	</schema>
 	<schema>
+	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel</key>
+	  <applyto>/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel</applyto>
+	  <owner>libgnomenu</owner>
+	  <type>bool</type>
+	  <default>false</default>
+	  <locale name="C">
+		<short>Integrate Global Menu with gnome-panel</short>
+		<long>If this key is enabled, Global Menu will be directly integrated into the Main Menu applet.</long>
+	  </locale>
+	</schema>
+	<schema>
 		<key>/schemas/apps/gnome-applet-globalmenu/prefs/disable_module_check</key>
 		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
