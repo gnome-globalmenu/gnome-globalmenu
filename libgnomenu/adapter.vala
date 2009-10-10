@@ -1,3 +1,12 @@
+/**
+ * Adapting any Gtk.MenuShell to a Gnomenu.Shell.
+ * AKA, if you have a Gtk.MenuShell, and want to 
+ * use Gnomenu.Parser to put Gnomenu.MenuItem into it,
+ * then use this adapter.
+ *
+ * WARNING:
+ * Never touch any children with the type Gnomenu.MenuItem!
+ */
 public class Gnomenu.Adapter : GLib.Object, Gnomenu.Shell {
 	public Gtk.MenuShell gtk_shell {get; construct set;}
 	public Adapter(Gtk.MenuShell gtk_shell) {
