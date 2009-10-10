@@ -20,12 +20,22 @@ public class Gnomenu.Parser {
 		 * when the menu tag is closed,
 		 * this number is also used to truncated the shell.
 		 * */
-		public int position;
+		private int _position = 0;
+		public int position {
+			get {
+				return _position;
+			}
+		}
+		public void advance() {
+			_position++;
+		}
+		private Item _item = null;
 		public Item item {
 			owned get {
 				return shell.get_item(position);
 			}
 		}
+
 		/* item_has_sub_shell is used to defer the removal of the
 		 * sub menu shell to the close tag of the item, when
 		 * we are 100% sure whether there is a sub shell or not.
@@ -34,11 +44,9 @@ public class Gnomenu.Parser {
 		 * open tag handler. Doing so will get the popup submenus 
 		 * crazy if they were already popped up.
 		 * */
-		public bool item_has_sub_shell;
+		public bool item_has_sub_shell = false;
 		public State(Shell shell) {
 			this.shell = shell;
-			item_has_sub_shell = false;
-			position = 0;
 		}
 	}
 
@@ -168,7 +176,7 @@ public class Gnomenu.Parser {
 				if(!state.item_has_sub_shell) {
 					state.item.has_sub_shell = false;
 				}
-				state.position++;
+				state.advance();
 			break;
 		}
 	}

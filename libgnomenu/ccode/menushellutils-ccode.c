@@ -1,93 +1,104 @@
 #include <gtk/gtk.h>
 #include <libgnomenu/libgnomenu.h>
-
-static void gmsg_foreach_cb(GtkWidget * child, gpointer data[]) {
-	gint * pos = data[0];
-	GtkMenuShell * menu_shell = data[1];
-	if(*pos == 0) data[2] = child;
-	if(GNOMENU_IS_MENU_ITEM(child))
-	(*pos) --;
+static GnomenuMenuItem ** gtk_menu_shell_get_item_array(GtkMenuShell * menu_shell, gint * array_length) {
+	GnomenuMenuItem ** rt =
+	g_object_get_data(G_OBJECT(menu_shell),
+	            "item-array");
+	*array_length = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(menu_shell),
+				"item-array-length"));
+	return rt;
 }
+
+static void gtk_menu_shell_set_item_array(GtkMenuShell * menu_shell,
+	GnomenuMenuItem ** array, gint array_length) {
+	GnomenuMenuItem ** old_array =
+	g_object_get_data(G_OBJECT(menu_shell),
+	            "item-array");
+	if(old_array != array) {
+		g_object_set_data_full(G_OBJECT(menu_shell),
+					"item-array", array, g_free);
+	}
+	g_object_set_data(G_OBJECT(menu_shell),
+				"item-array-length", GINT_TO_POINTER(array_length));
+}
+
+
 void gtk_menu_shell_remove_all(GtkMenuShell * menu_shell) {
 	GList * children = gtk_container_get_children(GTK_CONTAINER(menu_shell));
 	GList * iter;
 	for(iter = children; iter; iter = iter->next) {
 		gtk_container_remove(GTK_CONTAINER(menu_shell), iter->data);
 	}
+	gtk_menu_shell_set_item_array(menu_shell, NULL, 0);
+}
+
+int gtk_menu_shell_get_length(GtkMenuShell * menu_shell) {
+	int length = 0;
+	gtk_menu_shell_get_item_array(menu_shell, &length);
+	return length;
 }
 /**
  * Ensures the menu shell has 'length' elements
  * If it had more elements, set 'truncated' flag on the extra ones.
  * non-gnomenu-item is not counted.
  * */
-void gtk_menu_shell_truncate(GtkMenuShell * menu_shell, gint length) {
-	GList * children = gtk_container_get_children(menu_shell);
-	GList * iter;
-	gint l = 0;
-	for(iter = children; iter; iter = iter->next) {
-		if(GNOMENU_IS_MENU_ITEM(iter->data)) l ++;
-	}
-	if( l < length) {
-		int i;
-		for(i = l; i < length; i++) {
-			gtk_menu_shell_append(menu_shell, gnomenu_menu_item_new());	
+void gtk_menu_shell_set_length(GtkMenuShell * menu_shell, gint length) {
+	int i = 0;
+	int array_length = 0;
+	GnomenuMenuItem **array = gtk_menu_shell_get_item_array(menu_shell, &array_length);
+	if( array_length < length) {
+		GnomenuMenuItem ** new_array = g_new0(GnomenuMenuItem*, length);
+		/* grow the array for fast indexing items */
+		/* first setup the existing items */
+		for(i = 0; i < array_length; i++) {
+			new_array[i] = array[i];
 		}
-		l = length;
-		g_list_free(children);
-		children = gtk_container_get_children(menu_shell);
+		/* then create the new items and store an unrefed pointer
+           to the array, too.*/
+		for(i = array_length; i < length; i++) {
+			GnomenuMenuItem * item = gnomenu_menu_item_new();
+			new_array[i] = item;
+			gtk_menu_shell_append(menu_shell, GTK_WIDGET(item));
+		}
+		/* Recalculate the children list, pass through the next
+		   step. This is subopti!*/
+		gtk_menu_shell_set_item_array(menu_shell, new_array, length);
+		array = new_array;
+		array_length = length;
 	}
-	for(iter = g_list_last(children); iter; iter = iter->prev) {
-		if(GNOMENU_IS_MENU_ITEM(iter->data)) {
-		if(l > length) {
-			gnomenu_menu_item_set_truncated(iter->data, TRUE);
+	
+	/* set the truncated flags on the children */
+	for(i = 0; i < array_length; i++) {
+		if(i > length) {
+			gnomenu_menu_item_set_truncated(array[i], TRUE);
 		} else {
-			gnomenu_menu_item_set_truncated(iter->data, FALSE);
-		}
-		l--;
+			gnomenu_menu_item_set_truncated(array[i], FALSE);
 		}
 	}
-	g_list_free(children);
 }
+
 GtkMenuItem * gtk_menu_shell_get_item(GtkMenuShell * menu_shell, gint position) {
-	if(position >= gtk_menu_shell_length_without_truncated(menu_shell)) {
-		gtk_menu_shell_truncate(menu_shell, position + 1);
+	GnomenuMenuItem ** array = NULL;
+	gint length = 0;
+	array = gtk_menu_shell_get_item_array(menu_shell, &length);
+	if(position >= length) {
+		/* grow as needed */
+		gtk_menu_shell_set_length(menu_shell, position + 1);
+		array = gtk_menu_shell_get_item_array(menu_shell, &length);
 	}
-	gint length = gtk_menu_shell_length_without_truncated(menu_shell);
 	if(position == -1) position = length - 1;
 
-	gint pos = position;
-	gpointer data[3] = { &pos, menu_shell, NULL};
-	gtk_container_foreach(GTK_CONTAINER(menu_shell), 
-			(GtkCallback)gmsg_foreach_cb, data);
-	return (GtkMenuItem*) data[2];
+	return GTK_MENU_ITEM(array[position]);
 }
-static void gmsgip_foreach_cb(GtkWidget * child, gpointer data[]) {
-	gint * i = data[0];
-	gboolean * found = data[1];
-	GtkWidget * foo = data[2];
-	if(child == foo) {
-		*found = TRUE;
-	}
-	if(!*found && GNOMENU_IS_MENU_ITEM(child)) (*i)++;
-}
+
 gint gtk_menu_shell_get_item_position(GtkMenuShell *menu_shell, GtkMenuItem * item) {
-	gint i = 0;
-	gboolean found = FALSE;
-	gpointer data[] = {&i, &found, item};
-	gtk_container_foreach((GtkContainer*)menu_shell, (GtkCallback)gmsgip_foreach_cb, data);
-	if(found)
-		return i;
-	else
-		return -1;
-}
-static void gmsl_foreach(GtkWidget * child, gpointer data[]) {
-	gint * length = data[0];
-	if( GNOMENU_IS_MENU_ITEM(child) &&		
-	!gnomenu_menu_item_get_truncated((GnomenuMenuItem*)child)) (*length) ++;
-}
-gint gtk_menu_shell_length_without_truncated(GtkMenuShell * menu_shell) {
+	GnomenuMenuItem ** array = NULL;
 	gint length = 0;
-	gpointer data[1] = {&length};
-	gtk_container_foreach((GtkContainer*)menu_shell, (GtkCallback)gmsl_foreach, data);
-	return length;
+	gint i = 0;
+	array = gtk_menu_shell_get_item_array(menu_shell, &length);
+	if(array == NULL) return -1;
+	for(i = 0; i < length; i++) {
+		if(GTK_MENU_ITEM(array[i]) == item) return i;
+	}
+	return -1;
 }

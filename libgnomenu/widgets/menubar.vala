@@ -487,10 +487,10 @@ static const string EMPTY_OVERFLOWN_MENU =
 	}
 	public int length {
 		get {
-			return gtk_menu_shell_length_without_truncated(this);
+			return gtk_menu_shell_get_length(this);
 		}
 		set {
-			gtk_menu_shell_truncate(this, value);
+			gtk_menu_shell_set_length(this, value);
 		}	
 	}
 }
