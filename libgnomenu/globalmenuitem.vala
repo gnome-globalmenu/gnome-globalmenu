@@ -1,4 +1,4 @@
-public class Gnomenu.GlobalMenuItem : Gtk.MenuItem {
+public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
 	private Gnomenu.Monitor active_window_monitor;
 
 	public bool per_monitor_mode {
