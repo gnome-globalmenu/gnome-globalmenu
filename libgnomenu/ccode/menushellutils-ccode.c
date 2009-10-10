@@ -69,7 +69,7 @@ void gtk_menu_shell_set_length(GtkMenuShell * menu_shell, gint length) {
 	
 	/* set the truncated flags on the children */
 	for(i = 0; i < array_length; i++) {
-		if(i > length) {
+		if(i >= length) {
 			gnomenu_menu_item_set_truncated(array[i], TRUE);
 		} else {
 			gnomenu_menu_item_set_truncated(array[i], FALSE);
