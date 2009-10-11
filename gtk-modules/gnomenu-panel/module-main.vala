@@ -40,7 +40,7 @@ public static class Plugin {
 		widget.set_data("hacked", (void*) true);
 		message("hacked");
 		var adapter = new Gnomenu.GlobalMenuAdapter(widget);
-
+		widget.set_data_full("globalmenu-adapter", adapter.ref(), g_object_unref);
 	}
 	private static void hack_all() {
 		List<unowned Gtk.Window> toplevels = Gtk.Window.list_toplevels();
