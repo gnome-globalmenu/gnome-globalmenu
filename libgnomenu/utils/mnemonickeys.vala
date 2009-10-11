@@ -25,10 +25,18 @@ internal class Gnomenu.MnemonicKeys {
 			keys.insert(keyval, item);
 		}
 		current_grab = window;
-		var toplevel = (shell as Gtk.Widget).get_toplevel();
-		current_grab.set_key_widget(toplevel);
+		current_grab.set_key_widget(get_toplevel());
 	}
 
+	private Gtk.Widget? get_toplevel() {
+		var toplevel = (shell as Gtk.Widget).get_toplevel();
+		if(toplevel == null) {
+			if(shell is Gnomenu.Adapter) {
+				toplevel = (shell as Gnomenu.Adapter).gtk_shell.get_toplevel();
+			}
+		}
+		return toplevel;
+	}
 	public void ungrab() {
 		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
 		if(current_grab != null) {
