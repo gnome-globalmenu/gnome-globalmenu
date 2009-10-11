@@ -4,8 +4,18 @@ Post Installation
 
 On Gnome 2.24 or newer
 ----------------------
+
+- With the Applet
+
 1. Add the applet (GlobalMenu PanelApplet) to the panel.
 2. Enable the Gtk Plugin from the preference window of the applet.
+
+- With Gnome Panel
+
+Enable the following gconf keys via gconf-editor
+ apps/gnome_settings_daemon/gtk_modules/globalmenu-gnome
+ apps/gnome_settings_daemon/gtk_modules/gnomenu-panel
+Add Panel Menu Bar to the top panel
 
 On Gnome 2.22 or older
 ----------------------
