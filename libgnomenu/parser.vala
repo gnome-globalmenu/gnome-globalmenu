@@ -29,7 +29,6 @@ public class Gnomenu.Parser {
 		public void advance() {
 			_position++;
 		}
-		private Item _item = null;
 		public Item item {
 			owned get {
 				return shell.get_item(position);
@@ -100,7 +99,7 @@ public class Gnomenu.Parser {
 	}
 	private void setup_item(Item item, 
 			string[] attr_names, 
-			string[] attr_vals) {
+			string[] attr_vals) throws GLib.Error {
 		weak string label = null;
 		weak string icon = null;
 		weak string type = null;
@@ -112,6 +111,7 @@ public class Gnomenu.Parser {
 		bool visible = true;
 		bool underline = true;
 		bool client_side = false;
+
 		collect_attributes("item", attr_names, attr_vals,
 				Markup.CollectType.STRING | Markup.CollectType.OPTIONAL,
 				"label", &label, 
@@ -136,6 +136,7 @@ public class Gnomenu.Parser {
 				Markup.CollectType.TRISTATE,
 				"client-side", &client_side
 				);
+
 		if(visible != false)
 			visible = true;
 		
