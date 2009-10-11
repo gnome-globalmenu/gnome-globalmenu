@@ -13,7 +13,7 @@ public class Gnomenu.GlobalMenuAdapter : Gnomenu.Adapter {
 	public signal void active_window_changed(Gnomenu.Window? prev_window);
 
 	private Gnomenu.Monitor active_window_monitor;
-	private Gnomenu.Menu main_shell = null;
+
 	construct {
 		active_window_monitor = new Gnomenu.Monitor(gtk_shell.get_screen());
 		active_window_monitor.managed_shell = this;
