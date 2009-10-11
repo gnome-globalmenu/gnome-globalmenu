@@ -1,0 +1,46 @@
+/** Grab mnemonic keys on a Gtk.Widget from a Gnomenu.Window **/
+internal class Gnomenu.MnemonicKeys {
+	private HashTable<uint, Gtk.Widget> keys
+	    = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
+	public Gnomenu.Shell shell {get; private set;}
+	private Gnomenu.Window current_grab = null;
+
+	public MnemonicKeys(Gnomenu.Shell shell) {
+		this.shell = shell;
+	}
+
+	public void grab(Gnomenu.Window window) {
+		if(current_grab != null) {
+			ungrab();
+		}
+		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
+		for(int i = 0; i< shell.length; i++) {
+			var item = shell.get_item(i) as Gnomenu.MenuItem;
+			if(item == null) continue;
+			Gnomenu.MenuLabel label = item.get_child() as Gnomenu.MenuLabel;
+			if(label == null) continue;
+			uint keyval = label.mnemonic_keyval;
+			debug("grabbing key for %s:%u", label.label, keyval);
+			window.grab_key(keyval, mods);
+			keys.insert(keyval, item);
+		}
+		current_grab = window;
+		var toplevel = (shell as Gtk.Widget).get_toplevel();
+		current_grab.set_key_widget(toplevel);
+	}
+
+	public void ungrab() {
+		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
+		if(current_grab != null) {
+			foreach(uint keyval in keys.get_keys()) {
+				debug("ungrabbing %u", keyval);
+				current_grab.ungrab_key(keyval, mods);
+			}
+			current_grab.set_key_widget(null);
+		}
+
+		keys.remove_all();
+		current_grab = null;
+	}
+	
+}

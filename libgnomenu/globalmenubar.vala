@@ -1,9 +1,7 @@
 public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	private Gnomenu.Window _root_window;
 	private Gnomenu.Monitor active_window_monitor;
-	private HashTable<uint, Gtk.Widget> keys
-	    = new HashTable<uint, Gtk.Widget>(direct_hash, direct_equal);
-
+	private Gnomenu.MnemonicKeys mnemonic_keys;
 
 	public bool per_monitor_mode {
 		get { return active_window_monitor.per_monitor_mode;}
@@ -28,11 +26,13 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 	public signal void active_window_changed(Gnomenu.Window? prev_window);
 
 	construct {
+		mnemonic_keys = new MnemonicKeys(this);
+
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.managed_shell = this;
 		/*FIXME: How do we sync the monitor_num with the applet? */
 		active_window_monitor.monitor_num = -1;
-		active_window_monitor.active_window_changed += regrab_mnemonic_keys0;
+		active_window_monitor.active_window_changed += regrab_mnemonic_keys;
 		active_window_monitor.shell_rebuilt += regrab_mnemonic_keys;
 		active_window_monitor.active_window_lost_focus += regrab_mnemonic_keys;
 		active_window_monitor.active_window_received_focus += regrab_mnemonic_keys;
@@ -78,19 +78,10 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 			active_window_monitor.has_pointer();
 	}
 	private void regrab_mnemonic_keys() {
-		regrab_mnemonic_keys0(active_window);
-	}
-	private void regrab_mnemonic_keys0(Gnomenu.Window? prev_window) {
-		if(prev_window != null) {
-			ungrab_mnemonic_keys(prev_window);
-			prev_window.set_key_widget(null);
-		}
+		mnemonic_keys.ungrab();
 		if(really_should_grab_keys()) {
 			show_underlines();
-			if(active_window != null) {
-				active_window.set_key_widget(this.get_toplevel());
-				grab_mnemonic_keys(active_window);
-			}
+			mnemonic_keys.grab(active_window);
 		} else {
 			hide_underlines();
 		}
@@ -126,35 +117,11 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		if(_root_window != null) {
 			_root_window.set_key_widget(null);
 			ungrab_menu_bar_key();
-			if(active_window != null)
-				ungrab_mnemonic_keys(active_window);
+			mnemonic_keys.ungrab();
 		}
 		var settings = get_settings();
 		settings.notify["gtk-menu-bar-accel"] -= regrab_menu_bar_key;
 		_root_window = null;
-	}
-
-	private void grab_mnemonic_keys(Gnomenu.Window window) {
-		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
-		foreach(Gtk.Widget widget in get_children()) {
-			Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
-			if(item == null) continue;
-			Gnomenu.MenuLabel label = item.get_child() as Gnomenu.MenuLabel;
-			if(label == null) continue;
-			uint keyval = label.mnemonic_keyval;
-			debug("grabbing key for %s:%u", label.label, keyval);
-			window.grab_key(keyval, mods);
-			keys.insert(keyval, widget);
-		}
-	}
-
-	private void ungrab_mnemonic_keys(Gnomenu.Window window) {
-		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
-		foreach(uint keyval in keys.get_keys()) {
-			debug("ungrabbing %u", keyval);
-			window.ungrab_key(keyval, mods);
-		}
-		keys.remove_all();
 	}
 
 	private bool sync_monitor_num() {

@@ -20,6 +20,7 @@ VALASOURCES = \
 	widgets/menulabel.vala \
 	utils/menushellutils.vala \
 	utils/keygrab.vala \
+	utils/mnemonickeys.vala \
 	$(NULL)
 
 lib_LTLIBRARIES = libgnomenu.la
