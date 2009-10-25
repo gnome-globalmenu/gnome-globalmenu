@@ -29,7 +29,6 @@ libgnomenu_panel_la_LDFLAGS = \
 		-g \
 		-version-info 1:0:0 \
 		-avoid-version \
-		-release $(PACKAGE_VERSION) \
 		-no-undefined \
 		-export-dynamic \
 		-Wl,--as-needed \
