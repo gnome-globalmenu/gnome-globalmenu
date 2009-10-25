@@ -62,11 +62,16 @@ void dyn_patch_set_is_local(GtkMenuBar * menubar, gboolean is_local) {
 	}
 	if(GTK_WIDGET_MAPPED (menubar))
 		_gtk_menu_bar_map (GTK_WIDGET(menubar));
+
 	gtk_widget_queue_resize(GTK_WIDGET(menubar));
+	/* Trigger a resize for wxGTK */
+	g_signal_emit_by_name(G_OBJECT(menubar), "style-set", NULL);
+
 	if(is_local)
 		dyn_patch_set_menubar_r(GTK_WIDGET(menubar), NULL);
 	else 
 		dyn_patch_set_menubar_r(GTK_WIDGET(menubar), menubar);
+
 }
 
 DEFINE_FUNC(void, gtk_menu_bar, size_request, (GtkWidget * widget, GtkRequisition * requisition)) {
