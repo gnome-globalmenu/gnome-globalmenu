@@ -302,6 +302,7 @@ public class Applet : Panel.Applet {
 			_("General Settings"),
 			new string[] {
 				"/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome",
+				"/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel",
 				root + "/disable_module_check",
 				root + "/use_rgba_colormap",
 				root + "/per_monitor_mode",
