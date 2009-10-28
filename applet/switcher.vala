@@ -112,14 +112,12 @@ extern int system(string arg);
 			
 			/* if it is an Action Menu item, try to get reference to parent */
 			if (window == null) {
-				string[] paths = item.item_path.split("/");
-				string parent_path = "";
-				for (int co=0; co<paths.length-1; co++)
-					if (paths[co]!="")
-						parent_path = parent_path.concat("/", paths[co], null);
-				window = item_to_window(this.get(parent_path));
+				var parent_shell = item.shell;
+				var parent_item = parent_shell.owner;
+				window = item_to_window(parent_item as Gnomenu.MenuItem);
 			}
 			
+
 			switch(item.item_id) {
 				case "minimize":
 					if (window != null) window.minimize(); break;
@@ -156,7 +154,8 @@ extern int system(string arg);
 				default:
 					/** dirty trick to ignore the activate
 					 * signal on the item with the wnck action menu */
-					if (item.sub_shell != null) return;
+
+					if (item.has_sub_shell) return;
 					if (window != null) perhaps_minimize_window(window);
 					break;
 			}
