@@ -6,7 +6,7 @@
 	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome</applyto>
 	  <owner>libglobalmenu-gnome</owner>
 	  <type>bool</type>
-	  <default>false</default>
+	  <default>true</default>
 	  <locale name="C">
 		<short>Enable Global Menu For GTK applications</short>
 		<long>If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is loaded.</long>
@@ -17,7 +17,7 @@
 	  <applyto>/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel</applyto>
 	  <owner>libgnomenu</owner>
 	  <type>bool</type>
-	  <default>false</default>
+	  <default>true</default>
 	  <locale name="C">
 		<short>Integrate Global Menu with gnome-panel</short>
 		<long>If this key is enabled, Global Menu will be directly integrated into the Main Menu applet.</long>
