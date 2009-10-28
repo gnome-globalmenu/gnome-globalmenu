@@ -102,6 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT/%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.la
+rm -f $RPM_BUILD_ROOT/%{_libdir}/gtk-2.0/modules/libgnomenu-panel.la
 rm -f $RPM_BUILD_ROOT/%{_libdir}/libgnomenu.la
 rm -f $RPM_BUILD_ROOT/%{pkgdocdir}/INSTALL
 
@@ -139,7 +140,7 @@ fi
 %{_libdir}/libgnomenu-%{version}.so.2.0.0
 %{_mandir}/man1/gnome-globalmenu.1.gz
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
-%{_libdir}/gtk-2.0/modules/libglobalmenu-gnome-%{version}.so
+%{_libdir}/gtk-2.0/modules/libgnomenu-panel.so
 
 %files devel
 %defattr(-,root,root,-)
