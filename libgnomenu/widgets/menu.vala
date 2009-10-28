@@ -42,6 +42,7 @@ public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
 	public Item? get_item_by_id(string id) {
 		foreach(var child in get_children()) {
 			var item = child as Item;
+			if(item == null) continue;
 			if(item.item_id == id) return item;
 		}
 		return null;
