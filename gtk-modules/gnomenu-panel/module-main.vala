@@ -6,7 +6,7 @@ public static class Plugin {
 		string app_name = Environment.get_prgname();
 		if(app_name != "gnome-panel") {
 			disabled = true;
-			return "GnomenuPanel only works with gnome-panel.";
+			return null;
 		}
 		return null;
 	}
@@ -14,6 +14,9 @@ public static class Plugin {
 	private static Type panel_menu_bar_type;
 	[CCode (cname="gtk_module_init")]
 	public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref string[] args) {
+
+		if(disabled) return;
+
 		module = Module.open(null, 0);
 		panel_menu_bar_type = panel_menu_bar_get_type();
 		klass = panel_menu_bar_type.class_ref();
