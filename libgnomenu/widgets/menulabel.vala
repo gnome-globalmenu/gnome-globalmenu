@@ -16,6 +16,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		child_set(_accel_widget, "alignment", Pango.Alignment.RIGHT, null);
 		child_set(_accel_widget, "padding", 10, null);
 		child_set(_label_widget, "ellipsized", true, null);
+		child_set(_label_widget, "padding", 0, null);
 	}
 	private struct ChildPropBag {
 		public Pango.Alignment alignment;
@@ -60,13 +61,15 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 			return _accel;
 		}
 		set {
-			if(_accel == value) return;
-			_accel = value;
 			if(value ==  null) {
 				_accel_widget.visible = false;
 			} else {
-				_accel_widget.label = value;
 				_accel_widget.visible = true;
+			}
+			if(_accel == value) return;
+			_accel = value;
+			if(value != null) {
+				_accel_widget.label = value;
 			}
 			queue_resize();
 		}
@@ -186,6 +189,19 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		}
 	}
 
+	public override void map() {
+		if(label != null) {
+			_label_widget.show();
+		} else {
+			_label_widget.hide();
+		}
+		if(accel != null) {
+			_accel_widget.show();
+		} else {
+			_accel_widget.hide();
+		}
+		base.map();
+	}
 	public override void size_request(out Gtk.Requisition r) {
 		Gtk.Requisition cr;
 		r.width = 0;
