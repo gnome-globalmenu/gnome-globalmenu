@@ -172,8 +172,10 @@ namespace GlobalMenuGTK {
 
 		string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
 			Gdk.Pixdata pixdata = {0};
-			pixdata.from_pixbuf(pixbuf, true);
-			return Base64.encode(pixdata.serialize());
+			Gdk.Pixdata * rle = pixdata.from_pixbuf(pixbuf, true);
+			string rt = Base64.encode(rle->serialize());
+			delete rle;
+			return rt;
 		}
 		private void append_icon_attribute(Image image) {
 			if(image.file != null) {
