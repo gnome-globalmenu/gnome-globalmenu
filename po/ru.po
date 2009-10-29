@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-05-18 17:55+0000\n"
-"Last-Translator: Nikita Ivanitski <sukinkot@gmail.com>\n"
+"PO-Revision-Date: 2009-10-16 05:23+0000\n"
+"Last-Translator: Alexander Kluev <kwargs@gmail.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
+"X-Launchpad-Export-Date: 2009-10-29 01:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
@@ -29,17 +29,13 @@ msgstr "Файл журнала, по умолчанию ~/.gnomenu.log"
 msgid "globalmenu-panel-applet"
 msgstr "апплет-панели-глобального меню"
 
-#: ../applet/applet.vala:216
-msgid "_Preferences"
-msgstr "_Параметры"
-
 #: ../applet/applet.vala:313
 msgid "On-line help"
 msgstr "Помощь в сети"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr "Показать _рабочий стол"
+msgstr "Показать рабочий стол"
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
@@ -85,9 +81,13 @@ msgstr ""
 "Параметры должны быть применены в переменной окружения "
 "GLOBALMENU_GNOME_ARGS, а не в командной строке."
 
+#: ../applet/applet.vala:216
+msgid "_Preferences"
+msgstr "_Настройки"
+
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr "_Справка"
+msgstr "Помощь"
 
 #: ../applet/applet.vala:218
 msgid "_About"
@@ -119,10 +119,12 @@ msgstr "Сайт проекта"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Alexander Kluev https://launchpad.net/~kwargs\n"
 "  Alexander Semyonov https://launchpad.net/~rotuka\n"
 "  Konstantin Khazov https://launchpad.net/~kvk15-ripe\n"
 "  Nikita Ivanitski https://launchpad.net/~sukinkot\n"
-"  Oleg Grom https://launchpad.net/~gromescu"
+"  Oleg Grom https://launchpad.net/~gromescu\n"
+"  Sergey Sedov https://launchpad.net/~serg-sedov"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
@@ -138,27 +140,27 @@ msgstr "нет действий"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr "_Свернуть"
+msgstr "Свернуть"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr "_Развернуть"
+msgstr "Развернуть"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr "Восстановить _прежний размер"
+msgstr "Восстановить прежний размер"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr "Пере_местить"
+msgstr "Переместить"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr "Из_менить размер"
+msgstr "Изменить размер"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr "Всегда _сверху"
+msgstr "Всегда сверху"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
@@ -166,11 +168,11 @@ msgstr "Всегда на видимом рабочем месте"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr "_Рабочее место…"
+msgstr "Рабочее место…"
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr "_Закрыть"
+msgstr "Закрыть"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
@@ -215,7 +217,7 @@ msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
-"Если этот включено, GTK-модуль libglobalmenu-gnome для глобального меню "
+"Если это включено,  то GTK-модуль libglobalmenu-gnome для глобального меню "
 "загружен."
 
 #: ../gnome-globalmenu.schemas.in.h:9

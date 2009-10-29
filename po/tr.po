@@ -8,14 +8,26 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-24 06:13+0000\n"
-"Last-Translator: Ufuk Tekir <Unknown>\n"
+"PO-Revision-Date: 2009-10-28 14:37+0000\n"
+"Last-Translator: TurkMame <turkmame@pozitif.net>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
+"X-Launchpad-Export-Date: 2009-10-29 01:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
+
+#: ../applet/applet.vala:216
+msgid "_Preferences"
+msgstr "_Özellikler"
+
+#: ../applet/applet.vala:217
+msgid "_Help"
+msgstr "_Yardım"
+
+#: ../applet/applet.vala:218
+msgid "_About"
+msgstr "_Hakkında"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
@@ -23,15 +35,15 @@ msgstr "Belirteç Boyutu"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
-msgstr ""
+msgstr "Onay ya da radyo düğmesi belirtecinin boyutu"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
 msgid "Be verbose"
-msgstr ""
+msgstr "Konuşkan ol"
 
 #: ../gtk-modules/globalmenu/module-main.vala:83
 msgid "disable serializing pixbuf"
-msgstr ""
+msgstr "pixbuf serileştirmesini kapat"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
@@ -43,11 +55,11 @@ msgstr "Günlük kaydedilecek dosya, varsayılan ~/.gnomenu.log"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "hybrid modu aç"
 
 #: ../gtk-modules/globalmenu/module-main.vala:101
 msgid "- Global Menu plugin Module for GTK"
-msgstr ""
+msgstr "GTK modülü için Global Menü Eklentisi"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -59,27 +71,15 @@ msgstr ""
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
-msgstr ""
-
-#: ../applet/applet.vala:216
-msgid "_Preferences"
-msgstr "_Tercihler"
-
-#: ../applet/applet.vala:217
-msgid "_Help"
-msgstr "_Yardım"
-
-#: ../applet/applet.vala:218
-msgid "_About"
-msgstr "_Hakkında"
+msgstr "globalmenu-panel-applet"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
-msgstr ""
+msgstr "Global Menü Olmasın mı?"
 
 #: ../applet/applet.vala:247
 msgid "The Global Menu Plugin is not enabled on this desktop."
-msgstr ""
+msgstr "Masaüstü için Global Menü Eklentisi etkinleştirilmedi"
 
 #: ../applet/applet.vala:248
 msgid ""
@@ -88,93 +88,95 @@ msgstr "Bu eklentiyi sağ-tıklamayla tercihlere girerek etkinleştir"
 
 #: ../applet/applet.vala:249
 msgid "or by exporting GTK_MODULES=globalmenu-gnome in your profile."
-msgstr ""
+msgstr "veya proflinizdeki GTK_MODULES=globalmenu-gnome'u dışa aktararak."
 
 #: ../applet/applet.vala:283
 msgid "Project Home"
-msgstr ""
+msgstr "Proje Başlangıç Sayfası"
 
 #: ../applet/applet.vala:301
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Ferit Terzi https://launchpad.net/~feritterzi\n"
+"  TurkMame https://launchpad.net/~turkmame\n"
 "  Ufuk Tekir https://launchpad.net/~tekir"
 
 #: ../applet/applet.vala:313
 msgid "On-line help"
-msgstr ""
+msgstr "Online Yardım"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "Global Menü Applet Özellikleri"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
-msgstr ""
+msgstr "Pencereler Olmasın"
 
 #: ../applet/switcher.vala:69
 msgid "no actions"
-msgstr ""
+msgstr "Komutlar Olmasın"
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr ""
+msgstr "_Küçült"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr ""
+msgstr "_Büyült"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr ""
+msgstr "_Büyültmeyi geri al"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr ""
+msgstr "_Taşı"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr ""
+msgstr "_Yeniden Boyutlandır"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr ""
+msgstr "Her Zaman Üstte"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "_Herzaman Çalışma Alanında Görüntüle"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr ""
+msgstr "_Çalışma Alanı..."
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr ""
+msgstr "_Kapat"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr ""
+msgstr "Masaüstünü_Göster"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "Masaüstü"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
-msgstr ""
+msgstr "Pencere İzle"
 
 #: ../gnome-globalmenu.schemas.in.h:1
 msgid "Add a handle to the applet"
-msgstr ""
+msgstr "Applete yeni yol ekle"
 
 #: ../gnome-globalmenu.schemas.in.h:2
 msgid "Add window action menu entries to active application name menu"
-msgstr ""
+msgstr "Aktif uygulama  menüsüne Komut Menü Penceresini ekle"
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "Başlangıçta GTK plugin modüllerinini kontol etmeyi kapat"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -182,44 +184,49 @@ msgid ""
 "loaded but for some reasons the applet cannot correctly detect this fact, "
 "set this key to true to skip the checking."
 msgstr ""
+"Başlangıçtaki GTK eklentisi kipi kontrolünü devre dışı bırakın.Eğer kipin "
+"yüklendiğini biliyorsanız ama herhangi bir sebepten uygulama bunu "
+"algılamazsa,kontrolü atlamak için bu anahtarı doğru olarak ayarlayın."
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr ""
+msgstr "GTK Uygulamaları için Global Menüyü Etkinleştir"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr ""
+msgstr "Pencere Komutlarını Etkinleştir"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "Pencere Listesini Etkinleştir"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
 msgstr ""
+"Eğer libglobalmenu-gnome anahtarı doğruysa GTK eklentileri için Global Menü "
+"yüklenir."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "Title için En Fazla Uzunluk"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "Komut penceresindeki appletlerde ikon göster"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "Komut penceresindeki appletlerde ikon gösterilirse etkinleştir"
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "Aktif uygulamaladaki appletde Adını Göster"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "Aktif uygulamaladaki appletde Adını Gösterirse etkinleştir."
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -229,11 +236,11 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Uygulamalar arasında geçiş yaparken uygulama etiket adı"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr ""
+msgstr "Aktif uygulamanın adı için en fazla uzunluk"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
@@ -249,8 +256,8 @@ msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "XFCE paneli için Global Menü Eklentisi"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "XFCE paneli için Global Menü Eklentisi"

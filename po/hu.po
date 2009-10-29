@@ -14,7 +14,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
+"X-Launchpad-Export-Date: 2009-10-29 01:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
@@ -239,10 +239,13 @@ msgid ""
 "Specify if the applet has a handle. When the handle is enabled, the applet "
 "will not expand to occupy the remaining empty area on the panel."
 msgstr ""
+"Meghatározza, hogy van-e a kisalkalmazásnak kezelője. Ha engedélyezve van a "
+"kezelő, akkor a kisalkalmazás nem terjed ki az egész szabad területre a "
+"panelen, elfoglalva azt."
 
 #: ../gnome-globalmenu.schemas.in.h:15
 msgid "Switch among applications via the application name label"
-msgstr ""
+msgstr "Alkalmazások közötti váltás az alkalmazás-név címkével"
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"

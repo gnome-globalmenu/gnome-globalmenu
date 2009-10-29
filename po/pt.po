@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-05-06 11:41+0000\n"
-"Last-Translator: dbrenha <Unknown>\n"
+"PO-Revision-Date: 2009-09-06 18:35+0000\n"
+"Last-Translator: Bruno Guerreiro <Unknown>\n"
 "Language-Team: Portuguese <pt@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
+"X-Launchpad-Export-Date: 2009-10-29 01:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../libgnomenu/menuitem.vala:31
@@ -96,6 +96,7 @@ msgstr "Página do Projecto"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Bruno Guerreiro https://launchpad.net/~american-jesus-pt\n"
 "  Diogo Ferreira https://launchpad.net/~diogo-underdev\n"
 "  Edgar Gonçalves https://launchpad.net/~edgar.goncalves\n"
 "  Francisco Silva https://launchpad.net/~fsilvaportugal\n"
@@ -159,7 +160,7 @@ msgstr "Mostrar Ambiente de _Trabalho"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "Ambiente de Trabalho"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
@@ -242,7 +243,7 @@ msgstr "O tamanho máximo para o nome da aplicação activa, em pixeis."
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr "Applet de Painél do Menu Global"
+msgstr "Applet de Painel do Menu Global"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"

@@ -1,6 +1,6 @@
 [encoding: UTF-8]
-libgnomenu/menuitem.vala
-libgnomenu/menubarbox.vala
+libgnomenu/widgets/menuitem.vala
+libgnomenu/widgets/menubarbox.vala
 gtk-modules/globalmenu/module-main.vala
 applet/main.vala
 applet/applet.vala

@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: globalmenu\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2009-05-05 17:11-0400\n"
-"PO-Revision-Date: 2009-04-19 07:53+0000\n"
-"Last-Translator: Mike Sierra <Unknown>\n"
+"PO-Revision-Date: 2009-10-09 06:47+0000\n"
+"Last-Translator: Jaesung <jaesung@liberotown.com>\n"
 "Language-Team: Korean <ko@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-09-05 15:52+0000\n"
+"X-Launchpad-Export-Date: 2009-10-29 01:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: ../gtk-modules/globalmenu/module-main.vala:82 ../applet/main.vala:7
@@ -27,11 +27,11 @@ msgstr "GTK를 위한 글로벌 메뉴 플러그인 모듈"
 
 #: ../applet/applet.vala:169
 msgid "globalmenu-panel-applet"
-msgstr "글로벌메뉴-패널-애플릿"
+msgstr "글로벌 메뉴-패널-애플릿"
 
 #: ../libgnomenu/menuitem.vala:30
 msgid "Indicator Size"
-msgstr "표시자 크기"
+msgstr "알림창 크기"
 
 #: ../libgnomenu/menuitem.vala:31
 msgid "Size of check or radio indicator"
@@ -43,15 +43,15 @@ msgstr ""
 
 #: ../gtk-modules/globalmenu/module-main.vala:84
 msgid "Disable the Plugin"
-msgstr "플러그인 사용 안하기"
+msgstr "플러그인 비활성화"
 
 #: ../gtk-modules/globalmenu/module-main.vala:85
 msgid "File to save the log, default to ~/.gnomenu.log"
-msgstr "기록 파일 생성하기, 기본값은 ~/.gnomenu.log"
+msgstr "기록 파일 저장(기본값: ~/.gnomenu.log)"
 
 #: ../gtk-modules/globalmenu/module-main.vala:86
 msgid "Enable hybrid mode"
-msgstr ""
+msgstr "하이브리드 모드 활성화"
 
 #: ../gtk-modules/globalmenu/module-main.vala:103
 msgid ""
@@ -61,15 +61,15 @@ msgstr ""
 
 #: ../applet/applet.vala:216
 msgid "_Preferences"
-msgstr "설정(_P)"
+msgstr "기본 설정(_P)"
 
 #: ../applet/applet.vala:217
 msgid "_Help"
-msgstr ""
+msgstr "도움말(_H)"
 
 #: ../applet/applet.vala:218
 msgid "_About"
-msgstr ""
+msgstr "정보(_A)"
 
 #: ../applet/applet.vala:246
 msgid "No Global Menu?"
@@ -96,6 +96,7 @@ msgstr "프로젝트 홈"
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
+"  Jaesung https://launchpad.net/~jaesung\n"
 "  Mike Sierra https://launchpad.net/~ubuntuda"
 
 #: ../applet/applet.vala:313
@@ -104,7 +105,7 @@ msgstr "온라인 도움말"
 
 #: ../applet/applet.vala:324
 msgid "Global Menu Applet Preferences"
-msgstr ""
+msgstr "글로벌 메뉴 애플릿 기본 설정"
 
 #: ../applet/switcher.vala:68
 msgid "no windows"
@@ -116,47 +117,47 @@ msgstr ""
 
 #: ../applet/switcher.vala:72
 msgid "Mi_nimize"
-msgstr ""
+msgstr "최소화(_N)"
 
 #: ../applet/switcher.vala:73
 msgid "Ma_ximize"
-msgstr ""
+msgstr "최대화(_X)"
 
 #: ../applet/switcher.vala:74
 msgid "Unma_ximize"
-msgstr ""
+msgstr "최대화 취소(_X)"
 
 #: ../applet/switcher.vala:75
 msgid "_Move"
-msgstr ""
+msgstr "이동(_M)"
 
 #: ../applet/switcher.vala:76
 msgid "_Resize"
-msgstr ""
+msgstr "크기 바꾸기(_R)"
 
 #: ../applet/switcher.vala:78 ../applet/switcher.vala:79
 msgid "Always on _Top"
-msgstr ""
+msgstr "항상 위에(_T)"
 
 #: ../applet/switcher.vala:80 ../applet/switcher.vala:81
 msgid "_Always on visible Workspace"
-msgstr ""
+msgstr "항상 보이는 작업 공간에(_A)"
 
 #: ../applet/switcher.vala:82
 msgid "_Workspace..."
-msgstr ""
+msgstr "작업 공간(_W)..."
 
 #: ../applet/switcher.vala:84
 msgid "_Close"
-msgstr ""
+msgstr "닫기(_C)"
 
 #: ../applet/switcher.vala:249
 msgid "Show _Desktop"
-msgstr ""
+msgstr "바탕 화면 보기(_D)"
 
 #: ../applet/switcher.vala:292
 msgid "Desktop"
-msgstr ""
+msgstr "바탕 화면"
 
 #: ../applet/workspaceselector.vala:115
 msgid "Follow the window"
@@ -172,7 +173,7 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:3
 msgid "Disable checking the GTK plugin module at startup"
-msgstr ""
+msgstr "시작할 때 GTK 플러그인 모듈 체크 비활성화"
 
 #: ../gnome-globalmenu.schemas.in.h:4
 msgid ""
@@ -183,41 +184,41 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:5
 msgid "Enable Global Menu For GTK applications"
-msgstr ""
+msgstr "GTK 애플리케이션 글로벌 메뉴 활성화"
 
 #: ../gnome-globalmenu.schemas.in.h:6
 msgid "Enable the Window Actions"
-msgstr ""
+msgstr "창 동작 활성화"
 
 #: ../gnome-globalmenu.schemas.in.h:7
 msgid "Enabled the Window List"
-msgstr ""
+msgstr "창 목록 활성화"
 
 #: ../gnome-globalmenu.schemas.in.h:8
 msgid ""
 "If this key is true, libglobalmenu-gnome, the GTK plugin for Global Menu is "
 "loaded."
-msgstr ""
+msgstr "이 값을 참으로 설정하면, 글로벌 메뉴의 GTK 플러그인 libglobalmenu-gnome을 불러옵니다."
 
 #: ../gnome-globalmenu.schemas.in.h:9
 msgid "Maximum length of the title area"
-msgstr ""
+msgstr "타이틀 영역의 최대 길이"
 
 #: ../gnome-globalmenu.schemas.in.h:10
 msgid "Show the icon of the action window in the applet"
-msgstr ""
+msgstr "애플릿에 활성 창의 아이콘 표시"
 
 #: ../gnome-globalmenu.schemas.in.h:11
 msgid "Show the icon of the active window in the applet when enabled."
-msgstr ""
+msgstr "활성화하면 애플릿에 현재 활성화된 창의 아이콘을 표시합니다."
 
 #: ../gnome-globalmenu.schemas.in.h:12
 msgid "Show the name of the active application in the applet"
-msgstr ""
+msgstr "애플릿에 활성 창의 이름 표시"
 
 #: ../gnome-globalmenu.schemas.in.h:13
 msgid "Show the name of the active application in the applet when enabled"
-msgstr ""
+msgstr "활성화하면 애플릿에 현재 활성화된 창의 이름을 표시합니다."
 
 #: ../gnome-globalmenu.schemas.in.h:14
 msgid ""
@@ -231,15 +232,15 @@ msgstr ""
 
 #: ../gnome-globalmenu.schemas.in.h:16
 msgid "The maximum length of name of the active application, in pixels"
-msgstr ""
+msgstr "활성 애플리케이션 이름의 픽셀 단위 최대 길이"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:1
 msgid "Global Menu Panel Applet"
-msgstr ""
+msgstr "글로벌 메뉴 패널 애플릿"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:2
 msgid "GlobalMenu.PanelApplet Factory"
-msgstr ""
+msgstr "GlobalMenu.PanelApplet 팩토리"
 
 #: ../applet/GlobalMenu_PanelApplet.server.in.in.h:3
 msgid "The factory to build GlobalMenu.PanelApplet objects"
@@ -247,8 +248,8 @@ msgstr ""
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:1
 msgid "Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "XFCE 패널의 글로벌 메뉴 플러그인"
 
 #: ../xfce/GlobalMenu_XFCEPlugin.desktop.in.in.h:2
 msgid "The Global Menu Plugin for XFCE Panel"
-msgstr ""
+msgstr "XFCE 패널의 글로벌 메뉴 플러그인"
