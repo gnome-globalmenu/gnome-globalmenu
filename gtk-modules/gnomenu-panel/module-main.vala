@@ -1,6 +1,7 @@
 
 public static class Plugin {
 	public static bool disabled = false;
+	private static bool tiny_mode = false;
 	[CCode (cname="g_module_check_init")]
 	public static string? g_module_load(Module module) {
 		string app_name = Environment.get_prgname();
@@ -47,8 +48,13 @@ public static class Plugin {
 		}
 		widget.set_data("hacked", (void*) true);
 		message("hacked");
-		var adapter = new Gnomenu.GlobalMenuAdapter(widget);
-		widget.set_data_full("globalmenu-adapter", adapter.ref(), g_object_unref);
+		if(tiny_mode) {
+			var item = new Gnomenu.GlobalMenuItem();
+			widget.append(item);
+		} else {
+			var adapter = new Gnomenu.GlobalMenuAdapter(widget);
+			widget.set_data_full("globalmenu-adapter", adapter.ref(), g_object_unref);
+		}
 	}
 	private static void hack_all() {
 		List<unowned Gtk.Window> toplevels = Gtk.Window.list_toplevels();
