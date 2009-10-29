@@ -34,6 +34,7 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 
 	construct {
 		disposed = false;
+		this.no_show_all = true;
 		_item_type = ItemType.NORMAL;
 		_cached_label_widget = new Gnomenu.MenuLabel();
 		_cached_image_widget = new Gtk.Image();
