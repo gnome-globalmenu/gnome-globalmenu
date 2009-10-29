@@ -1,4 +1,4 @@
-public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
+public class Gnomenu.GlobalMenuItem : Gtk.MenuItem {
 	private Gnomenu.Monitor active_window_monitor;
 
 	public bool per_monitor_mode {
@@ -17,7 +17,7 @@ public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
 
 	private Gnomenu.Menu main_shell = null;
 	construct {
-		this.item_label = "Dummy";
+		this.label = _("Menu");
 		active_window_monitor = new Gnomenu.Monitor(this.get_screen());
 		active_window_monitor.managed_shell = null;
 		active_window_monitor.monitor_num = -1;
@@ -30,7 +30,6 @@ public class Gnomenu.GlobalMenuItem : Gnomenu.MenuItem {
 		main_shell.deselect += item_deselected;
 		this.hierarchy_changed += _hierarchy_changed;
 		this.activate += () => {
-			message("rebuild!");
 			active_window_monitor.rebuild_shell(main_shell);
 		};
 	}

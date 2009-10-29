@@ -8,7 +8,7 @@ namespace Gnomenu {
 		TestGlobalMenuItem() {
 			base("/GlobalMenuItem");
 			add("widget", () => {
-				menubar = new Gnomenu.MenuBar();
+				menubar = new Gtk.MenuBar();
 				Gtk.Box box = new Gtk.VBox(false, 0);
 				Gtk.MenuItem item = new Gnomenu.GlobalMenuItem();
 				menubar.set_size_request(100, 200);
