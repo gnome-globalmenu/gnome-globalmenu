@@ -8,6 +8,7 @@ public static class Plugin {
 			disabled = true;
 			return null;
 		}
+		module.make_resident();
 		return null;
 	}
 	private static TypeClass klass;
@@ -24,8 +25,12 @@ public static class Plugin {
 			0, hierarchy_changed, null);
 		
 		hack_all();
+		Log.set_handler ("libgnomenu", LogLevelFlags.LEVEL_DEBUG, void_log_handler);
 	}
 
+	private static void void_log_handler(string? domain, LogLevelFlags level, string message) {
+		return;
+	}
 	private static bool hierarchy_changed(SignalInvocationHint ihint,
 		[CCode (array_length_pos = 1.9)]
 		Value[] param_values) {
