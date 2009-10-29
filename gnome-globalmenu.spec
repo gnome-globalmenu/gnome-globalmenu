@@ -2,7 +2,7 @@
 #%define alphatag 20080418svn2511
 
 Name:		gnome-globalmenu
-Version:	0.7.8
+Version:	0.7.8beta2
 Release:	0.1%{?dist}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
