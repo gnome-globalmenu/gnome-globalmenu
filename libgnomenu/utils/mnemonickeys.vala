@@ -29,13 +29,13 @@ internal class Gnomenu.MnemonicKeys {
 	}
 
 	private Gtk.Widget? get_toplevel() {
-		var toplevel = (shell as Gtk.Widget).get_toplevel();
-		if(toplevel == null) {
-			if(shell is Gnomenu.Adapter) {
-				toplevel = (shell as Gnomenu.Adapter).gtk_shell.get_toplevel();
-			}
+		if(shell is Gtk.Widget) {
+			return (shell as Gtk.Widget).get_toplevel();
 		}
-		return toplevel;
+		if(shell is Gnomenu.Adapter) {
+			return (shell as Gnomenu.Adapter).gtk_shell.get_toplevel();
+		}
+		return null;
 	}
 	public void ungrab() {
 		Gdk.ModifierType mods = Gdk.ModifierType.MOD1_MASK;
