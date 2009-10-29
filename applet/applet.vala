@@ -63,9 +63,8 @@ public class Applet : Panel.Applet {
 		main_menubar.visible = true;
 		tiny_menubar.visible = false;
 
-		Gnomenu.MenuItem item = new GlobalMenuItem();
+		Gtk.MenuItem item = new GlobalMenuItem();
 		item.visible = true;
-		item.item_type = Gnomenu.ItemType.ARROW;
 		tiny_menubar.append(item);
 
 		if(main_menubar.active_window != null) {
