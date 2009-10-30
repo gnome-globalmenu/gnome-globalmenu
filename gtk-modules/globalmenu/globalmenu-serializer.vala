@@ -174,6 +174,9 @@ namespace GlobalMenuGTK {
 			Gdk.Pixdata pixdata = {0};
 			void * pixel_data = pixdata.from_pixbuf(pixbuf, true);
 			string rt = Base64.encode(pixdata.serialize());
+			/* pixdata.pixel_data is set to pixel_data
+			 * by Gdk, but pixdata.pixel_data is unowned,
+			 * so we have to free it */
 			delete pixel_data;
 			return rt;
 		}
