@@ -2,8 +2,8 @@
 #%define alphatag 20080418svn2511
 
 Name:		gnome-globalmenu
-Version:	0.7.8beta2
-Release:	0.1%{?dist}
+Version:	0.7.8
+Release:	0.2%{?dist}
 Summary:	Global Menu for GNOME
 Group:		User Interface/Desktops
 License:	GPLv2 and LGPLv2
@@ -136,8 +136,7 @@ fi
 %defattr(-,root,root,-)
 %doc %{pkgdocdir}/*
 %{_datadir}/pixmaps/globalmenu.png
-%{_libdir}/libgnomenu-%{version}.so.2
-%{_libdir}/libgnomenu-%{version}.so.2.0.0
+%{_libdir}/libgnomenu.so.*
 %{_mandir}/man1/gnome-globalmenu.1.gz
 %{_libdir}/gtk-2.0/modules/libglobalmenu-gnome.so
 %{_libdir}/gtk-2.0/modules/libgnomenu-panel.so
