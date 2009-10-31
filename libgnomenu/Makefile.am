@@ -42,7 +42,7 @@ libgnomenu_la_CPPFLAGS = \
 
 libgnomenu_la_LIBADD = ../legacy-support/liblegacy-support.la
 
-libgnomenu_la_LDFLAGS = -version-info 2:0:0 -release $(VERSION) -Wl,--as-needed
+libgnomenu_la_LDFLAGS = -version-info 2:0:0 -Wl,--as-needed
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libgnomenu.pc
