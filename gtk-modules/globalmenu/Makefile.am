@@ -8,6 +8,7 @@ BUILT_SOURCES = \
 
 VALASOURCES = \
 	module-main.vala \
+	superrider.vala \
 	globalmenu.vala \
 	globalmenu-serializer.vala \
 	globalmenu-locator.vala \
