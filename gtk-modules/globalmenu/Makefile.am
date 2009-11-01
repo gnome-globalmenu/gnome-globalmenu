@@ -1,14 +1,14 @@
 NULL = 
 SUBDIRS = . tests
-STAMP = globalmenu-gnome-private.vapi
 
 BUILT_SOURCES = \
-	$(STAMP) \
+	vala-ccode \
 	$(NULL)
 
 VALASOURCES = \
 	module-main.vala \
 	superrider.vala \
+	info.vala \
 	adapter.vala \
 	events.vala \
 	globalmenu-serializer.vala \
@@ -22,20 +22,17 @@ libglobalmenu_gnome_LTLIBRARIES = \
 
 libglobalmenu_gnome_la_SOURCES = \
 	$(VALASOURCES:.vala=.c) \
-	globalmenu-gnome-private.h \
 	globalmenu-helper.c \
+	globalmenu-gnome.h \
 	$(NULL)
 
-$(STAMP): $(VALASOURCES)
-	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -H globalmenu-gnome-private.h -C --basedir=$(top_srcdir) \
-		--library=$(@:.vapi=) --vapidir=. $(VALASOURCES) \
+vala-ccode : $(VALASOURCES)
+	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C --basedir=$(top_srcdir) \
+		--library=globalmenu-gnome -H globalmenu-gnome.h --vapidir=. $(VALASOURCES) \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
 		--pkg gdk-x11-2.0
 	touch $@
-
-$(STAMP:.vapi=.deps):
-	echo > $@
 
 libglobalmenu_gnome_la_LIBADD = \
 		$(GLIB_LIBS) \
@@ -57,7 +54,8 @@ libglobalmenu_gnome_la_CPPFLAGS = \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
 	  -g
 
-EXTRA_DIST = $(STAMP) $(STAMP:.vapi=.deps)\
+EXTRA_DIST = vala-ccode \
+	globalmenu-gnome.h \
 	$(VALASOURCES) \
 	$(NULL)
 

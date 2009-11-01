@@ -10,7 +10,7 @@ endif
 STAMP = $(VALASOURCES:.vala=.c)
 SUFFIXES = .vala .c 
 .vala.c:
-	$(VALAC) $(VALA_DEFAULT_PKGS) -C --vapidir=$(top_srcdir)/tests --vapidir=../ --pkg testman --pkg gtk+-2.0 --pkg globalmenu-gnome-private --pkg gmodule-2.0 $^
+	$(VALAC) $(VALA_DEFAULT_PKGS) -C --vapidir=$(top_srcdir)/tests --vapidir=../ --pkg testman --pkg gtk+-2.0 --pkg globalmenu-gnome --pkg gmodule-2.0 $^
 	touch $@
 
 

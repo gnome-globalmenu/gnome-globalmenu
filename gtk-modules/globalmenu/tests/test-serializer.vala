@@ -1,7 +1,5 @@
 using Gtk;
 
-namespace GlobalMenuGTK {
-
 	class TestSerializer : TestMan {
 		MenuBar menubar;
 		TestSerializer () {
@@ -49,4 +47,3 @@ namespace GlobalMenuGTK {
 	}
 }
 
-}

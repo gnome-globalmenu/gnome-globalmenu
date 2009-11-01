@@ -1,6 +1,5 @@
 using Gtk;
 
-namespace GlobalMenuGTK {
 	[Compact]
 	public class Locator {
 		Locator() { }	
@@ -45,5 +44,3 @@ namespace GlobalMenuGTK {
 		}
 	}
 
-
-}

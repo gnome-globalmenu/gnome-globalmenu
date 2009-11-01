@@ -1,5 +1,4 @@
-public class Adapter {
-	public Gtk.MenuBar menubar;
+public class Adapter : Info {
 	public Adapter(Gtk.MenuBar menubar) {
 		this.menubar = menubar;
 	}
