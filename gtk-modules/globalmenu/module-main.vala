@@ -24,8 +24,9 @@ private static bool deferred_init() {
 	deferred_init_id = 0;
 	return false;
 }
+
 [CCode (cname="g_module_check_init")]
-public static string? g_module_load(Module module) {
+public string g_module_check_init(Module module) {
 	domain = Quark.from_string("GlobalMenu");
 
 	if(is_quirky_app()) disabled = true;

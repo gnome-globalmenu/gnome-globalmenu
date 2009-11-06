@@ -2,39 +2,31 @@ using Gtk;
 namespace GnomenuGtk {
 
 	class TestUnload : TestMan {
-		Window window = null;
-		FileChooser chooser = null;
-		Button load = null;
-		Button unload = null;
-		Gtk.Settings settings = null;
 		Module module;
 
-		static const string rel_path = "/gtk-modules/globalmenu";
 		TestUnload () {
 			base("/GnomenuGTK/Unload");
-			settings = Gtk.Settings.get_default();
 			add("test", () => {
-				Builder builder = new Builder();
-				try {
-					builder.add_from_file("./test-unload.ui");
-				} catch(GLib.Error e) {
-					critical("%s", e.message);
-				}
-				window = builder.get_object("test_window") as Window;
-				chooser = builder.get_object("chooser") as FileChooser;
-				chooser.set_filename("./libglobalmenu-gnome.so");
-				load = builder.get_object("load") as Button;
-				unload = builder.get_object("unload") as Button;
-				load.clicked += load_module;
-				unload.clicked += unload_module;
-				window.show();
-				window.destroy += Gtk.main_quit;
+				Gtk.MenuBar menubar = new Gtk.MenuBar();
+				menubar.append(new MenuItem.with_label("test1"));
+				menubar.append(new MenuItem.with_label("test2"));
+				menubar.append(new MenuItem.with_label("test3"));
+				Gtk.Box box = new Gtk.VBox(false, 0);
+				Gtk.Button button1 = new Button.with_label("Load");
+				Gtk.Button button2 = new Button.with_label("UnLoad");
+				window.add(box);
+				box.add(menubar);
+				box.add(button1);
+				box.add(button2);
+				window.show_all();
+				button1.clicked += load_module;
+				button2.clicked += unload_module;
 				Gtk.main();
 			});
 
 		}
-		private void load_module(Button button) {
-			string module_name = chooser.get_filename();
+		private void load_module() {
+			string module_name = "../.libs/libgnomenu-gtk.so";
 			if(module == null) {
 				module = Module.open(module_name, 
 						ModuleFlags.BIND_LOCAL | ModuleFlags.BIND_LAZY);
@@ -50,7 +42,7 @@ namespace GnomenuGtk {
 				init(0, null);
 			}
 		}
-		private void unload_module(Button button) {
+		private void unload_module() {
 			module = null;
 		}
 		public static int main(string[] args) {

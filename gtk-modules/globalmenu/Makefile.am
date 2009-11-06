@@ -6,12 +6,12 @@ BUILT_SOURCES = \
 	$(NULL)
 
 VALASOURCES = \
-	module-main.vala \
 	superrider.vala \
 	info-factory.vala \
 	pref.vala \
 	info.vala \
 	patcher.vala \
+	module-main.vala \
 	$(NULL)
 
 libgnomenu_gtkdir = $(GTK_MODULES_DIR)
@@ -28,12 +28,14 @@ libgnomenu_gtk_la_SOURCES= \
 vala-ccode : $(VALASOURCES)
 	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C --basedir=$(top_srcdir) \
 		--library=globalmenu-gnome -H globalmenu-gnome.h --vapidir=. $(VALASOURCES) \
+		--vapidir=../../libgnomenu \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
-		--pkg gdk-x11-2.0
+		--pkg gdk-x11-2.0 \
+		--pkg gnomenu 
 	touch $@
 
-libgomenu_gtk_la_LIBADD = \
+libgnomenu_gtk_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
 		$(NULL)
@@ -43,10 +45,10 @@ libgnomenu_gtk_la_LDFLAGS = \
 		-version-info 1:0:0 \
 		-avoid-version \
 		-no-undefined \
-		-Wl,--as-needed \
 		-export-dynamic \
 		-module
 
+#		-Wl,--as-needed 
 libgnomenu_gtk_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
