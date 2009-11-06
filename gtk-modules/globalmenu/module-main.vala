@@ -2,9 +2,6 @@
 private static bool verbose = false;
 private static bool disabled = false;
 private static bool initialized = false;
-private static bool patch_only = false;
-private static bool disable_pixbuf = false;
-private static bool hybrid = false;
 
 private static string log_file_name = null;
 private static FileStream log_stream;
@@ -21,13 +18,8 @@ public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref string[]
 private static bool deferred_init() {
 	if(!initialized) {
 		initialized = true;
-		if(disable_pixbuf) {
-		}
-		if(hybrid) {
-		}
-		if(!patch_only) {
-
-		}
+		MenuBarInfoFactory.init();
+		MenuBarInfoFactory.get().prepare_attached_menubars();
 	}
 	deferred_init_id = 0;
 	return false;
@@ -55,32 +47,28 @@ public static string? g_module_load(Module module) {
 
 [CCode (cname="g_module_unload")]
 public static void g_module_unload(Module module) {
-	if(!disabled) {
-		if(deferred_init_id != 0) {
-			Source.remove(deferred_init_id);
-		}
-		if(initialized) {
-			if(!patch_only) {
-				
-			}
-		}
+	if(disabled) return;
 
-		debug("Global Menu plugin module is unloaded");
-		/******
-		 * this line is causing vala gives two criticals
-		 * */
-		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, (GLib.LogFunc)Log.default_handler);
-		log_stream = null;
+	if(deferred_init_id != 0) {
+		Source.remove(deferred_init_id);
 	}
+
+	debug("Global Menu plugin module is unloaded");
+	/******
+	 * this line is causing vala gives two criticals
+	 * */
+	Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, (GLib.LogFunc)Log.default_handler);
+	log_stream = null;
 }
 
 private static const OptionEntry [] options = {
 	{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
-	{"disable-pixbuf", 'P', 0, OptionArg.NONE, ref disable_pixbuf, N_("disable serializing pixbuf"), null},
 	{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
-	{"patch-only", 'p', 0, OptionArg.NONE, ref patch_only, N_("Do not make the menu global"), null},
 	{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to ~/.gnomenu.log"), null},
-	{"hybrid", 'h', 0, OptionArg.NONE, ref hybrid, N_("Enable hybrid mode"), null},
+
+	{"disable-pixbuf", 'P', 0, OptionArg.NONE, ref Pref.disable_pixbuf, N_("disable serializing pixbuf"), null},
+	{"patch-only", 'p', 0, OptionArg.NONE, ref Pref.patch_only, N_("Do not make the menu global"), null},
+	{"hybrid", 'h', 0, OptionArg.NONE, ref Pref.hybrid, N_("Enable hybrid mode"), null},
 	{null}
 };
 

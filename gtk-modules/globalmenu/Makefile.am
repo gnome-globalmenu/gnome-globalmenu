@@ -8,19 +8,18 @@ BUILT_SOURCES = \
 VALASOURCES = \
 	module-main.vala \
 	superrider.vala \
+	info-factory.vala \
+	pref.vala \
 	info.vala \
-	adapter.vala \
-	events.vala \
-	globalmenu-serializer.vala \
-	globalmenu-locator.vala \
+	patcher.vala \
 	$(NULL)
 
-libglobalmenu_gnomedir = $(GTK_MODULES_DIR)
-libglobalmenu_gnome_LTLIBRARIES = \
-	libglobalmenu-gnome.la \
+libgnomenu_gtkdir = $(GTK_MODULES_DIR)
+libgnomenu_gtk_LTLIBRARIES = \
+	libgnomenu-gtk.la \
 	$(NULL)
 
-libglobalmenu_gnome_la_SOURCES = \
+libgnomenu_gtk_la_SOURCES= \
 	$(VALASOURCES:.vala=.c) \
 	globalmenu-helper.c \
 	globalmenu-gnome.h \
@@ -34,12 +33,12 @@ vala-ccode : $(VALASOURCES)
 		--pkg gdk-x11-2.0
 	touch $@
 
-libglobalmenu_gnome_la_LIBADD = \
+libgomenu_gtk_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
 		$(NULL)
 
-libglobalmenu_gnome_la_LDFLAGS = \
+libgnomenu_gtk_la_LDFLAGS = \
 		-g \
 		-version-info 1:0:0 \
 		-avoid-version \
@@ -48,7 +47,7 @@ libglobalmenu_gnome_la_LDFLAGS = \
 		-export-dynamic \
 		-module
 
-libglobalmenu_gnome_la_CPPFLAGS = \
+libgnomenu_gtk_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \

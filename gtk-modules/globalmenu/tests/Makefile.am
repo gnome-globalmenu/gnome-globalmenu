@@ -1,6 +1,6 @@
 include $(top_srcdir)/Makefile.gtest
 
-VALASOURCES = test-superride.vala test-serializer.vala test-unload.vala
+VALASOURCES = test-superride.vala test-unload.vala
 
 if ENABLE_TESTS
 noinst_PROGRAMS =  $(VALASOURCES:.vala=)
@@ -18,5 +18,5 @@ test_unload_LDADD = $(GTK_LIBS) $(GLIB_LIBS) $(top_builddir)/tests/libtestman.la
 
 AM_CPPFLAGS = -I$(srcdir)/.. $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER) -I$(top_srcdir)/tests
 BUILT_SOURCES = $(STAMP)
-LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libglobalmenu-gnome.la $(top_builddir)/tests/libtestman.la
+LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libgnomenu-gtk.la $(top_builddir)/tests/libtestman.la
 EXTRA_DIST += $(STAMP) $(VALASOURCES) test-unload.ui
