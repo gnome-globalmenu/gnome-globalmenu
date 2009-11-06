@@ -183,6 +183,8 @@ AC_CONFIG_FILES(
 	legacy-support/Makefile
 	libserver/Makefile
 	libserver/tests/Makefile
+	libsettings/Makefile
+	libsettings/tests/Makefile
 	applet/Makefile
 	xfce/Makefile
 	tests/Makefile
