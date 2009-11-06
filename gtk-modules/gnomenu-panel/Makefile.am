@@ -14,15 +14,15 @@ vala-ccode: $(VALASOURCES)
 	   --pkg gmodule-2.0 \
 	   --pkg gtk+-2.0 \
 	   --pkg gdk-x11-2.0 \
-	   --pkg gnomenu \
-	   --vapidir ../../libgnomenu \
+	   --pkg globalmenu-server \
+	   --vapidir $(top_srcdir)/libserver\
 	   $(VALASOURCES)
 	touch $@
 
 libgnomenu_panel_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
-		../../libgnomenu/libgnomenu.la \
+		../../libserver/libserver.la \
 		$(WNCK_LIBS)
 
 libgnomenu_panel_la_LDFLAGS = \
@@ -37,7 +37,7 @@ libgnomenu_panel_la_LDFLAGS = \
 
 libgnomenu_panel_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(WNCK_CFLAGS) \
-	  -I$(top_srcdir)/libgnomenu \
+	  -I$(top_srcdir)/libserver \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GnomenuPanel\" \
 	  -g

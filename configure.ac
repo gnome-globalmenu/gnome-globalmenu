@@ -143,7 +143,7 @@ AC_ARG_WITH(
 	[xfce4-panel],
 	AC_HELP_STRING([--with-xfce4-panel], [enable xfce panel applet]),
 	[],
-	[with_xfce4_panel=no])
+	[with_xfce4_panel=check])
 AS_IF([test "x$with_xfce4_panel" != xno],
 	[PKG_CHECK_MODULES(XFCE4_PANEL, [libxfce4panel-1.0 >= $XFCE4_PANEL_REQUIRED],
 		[
@@ -181,10 +181,8 @@ AC_SUBST(abs_top_srcdir)
 AC_CONFIG_FILES(
 	[Makefile
 	legacy-support/Makefile
-	libgnomenu/Makefile
-	libgnomenu/tests/Makefile
-	libgnomenu/libgnomenu.pc
-	libgnomenu/libgnomenu-uninstalled.pc
+	libserver/Makefile
+	libserver/tests/Makefile
 	applet/Makefile
 	xfce/Makefile
 	tests/Makefile

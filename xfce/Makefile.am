@@ -19,6 +19,7 @@ GlobalMenu_XFCEPlugin_SOURCES = main.c
 GlobalMenu_XFCEPlugin_CPPFLAGS = $(XFCE4_PANEL_CFLAGS) \
 						$(WNCK_CFLAGS) \
 						-I$(top_srcdir) \
+						-I$(top_srcdir)/libserver \
 						-include $(CONFIG_HEADER) \
 						-g 
 
@@ -26,7 +27,7 @@ GlobalMenu_XFCEPlugin_LDADD = \
 			$(WNCK_LIBS) \
 			$(GTK_LIBS) \
 			$(XFCE4_PANEL_LIBS) \
-			../libgnomenu/libgnomenu.la
+			../libserver/libserver.la
 
 EXTRA_DIST = \
 	$(desktopfile_in_in_files)	\

@@ -1,12 +1,15 @@
 NULL=
 SUBDIRS = . tests
+VAPI_FILE = globalmenu-server.vapi
+DEPS_FILE = globalmenu-server.deps
+HEADER_FILE = globalmenu-server.h
 
 VALASOURCES = \
 	globalmenubar.vala \
 	globalmenuitem.vala \
 	globalmenuadapter.vala \
 	adapter.vala \
-	gnomenu.vala \
+	enums.vala \
 	monitor.vala \
 	window.vala \
 	parser.vala \
@@ -23,37 +26,47 @@ VALASOURCES = \
 	utils/mnemonickeys.vala \
 	$(NULL)
 
-noinst_LTLIBRARIES = libgnomenu.la
+noinst_LTLIBRARIES = libserver.la
 
-libgnomenu_la_SOURCES = \
+libserver_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
-						libgnomenu.h \
+						$(HEADER_FILE) \
 						ccode/keygrab-ccode.c \
 						ccode/menushellutils-ccode.c 
 
-libgnomenu_la_CPPFLAGS = \
+libserver_la_CPPFLAGS = \
 			 -I$(top_srcdir) \
 			 $(GTK_CFLAGS) \
 			 $(WNCK_CFLAGS) \
 			 $(X11_CFLAGS) \
-			 -DG_LOG_DOMAIN=\"libgnomenu\" \
+			 -DG_LOG_DOMAIN=\"GlobalMenu:Server\" \
 			 -include $(CONFIG_HEADER) \
 			 -include ../legacy-support/legacy-support.h
 
-libgnomenu_la_LIBADD = ../legacy-support/liblegacy-support.la
+libserver_la_LIBADD = ../legacy-support/liblegacy-support.la
 
-libgnomenu_la_LDFLAGS = -version-info 2:0:0 -Wl,--as-needed
+libserver_la_LDFLAGS = -version-info 3:0:0 -Wl,--as-needed
 
-gnomenu.vapi: $(VALASOURCES) bindings.vapi
-	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h \
-		--library $(@:.vapi=) $(VALASOURCES) \
+vala-ccode: $(VALASOURCES) bindings.vapi
+	$(VALAC) $(VALA_DEFAULT_PKGS) \
+		-C --basedir=$(top_srcdir) \
+		-H $(HEADER_FILE) \
+		--library=globalmenu-server \
+		--vapi=$(VAPI_FILE) \
+		$(VALASOURCES) \
 		bindings.vapi \
 		--pkg gtk+-2.0 \
 		--pkg libwnck-1.0 \
 		--pkg gnome-desktop-2.0 \
 		--pkg gdk-x11-2.0
+	touch $@
 
-BUILT_SOURCES = gnomenu.vapi
+BUILT_SOURCES = vala-ccode
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps bindings.vapi
+EXTRA_DIST = \
+	$(VALASOURCES) \
+	globalmenu-server.vapi \
+	globalmenu-server.deps \
+	bindings.vapi \
+	vala-ccode
 

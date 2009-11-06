@@ -1,8 +1,6 @@
 NULL = 
 
-STAMP = vala-stamp
-
-BUILT_SOURCES = $(STAMP)
+BUILT_SOURCES = vala-ccode
 
 VALASOURCES = \
 	application.vala \
@@ -37,19 +35,18 @@ GlobalMenu_PanelApplet_SOURCES = \
 	task-utils-c.c \
 	$(NULL)
 
-#@VALA_CCODE_RULES@
-$(STAMP): $(VALASOURCES) 
-	$(VALAC) -C $(VALA_DEFAULT_PKGS) --vapidir . \
-	--vapidir $(top_srcdir)/libgnomenu \
-	--pkg gtk+-2.0 \
-	--pkg libwnck-1.0 \
-	--pkg libpanelapplet-2.0 \
-	--pkg gconf-2.0 \
-	--pkg gnomenu \
-	--pkg libgnome-menu \
-	--pkg libnotify \
-	--pkg gdk-x11-2.0 \
-	$(VALASOURCES) 
+vala-ccode : $(VALASOURCES)
+	$(VALAC) -C $(VALA_DEFAULT_PKGS)  \
+		--vapidir $(top_srcdir)/libserver \
+		--pkg gtk+-2.0 \
+		--pkg libwnck-1.0 \
+		--pkg libpanelapplet-2.0 \
+		--pkg gconf-2.0 \
+		--pkg globalmenu-server \
+		--pkg libgnome-menu \
+		--pkg libnotify \
+		--pkg gdk-x11-2.0 \
+		$(VALASOURCES) 
 	touch $@
 
 GlobalMenu_PanelApplet_LDFLAGS = \
@@ -62,13 +59,14 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		$(GMENU_LIBS) \
-		../libgnomenu/libgnomenu.la \
+		../libserver/libserver.la \
 		$(NULL)
+
 GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(WNCK_CFLAGS) \
 		$(GMENU_CFLAGS) \
 		$(GNOME_PANEL_CFLAGS) \
-		-I$(top_srcdir)/libgnomenu \
+		-I$(top_srcdir)/libserver \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
 		-include ../legacy-support/legacy-support.h \
@@ -80,7 +78,7 @@ icons_DATA = globalmenu.png
 
 
 EXTRA_DIST = \
-	$(STAMP) \
+	vala-ccode \
 	$(VALASOURCES) \
 	$(server_in_in_files) \
 	$(icons_DATA) \
