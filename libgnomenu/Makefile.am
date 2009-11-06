@@ -23,7 +23,7 @@ VALASOURCES = \
 	utils/mnemonickeys.vala \
 	$(NULL)
 
-lib_LTLIBRARIES = libgnomenu.la
+noinst_LTLIBRARIES = libgnomenu.la
 
 libgnomenu_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
@@ -44,22 +44,6 @@ libgnomenu_la_LIBADD = ../legacy-support/liblegacy-support.la
 
 libgnomenu_la_LDFLAGS = -version-info 2:0:0 -Wl,--as-needed
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libgnomenu.pc
-
-libgnomenu_includedir = $(includedir)/libgnomenu
-libgnomenu_include_HEADERS = libgnomenu.h
-if WITH_GIR
-typelibdir = $(TYPELIBDIR)
-typelib_DATA = Gnomenu-1.0.typelib
-girdir = $(GIRDIR)
-gir_DATA = Gnomenu-1.0.gir
-SUFFIXES = .gir .typelib
-.gir.typelib: libgnomenu.la
-	LD_LIBRARY_PATH=$${LD_LIBRARY_PATH:+$$LD_LIBRARY_PATH:}. $(GIRCOMPILER) $^ -o $@
-endif 
-
-#VALAC=/home/rainwoodman/Projects/vala/compiler/valac
 gnomenu.vapi: $(VALASOURCES) bindings.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) -C --basedir=$(top_srcdir) -H libgnomenu.h \
 		--library $(@:.vapi=) $(VALASOURCES) \
@@ -71,5 +55,5 @@ gnomenu.vapi: $(VALASOURCES) bindings.vapi
 
 BUILT_SOURCES = gnomenu.vapi
 
-EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps bindings.vapi Gnomenu-1.0.gir libgnomenu.pc.in libgnomenu-uninstalled.pc.in 
+EXTRA_DIST = $(VALASOURCES) gnomenu.vapi gnomenu.deps bindings.vapi
 
