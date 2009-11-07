@@ -3,27 +3,37 @@ namespace GnomenuGtk {
 
 	class TestUnload : TestMan {
 		Module module;
+		Gtk.MenuBar menubar = new Gtk.MenuBar();
+		Gtk.MenuItem item = new MenuItem.with_label("test1");
+		Gtk.Menu submenu = new Gtk.Menu();
 
 		TestUnload () {
 			base("/GnomenuGTK/Unload");
 			add("test", () => {
-				Gtk.MenuBar menubar = new Gtk.MenuBar();
-				menubar.append(new MenuItem.with_label("test1"));
+				item.submenu = submenu;
+				menubar.append(item);
 				menubar.append(new MenuItem.with_label("test2"));
 				menubar.append(new MenuItem.with_label("test3"));
 				Gtk.Box box = new Gtk.VBox(false, 0);
 				Gtk.Button button1 = new Button.with_label("Load");
 				Gtk.Button button2 = new Button.with_label("UnLoad");
+				Gtk.Button button3 = new Button.with_label("add item");
 				window.add(box);
 				box.add(menubar);
 				box.add(button1);
 				box.add(button2);
+				box.add(button3);
 				window.show_all();
 				button1.clicked += load_module;
 				button2.clicked += unload_module;
+				button3.clicked += add_item;
 				Gtk.main();
 			});
 
+		}
+		private void add_item() {
+			submenu.append(new MenuItem.with_label("added item"));
+			submenu.show_all();
 		}
 		private void load_module() {
 			string module_name = "../.libs/libgnomenu-gtk.so";

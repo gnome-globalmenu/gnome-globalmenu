@@ -53,8 +53,9 @@ public class MenuBarInfo {
 
 		settings = new Gnomenu.Settings(menubar.get_screen());
 
+		MenuBar.set_children_menubar(menubar);
 		menubar.queue_resize();
-		if(menubar.is_mapped()) Patcher.MenuBar.map(menubar);
+		if(menubar.is_mapped()) MenuBar.map(menubar);
 		message("info created");
 	}
 	
@@ -71,20 +72,21 @@ public class MenuBarInfo {
 	public void queue_changed() {
 		if(dirty == false) {
 			dirty = true;
-			Timeout.add(300, send_globalmenu_message);
+			Timeout.add(1000, send_globalmenu_message);
 		}
 	}
 
 	[CCode (cname = "gdk_window_set_menu_context")]
 	protected extern void gdk_window_set_menu_context (Gdk.Window window, string? context);
 	private bool send_globalmenu_message() {
+		message("FIXME: STUB send_globalmenu_message()");
 		dirty = false;
 		// send the message
 		/*
 		gdk_window_set_menu_context(event_window, 
 				Serializer.to_string(menubar)
 				);*/
-		return true;
+		return false;
 	}
 
 }

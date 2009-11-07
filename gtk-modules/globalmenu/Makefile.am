@@ -8,6 +8,8 @@ BUILT_SOURCES = \
 VALASOURCES = \
 	superrider.vala \
 	patcher.vala \
+	gtk-menubar.vala \
+	gtk-widget.vala \
 	info-factory.vala \
 	info.vala \
 	module-main.vala \
