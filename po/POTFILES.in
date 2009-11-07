@@ -9,3 +9,4 @@ applet/workspaceselector.vala
 schemas/gnome-globalmenu.schemas.in
 applet/GlobalMenu_PanelApplet.server.in.in
 xfce/GlobalMenu_XFCEPlugin.desktop.in.in
+tools/globalmenu-settings.vala
