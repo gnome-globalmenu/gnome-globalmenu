@@ -60,9 +60,18 @@ public class Gnomenu.Settings : Object {
 		var data = get_by_atom(atom);
 		if(data == null) return;
 		keyfile.load_from_data(data, data.length, KeyFileFlags.NONE);
-		this.show_local_menu = keyfile.get_boolean("GlobalMenu:Client", "show-local-menu");
-		this.show_menu_icons = keyfile.get_boolean("GlobalMenu:Client", "show-menu-icons");
-		this.changed_notify_timeout = keyfile.get_integer("GlobalMenu:Client", "changed-notify-timeout");
+		try {
+			var value = keyfile.get_boolean("GlobalMenu:Client", "show-local-menu");
+			this.show_local_menu  = value;
+		} catch {}
+		try {
+			var value = keyfile.get_boolean("GlobalMenu:Client", "show-menu-icons");
+			this.show_menu_icons = value;
+		} catch {}
+		try {
+			var value = keyfile.get_integer("GlobalMenu:Client", "changed-notify-timeout");
+			this.changed_notify_timeout = value;
+		} catch {}
 	}
 
 	public void push() {
