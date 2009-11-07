@@ -155,6 +155,7 @@ internal class MenuBarInfo {
 		if(settings == null) {
 			settings = new Gnomenu.Settings();
 			settings.notify["show-local-menu"] += show_local_menu_changed;
+			settings.notify["show-menu-icons"] += show_menu_icons_changed;
 		}
 
 		if(settings.screen == screen) return;
@@ -195,6 +196,10 @@ internal class MenuBarInfo {
 		return false;
 	}
 
+	private void show_menu_icons_changed() {
+		message("menu icons changed!");
+		this.queue_changed();
+	}
 	private void show_local_menu_changed() {
 		menubar.queue_resize();
 		if(quirks.has(QuirkType.WX_GTK)) {
@@ -277,8 +282,12 @@ internal class MenuBarInfo {
 		message("FIXME: STUB send_globalmenu_message()");
 		dirty = false;
 
+		var ser = new Serializer();
+		ser.disable_pixbuf = ! settings.show_menu_icons;
+		message("disable_pixbuf = %s", ser.disable_pixbuf.to_string());
+		ser.pretty_print = false;
 		set_by_atom(Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
-				Serializer.to_string(menubar)
+				ser.to_string(menubar)
 				);
 		
 		return false;

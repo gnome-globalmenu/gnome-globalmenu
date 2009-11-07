@@ -1,17 +1,17 @@
 public class Serializer {
-	Serializer () { }
-	private bool disable_pixbuf = false;
+	public Serializer () { }
+	public bool disable_pixbuf = false;
+	public bool pretty_print = false;
+
 	private bool hybrid = false;
-	public static string to_string(Gtk.MenuBar menubar, bool pretty_print = false) {
-		Serializer s = new Serializer();
+	public string to_string(Gtk.MenuBar menubar) {
 		Timer timer = new Timer();
-		s.menubar = menubar;
-		s.pretty_print = pretty_print;
-		s.sb = new StringBuilder("");
-		s.label_sb = new StringBuilder("");
-		s.visit(menubar);
+		this.menubar = menubar;
+		sb = new StringBuilder("");
+		label_sb = new StringBuilder("");
+		visit(menubar);
 		debug("Serializer consumption = %lf", timer.elapsed(null));
-		return s.sb.str;
+		return sb.str;
 	}
 	private void visit(Gtk.Widget widget) {
 		if(widget is Gtk.MenuBar) visit_menubar(widget as Gtk.MenuBar);
@@ -223,12 +223,12 @@ public class Serializer {
 			}
 		}
 	}
+
 	private Gtk.MenuBar menubar;
 	private StringBuilder sb;
 	private StringBuilder label_sb;
 	private bool last_item_empty;
 	private weak string guessed_type;
-	private bool pretty_print;
 	private int level;
 	private bool newline;
 	private void indent() {
