@@ -2,8 +2,9 @@ public class MenuBarInfo {
 	public enum QuirkType {
 		/* usual thing */
 		NONE = 0,
-		/* There is already a global menu on the window */
-		NOT_A_GLOBAL = 1,
+		/* There is already a global menu on the window,
+		 * this one is merely a regular widget */
+		REGULAR_WIDGET = 1,
 		/* for GtkMenuBar in a bonobo plug */
 		HIDE_PARENT = 2,
 		/* for wxGTK 2.8.10 programs */
@@ -45,9 +46,13 @@ public class MenuBarInfo {
 
 	public MenuBarInfo (Gtk.MenuBar menubar) {
 		this.menubar = menubar;
+		MenuBarInfoFactory.get().associate(menubar, this);
 		menubar.weak_ref(menubar_disposed, this);
+		menubar.queue_resize();
+		if(menubar.is_mapped()) Patcher.MenuBar.map(menubar);
+		message("info created");
 	}
-
+	
 	~MenuBarInfo() {
 		message("dispose MenuBarInfo");
 		release_menubar();

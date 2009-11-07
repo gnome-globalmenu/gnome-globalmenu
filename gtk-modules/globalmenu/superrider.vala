@@ -31,6 +31,12 @@ namespace Superrider {
 		unowned Member m = cl.get_member(offset);
 		return m.peek_super();
 	}
+	public static void* peek_base(Type type, int offset) {
+		unowned Class cl = get_class(type.parent());
+		unowned Member m = cl.get_member(offset);
+		return m.peek_current();
+	}
+
 	public static void release_all() {
 		classes.clear();
 	}
@@ -50,6 +56,7 @@ internal class Superrider.Class {
 			delete m;
 		}
 	}
+
 	private Member* lookup_member(int offset) {
 		foreach(Member* m in members) {
 			if(m->offset == offset) return m;

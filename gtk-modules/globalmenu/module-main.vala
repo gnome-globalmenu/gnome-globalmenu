@@ -2,7 +2,7 @@
 private static bool verbose = false;
 private static bool disabled = false;
 private static bool initialized = false;
-
+private Patcher patcher;
 private static string log_file_name = null;
 private static FileStream log_stream;
 private static Quark domain;
@@ -10,14 +10,14 @@ private static Quark domain;
 private static uint deferred_init_id = 0;
 [CCode (cname="gtk_module_init")]
 public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref string[] args) {
-	if(!disabled) {
-		deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
-	}
+	if(disabled) return;
+	deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
 }
 
 private static bool deferred_init() {
 	if(!initialized) {
 		initialized = true;
+		patcher = new Patcher();
 		MenuBarInfoFactory.init();
 		MenuBarInfoFactory.get().prepare_attached_menubars();
 	}
@@ -43,6 +43,7 @@ public string g_module_check_init(Module module) {
 	} else {
 		return "Global Menu is disabled";
 	}
+	module.make_resident();
 	return null;
 }
 

@@ -26,7 +26,7 @@ public class MenuBarInfoFactory {
 
 	private List<unowned MenuBarInfo> info_list;
 
-	private static void unref_info(MenuBarInfo * info) {
+	internal static void unref_info(MenuBarInfo * info) {
 		/* This function is called when menubar disposes
 		 * MenuBarInfo. Because the MenuBar is no longer
 		 * valid after this point, so is the info.
@@ -52,10 +52,8 @@ public class MenuBarInfoFactory {
 	}
 
 	/* Factory Interface */
-	public unowned MenuBarInfo create(Gtk.MenuBar menubar) {
-		MenuBarInfo* info = menubar.get_data("globalmenu-info");
-		if(info != null) return info;
-		info = new MenuBarInfo(menubar);
+	internal void associate(Gtk.MenuBar menubar, MenuBarInfo info) {
+		/* This function is called by MenuBarInfo() */
 		/* We set a reference of info object to the menu bar.
 		 * So that when the menubar object is destroyed,
 		 * the info object will be disposed.
@@ -63,7 +61,13 @@ public class MenuBarInfoFactory {
 		 * By doing this we don't need to deal with
 		 * WeakNotify.
 		 * */
-		menubar.set_data_full("globalmenu-info", info, unref_info);
+		menubar.set_data_full("globalmenu-info", info, MenuBarInfoFactory.unref_info);
+	}
+	public unowned MenuBarInfo create(Gtk.MenuBar menubar) {
+		MenuBarInfo* info = menubar.get_data("globalmenu-info");
+		if(info != null) return info;
+		info = new MenuBarInfo(menubar);
+
 		return info;
 	}
 
