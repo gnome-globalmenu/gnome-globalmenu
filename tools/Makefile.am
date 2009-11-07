@@ -1,6 +1,7 @@
 VALASOURCES = globalmenu-settings.vala
 STAMPS = $(VALASOURCES:.vala=.c)
-noinst_PROGRAMS = $(VALASOURCES:.vala=)
+
+bin_PROGRAMS = $(VALASOURCES:.vala=)
 
 SUFFIXES = .vala .c
 
