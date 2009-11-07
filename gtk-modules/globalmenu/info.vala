@@ -13,6 +13,8 @@ public class MenuBarInfo {
 	public QuirkType quirks;
 
 	private weak Gtk.MenuBar _menubar;
+	private Gnomenu.Settings settings;
+
 	public Gtk.MenuBar menubar {
 		get { return _menubar; }
 		private set { _menubar = value; }
@@ -48,6 +50,9 @@ public class MenuBarInfo {
 		this.menubar = menubar;
 		MenuBarInfoFactory.get().associate(menubar, this);
 		menubar.weak_ref(menubar_disposed, this);
+
+		settings = new Gnomenu.Settings(menubar.get_screen());
+
 		menubar.queue_resize();
 		if(menubar.is_mapped()) Patcher.MenuBar.map(menubar);
 		message("info created");

@@ -20,22 +20,25 @@ libgnomenu_gtk_LTLIBRARIES = \
 
 libgnomenu_gtk_la_SOURCES= \
 	$(VALASOURCES:.vala=.c) \
-	globalmenu-helper.c \
 	globalmenu-gnome.h \
 	$(NULL)
 
 vala-ccode : $(VALASOURCES)
-	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C --basedir=$(top_srcdir) \
-		--library=globalmenu-gnome -H globalmenu-gnome.h --vapidir=. $(VALASOURCES) \
-		--vapidir=../../libgnomenu \
+	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C  \
+		--library=globalmenu-gnome \
+		-H globalmenu-gnome.h --vapidir=.  \
+		$(VALASOURCES) \
+		--vapidir=../../libsettings \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
-		--pkg gdk-x11-2.0
+		--pkg gdk-x11-2.0 \
+		--pkg globalmenu-settings
 	touch $@
 
 libgnomenu_gtk_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
+		../../libsettings/libsettings.la \
 		$(NULL)
 
 libgnomenu_gtk_la_LDFLAGS = \
@@ -48,7 +51,9 @@ libgnomenu_gtk_la_LDFLAGS = \
 
 #		-Wl,--as-needed 
 libgnomenu_gtk_la_CPPFLAGS = \
-	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) \
+	  -I$(top_srcdir) \
+	  -I$(top_srcdir)/libsettings \
+	  $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
 	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
 	  -g

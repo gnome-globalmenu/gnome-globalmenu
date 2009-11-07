@@ -67,10 +67,6 @@ private static const OptionEntry [] options = {
 	{"verbose", 'v', 0, OptionArg.NONE, ref verbose, N_("Be verbose"), null},
 	{"disable", 'd', 0, OptionArg.NONE, ref disabled, N_("Disable the Plugin"), null},
 	{"log-file", 'l', 0, OptionArg.FILENAME, ref log_file_name, N_("File to save the log, default to ~/.gnomenu.log"), null},
-
-	{"disable-pixbuf", 'P', 0, OptionArg.NONE, ref Pref.disable_pixbuf, N_("disable serializing pixbuf"), null},
-	{"patch-only", 'p', 0, OptionArg.NONE, ref Pref.patch_only, N_("Do not make the menu global"), null},
-	{"hybrid", 'h', 0, OptionArg.NONE, ref Pref.hybrid, N_("Enable hybrid mode"), null},
 	{null}
 };
 
