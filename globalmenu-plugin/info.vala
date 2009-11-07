@@ -24,6 +24,8 @@ internal class MenuBarInfo {
 	private static Gdk.Atom atom_deselect = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_DESELECT", false);
 	private static Gdk.Atom atom_activate = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false);
 
+	private signal void quirks_changed(QuirkType old_quirks);
+
 	private weak Gtk.MenuBar _menubar;
 	public Gnomenu.Settings settings {get; private set;}
 
@@ -68,12 +70,11 @@ internal class MenuBarInfo {
 		menubar.weak_ref(menubar_disposed, this);
 
 		menubar.hierarchy_changed += sync_toplevel;
-		menubar.hierarchy_changed += find_quirks;
+		menubar.hierarchy_changed += sync_quirks;
 		menubar.screen_changed += sync_settings;
+		this.quirks_changed += sync_settings;
 
-		find_quirks();
-
-		sync_settings();
+		sync_quirks();
 		sync_toplevel();
 
 		MenuBar.set_children_menubar(menubar);
@@ -92,7 +93,7 @@ internal class MenuBarInfo {
 	private void release_menubar() {
 		if(menubar == null) return;
 		menubar.hierarchy_changed -= sync_toplevel;
-		menubar.hierarchy_changed -= find_quirks;
+		menubar.hierarchy_changed -= sync_quirks;
 		menubar.screen_changed -= sync_settings;
 		menubar.weak_unref(menubar_disposed, this);
 	}
@@ -117,8 +118,13 @@ internal class MenuBarInfo {
 		}
 	}
 
-	private void find_quirks() {
-		if(menubar.get_ancestor(typeof(Gtk.Window)) == null) {
+	private void sync_quirks() {
+		var toplevel = menubar.get_toplevel();
+		var old_quirks = quirks;
+
+		quirks = QuirkType.NONE;
+
+		if(!toplevel.is_toplevel()) {
 			quirks = QuirkType.REGULAR_WIDGET;
 		}
 
@@ -145,7 +151,8 @@ internal class MenuBarInfo {
 		if(has_parent_type_name("BonoboDockBand")) {
 			quirks = QuirkType.BONOBO_PLUG;
 		}
-		
+
+		this.quirks_changed(old_quirks);
 	}
 
 	private void sync_settings() {
