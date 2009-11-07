@@ -1,6 +1,6 @@
 include $(top_srcdir)/Makefile.gtest
 
-VALASOURCES = test-superride.vala test-unload.vala
+VALASOURCES = test-superride.vala test-module.vala
 
 if ENABLE_TESTS
 noinst_PROGRAMS =  $(VALASOURCES:.vala=)
