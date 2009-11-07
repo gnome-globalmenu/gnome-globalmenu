@@ -7,10 +7,9 @@ BUILT_SOURCES = \
 
 VALASOURCES = \
 	superrider.vala \
-	info-factory.vala \
-	pref.vala \
-	info.vala \
 	patcher.vala \
+	info-factory.vala \
+	info.vala \
 	module-main.vala \
 	$(NULL)
 
