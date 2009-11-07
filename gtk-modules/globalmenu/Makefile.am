@@ -31,8 +31,7 @@ vala-ccode : $(VALASOURCES)
 		--vapidir=../../libgnomenu \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
-		--pkg gdk-x11-2.0 \
-		--pkg gnomenu 
+		--pkg gdk-x11-2.0
 	touch $@
 
 libgnomenu_gtk_la_LIBADD = \
