@@ -99,5 +99,3 @@ public class Gnomenu.Settings : Object {
 		}
 	}
 }
-
-}

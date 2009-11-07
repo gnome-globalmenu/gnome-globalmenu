@@ -318,4 +318,3 @@ public class Gnomenu.Window : GLib.Object {
 	
 	public signal void transient_changed(Gnomenu.Window? prev_transient);
 }
-}
