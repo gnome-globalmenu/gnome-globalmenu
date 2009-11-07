@@ -59,7 +59,7 @@ libgnomenu_gtk_la_CPPFLAGS = \
 	  -I$(top_srcdir)/libsettings \
 	  $(GLIB_CFLAGS) $(GTK_CFLAGS) \
 	  -include $(CONFIG_HEADER) \
-	  -DG_LOG_DOMAIN=\"GlobalMenu\" \
+	  -DG_LOG_DOMAIN=\"GlobalMenu:Plugin\" \
 	  -g
 
 EXTRA_DIST = vala-ccode \

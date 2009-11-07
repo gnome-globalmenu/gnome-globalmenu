@@ -1,66 +1,59 @@
 
-private static bool verbose = false;
-private static bool disabled = false;
-private static bool initialized = false;
+private bool verbose = false;
+private bool disabled = false;
+private bool initialized = false;
 private Patcher patcher;
-private static string log_file_name = null;
-private static FileStream log_stream;
-private static Quark domain;
+private string log_file_name = null;
+private FileStream log_stream;
+private Quark domain;
 
-private static uint deferred_init_id = 0;
 [CCode (cname="gtk_module_init")]
-public static void gtk_module_init([CCode (array_length_pos = 0.9)] ref string[] args) {
+public void gtk_entry([CCode (array_length_pos = 0.9)] ref string[] args) {
 	if(disabled) return;
-	deferred_init_id = Idle.add_full(Priority.HIGH, deferred_init);
-}
+	Idle.add_full(Priority.HIGH, 
+		() => {
+			if(initialized) return false;
 
-private static bool deferred_init() {
-	if(!initialized) {
-		initialized = true;
-		patcher = new Patcher();
-		MenuBarInfoFactory.init();
-		MenuBarInfoFactory.get().prepare_attached_menubars();
-	}
-	deferred_init_id = 0;
-	return false;
+			initialized = true;
+			patcher = new Patcher();
+			MenuBarInfoFactory.init();
+			MenuBarInfoFactory.get().prepare_attached_menubars();
+			return false;
+		}
+	);
 }
 
 [CCode (cname="g_module_check_init")]
-public string g_module_check_init(Module module) {
-	domain = Quark.from_string("GlobalMenu");
+public string glib_entry(Module module) {
+	domain = Quark.from_string("GlobalMenu:Plugin");
 
 	if(is_quirky_app()) disabled = true;
 
 	parse_args();
 
 /* Do not write any log messages before we prepare the log file.*/
-	prepare_log_file();
-	Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, default_log_handler);
+	if(verbose) {
+		log_stream = FileStream.open(log_file_name, "a+");
+		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, write_log);
+	} else {
+		Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_DEBUG, suppress_log);
+	}
 
 	debug("Global Menu Version: %s", Config.VERSION);
-	if(!disabled) {
-		debug("Global Menu is enabled");
-	} else {
+
+	if(disabled) {
 		return "Global Menu is disabled";
 	}
+
+	debug("Global Menu is enabled");
+
+	/* So that the module is never unloaded once.
+	 * unloading the module causes problem with GType info
+	 * after 0.7.9.
+	 * */
 	module.make_resident();
 	return null;
-}
 
-[CCode (cname="g_module_unload")]
-public static void g_module_unload(Module module) {
-	if(disabled) return;
-
-	if(deferred_init_id != 0) {
-		Source.remove(deferred_init_id);
-	}
-
-	debug("Global Menu plugin module is unloaded");
-	/******
-	 * this line is causing vala gives two criticals
-	 * */
-	Log.set_handler (domain.to_string(), LogLevelFlags.LEVEL_MASK, (GLib.LogFunc)Log.default_handler);
-	log_stream = null;
 }
 
 private static const OptionEntry [] options = {
@@ -73,48 +66,39 @@ private static const OptionEntry [] options = {
 private static bool parse_args() {
 	string [] args = null;
 	string env = Environment.get_variable("GLOBALMENU_GNOME_ARGS");
-	bool rt = true;	
-	if(env != null) {
-		string command_line = "globalmenu-gnome " + env;
-		try {
-			rt = Shell.parse_argv(command_line, out args);
-		} catch( GLib.Error e) { }
-		if(rt) {
-			OptionContext context = new OptionContext(
-					_("- Global Menu plugin Module for GTK"));
-			context.set_description(
-	_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
-	NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by the plugin.
-	""")
-			);
-			context.set_help_enabled(false);
-			context.set_ignore_unknown_options(true);
-			context.add_main_entries(options, Config.GETTEXT_PACKAGE);
-			try {
-				rt = context.parse(ref args);
-			} catch(GLib.Error e) { }
-		}
+	if(env == null) return true;
+
+	string command_line = "globalmenu-gnome " + env;
+	/* set default log file name */
+	log_file_name = Environment.get_home_dir() + "/.gnomenu.log";
+	try {
+		Shell.parse_argv(command_line, out args);
+		OptionContext context = new OptionContext(
+				_("- Global Menu plugin Module for GTK"));
+		context.set_description(
+_("""These parameters should be supplied in environment GLOBALMENU_GNOME_ARGS instead of the command line.
+NOTE: Environment GTK_MENUBAR_NO_MAC contains the applications to be ignored by the plugin.
+""")
+		);
+		context.set_help_enabled(false);
+		context.set_ignore_unknown_options(true);
+		context.add_main_entries(options, Config.GETTEXT_PACKAGE);
+		context.parse(ref args);
+	} catch(GLib.Error e) {
+		return false;
 	}
-	if(log_file_name == null) {
-		log_file_name = Environment.get_home_dir() + "/.gnomenu.log";
-	}
-	return rt;
+	return true;
 }
 
-private static void prepare_log_file() {
-	if(!verbose) return;
-	log_stream = FileStream.open(log_file_name, "a+");
-}
-
-
-private static void default_log_handler(string? domain, LogLevelFlags level, string message) {
-	if(!verbose) return;
+private static void write_log(string? domain, LogLevelFlags level, string message) {
 	TimeVal time = {0};
 	time.get_current_time();
 	string s = "%.10ld | %20s | %10s | %s\n".printf(time.tv_usec, Environment.get_prgname(), domain, message);
 	log_stream.puts(s);
 	log_stream.flush();
 }
+private static void suppress_log(string? domain, LogLevelFlags level, string message) {}
+
 private static bool is_quirky_app() {
 	string disabled_application_names = 
 		Environment.get_variable("GTK_MENUBAR_NO_MAC");
@@ -123,15 +107,6 @@ private static bool is_quirky_app() {
 	/* Don't use switch case because vala will create
 	 * static quarks which cause core dumps when 
 	 * the module is unloaded */
-
-	/* Try to figure this out by filtering out 
-	 * menubars in 'PanelApplet'
-	 * and sub classes of 'PanelMenuBar'
-	 * in globalmenu.vala
-	if(app_name == "gnome-panel"
-	|| app_name == "gdm-user-switch-applet")
-		return true;
-	*/
 
 	if((disabled_application_names!=null) 
 	&& disabled_application_names.str(app_name)!=null)
