@@ -1,5 +1,17 @@
 NULL =
-SUBDIRS = vapi tests legacy-support libsettings libserver applet xfce po
+SUBDIRS = \
+	vapi \
+	tests \
+	legacy-support \
+	libsettings \
+	libserver \
+	applet \
+	xfce \
+	globalmenu-plugin \
+	globalmenu-gnome-panel \
+	po \
+	$(NULL)
+
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \
