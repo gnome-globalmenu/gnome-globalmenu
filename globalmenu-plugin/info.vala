@@ -114,7 +114,7 @@ internal class MenuBarInfo {
 		if(quirks.has(QuirkType.REGULAR_WIDGET)) return;
 		if(dirty == false) {
 			dirty = true;
-			Timeout.add(1000, send_globalmenu_message);
+			Timeout.add(settings.changed_notify_timeout, send_globalmenu_message);
 		}
 	}
 
