@@ -8,7 +8,7 @@ public class Gnomenu.Settings : Object {
 
 	public bool show_local_menu { get; set; default = true; }
 	public bool show_menu_icons { get; set; default = true; }
-	public int changed_notify_timeout { get; set; default = 1000; }
+	public int changed_notify_timeout { get; set; default = 500; }
 	
 	public Settings(Gdk.Screen? screen = null) {
 		attach(screen);
