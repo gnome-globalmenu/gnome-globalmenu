@@ -189,10 +189,9 @@ AC_CONFIG_FILES(
 	xfce/Makefile
 	tests/Makefile
 	vapi/Makefile
-	gtk-modules/Makefile
 	globalmenu-plugin/Makefile
 	globalmenu-plugin/tests/Makefile
-	gtk-modules/gnomenu-panel/Makefile
+	globalmenu-gnome-panel/Makefile
 	po/Makefile.in
 	])
 

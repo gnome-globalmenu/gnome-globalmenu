@@ -13,9 +13,9 @@
 	  </locale>
 	</schema>
 	<schema>
-	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-panel</key>
-	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-panel</applyto>
-	  <owner>libgnomenu</owner>
+	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome-panel</key>
+	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome-panel</applyto>
+	  <owner>gnome-globalmenu</owner>
 	  <type>bool</type>
 	  <default>false</default>
 	  <locale name="C">

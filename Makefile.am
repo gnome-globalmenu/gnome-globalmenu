@@ -1,5 +1,5 @@
 NULL =
-SUBDIRS = vapi tests legacy-support libsettings libserver applet xfce gtk-modules po
+SUBDIRS = vapi tests legacy-support libsettings libserver applet xfce po
 DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
 
 AM_CPPFLAGS = \

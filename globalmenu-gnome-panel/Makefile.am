@@ -4,13 +4,13 @@ BUILT_SOURCES = vala-ccode
 VALASOURCES = \
 	module-main.vala
 
-libgnomenu_panel_LTLIBRARIES = libgnomenu-panel.la
-libgnomenu_paneldir = $(GTK_MODULES_DIR)
-libgnomenu_panel_la_SOURCES = $(VALASOURCES:.vala=.c)
+libglobalmenu_gnome_panel_LTLIBRARIES = libglobalmenu-gnome-panel.la
+libglobalmenu_gnome_paneldir = $(GTK_MODULES_DIR)
+libglobalmenu_gnome_panel_la_SOURCES = $(VALASOURCES:.vala=.c)
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALA_DEFAULT_PKGS) --thread \
-	   -C --basedir=$(top_srcdir) \
+	   -C \
 	   --pkg gmodule-2.0 \
 	   --pkg gtk+-2.0 \
 	   --pkg gdk-x11-2.0 \
@@ -19,13 +19,13 @@ vala-ccode: $(VALASOURCES)
 	   $(VALASOURCES)
 	touch $@
 
-libgnomenu_panel_la_LIBADD = \
+libglobalmenu_gnome_panel_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
-		../../libserver/libserver.la \
+		$(top_builddir)/libserver/libserver.la \
 		$(WNCK_LIBS)
 
-libgnomenu_panel_la_LDFLAGS = \
+libglobalmenu_gnome_panel_la_LDFLAGS = \
 		-g \
 		-version-info 1:0:0 \
 		-avoid-version \
@@ -35,11 +35,11 @@ libgnomenu_panel_la_LDFLAGS = \
 		-module
 
 
-libgnomenu_panel_la_CPPFLAGS = \
+libglobalmenu_gnome_panel_la_CPPFLAGS = \
 	  -I$(top_srcdir) $(GLIB_CFLAGS) $(GTK_CFLAGS) $(WNCK_CFLAGS) \
 	  -I$(top_srcdir)/libserver \
 	  -include $(CONFIG_HEADER) \
-	  -DG_LOG_DOMAIN=\"GnomenuPanel\" \
+	  -DG_LOG_DOMAIN=\"GlobalMenu:GnomePanel\"
 	  -g
 
 EXTRA_DIST = vala-ccode $(VALASOURCES)
