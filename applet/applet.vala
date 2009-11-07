@@ -249,6 +249,7 @@ public class Applet : Panel.Applet {
 		this.has_handle = gconf_get_bool("has_handle");
 		this.tiny_mode = gconf_get_bool("tiny_mode");
 		settings.show_local_menu = gconf_get_bool("show_local_menu");
+		settings.show_menu_icons = gconf_get_bool("show_menu_icons");
 		settings.push();
 	}
 
@@ -261,6 +262,7 @@ public class Applet : Panel.Applet {
 			_("General Settings"),
 			new string[] {
 				root + "/show_local_menu",
+				root + "/show_menu_icons",
 				root + "/use_rgba_colormap",
 				root + "/per_monitor_mode",
 				root + "/grab_mnemonic_keys"

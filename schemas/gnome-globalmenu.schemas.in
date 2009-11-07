@@ -34,6 +34,16 @@
 		</locale>
 	</schema>
 	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_menu_icons</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>TRUE</default>
+		<locale name="C">
+			<short>Show customized menu item images </short>
+			<long>Whether or not send the customized menu item images to Global Menu. These images are large and slow to parse. If you are using Global Menu over a network X11 server or having a slow computer, consider disabling this key. </long>
+		</locale>
+	</schema>
+	<schema>
 		<key>/schemas/apps/gnome-applet-globalmenu/prefs/has_handle</key>
 		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
