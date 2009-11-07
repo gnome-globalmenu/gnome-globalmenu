@@ -8,6 +8,7 @@ public class Gnomenu.Settings : Object {
 
 	public bool show_local_menu { get; set; default = true; }
 	public bool show_menu_icons { get; set; default = true; }
+	public int changed_notify_timeout { get; set; default = 1000; }
 	
 	public Settings(Gdk.Screen? screen = null) {
 		attach(screen);
@@ -51,6 +52,7 @@ public class Gnomenu.Settings : Object {
 	public string to_string() {
 		keyfile.set_boolean("GlobalMenu:Client", "show-local-menu", this.show_local_menu);
 		keyfile.set_boolean("GlobalMenu:Client", "show-menu-icons", this.show_menu_icons);
+		keyfile.set_integer("GlobalMenu:Client", "changed-notify-timeout", this.changed_notify_timeout);
 		return keyfile.to_data(null);
 	}
 
@@ -60,6 +62,7 @@ public class Gnomenu.Settings : Object {
 		keyfile.load_from_data(data, data.length, KeyFileFlags.NONE);
 		this.show_local_menu = keyfile.get_boolean("GlobalMenu:Client", "show-local-menu");
 		this.show_menu_icons = keyfile.get_boolean("GlobalMenu:Client", "show-menu-icons");
+		this.changed_notify_timeout = keyfile.get_integer("GlobalMenu:Client", "changed-notify-timeout");
 	}
 
 	public void push() {
