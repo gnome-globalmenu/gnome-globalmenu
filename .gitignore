@@ -23,3 +23,7 @@ autom4te.cache
 INSTALL
 aclocal.m4
 stamp-h1
+vala-ccode
+*.[ch]
+*.tar.bz2
+*.tar.gz
