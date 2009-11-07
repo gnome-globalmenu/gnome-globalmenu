@@ -100,17 +100,21 @@ private static void write_log(string? domain, LogLevelFlags level, string messag
 private static void suppress_log(string? domain, LogLevelFlags level, string message) {}
 
 private static bool is_quirky_app() {
-	string disabled_application_names = 
+	string list = 
 		Environment.get_variable("GTK_MENUBAR_NO_MAC");
+
+	string internal_list = 
+	"lt-GlobalMenu.PanelApplet gnome-panel GlobalMenu.PanelApplet";
 
 	string app_name = Environment.get_prgname();
 	/* Don't use switch case because vala will create
 	 * static quarks which cause core dumps when 
 	 * the module is unloaded */
 
-	if((disabled_application_names!=null) 
-	&& disabled_application_names.str(app_name)!=null)
+	if((list != null) && list.str(app_name)!=null)
 		return true;
 
+	if(internal_list.str(app_name) != null) 
+		return true;
 	return false;
 }
