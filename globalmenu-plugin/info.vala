@@ -110,6 +110,7 @@ internal class MenuBarInfo {
 	}
 
 	public void queue_changed() {
+		if(quirks.has(QuirkType.REGULAR_WIDGET)) return;
 		if(dirty == false) {
 			dirty = true;
 			Timeout.add(1000, send_globalmenu_message);
@@ -117,6 +118,10 @@ internal class MenuBarInfo {
 	}
 
 	private void find_quirks() {
+		if(menubar.get_ancestor(typeof(Gtk.Window)) == null) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
 		if(has_parent_type_name("PanelMenuBar")) {
 			quirks = QuirkType.REGULAR_WIDGET;
 		}

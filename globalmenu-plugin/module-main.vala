@@ -103,9 +103,6 @@ private static bool is_quirky_app() {
 	string list = 
 		Environment.get_variable("GTK_MENUBAR_NO_MAC");
 
-	string internal_list = 
-	"lt-GlobalMenu.PanelApplet gnome-panel GlobalMenu.PanelApplet";
-
 	string app_name = Environment.get_prgname();
 	/* Don't use switch case because vala will create
 	 * static quarks which cause core dumps when 
@@ -114,7 +111,5 @@ private static bool is_quirky_app() {
 	if((list != null) && list.str(app_name)!=null)
 		return true;
 
-	if(internal_list.str(app_name) != null) 
-		return true;
 	return false;
 }
