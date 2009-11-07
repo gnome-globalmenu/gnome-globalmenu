@@ -16,3 +16,6 @@ export GTK_MODULES=globalmenu-gnome
 
 Try http://bapoumba.wordpress.com/2008/01/04/add-gnome-applets-to-the-xfce-panel/
 (Not tested) with the GNOME Applet
+
+The XFCE applet is a stub and unmaintained. Feel free to take it and make it stronger.
+

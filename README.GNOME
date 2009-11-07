@@ -1,7 +1,6 @@
 Post Installation
 ================
 
-
 On Gnome 2.24 or newer
 ----------------------
 
@@ -13,9 +12,9 @@ On Gnome 2.24 or newer
 - With Gnome Panel
 
 Enable the following gconf keys via gconf-editor
- apps/gnome_settings_daemon/gtk_modules/globalmenu-gnome
- apps/gnome_settings_daemon/gtk_modules/gnomenu-panel
-Add Panel Menu Bar to the top panel
+ apps/gnome_settings_daemon/gtk_modules/globalmenu-gnome-panel
+Add Panel Menu Bar to the top panel if it is not already there
+
 
 On Gnome 2.22 or older
 ----------------------

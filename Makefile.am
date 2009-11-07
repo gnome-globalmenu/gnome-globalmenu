@@ -43,5 +43,5 @@ include $(top_srcdir)/Makefile.configmake
 include $(top_srcdir)/Makefile.config
 
 doc_DATA = README COPYING ChangeLog AUTHORS INSTALL \
-	README.XFCE README.GNOME README.RHEL5
+	README.XFCE README.GNOME README.LEGACY
 
