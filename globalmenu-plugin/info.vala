@@ -62,45 +62,19 @@ internal class MenuBarInfo {
 		((MenuBarInfo*)data)->event_window = null;
 	}
 
-
 	public MenuBarInfo (Gtk.MenuBar menubar) {
 		this.menubar = menubar;
 		MenuBarInfoFactory.get().associate(menubar, this);
 		menubar.weak_ref(menubar_disposed, this);
 
 		menubar.hierarchy_changed += sync_toplevel;
+		menubar.hierarchy_changed += find_quirks;
 		menubar.screen_changed += sync_settings;
 
-		settings = new Gnomenu.Settings();
-
-		settings.notify["show-local-menu"] += show_local_menu_changed;
+		find_quirks();
 
 		sync_settings();
 		sync_toplevel();
-
-		if(has_parent_type_name("PanelMenuBar")) {
-			quirks = QuirkType.REGULAR_WIDGET;
-		}
-
-		if(has_parent_type_name("GnomenuMenuBar")) {
-			quirks = QuirkType.REGULAR_WIDGET;
-		}
-
-		if(has_parent_type_name("PanelApplet")) {
-			quirks = QuirkType.REGULAR_WIDGET;
-		}
-
-		if(has_parent_type_name("GtkNotebook")) {
-			quirks = QuirkType.REGULAR_WIDGET;
-		}
-
-		if(has_parent_type_name("GtkPizza")) {
-			quirks = QuirkType.WX_GTK;
-		}
-
-		if(has_parent_type_name("BonoboDockBand")) {
-			quirks = QuirkType.BONOBO_PLUG;
-		}
 
 		MenuBar.set_children_menubar(menubar);
 		show_local_menu_changed();
@@ -118,6 +92,7 @@ internal class MenuBarInfo {
 	private void release_menubar() {
 		if(menubar == null) return;
 		menubar.hierarchy_changed -= sync_toplevel;
+		menubar.hierarchy_changed -= find_quirks;
 		menubar.screen_changed -= sync_settings;
 		menubar.weak_unref(menubar_disposed, this);
 	}
@@ -141,8 +116,42 @@ internal class MenuBarInfo {
 		}
 	}
 
+	private void find_quirks() {
+		if(has_parent_type_name("PanelMenuBar")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GnomenuMenuBar")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("PanelApplet")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GtkNotebook")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GtkPizza")) {
+			quirks = QuirkType.WX_GTK;
+		}
+
+		if(has_parent_type_name("BonoboDockBand")) {
+			quirks = QuirkType.BONOBO_PLUG;
+		}
+		
+	}
+
 	private void sync_settings() {
+		if(quirks.has(QuirkType.REGULAR_WIDGET)) return;
 		var screen = menubar.get_screen();
+
+		if(settings == null) {
+			settings = new Gnomenu.Settings();
+			settings.notify["show-local-menu"] += show_local_menu_changed;
+		}
+
 		if(settings.screen == screen) return;
 		else settings.attach(screen);
 	}
