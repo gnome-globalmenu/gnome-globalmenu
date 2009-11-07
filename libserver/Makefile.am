@@ -49,7 +49,7 @@ libserver_la_LDFLAGS = -version-info 3:0:0 -Wl,--as-needed
 
 vala-ccode: $(VALASOURCES) bindings.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) \
-		-C --basedir=$(top_srcdir) \
+		-C \
 		-H $(HEADER_FILE) \
 		--library=globalmenu-server \
 		--vapi=$(VAPI_FILE) \

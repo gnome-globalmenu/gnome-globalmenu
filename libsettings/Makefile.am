@@ -28,7 +28,7 @@ libsettings_la_LDFLAGS = -version-info 0:0:0 -Wl,--as-needed
 
 vala-ccode: $(VALASOURCES)
 	$(VALAC) $(VALA_DEFAULT_PKGS) \
-		-C --basedir=$(top_srcdir) \
+		-C \
 		-H $(HEADER_FILE) \
 		--library=globalmenu-settings \
 		--vapi=$(VAPI_FILE) \
