@@ -17,7 +17,7 @@ public class MenuBarInfo {
 	private static Gdk.Atom atom_activate = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false);
 
 	private weak Gtk.MenuBar _menubar;
-	private Gnomenu.Settings settings;
+	public Gnomenu.Settings settings {get; private set;}
 
 	public Gtk.MenuBar menubar {
 		get { return _menubar; }
@@ -61,9 +61,13 @@ public class MenuBarInfo {
 		menubar.weak_ref(menubar_disposed, this);
 
 		menubar.hierarchy_changed += sync_toplevel;
+		menubar.screen_changed += sync_settings;
 
-		settings = new Gnomenu.Settings(menubar.get_screen());
+		settings = new Gnomenu.Settings();
 
+		settings.notify["show-local-menu"] += show_local_menu_changed;
+
+		sync_settings();
 		sync_toplevel();
 
 		MenuBar.set_children_menubar(menubar);
@@ -82,6 +86,7 @@ public class MenuBarInfo {
 	private void release_menubar() {
 		if(menubar == null) return;
 		menubar.hierarchy_changed -= sync_toplevel;
+		menubar.screen_changed -= sync_settings;
 		menubar.weak_unref(menubar_disposed, this);
 	}
 
@@ -104,6 +109,11 @@ public class MenuBarInfo {
 		}
 	}
 
+	private void sync_settings() {
+		var screen = menubar.get_screen();
+		if(settings.screen == screen) return;
+		else settings.attach(screen);
+	}
 	private void sync_toplevel() {
 		release_toplevel();
 		if(menubar == null) toplevel = null;
@@ -124,6 +134,11 @@ public class MenuBarInfo {
 			event_window.add_filter(event_filter);
 			event_window.weak_ref(event_window_disposed, this);
 		}
+	}
+
+	private void show_local_menu_changed() {
+		menubar.queue_resize();
+		if(menubar.is_mapped()) MenuBar.map(menubar);
 	}
 
 	[CCode (instance_pos = -1)]

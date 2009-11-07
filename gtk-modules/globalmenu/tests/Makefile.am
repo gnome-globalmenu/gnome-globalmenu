@@ -16,7 +16,7 @@ SUFFIXES = .vala .c
 
 test_unload_LDADD = $(GTK_LIBS) $(GLIB_LIBS) $(top_builddir)/tests/libtestman.la
 
-AM_CPPFLAGS = -I$(srcdir)/.. $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER) -I$(top_srcdir)/tests
+AM_CPPFLAGS = -I$(srcdir)/.. $(GTK_CFLAGS) $(GLIB_CFLAGS) -include $(CONFIG_HEADER) -I$(top_srcdir)/tests -I$(top_srcdir)/libsettings
 BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) $(GLIB_LIBS) ../libgnomenu-gtk.la $(top_builddir)/tests/libtestman.la
 EXTRA_DIST += $(STAMP) $(VALASOURCES) test-unload.ui

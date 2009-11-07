@@ -25,13 +25,18 @@ internal class MenuBar {
 
 		var factory = MenuBarInfoFactory.get();
 		var info = factory.create(widget as Gtk.MenuBar);
-		if((info.quirks & MenuBarInfo.QuirkType.REGULAR_WIDGET) != 0) 
+		if((info.quirks & MenuBarInfo.QuirkType.REGULAR_WIDGET) != 0) {
 			super(widget);
-		else {
-			widget.set_flags(Gtk.WidgetFlags.MAPPED);
-			@base(widget);
-			if(widget.window != null) widget.window.hide();
+			return;
 		}
+		if(info.settings.show_local_menu) {
+			super(widget);
+			return;
+		}
+
+		widget.set_flags(Gtk.WidgetFlags.MAPPED);
+		@base(widget);
+		if(widget.window != null) widget.window.hide();
 	}
 	public static void size_request(Gtk.Widget? widget, ref Gtk.Requisition req) {
 		message("size_request called");
@@ -46,6 +51,10 @@ internal class MenuBar {
 
 		if((info.quirks & MenuBarInfo.QuirkType.REGULAR_WIDGET) != 0) 
 			return;
+
+		if(info.settings.show_local_menu) {
+			return;
+		}
 
 		req.width = 0;
 		req.height = 0;
