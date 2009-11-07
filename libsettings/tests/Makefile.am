@@ -6,7 +6,6 @@ noinst_PROGRAMS =$(VALASOURCES:.vala=)
 endif
 
 VALASOURCES = \
-	test-write-settings.vala \
 	test-watch-settings.vala
 
 STAMP = $(VALASOURCES:.vala=.c)

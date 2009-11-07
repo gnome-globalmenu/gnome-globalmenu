@@ -9,6 +9,7 @@ SUBDIRS = \
 	xfce \
 	globalmenu-plugin \
 	globalmenu-gnome-panel \
+	tools \
 	po \
 	schemas \
 	$(NULL)
