@@ -13,39 +13,39 @@ VALASOURCES = \
 	info-factory.vala \
 	info.vala \
 	module-main.vala \
-	globalmenu-serializer.vala \
-	globalmenu-locator.vala \
+	serializer.vala \
+	locator.vala \
 	$(NULL)
 
-libgnomenu_gtkdir = $(GTK_MODULES_DIR)
-libgnomenu_gtk_LTLIBRARIES = \
-	libgnomenu-gtk.la \
+libglobalmenu_plugindir = $(GTK_MODULES_DIR)
+libglobalmenu_plugin_LTLIBRARIES = \
+	libglobalmenu-plugin.la \
 	$(NULL)
 
-libgnomenu_gtk_la_SOURCES= \
+libglobalmenu_plugin_la_SOURCES= \
 	$(VALASOURCES:.vala=.c) \
-	globalmenu-gnome.h \
+	globalmenu-plugin.h \
 	$(NULL)
 
 vala-ccode : $(VALASOURCES)
 	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C  \
 		--library=globalmenu-gnome \
-		-H globalmenu-gnome.h --vapidir=.  \
+		-H globalmenu-plugin.h --vapidir=.  \
 		$(VALASOURCES) \
-		--vapidir=../../libsettings \
+		--vapidir=$(top_srcdir)/libsettings \
 		--pkg gmodule-2.0 \
 		--pkg gtk+-2.0 \
 		--pkg gdk-x11-2.0 \
 		--pkg globalmenu-settings
 	touch $@
 
-libgnomenu_gtk_la_LIBADD = \
+libglobalmenu_plugin_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
-		../../libsettings/libsettings.la \
+		$(top_builddir)/libsettings/libsettings.la \
 		$(NULL)
 
-libgnomenu_gtk_la_LDFLAGS = \
+libglobalmenu_plugin_la_LDFLAGS = \
 		-g \
 		-version-info 1:0:0 \
 		-avoid-version \
@@ -54,7 +54,7 @@ libgnomenu_gtk_la_LDFLAGS = \
 		-module
 
 #		-Wl,--as-needed 
-libgnomenu_gtk_la_CPPFLAGS = \
+libglobalmenu_plugin_la_CPPFLAGS = \
 	  -I$(top_srcdir) \
 	  -I$(top_srcdir)/libsettings \
 	  $(GLIB_CFLAGS) $(GTK_CFLAGS) \
@@ -63,7 +63,7 @@ libgnomenu_gtk_la_CPPFLAGS = \
 	  -g
 
 EXTRA_DIST = vala-ccode \
-	globalmenu-gnome.h \
+	globalmenu-plugin.h \
 	$(VALASOURCES) \
 	$(NULL)
 

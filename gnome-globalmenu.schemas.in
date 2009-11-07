@@ -2,9 +2,9 @@
 <gconfschemafile>
 <schemalist>
 	<schema>
-	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome</key>
-	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome</applyto>
-	  <owner>libglobalmenu-gnome</owner>
+	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-plugin</key>
+	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-plugin</applyto>
+	  <owner>gnome-globalmenu</owner>
 	  <type>bool</type>
 	  <default>true</default>
 	  <locale name="C">
@@ -13,8 +13,8 @@
 	  </locale>
 	</schema>
 	<schema>
-	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel</key>
-	  <applyto>/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel</applyto>
+	  <key>/schemas/apps/gnome_settings_daemon/gtk-modules/globalmenu-panel</key>
+	  <applyto>/apps/gnome_settings_daemon/gtk-modules/globalmenu-panel</applyto>
 	  <owner>libgnomenu</owner>
 	  <type>bool</type>
 	  <default>false</default>
