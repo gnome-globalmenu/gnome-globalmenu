@@ -87,9 +87,12 @@ public class Applet : Panel.Applet {
 		AppletBackgroundType bgtype;
 		bgtype = get_background(out color, out pixmap);
 		on_change_background(bgtype, color, pixmap);
-
+		this.screen_changed += () => {
+			settings.attach(this.get_screen());
+		};
 	}
 
+	private Gnomenu.Settings settings = new Gnomenu.Settings();
 	private MenuBarBox menubars = new MenuBarBox();
 	private GlobalMenuBar main_menubar = new GlobalMenuBar();
 	private Gnomenu.MenuBar tiny_menubar = new Gnomenu.MenuBar();
@@ -140,21 +143,6 @@ public class Applet : Panel.Applet {
 			return _has_handle;
 		}
 	}
-
-	public override void screen_changed(Gdk.Screen? previous_screen) {
-		Gdk.Screen screen = get_screen();
-		if(previous_screen != null) {
-			Gtk.Settings old_settings = Gtk.Settings.get_for_screen(previous_screen);
-			/* Work around an old vala bug on disconnecting signals
-			 * perhaps already fixed but ...*/
-			old_settings.notify -= check_module;
-		}
-		if(screen != null) {
-			check_module();
-			get_settings().notify["gtk-modules"] += check_module;
-		}
-	}
-
 
 	private void on_active_window_changed() {
 		if(main_menubar.active_window != null) {
@@ -244,37 +232,6 @@ public class Applet : Panel.Applet {
 		get_prefs();
 
 		initialized = true;
-		check_module();
-	}
-
-	private void check_module() {
-		if(!initialized) return;
-		if(disable_module_check) return;
-
-		string modules = Environment.get_variable("GTK_MODULES");
-		if(modules == null) modules = "";
-		Gtk.Settings settings = get_settings();
-		if(settings != null) {
-			modules += settings.gtk_modules;
-		}
-
-		if(modules.str("globalmenu") != null) return;
-
-		try {
-			Notify.init(APPLET_NAME);
-			notify_no_plugin = new Notify.Notification(
-				_("No Global Menu?"), 
-				_("The Global Menu Plugin is not enabled on this desktop.") +
-				_("Enable the plugin by accessing the preferences dialog via a right-click,") +
-				_("or by exporting GTK_MODULES=globalmenu-gnome in your profile.")
-				, "globalmenu", null);
-		
-			notify_no_plugin.show();
-		} catch (GLib.Error e) {
-			/*ignore the error*/
-			warning("notify library doesn't work as intended");
-		}
-	
 	}
 
 	private void get_prefs() {
@@ -288,8 +245,9 @@ public class Applet : Panel.Applet {
 		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
 		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
 		this.has_handle = gconf_get_bool("has_handle");
-		this.disable_module_check = gconf_get_bool("disable_module_check");
 		this.tiny_mode = gconf_get_bool("tiny_mode");
+		settings.show_local_menu = gconf_get_bool("show_local_menu");
+		settings.push();
 	}
 
 	private Gtk.Dialog get_pref_dialog() {
@@ -300,9 +258,7 @@ public class Applet : Panel.Applet {
 		gcd.add_key_group(
 			_("General Settings"),
 			new string[] {
-				"/apps/gnome_settings_daemon/gtk-modules/globalmenu-gnome",
-				"/apps/gnome_settings_daemon/gtk-modules/gnomenu-panel",
-				root + "/disable_module_check",
+				root + "/show_local_menu",
 				root + "/use_rgba_colormap",
 				root + "/per_monitor_mode",
 				root + "/grab_mnemonic_keys"

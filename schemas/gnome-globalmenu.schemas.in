@@ -24,13 +24,13 @@
 	  </locale>
 	</schema>
 	<schema>
-		<key>/schemas/apps/gnome-applet-globalmenu/prefs/disable_module_check</key>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/show_local_menu</key>
 		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>
 		<default>FALSE</default>
 		<locale name="C">
-			<short>Disable checking the GTK plugin module at startup</short>
-			<long>Disable checking the GTK plugin module at startup. If you know the module is loaded but for some reasons the applet cannot correctly detect this fact, set this key to true to skip the checking.</long>
+			<short>Show local menu in window</short>
+			<long>Keep a local menu bar in window. </long>
 		</locale>
 	</schema>
 	<schema>

@@ -38,11 +38,13 @@ GlobalMenu_PanelApplet_SOURCES = \
 vala-ccode : $(VALASOURCES)
 	$(VALAC) -C $(VALA_DEFAULT_PKGS)  \
 		--vapidir $(top_srcdir)/libserver \
+		--vapidir $(top_srcdir)/libsettings \
 		--pkg gtk+-2.0 \
 		--pkg libwnck-1.0 \
 		--pkg libpanelapplet-2.0 \
 		--pkg gconf-2.0 \
 		--pkg globalmenu-server \
+		--pkg globalmenu-settings \
 		--pkg libgnome-menu \
 		--pkg libnotify \
 		--pkg gdk-x11-2.0 \
@@ -59,7 +61,8 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		$(GMENU_LIBS) \
-		../libserver/libserver.la \
+		$(top_builddir)/libserver/libserver.la \
+		$(top_builddir)/libsettings/libsettings.la \
 		$(NULL)
 
 GlobalMenu_PanelApplet_CPPFLAGS = \
@@ -67,6 +70,7 @@ GlobalMenu_PanelApplet_CPPFLAGS = \
 		$(GMENU_CFLAGS) \
 		$(GNOME_PANEL_CFLAGS) \
 		-I$(top_srcdir)/libserver \
+		-I$(top_srcdir)/libsettings \
 		-include $(CONFIG_HEADER) \
 		-include glib/gi18n-lib.h \
 		-include ../legacy-support/legacy-support.h \
