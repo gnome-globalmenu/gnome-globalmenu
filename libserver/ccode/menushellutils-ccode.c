@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include <libgnomenu/libgnomenu.h>
+#include <globalmenu-server.h>
 static GnomenuMenuItem ** gtk_menu_shell_get_item_array(GtkMenuShell * menu_shell, gint * array_length) {
 	GnomenuMenuItem ** rt =
 	g_object_get_data(G_OBJECT(menu_shell),
