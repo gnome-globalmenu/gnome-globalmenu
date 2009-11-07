@@ -12,22 +12,25 @@ public class MenuBarInfo {
 	}
 	public QuirkType quirks;
 
+	private static Gdk.Atom atom_select = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_SELECT", false);
+	private static Gdk.Atom atom_deselect = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_DESELECT", false);
+	private static Gdk.Atom atom_activate = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false);
+
 	private weak Gtk.MenuBar _menubar;
 	private Gnomenu.Settings settings;
 
 	public Gtk.MenuBar menubar {
 		get { return _menubar; }
 		private set { _menubar = value; }
-	
 	}
-	private bool dirty = false;
-	private Gdk.Window? event_window {
-		get {
-			if(menubar == null) return null;
-			var toplevel = menubar.get_toplevel();
-			if(toplevel == null) return null;
-			return toplevel.window;
-		}
+
+	private weak Gdk.Window? event_window {
+		get;
+		set;
+	}
+	private weak Gtk.Widget toplevel {
+		get;
+		set;
 	}
 
 	private static void menubar_disposed(void* data, Object? object) {
@@ -44,6 +47,12 @@ public class MenuBarInfo {
 		 */
 		((MenuBarInfo*)data)->menubar = null;
 	}
+	private static void toplevel_disposed(void* data, Object? object) {
+		((MenuBarInfo*)data)->toplevel = null;
+	}
+	private static void event_window_disposed(void* data, Object? object) {
+		((MenuBarInfo*)data)->event_window = null;
+	}
 
 
 	public MenuBarInfo (Gtk.MenuBar menubar) {
@@ -51,7 +60,11 @@ public class MenuBarInfo {
 		MenuBarInfoFactory.get().associate(menubar, this);
 		menubar.weak_ref(menubar_disposed, this);
 
+		menubar.hierarchy_changed += sync_toplevel;
+
 		settings = new Gnomenu.Settings(menubar.get_screen());
+
+		sync_toplevel();
 
 		MenuBar.set_children_menubar(menubar);
 		menubar.queue_resize();
@@ -62,11 +75,26 @@ public class MenuBarInfo {
 	~MenuBarInfo() {
 		message("dispose MenuBarInfo");
 		release_menubar();
+		release_toplevel();
+		release_event_window();
 	}
 
 	private void release_menubar() {
 		if(menubar == null) return;
+		menubar.hierarchy_changed -= sync_toplevel;
 		menubar.weak_unref(menubar_disposed, this);
+	}
+
+	private void release_toplevel() {
+		if(toplevel == null) return;
+		toplevel.realize -= sync_event_window;
+		toplevel.unrealize -= sync_event_window;
+		toplevel.weak_unref(toplevel_disposed, this);
+	}
+	private void release_event_window() {
+		if(event_window == null) return;
+		event_window.remove_filter(event_filter);
+		event_window.weak_unref(event_window_disposed, this);
 	}
 
 	public void queue_changed() {
@@ -76,8 +104,79 @@ public class MenuBarInfo {
 		}
 	}
 
-	[CCode (cname = "gdk_window_set_menu_context")]
-	protected extern void gdk_window_set_menu_context (Gdk.Window window, string? context);
+	private void sync_toplevel() {
+		release_toplevel();
+		if(menubar == null) toplevel = null;
+		toplevel = menubar.get_toplevel();
+		if(toplevel != null) {
+			toplevel.weak_ref(toplevel_disposed, this);
+			toplevel.realize += sync_event_window;
+			toplevel.unrealize += sync_event_window;
+		}
+		sync_event_window();
+	}
+
+	private void sync_event_window() {
+		release_event_window();
+		if(toplevel == null) event_window = null;
+		event_window = toplevel.window;
+		if(event_window != null) {
+			event_window.add_filter(event_filter);
+			event_window.weak_ref(event_window_disposed, this);
+		}
+	}
+
+	[CCode (instance_pos = -1)]
+	private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event event) {
+		/* This weird extra level of calling is to avoid a type cast in Vala
+		 * which will cause the loss of delegate target. */
+		return real_event_filter(&xevent, event);
+	}
+	[CCode (instance_pos = -1)]
+	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
+		switch(xevent->type) {
+			case X.EventType.PropertyNotify:
+				Gdk.Atom atom = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
+				if(!(atom_select == atom)
+				&& !(atom_deselect == atom)
+				&& !(atom_activate == atom))
+					break;
+				var path = get_by_atom(atom);
+				var item = Locator.locate(menubar, path);
+				if(item == null) {
+					warning("item not found. path=%s", path);
+					break;
+				}
+				if(atom_select == atom) {
+					select_item(item);
+				}
+				if(atom_deselect == atom) {
+					deselect_item(item);
+				}
+				if(atom_activate == atom) {
+					activate_item(item);
+				}
+				break;
+		}
+		return Gdk.FilterReturn.CONTINUE;
+	}
+
+	private void select_item(Gtk.MenuItem item) {
+		item.select();
+		if(item.submenu != null) {
+			item.submenu.show();
+		}
+	}
+	private void deselect_item(Gtk.MenuItem item) {
+		item.deselect();
+		if(item.submenu != null) {
+			item.submenu.hide();
+		}
+	}
+	private void activate_item(Gtk.MenuItem item) {
+		item.activate();
+	}
+	private bool dirty = false;
 	private bool send_globalmenu_message() {
 		message("FIXME: STUB send_globalmenu_message()");
 		dirty = false;
