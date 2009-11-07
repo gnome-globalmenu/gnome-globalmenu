@@ -7,7 +7,7 @@ public class Gnomenu.Settings : Object {
 	public KeyFile keyfile = new KeyFile();
 
 	public bool show_local_menu { get; set; default = true; }
-	public bool use_global_menu { get; set; default = true; }
+	public bool show_menu_icons { get; set; default = true; }
 	
 	public Settings(Gdk.Screen? screen = null) {
 		attach(screen);
@@ -50,7 +50,7 @@ public class Gnomenu.Settings : Object {
 
 	public string to_string() {
 		keyfile.set_boolean("GlobalMenu:Client", "show-local-menu", this.show_local_menu);
-		keyfile.set_boolean("GlobalMenu:Client", "use-global-menu", this.use_global_menu);
+		keyfile.set_boolean("GlobalMenu:Client", "show-menu-icons", this.show_menu_icons);
 		return keyfile.to_data(null);
 	}
 
@@ -59,7 +59,7 @@ public class Gnomenu.Settings : Object {
 		if(data == null) return;
 		keyfile.load_from_data(data, data.length, KeyFileFlags.NONE);
 		this.show_local_menu = keyfile.get_boolean("GlobalMenu:Client", "show-local-menu");
-		this.use_global_menu = keyfile.get_boolean("GlobalMenu:Client", "use-global-menu");
+		this.show_menu_icons = keyfile.get_boolean("GlobalMenu:Client", "show-menu-icons");
 	}
 
 	public void push() {
