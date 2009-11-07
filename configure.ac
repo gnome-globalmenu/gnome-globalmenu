@@ -192,6 +192,7 @@ AC_CONFIG_FILES(
 	globalmenu-plugin/Makefile
 	globalmenu-plugin/tests/Makefile
 	globalmenu-gnome-panel/Makefile
+	schemas/Makefile
 	po/Makefile.in
 	])
 

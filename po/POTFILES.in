@@ -1,11 +1,11 @@
 [encoding: UTF-8]
-libgnomenu/widgets/menuitem.vala
-libgnomenu/widgets/menubarbox.vala
-gtk-modules/globalmenu/module-main.vala
+libserver/widgets/menuitem.vala
+libserver/widgets/menubarbox.vala
+globalmenu-plugin/module-main.vala
 applet/main.vala
 applet/applet.vala
 applet/switcher.vala
 applet/workspaceselector.vala
-gnome-globalmenu.schemas.in
+schemas/gnome-globalmenu.schemas.in
 applet/GlobalMenu_PanelApplet.server.in.in
 xfce/GlobalMenu_XFCEPlugin.desktop.in.in
