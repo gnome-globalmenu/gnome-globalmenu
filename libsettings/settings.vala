@@ -1,5 +1,5 @@
 public class Gnomenu.Settings : Object {
-	private Gdk.Screen screen;
+	public Gdk.Screen screen {get; private set;}
 	private Gdk.Window window;
 
 	private Gdk.Atom atom = Gdk.Atom.intern("_NET_GLOBALMENU_SETTINGS", false);
@@ -9,17 +9,25 @@ public class Gnomenu.Settings : Object {
 	public bool show_local_menu { get; set; default = true; }
 	public bool use_global_menu { get; set; default = true; }
 	
-	public Settings(Gdk.Screen screen) {
+	public Settings(Gdk.Screen? screen = null) {
+		attach(screen);
+	}
+	public void attach(Gdk.Screen? screen) {
+		if(this.window != null) {
+			window.remove_filter(this.event_filter);
+		}
 		this.screen = screen;
-		this.window = screen.get_root_window();
-		assert(window != null);
-		window.add_filter(this.event_filter);
-		var events = window.get_events();
-		window.set_events(events | Gdk.EventMask.PROPERTY_CHANGE_MASK);
+		if(this.screen == null) return;
+
+		this.window = this.screen.get_root_window();
+		assert(this.window != null);
+		this.window.add_filter(this.event_filter);
+		var events = this.window.get_events();
+		this.window.set_events(events | Gdk.EventMask.PROPERTY_CHANGE_MASK);
 		pull();
 	}
 	~Settings() {
-		window.remove_filter(this.event_filter);
+		attach(null);
 	}
 
 	[CCode (instance_pos = -1)]
