@@ -2,13 +2,21 @@ internal class MenuBarInfo {
 	public enum QuirkType {
 		/* usual thing */
 		NONE = 0,
-		/* There is already a global menu on the window,
-		 * this one is merely a regular widget */
+		/* this one is merely a regular widget */
 		REGULAR_WIDGET = 1,
 		/* for GtkMenuBar in a bonobo plug */
-		HIDE_PARENT = 2,
+		BONOBO_PLUG = 2,
 		/* for wxGTK 2.8.10 programs */
-		CHANGE_STYLE = 4,
+		WX_GTK= 4;
+		public bool has(QuirkType value) {
+			return (value & this) != 0;
+		}
+		public void add(QuirkType value) {
+			this = (value | this);
+		}
+		public void remove(QuirkType value) {
+			this = (this & ~((uint)value));
+		}
 	}
 	public QuirkType quirks;
 
@@ -70,10 +78,34 @@ internal class MenuBarInfo {
 		sync_settings();
 		sync_toplevel();
 
+		if(has_parent_type_name("PanelMenuBar")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GnomenuMenuBar")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("PanelApplet")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GtkNotebook")) {
+			quirks = QuirkType.REGULAR_WIDGET;
+		}
+
+		if(has_parent_type_name("GtkPizza")) {
+			quirks = QuirkType.WX_GTK;
+		}
+
+		if(has_parent_type_name("BonoboDockBand")) {
+			quirks = QuirkType.BONOBO_PLUG;
+		}
+
 		MenuBar.set_children_menubar(menubar);
-		menubar.queue_resize();
-		if(menubar.is_mapped()) MenuBar.map(menubar);
+		show_local_menu_changed();
 		message("info created");
+
 	}
 	
 	~MenuBarInfo() {
@@ -136,9 +168,44 @@ internal class MenuBarInfo {
 		}
 	}
 
+	private bool has_parent_type_name(string typename_pattern) {
+		if(menubar == null) return false;
+		for(Gtk.Widget parent = menubar;
+				parent != null;
+				parent = parent.parent) {
+
+			if(parent.get_type().name().str(typename_pattern) != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void show_local_menu_changed() {
 		menubar.queue_resize();
-		if(menubar.is_mapped()) MenuBar.map(menubar);
+		if(quirks.has(QuirkType.WX_GTK)) {
+			menubar.style_set(menubar.get_style());
+		}
+		if(menubar.is_mapped()) {
+			MenuBar.map(menubar);
+		}
+		if(quirks.has(QuirkType.WX_GTK)) {
+			for(Gtk.Widget parent = menubar;
+					parent != null;
+					parent = parent.parent) {
+
+				if(parent.get_type().name().str("BonoboDockBand") == null) continue;
+				if(!quirks.has(QuirkType.REGULAR_WIDGET)
+				&& !settings.show_local_menu ) {
+					if(parent.is_realized())
+					parent.window.hide();
+				} else {
+					if(parent.is_realized())
+					parent.window.show();
+				}
+				break;
+			}
+		}
 	}
 
 	[CCode (instance_pos = -1)]
