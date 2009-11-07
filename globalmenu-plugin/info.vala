@@ -1,4 +1,4 @@
-public class MenuBarInfo {
+internal class MenuBarInfo {
 	public enum QuirkType {
 		/* usual thing */
 		NONE = 0,

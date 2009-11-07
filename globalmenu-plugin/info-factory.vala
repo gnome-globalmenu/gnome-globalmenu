@@ -1,4 +1,4 @@
-public class MenuBarInfoFactory {
+internal class MenuBarInfoFactory {
 	/* Return the unique factory */
 	private static MenuBarInfoFactory unique = null;
 	private static bool initialized = false;
