@@ -105,6 +105,8 @@ public class Applet : Panel.Applet {
 	public override void dispose() {
 		if(!disposed) {
 			disposed = true;
+			settings.show_local_menu = true;
+			settings.push();
 			set_background_widget(null);
 		}
 		base.dispose();
