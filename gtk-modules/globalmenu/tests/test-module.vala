@@ -18,15 +18,18 @@ namespace GnomenuGtk {
 				Gtk.Button button1 = new Button.with_label("Load");
 				Gtk.Button button2 = new Button.with_label("UnLoad");
 				Gtk.Button button3 = new Button.with_label("add item");
+				Gtk.Button button4 = new Button.with_label("change label");
 				window.add(box);
 				box.add(menubar);
 				box.add(button1);
 				box.add(button2);
 				box.add(button3);
+				box.add(button4);
 				window.show_all();
 				button1.clicked += load_module;
 				button2.clicked += unload_module;
 				button3.clicked += add_item;
+				button4.clicked += change_label;
 				Gtk.main();
 			});
 
@@ -34,6 +37,9 @@ namespace GnomenuGtk {
 		private void add_item() {
 			submenu.append(new MenuItem.with_label("added item"));
 			submenu.show_all();
+		}
+		private void change_label() {
+			item.set_label("changed label");
 		}
 		private void load_module() {
 			string module_name = "../.libs/libgnomenu-gtk.so";

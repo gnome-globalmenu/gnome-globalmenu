@@ -81,12 +81,44 @@ public class MenuBarInfo {
 	private bool send_globalmenu_message() {
 		message("FIXME: STUB send_globalmenu_message()");
 		dirty = false;
-		// send the message
-		/*
-		gdk_window_set_menu_context(event_window, 
+
+		set_by_atom(Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
 				Serializer.to_string(menubar)
-				);*/
+				);
+		
 		return false;
+	}
+
+	public string? get_by_atom(Gdk.Atom atom) {
+		string context = null;
+		Gdk.Atom actual_type;
+		Gdk.Atom type = Gdk.Atom.intern("STRING", false);
+		int actual_format;
+		int actual_length;
+		Gdk.property_get(event_window,
+			atom,
+			type,
+			0, (ulong) long.MAX, false, 
+			out actual_type, 
+			out actual_format, 
+			out actual_length, 
+			out context);
+		return context;
+	}
+
+	public void set_by_atom(Gdk.Atom atom, string? value) {
+		if(value != null) {
+			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
+			Gdk.property_change(event_window,
+				atom, type,
+				8,
+				Gdk.PropMode.REPLACE,
+				value, 
+				(int) value.size() + 1
+			);
+		} else {
+			Gdk.property_delete(event_window, atom);
+		}
 	}
 
 }

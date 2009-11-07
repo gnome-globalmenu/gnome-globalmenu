@@ -13,6 +13,7 @@ VALASOURCES = \
 	info-factory.vala \
 	info.vala \
 	module-main.vala \
+	globalmenu-serializer.vala \
 	$(NULL)
 
 libgnomenu_gtkdir = $(GTK_MODULES_DIR)

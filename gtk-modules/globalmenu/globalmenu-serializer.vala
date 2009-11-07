@@ -1,7 +1,8 @@
-using Gtk;
 public class Serializer {
 	Serializer () { }
-	public static string to_string(MenuBar menubar, bool pretty_print = false) {
+	private bool disable_pixbuf = false;
+	private bool hybrid = false;
+	public static string to_string(Gtk.MenuBar menubar, bool pretty_print = false) {
 		Serializer s = new Serializer();
 		Timer timer = new Timer();
 		s.menubar = menubar;
@@ -12,27 +13,27 @@ public class Serializer {
 		debug("Serializer consumption = %lf", timer.elapsed(null));
 		return s.sb.str;
 	}
-	private void visit(Widget widget) {
-		if(widget is MenuBar) visit_menubar(widget as MenuBar);
+	private void visit(Gtk.Widget widget) {
+		if(widget is Gtk.MenuBar) visit_menubar(widget as Gtk.MenuBar);
 		else
-		if(widget is Menu) visit_menu(widget as Menu);
+		if(widget is Gtk.Menu) visit_menu(widget as Gtk.Menu);
 		else
-		if(widget is MenuItem) visit_menuitem(widget as MenuItem);
+		if(widget is Gtk.MenuItem) visit_menuitem(widget as Gtk.MenuItem);
 		else
-		if(widget is Label) visit_label(widget as Label);
+		if(widget is Gtk.Label) visit_label(widget as Gtk.Label);
 		else
-		if(widget is Image) visit_image(widget as Image);
+		if(widget is Gtk.Image) visit_image(widget as Gtk.Image);
 		else
-		if(widget is Gtk.Container) visit_container(widget as Container);
+		if(widget is Gtk.Container) visit_container(widget as Gtk.Container);
 	}
-	private void visit_container(Container container) {
-		List<weak Widget> children = container.get_children();
+	private void visit_container(Gtk.Container container) {
+		List<weak Gtk.Widget> children = container.get_children();
 		debug("%p has %u children", container, children.length());
-		foreach(weak Widget child in children) {
+		foreach(var child in children) {
 			visit(child);
 		}
 	}
-	private void visit_menubar(MenuBar menubar) {
+	private void visit_menubar(Gtk.MenuBar menubar) {
 		indent();
 		sb.append("<menu>");
 		linebreak();
@@ -43,7 +44,7 @@ public class Serializer {
 		sb.append("</menu>");
 		linebreak();
 	}
-	private void visit_menu(Menu menu) {
+	private void visit_menu(Gtk.Menu menu) {
 		indent();
 		sb.append("<menu>");
 		linebreak();
@@ -52,8 +53,8 @@ public class Serializer {
 		sb.append("</menu>");
 		linebreak();
 	}
-	private void visit_menuitem(MenuItem menuitem) {
-		if(menuitem is TearoffMenuItem) return;
+	private void visit_menuitem(Gtk.MenuItem menuitem) {
+		if(menuitem is Gtk.TearoffMenuItem) return;
 		indent();
 		sb.append("<item");
 
@@ -70,23 +71,23 @@ public class Serializer {
 			sb.append(Markup.printf_escaped(" label=\"%s\"", label_sb.str));
 			last_item_empty = false;
 		}
-		if(menuitem is SeparatorMenuItem
+		if(menuitem is Gtk.SeparatorMenuItem
 		|| menuitem.get_child() == null) {
 			guessed_type = "s";
 			last_item_empty = false;
 		}
 
 
-		if(menuitem is ImageMenuItem) {
-			Image image = (menuitem as ImageMenuItem).image as Image;
+		if(menuitem is Gtk.ImageMenuItem) {
+			Gtk.Image image = (menuitem as Gtk.ImageMenuItem).image as Gtk.Image;
 			if(image != null) {
 				guessed_type = "i";
 				append_icon_attribute(image);
 				last_item_empty = false;
 			}
 		}
-		if(menuitem is CheckMenuItem) {
-			var checkmenuitem = menuitem as CheckMenuItem;
+		if(menuitem is Gtk.CheckMenuItem) {
+			var checkmenuitem = menuitem as Gtk.CheckMenuItem;
 			if(checkmenuitem.draw_as_radio) 
 				guessed_type = "r";
 			else 
@@ -113,7 +114,7 @@ public class Serializer {
 			 * no label, no image, or
 			 * any other visible elements.
 			 *
-			 * eg, PidginMenuTray
+			 * eg, PidginGtk.MenuTray
 			 * */
 			sb.append(" visible=\"0\"");
 		}
@@ -136,21 +137,21 @@ public class Serializer {
 			linebreak();
 		}
 	}
-	private void visit_label(Label label) {
+	private void visit_label(Gtk.Label label) {
 		string label_text = label.label;
 		label_sb.append(label_text);
 		debug ("append text = %s", label_text);
-		if(label is AccelLabel) {
-			(label as AccelLabel).refetch();
-			string accel_string = (label as AccelLabel).accel_string.strip();
+		if(label is Gtk.AccelLabel) {
+			(label as Gtk.AccelLabel).refetch();
+			string accel_string = (label as Gtk.AccelLabel).accel_string.strip();
 			if(accel_string.length > 0 && accel_string != "-/-" /*refer to gtkaccellabel.c:802*/ ) {
 				sb.append(Markup.printf_escaped(" accel=\"%s\"", accel_string));
 			}
 		}
 	}
-	private void visit_image(Image image) {
+	private void visit_image(Gtk.Image image) {
 		/*workaround a bug before Gtk 2.14*/
-		if(image.parent is ImageMenuItem) return; 
+		if(image.parent is Gtk.ImageMenuItem) return; 
 		/*Disable pure image menu item since
 		  the purpose of introducing it was
 		  to get Pidgin's menu icon tray working
@@ -177,11 +178,11 @@ public class Serializer {
 		delete pixel_data;
 		return rt;
 	}
-	private void append_icon_attribute(Image image) {
+	private void append_icon_attribute(Gtk.Image image) {
 		if(image.file != null) {
 			sb.append(Markup.printf_escaped(" icon=\"file:%s\"", image.file));
 		} else {
-			if(image.storage_type == ImageType.STOCK) {
+			if(image.storage_type == Gtk.ImageType.STOCK) {
 				/* STOCK is not shared between app and the applet */
 				string stock = image.stock;
 				if(stock.has_prefix("gtk")) {
@@ -191,26 +192,26 @@ public class Serializer {
 				} else {
 					if(!disable_pixbuf) {
 					Gdk.Pixbuf pixbuf = image.render_icon(image.stock, 
-						IconSize.MENU, null);
+						Gtk.IconSize.MENU, null);
 					if(pixbuf != null)
 						sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
 							pixbuf_encode_b64(pixbuf)));
 					}
 				}
 			}
-			if(image.storage_type == ImageType.ICON_NAME) {
+			if(image.storage_type == Gtk.ImageType.ICON_NAME) {
 				/* THEME is shared between applet and the application*/
 				sb.append(Markup.printf_escaped(" icon=\"theme:%s\"", 
 						image.icon_name));
 			}
-			if(image.storage_type == ImageType.PIXBUF) {
+			if(image.storage_type == Gtk.ImageType.PIXBUF) {
 				if(!disable_pixbuf) {
 				if(image.pixbuf != null)
 					sb.append(Markup.printf_escaped(" icon=\"pixbuf:%s\"", 
 							pixbuf_encode_b64(image.pixbuf)));
 				}
 			}		
-			if(image.storage_type == ImageType.PIXMAP) {
+			if(image.storage_type == Gtk.ImageType.PIXMAP) {
 				ulong pixmap_xid = 0;
 				ulong mask_xid = 0;
 				if(image.pixmap != null) 
@@ -222,7 +223,7 @@ public class Serializer {
 			}
 		}
 	}
-	private MenuBar menubar;
+	private Gtk.MenuBar menubar;
 	private StringBuilder sb;
 	private StringBuilder label_sb;
 	private bool last_item_empty;
