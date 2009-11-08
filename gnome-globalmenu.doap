@@ -1,0 +1,19 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">gnome-globalmenu</name>
+  <shortdesc xml:lang="en">Global Menu is the centralized menu bar</shortdesc>
+  <homepage rdf:resource="http://gnome2-globalmenu.googlecode.com" />
+  <mailing-list rdf:resource="http://gnome-globalmenu@googlegroups.com" />
+
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Yu Feng</foaf:name>
+      <foaf:mbox rdf:resource="mailto:fengy@src.gnome.org" />
+      <gnome:userid>YuFeng</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+</Project>
