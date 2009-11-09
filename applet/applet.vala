@@ -245,6 +245,7 @@ public class Applet : Panel.Applet {
 		switcher.enable_search_box = gconf_get_bool("enable_search_box");
 		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
 		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
+		main_menubar.grab_menu_key = gconf_get_bool("grab_menu_bar_key");
 		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
 		this.has_handle = gconf_get_bool("has_handle");
 		this.tiny_mode = gconf_get_bool("tiny_mode");
@@ -263,17 +264,18 @@ public class Applet : Panel.Applet {
 			new string[] {
 				root + "/show_local_menu",
 				root + "/show_menu_icons",
-				root + "/use_rgba_colormap",
-				root + "/per_monitor_mode",
-				root + "/grab_mnemonic_keys"
+				root + "/per_monitor_mode"
 			}
 		);
 
 		gcd.add_key_group(
-			_("Global Menu"),
+			_("Applet"),
 			new string[]{
 				root + "/has_handle",
-				root + "/tiny_mode"
+				root + "/tiny_mode",
+				root + "/use_rgba_colormap",
+				root + "/grab_mnemonic_keys",
+				root + "/grab_menu_bar_key"
 			}
 		);
 

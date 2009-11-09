@@ -134,6 +134,16 @@
 		</locale>
 	</schema>
 	<schema>
+		<key>/schemas/apps/gnome-applet-globalmenu/prefs/grab_menu_bar_key</key>
+		<owner>gnome-applet-globalmenu</owner>
+		<type>bool</type>
+		<default>TRUE</default>
+		<locale name="C">
+			<short>Enable the menu bar key (F10 usually) </short>
+			<long>Accessing the global menu items by the menu bar key. When this option is disabled, the topmost menu items are not directly accessible from keyboard.</long>
+		</locale>
+	</schema>
+	<schema>
 		<key>/schemas/apps/gnome-applet-globalmenu/prefs/per_monitor_mode</key>
 		<owner>gnome-applet-globalmenu</owner>
 		<type>bool</type>

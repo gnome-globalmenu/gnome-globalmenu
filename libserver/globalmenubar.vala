@@ -19,6 +19,15 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		}
 	}
 
+	public bool _grab_menu_key = true;
+	public bool grab_menu_key {
+		get { return _grab_menu_key; }
+		set {
+			_grab_menu_key = value;
+			regrab_menu_bar_key();
+		}
+	}
+
 	public Gnomenu.Window active_window {
 		get { return active_window_monitor.active_window; }
 	}
@@ -103,6 +112,7 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 			}
 		}
 	}
+
 	private void attach_to_screen(Gdk.Screen screen) {
 		active_window_monitor.attach(screen);
 		_root_window = new Window(get_root_window());
@@ -190,7 +200,9 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		uint keyval;
 		Gdk.ModifierType mods;
 		get_accel_key(out keyval, out mods);
-		_root_window.grab_key(keyval, mods);
+		if(_grab_menu_key) {
+			_root_window.grab_key(keyval, mods);
+		}
 		_root_window.set_data("menu-bar-keyval", (void*) keyval);
 		_root_window.set_data("menu-bar-keymods", (void*) mods);
 	}
