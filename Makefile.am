@@ -45,3 +45,4 @@ include $(top_srcdir)/Makefile.config
 doc_DATA = README COPYING ChangeLog AUTHORS INSTALL \
 	README.XFCE README.GNOME README.LEGACY
 
+include $(top_srcdir)/Makefile.sanity

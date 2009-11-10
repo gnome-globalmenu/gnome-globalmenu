@@ -1,0 +1,9 @@
+# check if the installation will conflict with installations of previous versions
+install-exec-hook:
+	@if [ -f $(DESTDIR)$(GTK_MODULES_DIR)/libglobalmenu-gnome.so ]; then \
+	echo "ERROR: $(DESTDIR)$(GTK_MODULES_DIR)/libglobalmenu-gnome.so is found"; \
+	echo "ERROR: this file is a leftover of an installation of a previous version"; \
+	echo "ERROR: Please remove the previous version, or at least this file."; \
+	echo "ERROR: otherwise your Global Menu will not work properly"; \
+	exit 1; \
+	fi;
