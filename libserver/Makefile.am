@@ -26,7 +26,15 @@ VALASOURCES = \
 	utils/mnemonickeys.vala \
 	$(NULL)
 
-noinst_LTLIBRARIES = libserver.la
+
+#mylibdir = $(libdir)/gnome-globalmenu
+lib_LTLIBRARIES = libserver.la
+
+libserver_includedir = $(includedir)/gnome-globalmenu
+libserver_include_HEADERS = globalmenu-server.h
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = gnomeglobalmenu-server.pc
 
 libserver_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
@@ -68,5 +76,6 @@ EXTRA_DIST = \
 	globalmenu-server.vapi \
 	globalmenu-server.deps \
 	bindings.vapi \
-	vala-ccode
+	vala-ccode \
+	gnomeglobalmenu-server.pc.in
 
