@@ -6,6 +6,7 @@ namespace GnomenuGtk {
 		Gtk.MenuBar menubar = new Gtk.MenuBar();
 		Gtk.MenuItem item = new MenuItem.with_label("test1");
 		Gtk.Menu submenu = new Gtk.Menu();
+		Gtk.Box box = new Gtk.VBox(false, 0);
 
 		TestUnload () {
 			base("/GnomenuGTK/Unload");
@@ -14,18 +15,19 @@ namespace GnomenuGtk {
 				menubar.append(item);
 				menubar.append(new MenuItem.with_label("test2"));
 				menubar.append(new MenuItem.with_label("test3"));
-				Gtk.Box box = new Gtk.VBox(false, 0);
+				Gtk.Button button0 = new Button.with_label("add menu");
 				Gtk.Button button1 = new Button.with_label("Load");
 				Gtk.Button button2 = new Button.with_label("UnLoad");
 				Gtk.Button button3 = new Button.with_label("add item");
 				Gtk.Button button4 = new Button.with_label("change label");
 				window.add(box);
-				box.add(menubar);
+				box.add(button0);
 				box.add(button1);
 				box.add(button2);
 				box.add(button3);
 				box.add(button4);
 				window.show_all();
+				button0.clicked += add_menu;
 				button1.clicked += load_module;
 				button2.clicked += unload_module;
 				button3.clicked += add_item;
@@ -33,6 +35,10 @@ namespace GnomenuGtk {
 				Gtk.main();
 			});
 
+		}
+		private void add_menu() {
+			menubar.show_all();
+			box.add(menubar);
 		}
 		private void add_item() {
 			submenu.append(new MenuItem.with_label("added item"));

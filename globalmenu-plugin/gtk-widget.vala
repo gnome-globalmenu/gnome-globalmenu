@@ -17,7 +17,15 @@ internal class Widget {
 		ParentSetFunc super = (ParentSetFunc) Superrider.peek_super(typeof(Gtk.Widget), OffsetParentSet);
 		if(super != null) super(widget, old_parent);
 
+		/* Detect menu bar */
+		if(widget is Gtk.MenuBar) {
+			var factory = MenuBarInfoFactory.get();
+			factory.create(widget as Gtk.MenuBar);
+			message("menubar detected %p", widget);
+		}
+
 		if(widget is Gtk.MenuBar || widget is Gtk.Menu) return;
+
 		var parent = widget.parent;
 		Gtk.MenuBar menubar = null;
 		if(parent != null) {
