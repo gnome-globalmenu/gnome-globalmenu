@@ -7,7 +7,7 @@ SUFFIXES = .vala .c
 
 noinst_PROGRAMS = standalone-global-menu
 standalone_global_menu_SOURCES = standalone.c
-standalone_global_menu_LDADD = $(top_builddir)/libserver/libserver.la $(GTK_LIBS) $(WNCK_LIBS)
+standalone_global_menu_LDADD = $(top_builddir)/libserver/libglobalmenu-server.la $(GTK_LIBS) $(WNCK_LIBS)
 standalone_global_menu_CFLAGS = -I$(top_srcdir)/libserver $(GTK_CFLAGS) $(WNCK_CFLAGS)
 
 .vala.c:

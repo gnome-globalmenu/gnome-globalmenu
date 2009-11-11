@@ -61,7 +61,7 @@ GlobalMenu_PanelApplet_LDADD = \
 		$(WNCK_LIBS) \
 		$(GNOME_PANEL_LIBS) \
 		$(GMENU_LIBS) \
-		$(top_builddir)/libserver/libserver.la \
+		$(top_builddir)/libserver/libglobalmenu-server.la \
 		$(top_builddir)/libsettings/libsettings.la \
 		$(NULL)
 
