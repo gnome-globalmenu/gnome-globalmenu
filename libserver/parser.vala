@@ -29,10 +29,8 @@ public class Gnomenu.Parser {
 		public void advance() {
 			_position++;
 		}
-		public Item item {
-			owned get {
-				return shell.get_item(position);
-			}
+		public Item get_item() {
+			return shell.get_item(position);
 		}
 
 		/* item_has_sub_shell is used to defer the removal of the
@@ -56,6 +54,12 @@ public class Gnomenu.Parser {
 		stack.push_tail(bootstrap);
 	}
 
+	~Parser() {
+		State s = null;
+		while((s = stack.pop_tail()) != null) {
+			continue;
+		}
+	}
 	static const MarkupParser parser_functions = {
 		start_element,
 		end_element,
@@ -80,17 +84,18 @@ public class Gnomenu.Parser {
 					/*if this is not the root <menu> entry
 					 * aka, we are at
 					 * <menu><item><MENU>*/
-					state.item.has_sub_shell = true;
-					state.item_has_sub_shell = true;
+					var item = state.get_item();
+					item.has_sub_shell = true;
 					/* nested the menu, change state*/
-					stack.push_tail(new State(state.item.sub_shell));
+					stack.push_tail(new State(item.sub_shell));
 				}
 			break;
 			case "item":
 				is_bootstrapping = false;
 				/*NOTE: after the first time we has(position) == false,
 				 * it should be false forever)*/
-				setup_item(state.item, attribute_names, attribute_values);
+				var item = state.get_item();
+				setup_item(item, attribute_names, attribute_values);
 				state.item_has_sub_shell = false;
 			break;
 			default:
@@ -175,7 +180,7 @@ public class Gnomenu.Parser {
 				break;
 			case "item":
 				if(!state.item_has_sub_shell) {
-					state.item.has_sub_shell = false;
+					state.get_item().has_sub_shell = false;
 				}
 				state.advance();
 			break;

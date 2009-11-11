@@ -62,6 +62,12 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		};
 	}
 
+	public override void dispose() {
+		this.active_window_monitor = null;
+		this.mnemonic_keys = null;
+		base.dispose();
+	}
+
 	private void emit_active_window_changed(Gnomenu.Window? prev_window) {
 		active_window_changed(prev_window);
 	}

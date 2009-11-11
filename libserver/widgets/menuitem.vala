@@ -50,6 +50,7 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 				_image_widget.unparent();
 				_image_widget = null;
 			}
+			this._submenu_cache.destroy();
 		}
 		base.dispose();
 	}

@@ -73,9 +73,11 @@ static const string EMPTY_OVERFLOWN_MENU =
 	public override void dispose() {
 		if(!disposed) {
 			disposed = true;
+			gtk_menu_shell_remove_all(this);
 		}
 		base.dispose();
 	}
+
 	private MenuItem resolve_item_maybe_from_overflown(MenuItem item) {
 		if(item.is_child_of(_overflown_arrow)) {
 			string path = overflown_path_to_path(item.item_path);

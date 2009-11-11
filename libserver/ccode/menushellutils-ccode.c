@@ -23,11 +23,15 @@ static void gtk_menu_shell_set_item_array(GtkMenuShell * menu_shell,
 }
 
 
+/**
+ * only removes the extra reference for later attached widgets.
+ */
 void gtk_menu_shell_remove_all(GtkMenuShell * menu_shell) {
-	GList * children = gtk_container_get_children(GTK_CONTAINER(menu_shell));
-	GList * iter;
-	for(iter = children; iter; iter = iter->next) {
-		gtk_container_remove(GTK_CONTAINER(menu_shell), iter->data);
+	int array_length = 0;
+	int i;
+	GnomenuMenuItem **array = gtk_menu_shell_get_item_array(menu_shell, &array_length);
+	for(i = 0; i < array_length; i++) {
+		g_object_unref(array[i]);
 	}
 	gtk_menu_shell_set_item_array(menu_shell, NULL, 0);
 }
@@ -57,7 +61,7 @@ void gtk_menu_shell_set_length(GtkMenuShell * menu_shell, gint length) {
            to the array, too.*/
 		for(i = array_length; i < length; i++) {
 			GnomenuMenuItem * item = gnomenu_menu_item_new();
-			new_array[i] = item;
+			new_array[i] = g_object_ref_sink(item);
 			gtk_menu_shell_append(menu_shell, GTK_WIDGET(item));
 		}
 		/* Recalculate the children list, pass through the next

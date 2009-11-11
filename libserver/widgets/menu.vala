@@ -27,6 +27,10 @@ public class Gnomenu.Menu : Gtk.Menu, Gnomenu.Shell {
 
 		}
 	}
+	public override void destroy() {
+		gtk_menu_shell_remove_all(this);
+		base.destroy();
+	}
 	/******
 	 * Gnomenu.Shell interface
 	 ********* */
