@@ -27,22 +27,21 @@ VALASOURCES = \
 	$(NULL)
 
 
-#mylibdir = $(libdir)/gnome-globalmenu
-lib_LTLIBRARIES = libserver.la
+lib_LTLIBRARIES = libglobalmenu-server.la
 
-libserver_includedir = $(includedir)/gnome-globalmenu
-libserver_include_HEADERS = globalmenu-server.h
+libglobalmenu_server_includedir = $(includedir)/gnome-globalmenu
+libglobalmenu_server_include_HEADERS = globalmenu-server.h
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = gnomeglobalmenu-server.pc
+pkgconfig_DATA = globalmenu-server.pc
 
-libserver_la_SOURCES = \
+libglobalmenu_server_la_SOURCES = \
 						$(VALASOURCES:.vala=.c) \
 						$(HEADER_FILE) \
 						ccode/keygrab-ccode.c \
 						ccode/menushellutils-ccode.c 
 
-libserver_la_CPPFLAGS = \
+libglobalmenu_server_la_CPPFLAGS = \
 			 -I$(top_srcdir) \
 			 $(GTK_CFLAGS) \
 			 $(WNCK_CFLAGS) \
@@ -51,9 +50,9 @@ libserver_la_CPPFLAGS = \
 			 -include $(CONFIG_HEADER) \
 			 -include ../legacy-support/legacy-support.h
 
-libserver_la_LIBADD = ../legacy-support/liblegacy-support.la
+libglobalmenu_server_la_LIBADD = ../legacy-support/liblegacy-support.la
 
-libserver_la_LDFLAGS = -version-info 3:0:0 -Wl,--as-needed
+libglobalmenu_server_la_LDFLAGS = -version-info 3:0:0 -Wl,--as-needed
 
 vala-ccode: $(VALASOURCES) bindings.vapi
 	$(VALAC) $(VALA_DEFAULT_PKGS) \
@@ -77,5 +76,5 @@ EXTRA_DIST = \
 	globalmenu-server.deps \
 	bindings.vapi \
 	vala-ccode \
-	gnomeglobalmenu-server.pc.in
+	globalmenu-server.pc.in
 

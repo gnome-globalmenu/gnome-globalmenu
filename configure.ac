@@ -182,7 +182,7 @@ AC_CONFIG_FILES(
 	[Makefile
 	legacy-support/Makefile
 	libserver/Makefile
-	libserver/gnomeglobalmenu-server.pc
+	libserver/globalmenu-server.pc
 	libserver/tests/Makefile
 	libsettings/Makefile
 	libsettings/tests/Makefile
