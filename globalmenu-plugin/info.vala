@@ -132,7 +132,7 @@ internal class MenuBarInfo {
 			quirks = QuirkType.REGULAR_WIDGET;
 		}
 
-		if(has_parent_type_name("GnomenuMenuBar")) {
+		if(has_parent_type_name("Gnomenu")) {
 			quirks = QuirkType.REGULAR_WIDGET;
 		}
 
@@ -160,8 +160,7 @@ internal class MenuBarInfo {
 		var screen = menubar.get_screen();
 
 		if(settings == null) {
-			settings = new Gnomenu.Settings();
-			settings.notify["show-local-menu"] += show_local_menu_changed;
+			settings = new Gnomenu.Settings(); settings.notify["show-local-menu"] += show_local_menu_changed;
 			settings.notify["show-menu-icons"] += show_menu_icons_changed;
 		}
 
