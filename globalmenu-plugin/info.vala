@@ -80,7 +80,6 @@ internal class MenuBarInfo {
 		MenuBar.set_children_menubar(menubar);
 		show_local_menu_changed();
 		message("info created");
-
 	}
 	
 	~MenuBarInfo() {
@@ -104,6 +103,7 @@ internal class MenuBarInfo {
 		toplevel.unrealize -= sync_event_window;
 		toplevel.weak_unref(toplevel_disposed, this);
 	}
+
 	private void release_event_window() {
 		if(event_window == null) return;
 		event_window.remove_filter(event_filter);
@@ -152,6 +152,7 @@ internal class MenuBarInfo {
 			quirks = QuirkType.BONOBO_PLUG;
 		}
 
+		message("quirks = %d", quirks);
 		this.quirks_changed(old_quirks);
 	}
 
@@ -167,6 +168,7 @@ internal class MenuBarInfo {
 		if(settings.screen == screen) return;
 		else settings.attach(screen);
 	}
+
 	private void sync_toplevel() {
 		release_toplevel();
 		if(menubar == null) toplevel = null;
@@ -206,6 +208,7 @@ internal class MenuBarInfo {
 		message("menu icons changed!");
 		this.queue_changed();
 	}
+
 	private void show_local_menu_changed() {
 		menubar.queue_resize();
 		if(quirks.has(QuirkType.WX_GTK)) {
