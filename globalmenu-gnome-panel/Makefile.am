@@ -22,7 +22,7 @@ vala-ccode: $(VALASOURCES)
 libglobalmenu_gnome_panel_la_LIBADD = \
 		$(GLIB_LIBS) \
 		$(GTK_LIBS) \
-		$(top_builddir)/libserver/libserver.la \
+		$(top_builddir)/libserver/libglobalmenu-server.la \
 		$(WNCK_LIBS)
 
 libglobalmenu_gnome_panel_la_LDFLAGS = \

@@ -27,7 +27,7 @@ GlobalMenu_XFCEPlugin_LDADD = \
 			$(WNCK_LIBS) \
 			$(GTK_LIBS) \
 			$(XFCE4_PANEL_LIBS) \
-			../libserver/libserver.la
+			../libserver/libglobalmenu-server.la
 
 EXTRA_DIST = \
 	$(desktopfile_in_in_files)	\
