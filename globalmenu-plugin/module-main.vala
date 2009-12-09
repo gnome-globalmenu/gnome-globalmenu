@@ -10,7 +10,7 @@ private Quark domain;
 [CCode (cname="gtk_module_init")]
 public void gtk_entry([CCode (array_length_pos = 0.9)] ref string[] args) {
 	if(disabled) return;
-	Idle.add_full(Priority.HIGH, 
+	Gdk.threads_add_idle_full(Priority.HIGH, 
 		() => {
 			if(initialized) return false;
 

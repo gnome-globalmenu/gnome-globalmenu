@@ -116,7 +116,7 @@ internal class MenuBarInfo {
 		if(quirks.has(QuirkType.REGULAR_WIDGET)) return;
 		if(dirty == false) {
 			dirty = true;
-			Timeout.add(settings.changed_notify_timeout, send_globalmenu_message);
+			Gdk.threads_add_timeout(settings.changed_notify_timeout, send_globalmenu_message);
 		}
 	}
 

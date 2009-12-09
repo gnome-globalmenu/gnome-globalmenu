@@ -1801,11 +1801,11 @@ namespace Gdk {
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public static uint threads_add_idle (GLib.SourceFunc function);
 	[CCode (cheader_filename = "gdk/gdk.h")]
-	public static uint threads_add_idle_full (int priority, GLib.SourceFunc function, void* data, GLib.DestroyNotify notify);
+	public static uint threads_add_idle_full (int priority, owned GLib.SourceFunc function);
 	[CCode (cheader_filename = "gdk/gdk.h")]
-	public static uint threads_add_timeout (uint interval, GLib.SourceFunc function, void* data);
+	public static uint threads_add_timeout (uint interval, GLib.SourceFunc function);
 	[CCode (cheader_filename = "gdk/gdk.h")]
-	public static uint threads_add_timeout_full (int priority, uint interval, GLib.SourceFunc function, void* data, GLib.DestroyNotify notify);
+	public static uint threads_add_timeout_full (uint interval, owned GLib.SourceFunc function, [CCode (pos = 0.1)] int priority = GLib.Priority.DEFAULT);
 	[CCode (cheader_filename = "gdk/gdk.h")]
 	public static uint threads_add_timeout_seconds (uint interval, GLib.SourceFunc function, void* data);
 	[CCode (cheader_filename = "gdk/gdk.h")]
