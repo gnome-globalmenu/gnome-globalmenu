@@ -85,7 +85,7 @@ public class Gnomenu.Parser {
 					 * aka, we are at
 					 * <menu><item><MENU>*/
 					var item = state.get_item();
-					item.has_sub_shell = true;
+					state.item_has_sub_shell = true;
 					/* nested the menu, change state*/
 					stack.push_tail(new State(item.sub_shell));
 				}
@@ -181,6 +181,8 @@ public class Gnomenu.Parser {
 			case "item":
 				if(!state.item_has_sub_shell) {
 					state.get_item().has_sub_shell = false;
+				} else {
+					state.get_item().has_sub_shell = true;
 				}
 				state.advance();
 			break;
