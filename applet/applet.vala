@@ -88,11 +88,11 @@ public class Applet : Panel.Applet {
 		bgtype = get_background(out color, out pixmap);
 		on_change_background(bgtype, color, pixmap);
 		this.screen_changed += () => {
-			settings.attach(this.get_screen());
+			settings.attach_to_screen(this.get_screen());
 		};
 	}
 
-	private Gnomenu.Settings settings = new Gnomenu.Settings();
+	private Gnomenu.GlobalSettings settings = new Gnomenu.GlobalSettings();
 	private MenuBarBox menubars = new MenuBarBox();
 	private GlobalMenuBar main_menubar = new GlobalMenuBar();
 	private Gnomenu.MenuBar tiny_menubar = new Gnomenu.MenuBar();

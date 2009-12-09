@@ -67,12 +67,14 @@ internal class MenuBarInfo {
 	public MenuBarInfo (Gtk.MenuBar menubar) {
 		this.menubar = menubar;
 		MenuBarInfoFactory.get().associate(menubar, this);
+		settings = new Gnomenu.LocalSettings();
+		settings.notify["show-local-menu"] += show_local_menu_changed;
+		settings.notify["show-menu-icons"] += show_menu_icons_changed;
+
 		menubar.weak_ref(menubar_disposed, this);
 
 		menubar.hierarchy_changed += sync_toplevel;
 		menubar.hierarchy_changed += sync_quirks;
-		menubar.screen_changed += sync_settings;
-		this.quirks_changed += sync_settings;
 
 		sync_quirks();
 		sync_toplevel();
@@ -93,7 +95,6 @@ internal class MenuBarInfo {
 		if(menubar == null) return;
 		menubar.hierarchy_changed -= sync_toplevel;
 		menubar.hierarchy_changed -= sync_quirks;
-		menubar.screen_changed -= sync_settings;
 		menubar.weak_unref(menubar_disposed, this);
 	}
 
@@ -108,6 +109,7 @@ internal class MenuBarInfo {
 		if(event_window == null) return;
 		event_window.remove_filter(event_filter);
 		event_window.weak_unref(event_window_disposed, this);
+		settings.attach_to_window(null);
 	}
 
 	public void queue_changed() {
@@ -156,19 +158,6 @@ internal class MenuBarInfo {
 		this.quirks_changed(old_quirks);
 	}
 
-	private void sync_settings() {
-		if(quirks.has(QuirkType.REGULAR_WIDGET)) return;
-		var screen = menubar.get_screen();
-
-		if(settings == null) {
-			settings = new Gnomenu.Settings(); settings.notify["show-local-menu"] += show_local_menu_changed;
-			settings.notify["show-menu-icons"] += show_menu_icons_changed;
-		}
-
-		if(settings.screen == screen) return;
-		else settings.attach(screen);
-	}
-
 	private void sync_toplevel() {
 		release_toplevel();
 		if(menubar == null) toplevel = null;
@@ -189,6 +178,7 @@ internal class MenuBarInfo {
 			event_window.add_filter(event_filter);
 			event_window.weak_ref(event_window_disposed, this);
 		}
+		settings.attach_to_window(event_window);
 	}
 
 	private bool has_parent_type_name(string typename_pattern) {

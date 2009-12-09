@@ -2,9 +2,11 @@ private string[] pairs;
 private bool show = false;
 private ObjectClass klass = null;
 private Gnomenu.Settings settings = null;
+private ulong xid = 0;
 
 private const OptionEntry[] options = {
 	{"show", 's', 0, OptionArg.NONE, ref show, N_("Show current settings"), null },
+	{"window", 'w', 0, OptionArg.INT, ref xid, N_("Access local settings of the window(XWin ID)"), null },
 	{"", 0, 0, OptionArg.STRING_ARRAY, ref pairs, N_("key/setting pairs"), "[ key settings ] ..."},
 	{null}
 };
@@ -26,7 +28,11 @@ N_("""A tool to modify Global Menu settings.""")
 
 	context.parse(ref args);
 
-	settings = new Gnomenu.Settings(Gdk.Screen.get_default());
+	if(xid == 0) {
+		settings = new Gnomenu.GlobalSettings(Gdk.Screen.get_default());
+	} else {
+		settings = new Gnomenu.LocalSettings(Gdk.Window.foreign_new((Gdk.NativeWindow)xid));
+	}
 
 	if(show) {
 		list_settings();
@@ -51,8 +57,8 @@ N_("""A tool to modify Global Menu settings.""")
 }
 
 private void list_settings() {
-	weak ParamSpec[] pspecs = klass.list_properties();
-	foreach(weak ParamSpec ps in pspecs) {
+	foreach(var key in Gnomenu.Settings.KEYS) {
+		weak ParamSpec ps = klass.find_property(key);
 		Value value = Value(ps.value_type);
 		settings.get_property(ps.name, ref value);
 		stdout.printf("%s (%s) = %s\n", ps.name, ps.value_type.name(), value.strdup_contents());

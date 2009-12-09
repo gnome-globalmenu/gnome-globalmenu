@@ -7,7 +7,9 @@ DEPS_FILE = globalmenu-settings.deps
 HEADER_FILE = globalmenu-settings.h
 
 VALASOURCES = \
-	settings.vala
+	settings.vala \
+	global-settings.vala \
+	local-settings.vala \
 	$(NULL)
 
 noinst_LTLIBRARIES = libsettings.la
