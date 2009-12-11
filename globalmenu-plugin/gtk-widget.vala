@@ -19,7 +19,7 @@ internal class Widget {
 
 		/* Detect menu bar */
 		if(widget is Gtk.MenuBar) {
-			var factory = MenuBarInfoFactory.get();
+			var factory = MenuBarAgentFactory.get();
 			factory.create(widget as Gtk.MenuBar);
 			message("menubar detected %p", widget);
 		}

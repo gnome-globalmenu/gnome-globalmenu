@@ -1,14 +1,14 @@
-internal class MenuBarInfoFactory {
+internal class MenuBarAgentFactory {
 	/* Return the unique factory */
-	private static MenuBarInfoFactory unique = null;
+	private static MenuBarAgentFactory unique = null;
 	private static bool initialized = false;
-	public static MenuBarInfoFactory get() {
+	public static MenuBarAgentFactory get() {
 		assert(initialized);
 		return unique;
 	}
 	public static void init() {
 		assert(!initialized);
-		unique = new MenuBarInfoFactory();
+		unique = new MenuBarAgentFactory();
 		initialized = true;
 	}
 	/* Reset the factory to a clean state,
@@ -17,61 +17,61 @@ internal class MenuBarInfoFactory {
 	 * removing all signal handlers,
 	 * removing all pointers and extra referneces.
 	 *
-	 * Refer to ~MenuBarInfoFactory()
+	 * Refer to ~MenuBarAgentFactory()
 	 * */
 	public static void reset() {
 		unique = null;
 		initialized = false;
 	}
 
-	private List<unowned MenuBarInfo> info_list;
+	private List<unowned MenuBarAgent> agent_list;
 
-	internal static void unref_info(MenuBarInfo * info) {
+	internal static void unref_agent(MenuBarAgent * agent) {
 		/* This function is called when menubar disposes
-		 * MenuBarInfo. Because the MenuBar is no longer
-		 * valid after this point, so is the info.
+		 * MenuBarAgent. Because the MenuBar is no longer
+		 * valid after this point, so is the agent.
 		 * Therefore we remove it from our internal tracking
 		 * list, avoiding freeing it twice when the factory
 		 * is diposed.
 		 * */
-		get().info_list.remove(info);
-		delete info;
+		get().agent_list.remove(agent);
+		delete agent;
 	}
-	private MenuBarInfoFactory() {}
-	~MenuBarInfoFactory() {
-		foreach(unowned MenuBarInfo info in info_list) {
+	private MenuBarAgentFactory() {}
+	~MenuBarAgentFactory() {
+		foreach(unowned MenuBarAgent agent in agent_list) {
 			/*
-			 * unset the menubar's reference to the info object,
-			 * so that the info object will be disposed.
-			 * the info object will clean up after itself.
+			 * unset the menubar's reference to the agent object,
+			 * so that the agent object will be disposed.
+			 * the agent object will clean up after itself.
 			 *
-			 * Refer to ~MenuBarInfo()
+			 * Refer to ~MenuBarAgent()
 			 * */
-			info.menubar.set_data("globalmenu-info", null);
+			agent.menubar.set_data("globalmenu-agent", null);
 		}
 	}
 
 	/* Factory Interface */
-	internal void associate(Gtk.MenuBar menubar, MenuBarInfo info) {
-		/* This function is called by MenuBarInfo() */
-		/* We set a reference of info object to the menu bar.
+	internal void associate(Gtk.MenuBar menubar, MenuBarAgent agent) {
+		/* This function is called by MenuBarAgent() */
+		/* We set a reference of agent object to the menu bar.
 		 * So that when the menubar object is destroyed,
-		 * the info object will be disposed.
+		 * the agent object will be disposed.
 		 *
 		 * By doing this we don't need to deal with
 		 * WeakNotify.
 		 * */
-		menubar.set_data_full("globalmenu-info", info, MenuBarInfoFactory.unref_info);
+		menubar.set_data_full("globalmenu-agent", agent, MenuBarAgentFactory.unref_agent);
 	}
-	public unowned MenuBarInfo create(Gtk.MenuBar menubar) {
-		MenuBarInfo* info = menubar.get_data("globalmenu-info");
-		if(info != null) return info;
-		info = new MenuBarInfo(menubar);
+	public unowned MenuBarAgent create(Gtk.MenuBar menubar) {
+		MenuBarAgent* agent = menubar.get_data("globalmenu-agent");
+		if(agent != null) return agent;
+		agent = new MenuBarAgent(menubar);
 
-		return info;
+		return agent;
 	}
 
-	/* Create the menu bar info object for all menubar widgets
+	/* Create the menu bar agent object for all menubar widgets
 	 * currently attached to any toplevel */
 	public void prepare_attached_menubars() {
 		List<weak Gtk.Widget> toplevels = Gtk.Window.list_toplevels();

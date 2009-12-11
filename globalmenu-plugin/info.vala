@@ -1,4 +1,4 @@
-internal class MenuBarInfo {
+internal class MenuBarAgent {
 	public enum QuirkType {
 		/* usual thing */
 		NONE = 0,
@@ -45,28 +45,28 @@ internal class MenuBarInfo {
 
 	private static void menubar_disposed(void* data, Object? object) {
 		/*
-		 * the only reference to MenuBarInfo is held by the menubar.
+		 * the only reference to MenuBarAgent is held by the menubar.
 		 * when menubar is disposed, the weak_ref_notify is invoked before
-		 * its reference on MenuBarInfo is released.
+		 * its reference on MenuBarAgent is released.
 		 *
 		 * When this callback is invoked, we are 100% sure that
 		 * the menubar is already invalid, and Gtk will take care of all
-		 * the signal removal stuff. Therefore we simply detach the info
+		 * the signal removal stuff. Therefore we simply detach the agent
 		 * from the menubar.
 		 *
 		 */
-		((MenuBarInfo*)data)->menubar = null;
+		((MenuBarAgent*)data)->menubar = null;
 	}
 	private static void toplevel_disposed(void* data, Object? object) {
-		((MenuBarInfo*)data)->toplevel = null;
+		((MenuBarAgent*)data)->toplevel = null;
 	}
 	private static void event_window_disposed(void* data, Object? object) {
-		((MenuBarInfo*)data)->event_window = null;
+		((MenuBarAgent*)data)->event_window = null;
 	}
 
-	public MenuBarInfo (Gtk.MenuBar menubar) {
+	public MenuBarAgent (Gtk.MenuBar menubar) {
 		this.menubar = menubar;
-		MenuBarInfoFactory.get().associate(menubar, this);
+		MenuBarAgentFactory.get().associate(menubar, this);
 		settings = new Gnomenu.LocalSettings();
 		settings.notify["show-local-menu"] += show_local_menu_changed;
 		settings.notify["show-menu-icons"] += show_menu_icons_changed;
@@ -81,11 +81,11 @@ internal class MenuBarInfo {
 
 		MenuBar.set_children_menubar(menubar);
 		show_local_menu_changed();
-		message("info created");
+		message("agent created");
 	}
 	
-	~MenuBarInfo() {
-		message("dispose MenuBarInfo");
+	~MenuBarAgent() {
+		message("dispose MenuBarAgent");
 		release_menubar();
 		release_toplevel();
 		release_event_window();

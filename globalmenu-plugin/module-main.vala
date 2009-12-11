@@ -16,8 +16,8 @@ public void gtk_entry([CCode (array_length_pos = 0.9)] ref string[] args) {
 
 			initialized = true;
 			patcher = new Patcher();
-			MenuBarInfoFactory.init();
-			MenuBarInfoFactory.get().prepare_attached_menubars();
+			MenuBarAgentFactory.init();
+			MenuBarAgentFactory.get().prepare_attached_menubars();
 			return false;
 		}
 	);

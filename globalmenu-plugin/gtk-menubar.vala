@@ -23,13 +23,13 @@ internal class MenuBar {
 
 		message("map called");
 
-		var factory = MenuBarInfoFactory.get();
-		var info = factory.create(widget as Gtk.MenuBar);
-		if((info.quirks & MenuBarInfo.QuirkType.REGULAR_WIDGET) != 0) {
+		var factory = MenuBarAgentFactory.get();
+		var agent = factory.create(widget as Gtk.MenuBar);
+		if((agent.quirks & MenuBarAgent.QuirkType.REGULAR_WIDGET) != 0) {
 			super(widget);
 			return;
 		}
-		if(info.settings.show_local_menu) {
+		if(agent.settings.show_local_menu) {
 			super(widget);
 			return;
 		}
@@ -41,18 +41,18 @@ internal class MenuBar {
 	public static void size_request(Gtk.Widget? widget, ref Gtk.Requisition req) {
 		message("size_request called");
 		assert(widget is Gtk.MenuBar);
-		var factory = MenuBarInfoFactory.get();
-		var info = factory.create(widget as Gtk.MenuBar);
+		var factory = MenuBarAgentFactory.get();
+		var agent = factory.create(widget as Gtk.MenuBar);
 
 		SizeRequestFunc super = (SizeRequestFunc) 
 			Superrider.peek_super(typeof(Gtk.MenuBar), OffsetSizeRequest);
 
 		super(widget, ref req);
 
-		if((info.quirks & MenuBarInfo.QuirkType.REGULAR_WIDGET) != 0) 
+		if((agent.quirks & MenuBarAgent.QuirkType.REGULAR_WIDGET) != 0) 
 			return;
 
-		if(info.settings.show_local_menu) {
+		if(agent.settings.show_local_menu) {
 			return;
 		}
 
@@ -72,8 +72,8 @@ internal class MenuBar {
 	}
 
 	public static void queue_changed(Gtk.MenuBar menubar) {
-		var factory = MenuBarInfoFactory.get();
-		var info = factory.create(menubar);
-		info.queue_changed();
+		var factory = MenuBarAgentFactory.get();
+		var agent = factory.create(menubar);
+		agent.queue_changed();
 	}
 }
