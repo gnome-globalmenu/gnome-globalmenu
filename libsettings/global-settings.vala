@@ -5,7 +5,7 @@ public class Gnomenu.GlobalSettings : Gnomenu.Settings {
 		if(settings != null) return settings;
 		return new GlobalSettings(screen);
 	}
-	public GlobalSettings(Gdk.Screen? screen = null) {
+	private GlobalSettings(Gdk.Screen? screen = null) {
 		attach_to_screen(screen);
 		screen.set_data_full("globalmenu-settings", this.ref(), g_object_unref);
 	}

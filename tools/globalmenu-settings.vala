@@ -29,7 +29,7 @@ N_("""A tool to modify Global Menu settings.""")
 	context.parse(ref args);
 
 	if(xid == 0) {
-		settings = new Gnomenu.GlobalSettings(Gdk.Screen.get_default());
+		settings = Gnomenu.GlobalSettings.get(Gdk.Screen.get_default());
 	} else {
 		settings = new Gnomenu.LocalSettings(Gdk.Window.foreign_new((Gdk.NativeWindow)xid));
 	}

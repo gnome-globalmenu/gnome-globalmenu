@@ -46,6 +46,7 @@ public class Applet : Panel.Applet {
 	public Applet() { }
 
 	construct {
+		settings = Gnomenu.GlobalSettings.get(Gdk.Screen.get_default());
 		add_events(Gdk.EventMask.KEY_PRESS_MASK);
 
 		menubars.visible = true;
@@ -92,7 +93,7 @@ public class Applet : Panel.Applet {
 		};
 	}
 
-	private Gnomenu.GlobalSettings settings = new Gnomenu.GlobalSettings();
+	private Gnomenu.GlobalSettings settings;
 	private MenuBarBox menubars = new MenuBarBox();
 	private GlobalMenuBar main_menubar = new GlobalMenuBar();
 	private Gnomenu.MenuBar tiny_menubar = new Gnomenu.MenuBar();
