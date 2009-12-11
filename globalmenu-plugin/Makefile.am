@@ -10,8 +10,8 @@ VALASOURCES = \
 	patcher.vala \
 	gtk-menubar.vala \
 	gtk-widget.vala \
-	info-factory.vala \
-	info.vala \
+	agent-factory.vala \
+	agent.vala \
 	module-main.vala \
 	serializer.vala \
 	locator.vala \
