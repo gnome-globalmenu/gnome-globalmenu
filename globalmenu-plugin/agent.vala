@@ -81,11 +81,11 @@ internal class MenuBarAgent {
 
 		MenuBar.set_children_menubar(menubar);
 		show_local_menu_changed();
-		message("agent created");
+		debug("agent created");
 	}
 	
 	~MenuBarAgent() {
-		message("dispose MenuBarAgent");
+		debug("dispose MenuBarAgent");
 		release_menubar();
 		release_toplevel();
 		release_event_window();
@@ -154,7 +154,7 @@ internal class MenuBarAgent {
 			quirks = QuirkType.BONOBO_PLUG;
 		}
 
-		message("quirks = %d", quirks);
+		debug("quirks = %d", quirks);
 		this.quirks_changed(old_quirks);
 	}
 
@@ -195,7 +195,7 @@ internal class MenuBarAgent {
 	}
 
 	private void show_menu_icons_changed() {
-		message("menu icons changed!");
+		debug("menu icons changed!");
 		this.queue_changed();
 	}
 
@@ -278,12 +278,12 @@ internal class MenuBarAgent {
 	}
 	private bool dirty = false;
 	private bool send_globalmenu_message() {
-		message("FIXME: STUB send_globalmenu_message()");
+		debug("FIXME: STUB send_globalmenu_message()");
 		dirty = false;
 
 		var ser = new Serializer();
 		ser.disable_pixbuf = ! settings.show_menu_icons;
-		message("disable_pixbuf = %s", ser.disable_pixbuf.to_string());
+		debug("disable_pixbuf = %s", ser.disable_pixbuf.to_string());
 		ser.pretty_print = false;
 		set_by_atom(Gdk.Atom.intern("_NET_GLOBALMENU_MENU_CONTEXT", false),
 				ser.to_string(menubar)

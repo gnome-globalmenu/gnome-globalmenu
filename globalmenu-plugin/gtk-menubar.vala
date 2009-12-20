@@ -21,7 +21,7 @@ internal class MenuBar {
 		MapFunc super = (MapFunc) Superrider.peek_super(typeof(Gtk.MenuBar), OffsetMap);
 		MapFunc @base = (MapFunc) Superrider.peek_base(typeof(Gtk.MenuBar), OffsetMap);
 
-		message("map called");
+		debug("map called");
 
 		var factory = MenuBarAgentFactory.get();
 		var agent = factory.create(widget as Gtk.MenuBar);
@@ -39,7 +39,7 @@ internal class MenuBar {
 		if(widget.window != null) widget.window.hide();
 	}
 	public static void size_request(Gtk.Widget? widget, ref Gtk.Requisition req) {
-		message("size_request called");
+		debug("size_request called");
 		assert(widget is Gtk.MenuBar);
 		var factory = MenuBarAgentFactory.get();
 		var agent = factory.create(widget as Gtk.MenuBar);
