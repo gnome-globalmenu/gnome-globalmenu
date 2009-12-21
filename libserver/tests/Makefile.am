@@ -35,6 +35,6 @@ BUILT_SOURCES = $(STAMP)
 LDADD = $(GTK_LIBS) \
 	$(GLIB_LIBS) \
 	$(WNCK_LIBS) \
-	../libserver.la \
+	../libglobalmenu-server.la \
 	../../tests/libtestman.la
 EXTRA_DIST += $(STAMP) $(VALASOURCES) evo-nolabel.xml evo.xml
