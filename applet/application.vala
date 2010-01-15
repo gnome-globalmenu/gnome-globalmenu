@@ -14,6 +14,9 @@
 	 * Known problem: Openoffice suite apps always show up 
 	 * as one Openoffice app (the last found one in GMenu).
 	 * */
+
+extern string get_task_name_by_pid(int pid);
+
 public class Application{
 	private string key;
 
@@ -110,6 +113,7 @@ public class Application{
 			app.key = key;
 			app.not_in_menu = true;
 			app.readable_name = wapp.get_name();
+			
 			app.exec_path = null;
 			/* NOTE: get_icon_name is not implement in wnck.
 			 * Therefore we set icon_pixbuf, which

@@ -297,6 +297,12 @@ extern int system(string arg);
 				if(app != null) {
 				_label = (current_window.get_window_type()==Wnck.WindowType.DESKTOP) ?
 						 _("Desktop") : app.readable_name;
+				
+				/* workaround to java/swt based apps due to a bug in swt */
+				if ((_label==".") || (_label=="<unknown>")) {
+					_label = current_window.get_name();
+				}
+				
 				} else {
 				_label = "app unknown shouldn't see this";
 				}
