@@ -233,14 +233,18 @@ internal class MenuBarAgent {
 		void* pointer = &xevent;
 		return real_event_filter((X.Event*) pointer, event);
 	}
+	private bool atom_equal(Gdk.Atom a1, Gdk.Atom a2) {
+		if(&a1 == &a2) return true;
+		return false;
+	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
 		switch(xevent->type) {
 			case X.EventType.PropertyNotify:
 				Gdk.Atom atom = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
-				if(!(atom_select == atom)
-				&& !(atom_deselect == atom)
-				&& !(atom_activate == atom))
+				if(!atom_equal(atom_select, atom)
+				&& !atom_equal(atom_deselect, atom)
+				&& !atom_equal(atom_activate, atom))
 					break;
 				var path = get_by_atom(atom);
 				var item = Locator.locate(menubar, path);
@@ -248,13 +252,13 @@ internal class MenuBarAgent {
 					warning("item not found. path=%s", path);
 					break;
 				}
-				if(atom_select == atom) {
+				if(!atom_equal(atom_select, atom)) {
 					select_item(item);
 				}
-				if(atom_deselect == atom) {
+				if(!atom_equal(atom_deselect, atom)) {
 					deselect_item(item);
 				}
-				if(atom_activate == atom) {
+				if(!atom_equal(atom_activate, atom)) {
 					activate_item(item);
 				}
 				break;

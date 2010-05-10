@@ -42,12 +42,15 @@ public class Gnomenu.Settings : Object {
 		void * pointer = &xevent;
 		return real_event_filter((X.Event*)pointer, event);
 	}
+	private bool atom_equal(Gdk.Atom a1, Gdk.Atom a2) {
+		return &a1 == &a2;
+	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
 		Gdk.Atom atom_in = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
 		switch(xevent->type) {
 			case X.EventType.PropertyNotify:
-			if(atom == atom_in) {
+			if(atom_equal(atom, atom_in)) {
 				pull();
 			}
 			break;
