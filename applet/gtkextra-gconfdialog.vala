@@ -110,13 +110,13 @@ using GConf;
 			}
 			action_widget.tooltip_text = tooltip;
 			action_widget.set_data("gconf-entry", entry);
-			action_widget.set_data("gconf-schema", schema);
+			action_widget.set_data("gconf-schema", schema.copy());
 
 			Gtk.Button reset = new Gtk.Button.from_stock(Gtk.STOCK_CLEAR);
 			reset.tooltip_text = _("Reset to the default value");
 			//			reset.set_image(new Gtk.Image.from_stock("gtk-clear", Gtk.IconSize.SMALL_TOOLBAR));
 			reset.set_data("gconf-entry", entry);
-			reset.set_data("gconf-schema", schema);
+			reset.set_data("gconf-schema", schema.copy());
 			reset.set_data("target", action_widget);
 
 			reset.clicked += onResetButtonPressed;
@@ -128,7 +128,7 @@ using GConf;
 			return row;
 		}
 		private void onCheckButtonActivated(Gtk.CheckButton widget) {
-			var entry = (GConf.Entry)widget.get_data("gconf-entry");
+			var entry = widget.get_data<GConf.Entry>("gconf-entry");
 			try {
 				_default_client.set_bool(entry.key, widget.active);
 			} catch (GLib.Error e) {
@@ -137,7 +137,7 @@ using GConf;
 		}
 		
 		private void onSpinButtonValueChanged(Gtk.SpinButton widget) {
-			var entry = (GConf.Entry)widget.get_data("gconf-entry");
+			var entry = widget.get_data<GConf.Entry>("gconf-entry");
 			try {
 				_default_client.set_int(entry.key, (int)widget.value);
 			} catch (GLib.Error e) {
@@ -164,9 +164,9 @@ using GConf;
 			}
 		}
 		private void onResetButtonPressed(Gtk.Button widget) {
-			weak GConf.Schema schema = (GConf.Schema)widget.get_data("gconf-schema");
+			weak GConf.Schema schema = widget.get_data<GConf.Schema>("gconf-schema");
 			weak GConf.Value default_value = schema.get_default_value();
-			var target = (Gtk.Widget)widget.get_data("target");
+			var target = widget.get_data<Gtk.Widget>("target");
 			switch(schema.get_type()) {
 				case ValueType.BOOL:
 					var checkbutton = target as Gtk.CheckButton;

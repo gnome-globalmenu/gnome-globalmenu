@@ -43,10 +43,10 @@ public static class Plugin {
 	}
 
 	private static void hack(Gtk.MenuBar widget) {
-		if((bool)widget.get_data("hacked") == true) {
+		if(widget.get_data<bool>("hacked") == true) {
 			return;
 		}
-		widget.set_data("hacked", (void*) true);
+		widget.set_data("hacked", true);
 		message("hacked");
 		if(tiny_mode) {
 			var item = new Gnomenu.GlobalMenuItem();

@@ -113,7 +113,7 @@ namespace Gnomenu {
 					return ItemState.TRISTATE;
 			}
 		}
-		public static weak string? state_to_string(ItemState state) {
+		public static unowned string? state_to_string(ItemState state) {
 			switch(state) {
 				case ItemState.UNTOGGLED:
 					return "untoggled";
@@ -156,7 +156,7 @@ namespace Gnomenu {
 			) return true;
 			return false;	
 		}
-		public static weak string? type_to_string(ItemType type) {
+		public static unowned string? type_to_string(ItemType type) {
 			switch(type) {
 				case ItemType.CHECK:
 					return "check";

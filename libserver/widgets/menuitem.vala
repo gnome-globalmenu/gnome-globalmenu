@@ -66,7 +66,7 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		}
 	}
 	public Shell shell {get {
-		weak Shell rt = Adapter.get_adapter(parent as Gtk.MenuShell);
+		unowned Shell rt = Adapter.get_adapter(parent as Gtk.MenuShell);
 		if(rt != null) {
 			return rt;
 		} else {
@@ -535,14 +535,14 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 			item.update_show_image();
 		} else {
 			if(widget is Gtk.Container) {
-				List<weak Gtk.Widget> children = (widget as Gtk.Container).get_children();
+				List<unowned Gtk.Widget> children = (widget as Gtk.Container).get_children();
 				foreach(Gtk.Widget child in children)
 					show_image_notify_r(child, settings);
 			}
 		}
 	}
 	private void show_image_notify(Gtk.Settings settings, ParamSpec pspec) {
-		List<weak Gtk.Window> toplevels = Gtk.Window.list_toplevels();
+		List<unowned Gtk.Window> toplevels = Gtk.Window.list_toplevels();
 		foreach(Gtk.Container c in toplevels) {
 			show_image_notify_r(c, settings);
 		}
@@ -550,7 +550,7 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 	public override void screen_changed(Gdk.Screen? previous_screen) {
 		if(!has_screen()) return;
 		Gtk.Settings settings = get_settings();
-		if(settings.get_data("gnomenu-menu-item-connection") == null) {
+		if(settings.get_data<Gtk.Settings>("gnomenu-menu-item-connection") == null) {
 			settings.notify["gtk-menu-images"] += show_image_notify;
 			/*set it to non-null value*/
 			settings.set_data("gnomenu-menu-item-connection", settings);
@@ -652,7 +652,7 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 	}
 	private string remove_underlines(string s) {
 		StringBuilder sb = new StringBuilder("");
-		weak string p;
+		unowned string p;
 		for(p = s; p.get_char() != 0; p = p.next_char()) {
 			unichar c = p.get_char();
 			if(c != '_') {
@@ -689,17 +689,16 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		if(_item_type != ItemType.IMAGE
 		&& _item_type != ItemType.ICON) return;
 		if(_icon != null && _icon.has_prefix("theme:")) {
-			weak string icon_name = _icon.offset(6);
+			unowned string icon_name = _icon.offset(6);
 			image.set_from_icon_name(icon_name, Gtk.IconSize.MENU);
 		} else 
 		if(_icon != null && _icon.has_prefix("file:")) {
-			weak string filename = _icon.offset(5);
+			unowned string filename = _icon.offset(5);
 			image.set_from_file(filename);
 		} else 
 		if(_icon != null && _icon.has_prefix("pixbuf:")) {
-			weak string b64data = _icon.offset(7);
-			size_t len = 0;
-			uchar [] data = Base64.decode(b64data, out len);
+			unowned string b64data = _icon.offset(7);
+			uchar [] data = Base64.decode(b64data);
 			Gdk.Pixdata pixdata = {0};
 			pixdata.deserialize(data);
 			Gdk.Pixbuf pixbuf = Gdk.Pixbuf.from_pixdata(pixdata, true);
@@ -724,8 +723,8 @@ public class Gnomenu.MenuItem : Gtk.MenuItem, Gnomenu.Item {
 		update_font();	
 		update_label_underline();
 	}
-	private weak MenuLabel? get_label_widget() {
-		weak MenuLabel label = get_child() as MenuLabel;
+	private unowned MenuLabel? get_label_widget() {
+		unowned MenuLabel label = get_child() as MenuLabel;
 		return label;
 	}
 	private void remove_child() {

@@ -43,7 +43,7 @@ internal class MenuBarAgent {
 		set;
 	}
 
-	private static void menubar_disposed(void* data, Object? object) {
+	private void menubar_disposed(Object? object) {
 		/*
 		 * the only reference to MenuBarAgent is held by the menubar.
 		 * when menubar is disposed, the weak_ref_notify is invoked before
@@ -55,13 +55,13 @@ internal class MenuBarAgent {
 		 * from the menubar.
 		 *
 		 */
-		((MenuBarAgent*)data)->menubar = null;
+		this.menubar = null;
 	}
-	private static void toplevel_disposed(void* data, Object? object) {
-		((MenuBarAgent*)data)->toplevel = null;
+	private void toplevel_disposed(Object? object) {
+		this.toplevel = null;
 	}
-	private static void event_window_disposed(void* data, Object? object) {
-		((MenuBarAgent*)data)->event_window = null;
+	private void event_window_disposed(Object? object) {
+		this.event_window = null;
 	}
 
 	public MenuBarAgent (Gtk.MenuBar menubar) {
@@ -71,7 +71,7 @@ internal class MenuBarAgent {
 		settings.notify["show-local-menu"] += show_local_menu_changed;
 		settings.notify["show-menu-icons"] += show_menu_icons_changed;
 
-		menubar.weak_ref(menubar_disposed, this);
+		menubar.weak_ref(menubar_disposed);
 
 		menubar.hierarchy_changed += sync_toplevel;
 		menubar.hierarchy_changed += sync_quirks;
@@ -95,20 +95,20 @@ internal class MenuBarAgent {
 		if(menubar == null) return;
 		menubar.hierarchy_changed -= sync_toplevel;
 		menubar.hierarchy_changed -= sync_quirks;
-		menubar.weak_unref(menubar_disposed, this);
+		menubar.weak_unref(menubar_disposed);
 	}
 
 	private void release_toplevel() {
 		if(toplevel == null) return;
 		toplevel.realize -= sync_event_window;
 		toplevel.unrealize -= sync_event_window;
-		toplevel.weak_unref(toplevel_disposed, this);
+		toplevel.weak_unref(toplevel_disposed);
 	}
 
 	private void release_event_window() {
 		if(event_window == null) return;
 		event_window.remove_filter(event_filter);
-		event_window.weak_unref(event_window_disposed, this);
+		event_window.weak_unref(event_window_disposed);
 		settings.attach_to_window(null);
 	}
 
@@ -163,7 +163,7 @@ internal class MenuBarAgent {
 		if(menubar == null) toplevel = null;
 		toplevel = menubar.get_toplevel();
 		if(toplevel != null) {
-			toplevel.weak_ref(toplevel_disposed, this);
+			toplevel.weak_ref(toplevel_disposed);
 			toplevel.realize += sync_event_window;
 			toplevel.unrealize += sync_event_window;
 		}
@@ -176,7 +176,7 @@ internal class MenuBarAgent {
 		event_window = toplevel.window;
 		if(event_window != null) {
 			event_window.add_filter(event_filter);
-			event_window.weak_ref(event_window_disposed, this);
+			event_window.weak_ref(event_window_disposed);
 		}
 		settings.attach_to_window(event_window);
 	}
@@ -230,7 +230,8 @@ internal class MenuBarAgent {
 	private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event event) {
 		/* This weird extra level of calling is to avoid a type cast in Vala
 		 * which will cause the loss of delegate target. */
-		return real_event_filter(&xevent, event);
+		void* pointer = &xevent;
+		return real_event_filter((X.Event*) pointer, event);
 	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {

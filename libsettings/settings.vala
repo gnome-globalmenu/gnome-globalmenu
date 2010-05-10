@@ -39,13 +39,15 @@ public class Gnomenu.Settings : Object {
 	private Gdk.FilterReturn event_filter(Gdk.XEvent xevent, Gdk.Event event) {
 		/* This weird extra level of calling is to avoid a type cast in Vala
 		 * which will cause the loss of delegate target. */
-		return real_event_filter(&xevent, event);
+		void * pointer = &xevent;
+		return real_event_filter((X.Event*)pointer, event);
 	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
+		Gdk.Atom atom_in = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
 		switch(xevent->type) {
 			case X.EventType.PropertyNotify:
-			if(atom == Gdk.x11_xatom_to_atom(xevent->xproperty.atom)) {
+			if(atom == atom_in) {
 				pull();
 			}
 			break;

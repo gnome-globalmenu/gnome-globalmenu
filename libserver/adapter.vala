@@ -28,16 +28,16 @@ public class Gnomenu.Adapter : GLib.Object, Gnomenu.Shell {
 		base.dispose();
 	}
 
-	public static weak Adapter? get_adapter(Gtk.MenuShell gtk_shell) {
+	public static unowned Adapter? get_adapter(Gtk.MenuShell gtk_shell) {
 		if(g2a == null) return null;
-		weak Adapter a = g2a.lookup(gtk_shell);
+		unowned Adapter a = g2a.lookup(gtk_shell);
 		return a;
 	}
 
-	private static HashTable<weak Adapter, Gtk.MenuShell> a2g
-	= new HashTable<weak Adapter, Gtk.MenuShell>(direct_hash, direct_equal);
-	private static HashTable<Gtk.MenuShell, weak Adapter> g2a
-	= new HashTable<Gtk.MenuShell, weak Adapter>(direct_hash, direct_equal);
+	private static HashTable<unowned Adapter, Gtk.MenuShell> a2g
+	= new HashTable<unowned Adapter, Gtk.MenuShell>(direct_hash, direct_equal);
+	private static HashTable<Gtk.MenuShell, unowned Adapter> g2a
+	= new HashTable<Gtk.MenuShell, unowned Adapter>(direct_hash, direct_equal);
 
 	public bool is_topmost { get; set; default = false;}
 	/******

@@ -1,6 +1,6 @@
 namespace Gnomenu {
 	[CCode (cname="gtk_menu_shell_get_item")]
-	internal extern weak Gtk.MenuItem gtk_menu_shell_get_item(Gtk.MenuShell * menu_shell, int position);
+	internal extern unowned Gtk.MenuItem gtk_menu_shell_get_item(Gtk.MenuShell * menu_shell, int position);
 	[CCode (cname="gtk_menu_shell_remove_all")]
 	internal extern void gtk_menu_shell_remove_all(Gtk.MenuShell * menushell);
 	[CCode (cname="gtk_menu_shell_set_length")]

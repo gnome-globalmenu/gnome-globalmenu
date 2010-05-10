@@ -83,7 +83,7 @@ internal class Superrider.Class {
 
 /*FIXME: [Compact] Before 600285 is fixed leave this commented */
 internal class Superrider.Member {
-	public List chain;
+	public List<void*> chain;
 	public int offset;
 	public unowned Class cl;
 	public Member(Class cl, int offset) {

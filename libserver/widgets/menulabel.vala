@@ -147,6 +147,7 @@ public class Gnomenu.MenuLabel: Gtk.Container {
 		}
 		child.mnemonic_activate += (obj, arg1) => {
 			debug("mnemonic activate: %s", (obj as Gtk.Label).label);
+			return false;
 		};
 		children.append(child as Gtk.Label);
 		child.set_parent(this);

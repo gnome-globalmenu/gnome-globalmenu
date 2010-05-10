@@ -54,7 +54,7 @@ public class Gnomenu.Window : GLib.Object {
 	}
 	public uint get_xid() {
 		if(_window != null)
-			return Gdk.x11_drawable_get_xid(_window);
+			return (uint) Gdk.x11_drawable_get_xid(_window);
 		error("getting xid before _window has been initialized");
 		return 0;
 	}

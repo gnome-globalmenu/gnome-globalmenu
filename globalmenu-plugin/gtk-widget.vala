@@ -36,7 +36,7 @@ internal class Widget {
 
 	public static unowned Gtk.MenuBar get_menubar(Gtk.Widget widget) {
 		if(widget is Gtk.MenuBar) return widget as Gtk.MenuBar;
-		unowned Gtk.MenuBar menubar = (Gtk.MenuBar) widget.get_data("globalmenu-menubar");
+		unowned Gtk.MenuBar menubar = widget.get_data<Gtk.MenuBar>("globalmenu-menubar");
 		return menubar;
 	}
 
@@ -124,7 +124,7 @@ internal class Widget {
 		assert(widget is Gtk.MenuItem);
 		var item = widget as Gtk.MenuItem;
 		var submenu = item.submenu;
-		var old_submenu = (Gtk.Menu) item.get_data("old_submenu");
+		var old_submenu = item.get_data<Gtk.Menu>("old_submenu");
 		var menubar = Widget.get_menubar(widget);
 
 		if(submenu == old_submenu) {

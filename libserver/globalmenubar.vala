@@ -193,9 +193,9 @@ public class Gnomenu.GlobalMenuBar : Gnomenu.MenuBar {
 		grab_menu_bar_key();
 	}
 	private void ungrab_menu_bar_key() {
-		int keyval = (int) _root_window.get_data("menu-bar-keyval");
+		int keyval = _root_window.get_data<int>("menu-bar-keyval");
 		Gdk.ModifierType mods = 
-			(Gdk.ModifierType) _root_window.get_data("menu-bar-keymods");
+			(Gdk.ModifierType) _root_window.get_data<Gdk.ModifierType>("menu-bar-keymods");
 
 		_root_window.ungrab_key(keyval, mods);
 		_root_window.set_data("menu-bar-keyval", null);

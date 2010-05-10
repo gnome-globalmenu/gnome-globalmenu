@@ -83,7 +83,7 @@ public class Application{
 		screen.window_opened += window_opened;
 		screen.window_closed += window_closed;
 		screen.application_closed += application_closed;
-		unowned List<AppInfo> appinfos = AppInfo.get_all();
+		List<AppInfo> appinfos = AppInfo.get_all();
 		foreach(var appinfo in appinfos) {
 			debug("%s", appinfo.get_executable());
 		}
@@ -175,7 +175,7 @@ public class Application{
 		
 	}
 	private static void window_closed(Wnck.Screen s, Wnck.Window wwin) {
-		Application app = wwin.get_data("gnomenu-app") as Application;
+		Application app = wwin.get_data<Application>("gnomenu-app");
 		if(app == null)	return;
 		app.update();
 	}
