@@ -38,26 +38,26 @@ namespace GConf {
 		public int pad2;
 		public int pending_notify_count;
 		public void add_dir (string dir, GConf.ClientPreloadType preload) throws GLib.Error;
-		public unowned GLib.SList all_dirs (string dir) throws GLib.Error;
-		public unowned GLib.SList all_entries (string dir) throws GLib.Error;
+		public GLib.SList<string> all_dirs (string dir) throws GLib.Error;
+		public GLib.SList<GConf.Entry> all_entries (string dir) throws GLib.Error;
 		public unowned GConf.ChangeSet change_set_from_current (...) throws GLib.Error;
 		public unowned GConf.ChangeSet change_set_from_currentv (string keys) throws GLib.Error;
 		public void clear_cache ();
 		public bool commit_change_set (GConf.ChangeSet cs, bool remove_committed) throws GLib.Error;
 		public bool dir_exists (string dir) throws GLib.Error;
-		public unowned GConf.Value @get (string key) throws GLib.Error;
+		public GConf.Value? @get (string key) throws GLib.Error;
 		public bool get_bool (string key) throws GLib.Error;
 		public static unowned GConf.Client get_default ();
-		public unowned GConf.Value get_default_from_schema (string key) throws GLib.Error;
-		public unowned GConf.Entry get_entry (string key, string? locale, bool use_schema_default) throws GLib.Error;
+		public GConf.Value? get_default_from_schema (string key) throws GLib.Error;
+		public GConf.Entry get_entry (string key, string? locale, bool use_schema_default) throws GLib.Error;
 		public double get_float (string key) throws GLib.Error;
 		public static unowned GConf.Client get_for_engine (GConf.Engine engine);
 		public int get_int (string key) throws GLib.Error;
-		public unowned GLib.SList get_list (string key, GConf.ValueType list_type) throws GLib.Error;
+		public GLib.SList get_list (string key, GConf.ValueType list_type) throws GLib.Error;
 		public bool get_pair (string key, GConf.ValueType car_type, GConf.ValueType cdr_type, void* car_retloc, void* cdr_retloc) throws GLib.Error;
-		public unowned GConf.Schema get_schema (string key) throws GLib.Error;
-		public unowned string get_string (string key) throws GLib.Error;
-		public GConf.Value get_without_default (string key) throws GLib.Error;
+		public GConf.Schema? get_schema (string key) throws GLib.Error;
+		public string? get_string (string key) throws GLib.Error;
+		public GConf.Value? get_without_default (string key) throws GLib.Error;
 		public bool key_is_writable (string key) throws GLib.Error;
 		public void notify (string key);
 		public uint notify_add (string namespace_section, owned GConf.ClientNotifyFunc func) throws GLib.Error;
@@ -246,19 +246,19 @@ namespace GConf {
 		public void set_string (string the_str);
 		public unowned string to_string ();
 	}
-	[CCode (cprefix = "GCONF_CLIENT_HANDLE_", has_type_id = "0", cheader_filename = "gconf/gconf.h")]
+	[CCode (cprefix = "GCONF_CLIENT_HANDLE_", has_type_id = false, cheader_filename = "gconf/gconf.h")]
 	public enum ClientErrorHandlingMode {
 		NONE,
 		UNRETURNED,
 		ALL
 	}
-	[CCode (cprefix = "GCONF_CLIENT_PRELOAD_", has_type_id = "0", cheader_filename = "gconf/gconf.h")]
+	[CCode (cprefix = "GCONF_CLIENT_PRELOAD_", has_type_id = false, cheader_filename = "gconf/gconf.h")]
 	public enum ClientPreloadType {
 		NONE,
 		ONELEVEL,
 		RECURSIVE
 	}
-	[CCode (cprefix = "GCONF_ERROR_", has_type_id = "0", cheader_filename = "gconf/gconf.h")]
+	[CCode (cprefix = "GCONF_ERROR_", has_type_id = false, cheader_filename = "gconf/gconf.h")]
 	public enum Error {
 		SUCCESS,
 		FAILED,
@@ -278,12 +278,12 @@ namespace GConf {
 		NO_WRITABLE_DATABASE,
 		IN_SHUTDOWN
 	}
-	[CCode (cprefix = "GCONF_UNSET_INCLUDING_SCHEMA_", has_type_id = "0", cheader_filename = "gconf/gconf.h")]
+	[CCode (cprefix = "GCONF_UNSET_INCLUDING_SCHEMA_", has_type_id = false, cheader_filename = "gconf/gconf.h")]
 	[Flags]
 	public enum UnsetFlags {
 		NAMES
 	}
-	[CCode (cprefix = "GCONF_VALUE_", has_type_id = "0", cheader_filename = "gconf/gconf.h")]
+	[CCode (cprefix = "GCONF_VALUE_", has_type_id = false, cheader_filename = "gconf/gconf.h")]
 	public enum ValueType {
 		INVALID,
 		STRING,
