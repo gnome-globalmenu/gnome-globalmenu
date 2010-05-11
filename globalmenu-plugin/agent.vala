@@ -24,7 +24,18 @@ internal class MenuBarAgent {
 	private static Gdk.Atom atom_deselect = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_DESELECT", false);
 	private static Gdk.Atom atom_activate = Gdk.Atom.intern("_NET_GLOBALMENU_MENU_EVENT", false);
 
-	private signal void quirks_changed(QuirkType old_quirks);
+	private virtual signal void quirks_changed(QuirkType old_quirks) {
+		if(quirks == old_quirks) return;
+			
+		if(old_quirks.has(QuirkType.REGULAR_WIDGET)
+		&& !quirks.has(QuirkType.REGULAR_WIDGET)) {
+			menubar.queue_resize();
+			if(menubar.is_mapped()) {
+				MenuBar.map(menubar);
+			}
+			queue_changed();
+		}
+	}
 
 	private weak Gtk.MenuBar _menubar;
 	public Gnomenu.Settings settings {get; private set;}
@@ -73,8 +84,11 @@ internal class MenuBarAgent {
 
 		menubar.weak_ref(menubar_disposed);
 
-		menubar.hierarchy_changed += sync_toplevel;
+		menubar.hierarchy_changed += () => {
+			debug("hierarchy changed");
+		};
 		menubar.hierarchy_changed += sync_quirks;
+		menubar.hierarchy_changed += sync_toplevel;
 
 		sync_quirks();
 		sync_toplevel();
@@ -126,9 +140,7 @@ internal class MenuBarAgent {
 
 		quirks = QuirkType.NONE;
 
-		if(!toplevel.is_toplevel()) {
-			quirks = QuirkType.REGULAR_WIDGET;
-		}
+		debug("toplevel is a %s", toplevel.get_type().name());
 
 		if(has_parent_type_name("PanelMenuBar")) {
 			quirks = QuirkType.REGULAR_WIDGET;
@@ -160,25 +172,39 @@ internal class MenuBarAgent {
 
 	private void sync_toplevel() {
 		release_toplevel();
-		if(menubar == null) toplevel = null;
-		toplevel = menubar.get_toplevel();
-		if(toplevel != null) {
-			toplevel.weak_ref(toplevel_disposed);
-			toplevel.realize += sync_event_window;
-			toplevel.unrealize += sync_event_window;
+		if(menubar == null || quirks.has(QuirkType.REGULAR_WIDGET)) {
+			toplevel = null;
+			sync_event_window();
+			return;
 		}
+
+		toplevel = menubar.get_toplevel();
+		if(toplevel != null && !toplevel.is_toplevel()) {
+			toplevel = null;
+			sync_event_window();
+			return;
+		}
+		/* else */
+		toplevel.weak_ref(toplevel_disposed);
+		toplevel.realize += sync_event_window;
+		toplevel.unrealize += sync_event_window;
+
 		sync_event_window();
 	}
 
 	private void sync_event_window() {
 		release_event_window();
-		if(toplevel == null) event_window = null;
+		if(toplevel == null) {
+			event_window = null;
+			return;
+		}
 		event_window = toplevel.window;
+		settings.attach_to_window(event_window);
 		if(event_window != null) {
 			event_window.add_filter(event_filter);
 			event_window.weak_ref(event_window_disposed);
+			send_globalmenu_message();
 		}
-		settings.attach_to_window(event_window);
 	}
 
 	private bool has_parent_type_name(string typename_pattern) {
@@ -207,7 +233,7 @@ internal class MenuBarAgent {
 		if(menubar.is_mapped()) {
 			MenuBar.map(menubar);
 		}
-		if(quirks.has(QuirkType.WX_GTK)) {
+		if(quirks.has(QuirkType.BONOBO_PLUG)) {
 			for(Gtk.Widget parent = menubar;
 					parent != null;
 					parent = parent.parent) {
@@ -284,6 +310,7 @@ internal class MenuBarAgent {
 	private bool dirty = false;
 	private bool send_globalmenu_message() {
 		debug("FIXME: STUB send_globalmenu_message()");
+		if(menubar == null) return false;
 		dirty = false;
 
 		var ser = new Serializer();
@@ -315,6 +342,8 @@ internal class MenuBarAgent {
 	}
 
 	public void set_by_atom(Gdk.Atom atom, string? value) {
+		if(event_window == null) return;
+		debug("set_by_atom: %s", value);
 		if(value != null) {
 			Gdk.Atom type = Gdk.Atom.intern("STRING", false);
 			Gdk.property_change(event_window,

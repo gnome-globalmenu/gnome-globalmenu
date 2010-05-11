@@ -25,7 +25,7 @@ internal class MenuBar {
 
 		var factory = MenuBarAgentFactory.get();
 		var agent = factory.create(widget as Gtk.MenuBar);
-		if((agent.quirks & MenuBarAgent.QuirkType.REGULAR_WIDGET) != 0) {
+		if(agent.quirks.has(MenuBarAgent.QuirkType.REGULAR_WIDGET)) {
 			super(widget);
 			return;
 		}
@@ -49,7 +49,7 @@ internal class MenuBar {
 
 		super(widget, ref req);
 
-		if((agent.quirks & MenuBarAgent.QuirkType.REGULAR_WIDGET) != 0) 
+		if(agent.quirks.has(MenuBarAgent.QuirkType.REGULAR_WIDGET))
 			return;
 
 		if(agent.settings.show_local_menu) {
