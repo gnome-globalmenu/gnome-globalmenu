@@ -234,7 +234,7 @@ internal class MenuBarAgent {
 		return real_event_filter((X.Event*) pointer, event);
 	}
 	private bool atom_equal(Gdk.Atom a1, Gdk.Atom a2) {
-		if(&a1 == &a2) return true;
+		if((int)a1 == (int)a2) return true;
 		return false;
 	}
 	[CCode (instance_pos = -1)]
@@ -252,13 +252,13 @@ internal class MenuBarAgent {
 					warning("item not found. path=%s", path);
 					break;
 				}
-				if(!atom_equal(atom_select, atom)) {
+				if(atom_equal(atom_select, atom)) {
 					select_item(item);
 				}
-				if(!atom_equal(atom_deselect, atom)) {
+				if(atom_equal(atom_deselect, atom)) {
 					deselect_item(item);
 				}
-				if(!atom_equal(atom_activate, atom)) {
+				if(atom_equal(atom_activate, atom)) {
 					activate_item(item);
 				}
 				break;

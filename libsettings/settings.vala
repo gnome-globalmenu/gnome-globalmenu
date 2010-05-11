@@ -43,7 +43,7 @@ public class Gnomenu.Settings : Object {
 		return real_event_filter((X.Event*)pointer, event);
 	}
 	private bool atom_equal(Gdk.Atom a1, Gdk.Atom a2) {
-		return &a1 == &a2;
+		return (int)a1 == (int)a2;
 	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
