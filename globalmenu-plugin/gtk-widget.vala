@@ -4,7 +4,8 @@
 internal class Widget {
 	[CCode (cname="G_STRUCT_OFFSET(GtkWidgetClass, parent_set)")]
 	private extern const int OffsetParentSet;
-	private static delegate void ParentSetFunc(Gtk.Widget? widget, Gtk.Widget? old_parent);
+	[CCode (has_target = false)]
+	private delegate void ParentSetFunc(Gtk.Widget? widget, Gtk.Widget? old_parent);
 
 	public Widget() {
 		Superrider.superride(typeof(Gtk.Widget), OffsetParentSet, (void*)parent_set);

@@ -8,9 +8,12 @@ internal class MenuBar {
 	private extern const int OffsetSizeRequest;
 	[CCode (cname="G_STRUCT_OFFSET(GtkWidgetClass, can_activate_accel)")]
 	private extern const int OffsetCanActivateAccel;
-	private static delegate void MapFunc(Gtk.Widget? widget);
-	private static delegate void SizeRequestFunc(Gtk.Widget? widget, ref Gtk.Requisition req);
-	private static delegate bool CanActivateAccelfunc(Gtk.Widget? widget);
+	[CCode (has_target = false)]
+	private delegate void MapFunc(Gtk.Widget? widget);
+	[CCode (has_target = false)]
+	private delegate void SizeRequestFunc(Gtk.Widget? widget, ref Gtk.Requisition req);
+	[CCode (has_target = false)]
+	private delegate bool CanActivateAccelfunc(Gtk.Widget? widget);
 
 	public MenuBar() {
 		Superrider.superride(typeof(Gtk.MenuBar), OffsetMap, (void*)map);
