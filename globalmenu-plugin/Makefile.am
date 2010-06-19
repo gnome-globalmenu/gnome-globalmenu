@@ -1,5 +1,4 @@
 NULL = 
-SUBDIRS = . tests
 
 BUILT_SOURCES = \
 	vala-ccode \

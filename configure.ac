@@ -28,12 +28,12 @@ AM_GCONF_SOURCE_2
 AC_PATH_PROG(GCONFTOOL, gconftool-2)
 
 # tests
-USE_TESTS=true
-AC_ARG_ENABLE(
-	[tests],
-	AC_HELP_STRING([--enable-tests], [enable tests, default is yes]),
-	[ test "x$enableval" == xno && USE_TESTS=false ],
-	[ USE_TESTS=true ])
+#USE_TESTS=false
+#AC_ARG_ENABLE(
+#	[tests],
+#	AC_HELP_STRING([--enable-tests], [enable tests, default is yes]),
+#	[ test "x$enableval" == xno && USE_TESTS=false ],
+#	[ USE_TESTS=true ])
 AM_CONDITIONAL([ENABLE_TESTS], [test "x$USE_TESTS" == xtrue])
 
 # misc defines
@@ -183,15 +183,11 @@ AC_CONFIG_FILES(
 	legacy-support/Makefile
 	libserver/Makefile
 	libserver/globalmenu-server.pc
-	libserver/tests/Makefile
 	libsettings/Makefile
-	libsettings/tests/Makefile
 	applet/Makefile
 	xfce/Makefile
-	tests/Makefile
 	vapi/Makefile
 	globalmenu-plugin/Makefile
-	globalmenu-plugin/tests/Makefile
 	globalmenu-gnome-panel/Makefile
 	tools/Makefile
 	schemas/Makefile

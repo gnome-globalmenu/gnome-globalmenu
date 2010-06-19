@@ -1,7 +1,6 @@
 NULL =
 SUBDIRS = \
 	vapi \
-	tests \
 	legacy-support \
 	libsettings \
 	libserver \

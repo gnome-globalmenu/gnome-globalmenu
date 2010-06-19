@@ -1,6 +1,5 @@
 
 NULL=
-SUBDIRS = . tests
 
 VAPI_FILE = globalmenu-settings.vapi
 DEPS_FILE = globalmenu-settings.deps

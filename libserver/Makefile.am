@@ -1,5 +1,4 @@
 NULL=
-SUBDIRS = . tests
 VAPI_FILE = globalmenu-server.vapi
 DEPS_FILE = globalmenu-server.deps
 HEADER_FILE = globalmenu-server.h
