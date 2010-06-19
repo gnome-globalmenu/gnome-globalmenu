@@ -47,9 +47,9 @@ public class Gnomenu.Settings : Object {
 	}
 	[CCode (instance_pos = -1)]
 	private Gdk.FilterReturn real_event_filter(X.Event* xevent, Gdk.Event event) {
-		Gdk.Atom atom_in = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
 		switch(xevent->type) {
 			case X.EventType.PropertyNotify:
+			Gdk.Atom atom_in = Gdk.x11_xatom_to_atom(xevent->xproperty.atom);
 			if(atom_equal(atom, atom_in)) {
 				pull();
 			}
