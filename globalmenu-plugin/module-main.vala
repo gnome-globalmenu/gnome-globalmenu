@@ -24,7 +24,7 @@ public void gtk_entry([CCode (array_length_pos = 0.9)] ref string[] args) {
 }
 
 [CCode (cname="g_module_check_init")]
-public string glib_entry(Module module) {
+public string? glib_entry(Module module) {
 	domain = Quark.from_string("GlobalMenu:Plugin");
 
 	if(is_quirky_app()) disabled = true;
