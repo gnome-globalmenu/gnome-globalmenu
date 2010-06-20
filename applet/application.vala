@@ -103,6 +103,44 @@ public class Application{
 		init();
 		return dict.lookup(key);
 	}
+	public static unowned Application lookup_from_wnck_window(Wnck.Window wwin) {
+		init();
+		Wnck.Application wapp = wwin.get_application();
+		weak Application rt = lookup_from_wnck(wapp);
+		string key = generate_key_from_wnck_window(wwin);
+		if(rt == null) {
+			debug("wnck key = %s", key);
+			rt = dict.lookup(key);
+		}
+		if(rt == null) {
+			Application app = new Application();
+			app.key = key;
+			app.not_in_menu = true;
+
+			app.exec_path = null;
+			/* NOTE: get_icon_name is not implement in wnck.
+			 * Therefore we set icon_pixbuf, which
+			 * indeed has a higher priority in switcher.vala
+			 * */
+			app.icon_name = wwin.get_icon_name();
+
+			dict.insert(key, app);
+			rt = app;
+			applications.prepend((owned)app);
+		}
+	
+		switch(wwin.get_window_type()) {
+			case Wnck.WindowType.DESKTOP :
+				rt.readable_name = _("Desktop");
+			break;
+			case Wnck.WindowType.DOCK :
+			/* We are in good hands if a dock is activated */
+			/* FIXME: probably should simply not activate a dock */
+				rt.readable_name = "";
+			break;
+		}
+		return rt;
+	}
 	public static unowned Application lookup_from_wnck(Wnck.Application wapp) {
 		init();
 		string key = generate_key_from_wnck(wapp);
@@ -225,13 +263,20 @@ public class Application{
 	[CCode (cname = "get_task_name_by_pid")]
 	public static extern string get_task_name_by_pid(int pid);
 	private static string generate_key_from_wnck(Wnck.Application app) {
-		return get_process_name(app);
+		string rt = get_process_name(app.get_pid());
+		if(rt == null) return app.get_name();
+		return rt;
+	}
+	private static string generate_key_from_wnck_window(Wnck.Window win) {
+		string rt = get_process_name(win.get_pid());
+		if(rt == null) return win.get_name();
+		return rt;
 	}
 
-	private static string get_process_name(Wnck.Application app) {
-		string cmdline = get_task_name_by_pid(app.get_pid());
+	private static string? get_process_name(int pid) {
+		string cmdline = get_task_name_by_pid(pid);
 		string[] args;
-		if (cmdline == null || cmdline =="") return app.get_name();
+		if (cmdline == null || cmdline =="") return null;
 
 		try {
 			GLib.Shell.parse_argv(cmdline, out args);
@@ -243,13 +288,13 @@ public class Application{
 				case "python":
 				case "python2.5":
 				case "wine":
-				return app.get_name();
+				return null;
 				case "swriter.bin":
 				return "openoffice.org";
 			}
 			return basename;
 		} catch (GLib.Error e) {
-			return app.get_name();
+			return null;
 		}
 	}
 

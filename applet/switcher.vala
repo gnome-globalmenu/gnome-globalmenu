@@ -287,25 +287,11 @@ extern int system(string arg);
 			if (!guess_dock_is_around())
 				set_iconify_destination(_current_window);
 			
-			_label = _("UNKNOWN-REPORT-A-BUG!"); 
-			Application app = Application.lookup_from_wnck(current_window.get_application());
+			Application app = Application.lookup_from_wnck_window(current_window);
 
-			switch(current_window.get_window_type()) {
-				case Wnck.WindowType.DESKTOP :
-					_label = _("Desktop");
-				break;
-				case Wnck.WindowType.DOCK :
-				/* We are in good hands if a dock is activated */
-				/* FIXME: probably should simply not activate a dock */
-					_label = "";
-				break;
-				default:
-					if(app != null)
-					_label = app.readable_name;
-				break;
-			}
-
+			_label = app.readable_name; 
 			string s = MENU_TEMPLATE;
+
 			s = replace(s, "%label%", Markup.escape_text(_label));
 			if (_show_icon) {
 				if (_show_label)
