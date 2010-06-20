@@ -112,8 +112,16 @@ public class Application{
 			Application app = new Application();
 			app.key = key;
 			app.not_in_menu = true;
-			app.readable_name = wapp.get_name();
-			
+			string name = wapp.get_name();
+
+			/* workaround to java/swt based apps due to a bug in swt */
+			if(name == "." || name == "<unknown>") {
+				unowned List<Wnck.Window> windows = wapp.get_windows();
+				if(windows != null) 
+					name = windows.data.get_name();
+			} 
+			app.readable_name = name;
+
 			app.exec_path = null;
 			/* NOTE: get_icon_name is not implement in wnck.
 			 * Therefore we set icon_pixbuf, which

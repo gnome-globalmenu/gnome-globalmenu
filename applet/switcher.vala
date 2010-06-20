@@ -288,24 +288,22 @@ extern int system(string arg);
 			if (!guess_dock_is_around())
 				set_iconify_destination(_current_window);
 			
+			_label = _("UNKNOWN-REPORT-A-BUG!"); 
 			Application app = Application.lookup_from_wnck(current_window.get_application());
 
-			Wnck.WindowType wt = current_window.get_window_type();
-			if (wt==Wnck.WindowType.DOCK) 
-				_label = ""; 
-			else {
-				if(app != null) {
-				_label = (current_window.get_window_type()==Wnck.WindowType.DESKTOP) ?
-						 _("Desktop") : app.readable_name;
-				
-				/* workaround to java/swt based apps due to a bug in swt */
-				if ((_label==".") || (_label=="<unknown>")) {
-					_label = current_window.get_name();
-				}
-				
-				} else {
-				_label = "app unknown shouldn't see this";
-				}
+			switch(current_window.get_window_type()) {
+				case Wnck.WindowType.DESKTOP :
+					_label = _("Desktop");
+				break;
+				case Wnck.WindowType.DOCK :
+				/* We are in good hands if a dock is activated */
+				/* FIXME: probably should simply not activate a dock */
+					_label = "";
+				break;
+				default:
+					if(app != null)
+					_label = app.readable_name;
+				break;
 			}
 
 			string s = MENU_TEMPLATE;
