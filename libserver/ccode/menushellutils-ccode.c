@@ -37,8 +37,13 @@ void gtk_menu_shell_remove_all(GtkMenuShell * menu_shell) {
 }
 
 int gtk_menu_shell_get_length(GtkMenuShell * menu_shell) {
-	int length = 0;
-	gtk_menu_shell_get_item_array(menu_shell, &length);
+	int array_length = 0;
+	GnomenuMenuItem ** array = gtk_menu_shell_get_item_array(menu_shell, &array_length);
+	int length = array_length;
+	int i;
+	for(i = array_length - 1; i >= 0; i--) {
+		if(gnomenu_menu_item_get_truncated(array[i])) length --;
+	}
 	return length;
 }
 /**
@@ -64,11 +69,11 @@ void gtk_menu_shell_set_length(GtkMenuShell * menu_shell, gint length) {
 			new_array[i] = g_object_ref_sink(item);
 			gtk_menu_shell_append(menu_shell, GTK_WIDGET(item));
 		}
-		/* Recalculate the children list, pass through the next
-		   step. This is subopti!*/
-		gtk_menu_shell_set_item_array(menu_shell, new_array, length);
 		array = new_array;
 		array_length = length;
+		/* Recalculate the children list, pass through the next
+		   step. This is subopti!*/
+		gtk_menu_shell_set_item_array(menu_shell, array, array_length);
 	}
 	
 	/* set the truncated flags on the children */
