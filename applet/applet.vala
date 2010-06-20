@@ -99,7 +99,6 @@ public class Applet : Panel.Applet {
 	private Gnomenu.MenuBar tiny_menubar = new Gnomenu.MenuBar();
 	private Switcher switcher = new Switcher();
 
-	private Notify.Notification notify_no_plugin;
 	private bool initialized = false;
 
 	private bool disposed = false;
@@ -238,20 +237,48 @@ public class Applet : Panel.Applet {
 	}
 
 	private void get_prefs() {
-		switcher.max_size = gconf_get_int("title_max_width");
-		switcher.show_icon = gconf_get_bool("show_icon");
-		switcher.show_label = gconf_get_bool("show_name");
-		switcher.show_window_actions = gconf_get_bool("show_window_actions");
-		switcher.show_window_list = gconf_get_bool("show_window_list");
-		switcher.enable_search_box = gconf_get_bool("enable_search_box");
-		Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
-		main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
-		main_menubar.grab_menu_key = gconf_get_bool("grab_menu_bar_key");
-		main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
-		this.has_handle = gconf_get_bool("has_handle");
-		this.tiny_mode = gconf_get_bool("tiny_mode");
-		settings.show_local_menu = gconf_get_bool("show_local_menu");
-		settings.show_menu_icons = gconf_get_bool("show_menu_icons");
+		try {
+			switcher.max_size = gconf_get_int("title_max_width");
+		} catch (GLib.Error e) {}
+		try {
+			switcher.show_icon = gconf_get_bool("show_icon");
+		} catch (GLib.Error e) {}
+		try {
+			switcher.show_label = gconf_get_bool("show_name");
+		} catch (GLib.Error e) {}
+		try {
+			switcher.show_window_actions = gconf_get_bool("show_window_actions");
+		} catch (GLib.Error e) {}
+		try {
+			switcher.show_window_list = gconf_get_bool("show_window_list");
+		} catch (GLib.Error e) {}
+		try {
+			switcher.enable_search_box = gconf_get_bool("enable_search_box");
+		} catch (GLib.Error e) {}
+		try {
+			Gnomenu.Menu.default_use_rgba_colormap = gconf_get_bool("use_rgba_colormap");
+		} catch (GLib.Error e) {}
+		try {
+			main_menubar.grab_keys = gconf_get_bool("grab_mnemonic_keys");
+		} catch (GLib.Error e) {}
+		try {
+			main_menubar.grab_menu_key = gconf_get_bool("grab_menu_bar_key");
+		} catch (GLib.Error e) {}
+		try {
+			main_menubar.per_monitor_mode = gconf_get_bool("per_monitor_mode");
+		} catch (GLib.Error e) {}
+		try {
+			this.has_handle = gconf_get_bool("has_handle");
+		} catch (GLib.Error e) {}
+		try {
+			this.tiny_mode = gconf_get_bool("tiny_mode");
+		} catch (GLib.Error e) {}
+		try {
+			settings.show_local_menu = gconf_get_bool("show_local_menu");
+		} catch (GLib.Error e) {}
+		try {
+			settings.show_menu_icons = gconf_get_bool("show_menu_icons");
+		} catch (GLib.Error e) {}
 		settings.push();
 	}
 

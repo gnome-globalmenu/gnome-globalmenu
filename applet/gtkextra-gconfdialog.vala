@@ -151,17 +151,19 @@ using GConf;
 		 */
 		private GConf.Schema safely_get_schema(GConf.Entry entry) {
 			weak string schema_name = entry.get_schema_name();
-
-			if(schema_name == null) {
-				critical("schema not found for entry %s", entry.get_key());
-				GConf.Schema rt = new GConf.Schema();
-				rt.set_short_desc(entry.get_key());
-				rt.set_long_desc("This key lacks a schema");
-				rt.set_type(ValueType.STRING);
-				return rt;
-			} else {
-				return _default_client.get_schema(schema_name).copy();
+			GConf.Schema rt = null;
+			if(schema_name != null) {
+				try {
+					rt = _default_client.get_schema(schema_name).copy();
+					return rt;
+				} catch( GLib.Error e) { }
 			}
+			critical("schema not found for entry %s", entry.get_key());
+			rt = new GConf.Schema();
+			rt.set_short_desc(entry.get_key());
+			rt.set_long_desc("This key lacks a schema");
+			rt.set_type(ValueType.STRING);
+			return rt;
 		}
 		private void onResetButtonPressed(Gtk.Button widget) {
 			weak GConf.Schema schema = widget.get_data<GConf.Schema>("gconf-schema");

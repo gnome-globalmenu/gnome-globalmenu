@@ -139,7 +139,6 @@ extern int system(string arg);
 					if (window != null) window.unstick(); break;
 				case "close":
 					if (window != null) window.close(Gtk.get_current_event_time()); break;
-					break;
 				case "show_desktop":
 					weak GLib.List<Wnck.Window> windows = Wnck.Screen.get_default().get_windows();
 					foreach(weak Wnck.Window w in windows) {
@@ -335,13 +334,11 @@ extern int system(string arg);
 			if (include_menu) {
 				if (_show_window_list) {
 					s = replace(s, "%submenu%", do_xml_menu());
+					try {
 					Parser.parse(this, s);
-					Gtk.Menu menu = _label_item.submenu;
+					} catch (GLib.Error e) {}
 					
-					/*Gnomenu.MenuItem misd = this.get("/switcher/show_desktop");
-					if (misd!=null) {
-						override_item_window(misd, find_desktop());
-					}*/
+					Gtk.Menu menu = _label_item.submenu;
 					
 					foreach(Gtk.Widget widget in menu.get_children()) {
 						Gnomenu.MenuItem item = widget as Gnomenu.MenuItem;
@@ -360,13 +357,17 @@ extern int system(string arg);
 				} else {
 					if (_show_window_actions) {
 						s = replace(s, "%submenu%", do_action_menu(_current_window));
+						try {
 						Parser.parse(this, s);
+						} catch (GLib.Error e) {}
 						/*setup_window_actions_menu("/switcher/", _current_window);*/
 					}
 				}
 			} else {
 				s = replace(s, "%submenu%", "<menu/>");
+				try {
 				Parser.parse(this, s);
+				} catch (GLib.Error e) {}
 			}
 		}
 		/*private void setup_window_actions_menu(string prefix, Wnck.Window window) {
@@ -395,9 +396,6 @@ extern int system(string arg);
 		private Gnomenu.MenuItem? window_to_item(Wnck.Window window) {
 			return this.get("/switcher/XID" + window.get_xid().to_string());
 		}
-		/*private void override_item_window(Gnomenu.MenuItem item, Wnck.Window? window) {
-			item.user_data = window;
-		}*/
 		private Wnck.Window? item_to_window(Gnomenu.MenuItem item) {
 			string id = item.item_id;
 			//if(item.user_data != null) return item.user_data as Wnck.Window;
@@ -617,7 +615,6 @@ private bool guess_dock_is_around() {
 				case "Do":
 					/* add any other known dock having a task bar */
 					return true;
-					break;
 			}
 		}
 	return false;
@@ -641,14 +638,7 @@ private string replace(string source, string find, string replacement) {
 	return sb.str;
 }
 
-private string remove_path(string txt, string separator) {
-	long co = txt.length-1;
-	while ((co>=0) && (txt.substring(co, 1)!=separator)) {
-		co--;
-	}
-	string ret = txt.substring(co+1,(txt.length-co-1));
-	return ret;
-}
+
 private string pixbuf_encode_b64(Gdk.Pixbuf pixbuf) {
 	Gdk.Pixdata pixdata = {0};
 	pixdata.from_pixbuf(pixbuf, true);
