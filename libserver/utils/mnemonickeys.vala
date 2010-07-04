@@ -22,6 +22,9 @@ internal class Gnomenu.MnemonicKeys {
 			uint keyval = label.mnemonic_keyval;
 			debug("grabbing key for %s:%u", label.label, keyval);
 			window.grab_key(keyval, mods);
+			window.grab_key(keyval, mods | Gdk.ModifierType.MOD2_MASK);
+			window.grab_key(keyval, mods | Gdk.ModifierType.MOD3_MASK);
+			window.grab_key(keyval, mods | Gdk.ModifierType.MOD3_MASK | Gdk.ModifierType.MOD2_MASK);
 			keys.insert(keyval, item);
 		}
 		current_grab = window;
@@ -43,6 +46,9 @@ internal class Gnomenu.MnemonicKeys {
 			foreach(uint keyval in keys.get_keys()) {
 				debug("ungrabbing %u", keyval);
 				current_grab.ungrab_key(keyval, mods);
+				current_grab.ungrab_key(keyval, mods | Gdk.ModifierType.MOD2_MASK);
+				current_grab.ungrab_key(keyval, mods | Gdk.ModifierType.MOD3_MASK);
+				current_grab.ungrab_key(keyval, mods | Gdk.ModifierType.MOD3_MASK | Gdk.ModifierType.MOD2_MASK);
 			}
 			current_grab.set_key_widget(null);
 		}
