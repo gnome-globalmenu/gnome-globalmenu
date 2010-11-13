@@ -36,7 +36,7 @@ GlobalMenu_PanelApplet_SOURCES = \
 	$(NULL)
 
 vala-ccode : $(VALASOURCES)
-	$(VALAC) -C $(VALA_DEFAULT_PKGS)  \
+	$(VALAC) --enable-deprecated -C $(VALA_DEFAULT_PKGS)  \
 		--vapidir $(top_srcdir)/libserver \
 		--vapidir $(top_srcdir)/libsettings \
 		--pkg gtk+-2.0 \

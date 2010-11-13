@@ -11,12 +11,6 @@ internal class MenuBarAgent {
 		public bool has(QuirkType value) {
 			return (value & this) != 0;
 		}
-		public void add(QuirkType value) {
-			this = (value | this);
-		}
-		public void remove(QuirkType value) {
-			this = (this & ~((uint)value));
-		}
 	}
 	public QuirkType quirks;
 

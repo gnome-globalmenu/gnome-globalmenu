@@ -29,6 +29,7 @@ libglobalmenu_plugin_la_SOURCES= \
 vala-ccode : $(VALASOURCES)
 	$(VALAC) $(VALA_DEFAULT_PKGS) --thread -C  \
 		--library=globalmenu-plugin \
+		--enable-deprecated \
 		-H globalmenu-plugin.h --vapidir=.  \
 		$(VALASOURCES) \
 		--vapidir=$(top_srcdir)/libsettings \
