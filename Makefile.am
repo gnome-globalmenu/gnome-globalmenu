@@ -1,19 +1,12 @@
 NULL =
 SUBDIRS = \
-	vapi \
-	legacy-support \
-	libsettings \
-	libserver \
-	applet \
-	xfce \
-	globalmenu-plugin \
-	globalmenu-gnome-panel \
-	tools \
+	src \
 	po \
-	schemas \
 	$(NULL)
 
-DISTCHECK_CONFIGURE_FLAGS = --disable-schemas-install --disable-static
+#	globalmenu-plugin 
+
+DISTCHECK_CONFIGURE_FLAGS = 
 
 AM_CPPFLAGS = \
 		$(NULL)
@@ -38,10 +31,7 @@ DISTCLEANFILES = \
 CLEANFILES = 
 
 BUILT_SOURCES =
-include $(top_srcdir)/Makefile.configmake
-include $(top_srcdir)/Makefile.config
 
 doc_DATA = README COPYING ChangeLog AUTHORS INSTALL \
 	README.XFCE README.GNOME README.LEGACY
 
-include $(top_srcdir)/Makefile.sanity
