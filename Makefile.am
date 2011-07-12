@@ -6,7 +6,7 @@ SUBDIRS = \
 
 #	globalmenu-plugin 
 
-DISTCHECK_CONFIGURE_FLAGS = 
+DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
 AM_CPPFLAGS = \
 		$(NULL)

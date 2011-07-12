@@ -6,11 +6,10 @@ gnome_globalmenu_manager_SOURCES = manager.vala
 gnome_globalmenu_manager_CPPFLAGS = $(GLIB_CFLAGS)
 gnome_globalmenu_manager_LDADD = $(GLIB_LIBS)
 
-lib_LTLIBRARIES = libgnome-globalmenu.la
+lib_LTLIBRARIES = libglobalmenu-gtk3.la
 
-libgnome_globalmenu_la_SOURCES = client.vala module.c superrider.vala gtk-menubar.vala
-libgnome_globalmenu_la_VALAFLAGS = --internal-header header.h
-libgnome_globalmenu_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS)
-libgnome_globalmenu_la_LIBADD = $(GLIB_LIBS) $(GTK_LIBS)
-
+libglobalmenu_gtk3_la_SOURCES = client.vala module.c superrider.vala gtk-menubar.vala
+libglobalmenu_gtk3_la_VALAFLAGS = --internal-header header.h
+libglobalmenu_gtk3_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS)
+libglobalmenu_gtk3_la_LIBADD = $(GLIB_LIBS) $(GTK_LIBS)
 

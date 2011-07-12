@@ -38,6 +38,8 @@ localedir='${datadir}/locale'
 AC_SUBST(localedir)
 fi
 
+GOBJECT_INTROSPECTION_CHECK([0.6.7])
+
 GLIB_REQUIRED=2.28.0
 GTK_REQUIRED=3.0.3
 
@@ -48,7 +50,6 @@ AC_SUBST(GLIB_LIBS)
 PKG_CHECK_MODULES(GTK, gtk+-3.0 >= $GTK_REQUIRED)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
-
 
 GTK_MODULES_DIR="$($PKG_CONFIG --variable=libdir gtk+-2.0)/gtk-2.0/modules"
 AC_SUBST(GTK_MODULES_DIR)

@@ -12,5 +12,5 @@ intltoolize --force
 #autoheader
 #autoconf
 env ACLOCAL="aclocal -I autotools" autoreconf -vi
-./configure --enable-maintainer-mode $*
+./configure --enable-maintainer-mode --enable-introspection $*
 #fi
