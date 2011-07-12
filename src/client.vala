@@ -60,6 +60,8 @@ internal class Menu: Object {
 			shell.set_data<uint>("globalmenu", 1000);
 		} catch (IOError e) {
 			warning("could not register menu %s\n", e.message);
+		} catch (Error e) {
+			error("%s\n", e.message);
 		}
 	}
 	internal static bool has_registered(Gtk.MenuShell shell) {
@@ -81,19 +83,29 @@ internal class Menu: Object {
 	private void attach_to_toplevel(Gtk.Widget toplevel) {
 		this.realize_handler_id = toplevel.realize.connect(
 			(obj) => {
+#if GTK_VERSION == 3
 				this.xwindow = Gdk.X11Window.get_xid(obj.get_window());
+#else
+				this.xwindow = Gdk.x11_drawable_get_xid(obj.get_window());
+#endif
 			}
 		);
+
 		this.unrealize_handler_id = toplevel.unrealize.connect(
 			(obj) => {
 				this.xwindow = 0;
 			}
 		);
 		if(toplevel.get_realized()) {
+#if GTK_VERSION == 3
 			this.xwindow = Gdk.X11Window.get_xid(toplevel.get_window());
+#else
+			this.xwindow = Gdk.x11_drawable_get_xid(toplevel.get_window());
+#endif
 		}
 
 	}
+
 	/* if the path ends with '/' returns the shell, otherwise the item */
 	private Gtk.Widget? get_widget(string path) {
 		var segs = path.split("/");
