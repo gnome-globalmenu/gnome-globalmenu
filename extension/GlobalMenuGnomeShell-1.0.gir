@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- This file was automatically generated from C sources - DO NOT EDIT!
+To affect the contents of this file, edit the original C definitions,
+and/or use gtk-doc annotations.  -->
+<repository version="1.2"
+            xmlns="http://www.gtk.org/introspection/core/1.0"
+            xmlns:c="http://www.gtk.org/introspection/c/1.0"
+            xmlns:glib="http://www.gtk.org/introspection/glib/1.0">
+  <namespace name="GlobalMenuGnomeShell"
+             version="1.0"
+             c:identifier-prefixes="GlobalMenu"
+             c:symbol-prefixes="global_menu">
+      <function name="meta_window_get_xwindow"
+              c:identifier="meta_window_get_xwindow">
+        <return-value transfer-ownership="none">
+          <type name="guintptr" c:type="guintptr"/>
+        </return-value>
+        <parameters>
+          <parameter name="window" transfer-ownership="none">
+          <type name="Meta.Window" c:type="MetaWindow*"/>
+          </parameter>
+        </parameters>
+      </function>
+   </namespace>
+</repository>

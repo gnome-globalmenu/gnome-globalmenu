@@ -38,6 +38,14 @@ localedir='${datadir}/locale'
 AC_SUBST(localedir)
 fi
 
+AC_ARG_VAR(EXTDIR, AS_HELP_STRING([EXTDIR], [directory to install the extension]))
+
+AS_IF([test "x$EXTDIR" == "x"],
+    [EXTDIR='$datadir/gnome-shell/extensions/GlobalMenu@globalmenu.org'],
+    [])
+
+AC_SUBST(EXTDIR)
+
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 GLIB_REQUIRED=2.28.0
@@ -63,7 +71,7 @@ AC_SUBST(GTK_MODULES_DIR)
 
 AC_CONFIG_FILES(
 	[Makefile
-	globalmenu-plugin/Makefile
+	extension/Makefile
 	src/Makefile
 	po/Makefile.in
 	])

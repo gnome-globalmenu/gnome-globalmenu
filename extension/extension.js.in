@@ -5,6 +5,7 @@ const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const Lang = imports.lang;
 const PanelMenu = imports.ui.panelMenu;
+const DBus = imports.dbus
 
 const Clutter = imports.gi.Clutter;
 const Overview = imports.ui.overview;
@@ -15,11 +16,36 @@ const Gettext = imports.gettext.domain('gnome-shell');
 const _ = Gettext.gettext;
 const Tweener = imports.ui.tweener;
 
+const GIR = imports.gi.GIRepository;
+GIR.Repository.prepend_search_path("@EXTENSION_PATH@");
+const GlobalMenu = imports.gi.GlobalMenuGnomeShell
+
 const PANEL_ICON_SIZE = 24;
 const ANIMATED_ICON_UPDATE_TIMEOUT = 100;
 const SPINNER_ANIMATION_TIME = 0.2;
 const BUTTON_DND_ACTIVATION_TIMEOUT = 250;
 const HOT_CORNER_ACTIVATION_TIMEOUT = 0.5;
+
+const ManagerIface = {
+    name: 'org.globalmenu.manager',
+    methods: [{ name: 'GetUi',
+                inSignature: 'ts',
+                outSignature: 's' },
+              { name: 'Emit',
+                inSignature: 'ts',
+                outSignature: '' },
+              ],
+};
+const Manager = function () {
+    this._init();
+};
+Manager.prototype = {
+     _init: function() {
+         DBus.session.proxifyObject(this, 'org.globalmenu.manager', '/org/globalmenu/manager');
+     }
+};
+
+DBus.proxifyPrototype(Manager.prototype, ManagerIface);
 
 function AnimatedIcon(name, size) {
     this._init(name, size);
@@ -217,24 +243,68 @@ MyAppMenuButton.prototype = {
 
         global.window_manager.connect('switch-workspace', Lang.bind(this, this._sync));
 
-        this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenStateChanged));
+        this.menu.connect('open-state-changed', Lang.bind(this, this.refreshMenu, '/'));
         this._sync();
     },
 
-    _onOpenStateChanged: function(menu, open) {
+    
+    refreshMenu: function(menu, open, path) {
         if(!open) return;
-        this.menu.removeAll(); 
-        var file = new PopupMenu.PopupSubMenuMenuItem("File");
-        this.menu.addMenuItem(file);
-	file.menu.addMenuItem(new PopupMenu.PopupMenuItem("Open..."));
-        var edit = new PopupMenu.PopupSubMenuMenuItem("Edit");
-        this.menu.addMenuItem(edit);
-
+        menu.removeAll(); 
+        var xwindow = this._getTargetXWindow();
+        if(xwindow != 0) {
+            var manager = new Manager();
+            manager.GetUiRemote(xwindow, path,
+               Lang.bind(this, function(result, error, xwindow) {
+                  this.rebuildMenu(menu, path, result, xwindow);
+               }, xwindow)
+            );
+        }
+        if (path == "/") {
         var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
         this.menu.addMenuItem(quitMenu);
         quitMenu.connect('activate', Lang.bind(this, this._onQuit));
+        }
     },
-
+    rebuildMenu: function(menu, path, ui, xwindow) {
+	 var xml = XML('<menu>'+ui+'</menu>');
+         var i = 0;
+	 for each (var item in xml.*) {
+             var menuitem = null;
+             switch(item.name().toString()) {
+             case "menuitem":
+               if(item.@submenu.toString() == "true") {
+                  menuitem = new PopupMenu.PopupSubMenuMenuItem(item.@label.toString());
+                  menuitem.menu.connect('open-state-changed',
+                      Lang.bind(this, this.refreshMenu, path + i + '/'));
+               } else {
+                  menuitem = new PopupMenu.PopupMenuItem(item.@label.toString());
+               }
+               break;
+             case "separator":
+             case "seperator":
+                  menuitem = new PopupMenu.PopupSeparatorMenuItem();
+               break;
+             case "empty":
+             case "tearoff":
+             default:
+               menuitem = new PopupMenu.PopupMenuItem(item.name().toString());
+               break;
+             }
+             if(item.@visible.toString() == "false") {
+               menuitem.actor.visible = false;
+             }
+             if(item.@sensitive.toString() == "false") {
+               menuitem.actor.visible = false;
+             }
+             menuitem.connect("activate", Lang.bind(this, function(menuitem, event, xwindow, path) {
+                var manager = new Manager();
+                manager.EmitRemote(xwindow, path);
+             }, xwindow, path + i));
+             menu.addMenuItem(menuitem);
+             i++;
+         }
+    },
     show: function() {
         if (this._visible)
             return;
@@ -384,6 +454,14 @@ MyAppMenuButton.prototype = {
         }
     },
 
+    _getTargetXWindow: function() {
+        if (this._targetApp == null)
+            return 0;
+        var list = this._targetApp.get_windows();
+        var window = list[0];
+        return GlobalMenu.meta_window_get_xwindow(window);
+    },
+
     _onQuit: function() {
         if (this._targetApp == null)
             return;
@@ -391,6 +469,7 @@ MyAppMenuButton.prototype = {
         var list = this._targetApp.get_windows();
         var window = list[0];
         _showHello('' + window);
+        _showHello('hello:' + GlobalMenu.meta_window_get_xwindow(window));
     },
 
     _onAppStateChanged: function(tracker, app) {
