@@ -140,28 +140,29 @@ internal class Menu: Object {
 			(widget as Gtk.MenuShell).forall((item) => {
 				serialize_to(sb, item);
 			});
-		} else if(widget is Gtk.SeparatorMenuItem) {
-			sb->append_printf("<seperator/>");
+			return;
+		} 
+		bool visible = widget.visible;
+		bool sensitive = widget.sensitive;
+		if(widget is Gtk.SeparatorMenuItem) {
+			sb->append_printf("<separator");
 		} else if(widget is Gtk.TearoffMenuItem) {
-			sb->append_printf("<tearoff/>");
+			sb->append_printf("<tearoff");
 		} else if(widget is Gtk.MenuItem) {
 			var label = widget_by_type(widget, typeof(Gtk.Label)) as Gtk.Label;
 			bool has_submenu = ((widget as Gtk.MenuItem).get_submenu() != null);
-			bool visible = widget.visible;
-			bool sensitive = widget.sensitive;
 			
 			sb->append_printf("<menuitem label=\"%s\"", label == null?"null":label.get_label());
 			if(has_submenu)
 				sb->append_printf(" submenu=\"%s\"", has_submenu.to_string());
-			if(!visible)
-				sb->append_printf(" visible=\"%s\"", visible.to_string());
-			if(!sensitive)
-				sb->append_printf(" sensitive=\"%s\"", sensitive.to_string());
-			sb->append_printf("/>");
-			
 		} else {
-			sb->append_printf("<unknown/>");
+			sb->append_printf("<unknown");
 		}
+		if(!visible)
+			sb->append_printf(" visible=\"%s\"", visible.to_string());
+		if(!sensitive)
+			sb->append_printf(" sensitive=\"%s\"", sensitive.to_string());
+		sb->append_printf("/>");
 
 	}
 	private static Gtk.Widget widget_by_type(Gtk.Widget parent, Type type) {
