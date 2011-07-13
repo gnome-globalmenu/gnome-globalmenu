@@ -249,8 +249,10 @@ MyAppMenuButton.prototype = {
 
     
     refreshMenu: function(menu, open, path) {
-        if(!open) return;
-        menu.removeAll(); 
+        if(!open) {
+            menu.removeAll(); 
+            return;
+        }
         var xwindow = this._getTargetXWindow();
         if(xwindow != 0) {
             var manager = new Manager();
@@ -272,7 +274,12 @@ MyAppMenuButton.prototype = {
 	 for each (var item in xml.*) {
              var menuitem = null;
              switch(item.name().toString()) {
-             case "menuitem":
+             case "radio":
+             case "check":
+                var active = (item.@active.toString()=="true")
+                menuitem = new PopupMenu.PopupSwitchMenuItem(item.@label.toString(), active);
+               break;
+             case "item":
                if(item.@submenu.toString() == "true") {
                   menuitem = new PopupMenu.PopupSubMenuMenuItem(item.@label.toString());
                   menuitem.menu.connect('open-state-changed',
@@ -282,7 +289,6 @@ MyAppMenuButton.prototype = {
                }
                break;
              case "separator":
-             case "seperator":
                   menuitem = new PopupMenu.PopupSeparatorMenuItem();
                break;
              case "empty":
@@ -291,11 +297,15 @@ MyAppMenuButton.prototype = {
                menuitem = new PopupMenu.PopupMenuItem(item.name().toString());
                break;
              }
+             if(item.@tooltip.toString() != "") {
+                menuitem.actor.tooltip_text = item.@tooltip.toString();
+                menuitem.actor.has_tooltip = true;
+             }
              if(item.@visible.toString() == "false") {
                menuitem.actor.visible = false;
              }
              if(item.@sensitive.toString() == "false") {
-               menuitem.actor.visible = false;
+               menuitem.actor.add_style_pseudo_class('insensitive');
              }
              menuitem.connect("activate", Lang.bind(this, function(menuitem, event, xwindow, path) {
                 var manager = new Manager();

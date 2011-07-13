@@ -61,7 +61,7 @@ internal class Menu: Object {
 		} catch (IOError e) {
 			warning("could not register menu %s\n", e.message);
 		} catch (Error e) {
-			error("%s\n", e.message);
+			critical("%s\n", e.message);
 		}
 	}
 	internal static bool has_registered(Gtk.MenuShell shell) {
@@ -142,22 +142,45 @@ internal class Menu: Object {
 			});
 			return;
 		} 
-		bool visible = widget.visible;
-		bool sensitive = widget.sensitive;
 		if(widget is Gtk.SeparatorMenuItem) {
 			sb->append_printf("<separator");
 		} else if(widget is Gtk.TearoffMenuItem) {
 			sb->append_printf("<tearoff");
+		} else if(widget is Gtk.RadioMenuItem) {
+			sb->append_printf("<radio");
+		} else if(widget is Gtk.CheckMenuItem) {
+			sb->append_printf("<check");
 		} else if(widget is Gtk.MenuItem) {
-			var label = widget_by_type(widget, typeof(Gtk.Label)) as Gtk.Label;
-			bool has_submenu = ((widget as Gtk.MenuItem).get_submenu() != null);
-			
-			sb->append_printf("<menuitem label=\"%s\"", label == null?"null":label.get_label());
-			if(has_submenu)
-				sb->append_printf(" submenu=\"%s\"", has_submenu.to_string());
+			sb->append_printf("<item");
 		} else {
 			sb->append_printf("<unknown");
 		}
+
+		if(widget is Gtk.MenuItem) {
+			var label = widget_by_type(widget, typeof(Gtk.Label)) as Gtk.Label;
+			sb->append_printf(" label=\"%s\"", label == null?"___":label.get_text());
+
+			bool has_submenu = ((widget as Gtk.MenuItem).get_submenu() != null);
+			if(has_submenu)
+				sb->append_printf(" submenu=\"%s\"", has_submenu.to_string());
+			var action = (widget as Gtk.MenuItem).get_related_action();
+			if(action != null) {
+				var tooltip = action.get_tooltip();
+				if(tooltip != null)
+				sb->append_printf(" tooltip=\"%s\"", tooltip);
+			}
+		}
+		if(widget is Gtk.RadioMenuItem) {
+			var group = (void*)(widget as Gtk.RadioMenuItem).get_group();
+			sb->append_printf(" group=\"%P\"", group);
+		}
+		if(widget is Gtk.CheckMenuItem) {
+			var active = (widget as Gtk.CheckMenuItem).get_active();
+			sb->append_printf(" active=\"%s\"", active.to_string());
+		}
+
+		bool visible = widget.visible;
+		bool sensitive = widget.sensitive;
 		if(!visible)
 			sb->append_printf(" visible=\"%s\"", visible.to_string());
 		if(!sensitive)
@@ -227,7 +250,7 @@ void main(string[] args) {
 		Gtk.MenuBar shell = uiman.get_widget("/menubar") as Gtk.MenuBar;
 		Menu.register(shell);
 	} catch (IOError e) {
-		error("%s\n", e.message);
+		critical("%s\n", e.message);
 	}
 	new MainLoop().run();
 }
