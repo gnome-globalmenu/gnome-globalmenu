@@ -6,9 +6,12 @@ gnome_globalmenu_manager_SOURCES = manager.vala
 gnome_globalmenu_manager_CPPFLAGS = $(GLIB_CFLAGS)
 gnome_globalmenu_manager_LDADD = $(GLIB_LIBS)
 
-lib_LTLIBRARIES = libglobalmenu-gtk.la libglobalmenu-gtk2.la
+gtkplugindir= $(GTK3_MODULES_DIR)
+gtkplugin_LTLIBRARIES = libglobalmenu-gtk.la 
 
-libglobalmenu_gtk_ladir = $(GTK3_MODULES_DIR)
+gtk2plugindir= $(GTK2_MODULES_DIR)
+gtk2plugin_LTLIBRARIES = libglobalmenu-gtk2.la
+
 libglobalmenu_gtk_la_SOURCES = client.vala module.c superrider.vala gtk-menubar.vala
 libglobalmenu_gtk_la_VALAFLAGS = --internal-header header.h -D GTK_VERSION=3 --pkg gtk+-3.0  --pkg gdk-x11-3.0
 libglobalmenu_gtk_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK3_CFLAGS) -DGTK_VERSION=3
@@ -24,7 +27,6 @@ gtk-menubar-gtk2.vala: gtk-menubar.vala
 superrider-gtk2.vala: superrider.vala
 	$(CPP) -P -C -DGTK_VERSION=2 -o $@ - < $^
 
-libglobalmenu_gtk2_ladir = $(GTK2_MODULES_DIR)
 libglobalmenu_gtk2_la_SOURCES = client-gtk2.vala module.c superrider-gtk2.vala gtk-menubar-gtk2.vala
 libglobalmenu_gtk2_la_VALAFLAGS = --internal-header header-gtk2.h -D GTK_VERSION=2 --pkg gtk+-2.0 --pkg gdk-x11-2.0
 libglobalmenu_gtk2_la_CPPFLAGS = $(GLIB_CFLAGS) $(GTK2_CFLAGS) -DGTK_VERSION=2
@@ -32,8 +34,8 @@ libglobalmenu_gtk2_la_LIBADD = $(GLIB_LIBS) $(GTK2_LIBS)
 libglobalmenu_gtk2_la_LDFLAGS = -module -avoid-version
 
 CLEANFILES=$(BUILT_SOURCES)
-install-exec-hook:
-	ln -s $(GTK2_MODULES_DIR)/libglobalemnu-gtk2.so $(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
+install-data-hook:
+	ln -s $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalemnu-gtk2.so $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
 uninstall-local:
-	rm $(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
+	rm $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
 

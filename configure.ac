@@ -80,9 +80,9 @@ PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= $GTK2_REQUIRED)
 AC_SUBST(GTK2_CFLAGS)
 AC_SUBST(GTK2_LIBS)
 
-GTK3_MODULES_DIR="$($PKG_CONFIG --variable=libdir gtk+-3.0)/gtk+-3.0/modules"
+GTK3_MODULES_DIR="$libdir/gtk+-3.0/modules"
 AC_SUBST(GTK3_MODULES_DIR)
-GTK2_MODULES_DIR="$($PKG_CONFIG --variable=libdir gtk+-2.0)/gtk+-2.0/modules"
+GTK2_MODULES_DIR="$libdir/gtk+-2.0/modules"
 AC_SUBST(GTK2_MODULES_DIR)
 
 # output
