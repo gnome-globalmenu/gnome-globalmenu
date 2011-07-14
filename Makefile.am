@@ -18,17 +18,20 @@ gsettings_DATA= org.globalmenu.gschema.xml
 dbusdir = $(SERVICESDIR)
 dbus_DATA = org.globalmenu.manager.service
 
+
 org.globalmenu.manager.service: org.globalmenu.manager.service.in
 	sed "s;@BINDIR@;$(bindir);" < $^ > $@
-install-data-local:
+install-data-hook:
 	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
 
-uninstall-local:
+uninstall-hook:
 	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
 
 man_MANS = gnome-globalmenu.1
 
 EXTRA_DIST = \
+	org.globalmenu.manager.service.in \
+	org.globalmenu.gschema.xml \
 	$(man_MANS) \
 	$(doc_DATA) \
 	intltool-extract.in \
@@ -40,12 +43,12 @@ DISTCLEANFILES = \
 	intltool-extract \
 	intltool-merge \
 	intltool-update \
+	org.globalmenu.manager.service \
 	$(NULL)
 
 
 CLEANFILES = 
 
-BUILT_SOURCES =
 
 doc_DATA = README COPYING ChangeLog AUTHORS INSTALL
 

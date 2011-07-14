@@ -1,12 +1,1 @@
 [encoding: UTF-8]
-libserver/widgets/menuitem.vala
-libserver/widgets/menubarbox.vala
-globalmenu-plugin/module-main.vala
-applet/main.vala
-applet/applet.vala
-applet/switcher.vala
-applet/workspaceselector.vala
-schemas/gnome-globalmenu.schemas.in
-applet/GlobalMenu_PanelApplet.server.in.in
-xfce/GlobalMenu_XFCEPlugin.desktop.in.in
-tools/globalmenu-settings.vala
