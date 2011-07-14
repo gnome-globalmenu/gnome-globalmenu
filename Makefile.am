@@ -12,6 +12,20 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 AM_CPPFLAGS = \
 		$(NULL)
 
+gsettingsdir = $(GSCHEMASDIR)
+gsettings_DATA= org.globalmenu.gschema.xml
+
+dbusdir = $(SERVICESDIR)
+dbus_DATA = org.globalmenu.manager.service
+
+org.globalmenu.manager.service: org.globalmenu.manager.service.in
+	sed "s;@BINDIR@;$(bindir);" < $^ > $@
+install-data-local:
+	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
+
+uninstall-local:
+	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
+
 man_MANS = gnome-globalmenu.1
 
 EXTRA_DIST = \

@@ -83,8 +83,11 @@ public class Manager: Object {
 }
 
 void main () {
-	Manager man = new Manager();
+	var settings = new Settings ("org.globalmenu");
+	var enabled = settings.get_boolean("enabled");
+	message("%s", enabled.to_string());
 
+	var man = new Manager();
 	Bus.own_name(BusType.SESSION, "org.globalmenu.manager",
 		BusNameOwnerFlags.NONE,
 		(conn, name) => {
@@ -98,5 +101,4 @@ void main () {
 		() => error("could not aquire name\n"));
 
 	new MainLoop().run();
-	
 }

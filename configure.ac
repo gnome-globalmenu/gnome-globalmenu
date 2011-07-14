@@ -41,11 +41,27 @@ fi
 AC_ARG_VAR(EXTDIR, AS_HELP_STRING([EXTDIR], [directory to install the extension]))
 
 AS_IF([test "x$EXTDIR" == "x"],
-    [EXTDIR='$datadir/gnome-shell/extensions/GlobalMenu@globalmenu.org'],
+    [EXTDIR="$datadir/gnome-shell/extensions"],
     [])
 
 AC_SUBST(EXTDIR)
 
+AC_ARG_VAR(GSCHEMASDIR, AS_HELP_STRING([GSCHEMASDIR], [directory to install the gschema]))
+
+AS_IF([test "x$GSCHEMASDIR" == "x"],
+    [GSCHEMASDIR="$datadir/glib-2.0/schemas"],
+    [])
+
+AC_SUBST(GSCHEMASDIR)
+
+AC_ARG_VAR(SERVICESDIR, AS_HELP_STRING([SERVICESDIR], [directory to install the dbus service]))
+
+AS_IF([test "x$SERVICESDIR" == "x"],
+    [SERVICESDIR="$datadir/dbus-1/services"],
+    [])
+
+AC_SUBST(SERVICESDIR)
+GLIB_GSETTINGS
 GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
 GLIB_REQUIRED=2.28.0

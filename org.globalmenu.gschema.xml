@@ -1,0 +1,13 @@
+<schemalist>
+  <schema id="org.globalmenu" path="/org/globalmenu/" gettext-domain="globalmenu">
+    <key name="enabled" type="b">
+      <default>true</default>
+      <summary>Enabled</summary>
+      <description>
+        Controls if the Global Menu is enabled. When true, 
+        the menus of applications will be shown in GnomeShell's 
+        AppMenu.
+      </description>
+    </key>
+  </schema>
+</schemalist>
