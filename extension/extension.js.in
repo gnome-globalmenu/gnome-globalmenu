@@ -108,7 +108,6 @@ PopupSubMenu.prototype = {
     _real_open: function(animate) {
         if (this.isOpen)
             return;
-
         this.isOpen = true;
 
         this.actor.show();
@@ -431,7 +430,6 @@ MyAppMenuButton.prototype = {
     refreshMenu: function(obj, open, path, menu) {
         print("refresh " + path + "open=" + open);
         if(!open) {
-            menu.removeAll(); 
             return false;
         }
         var xwindow = this._getTargetXWindow();
@@ -443,17 +441,17 @@ MyAppMenuButton.prototype = {
                }, xwindow)
             );
         }
-        if (path == "/") {
-            var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
-            menu.addMenuItem(quitMenu);
-            quitMenu.connect('activate', Lang.bind(this, this._onQuit));
-        }
         return false;
     },
     rebuildMenu: function(menu, path, ui, xwindow) {
 	 var xml = XML('<menu>'+ui+'</menu>');
          var i = 0;
+         menu.removeAll(); 
+         var current_group = new PopupMenu.PopupMenuSection();
 	 for each (var item in xml.*) {
+             var visible = !(item.@visible.toString() == "false");
+             var sensitive = !(item.@sensitive.toString() == "false");
+
              var menuitem = null;
              switch(item.name().toString()) {
              case "radio":
@@ -474,31 +472,42 @@ MyAppMenuButton.prototype = {
                }
                break;
              case "separator":
-                  menuitem = new PopupMenu.PopupSeparatorMenuItem();
+                  //menuitem = new PopupMenu.PopupSeparatorMenuItem();
+                  if(visible) {
+                      menu.addMenuItem(current_group);
+                      current_group = new PopupMenu.PopupMenuSection();
+                  }
                break;
              case "empty":
              case "tearoff":
              default:
                menuitem = new PopupMenu.PopupMenuItem(item.name().toString());
+               visible = false;
                break;
              }
-             if(item.@tooltip.toString() != "") {
-                menuitem.actor.tooltip_text = item.@tooltip.toString();
-                menuitem.actor.has_tooltip = true;
+             if(menuitem) {
+                 if(item.@tooltip.toString() != "") {
+                    menuitem.actor.tooltip_text = item.@tooltip.toString();
+                    menuitem.actor.has_tooltip = true;
+                 }
+                 menuitem.actor.visible = visible;
+                 if(!sensitive) {
+                   menuitem.actor.add_style_pseudo_class('insensitive');
+                 }
+                 menuitem.connect("activate", Lang.bind(this, function(menuitem, event, xwindow, path) {
+                   var manager = new Manager();
+                   manager.EmitRemote(xwindow, path);
+                   }, xwindow, path + i));
+                 current_group.addMenuItem(menuitem);
              }
-             if(item.@visible.toString() == "false") {
-               menuitem.actor.visible = false;
-             }
-             if(item.@sensitive.toString() == "false") {
-               menuitem.actor.add_style_pseudo_class('insensitive');
-             }
-             menuitem.connect("activate", Lang.bind(this, function(menuitem, event, xwindow, path) {
-                var manager = new Manager();
-                manager.EmitRemote(xwindow, path);
-             }, xwindow, path + i));
-             menu.addMenuItem(menuitem);
              i++;
          }
+         menu.addMenuItem(current_group);
+        if (path == "/") {
+            var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
+            menu.addMenuItem(quitMenu);
+            quitMenu.connect('activate', Lang.bind(this, this._onQuit));
+        }
     },
     show: function() {
         if (this._visible)
