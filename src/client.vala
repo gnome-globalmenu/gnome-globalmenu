@@ -6,6 +6,12 @@ internal class Menu: Object {
 	public void get_ui(string path, out string ui) {
 		var widget = get_widget(path);
 		if(widget is Gtk.MenuShell) {
+			var item = get_widget(path.slice(0, -1)) as Gtk.MenuItem;
+			if(item != null) {
+				print("path = %s, item is %p\n", path.slice(0, -1), item);
+				item.activate();
+				item.select();
+			}
 			widget.show();
 			ui = this.serialize(widget as Gtk.MenuShell);
 		} else {
