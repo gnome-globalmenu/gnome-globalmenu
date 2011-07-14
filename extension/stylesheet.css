@@ -6,6 +6,7 @@
     background-color: rgba(10,10,10,0.7);
     border-radius: 5px;
 }
+
 .popup-menu-item:insensitive {
     color: #7f007f;
     font-weight: normal;

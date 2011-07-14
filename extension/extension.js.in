@@ -1,5 +1,6 @@
 // Sample extension code, makes clicking on the panel show a message
 const St = imports.gi.St;
+const Gtk = imports.gi.Gtk;
 const Mainloop = imports.mainloop;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
@@ -25,6 +26,184 @@ const ANIMATED_ICON_UPDATE_TIMEOUT = 100;
 const SPINNER_ANIMATION_TIME = 0.2;
 const BUTTON_DND_ACTIVATION_TIMEOUT = 250;
 const HOT_CORNER_ACTIVATION_TIMEOUT = 0.5;
+const MENU_POPUP_TIMEOUT = 600;
+
+function PopupSubMenu() {
+    this._init.apply(this, arguments);
+}
+
+PopupSubMenu.prototype = {
+    __proto__: PopupMenu.PopupMenuBase.prototype,
+
+    _init: function(sourceActor, sourceArrow) {
+        PopupMenu.PopupMenuBase.prototype._init.call(this, sourceActor);
+
+        this._arrow = sourceArrow;
+        this._arrow.rotation_center_z_gravity = Clutter.Gravity.CENTER;
+
+        // Since a function of a submenu might be to provide a "More.." expander
+        // with long content, we make it scrollable - the scrollbar will only take
+        // effect if a CSS max-height is set on the top menu.
+        this.actor = new St.ScrollView({ style_class: 'popup-sub-menu',
+                                         hscrollbar_policy: Gtk.PolicyType.NEVER,
+                                         vscrollbar_policy: Gtk.PolicyType.NEVER });
+
+        // StScrollbar plays dirty tricks with events, calling
+        // clutter_set_motion_events_enabled (FALSE) during the scroll; this
+        // confuses our event tracking, so we just turn it off during the
+        // scroll.
+        let vscroll = this.actor.get_vscroll_bar();
+        vscroll.connect('scroll-start',
+                        Lang.bind(this, function() {
+                                      let topMenu = this._getTopMenu();
+                                      if (topMenu)
+                                          topMenu.passEvents = true;
+                                  }));
+        vscroll.connect('scroll-stop',
+                        Lang.bind(this, function() {
+                                      let topMenu = this._getTopMenu();
+                                      if (topMenu)
+                                          topMenu.passEvents = false;
+                                  }));
+
+        this.actor.add_actor(this.box);
+        this.actor._delegate = this;
+        this.actor.clip_to_allocation = true;
+        this.actor.connect('key-press-event', Lang.bind(this, this._onKeyPressEvent));
+        this.actor.hide();
+    },
+
+    _getTopMenu: function() {
+        let actor = this.actor.get_parent();
+        while (actor) {
+            if (actor._delegate && actor._delegate instanceof PopupMenu.PopupMenu)
+                return actor._delegate;
+
+            actor = actor.get_parent();
+        }
+
+        return null;
+    },
+
+    _needsScrollbar: function() {
+        let topMenu = this._getTopMenu();
+        let [topMinHeight, topNaturalHeight] = topMenu.actor.get_preferred_height(-1);
+        let topThemeNode = topMenu.actor.get_theme_node();
+
+        let topMaxHeight = topThemeNode.get_max_height();
+        return topMaxHeight >= 0 && topNaturalHeight >= topMaxHeight;
+    },
+
+    open: function(animate) {
+        if (this.isOpen)
+            return;
+	this.emit('pre-open-state-changed', true);
+
+        Mainloop.timeout_add(100,
+            Lang.bind(this, function(animate) {
+                  this._real_open(animate);
+            }, animate));
+        
+    },
+    _real_open: function(animate) {
+        if (this.isOpen)
+            return;
+
+        this.isOpen = true;
+
+        this.actor.show();
+
+        let needsScrollbar = this._needsScrollbar();
+
+        // St.ScrollView always requests space horizontally for a possible vertical
+        // scrollbar if in AUTOMATIC mode. Doing better would require implementation
+        // of width-for-height in St.BoxLayout and St.ScrollView. This looks bad
+        // when we *don't* need it, so turn off the scrollbar when that's true.
+        // Dynamic changes in whether we need it aren't handled properly.
+        this.actor.vscrollbar_policy =
+            needsScrollbar ? Gtk.PolicyType.AUTOMATIC : Gtk.PolicyType.NEVER;
+
+        // It looks funny if we animate with a scrollbar (at what point is
+        // the scrollbar added?) so just skip that case
+        if (animate && needsScrollbar)
+            animate = false;
+
+        if (animate) {
+            let [minHeight, naturalHeight] = this.actor.get_preferred_height(-1);
+            this.actor.height = 0;
+            this.actor._arrow_rotation = this._arrow.rotation_angle_z;
+            Tweener.addTween(this.actor,
+                             { _arrow_rotation: 90,
+                               height: naturalHeight,
+                               time: 0.25,
+                               onUpdateScope: this,
+                               onUpdate: function() {
+                                   this._arrow.rotation_angle_z = this.actor._arrow_rotation;
+                               },
+                               onCompleteScope: this,
+                               onComplete: function() {
+                                   this.actor.set_height(-1);
+                                   this.emit('open-state-changed', true);
+                               }
+                             });
+        } else {
+            this._arrow.rotation_angle_z = 90;
+            this.emit('open-state-changed', true);
+        }
+    },
+
+    close: function(animate) {
+        if (!this.isOpen)
+            return;
+
+        this.isOpen = false;
+
+	this.emit('pre-open-state-changed', false);
+        if (this._activeMenuItem)
+            this._activeMenuItem.setActive(false);
+
+        if (animate && this._needsScrollbar())
+            animate = false;
+
+        if (animate) {
+            this.actor._arrow_rotation = this._arrow.rotation_angle_z;
+            Tweener.addTween(this.actor,
+                             { _arrow_rotation: 0,
+                               height: 0,
+                               time: 0.25,
+                               onCompleteScope: this,
+                               onComplete: function() {
+                                   this.actor.hide();
+                                   this.actor.set_height(-1);
+
+                                   this.emit('open-state-changed', false);
+                               },
+                               onUpdateScope: this,
+                               onUpdate: function() {
+                                   this._arrow.rotation_angle_z = this.actor._arrow_rotation;
+                               }
+                             });
+            } else {
+                this._arrow.rotation_angle_z = 0;
+                this.actor.hide();
+
+                this.isOpen = false;
+                this.emit('open-state-changed', false);
+            }
+    },
+
+    _onKeyPressEvent: function(actor, event) {
+        // Move focus back to parent menu if the user types Left.
+
+        if (this.isOpen && event.get_key_symbol() == Clutter.KEY_Left) {
+            this.close(true);
+            this.sourceActor._delegate.setActive(true);
+            return true;
+        }
+
+        return false;
+    }
+};
 
 const ManagerIface = {
     name: 'org.globalmenu.manager',
@@ -243,15 +422,17 @@ MyAppMenuButton.prototype = {
 
         global.window_manager.connect('switch-workspace', Lang.bind(this, this._sync));
 
-        this.menu.connect('open-state-changed', Lang.bind(this, this.refreshMenu, '/'));
+        this.menu.connect('open-state-changed', Lang.bind(this, this.refreshMenu, '/', this.menu));
+        
         this._sync();
     },
 
     
-    refreshMenu: function(menu, open, path) {
+    refreshMenu: function(obj, open, path, menu) {
+        print("refresh " + path + "open=" + open);
         if(!open) {
             menu.removeAll(); 
-            return;
+            return false;
         }
         var xwindow = this._getTargetXWindow();
         if(xwindow != 0) {
@@ -263,10 +444,11 @@ MyAppMenuButton.prototype = {
             );
         }
         if (path == "/") {
-        var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
-        this.menu.addMenuItem(quitMenu);
-        quitMenu.connect('activate', Lang.bind(this, this._onQuit));
+            var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
+            menu.addMenuItem(quitMenu);
+            quitMenu.connect('activate', Lang.bind(this, this._onQuit));
         }
+        return false;
     },
     rebuildMenu: function(menu, path, ui, xwindow) {
 	 var xml = XML('<menu>'+ui+'</menu>');
@@ -282,8 +464,11 @@ MyAppMenuButton.prototype = {
              case "item":
                if(item.@submenu.toString() == "true") {
                   menuitem = new PopupMenu.PopupSubMenuMenuItem(item.@label.toString());
-                  menuitem.menu.connect('open-state-changed',
-                      Lang.bind(this, this.refreshMenu, path + i + '/'));
+
+                  menuitem.menu = new PopupSubMenu(menuitem.actor, menuitem._triangle);
+                  menuitem.menu.connect('open-state-changed', Lang.bind(menuitem, menuitem._subMenuOpenStateChanged));
+                  menuitem.menu.connect('pre-open-state-changed',
+                      Lang.bind(this, this.refreshMenu, path + i + '/', menuitem.menu));
                } else {
                   menuitem = new PopupMenu.PopupMenuItem(item.@label.toString());
                }
