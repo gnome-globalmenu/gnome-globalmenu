@@ -18,6 +18,8 @@ gsettings_DATA= org.globalmenu.gschema.xml
 dbusdir = $(SERVICESDIR)
 dbus_DATA = org.globalmenu.manager.service
 
+profiledir = $(sysconfdir)/profile.d
+profile_FILES = globalmenu.sh
 
 org.globalmenu.manager.service: org.globalmenu.manager.service.in
 	sed "s;@BINDIR@;$(bindir);" < $^ > $@

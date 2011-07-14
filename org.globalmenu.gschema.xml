@@ -10,4 +10,16 @@
       </description>
     </key>
   </schema>
+  <!--
+  <schema id="org.gnome.settings-daemon" path="/org/gnome/settings-daemon/">
+    <child name="gtk-modules" schema="gnome-settings-daemon.gtk-modules"/>
+  </schema>
+  <schema id="gnome-settings-daemon.gtk-modules" path="/org/gnome/settings-daemon/gtk-modules/">
+    <key name="globalmenu-gtk" type="b">
+      <default>true</default>
+      <summary>GTK+ module for globalmenu</summary>
+      <description>This key determines if the global menu module is loaded.</description>
+    </key>
+  </schema>
+-->
 </schemalist>
