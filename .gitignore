@@ -1,10 +1,7 @@
 Makefile
 Makefile.in
-dolt*
 intltool*
-*.schemas
 .*
-!.gitignore
 *.gmo
 *.la
 *.lo
@@ -16,8 +13,6 @@ config.h
 config.vapi
 config.log
 config.status
-configmake.h
-configmake.vapi
 configure
 autom4te.cache
 INSTALL
@@ -27,3 +22,5 @@ vala-ccode
 *.[ch]
 *.tar.bz2
 *.tar.gz
+*-gtk2.vala
+*.stamp
