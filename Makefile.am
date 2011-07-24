@@ -34,6 +34,7 @@ man_MANS = gnome-globalmenu.1
 EXTRA_DIST = \
 	org.globalmenu.manager.service.in \
 	org.globalmenu.gschema.xml \
+	globalmenu.sh \
 	$(man_MANS) \
 	$(doc_DATA) \
 	intltool-extract.in \

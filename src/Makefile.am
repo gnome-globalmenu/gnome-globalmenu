@@ -35,7 +35,7 @@ libglobalmenu_gtk2_la_LDFLAGS = -module -avoid-version
 
 CLEANFILES=$(BUILT_SOURCES)
 install-data-hook:
-	ln -s $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalemnu-gtk2.so $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
+	ln -sf $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk2.so $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
 uninstall-local:
 	rm $(DESTDIR)$(GTK2_MODULES_DIR)/libglobalmenu-gtk.so
 
