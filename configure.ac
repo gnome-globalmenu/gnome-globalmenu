@@ -80,11 +80,21 @@ PKG_CHECK_MODULES(GTK2, gtk+-2.0 >= $GTK2_REQUIRED)
 AC_SUBST(GTK2_CFLAGS)
 AC_SUBST(GTK2_LIBS)
 
-GTK3_MODULES_DIR="$libdir/gtk+-3.0/modules"
-AC_SUBST(GTK3_MODULES_DIR)
-GTK2_MODULES_DIR="$libdir/gtk+-2.0/modules"
-AC_SUBST(GTK2_MODULES_DIR)
+AC_ARG_VAR(GTK3_MODULES_DIR, AS_HELP_STRING([GTK3_MODULES_DIR], [directory to install the gtk3 plugin module]))
 
+AS_IF([test "x$GTK3_MODULES_DIR" == "x"],
+    [GTK3_MODULES_DIR="$libdir/gtk-3.0/modules"],
+    [])
+
+AC_SUBST(GTK3_MODULES_DIR)
+
+AC_ARG_VAR(GTK2_MODULES_DIR, AS_HELP_STRING([GTK2_MODULES_DIR], [directory to install the gtk2 plugin module]))
+
+AS_IF([test "x$GTK2_MODULES_DIR" == "x"],
+    [GTK2_MODULES_DIR="$libdir/gtk-2.0/modules"],
+    [])
+
+AC_SUBST(GTK2_MODULES_DIR)
 # output
 
 AC_CONFIG_FILES(
