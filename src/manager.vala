@@ -1,8 +1,8 @@
 [DBus (name="org.globalmenu.menu")]
 public interface Menu: Object {
-	public abstract void get_ui(string path, out string ui) throws IOError;
+	public abstract async void get_ui(string path, out string ui) throws IOError;
 	public abstract uint64 xwindow {get; }
-	public abstract void emit(string path) throws IOError;
+	public abstract async void emit(string path) throws IOError;
 }
 
 private class KnownBusName {
@@ -36,18 +36,31 @@ public class Manager: Object {
 			return false;
 			});
 	}
-	public void get_ui(uint64 xwindow, string path, out string ui) {
+	public async void get_ui(uint64 xwindow, string path, out string ui) {
 		Menu menu = get_menu_by_xwindow(xwindow);
 		if(menu == null) {
 			ui = "<empty/>";
 			return;
 		}
-		menu.get_ui(path, out ui);
+		SourceFunc callback = get_ui.callback;
+		string s = "<empty/>";
+		menu.get_ui.begin(path, (obj, res) => {
+			try {
+				menu.get_ui.end(res, out s);
+			} catch (IOError e) {
+				warning ("failed to objtain ui, %s", e.message);
+				s = "<error/>";
+			}
+			callback();
+		});
+		yield;
+		ui = s;
+		return;
 	}
 	public void emit(uint64 xwindow, string path) {
 		Menu menu = get_menu_by_xwindow(xwindow);
 		if(menu == null) return;
-		menu.emit(path);
+		menu.emit.begin(path);
 	}
 	public void enumerate(out string list) {
 		StringBuilder sb = new StringBuilder("");
@@ -56,8 +69,12 @@ public class Manager: Object {
 				((KnownBusName)k).known_objects.foreach((object_id, menu) => {
 					var bus_name =	bus_id.to_string();
 					var object_path = object_id.to_string();
-					Menu m = Bus.get_proxy_sync(BusType.SESSION, bus_name, object_path, DBusProxyFlags.DO_NOT_AUTO_START);
-					sb.append_printf("%llu:%s:%s\n", m.xwindow, bus_name, object_path);
+					try {
+						Menu m = Bus.get_proxy_sync(BusType.SESSION, bus_name, object_path, DBusProxyFlags.DO_NOT_AUTO_START);
+						sb.append_printf("%llu:%s:%s\n", m.xwindow, bus_name, object_path);
+					} catch (IOError e) {
+						warning("ioerror %s", e.message);
+					}
 					}
 				);
 			}
