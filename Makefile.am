@@ -2,7 +2,6 @@ NULL =
 SUBDIRS = \
 	src \
         extension \
-	po \
 	$(NULL)
 
 #	globalmenu-plugin 
