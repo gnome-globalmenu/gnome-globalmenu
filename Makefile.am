@@ -19,15 +19,16 @@ dbusdir = $(SERVICESDIR)
 dbus_DATA = org.globalmenu.manager.service
 
 profiledir = $(sysconfdir)/profile.d
-profile_FILES = globalmenu.sh
+profile_DATA = globalmenu.sh
 
 org.globalmenu.manager.service: org.globalmenu.manager.service.in
 	sed "s;@BINDIR@;$(bindir);" < $^ > $@
 install-data-hook:
-	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
+	echo dest is $(DESTDIR)
+	$(GLIB_COMPILE_SCHEMAS) $(DESTDIR)$(GSCHEMASDIR)
 
 uninstall-hook:
-	$(GLIB_COMPILE_SCHEMAS) $(GSCHEMASDIR)
+	$(GLIB_COMPILE_SCHEMAS) $(DESTDIR)$(GSCHEMASDIR)
 
 man_MANS = gnome-globalmenu.1
 
