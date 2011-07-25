@@ -59,15 +59,18 @@ internal class Menu: Object {
 			manager.add(object_path);
 			var destroy_id = shell.destroy.connect(
 				(shell) => {
+					try {
 					Bus.get_sync(BusType.SESSION).unregister_object(reg_id);
+					} catch(IOError e) {
+						warning("could not unregister menu %s\n", e.message);
+
+					}
 					
 				}
 			);
-			shell.set_data<uint>("globalmenu", 1000);
+			shell.set_data<ulong>("globalmenu", destroy_id);
 		} catch (IOError e) {
 			warning("could not register menu %s\n", e.message);
-		} catch (Error e) {
-			critical("%s\n", e.message);
 		}
 	}
 	internal static bool has_registered(Gtk.MenuShell shell) {
@@ -215,10 +218,11 @@ internal interface Manager: Object {
 	public abstract void add(string object_path) throws IOError;
 }
 
-void callback(Gtk.Action action) {
+
+private void callback(Gtk.Action action) {
 	print("widget %s called", action.get_name());
 }
-void main(string[] args) {
+private void main(string[] args) {
 	const string uidef = """
 <ui>
   <menubar>
