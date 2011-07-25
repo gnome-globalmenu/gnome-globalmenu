@@ -68,23 +68,44 @@ internal class Menu: Object {
 					
 				}
 			);
-			shell.set_data<ulong>("globalmenu", destroy_id);
+			shell.set_data<uint>("globalmenu-reg", reg_id);
+			shell.set_data<ulong>("globalmenu-destroy", destroy_id);
 		} catch (IOError e) {
 			warning("could not register menu %s\n", e.message);
 		}
 	}
+	internal static void lost(Gtk.MenuShell shell) {
+		var destroy_id = shell.get_data<ulong>("globalmenu-destroy");
+		var reg_id = shell.get_data<uint>("globalmenu-reg");
+		shell.disconnect(destroy_id);
+		try {
+			Bus.get_sync(BusType.SESSION).unregister_object(reg_id);
+		} catch(IOError e) {
+			message("can't unregister %s", e.message);
+		}
+		shell.set_data<uint>("globalmenu-reg", 0);
+		shell.set_data<ulong>("globalmenu-destroy", 0);
+	}
 	internal static bool has_registered(Gtk.MenuShell shell) {
-		return (shell.get_data<uint>("globalmenu") != 0);
+		return (shell.get_data<ulong>("globalmenu-reg") != 0);
 	}
 	internal static void register_all() {
 		var l = Gtk.Window.list_toplevels();
 		foreach(var window in l) {
 			var menubar = widget_by_type(window, typeof(Gtk.MenuBar)) as Gtk.MenuBar;
-			if(menubar != null && !Menu.has_registered(menubar)) 
+			if(menubar != null && !Menu.has_registered(menubar)) {
 				Menu.register(menubar);
+			}
 		}
 	}
-
+	internal static void lost_all() {
+		var l = Gtk.Window.list_toplevels();
+		foreach(var window in l) {
+			var menubar = widget_by_type(window, typeof(Gtk.MenuBar)) as Gtk.MenuBar;
+			if(menubar != null && Menu.has_registered(menubar)) 
+				Menu.lost(menubar);
+		}
+	}
 	private Gtk.MenuShell shell;
 	private ulong realize_handler_id = 0;
 	private ulong unrealize_handler_id = 0;
