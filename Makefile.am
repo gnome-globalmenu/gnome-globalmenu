@@ -20,8 +20,8 @@ dbus_DATA = org.globalmenu.manager.service
 profiledir = $(sysconfdir)/profile.d
 profile_DATA = globalmenu.sh
 
-org.globalmenu.manager.service: org.globalmenu.manager.service.in
-	sed "s;@BINDIR@;$(bindir);" < $^ > $@
+org.globalmenu.manager.service: org.globalmenu.manager.service.in Makefile
+	sed "s;@BINDIR@;$(bindir);" < $< > $@
 install-data-hook:
 	echo dest is $(DESTDIR)
 	$(GLIB_COMPILE_SCHEMAS) $(DESTDIR)$(GSCHEMASDIR)
@@ -46,11 +46,10 @@ DISTCLEANFILES = \
 	intltool-extract \
 	intltool-merge \
 	intltool-update \
-	org.globalmenu.manager.service \
 	$(NULL)
 
 
-CLEANFILES = 
+CLEANFILES = org.globalmenu.manager.service
 
 
 doc_DATA = README COPYING ChangeLog AUTHORS INSTALL
