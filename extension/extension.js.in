@@ -505,11 +505,11 @@ MyAppMenuButton.prototype = {
              i++;
          }
          menu.addMenuItem(current_group);
-        if (path == "/") {
-            var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
+         if (path == "/" && i == 1) {
+            var quitMenu = new PopupMenu.PopupMenuItem("Close %s".format(this._targetApp.get_name()));
             menu.addMenuItem(quitMenu);
             quitMenu.connect('activate', Lang.bind(this, this._onQuit));
-        }
+         }
     },
     show: function() {
         if (this._visible)
@@ -671,11 +671,7 @@ MyAppMenuButton.prototype = {
     _onQuit: function() {
         if (this._targetApp == null)
             return;
-     //   this._targetApp.request_quit();
-        var list = this._targetApp.get_windows();
-        var window = list[0];
-        _showHello('' + window);
-        _showHello('hello:' + GlobalMenu.meta_window_get_xwindow(window));
+        this._targetApp.request_quit();
     },
 
     _onAppStateChanged: function(app_system, app) {
@@ -766,16 +762,6 @@ MyAppMenuButton.prototype = {
 };
 
 Signals.addSignalMethods(MyAppMenuButton.prototype);
-
-function _showHello(mytext) {
-	let text = new St.Label({ 
-		style_class: 'helloworld-label', 
-		text: mytext });
-	let monitor = global.get_primary_monitor();
-	global.stage.add_actor(text);
-	text.set_position(Math.floor (monitor.width / 2 - text.width / 2), Math.floor(monitor.height / 2 - text.height / 2));
-	Mainloop.timeout_add(3000, function () { text.destroy(); });
-}
 
 let oldAppMenuButton;
 let button;
