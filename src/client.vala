@@ -12,8 +12,13 @@ internal class Menu: Object {
 				item.activate();
 				item.select();
 			}
-			widget.show();
+			if(! (widget is Gtk.MenuBar)) {
+				widget.show();
+			}
 			ui = this.serialize(widget as Gtk.MenuShell);
+			if(! (widget is Gtk.MenuBar)) {
+				widget.hide();
+			}
 		} else {
 			ui = "<empty/>";
 		}
