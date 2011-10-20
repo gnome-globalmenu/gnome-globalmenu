@@ -20,6 +20,7 @@ aclocal.m4
 stamp-h1
 vala-ccode
 *.[ch]
+!module.c
 *.tar.bz2
 *.tar.gz
 *-gtk2.vala
