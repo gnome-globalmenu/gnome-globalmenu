@@ -1,11 +1,11 @@
 [DBus (name="org.globalmenu.menu")]
 public interface Menu: Object {
-	public abstract async void get_ui(string path, out string ui) throws IOError;
+	public  abstract async void get_ui(string path, out string ui) throws Error;
 	public abstract uint64 xwindow {get; }
-	public abstract async void emit(string path) throws IOError;
+	public abstract async void emit(string path) throws Error;
 }
 
-private class KnownBusName {
+public class KnownBusName {
 	public Datalist<Menu> known_objects;
 	public uint watch_id;
 }
@@ -30,7 +30,7 @@ public class Manager: Object {
 			try {
 				Menu menu = Bus.get_proxy_sync(BusType.SESSION, sender, object_path, DBusProxyFlags.DO_NOT_AUTO_START);
 				k.known_objects.set_data(object_path, menu);
-			} catch (IOError e) {
+			} catch (Error e) {
 				warning("Manager can't access client %s\n", e.message);
 			}
 			return false;
@@ -47,7 +47,7 @@ public class Manager: Object {
 		menu.get_ui.begin(path, (obj, res) => {
 			try {
 				menu.get_ui.end(res, out s);
-			} catch (IOError e) {
+			} catch (Error e) {
 				warning ("failed to objtain ui, %s", e.message);
 				s = "<error/>";
 			}
@@ -72,7 +72,7 @@ public class Manager: Object {
 					try {
 						Menu m = Bus.get_proxy_sync(BusType.SESSION, bus_name, object_path, DBusProxyFlags.DO_NOT_AUTO_START);
 						sb.append_printf("%llu:%s:%s\n", m.xwindow, bus_name, object_path);
-					} catch (IOError e) {
+					} catch (Error e) {
 						warning("ioerror %s", e.message);
 					}
 					}
@@ -110,7 +110,7 @@ void main () {
 		(conn, name) => {
 			try {
 				conn.register_object("/org/globalmenu/manager", man);
-			} catch (IOError e) {
+			} catch (Error e) {
 				error("could not register service\n");
 			}
 		},
