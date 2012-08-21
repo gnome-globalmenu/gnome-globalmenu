@@ -620,7 +620,7 @@ let oldAppMenuButton;
 let button;
 
 function init() {
-    let leftChildren = Main.panel._leftBox.get_children_list();
+    let leftChildren = Main.panel._leftBox.get_children();
     oldAppMenuButton = leftChildren[leftChildren.length - 1];
 }
 
