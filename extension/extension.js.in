@@ -99,7 +99,7 @@ AnimatedIcon.prototype = {
         this._timeoutId = 0;
         this._i = 0;
         this._animations = St.TextureCache.get_default().load_sliced_image (global.datadir + '/theme/' + name, size, size);
-        this.actor.set_child(this._animations);
+        this.actor.add_actor(this._animations);
     },
 
     _update: function() {
@@ -229,7 +229,7 @@ MyAppMenuButton.prototype = {
         this._targetApp = null;
 
         let bin = new St.Bin({ name: 'appMenu' });
-        this.actor.set_child(bin);
+        this.actor.add_actor(bin);
 
         this.actor.reactive = false;
         this._targetIsCurrent = false;
@@ -270,7 +270,9 @@ MyAppMenuButton.prototype = {
 
         let tracker = Shell.WindowTracker.get_default();
         tracker.connect('notify::focus-app', Lang.bind(this, this._sync));
-        tracker.connect('app-state-changed', Lang.bind(this, this._onAppStateChanged));
+
+        let app_system = Shell.AppSystem.get_default();
+        app_system.connect('app-state-changed', Lang.bind(this, this._onAppStateChanged));
 
         global.window_manager.connect('switch-workspace', Lang.bind(this, this._sync));
 
@@ -356,11 +358,11 @@ MyAppMenuButton.prototype = {
              i++;
          }
          menu.addMenuItem(current_group);
-        if (path == "/") {
-            var quitMenu = new PopupMenu.PopupMenuItem("Greet %s".format(this._targetApp.get_name()));
+         if (path == "/" && i == 1) {
+            var quitMenu = new PopupMenu.PopupMenuItem("Close %s".format(this._targetApp.get_name()));
             menu.addMenuItem(quitMenu);
             quitMenu.connect('activate', Lang.bind(this, this._onQuit));
-        }
+         }
     },
     show: function() {
         if (this._visible)
@@ -522,14 +524,10 @@ MyAppMenuButton.prototype = {
     _onQuit: function() {
         if (this._targetApp == null)
             return;
-     //   this._targetApp.request_quit();
-        var list = this._targetApp.get_windows();
-        var window = list[0];
-        _showHello('' + window);
-        _showHello('hello:' + GlobalMenu.meta_window_get_xwindow(window));
+        this._targetApp.request_quit();
     },
 
-    _onAppStateChanged: function(tracker, app) {
+    _onAppStateChanged: function(app_system, app) {
         let state = app.state;
         if (state != Shell.AppState.STARTING) {
             this._startingApps = this._startingApps.filter(function(a) {
@@ -618,23 +616,25 @@ MyAppMenuButton.prototype = {
 
 Signals.addSignalMethods(MyAppMenuButton.prototype);
 
-function _showHello(mytext) {
-	let text = new St.Label({ 
-		style_class: 'helloworld-label', 
-		text: mytext });
-	let monitor = global.get_primary_monitor();
-	global.stage.add_actor(text);
-	text.set_position(Math.floor (monitor.width / 2 - text.width / 2), Math.floor(monitor.height / 2 - text.height / 2));
-	Mainloop.timeout_add(3000, function () { text.destroy(); });
+let oldAppMenuButton;
+let button;
+
+function init() {
+    let leftChildren = Main.panel._leftBox.get_children();
+    oldAppMenuButton = leftChildren[leftChildren.length - 1];
 }
 
-function main() {
-    var leftChildren = Main.panel._leftBox.get_children_list();
-    var oldAppMenuButton = leftChildren[leftChildren.length - 1];
-    Main.panel._leftBox.remove_actor(oldAppMenuButton);
-    oldAppMenuButton.destroy();
+function enable() {
+  Main.panel._leftBox.remove_actor(oldAppMenuButton);
 
-    var button = new MyAppMenuButton();
-    Main.panel._leftBox.add(button.actor);
-    Main.panel._menus.addMenu(button.menu);
+  button = new MyAppMenuButton();
+  Main.panel._leftBox.add(button.actor);
+  Main.panel._menus.addMenu(button.menu);
+}
+
+function disable() {
+  Main.panel._menus.removeMenu(button.menu);
+  button.destroy();
+
+  Main.panel._leftBox.add(oldAppMenuButton);
 }
