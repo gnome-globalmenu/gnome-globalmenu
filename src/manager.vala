@@ -1,11 +1,11 @@
 [DBus (name="org.globalmenu.menu")]
 public interface Menu: Object {
-	public abstract async void get_ui(string path, out string ui) throws IOError;
+	public  abstract async void get_ui(string path, out string ui) throws IOError;
 	public abstract uint64 xwindow {get; }
 	public abstract async void emit(string path) throws IOError;
 }
 
-private class KnownBusName {
+public class KnownBusName {
 	public Datalist<Menu> known_objects;
 	public uint watch_id;
 }
